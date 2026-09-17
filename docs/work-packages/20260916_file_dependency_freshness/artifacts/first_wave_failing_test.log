@@ -1,0 +1,57 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_freshness.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 12 items
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py F
+
+=================================== FAILURES ===================================
+___________ test_accepted_artifact_survives_same_content[False-link] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_accepted_artifact_survive0')
+operation = 'link', strong = False
+
+    @pytest.mark.parametrize('operation', ['link', 'unlink', 'touch', 'chmod', 'replace'])
+    @pytest.mark.parametrize('strong', [False, True])
+    def test_accepted_artifact_survives_same_content(tmp_path, operation, strong):
+        source = tmp_path/'source'
+        source.write_bytes(b'accepted bytes')
+        linked = tmp_path/'linked'
+        os.link(source, linked)
+        record = {'artifacts': {'source': p.signature(tmp_path, source, strong=True)}}
+        if operation == 'link':
+            copy_input_file(str(tmp_path), 'source', tmp_path/'wepp/runs/pw0.cli')
+        elif operation == 'unlink':
+            linked.unlink()
+        elif operation == 'touch':
+            st = source.stat()
+            os.utime(source, ns=(st.st_atime_ns, st.st_mtime_ns + 1000000))
+        elif operation == 'chmod':
+            source.chmod(0o600)
+        else:
+            replacement = tmp_path/'replacement'
+            replacement.write_bytes(source.read_bytes())
+            os.replace(replacement, source)
+>       assert p.artifacts_current(tmp_path, record, strong=strong)
+E       AssertionError: assert False
+E        +  where False = <function artifacts_current at 0x7861480c5580>(PosixPath('/tmp/pytest-of-unknown/pytest-13/test_accepted_artifact_survive0'), {'artifacts': {'source': ['source', 14, 1789608692922687096, 1789608692922687096, 'af77f61c6d49263ab0a0e93e4f4245d7cc682159eb52579e04771271b322c7c7']}}, strong=False)
+E        +    where <function artifacts_current at 0x7861480c5580> = p.artifacts_current
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py:34: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_freshness.py::test_accepted_artifact_survives_same_content[False-link]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 2 warnings in 9.18s =========================

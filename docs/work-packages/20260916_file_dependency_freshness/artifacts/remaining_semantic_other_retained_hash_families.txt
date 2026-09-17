@@ -1,0 +1,70 @@
+tools/peakflow_phase1_replay.py:27:def canonical_sha256(value: Any) -> str:
+tools/peakflow_phase1_replay.py:29:    return hashlib.sha256(encoded).hexdigest()
+tools/peakflow_phase1_replay.py:98:    return {"schema_version": SCHEMA_VERSION, "payload_sha256": canonical_sha256(payload), **payload}
+tools/peakflow_phase1_replay.py:102:    payload = {key: value for key, value in packet.items() if key not in {"schema_version", "payload_sha256"}}
+tools/peakflow_phase1_replay.py:105:    if canonical_sha256(payload) != packet["payload_sha256"]:
+tools/peakflow_phase1_replay.py:207:        "packet_sha256": packet["payload_sha256"],
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:45:                if record.get('body_sha256',self.hashes[str(body)]) != self.hashes[str(body)]:
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:47:                received += io.regular(body,65536).stat().st_size
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:53:        io.write_json(output/'replay_sources.json',{'sources_sha256':self.hashes,'network_requests':0})
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:68:            if hashlib.sha256(body).hexdigest() != self.hashes[str(path)]:
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:93:def recover_sources(wd, dem, mask, original_receipt, *, expected_sha256):
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:100:    if digest != expected_sha256 or original.get('project') != str(root) or original.get('status') != 'complete':
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:105:    for key in ('grid','mukeys','dependency_state','cache_identity'):
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:113:        if lineage.get('response_sha256') != io.digest(original_output/'sda_response.json',io.MAX_TEXT):
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:125:                  'original_receipt_sha256':digest,'original_native_sha256':native_hash,'network_requests':0})
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:143:    parser.add_argument('--sha256',required=True)
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py:145:    print(recover_sources(args.project,args.dem,args.mask,args.receipt,expected_sha256=args.sha256))
+wepppy/nodb/mods/path_ce/path_cost_effective.py:7:sweep with cache reuse, and persists artifacts under ``<wd>/path/`` for
+wepppy/nodb/mods/path_ce/path_cost_effective.py:190:def _sha256_file(path: Path) -> str:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:191:    digest = hashlib.sha256()
+wepppy/nodb/mods/path_ce/path_cost_effective.py:431:    # Stage 4: threshold sweep (always-on, cache-keyed — D5)
+wepppy/nodb/mods/path_ce/path_cost_effective.py:433:    def _sweep_cache_key(self, config: Mapping[str, Any]) -> str:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:441:            "frame_sha256": _sha256_file(self.path_dir / PREPARED_FRAME),
+wepppy/nodb/mods/path_ce/path_cost_effective.py:443:        return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+wepppy/nodb/mods/path_ce/path_cost_effective.py:451:        cache_key = self._sweep_cache_key(config)
+wepppy/nodb/mods/path_ce/path_cost_effective.py:460:            if manifest.get("cache_key") == cache_key:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:544:            "cache_key": cache_key,
+wepppy/tools/migrations/unroll_root_resources_batch.py:79:def _sha256_path(path: Path) -> str:
+wepppy/tools/migrations/unroll_root_resources_batch.py:82:    digest = hashlib.sha256()
+wepppy/tools/migrations/unroll_root_resources_batch.py:383:    source_sha256: str | None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:384:    target_sha256: str | None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:400:        "source_sha256": source_sha256,
+wepppy/tools/migrations/unroll_root_resources_batch.py:401:        "target_sha256": target_sha256,
+wepppy/tools/migrations/unroll_root_resources_batch.py:507:                    source_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:508:                    target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:519:            source_hash = _sha256_path(source_path)
+wepppy/tools/migrations/unroll_root_resources_batch.py:533:                        source_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:534:                        target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:551:                    source_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:552:                    target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:562:                target_hash = _sha256_path(target_path)
+wepppy/tools/migrations/unroll_root_resources_batch.py:578:                            source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:579:                            target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:609:                    source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:610:                    target_sha256=target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:633:                        source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:634:                        target_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:641:                    post_target_hash = _sha256_path(target_path)
+wepppy/tools/migrations/unroll_root_resources_batch.py:655:                        source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:656:                        target_sha256=post_target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:675:                            source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:676:                            target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:693:                        source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:694:                        target_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:718:                        source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:719:                        target_sha256=target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:737:                            source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:738:                            target_sha256=target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:756:                        source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:757:                        target_sha256=target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:776:                source_sha256=source_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:777:                target_sha256=target_hash,
+wepppy/tools/migrations/unroll_root_resources_batch.py:884:                source_sha256=None,
+wepppy/tools/migrations/unroll_root_resources_batch.py:885:                target_sha256=None,
+wepppy/climates/gridmet/admission.py:69:    # Legacy configuration/fingerprint field; never limits live queue waiting.
+wepppy/climates/gridmet/admission.py:102:    def fingerprint(self) -> str:
+wepppy/climates/gridmet/admission.py:136:    fingerprint: str = ""
+wepppy/climates/gridmet/admission.py:322:                config.fingerprint, config.limit, config.lease_seconds * 1000,
+wepppy/climates/gridmet/admission.py:339:            code, state, position, queued, active, limit, server_time, fingerprint, sequence = result
+wepppy/climates/gridmet/admission.py:342:                int(limit), waited, float(server_time) / 1000, str(fingerprint),

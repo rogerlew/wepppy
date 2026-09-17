@@ -1,0 +1,16 @@
+[
+  {
+    "path": "/workdir/wepppy/wepp_runner/bin/wepp_260803",
+    "bytes": 2638424,
+    "cold_seconds": 0.009373842971399426,
+    "settled_mean_seconds": 6.177719915285706e-05,
+    "settled_misses": 0
+  },
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/dem/dem.tif",
+    "bytes": 26410828,
+    "cold_seconds": 0.09287095093168318,
+    "settled_mean_seconds": 9.566334076225757e-05,
+    "settled_misses": 0
+  }
+]

@@ -1,0 +1,60 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_features_export_cache_key.py tests/nodb/mods/test_features_export_carrier_layer_materializer.py tests/nodb/mods/test_features_export_catalog_loader.py tests/nodb/mods/test_features_export_dependency_tracker.py tests/nodb/mods/test_features_export_duckdb_materializer.py tests/nodb/mods/test_features_export_exporters.py tests/nodb/mods/test_features_export_freshness.py tests/nodb/mods/test_features_export_identity_columns.py tests/nodb/mods/test_features_export_manifest.py tests/nodb/mods/test_features_export_openfilegdb.py tests/nodb/mods/test_features_export_planner.py tests/nodb/mods/test_features_export_profiles.py tests/nodb/mods/test_features_export_service.py tests/rq/test_features_export_rq.py tests/microservices/test_rq_engine_features_export_routes.py --maxfail=3
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 195 items
+
+tests/nodb/mods/test_features_export_cache_key.py ....                   [  2%]
+tests/nodb/mods/test_features_export_carrier_layer_materializer.py ..... [  4%]
+...                                                                      [  6%]
+tests/nodb/mods/test_features_export_catalog_loader.py ....              [  8%]
+tests/nodb/mods/test_features_export_dependency_tracker.py ............. [ 14%]
+...                                                                      [ 16%]
+tests/nodb/mods/test_features_export_duckdb_materializer.py .....        [ 18%]
+tests/nodb/mods/test_features_export_exporters.py ...................    [ 28%]
+tests/nodb/mods/test_features_export_freshness.py ......                 [ 31%]
+tests/nodb/mods/test_features_export_identity_columns.py ..              [ 32%]
+tests/nodb/mods/test_features_export_manifest.py ..                      [ 33%]
+tests/nodb/mods/test_features_export_openfilegdb.py ......               [ 36%]
+tests/nodb/mods/test_features_export_planner.py .......................  [ 48%]
+tests/nodb/mods/test_features_export_profiles.py ..                      [ 49%]
+tests/nodb/mods/test_features_export_service.py ........................ [ 62%]
+..................................................                       [ 87%]
+tests/rq/test_features_export_rq.py ...                                  [ 89%]
+tests/microservices/test_rq_engine_features_export_routes.py ........... [ 94%]
+..........                                                               [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/rq/test_features_export_rq.py::test_run_features_export_rq_rejects_non_object_payload
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/microservices/test_rq_engine_features_export_routes.py::test_features_export_submit_non_json_returns_415
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 195 passed, 8 warnings in 7.83s ========================

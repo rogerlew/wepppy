@@ -1,0 +1,100 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/features_native_packaging_retention_probe.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 1 item
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/features_native_packaging_retention_probe.py::test_actual_native_gdb_packaging_error_retains_work {
+  "native_file_count_before_error": 20,
+  "native_bytes_before_error": 52335,
+  "native_paths": [
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000009.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000002.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000009.spx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000007.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000004.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000005.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/gdb",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000004.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000003.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000003.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000009.gdbindexes",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000001.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000007.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000001.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000006.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000005.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000009.gdbtablx",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000002.gdbtable",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/timestamps",
+    "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb/a00000006.gdbtablx"
+  ],
+  "partial_zip": "export/features/artifacts/1df61d9312054f9985ff635c6238a848/features_export.gdb.zip",
+  "remaining_native_paths": [],
+  "partial_zip_retained": false,
+  "failed_manifests": [
+    {
+      "artifact_id": "1df61d9312054f9985ff635c6238a848",
+      "dependency_snapshot": {
+        "catalog_signature": "88b00e7ac05ca183b73dbedb180ce228ae0e04083e23f9643ba63be818cf5f68",
+        "entries": [
+          {
+            "content_hash_marker": "sha256",
+            "content_hash_value": "2188fb88d65dcbd6eb1f96c895d949421768a8d15b6468736ed3ae55ab8dfc4f",
+            "dependency_id": "attrs",
+            "dependency_role": "source",
+            "exists": true,
+            "layer_id": "test.attributes",
+            "mtime_ns": 1789614005731734739,
+            "output_layer_id": "shared__test.attributes",
+            "relpath": "attrs.parquet",
+            "size": 1726
+          },
+          {
+            "content_hash_marker": "sha256",
+            "content_hash_value": "47ec91829467ec9886cda2cc433d7d473b65c1656f72a3a9224a7a22fd2c1d7c",
+            "dependency_id": "geometry",
+            "dependency_role": "geometry",
+            "exists": true,
+            "layer_id": "test.attributes",
+            "mtime_ns": 1789614005723734582,
+            "output_layer_id": "shared__test.attributes",
+            "relpath": "geometry.geojson",
+            "size": 181
+          }
+        ],
+        "fingerprint": "188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255"
+      },
+      "dependency_verification": {
+        "error_type": "FeaturesExportWriterError",
+        "stage": "conversion",
+        "status": "error"
+      },
+      "source_artifact_id": "da9d014be60d49c9b6e0ecf7b1477e17"
+    }
+  ]
+}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_features_export_dependency_tracker.py:15
+  /workdir/wepppy/tests/nodb/mods/test_features_export_dependency_tracker.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+tests/nodb/mods/test_features_export_freshness.py:16
+  /workdir/wepppy/tests/nodb/mods/test_features_export_freshness.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 1 passed, 4 warnings in 9.40s =========================

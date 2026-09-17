@@ -1,0 +1,42 @@
+wepppy/nodb/mods/omni/omni_input_parser.py:54:                    sbs_file_path = params.get("sbs_file_path")
+wepppy/nodb/mods/omni/omni_input_parser.py:55:                    if not sbs_file_path:
+wepppy/nodb/mods/omni/omni_input_parser.py:60:                            "sbs_file_path": sbs_file_path,
+wepppy/rq/project_rq.py:130:_WBT_BUILD_LINK_KEY = "jobs:0,func:build_subcatchments_rq"
+wepppy/rq/project_rq.py:156:def _build_channels_child_timeout(
+wepppy/rq/project_rq.py:655:        == f"{build_subcatchments_rq.__module__}.{build_subcatchments_rq.__qualname__}"
+wepppy/rq/project_rq.py:779:                build_subcatchments_rq,
+wepppy/rq/project_rq.py:997:        if TaskStub.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
+wepppy/rq/project_rq.py:1002:                lambda: watershed.build_channels(),
+wepppy/rq/project_rq.py:1018:        if TaskStub.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
+wepppy/rq/project_rq.py:1023:                lambda: watershed.build_subcatchments(),
+wepppy/rq/project_rq.py:1370:def build_channels_rq(
+wepppy/rq/project_rq.py:1426:            watershed.build_channels(csa, mcl)
+wepppy/rq/project_rq.py:1475:        prep.timestamp(TaskEnum.build_channels)
+wepppy/rq/project_rq.py:1539:def fetch_dem_and_build_channels_rq(
+wepppy/rq/project_rq.py:1587:        build_channels_timeout = _build_channels_child_timeout(
+wepppy/rq/project_rq.py:1596:                    build_channels_rq,
+wepppy/rq/project_rq.py:1606:                    timeout=build_channels_timeout,
+wepppy/rq/project_rq.py:1608:                job.meta['jobs:0,func:build_channels_rq'] = bjob.id
+wepppy/rq/project_rq.py:1620:                    build_channels_rq,
+wepppy/rq/project_rq.py:1630:                    timeout=build_channels_timeout,
+wepppy/rq/project_rq.py:1633:                job.meta['jobs:1,func:build_channels_rq'] = bjob.id
+wepppy/rq/project_rq.py:1732:def build_subcatchments_rq(
+wepppy/rq/project_rq.py:1773:            prep.remove_timestamp(TaskEnum.build_subcatchments)
+wepppy/rq/project_rq.py:1783:            watershed.build_subcatchments(
+wepppy/rq/project_rq.py:1947:def build_subcatchments_and_abstract_watershed_rq(
+wepppy/microservices/rq_engine/omni_routes.py:405:                        overwrite=True,
+wepppy/microservices/rq_engine/omni_routes.py:412:                scenario_params["sbs_file_path"] = str(upload_path)
+wepppy/microservices/rq_engine/omni_routes.py:413:            elif scenario_params.get("sbs_file_path"):
+wepppy/microservices/rq_engine/omni_routes.py:414:                scenario_params["sbs_file_path"] = str(scenario_params["sbs_file_path"])
+wepppy/microservices/rq_engine/omni_routes.py:528:                    overwrite=True,
+wepppy/nodb/core/watershed_mixins.py:304:    def build_channels(self, csa: Optional[float] = None, mcl: Optional[float] = None) -> None:
+wepppy/nodb/core/watershed_mixins.py:331:            Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
+wepppy/nodb/core/watershed_mixins.py:357:        prep.timestamp(TaskEnum.build_channels)
+wepppy/nodb/core/watershed_mixins.py:359:    def symlink_channels_map(
+wepppy/nodb/core/watershed_mixins.py:376:            raise RuntimeError("symlink_channels_map requires WBT delineation backend")
+wepppy/nodb/core/watershed_mixins.py:462:            prep.timestamp(TaskEnum.build_channels)
+wepppy/nodb/core/watershed_mixins.py:521:    def build_subcatchments(
+wepppy/nodb/core/watershed_mixins.py:545:            prep.remove_timestamp(TaskEnum.build_subcatchments)
+wepppy/nodb/core/watershed_mixins.py:556:            Topaz.getInstance(self.wd).build_subcatchments()
+wepppy/nodb/core/watershed_mixins.py:580:            self._taudem_build_subcatchments()
+wepppy/nodb/core/watershed_mixins.py:584:            prep.timestamp(TaskEnum.build_subcatchments)

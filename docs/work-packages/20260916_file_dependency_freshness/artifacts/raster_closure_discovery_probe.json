@@ -1,0 +1,42 @@
+[
+  {
+    "name": "<temporary>/source.tif",
+    "files": [
+      "<temporary>/source.tif"
+    ],
+    "vsi_size": 150,
+    "vsi_mtime": 1789611636,
+    "vsi_mode": 33188,
+    "identified": "GTiff"
+  },
+  {
+    "name": "/vsizip/<temporary>/source.zip/source.tif",
+    "files": [
+      "/vsizip/<temporary>/source.zip/source.tif"
+    ],
+    "vsi_size": 150,
+    "vsi_mtime": 1789611636,
+    "vsi_mode": 32768,
+    "identified": "GTiff"
+  },
+  {
+    "name": "<temporary>/source.zarr",
+    "files": [
+      "<temporary>/source.zarr/source/.zarray",
+      "<temporary>/source.zarr"
+    ],
+    "vsi_size": 4096,
+    "vsi_mtime": 1789611636,
+    "vsi_mode": 16877,
+    "identified": "Zarr"
+  },
+  {
+    "directory_members": [
+      "source.zarr/.zgroup",
+      "source.zarr/.zmetadata",
+      "source.zarr/source/.zarray",
+      "source.zarr/source/.zattrs",
+      "source.zarr/source/0.0"
+    ]
+  }
+]

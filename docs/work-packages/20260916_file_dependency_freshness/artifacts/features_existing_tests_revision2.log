@@ -1,0 +1,120 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_features_export_dependency_tracker.py tests/nodb/mods/test_features_export_service.py --maxfail=3
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 85 items
+
+tests/nodb/mods/test_features_export_dependency_tracker.py ...........   [ 12%]
+tests/nodb/mods/test_features_export_service.py ........................ [ 41%]
+.................................................F                       [100%]
+
+=================================== FAILURES ===================================
+_ test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase _
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-40/test_publish_profile_execution0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7c79cc98d820>
+
+    def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        artifact_dir = tmp_path / "export" / "features" / "artifacts" / "artifact-1"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        source_zip_path = artifact_dir / "features_export.geopackage.zip"
+        source_zip_path.write_bytes(b"source-geopackage-zip")
+        source_gpkg_path = artifact_dir / "features_export.gpkg"
+        source_gpkg_path.write_bytes(b"source-gpkg")
+    
+        def _fake_prepare_export_submission(_wd: Path, payload: dict[str, object]):
+            format_token = str(payload.get("format") or "").strip().lower()
+            if format_token == "geodatabase":
+                return _build_submission(
+                    cache_key="request-hash+dependency-fingerprint-geodatabase",
+                    format_token="geodatabase",
+                )
+            return _build_submission(
+                cache_key="request-hash+dependency-fingerprint-geopackage",
+                format_token="geopackage",
+            )
+    
+        monkeypatch.setattr(service, "prepare_export_submission", _fake_prepare_export_submission)
+        monkeypatch.setattr(service, "openfilegdb_create_available", lambda: True)
+    
+        def _fake_convert_gpkg_to_gdb(gpkg_path: str, gdb_path: str, zip_output: bool = True) -> None:
+            assert Path(gpkg_path) == source_gpkg_path
+            assert zip_output is True
+            gdb_dir = Path(gdb_path)
+            gdb_dir.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(gdb_dir.with_suffix(".gdb.zip"), "w") as zip_handle:
+                zip_handle.writestr("features_export.gdb/table.gdbtable", b"co-created-gdb-bytes")
+    
+        monkeypatch.setattr(service, "convert_geopackage_to_openfilegdb", _fake_convert_gpkg_to_gdb)
+    
+        source_artifact_relpath = source_zip_path.relative_to(tmp_path).as_posix()
+>       published_entries = service.publish_profile_execution_artifacts(
+            tmp_path,
+            requested_profile="prep-wepp-gpkg-gdb",
+            job_id="job-1",
+            job_result={
+                "artifact_id": "artifact-1",
+                "artifact_relpath": source_artifact_relpath,
+                "manifest_relpath": "export/features/jobs/job-1/manifest.json",
+            },
+        )
+
+tests/nodb/mods/test_features_export_service.py:3592: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/features_export/service.py:774: in publish_profile_execution_artifacts
+    geodatabase_result = co_create_post_wepp_geodatabase_artifact(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wd = PosixPath('/tmp/pytest-of-unknown/pytest-40/test_publish_profile_execution0')
+
+    def co_create_post_wepp_geodatabase_artifact(
+        wd: str | Path,
+        *,
+        source_job_id: str,
+        source_job_result: dict[str, object] | None,
+    ) -> dict[str, object]:
+        """Create one FileGDB artifact from a completed prep-wepp GeoPackage artifact."""
+    
+        wd_path = Path(wd).resolve()
+        if not isinstance(source_job_id, str) or not source_job_id:
+            raise FeaturesExportServiceError("source_job_id must be a non-empty string.", status_code=500)
+    
+        if not openfilegdb_create_available():
+            raise FeaturesExportServiceError(
+                "Geodatabase co-creation requires GDAL OpenFileGDB vector-create "
+                "capability, but it is unavailable.",
+                status_code=409,
+                code="export_backend_unavailable",
+            )
+    
+        source_artifact_path, source_artifact_relpath = resolve_download_artifact_path(
+            wd_path,
+            job_id=source_job_id,
+            job_result=source_job_result,
+        )
+        geodatabase_request = resolve_published_profile_request("prep-wepp-geodatabase")[1]
+        submission = prepare_export_submission(wd_path, geodatabase_request)
+>       source_submission = prepare_export_submission(
+            wd_path, {**geodatabase_request, "format": "geopackage"}, catalog=submission.catalog,
+        )
+E       TypeError: test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase.<locals>._fake_prepare_export_submission() got an unexpected keyword argument 'catalog'
+
+wepppy/nodb/mods/features_export/service.py:642: TypeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_features_export_service.py::test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase
+================== 1 failed, 84 passed, 2 warnings in 11.39s ===================

@@ -1,0 +1,8 @@
+{
+  "old": "71fd3c340bd842a68234cf36752ad1e115cfe01cf662a5c46b03bf5ec0bddc81",
+  "observed": "71fd3c340bd842a68234cf36752ad1e115cfe01cf662a5c46b03bf5ec0bddc81",
+  "expected": "5a1376798ba0cc1417a47939d2b2e4bdc0c999c7c99b9d7dd12b0b173ae4c889",
+  "equal_size": true,
+  "same_mtime": true,
+  "stale_digest": true
+}

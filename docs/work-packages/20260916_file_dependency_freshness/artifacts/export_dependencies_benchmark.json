@@ -1,0 +1,25 @@
+{
+  "root": "/wc1/runs/th/thespian-cleanness",
+  "entries": 24,
+  "unique_files": 14,
+  "bytes": 2345715,
+  "paths": [
+    "dem/wbt/channels.WGS.geojson",
+    "dem/wbt/subcatchments.WGS.geojson",
+    "landuse/landuse.parquet",
+    "landuse.nodb",
+    "soils/soils.parquet",
+    "soils.nodb",
+    "unitizer.nodb",
+    "watershed/channels.parquet",
+    "watershed/hillslopes.parquet",
+    "watershed.nodb",
+    "wepp/output/interchange/interchange_version.json",
+    "wepp/output/interchange/loss_pw0.chn.parquet",
+    "wepp/output/interchange/loss_pw0.hill.parquet",
+    "wepp.nodb"
+  ],
+  "cold_hash_seconds": 0.028693970991298556,
+  "settled_set_mean_seconds": 0.001619671646039933,
+  "settled_misses": 0
+}

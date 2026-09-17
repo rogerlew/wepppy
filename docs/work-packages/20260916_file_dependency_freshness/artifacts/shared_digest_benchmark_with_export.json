@@ -1,0 +1,23 @@
+[
+  {
+    "path": "/workdir/wepppy/wepp_runner/bin/wepp_260803",
+    "bytes": 2638424,
+    "cold_seconds": 0.010488840052857995,
+    "settled_mean_seconds": 6.56619411893189e-05,
+    "settled_misses": 0
+  },
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/dem/dem.tif",
+    "bytes": 26410828,
+    "cold_seconds": 0.09608665597625077,
+    "settled_mean_seconds": 9.40807699225843e-05,
+    "settled_misses": 0
+  },
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/export/features/artifacts/a41d267b33ad4105ac0fbc5142fd36a8/features_export.gdb.zip",
+    "bytes": 164591,
+    "cold_seconds": 0.004427515901625156,
+    "settled_mean_seconds": 0.00029121464118361475,
+    "settled_misses": 0
+  }
+]

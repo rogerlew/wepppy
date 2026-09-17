@@ -1,0 +1,39 @@
+{
+  "artifact_id": "3a49876cbbe641c7b172a1b1695faa5d",
+  "dependency_snapshot": {
+    "catalog_signature": "88b00e7ac05ca183b73dbedb180ce228ae0e04083e23f9643ba63be818cf5f68",
+    "entries": [
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "2188fb88d65dcbd6eb1f96c895d949421768a8d15b6468736ed3ae55ab8dfc4f",
+        "dependency_id": "attrs",
+        "dependency_role": "source",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614085791263132,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "attrs.parquet",
+        "size": 1726
+      },
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "47ec91829467ec9886cda2cc433d7d473b65c1656f72a3a9224a7a22fd2c1d7c",
+        "dependency_id": "geometry",
+        "dependency_role": "geometry",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614083786263034,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "geometry.geojson",
+        "size": 181
+      }
+    ],
+    "fingerprint": "188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255"
+  },
+  "dependency_verification": {
+    "error_type": "FeaturesExportWriterError",
+    "stage": "conversion",
+    "status": "error"
+  },
+  "source_artifact_id": "bb30e73373f7441897ad8307b096e36e"
+}

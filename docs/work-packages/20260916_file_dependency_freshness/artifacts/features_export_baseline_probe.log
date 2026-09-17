@@ -1,0 +1,6 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/features_export_baseline_probe.py
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_export_baseline_probe.py", line 25, in <module>
+    first = service.run_export_job(root, runid='probe', config='test', payload=payload, job_id='first')
+            ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'wepppy.nodb.mods.features_export.service' has no attribute 'run_export_job'

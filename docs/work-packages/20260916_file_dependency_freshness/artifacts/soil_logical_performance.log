@@ -1,0 +1,3637 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_soil_logical_identity.py
+largest_wal source_state: 0.529 ms 
+largest_wal actual_production_soils_inventory: 2.364 ms 
+largest_wal physical_set_first_observation: 5.760 ms 
+largest_wal physical_set_during_admission: 5.291 ms 
+largest_wal physical_set_admitting: 7.964 ms 
+largest_wal physical_set_settled: 0.607 ms 
+largest_wal actual_snapshot_first: 317.474 ms 
+largest_wal actual_snapshot_warm: 209.095 ms 
+largest_wal actual_snapshot_profiled: 225.345 ms 
+largest_main_without_wal source_state: 0.238 ms 
+largest_main_without_wal actual_production_soils_inventory: 1.509 ms 
+largest_main_without_wal physical_set_first_observation: 1.000 ms 
+largest_main_without_wal physical_set_during_admission: 1.014 ms 
+largest_main_without_wal physical_set_admitting: 0.906 ms 
+largest_main_without_wal physical_set_settled: 0.290 ms 
+largest_main_without_wal actual_snapshot_first: 58.565 ms 
+largest_main_without_wal actual_snapshot_warm: 46.133 ms 
+largest_main_without_wal actual_snapshot_profiled: 40.590 ms 
+largest_prepared source_state: 0.207 ms 
+largest_prepared actual_production_soils_inventory: 14.534 ms 
+largest_prepared physical_set_first_observation: 5.824 ms 
+largest_prepared physical_set_during_admission: 5.192 ms 
+largest_prepared physical_set_admitting: 6.986 ms 
+largest_prepared physical_set_settled: 0.640 ms 
+largest_prepared actual_snapshot_first: 129.855 ms 
+largest_prepared actual_snapshot_warm: 134.254 ms 
+largest_prepared actual_snapshot_profiled: 133.984 ms 
+{
+  "disposable_root": "/wc1/batch/qa-soil-logical-perf-d7ea2e582667",
+  "uid": 1000,
+  "gid": 993,
+  "survey": [
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1076443,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789086179911196144,
+          "st_ctime_ns": 1789086179911196144
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1074019,
+          "st_mode": 33188,
+          "st_size": 280192,
+          "st_mtime_ns": 1789086183712221121,
+          "st_ctime_ns": 1789086183712221121
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1074020,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789407338765264245,
+          "st_ctime_ns": 1789407338765264245
+        },
+        "-journal": null
+      },
+      "total_bytes": 317056,
+      "prepared_metadata_present": true
+    },
+    {
+      "path": "/wc1/runs/an/anaphylactic-vernacular/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1760189,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782401521415858219,
+          "st_ctime_ns": 1782401521415858219
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1760191,
+          "st_mode": 33188,
+          "st_size": 238992,
+          "st_mtime_ns": 1782401524353874808,
+          "st_ctime_ns": 1782401524353874808
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1760192,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782401524355874819,
+          "st_ctime_ns": 1782401524355874819
+        },
+        "-journal": null
+      },
+      "total_bytes": 275856,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/te/teasing-interjection/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 886577,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785424555291958174,
+          "st_ctime_ns": 1785742430278495044
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 886579,
+          "st_mode": 33188,
+          "st_size": 276072,
+          "st_mtime_ns": 1785424558380977847,
+          "st_ctime_ns": 1785742430287495116
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 886578,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785742444808611313,
+          "st_ctime_ns": 1785742444808611313
+        },
+        "-journal": null
+      },
+      "total_bytes": 312936,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/br/branching-hubbub/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 777506,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785427251994219251,
+          "st_ctime_ns": 1785427251994219251
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 777508,
+          "st_mode": 33188,
+          "st_size": 428512,
+          "st_mtime_ns": 1785427256630248880,
+          "st_ctime_ns": 1785427256630248880
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 777509,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785427253813230877,
+          "st_ctime_ns": 1785427253813230877
+        },
+        "-journal": null
+      },
+      "total_bytes": 465376,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/in/interconnected-fit/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1778119,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782512509883558718,
+          "st_ctime_ns": 1782512509883558718
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1778121,
+          "st_mode": 33188,
+          "st_size": 354352,
+          "st_mtime_ns": 1782512513826582422,
+          "st_ctime_ns": 1782512513826582422
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1778122,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782512513828582434,
+          "st_ctime_ns": 1782512513828582434
+        },
+        "-journal": null
+      },
+      "total_bytes": 391216,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/in/incomparable-gracefulness/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 3400113,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782862032823471552,
+          "st_ctime_ns": 1782862032823471552
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 3400496,
+          "st_mode": 33188,
+          "st_size": 449112,
+          "st_mtime_ns": 1782862036702497796,
+          "st_ctime_ns": 1782862036702497796
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 3400114,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782862036707497830,
+          "st_ctime_ns": 1782862036707497830
+        },
+        "-journal": null
+      },
+      "total_bytes": 485976,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/in/incommensurate-stickball/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 6475117,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1786046567426558602,
+          "st_ctime_ns": 1786046567426558602
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 6464628,
+          "st_mode": 33188,
+          "st_size": 469712,
+          "st_mtime_ns": 1786046571854537344,
+          "st_ctime_ns": 1786046571854537344
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 6464629,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1786046571855537339,
+          "st_ctime_ns": 1786046571855537339
+        },
+        "-journal": null
+      },
+      "total_bytes": 506576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ma/mammalian-ageism/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 4984299,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782158025716763379,
+          "st_ctime_ns": 1782158025716763379
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 4985357,
+          "st_mode": 33188,
+          "st_size": 700432,
+          "st_mtime_ns": 1782158030663792972,
+          "st_ctime_ns": 1782158030663792972
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 4985358,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782158514304623973,
+          "st_ctime_ns": 1782158514304623973
+        },
+        "-journal": null
+      },
+      "total_bytes": 737296,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ju/juvenile-separatist/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1773432,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782510948627746942,
+          "st_ctime_ns": 1782510948627746942
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1773434,
+          "st_mode": 33188,
+          "st_size": 271952,
+          "st_mtime_ns": 1782510951321765771,
+          "st_ctime_ns": 1782510951321765771
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1773435,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782510951323765786,
+          "st_ctime_ns": 1782510951323765786
+        },
+        "-journal": null
+      },
+      "total_bytes": 308816,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ch/chemotherapeutic-scope/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 80756,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1787961041883071931,
+          "st_ctime_ns": 1787961041883071931
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 80758,
+          "st_mode": 33188,
+          "st_size": 276072,
+          "st_mtime_ns": 1787961044733083486,
+          "st_ctime_ns": 1787961044733083486
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 80759,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1787961044735083494,
+          "st_ctime_ns": 1787961044735083494
+        },
+        "-journal": null
+      },
+      "total_bytes": 312936,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/de/deathless-wangle/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1763501,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782403203777066225,
+          "st_ctime_ns": 1782403203777066225
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1763503,
+          "st_mode": 33188,
+          "st_size": 276072,
+          "st_mtime_ns": 1782403207539093869,
+          "st_ctime_ns": 1782403207539093869
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1763600,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782403207540093876,
+          "st_ctime_ns": 1782403207540093876
+        },
+        "-journal": null
+      },
+      "total_bytes": 312936,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ba/baseless-salesmanship/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1750488,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782331680434252603,
+          "st_ctime_ns": 1782331680434252603
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1750490,
+          "st_mode": 33188,
+          "st_size": 337872,
+          "st_mtime_ns": 1782331683802277656,
+          "st_ctime_ns": 1782331683802277656
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1750510,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782331683804277671,
+          "st_ctime_ns": 1782331683804277671
+        },
+        "-journal": null
+      },
+      "total_bytes": 374736,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ba/barred-pro/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1761706,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782402556813724154,
+          "st_ctime_ns": 1782402556813724154
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1761708,
+          "st_mode": 33188,
+          "st_size": 420272,
+          "st_mtime_ns": 1782402712847158519,
+          "st_ctime_ns": 1782402712847158519
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1761709,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782402712847158519,
+          "st_ctime_ns": 1782402712847158519
+        },
+        "-journal": null
+      },
+      "total_bytes": 457136,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1189318,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789605340316991944,
+          "st_ctime_ns": 1789605340316991944
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1187780,
+          "st_mode": 33188,
+          "st_size": 1203072,
+          "st_mtime_ns": 1789605358417106335,
+          "st_ctime_ns": 1789605358417106335
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1187781,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789605358419106347,
+          "st_ctime_ns": 1789605358419106347
+        },
+        "-journal": null
+      },
+      "total_bytes": 1239936,
+      "prepared_metadata_present": true
+    },
+    {
+      "path": "/wc1/runs/so/soft-boiled-copying/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 6512177,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1787516710994383701,
+          "st_ctime_ns": 1787516710994383701
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 70365,
+          "st_mode": 33188,
+          "st_size": 531512,
+          "st_mtime_ns": 1787516717725425565,
+          "st_ctime_ns": 1787516717725425565
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 68019,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1787516717756425758,
+          "st_ctime_ns": 1787516717756425758
+        },
+        "-journal": null
+      },
+      "total_bytes": 568376,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/se/sensory-bun/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 857121,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785741749315588426,
+          "st_ctime_ns": 1785741749315588426
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 857124,
+          "st_mode": 33188,
+          "st_size": 362592,
+          "st_mtime_ns": 1785741752587620147,
+          "st_ctime_ns": 1785741752587620147
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 873190,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785741752589620167,
+          "st_ctime_ns": 1785741752589620167
+        },
+        "-journal": null
+      },
+      "total_bytes": 399456,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/se/seductive-sabra/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1066759,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1788986122519286943,
+          "st_ctime_ns": 1788986122519286943
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1066725,
+          "st_mode": 33188,
+          "st_size": 510912,
+          "st_mtime_ns": 1788986122641287630,
+          "st_ctime_ns": 1788986122641287630
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1066726,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1788986122580287287,
+          "st_ctime_ns": 1788986122580287287
+        },
+        "-journal": null
+      },
+      "total_bytes": 547776,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/sa/sacral-self-discipline/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 329088,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1783697009054963020,
+          "st_ctime_ns": 1783697009054963020
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5059403,
+          "st_mode": 33188,
+          "st_size": 947632,
+          "st_mtime_ns": 1783697014671996216,
+          "st_ctime_ns": 1783697014671996216
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5059404,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1783697014673996228,
+          "st_ctime_ns": 1783697014673996228
+        },
+        "-journal": null
+      },
+      "total_bytes": 984496,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/as/askance-regularity/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1766574,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782505957068111654,
+          "st_ctime_ns": 1782505957068111654
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1766576,
+          "st_mode": 33188,
+          "st_size": 263712,
+          "st_mtime_ns": 1782505959521127625,
+          "st_ctime_ns": 1782505959521127625
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1766577,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782505959523127637,
+          "st_ctime_ns": 1782505959523127637
+        },
+        "-journal": null
+      },
+      "total_bytes": 300576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5230092,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784150371556554908,
+          "st_ctime_ns": 1784150371556554908
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5230094,
+          "st_mode": 33188,
+          "st_size": 1248392,
+          "st_mtime_ns": 1784152388412010224,
+          "st_ctime_ns": 1784152388412010224
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5230095,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784745425123912044,
+          "st_ctime_ns": 1784745425123912044
+        },
+        "-journal": null
+      },
+      "total_bytes": 1285256,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/im/impure-tapa/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 76158,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1787800097028693559,
+          "st_ctime_ns": 1787800097028693559
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 76582,
+          "st_mode": 33188,
+          "st_size": 515032,
+          "st_mtime_ns": 1787800101498715720,
+          "st_ctime_ns": 1787800101498715720
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 76583,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1787800101500715730,
+          "st_ctime_ns": 1787800101500715730
+        },
+        "-journal": null
+      },
+      "total_bytes": 551896,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/cr/cryptic-beechnut/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 202771,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1788849197413845397,
+          "st_ctime_ns": 1788849197413845397
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 202773,
+          "st_mode": 33188,
+          "st_size": 531512,
+          "st_mtime_ns": 1788849209707913647,
+          "st_ctime_ns": 1788849209707913647
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 202774,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1788849209709913659,
+          "st_ctime_ns": 1788849209709913659
+        },
+        "-journal": null
+      },
+      "total_bytes": 568376,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/jo/joyous-armchair/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1765080,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782505527410239672,
+          "st_ctime_ns": 1782505527410239672
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1765082,
+          "st_mode": 33188,
+          "st_size": 263712,
+          "st_mtime_ns": 1782505530090258191,
+          "st_ctime_ns": 1782505530090258191
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1765083,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782505600484741264,
+          "st_ctime_ns": 1782505600484741264
+        },
+        "-journal": null
+      },
+      "total_bytes": 300576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ca/callable-shred/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 6514712,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1786270550139749542,
+          "st_ctime_ns": 1786270550139749542
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 6514715,
+          "st_mode": 33188,
+          "st_size": 366712,
+          "st_mtime_ns": 1786270550370750661,
+          "st_ctime_ns": 1786270550370750661
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 6514713,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1786270550248750070,
+          "st_ctime_ns": 1786270550248750070
+        },
+        "-journal": null
+      },
+      "total_bytes": 403576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ca/carnivorous-adobo/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 4978215,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1781901919205139311,
+          "st_ctime_ns": 1781901919205139311
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 4982668,
+          "st_mode": 33188,
+          "st_size": 271952,
+          "st_mtime_ns": 1781901922060156458,
+          "st_ctime_ns": 1781901922060156458
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 4978217,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1781901922063156476,
+          "st_ctime_ns": 1781901922063156476
+        },
+        "-journal": null
+      },
+      "total_bytes": 308816,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5740120,
+          "st_mode": 33188,
+          "st_size": 159744,
+          "st_mtime_ns": 1782858999757535000,
+          "st_ctime_ns": 1784438998923217228
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "total_bytes": 159744,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/op/open-plan-conservatism/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1754370,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782332476114957115,
+          "st_ctime_ns": 1782332476114957115
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1754372,
+          "st_mode": 33188,
+          "st_size": 247232,
+          "st_mtime_ns": 1782332478840976215,
+          "st_ctime_ns": 1782332478840976215
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1754373,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782332478842976229,
+          "st_ctime_ns": 1782332478842976229
+        },
+        "-journal": null
+      },
+      "total_bytes": 284096,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/op/open-source-thirtieth/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1758571,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782400589240578016,
+          "st_ctime_ns": 1782400589240578016
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1758573,
+          "st_mode": 33188,
+          "st_size": 263712,
+          "st_mtime_ns": 1782400592037593950,
+          "st_ctime_ns": 1782400592037593950
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1758574,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782400995855886895,
+          "st_ctime_ns": 1782400995855886895
+        },
+        "-journal": null
+      },
+      "total_bytes": 300576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/pf/pfdf-m3-validation-20260914/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1175217,
+          "st_mode": 33188,
+          "st_size": 12288,
+          "st_mtime_ns": 1789435225495579446,
+          "st_ctime_ns": 1789435225495579446
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "total_bytes": 12288,
+      "prepared_metadata_present": true
+    },
+    {
+      "path": "/wc1/runs/pf/pfdf-m3-validation-20260914b/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1175571,
+          "st_mode": 33188,
+          "st_size": 12288,
+          "st_mtime_ns": 1789435422399905858,
+          "st_ctime_ns": 1789435422399905858
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "total_bytes": 12288,
+      "prepared_metadata_present": true
+    },
+    {
+      "path": "/wc1/runs/pl/plastic-bundling/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 656225,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784745014817626078,
+          "st_ctime_ns": 1784745014817626078
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 656227,
+          "st_mode": 33188,
+          "st_size": 642752,
+          "st_mtime_ns": 1784745019584652632,
+          "st_ctime_ns": 1784745019584652632
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 656228,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784745019586652643,
+          "st_ctime_ns": 1784745019586652643
+        },
+        "-journal": null
+      },
+      "total_bytes": 679616,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/pr/praetorian-talcum/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1769529,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782506710368525374,
+          "st_ctime_ns": 1782506710368525374
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1769531,
+          "st_mode": 33188,
+          "st_size": 206032,
+          "st_mtime_ns": 1782506713030526662,
+          "st_ctime_ns": 1782506713030526662
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1769532,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782506713032526663,
+          "st_ctime_ns": 1782506713032526663
+        },
+        "-journal": null
+      },
+      "total_bytes": 242896,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/fo/forced-bop/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1752433,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782332116423418105,
+          "st_ctime_ns": 1782332116423418105
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1752435,
+          "st_mode": 33188,
+          "st_size": 420272,
+          "st_mtime_ns": 1782332120320445867,
+          "st_ctime_ns": 1782332120320445867
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1752436,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782332120321445874,
+          "st_ctime_ns": 1782332120321445874
+        },
+        "-journal": null
+      },
+      "total_bytes": 457136,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ha/hand-to-mouth-drought/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 6488333,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1786130435110724047,
+          "st_ctime_ns": 1786130435110724047
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 6485700,
+          "st_mode": 33188,
+          "st_size": 300792,
+          "st_mtime_ns": 1786130435215724369,
+          "st_ctime_ns": 1786130435215724369
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 6485701,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1786130435253724486,
+          "st_ctime_ns": 1786130435253724486
+        },
+        "-journal": null
+      },
+      "total_bytes": 337656,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ha/hard-line-foothold/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 4988719,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782158354999729285,
+          "st_ctime_ns": 1782158354999729285
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 4988721,
+          "st_mode": 33188,
+          "st_size": 811672,
+          "st_mtime_ns": 1782158360934764662,
+          "st_ctime_ns": 1782158360934764662
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 4988722,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782158933307884657,
+          "st_ctime_ns": 1782158933307884657
+        },
+        "-journal": null
+      },
+      "total_bytes": 848536,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ha/hard-bitten-doze/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1748647,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782331312565421678,
+          "st_ctime_ns": 1782331312565421678
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1748167,
+          "st_mode": 33188,
+          "st_size": 280192,
+          "st_mtime_ns": 1782331315850448011,
+          "st_ctime_ns": 1782331315850448011
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1748168,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782331315852448027,
+          "st_ctime_ns": 1782331315852448027
+        },
+        "-journal": null
+      },
+      "total_bytes": 317056,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/fe/feline-wrangler/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1754224,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782332862937772436,
+          "st_ctime_ns": 1782332862937772436
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1755845,
+          "st_mode": 33188,
+          "st_size": 259592,
+          "st_mtime_ns": 1782332865845779470,
+          "st_ctime_ns": 1782332865845779470
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1755846,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782332865846779473,
+          "st_ctime_ns": 1782332865846779473
+        },
+        "-journal": null
+      },
+      "total_bytes": 296456,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ol/old-fluorosis/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1768008,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782506398311940760,
+          "st_ctime_ns": 1782506398311940760
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1768010,
+          "st_mode": 33188,
+          "st_size": 263712,
+          "st_mtime_ns": 1782506400918957278,
+          "st_ctime_ns": 1782506400918957278
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1767908,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782506464269358167,
+          "st_ctime_ns": 1782506464269358167
+        },
+        "-journal": null
+      },
+      "total_bytes": 300576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/no/nonhierarchical-spender/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 782674,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785398148824443113,
+          "st_ctime_ns": 1785398148824443113
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 782676,
+          "st_mode": 33188,
+          "st_size": 387312,
+          "st_mtime_ns": 1785398152294465779,
+          "st_ctime_ns": 1785398152294465779
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 782677,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785398152296465792,
+          "st_ctime_ns": 1785398152296465792
+        },
+        "-journal": null
+      },
+      "total_bytes": 424176,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ne/nervous-mesquite/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1180158,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789591688171922663,
+          "st_ctime_ns": 1789591688171922663
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1181438,
+          "st_mode": 33188,
+          "st_size": 304912,
+          "st_mtime_ns": 1789591691187941887,
+          "st_ctime_ns": 1789591691187941887
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1181439,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789591691188941894,
+          "st_ctime_ns": 1789591691188941894
+        },
+        "-journal": null
+      },
+      "total_bytes": 341776,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/di/disrupted-subspace/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 784089,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785424555291958174,
+          "st_ctime_ns": 1785424561648998660
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 785263,
+          "st_mode": 33188,
+          "st_size": 276072,
+          "st_mtime_ns": 1785424558380977847,
+          "st_ctime_ns": 1785424561657998717
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 785262,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785424558381977853,
+          "st_ctime_ns": 1785424561651998679
+        },
+        "-journal": null
+      },
+      "total_bytes": 312936,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/vo/voltaic-locking/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 4982761,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1781902080762108897,
+          "st_ctime_ns": 1781902080762108897
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 4982763,
+          "st_mode": 33188,
+          "st_size": 494432,
+          "st_mtime_ns": 1781902084800133117,
+          "st_ctime_ns": 1781902084800133117
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 4982764,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1781902084805133147,
+          "st_ctime_ns": 1781902084805133147
+        },
+        "-journal": null
+      },
+      "total_bytes": 531296,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/sc/scabby-demographic/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1772498,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782511891612813154,
+          "st_ctime_ns": 1782511891612813154
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1776778,
+          "st_mode": 33188,
+          "st_size": 247232,
+          "st_mtime_ns": 1782511894126828555,
+          "st_ctime_ns": 1782511894126828555
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1776779,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782511894129828573,
+          "st_ctime_ns": 1782511894129828573
+        },
+        "-journal": null
+      },
+      "total_bytes": 284096,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/si/single-stranded-lamprey/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5896671,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785817356506558517,
+          "st_ctime_ns": 1785817356506558517
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5896673,
+          "st_mode": 33188,
+          "st_size": 618032,
+          "st_mtime_ns": 1785817367556649588,
+          "st_ctime_ns": 1785817367556649588
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5896674,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785817367557649596,
+          "st_ctime_ns": 1785817367557649596
+        },
+        "-journal": null
+      },
+      "total_bytes": 654896,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/li/listed-scar/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1757233,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782400007503278473,
+          "st_ctime_ns": 1782400007503278473
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1757235,
+          "st_mode": 33188,
+          "st_size": 234872,
+          "st_mtime_ns": 1782400010552295060,
+          "st_ctime_ns": 1782400010552295060
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1757236,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782400010554295071,
+          "st_ctime_ns": 1782400010554295071
+        },
+        "-journal": null
+      },
+      "total_bytes": 271736,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/li/listless-fantasy/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 865960,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785741116616029554,
+          "st_ctime_ns": 1785741116616029554
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 865962,
+          "st_mode": 33188,
+          "st_size": 465592,
+          "st_mtime_ns": 1785741120686091789,
+          "st_ctime_ns": 1785741120686091789
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 865963,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785741120687091804,
+          "st_ctime_ns": 1785741120687091804
+        },
+        "-journal": null
+      },
+      "total_bytes": 502456,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/au/austere-inaction/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5740248,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784581152130861652,
+          "st_ctime_ns": 1784581152130861652
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5740250,
+          "st_mode": 33188,
+          "st_size": 444992,
+          "st_mtime_ns": 1784581156003884243,
+          "st_ctime_ns": 1784581156003884243
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5740251,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784581156005884254,
+          "st_ctime_ns": 1784581156005884254
+        },
+        "-journal": null
+      },
+      "total_bytes": 481856,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/md/mdobre-undimmed-cellulite/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 6455402,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785947994886726032,
+          "st_ctime_ns": 1785947994886726032
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 6455403,
+          "st_mode": 33188,
+          "st_size": 984712,
+          "st_mtime_ns": 1785947995039726840,
+          "st_ctime_ns": 1785947995039726840
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 6455404,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785947994924726232,
+          "st_ctime_ns": 1785947994924726232
+        },
+        "-journal": null
+      },
+      "total_bytes": 1021576,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/md/mdobre-foursquare-fovea/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 710760,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1785127405277482344,
+          "st_ctime_ns": 1785127405277482344
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 715495,
+          "st_mode": 33188,
+          "st_size": 300792,
+          "st_mtime_ns": 1785127456346865445,
+          "st_ctime_ns": 1785127456346865445
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 715699,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1785127456302865116,
+          "st_ctime_ns": 1785127456302865116
+        },
+        "-journal": null
+      },
+      "total_bytes": 337656,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/un/undescended-conserve/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1775373,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1782511437573986479,
+          "st_ctime_ns": 1782511437573986479
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1775375,
+          "st_mode": 33188,
+          "st_size": 350232,
+          "st_mtime_ns": 1782511441045008545,
+          "st_ctime_ns": 1782511441045008545
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1775376,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1782511441047008558,
+          "st_ctime_ns": 1782511441047008558
+        },
+        "-journal": null
+      },
+      "total_bytes": 387096,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/ov/overpriced-sprawl/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1178507,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789501331628020492,
+          "st_ctime_ns": 1789501331628020492
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1178509,
+          "st_mode": 33188,
+          "st_size": 267832,
+          "st_mtime_ns": 1789501335149044117,
+          "st_ctime_ns": 1789501335149044117
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1178510,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789501335151044131,
+          "st_ctime_ns": 1789501335151044131
+        },
+        "-journal": null
+      },
+      "total_bytes": 304696,
+      "prepared_metadata_present": true
+    },
+    {
+      "path": "/wc1/runs/ho/honeyed-marathoner/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 4995987,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1783097850306099974,
+          "st_ctime_ns": 1783097850306099974
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 4989617,
+          "st_mode": 33188,
+          "st_size": 296672,
+          "st_mtime_ns": 1783097850531101424,
+          "st_ctime_ns": 1783097850531101424
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 4989618,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1783097850526101392,
+          "st_ctime_ns": 1783097850526101392
+        },
+        "-journal": null
+      },
+      "total_bytes": 333536,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/fa/far-out-quiescence/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 678875,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784748053497477559,
+          "st_ctime_ns": 1784748053497477559
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 678876,
+          "st_mode": 33188,
+          "st_size": 1153632,
+          "st_mtime_ns": 1784748301465290393,
+          "st_ctime_ns": 1784748301465290393
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 661312,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784748301470290429,
+          "st_ctime_ns": 1784748301470290429
+        },
+        "-journal": null
+      },
+      "total_bytes": 1190496,
+      "prepared_metadata_present": false
+    },
+    {
+      "path": "/wc1/runs/wo/woolen-refusal/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 209148,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1788973197535824762,
+          "st_ctime_ns": 1788973197535824762
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 209150,
+          "st_mode": 33188,
+          "st_size": 234872,
+          "st_mtime_ns": 1788973200247841452,
+          "st_ctime_ns": 1788973200247841452
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 209151,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1788973200249841464,
+          "st_ctime_ns": 1788973200249841464
+        },
+        "-journal": null
+      },
+      "total_bytes": 271736,
+      "prepared_metadata_present": false
+    }
+  ],
+  "selection_rule": "largest observed main+WAL+SHM, largest without WAL, largest with prepared metadata; no SQLite connection in selection",
+  "selections": {
+    "largest_wal": {
+      "path": "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5230092,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784150371556554908,
+          "st_ctime_ns": 1784150371556554908
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5230094,
+          "st_mode": 33188,
+          "st_size": 1248392,
+          "st_mtime_ns": 1784152388412010224,
+          "st_ctime_ns": 1784152388412010224
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5230095,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784745425123912044,
+          "st_ctime_ns": 1784745425123912044
+        },
+        "-journal": null
+      },
+      "total_bytes": 1285256,
+      "prepared_metadata_present": false
+    },
+    "largest_main_without_wal": {
+      "path": "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5740120,
+          "st_mode": 33188,
+          "st_size": 159744,
+          "st_mtime_ns": 1782858999757535000,
+          "st_ctime_ns": 1784438998923217228
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "total_bytes": 159744,
+      "prepared_metadata_present": false
+    },
+    "largest_prepared": {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite",
+      "members": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1189318,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789605340316991944,
+          "st_ctime_ns": 1789605340316991944
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1187780,
+          "st_mode": 33188,
+          "st_size": 1203072,
+          "st_mtime_ns": 1789605358417106335,
+          "st_ctime_ns": 1789605358417106335
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1187781,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789605358419106347,
+          "st_ctime_ns": 1789605358419106347
+        },
+        "-journal": null
+      },
+      "total_bytes": 1239936,
+      "prepared_metadata_present": true
+    }
+  },
+  "cases": {
+    "largest_wal": {
+      "label": "largest_wal",
+      "source": "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite",
+      "output_root": "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal",
+      "measurements": [
+        {
+          "name": "source_state",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.0007726717740297318,
+            0.0006366739980876446,
+            0.0006493399851024151,
+            0.0005992320366203785,
+            0.0005713878199458122,
+            0.0005770849529653788,
+            0.0005702660419046879,
+            0.0005477471277117729,
+            0.0005865888670086861,
+            0.0005440050736069679,
+            0.0005599870346486568,
+            0.0005432199686765671,
+            0.0005583770107477903,
+            0.0005417999345809221,
+            0.0005743850488215685,
+            0.0005646119825541973,
+            0.0005434269551187754,
+            0.0005668241064995527,
+            0.0005412190221250057,
+            0.0006041880697011948,
+            0.0005569069180637598,
+            0.0005657521542161703,
+            0.0005626711063086987,
+            0.0005437820218503475,
+            0.0005622920580208302,
+            0.0005430798046290874,
+            0.0005650569219142199,
+            0.0005392769817262888,
+            0.0005664841737598181,
+            0.0005405070260167122,
+            0.000557103892788291,
+            0.0005585409235209227,
+            0.0005423168186098337,
+            0.000564933056011796,
+            0.0005395908374339342,
+            0.0005639940500259399,
+            0.0005397179629653692,
+            0.0005614310503005981,
+            0.0005899630486965179,
+            0.0005644122138619423,
+            0.0005629709921777248,
+            0.0005382781382650137,
+            0.0005607591010630131,
+            0.0005388131830841303,
+            0.0005562279839068651,
+            0.0005390390288084745,
+            0.0005580259021371603,
+            0.0005377500783652067,
+            0.0005649318918585777,
+            0.0005568871274590492,
+            0.000541341956704855,
+            0.0005593821406364441,
+            0.000541783170774579,
+            0.0005577190313488245,
+            0.000535949133336544,
+            0.0005587609484791756,
+            0.0005862382240593433,
+            0.0005641311872750521,
+            0.0005645919591188431,
+            0.000539297005161643,
+            0.0005636799614876509,
+            0.0005396590568125248,
+            0.0006055978592485189,
+            0.0005398220382630825,
+            0.0005601609591394663,
+            0.0005373330786824226,
+            0.0005585940089076757,
+            0.0005819778889417648,
+            0.0004996040370315313,
+            0.0005124281160533428,
+            0.0004969870205968618,
+            0.0005132779479026794,
+            0.0004968259017914534,
+            0.0005336280446499586,
+            0.0005112041253596544,
+            0.00048769405111670494,
+            0.00045988685451447964,
+            0.00048716296441853046,
+            0.0004654198419302702,
+            0.0004795000422745943,
+            0.00046211504377424717,
+            0.0004757761489599943,
+            0.00046498700976371765,
+            0.00045871478505432606,
+            0.00047610211186110973,
+            0.0004315408878028393,
+            0.00044585298746824265,
+            0.00042783678509294987,
+            0.00045975903049111366,
+            0.0004033369477838278,
+            0.0004118459764868021,
+            0.00040847016498446465,
+            0.0004033998120576143,
+            0.000425518024712801,
+            0.00040371809154748917,
+            0.00041813007555902004,
+            0.00040293391793966293,
+            0.0004494651220738888,
+            0.00042555597610771656,
+            0.0003793791402131319
+          ],
+          "mean_seconds": 0.0005290860985405744,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 116,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_production_soils_inventory",
+          "requested_repeats": 30,
+          "completed_attempts": 30,
+          "seconds": [
+            0.00591565715149045,
+            0.0031085421796888113,
+            0.003072597784921527,
+            0.00310521200299263,
+            0.0030783801339566708,
+            0.0030500779394060373,
+            0.00304463692009449,
+            0.0028523539658635855,
+            0.00272620702162385,
+            0.0026314619462937117,
+            0.002567853080108762,
+            0.0024367677979171276,
+            0.00232206704095006,
+            0.0021944730542600155,
+            0.0021422929130494595,
+            0.0020938459783792496,
+            0.002074830001220107,
+            0.001963819842785597,
+            0.0019466099329292774,
+            0.0018565398640930653,
+            0.0018398049287497997,
+            0.0017688930965960026,
+            0.001746573019772768,
+            0.001721101114526391,
+            0.001664311159402132,
+            0.0016601718962192535,
+            0.0016340899746865034,
+            0.0015833450015634298,
+            0.0015599369071424007,
+            0.0015445661265403032
+          ],
+          "mean_seconds": 0.002363567325907449,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 119,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_first_observation",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.005759737221524119
+          ],
+          "mean_seconds": 0.005759737221524119,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1248392,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 32768
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 1,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 1
+          },
+          "process_rchar_delta": 1285377,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_during_admission",
+          "requested_repeats": 2,
+          "completed_attempts": 2,
+          "seconds": [
+            0.005307100946083665,
+            0.005274861119687557
+          ],
+          "mean_seconds": 0.005290981032885611,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 8192,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 2496784,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 65536
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 2,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 2,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 2
+          },
+          "process_rchar_delta": 2570633,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_admitting",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.007963587064296007
+          ],
+          "mean_seconds": 0.007963587064296007,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1248392,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 32768
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 1,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 1
+          },
+          "process_rchar_delta": 1285377,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_settled",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.0009037910494953394,
+            0.0007548178546130657,
+            0.0007144671399146318,
+            0.0007341089658439159,
+            0.0007358340080827475,
+            0.0007269978523254395,
+            0.0007071350701153278,
+            0.000724222045391798,
+            0.0007376018911600113,
+            0.000708811916410923,
+            0.0007294728420674801,
+            0.0007011720445007086,
+            0.0005871271714568138,
+            0.000768778845667839,
+            0.0007325289770960808,
+            0.0007143488619476557,
+            0.0005762700457125902,
+            0.0006577060557901859,
+            0.0005465978756546974,
+            0.00059909513220191,
+            0.0005588240455836058,
+            0.0006174200680106878,
+            0.0006586317904293537,
+            0.0005684890784323215,
+            0.000607531052082777,
+            0.0005720008630305529,
+            0.0005548340268433094,
+            0.0005797920748591423,
+            0.0005807860288769007,
+            0.0005967309698462486,
+            0.000585851026698947,
+            0.0005587639752775431,
+            0.0005665309727191925,
+            0.000551596051082015,
+            0.0005886128637939692,
+            0.0005550100468099117,
+            0.0005631530657410622,
+            0.0005451908800750971,
+            0.0005651998799294233,
+            0.0005371870938688517,
+            0.000526093877851963,
+            0.0005497890524566174,
+            0.0005284829530864954,
+            0.0005544088780879974,
+            0.0005057859234511852,
+            0.0005122821312397718,
+            0.000587505055591464,
+            0.0006816950626671314,
+            0.0006573300343006849,
+            0.0006998640019446611,
+            0.0006628939881920815,
+            0.0006845619063824415,
+            0.0006688788998872042,
+            0.0005993638187646866,
+            0.000571961048990488,
+            0.0005571369547396898,
+            0.0005751668941229582,
+            0.0005948960315436125,
+            0.0006952409166842699,
+            0.0006434828974306583,
+            0.0006182538345456123,
+            0.0006222121883183718,
+            0.0010963540989905596,
+            0.0006897749844938517,
+            0.0006288520526140928,
+            0.0006090500392019749,
+            0.0005282750353217125,
+            0.0005639069713652134,
+            0.0005594049580395222,
+            0.0005974241066724062,
+            0.000545677961781621,
+            0.0006253949832171202,
+            0.0005820801015943289,
+            0.0005546051543205976,
+            0.0005904340650886297,
+            0.0005812938325107098,
+            0.0005985780153423548,
+            0.0005741158965975046,
+            0.0005571611691266298,
+            0.000602297019213438,
+            0.0006070868112146854,
+            0.0005962469149380922,
+            0.0005936268717050552,
+            0.0005270529072731733,
+            0.0005620741285383701,
+            0.0005574978422373533,
+            0.0006026059854775667,
+            0.0005774139426648617,
+            0.000662272097542882,
+            0.0005176870618015528,
+            0.000496758846566081,
+            0.0005038550589233637,
+            0.0004810430109500885,
+            0.0005162949673831463,
+            0.0005048220045864582,
+            0.0004909890703856945,
+            0.0004730941727757454,
+            0.0005195010453462601,
+            0.00046425708569586277,
+            0.0004946920089423656
+          ],
+          "mean_seconds": 0.0006070386013016105,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 100,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 100,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": 100
+          },
+          "process_rchar_delta": 121,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_snapshot_first",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.3174736991059035
+          ],
+          "mean_seconds": 0.3174736991059035,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1248392
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 3152365,
+          "process_physical_read_bytes_delta": 4096
+        },
+        {
+          "name": "actual_snapshot_warm",
+          "requested_repeats": 5,
+          "completed_attempts": 5,
+          "seconds": [
+            0.21831480623222888,
+            0.21641167509369552,
+            0.2129739481024444,
+            0.19912416790612042,
+            0.198649579891935
+          ],
+          "mean_seconds": 0.20909483544528484,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 20480,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 6241960
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 15761343,
+          "process_physical_read_bytes_delta": 20480
+        },
+        {
+          "name": "actual_snapshot_profiled",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.2253452471923083
+          ],
+          "mean_seconds": 0.2253452471923083,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": 1248392
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 3152368,
+          "process_physical_read_bytes_delta": 4096
+        }
+      ],
+      "before_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5230092,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784150371556554908,
+          "st_ctime_ns": 1784150371556554908
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5230094,
+          "st_mode": 33188,
+          "st_size": 1248392,
+          "st_mtime_ns": 1784152388412010224,
+          "st_ctime_ns": 1784152388412010224
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5230095,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784745425123912044,
+          "st_ctime_ns": 1784745425123912044
+        },
+        "-journal": null
+      },
+      "before_physical_sha256": {
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": "67eff07e2476cad63c50a59899f8a2f641b9e031075e81280c7649131385eebc",
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": "e8d5cabb407ae67f18201301d99645fb980d93c5919255539c80ae2b9b3cd8f3"
+      },
+      "actual_inventory": {
+        "dependencies": {
+          "/wc1/runs/im/improvident-dyslexia/postfire_debris_flow/inputs/soil_sources.json": null,
+          "/wc1/runs/im/improvident-dyslexia/soils/ssurgo.tif": [
+            64,
+            5229837,
+            3607727,
+            1784745424853910540,
+            1784745424853910540
+          ],
+          "/wc1/runs/im/improvident-dyslexia/soils/ssurgo.tif.msk": null,
+          "/wc1/runs/im/improvident-dyslexia/soils/ssurgo.tif.meta": [
+            64,
+            5226005,
+            1664,
+            1784745424856910557,
+            1784745424856910557
+          ],
+          "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": [
+            64,
+            5230092,
+            4096,
+            1784150371556554908,
+            1784150371556554908
+          ],
+          "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite.meta.md": [
+            64,
+            678101,
+            1742,
+            1784745425148912184,
+            1784745425149912189
+          ]
+        },
+        "cache_state": {
+          "main": [
+            64,
+            5230092,
+            4096,
+            1784150371556554908,
+            1784150371556554908
+          ],
+          "-wal": [
+            64,
+            5230094,
+            1248392,
+            1784152388412010224,
+            1784152388412010224
+          ],
+          "-shm": [
+            64,
+            5230095,
+            32768,
+            1784745425123912044,
+            1784745425123912044
+          ]
+        },
+        "prepared_sha256": {}
+      },
+      "logical_identity": {
+        "source_schema": {
+          "component": {
+            "mukey": "INTEGER",
+            "cokey": "INTEGER",
+            "compname": "TEXT",
+            "comppct_r": "REAL"
+          },
+          "chorizon": {
+            "cokey": "INTEGER",
+            "chkey": "INTEGER",
+            "hzname": "TEXT",
+            "hzdepb_r": "REAL",
+            "hzdept_r": "REAL",
+            "hzthk_r": "REAL",
+            "desgnmaster": "TEXT"
+          }
+        },
+        "logical_sha256": {
+          "component": "236e2f7867f66b11d6073866fb9286f7cb2f22a2779399c2388907a3372ed5c0",
+          "chorizon": "a72ec792b0626f608756ecfae40c1414e9f15ca91764634f086ea242307cd8e0"
+        }
+      },
+      "row_counts": {
+        "components": 763,
+        "horizons": 4895
+      },
+      "consumed_typed_json_bytes": {
+        "components": 55586,
+        "horizons": 565774
+      },
+      "repeated_logical_identity_equal": true,
+      "profile_seconds": {
+        "source_copy": 0.016532683046534657,
+        "table_parse": 0.0691334311850369,
+        "logical_row_sort_key": 0.08920372859574854,
+        "logical_table": 0.029176622861996293
+      },
+      "profile_call_counts": {
+        "source_copy": 2,
+        "table_parse": 1,
+        "logical_row_sort_key": 5658,
+        "logical_table": 2
+      },
+      "after_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5230092,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1784150371556554908,
+          "st_ctime_ns": 1784150371556554908
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 5230094,
+          "st_mode": 33188,
+          "st_size": 1248392,
+          "st_mtime_ns": 1784152388412010224,
+          "st_ctime_ns": 1784152388412010224
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 5230095,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1784745425123912044,
+          "st_ctime_ns": 1784745425123912044
+        },
+        "-journal": null
+      },
+      "after_physical_sha256": {
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-wal": "67eff07e2476cad63c50a59899f8a2f641b9e031075e81280c7649131385eebc",
+        "/wc1/runs/im/improvident-dyslexia/soils/ssurgo_tabular_cache.sqlite-shm": "e8d5cabb407ae67f18201301d99645fb980d93c5919255539c80ae2b9b3cd8f3"
+      },
+      "source_state_unchanged": true,
+      "source_main_wal_shm_bytes_unchanged": true,
+      "retained_files": {
+        "warm-fbd9f669/cache.sqlite": 4096,
+        "warm-fbd9f669/cache.sqlite-wal": 1248392,
+        "warm-fbd9f669/cache.sqlite-shm": 32768,
+        "warm-fbd9f669/manifest.json": 920,
+        "warm-c04d3d90/cache.sqlite": 4096,
+        "warm-c04d3d90/cache.sqlite-shm": 32768,
+        "warm-c04d3d90/manifest.json": 920,
+        "warm-c04d3d90/cache.sqlite-wal": 1248392,
+        "warm-1c99573a/cache.sqlite": 4096,
+        "warm-1c99573a/cache.sqlite-shm": 32768,
+        "warm-1c99573a/cache.sqlite-wal": 1248392,
+        "warm-1c99573a/manifest.json": 920,
+        "warm-9728c789/cache.sqlite-shm": 32768,
+        "warm-9728c789/cache.sqlite-wal": 1248392,
+        "warm-9728c789/cache.sqlite": 4096,
+        "warm-9728c789/manifest.json": 920,
+        "warm-0494183d/manifest.json": 920,
+        "warm-0494183d/cache.sqlite-shm": 32768,
+        "warm-0494183d/cache.sqlite-wal": 1248392,
+        "warm-0494183d/cache.sqlite": 4096,
+        "profiled/cache.sqlite-shm": 32768,
+        "profiled/cache.sqlite": 4096,
+        "profiled/cache.sqlite-wal": 1248392,
+        "profiled/manifest.json": 920,
+        "first/cache.sqlite-shm": 32768,
+        "first/cache.sqlite-wal": 1248392,
+        "first/cache.sqlite": 4096,
+        "first/manifest.json": 920
+      }
+    },
+    "largest_main_without_wal": {
+      "label": "largest_main_without_wal",
+      "source": "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite",
+      "output_root": "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal",
+      "measurements": [
+        {
+          "name": "source_state",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.00029813102446496487,
+            0.0002478230744600296,
+            0.00024186493828892708,
+            0.00023786816745996475,
+            0.0002751140855252743,
+            0.0002392639871686697,
+            0.00023696012794971466,
+            0.000235632061958313,
+            0.0002458328381180763,
+            0.00024143792688846588,
+            0.00023630703799426556,
+            0.00023481296375393867,
+            0.0002338699996471405,
+            0.0002495860680937767,
+            0.00023512518964707851,
+            0.0002347568515688181,
+            0.00023426697589457035,
+            0.00024629407562315464,
+            0.00023439200595021248,
+            0.00023438199423253536,
+            0.00023319502361118793,
+            0.0002454489003866911,
+            0.0002339361235499382,
+            0.00023434008471667767,
+            0.0002341708168387413,
+            0.0002454989589750767,
+            0.00023466604761779308,
+            0.00023577292449772358,
+            0.00023383204825222492,
+            0.00032236683182418346,
+            0.00024617603048682213,
+            0.00023591797798871994,
+            0.00023406208492815495,
+            0.00024883286096155643,
+            0.00023490306921303272,
+            0.00023341504856944084,
+            0.0002328651025891304,
+            0.00024458603002130985,
+            0.0002370800357311964,
+            0.0002336690668016672,
+            0.00023330003023147583,
+            0.00023481715470552444,
+            0.00024500000290572643,
+            0.0002349521964788437,
+            0.00023335404694080353,
+            0.000258763087913394,
+            0.00024771085008978844,
+            0.00023426790721714497,
+            0.00023402809165418148,
+            0.00023285392671823502,
+            0.00024610687978565693,
+            0.00023446395061910152,
+            0.00023331097327172756,
+            0.00023351004347205162,
+            0.0002459511160850525,
+            0.00023355497978627682,
+            0.00023321108892560005,
+            0.0002339729107916355,
+            0.0002455699723213911,
+            0.00023503904230892658,
+            0.00023420597426593304,
+            0.00023283413611352444,
+            0.00023351400159299374,
+            0.0002458419185131788,
+            0.0002330448478460312,
+            0.000233139144256711,
+            0.00023217406123876572,
+            0.0002628718502819538,
+            0.00023740320466458797,
+            0.00023414799943566322,
+            0.00023282715119421482,
+            0.00024293293245136738,
+            0.0002329489216208458,
+            0.00023286393843591213,
+            0.00023272493854165077,
+            0.0002462528645992279,
+            0.0002337801270186901,
+            0.0002332350704818964,
+            0.0002334148157387972,
+            0.00024430989287793636,
+            0.0002466279547661543,
+            0.00022567110136151314,
+            0.00022492092102766037,
+            0.0002251579426229,
+            0.00023675104603171349,
+            0.00022637983784079552,
+            0.00022475793957710266,
+            0.00022476701997220516,
+            0.00026345811784267426,
+            0.00022717402316629887,
+            0.00022520706988871098,
+            0.00022599496878683567,
+            0.0002366439439356327,
+            0.00022716098465025425,
+            0.00022529694251716137,
+            0.0002256031148135662,
+            0.00022507202811539173,
+            0.00024999910965561867,
+            0.00021701795049011707,
+            0.00021702819503843784
+          ],
+          "mean_seconds": 0.00023817352717742324,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 126,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_production_soils_inventory",
+          "requested_repeats": 30,
+          "completed_attempts": 30,
+          "seconds": [
+            0.003784532891586423,
+            0.001487561035901308,
+            0.0014728379901498556,
+            0.001451029907912016,
+            0.0014561889693140984,
+            0.001444527180865407,
+            0.001475143013522029,
+            0.0014444638509303331,
+            0.001487653935328126,
+            0.0014457518700510263,
+            0.0014716770965605974,
+            0.0013991999439895153,
+            0.001401985064148903,
+            0.0014169560745358467,
+            0.001396900974214077,
+            0.00154569698497653,
+            0.0014097581151872873,
+            0.0013418279122561216,
+            0.0014868790749460459,
+            0.0013132288586348295,
+            0.0014579847920686007,
+            0.0014876811765134335,
+            0.0014663620386272669,
+            0.0013775750994682312,
+            0.0013354120310395956,
+            0.0013114581815898418,
+            0.0012812460772693157,
+            0.001533114118501544,
+            0.0014849919825792313,
+            0.001386447111144662
+          ],
+          "mean_seconds": 0.0015085357784604032,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 126,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_first_observation",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.0009999270550906658
+          ],
+          "mean_seconds": 0.0009999270550906658,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 159744
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 1
+          },
+          "process_rchar_delta": 159870,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_during_admission",
+          "requested_repeats": 2,
+          "completed_attempts": 2,
+          "seconds": [
+            0.0010765341576188803,
+            0.0009516039863228798
+          ],
+          "mean_seconds": 0.00101406907197088,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 319488
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 2
+          },
+          "process_rchar_delta": 319614,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_admitting",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.0009059240110218525
+          ],
+          "mean_seconds": 0.0009059240110218525,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 159744
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 1
+          },
+          "process_rchar_delta": 159870,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_settled",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.00022751092910766602,
+            0.00021431897766888142,
+            0.00020669680088758469,
+            0.00019607110880315304,
+            0.0001955938059836626,
+            0.00019190809689462185,
+            0.00019392487592995167,
+            0.00020283600315451622,
+            0.0001912310253828764,
+            0.00019030016846954823,
+            0.0001903099473565817,
+            0.00019111786969006062,
+            0.0002100798301398754,
+            0.00019120401702821255,
+            0.00018788711167871952,
+            0.00018881983123719692,
+            0.0001905390527099371,
+            0.00020652194507420063,
+            0.00019077095203101635,
+            0.00018808990716934204,
+            0.00018895510584115982,
+            0.00018869293853640556,
+            0.00019918102771043777,
+            0.0001922030933201313,
+            0.00019103288650512695,
+            0.0001890298444777727,
+            0.00019008596427738667,
+            0.00019104196690022945,
+            0.0002058639656752348,
+            0.00019140797667205334,
+            0.00018869386985898018,
+            0.00018875207751989365,
+            0.00018932390958070755,
+            0.0002918317914009094,
+            0.00045008305460214615,
+            0.0003983268979936838,
+            0.00020972383208572865,
+            0.0004286991897970438,
+            0.00036644097417593,
+            0.00021819816902279854,
+            0.0004155868664383888,
+            0.00035997084341943264,
+            0.0002026730217039585,
+            0.000438296003267169,
+            0.0003546799998730421,
+            0.0001955160405486822,
+            0.00035955803468823433,
+            0.0004095248878002167,
+            0.00019741710275411606,
+            0.00034027593210339546,
+            0.00042411498725414276,
+            0.00021606916561722755,
+            0.0003343750722706318,
+            0.0004023290239274502,
+            0.0002503411378711462,
+            0.0002852361649274826,
+            0.00041134818457067013,
+            0.0002822109963744879,
+            0.0002993559464812279,
+            0.00040619121864438057,
+            0.0003125290386378765,
+            0.00032301503233611584,
+            0.00040842010639607906,
+            0.000296910060569644,
+            0.00034566991962492466,
+            0.00044055888429284096,
+            0.00022892281413078308,
+            0.00036702188663184643,
+            0.00041938992217183113,
+            0.00023296289145946503,
+            0.00028152717277407646,
+            0.00040556001476943493,
+            0.00027396902441978455,
+            0.00034161494113504887,
+            0.0004308619536459446,
+            0.00019894097931683064,
+            0.00033274199813604355,
+            0.0004766539204865694,
+            0.00023580389097332954,
+            0.00039016595110297203,
+            0.0004072990268468857,
+            0.00026800413616001606,
+            0.0004068729467689991,
+            0.0003611519932746887,
+            0.00022587203420698643,
+            0.00040609389543533325,
+            0.0003905638586729765,
+            0.00026079313829541206,
+            0.00037062098272144794,
+            0.0003403851296752691,
+            0.0002505499869585037,
+            0.0003716330975294113,
+            0.0003592509310692549,
+            0.00022736494429409504,
+            0.00037359120324254036,
+            0.000393186928704381,
+            0.00037966598756611347,
+            0.0003770650364458561,
+            0.0003936400171369314,
+            0.00032591307535767555
+          ],
+          "mean_seconds": 0.0002902113017626107,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 100
+          },
+          "process_rchar_delta": 126,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_snapshot_first",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.05856495094485581
+          ],
+          "mean_seconds": 0.05856495094485581,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 159744
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 250082,
+          "process_physical_read_bytes_delta": 163840
+        },
+        {
+          "name": "actual_snapshot_warm",
+          "requested_repeats": 5,
+          "completed_attempts": 5,
+          "seconds": [
+            0.0535984409507364,
+            0.053276719991117716,
+            0.045142284128814936,
+            0.03972763288766146,
+            0.03892145794816315
+          ],
+          "mean_seconds": 0.04613330718129873,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 798720
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 1249906,
+          "process_physical_read_bytes_delta": 819200
+        },
+        {
+          "name": "actual_snapshot_profiled",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.04059044201858342
+          ],
+          "mean_seconds": 0.04059044201858342,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": 159744
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 250082,
+          "process_physical_read_bytes_delta": 163840
+        }
+      ],
+      "before_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5740120,
+          "st_mode": 33188,
+          "st_size": 159744,
+          "st_mtime_ns": 1782858999757535000,
+          "st_ctime_ns": 1784438998923217228
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "before_physical_sha256": {
+        "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": "a6ab1f0801fd9c17e50e9688407b3a5db4d4157a2ca360e094c5121374e44507"
+      },
+      "actual_inventory": {
+        "dependencies": {
+          "/wc1/runs/cu/curable-program/postfire_debris_flow/inputs/soil_sources.json": null,
+          "/wc1/runs/cu/curable-program/soils/ssurgo.tif": [
+            64,
+            5746992,
+            322535,
+            1782858731236501000,
+            1784438998920217208
+          ],
+          "/wc1/runs/cu/curable-program/soils/ssurgo.tif.msk": null,
+          "/wc1/runs/cu/curable-program/soils/ssurgo.tif.meta": [
+            64,
+            5740119,
+            1661,
+            1782858731240498000,
+            1784438998921217215
+          ],
+          "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": [
+            64,
+            5740120,
+            159744,
+            1782858999757535000,
+            1784438998923217228
+          ],
+          "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite.meta.md": [
+            64,
+            5729762,
+            1738,
+            1782858734775517000,
+            1784438998925217242
+          ]
+        },
+        "cache_state": {
+          "main": [
+            64,
+            5740120,
+            159744,
+            1782858999757535000,
+            1784438998923217228
+          ],
+          "-wal": null,
+          "-shm": null
+        },
+        "prepared_sha256": {}
+      },
+      "logical_identity": {
+        "source_schema": {
+          "component": {
+            "mukey": "INTEGER",
+            "cokey": "INTEGER",
+            "compname": "TEXT",
+            "comppct_r": "REAL"
+          },
+          "chorizon": {
+            "cokey": "INTEGER",
+            "chkey": "INTEGER",
+            "hzname": "TEXT",
+            "hzdepb_r": "REAL",
+            "hzdept_r": "REAL",
+            "hzthk_r": "REAL",
+            "desgnmaster": "TEXT"
+          }
+        },
+        "logical_sha256": {
+          "component": "b8d516c83b83fea034eaa79a1822dfdce7ecce309c3825002a0f591bc9dc15b0",
+          "chorizon": "a2807e8715d7bc6cf54a77d2cda71bceda63677202d16b07811263af362078d6"
+        }
+      },
+      "row_counts": {
+        "components": 146,
+        "horizons": 376
+      },
+      "consumed_typed_json_bytes": {
+        "components": 10339,
+        "horizons": 43171
+      },
+      "repeated_logical_identity_equal": true,
+      "profile_seconds": {
+        "source_copy": 0.005004656035453081,
+        "table_parse": 0.013100347016006708,
+        "logical_row_sort_key": 0.008544816635549068,
+        "logical_table": 0.002739395946264267
+      },
+      "profile_call_counts": {
+        "source_copy": 1,
+        "table_parse": 1,
+        "logical_row_sort_key": 522,
+        "logical_table": 2
+      },
+      "after_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 5740120,
+          "st_mode": 33188,
+          "st_size": 159744,
+          "st_mtime_ns": 1782858999757535000,
+          "st_ctime_ns": 1784438998923217228
+        },
+        "-wal": null,
+        "-shm": null,
+        "-journal": null
+      },
+      "after_physical_sha256": {
+        "/wc1/runs/cu/curable-program/soils/ssurgo_tabular_cache.sqlite": "a6ab1f0801fd9c17e50e9688407b3a5db4d4157a2ca360e094c5121374e44507"
+      },
+      "source_state_unchanged": true,
+      "source_main_wal_shm_bytes_unchanged": true,
+      "retained_files": {
+        "warm-9f8a1d3a/cache.sqlite-shm": 32768,
+        "warm-9f8a1d3a/cache.sqlite-wal": 0,
+        "warm-9f8a1d3a/manifest.json": 732,
+        "warm-9f8a1d3a/cache.sqlite": 159744,
+        "warm-0578078e/manifest.json": 732,
+        "warm-0578078e/cache.sqlite": 159744,
+        "warm-0578078e/cache.sqlite-wal": 0,
+        "warm-0578078e/cache.sqlite-shm": 32768,
+        "profiled/cache.sqlite": 159744,
+        "profiled/manifest.json": 732,
+        "profiled/cache.sqlite-wal": 0,
+        "profiled/cache.sqlite-shm": 32768,
+        "warm-04c03f7b/manifest.json": 732,
+        "warm-04c03f7b/cache.sqlite": 159744,
+        "warm-04c03f7b/cache.sqlite-wal": 0,
+        "warm-04c03f7b/cache.sqlite-shm": 32768,
+        "warm-8c985c76/cache.sqlite-wal": 0,
+        "warm-8c985c76/cache.sqlite-shm": 32768,
+        "warm-8c985c76/manifest.json": 732,
+        "warm-8c985c76/cache.sqlite": 159744,
+        "first/cache.sqlite-wal": 0,
+        "first/manifest.json": 732,
+        "first/cache.sqlite-shm": 32768,
+        "first/cache.sqlite": 159744,
+        "warm-c5ea377f/manifest.json": 732,
+        "warm-c5ea377f/cache.sqlite-wal": 0,
+        "warm-c5ea377f/cache.sqlite-shm": 32768,
+        "warm-c5ea377f/cache.sqlite": 159744
+      }
+    },
+    "largest_prepared": {
+      "label": "largest_prepared",
+      "source": "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite",
+      "output_root": "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared",
+      "measurements": [
+        {
+          "name": "source_state",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.0002437429502606392,
+            0.00021424214355647564,
+            0.00020916899666190147,
+            0.00020856596529483795,
+            0.00022030691616237164,
+            0.00020816689357161522,
+            0.0002067310269922018,
+            0.0002057170495390892,
+            0.0002061349805444479,
+            0.00021778489463031292,
+            0.0002067810855805874,
+            0.00020541180856525898,
+            0.00020586303435266018,
+            0.0002054879441857338,
+            0.00021679303608834743,
+            0.00020606489852070808,
+            0.0002049671020358801,
+            0.0002058770041912794,
+            0.00021604890935122967,
+            0.00020590098574757576,
+            0.00020562298595905304,
+            0.0002054970245808363,
+            0.0002062919083982706,
+            0.0002163420431315899,
+            0.00020664907060563564,
+            0.00022153579629957676,
+            0.00021304702386260033,
+            0.00022330391220748425,
+            0.00021538790315389633,
+            0.00020528794266283512,
+            0.0002047449816018343,
+            0.00020546209998428822,
+            0.0002067179884761572,
+            0.00022073695436120033,
+            0.0002066518645733595,
+            0.00020524300634860992,
+            0.00020618317648768425,
+            0.00021669012494385242,
+            0.00020611193031072617,
+            0.00020564300939440727,
+            0.00020480086095631123,
+            0.00020537315867841244,
+            0.0002166549675166607,
+            0.00020601809956133366,
+            0.0002050190232694149,
+            0.00020614685490727425,
+            0.00020508677698671818,
+            0.00021496182307600975,
+            0.00020499713718891144,
+            0.00020518898963928223,
+            0.00020518084056675434,
+            0.00020476896315813065,
+            0.0002509311307221651,
+            0.0002070399932563305,
+            0.0002056211233139038,
+            0.00020553194917738438,
+            0.000216243090108037,
+            0.00020611099898815155,
+            0.00020545115694403648,
+            0.00020577316172420979,
+            0.00020571798086166382,
+            0.00021615996956825256,
+            0.00020692101679742336,
+            0.00020629679784178734,
+            0.00020501716062426567,
+            0.00020524696446955204,
+            0.00021608592942357063,
+            0.00020575011149048805,
+            0.00020487001165747643,
+            0.00020582182332873344,
+            0.00020479504019021988,
+            0.00023003201931715012,
+            0.00020024902187287807,
+            0.0001978101208806038,
+            0.000199176836758852,
+            0.00019928393885493279,
+            0.0002098779659718275,
+            0.0002004068810492754,
+            0.0001997689250856638,
+            0.0001991530880331993,
+            0.00019922805950045586,
+            0.00020920997485518456,
+            0.00020178803242743015,
+            0.00019867997616529465,
+            0.00019980804063379765,
+            0.00019954494200646877,
+            0.00020994595251977444,
+            0.00019960291683673859,
+            0.00019825296476483345,
+            0.00019788392819464207,
+            0.00020739110186696053,
+            0.00021287798881530762,
+            0.00019350997172296047,
+            0.0001930959988385439,
+            0.0001918841153383255,
+            0.0002015859354287386,
+            0.00019628391601145267,
+            0.00019348901696503162,
+            0.00019246083684265614,
+            0.00019250414334237576
+          ],
+          "mean_seconds": 0.00020717277890071274,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 126,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_production_soils_inventory",
+          "requested_repeats": 30,
+          "completed_attempts": 30,
+          "seconds": [
+            0.018086990108713508,
+            0.014734847005456686,
+            0.014510153094306588,
+            0.015158951980993152,
+            0.015737579204142094,
+            0.015063676983118057,
+            0.010135598946362734,
+            0.010237701004371047,
+            0.01007125386968255,
+            0.01210461906157434,
+            0.015098909148946404,
+            0.014324798947200179,
+            0.014914413215592504,
+            0.014951711986213923,
+            0.014907597796991467,
+            0.014525240054354072,
+            0.014904010109603405,
+            0.014558732975274324,
+            0.014931306010112166,
+            0.015363709069788456,
+            0.01507094013504684,
+            0.015381911071017385,
+            0.014540780801326036,
+            0.01585188996978104,
+            0.014783518156036735,
+            0.015306406887248158,
+            0.015712265856564045,
+            0.01632891409099102,
+            0.013832224067300558,
+            0.014897291082888842
+          ],
+          "mean_seconds": 0.01453426475636661,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {},
+          "process_rchar_delta": 73716,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_first_observation",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.005823737010359764
+          ],
+          "mean_seconds": 0.005823737010359764,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1203072,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 32768
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 1,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 1
+          },
+          "process_rchar_delta": 1240062,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_during_admission",
+          "requested_repeats": 2,
+          "completed_attempts": 2,
+          "seconds": [
+            0.005247344030067325,
+            0.005137602100148797
+          ],
+          "mean_seconds": 0.005192473065108061,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 8192,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 2406144,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 65536
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 2,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 2,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 2
+          },
+          "process_rchar_delta": 2479998,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_admitting",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.006985665997490287
+          ],
+          "mean_seconds": 0.006985665997490287,
+          "error": null,
+          "physical_digest_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1203072,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 32768
+          },
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 1,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 1
+          },
+          "process_rchar_delta": 1240062,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "physical_set_settled",
+          "requested_repeats": 100,
+          "completed_attempts": 100,
+          "seconds": [
+            0.0008085868321359158,
+            0.0006505611818283796,
+            0.0006406749598681927,
+            0.0006456191185861826,
+            0.0006256711203604937,
+            0.0006437739357352257,
+            0.0006419040728360415,
+            0.0006205870304256678,
+            0.000634003896266222,
+            0.0006269339937716722,
+            0.0006427941843867302,
+            0.0006406230386346579,
+            0.0006302420515567064,
+            0.0006430880166590214,
+            0.0006434610113501549,
+            0.0006375880911946297,
+            0.0006524620112031698,
+            0.0006359568797051907,
+            0.0006177409086376429,
+            0.0006379128899425268,
+            0.0006424838211387396,
+            0.0006376111414283514,
+            0.0006413860246539116,
+            0.0006169879343360662,
+            0.0006471739616245031,
+            0.0006345848087221384,
+            0.0006175069138407707,
+            0.0006383031141012907,
+            0.0006303980480879545,
+            0.0006267710123211145,
+            0.0006357168313115835,
+            0.0006177190225571394,
+            0.0006360879633575678,
+            0.0006347298622131348,
+            0.0006239130161702633,
+            0.0006339119281619787,
+            0.0006189120467752218,
+            0.0006225109100341797,
+            0.000637612072750926,
+            0.0006340909749269485,
+            0.000625154934823513,
+            0.000768063822761178,
+            0.0007119369693100452,
+            0.0006898839492350817,
+            0.0007126119453459978,
+            0.0008213198743760586,
+            0.000706300837919116,
+            0.0006906581111252308,
+            0.0007028169929981232,
+            0.000702837947756052,
+            0.0006513211410492659,
+            0.000666226027533412,
+            0.0006618441548198462,
+            0.0006595610175281763,
+            0.0006764121353626251,
+            0.0006459800060838461,
+            0.0006482519675046206,
+            0.0006677331402897835,
+            0.0006638569757342339,
+            0.0006491800304502249,
+            0.0006689717993140221,
+            0.000642349012196064,
+            0.0006221400108188391,
+            0.0006321121472865343,
+            0.000621928134933114,
+            0.000654418021440506,
+            0.0006436239928007126,
+            0.0006265449337661266,
+            0.0006444549653679132,
+            0.0006437730044126511,
+            0.0006294520571827888,
+            0.0006683701649308205,
+            0.0006118449382483959,
+            0.0006000639405101538,
+            0.0006151599809527397,
+            0.0006097778677940369,
+            0.0006199018098413944,
+            0.0006157050374895334,
+            0.0006799371913075447,
+            0.0006171541754156351,
+            0.0006139678880572319,
+            0.0005983049049973488,
+            0.0006129147950559855,
+            0.0005740339402109385,
+            0.0005832728929817677,
+            0.0005959789268672466,
+            0.0008496681693941355,
+            0.0006138752214610577,
+            0.0005960189737379551,
+            0.000578755047172308,
+            0.0005912098567932844,
+            0.0005768570117652416,
+            0.0005932971835136414,
+            0.0005963309668004513,
+            0.0005774351302534342,
+            0.000649746973067522,
+            0.0005541560240089893,
+            0.0005709219258278608,
+            0.0005561199504882097,
+            0.000563282985240221
+          ],
+          "mean_seconds": 0.00063984380569309,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {},
+          "physical_digest_checks": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 100,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 100,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": 100
+          },
+          "process_rchar_delta": 126,
+          "process_physical_read_bytes_delta": 0
+        },
+        {
+          "name": "actual_snapshot_first",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.1298548320773989
+          ],
+          "mean_seconds": 0.1298548320773989,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1203072
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 2836450,
+          "process_physical_read_bytes_delta": 4096
+        },
+        {
+          "name": "actual_snapshot_warm",
+          "requested_repeats": 5,
+          "completed_attempts": 5,
+          "seconds": [
+            0.13758057611994445,
+            0.1362534360960126,
+            0.1280623550992459,
+            0.13184215500950813,
+            0.1375322339590639
+          ],
+          "mean_seconds": 0.134254151256755,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 20480,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 6015360
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 14181746,
+          "process_physical_read_bytes_delta": 20480
+        },
+        {
+          "name": "actual_snapshot_profiled",
+          "requested_repeats": 1,
+          "completed_attempts": 1,
+          "seconds": [
+            0.13398419017903507
+          ],
+          "mean_seconds": 0.13398419017903507,
+          "error": null,
+          "physical_digest_bytes": {},
+          "source_copy_bytes": {
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": 4096,
+            "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": 1203072
+          },
+          "physical_digest_checks": {},
+          "process_rchar_delta": 2836452,
+          "process_physical_read_bytes_delta": 4096
+        }
+      ],
+      "before_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1189318,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789605340316991944,
+          "st_ctime_ns": 1789605340316991944
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1187780,
+          "st_mode": 33188,
+          "st_size": 1203072,
+          "st_mtime_ns": 1789605358417106335,
+          "st_ctime_ns": 1789605358417106335
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1187781,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789605358419106347,
+          "st_ctime_ns": 1789605358419106347
+        },
+        "-journal": null
+      },
+      "before_physical_sha256": {
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": "5d05114a95827637d2bfb482d95696806fa3e9a70822f2e29896b39fc0ccda4f"
+      },
+      "actual_inventory": {
+        "dependencies": {
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/inputs/soil_sources.json": [
+            64,
+            1189483,
+            1097,
+            1789605545949292133,
+            1789605546086293000
+          ],
+          "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif": [
+            64,
+            1189317,
+            26410819,
+            1789605339617987527,
+            1789605339617987527
+          ],
+          "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif.msk": null,
+          "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif.meta": [
+            64,
+            1189385,
+            1667,
+            1789605339628987596,
+            1789605339628987596
+          ],
+          "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": [
+            64,
+            1189318,
+            4096,
+            1789605340316991944,
+            1789605340316991944
+          ],
+          "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite.meta.md": [
+            64,
+            1187985,
+            1744,
+            1789605358423106372,
+            1789605358424106378
+          ],
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json": [
+            64,
+            1183396,
+            724,
+            1789605541983267045,
+            1789605541983267045
+          ],
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json": [
+            64,
+            1189774,
+            632,
+            1789605542384269582,
+            1789605542384269582
+          ],
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif": [
+            64,
+            1183399,
+            22439,
+            1789605542269268854,
+            1789605542269268854
+          ],
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif.msk": null
+        },
+        "cache_state": {
+          "main": [
+            64,
+            1189318,
+            4096,
+            1789605340316991944,
+            1789605340316991944
+          ],
+          "-wal": [
+            64,
+            1187780,
+            1203072,
+            1789605358417106335,
+            1789605358417106335
+          ],
+          "-shm": [
+            64,
+            1187781,
+            32768,
+            1789605358419106347,
+            1789605358419106347
+          ]
+        },
+        "prepared_sha256": {
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/inputs/soil_sources.json": "8e00191b34d69f7f1995604e35a38edfde355115d3a1e8905d126adb3f333b11",
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json": "5e08667a041285a3e0aea2ef2a932c3bb895d6051f371bb9cfea8f6c8917002d",
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json": "ace300fba0363496ab28e70f564e54dcdec913071e1a33a4e39f5a155c66bad7",
+          "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif": "b5d26917d00cf457edf48f0a26174966416d8e7155d96c4627259886e5c795a4"
+        }
+      },
+      "logical_identity": {
+        "source_schema": {
+          "component": {
+            "mukey": "INTEGER",
+            "cokey": "INTEGER",
+            "compname": "TEXT",
+            "comppct_r": "REAL"
+          },
+          "chorizon": {
+            "cokey": "INTEGER",
+            "chkey": "INTEGER",
+            "hzname": "TEXT",
+            "hzdepb_r": "REAL",
+            "hzdept_r": "REAL",
+            "hzthk_r": "REAL",
+            "desgnmaster": "TEXT"
+          }
+        },
+        "logical_sha256": {
+          "component": "f25f8ab8dbb72a8e7264d9f6caaddd31b48b3481fb33ffdb4702ee917d5d179b",
+          "chorizon": "603fc263135942d1e64a901957129417c49c7dee8639cf830ea894cba2436b46"
+        }
+      },
+      "row_counts": {
+        "components": 708,
+        "horizons": 2337
+      },
+      "consumed_typed_json_bytes": {
+        "components": 51553,
+        "horizons": 268363
+      },
+      "repeated_logical_identity_equal": true,
+      "profile_seconds": {
+        "source_copy": 0.015069423010572791,
+        "table_parse": 0.03912936197593808,
+        "logical_row_sort_key": 0.04873310960829258,
+        "logical_table": 0.015185527736321092
+      },
+      "profile_call_counts": {
+        "source_copy": 2,
+        "table_parse": 1,
+        "logical_row_sort_key": 3045,
+        "logical_table": 2
+      },
+      "after_state": {
+        "main": {
+          "st_dev": 64,
+          "st_ino": 1189318,
+          "st_mode": 33188,
+          "st_size": 4096,
+          "st_mtime_ns": 1789605340316991944,
+          "st_ctime_ns": 1789605340316991944
+        },
+        "-wal": {
+          "st_dev": 64,
+          "st_ino": 1187780,
+          "st_mode": 33188,
+          "st_size": 1203072,
+          "st_mtime_ns": 1789605358417106335,
+          "st_ctime_ns": 1789605358417106335
+        },
+        "-shm": {
+          "st_dev": 64,
+          "st_ino": 1187781,
+          "st_mode": 33188,
+          "st_size": 32768,
+          "st_mtime_ns": 1789605358419106347,
+          "st_ctime_ns": 1789605358419106347
+        },
+        "-journal": null
+      },
+      "after_physical_sha256": {
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-wal": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+        "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite-shm": "5d05114a95827637d2bfb482d95696806fa3e9a70822f2e29896b39fc0ccda4f"
+      },
+      "source_state_unchanged": true,
+      "source_main_wal_shm_bytes_unchanged": true,
+      "retained_files": {
+        "warm-48c4d07d/manifest.json": 920,
+        "warm-48c4d07d/cache.sqlite-wal": 1203072,
+        "warm-48c4d07d/cache.sqlite-shm": 32768,
+        "warm-48c4d07d/cache.sqlite": 4096,
+        "warm-f4dfd3cc/manifest.json": 920,
+        "warm-f4dfd3cc/cache.sqlite": 4096,
+        "warm-f4dfd3cc/cache.sqlite-shm": 32768,
+        "warm-f4dfd3cc/cache.sqlite-wal": 1203072,
+        "warm-87d4be83/manifest.json": 920,
+        "warm-87d4be83/cache.sqlite": 4096,
+        "warm-87d4be83/cache.sqlite-shm": 32768,
+        "warm-87d4be83/cache.sqlite-wal": 1203072,
+        "warm-27619659/cache.sqlite": 4096,
+        "warm-27619659/manifest.json": 920,
+        "warm-27619659/cache.sqlite-wal": 1203072,
+        "warm-27619659/cache.sqlite-shm": 32768,
+        "warm-9632ac25/manifest.json": 920,
+        "warm-9632ac25/cache.sqlite-wal": 1203072,
+        "warm-9632ac25/cache.sqlite-shm": 32768,
+        "warm-9632ac25/cache.sqlite": 4096,
+        "profiled/cache.sqlite": 4096,
+        "profiled/cache.sqlite-wal": 1203072,
+        "profiled/cache.sqlite-shm": 32768,
+        "profiled/manifest.json": 920,
+        "first/cache.sqlite-shm": 32768,
+        "first/cache.sqlite-wal": 1203072,
+        "first/cache.sqlite": 4096,
+        "first/manifest.json": 920
+      }
+    }
+  },
+  "source_module_sha256": {
+    "/workdir/wepppy/wepppy/nodb/mods/postfire_debris_flow/soil_snapshot.py": "733325d3566fafb7a7fbdf1aa5553938ac5e15c3529dcea7a47c53c166428be6",
+    "/workdir/wepppy/wepppy/nodb/mods/postfire_debris_flow/production_soils.py": "a0077e3abf933ca5ca6a875295b86b0bc21724a190cdb0ae46c194f63685adf3"
+  },
+  "physical_storage_note": "No OS cache drop. Before/after raw byte verification primes page cache; helper-cold is not cold-storage evidence.",
+  "sqlite_connections": [
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/first/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/warm-1c99573a/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/warm-c04d3d90/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/warm-0494183d/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/warm-9728c789/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/warm-fbd9f669/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_wal/profiled/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/first/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/warm-c5ea377f/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/warm-0578078e/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/warm-04c03f7b/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/warm-9f8a1d3a/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/warm-8c985c76/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_main_without_wal/profiled/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/first/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/warm-87d4be83/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/warm-f4dfd3cc/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/warm-27619659/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/warm-9632ac25/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/warm-48c4d07d/cache.sqlite",
+    "/wc1/batch/qa-soil-logical-perf-d7ea2e582667/largest_prepared/profiled/cache.sqlite"
+  ],
+  "blocked_events": [],
+  "all_sqlite_connections_to_disposable_copies": true
+}

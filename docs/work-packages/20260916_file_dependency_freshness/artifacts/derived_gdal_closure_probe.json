@@ -1,0 +1,17 @@
+{
+  "gdal_version": "3100300",
+  "reported_members": [
+    "outer.vrt",
+    "inner.vrt"
+  ],
+  "base_member_omitted": true,
+  "listed_members_and_signatures_unchanged": true,
+  "base_size_and_mtime_restored": true,
+  "pixels_changed": true,
+  "native_before": {
+    "101": 3.0
+  },
+  "native_after": {
+    "101": 7.0
+  }
+}

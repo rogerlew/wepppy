@@ -1,0 +1,188 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_features_export_dependency_tracker.py tests/nodb/mods/test_features_export_service.py --maxfail=3
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 85 items
+
+tests/nodb/mods/test_features_export_dependency_tracker.py ...........   [ 12%]
+tests/nodb/mods/test_features_export_service.py ........................ [ 41%]
+.......................FFF
+
+=================================== FAILURES ===================================
+_____________ test_execute_features_export_cache_miss_result_shape _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76ce87871fa0>
+
+    def test_execute_features_export_cache_miss_result_shape(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
+        submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
+        monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+        monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
+        monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
+    
+>       result = service.execute_features_export(
+            tmp_path,
+            runid="run-1",
+            config="cfg",
+            payload={"format": "geopackage"},
+            job_id="job-source",
+        )
+
+tests/nodb/mods/test_features_export_service.py:2311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/features_export/service.py:385: in execute_features_export
+    return _run_cache_miss_export(
+wepppy/nodb/mods/features_export/service.py:1089: in _run_cache_miss_export
+    verification, verification_error = _verify_export_submission(wd, submission)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wd = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c1')
+submission = FeaturesExportSubmission(catalog=namespace(), plan=ResolvedExportPlan(catalog_version='test-catalog-v1', schema_versio...rint='dependency-fingerprint', cache_key='request-hash+dependency-fingerprint'), unitizer_preferences_fingerprint=None)
+
+    def _verify_export_submission(
+        wd: Path, submission: FeaturesExportSubmission,
+    ) -> tuple[dict[str, object], Exception | None]:
+        """Observe publication inputs again; callers retain the verdict before raising."""
+        verification: dict[str, object] = {
+            "status": "error",
+            "scope": "catalog_dependency_observations",
+            "before_fingerprint": submission.dependency_snapshot.fingerprint,
+            "after_fingerprint": None,
+        }
+        try:
+>           current = prepare_export_submission(
+                wd, submission.plan.request.to_mapping(), catalog=submission.catalog,
+            )
+E           TypeError: test_execute_features_export_cache_miss_result_shape.<locals>.<lambda>() got an unexpected keyword argument 'catalog'
+
+wepppy/nodb/mods/features_export/service.py:240: TypeError
+___ test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer ___
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76ce87897950>
+
+    def test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
+        submission = _build_submission(
+            cache_key="request-hash+dependency-fingerprint+parquet",
+            format_token="parquet",
+        )
+        monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+        monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyZipWriter(tmp_path))
+        monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
+    
+>       result = service.execute_features_export(
+            tmp_path,
+            runid="run-1",
+            config="cfg",
+            payload={"format": "parquet"},
+            job_id="job-source",
+        )
+
+tests/nodb/mods/test_features_export_service.py:2376: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/features_export/service.py:385: in execute_features_export
+    return _run_cache_miss_export(
+wepppy/nodb/mods/features_export/service.py:1089: in _run_cache_miss_export
+    verification, verification_error = _verify_export_submission(wd, submission)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wd = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c2')
+submission = FeaturesExportSubmission(catalog=namespace(), plan=ResolvedExportPlan(catalog_version='test-catalog-v1', schema_versio...pendency-fingerprint', cache_key='request-hash+dependency-fingerprint+parquet'), unitizer_preferences_fingerprint=None)
+
+    def _verify_export_submission(
+        wd: Path, submission: FeaturesExportSubmission,
+    ) -> tuple[dict[str, object], Exception | None]:
+        """Observe publication inputs again; callers retain the verdict before raising."""
+        verification: dict[str, object] = {
+            "status": "error",
+            "scope": "catalog_dependency_observations",
+            "before_fingerprint": submission.dependency_snapshot.fingerprint,
+            "after_fingerprint": None,
+        }
+        try:
+>           current = prepare_export_submission(
+                wd, submission.plan.request.to_mapping(), catalog=submission.catalog,
+            )
+E           TypeError: test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer.<locals>.<lambda>() got an unexpected keyword argument 'catalog'
+
+wepppy/nodb/mods/features_export/service.py:240: TypeError
+_ test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id __
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76ce87880e00>
+
+    def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
+        submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
+        monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+        monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
+        monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
+    
+>       miss_result = service.execute_features_export(
+            tmp_path,
+            runid="run-1",
+            config="cfg",
+            payload={"format": "geopackage"},
+            job_id="job-source",
+        )
+
+tests/nodb/mods/test_features_export_service.py:2413: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/features_export/service.py:385: in execute_features_export
+    return _run_cache_miss_export(
+wepppy/nodb/mods/features_export/service.py:1089: in _run_cache_miss_export
+    verification, verification_error = _verify_export_submission(wd, submission)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wd = PosixPath('/tmp/pytest-of-unknown/pytest-38/test_execute_features_export_c3')
+submission = FeaturesExportSubmission(catalog=namespace(), plan=ResolvedExportPlan(catalog_version='test-catalog-v1', schema_versio...rint='dependency-fingerprint', cache_key='request-hash+dependency-fingerprint'), unitizer_preferences_fingerprint=None)
+
+    def _verify_export_submission(
+        wd: Path, submission: FeaturesExportSubmission,
+    ) -> tuple[dict[str, object], Exception | None]:
+        """Observe publication inputs again; callers retain the verdict before raising."""
+        verification: dict[str, object] = {
+            "status": "error",
+            "scope": "catalog_dependency_observations",
+            "before_fingerprint": submission.dependency_snapshot.fingerprint,
+            "after_fingerprint": None,
+        }
+        try:
+>           current = prepare_export_submission(
+                wd, submission.plan.request.to_mapping(), catalog=submission.catalog,
+            )
+E           TypeError: test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id.<locals>.<lambda>() got an unexpected keyword argument 'catalog'
+
+wepppy/nodb/mods/features_export/service.py:240: TypeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_features_export_service.py::test_execute_features_export_cache_miss_result_shape
+FAILED tests/nodb/mods/test_features_export_service.py::test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer
+FAILED tests/nodb/mods/test_features_export_service.py::test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 3 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 3 failed, 58 passed, 2 warnings in 10.45s ===================

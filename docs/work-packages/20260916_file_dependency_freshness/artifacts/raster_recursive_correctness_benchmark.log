@@ -1,0 +1,386 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_benchmark.py
+{
+  "scope": "read-only named NFS paths; no models/locks/controller writes; OS cache not dropped",
+  "gdal_version": "3100300",
+  "groups": {
+    "sbs_original": {
+      "selected_paths": [
+        "/wc1/runs/th/thespian-cleanness/disturbed/GrizzlyCreek_SBS_final.tif"
+      ],
+      "member_count": 1,
+      "bytes": 599196,
+      "named_bytes_unchanged": true,
+      "measurements": [
+        {
+          "phase": "cold",
+          "seconds": 0.004872990073636174,
+          "discovery_seconds": 0.0021266909316182137,
+          "digest_computations": 1
+        },
+        {
+          "phase": "admit",
+          "seconds": 0.0050861770287156105,
+          "discovery_seconds": 0.002592009026557207,
+          "digest_computations": 1
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0020256631541997194,
+          "discovery_seconds": 0.001813004957512021,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0022189670708030462,
+          "discovery_seconds": 0.00199712417088449,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002063864143565297,
+          "discovery_seconds": 0.0018036870751529932,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0020975330844521523,
+          "discovery_seconds": 0.0018710261210799217,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002018673112615943,
+          "discovery_seconds": 0.0018133430276066065,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002059090882539749,
+          "discovery_seconds": 0.0018306209240108728,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002071317983791232,
+          "discovery_seconds": 0.0018623759970068932,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0021240890491753817,
+          "discovery_seconds": 0.001911086030304432,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0020769790280610323,
+          "discovery_seconds": 0.0018482080195099115,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0021985310595482588,
+          "discovery_seconds": 0.001968211028724909,
+          "digest_computations": 0
+        }
+      ],
+      "settled_mean_seconds": 0.0020954708568751814,
+      "settled_discovery_mean_seconds": 0.001871868735179305,
+      "settled_digest_computations": 0
+    },
+    "sbs_cropped": {
+      "selected_paths": [
+        "/wc1/runs/th/thespian-cleanness/disturbed/baer.cropped.tif"
+      ],
+      "member_count": 1,
+      "bytes": 424964,
+      "named_bytes_unchanged": true,
+      "measurements": [
+        {
+          "phase": "cold",
+          "seconds": 0.004568204982206225,
+          "discovery_seconds": 0.001842576079070568,
+          "digest_computations": 1
+        },
+        {
+          "phase": "admit",
+          "seconds": 0.0050734588876366615,
+          "discovery_seconds": 0.0030005748849362135,
+          "digest_computations": 1
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002212916035205126,
+          "discovery_seconds": 0.0019920561462640762,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0022076359018683434,
+          "discovery_seconds": 0.0019920589402318,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002045155968517065,
+          "discovery_seconds": 0.0018298649229109287,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0021247779950499535,
+          "discovery_seconds": 0.0018677790649235249,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.001962214009836316,
+          "discovery_seconds": 0.0017521430272608995,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0020497520454227924,
+          "discovery_seconds": 0.0018365371506661177,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002117181196808815,
+          "discovery_seconds": 0.0018832760397344828,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0020138081163167953,
+          "discovery_seconds": 0.0018035760149359703,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0021035978570580482,
+          "discovery_seconds": 0.0017425180412828922,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.002016220008954406,
+          "discovery_seconds": 0.0018108149524778128,
+          "digest_computations": 0
+        }
+      ],
+      "settled_mean_seconds": 0.002085325913503766,
+      "settled_discovery_mean_seconds": 0.0018510624300688504,
+      "settled_digest_computations": 0
+    },
+    "dem": {
+      "selected_paths": [
+        "/wc1/runs/th/thespian-cleanness/dem/dem.tif"
+      ],
+      "member_count": 2,
+      "bytes": 26411260,
+      "named_bytes_unchanged": true,
+      "measurements": [
+        {
+          "phase": "cold",
+          "seconds": 0.09982821601442993,
+          "discovery_seconds": 0.0032302639447152615,
+          "digest_computations": 2
+        },
+        {
+          "phase": "admit",
+          "seconds": 0.1087825270369649,
+          "discovery_seconds": 0.0035759310703724623,
+          "digest_computations": 2
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.004032023949548602,
+          "discovery_seconds": 0.003617512062191963,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0034813520032912493,
+          "discovery_seconds": 0.003045693039894104,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0034566489048302174,
+          "discovery_seconds": 0.003027674974873662,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.003940729191526771,
+          "discovery_seconds": 0.0034153449814766645,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.003789300797507167,
+          "discovery_seconds": 0.003367209807038307,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.003587119048461318,
+          "discovery_seconds": 0.003165741916745901,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.00359511305578053,
+          "discovery_seconds": 0.0031176710035651922,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0036266769748181105,
+          "discovery_seconds": 0.0031390730291604996,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0037647210992872715,
+          "discovery_seconds": 0.0032597261015325785,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0034115419257432222,
+          "discovery_seconds": 0.0029892169404774904,
+          "digest_computations": 0
+        }
+      ],
+      "settled_mean_seconds": 0.003668522695079446,
+      "settled_discovery_mean_seconds": 0.0032144863856956364,
+      "settled_digest_computations": 0
+    },
+    "rap_39_years_cropped": {
+      "selected_paths": [
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1986.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1987.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1988.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1989.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1990.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1991.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1992.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1993.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1994.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1995.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1996.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1997.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1998.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1999.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2000.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2001.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2002.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2003.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2004.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2005.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2006.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2007.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2008.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2009.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2010.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2011.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2012.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2013.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2014.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2015.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2016.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2017.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2018.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2019.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2020.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2021.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2022.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2023.tif",
+        "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2024.tif"
+      ],
+      "member_count": 39,
+      "bytes": 564058,
+      "named_bytes_unchanged": true,
+      "measurements": [
+        {
+          "phase": "cold",
+          "seconds": 0.08977801515720785,
+          "discovery_seconds": 0.07188050309196115,
+          "digest_computations": 39
+        },
+        {
+          "phase": "admit",
+          "seconds": 0.12646407075226307,
+          "discovery_seconds": 0.09848623280413449,
+          "digest_computations": 39
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.09188554645515978,
+          "discovery_seconds": 0.08060704660601914,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07988961599767208,
+          "discovery_seconds": 0.0711374212987721,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07695590192452073,
+          "discovery_seconds": 0.06740770791657269,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07390849222429097,
+          "discovery_seconds": 0.06518871104344726,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.0767875574529171,
+          "discovery_seconds": 0.0667347558774054,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07400513952597976,
+          "discovery_seconds": 0.06617457349784672,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07659593364223838,
+          "discovery_seconds": 0.06824446003884077,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07390380115248263,
+          "discovery_seconds": 0.06486070854589343,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07510515279136598,
+          "discovery_seconds": 0.06638734554871917,
+          "digest_computations": 0
+        },
+        {
+          "phase": "settled",
+          "seconds": 0.07605913793668151,
+          "discovery_seconds": 0.0681485771201551,
+          "digest_computations": 0
+        }
+      ],
+      "settled_mean_seconds": 0.07750962791033089,
+      "settled_discovery_mean_seconds": 0.06848913074936717,
+      "settled_digest_computations": 0
+    }
+  },
+  "probe_sha256": "92a564c5a5b06ba6d9823a2b6b070963aaf71c13d740f47c9d8d4db0bc68c7b9"
+}

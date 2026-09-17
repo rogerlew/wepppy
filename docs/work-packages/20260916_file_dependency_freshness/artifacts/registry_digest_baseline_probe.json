@@ -1,0 +1,6 @@
+{
+  "iterations": 1000,
+  "same_version_rewrites": 782,
+  "stale_digests": 452,
+  "filesystem": "/tmp in canonical container"
+}

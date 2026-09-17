@@ -1,0 +1,15 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/first_wave_security_probe.py
+{
+  "initial_bytes": 8,
+  "limit_bytes": 1048576,
+  "read_bytes": 1048576,
+  "response_status": 409,
+  "read_exceeded_limit": false
+}
+{
+  "kind": "cached_digest_growth",
+  "initial_bytes": 8,
+  "read_bytes": 9,
+  "grew": true,
+  "error_code": "changed_source"
+}

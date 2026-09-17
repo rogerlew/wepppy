@@ -1,0 +1,73 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 2 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change 2026-09-17 02:04:39 [INFO] wepppy.run.test_prism_publishes_after_res0.climate: submitting climate build for 1 to thread pool... 
+2026-09-17 02:04:39 [INFO] wepppy.run.test_prism_publishes_after_res0.climate:  (1/1) _prism_revision() -> None
+CONFIRMED: PRISM published despite changed source bytes with restored size/mtime
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_rap_publishes_after_restored_time_source_change 2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band ANNUAL_FORB_AND_GRASS
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band BARE_GROUND
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band LITTER
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band SHRUB
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analyzing year 2001 band TREE
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band ANNUAL_FORB_AND_GRASS complete (1/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band BARE_GROUND complete (2/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band LITTER complete (3/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band TREE complete (4/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band PERENNIAL_FORB_AND_GRASS complete (5/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: RAP analysis year 2001 band SHRUB complete (6/6)
+2026-09-17 02:04:39 [INFO] wepppy.run.test_rap_publishes_after_resto0.rap_ts: analysis complete...
+CONFIRMED: RAP published despite changed source bytes with restored size/mtime
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/test_batch_climate_rap_contention.py:20
+  /workdir/wepppy/tests/nodb/test_batch_climate_rap_contention.py:20: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+tests/nodb/test_batch_climate_rap_contention.py:408
+  /workdir/wepppy/tests/nodb/test_batch_climate_rap_contention.py:408: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py:13
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py:13: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_build_baseline_probe.py::test_prism_publishes_after_restored_time_source_change
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 2 passed, 11 warnings in 13.22s ========================

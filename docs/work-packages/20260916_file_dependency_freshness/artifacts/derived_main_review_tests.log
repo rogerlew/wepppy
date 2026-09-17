@@ -1,0 +1,145 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_derived_file_signature.py tests/nodb/test_batch_climate_rap_contention.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 45 items
+
+tests/nodb/test_derived_file_signature.py .......                        [ 15%]
+tests/nodb/test_batch_climate_rap_contention.py ........................ [ 68%]
+.............F
+
+=================================== FAILURES ===================================
+________ test_restored_time_main_source_change_rejects_publication[rap] ________
+
+controllers = (<wepppy.nodb.core.climate.Climate object at 0x705fe4285a90>, <wepppy.nodb.mods.rap.rap_ts.RAP_TS object at 0x705fe429f230>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x705fe43adbe0>
+consumer = 'rap'
+
+    @pytest.mark.parametrize("consumer", ["prism", "rap"])
+    def test_restored_time_main_source_change_rejects_publication(controllers, monkeypatch, consumer):
+        climate, rap = controllers
+        before = Path((climate if consumer == "prism" else rap)._nodb).read_bytes()
+        changed = False
+        gate = threading.Lock()
+    
+        def rewrite(path):
+            nonlocal changed
+            with gate:
+                if changed:
+                    return
+                path = Path(path)
+                version = path.stat()
+                path.write_bytes(b"X" * version.st_size)
+                os.utime(path, ns=(version.st_atime_ns, version.st_mtime_ns))
+                changed = True
+    
+        if consumer == "prism":
+            monkeypatch.setattr(helpers, "_retrieve_prism_revision_tiles", lambda *args: None)
+            monkeypatch.setattr(helpers, "_collect_prism_revision_monthlies", lambda *args: ([], [], []))
+            monkeypatch.setattr(helpers, "ClimateFile", lambda path: SimpleNamespace(cli_fn=path, breakpoint=False))
+            def revise(*args):
+                rewrite(climate.cli_path)
+                Path(args[-1]).write_text("collected old input")
+            monkeypatch.setattr(helpers, "cli_revision", revise)
+            operation = climate._prism_revision
+            output = Path(climate.cli_dir, "_1.cli")
+            controller = climate
+        else:
+            def analyze(**kwargs):
+                rewrite(kwargs["parameter_fn"])
+                return {"1": 25.0}
+            monkeypatch.setattr(rap_module, "identify_median_single_raster_key", analyze)
+            operation = rap.analyze
+            output = Path(rap.rap_dir, "rap_ts.parquet")
+            controller = rap
+        output.write_bytes(b"previous accepted output")
+        with pytest.raises(RuntimeError, match="superseded"):
+>           operation()
+
+tests/nodb/test_batch_climate_rap_contention.py:665: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/rap/rap_ts.py:258: in analyze
+    analyze(self, verbose=verbose)
+wepppy/nodb/mods/rap/rap_ts_build.py:179: in analyze
+    with finalize(controller) as publications:
+         ^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+wepppy/nodb/_derived_build.py:66: in finalize
+    fresh = type(controller)._hydrate_instance(
+wepppy/nodb/base.py:1344: in _hydrate_instance
+    db = cls._post_instance_loaded(db)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/mods/rap/rap_ts.py:144: in _post_instance_loaded
+    df = pd.read_parquet(parquet_path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/pandas/io/parquet.py:667: in read_parquet
+    return impl.read(
+/opt/venv/lib/python3.12/site-packages/pandas/io/parquet.py:274: in read
+    pa_table = self.api.parquet.read_table(
+/opt/venv/lib/python3.12/site-packages/pyarrow/parquet/core.py:1858: in read_table
+    dataset = ParquetDataset(
+/opt/venv/lib/python3.12/site-packages/pyarrow/parquet/core.py:1427: in __init__
+    [fragment], schema=schema or fragment.physical_schema,
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^
+pyarrow/_dataset.pyx:1477: in pyarrow._dataset.Fragment.physical_schema.__get__
+    ???
+pyarrow/error.pxi:155: in pyarrow.lib.pyarrow_internal_check_status
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   pyarrow.lib.ArrowInvalid: Could not open Parquet input source '<Buffer>': Parquet magic bytes not found in footer. Either the file is corrupted or this is not a parquet file.
+
+pyarrow/error.pxi:92: ArrowInvalid
+----------------------------- Captured stderr call -----------------------------
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band ANNUAL_FORB_AND_GRASS
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band BARE_GROUND
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band LITTER
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band LITTER complete (1/6)
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band BARE_GROUND complete (2/6)
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band ANNUAL_FORB_AND_GRASS complete (3/6)
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band SHRUB
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analyzing year 2001 band TREE
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band PERENNIAL_FORB_AND_GRASS complete (4/6)
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band SHRUB complete (5/6)
+2026-09-17 02:17:00 [INFO] wepppy.run.test_restored_time_main_source1.rap_ts: RAP analysis year 2001 band TREE complete (6/6)
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+tests/nodb/test_batch_climate_rap_contention.py::test_prism_unrelated_rewrite_survives
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_batch_climate_rap_contention.py::test_restored_time_main_source_change_rejects_publication[rap]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 44 passed, 8 warnings in 17.90s ===================

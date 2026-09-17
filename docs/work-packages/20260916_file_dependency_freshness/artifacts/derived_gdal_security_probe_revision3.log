@@ -1,0 +1,46 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_gdal_security_probe.py
+{
+  "direct": {
+    "files": [
+      "<temporary>/source.tif"
+    ],
+    "native_summary": {
+      "1": 25.0
+    }
+  },
+  "inner_vrt": {
+    "files": [
+      "<temporary>/inner.vrt",
+      "<temporary>/source.tif"
+    ],
+    "native_summary": {
+      "1": 25.0
+    }
+  },
+  "local_zip_vrt": {
+    "files": [
+      "<temporary>/zip.vrt",
+      "/vsizip/<temporary>/source.zip/source.tif"
+    ],
+    "native_summary": {
+      "1": 25.0
+    }
+  },
+  "nested_vrt": {
+    "files": [
+      "<temporary>/outer.vrt",
+      "<temporary>/inner.vrt"
+    ],
+    "native_summary": {
+      "1": 25.0
+    }
+  },
+  "nested_vrt_rewrite": {
+    "flat_listed_hashes_unchanged": true,
+    "native_summary_after": {
+      "1": 75.0
+    },
+    "source_mtime_preserved": true,
+    "source_size_preserved": true
+  }
+}

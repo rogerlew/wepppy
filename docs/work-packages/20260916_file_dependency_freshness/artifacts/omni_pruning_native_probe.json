@@ -1,0 +1,8 @@
+{
+  "completion_receipt_unchanged": true,
+  "needs_prune": false,
+  "original_retained_stream_cells": 5,
+  "reused_retained_stream_cells": 5,
+  "fresh_native_retained_stream_cells": 1,
+  "ordinary_writer_missing_receipt": "not established by this experiment"
+}

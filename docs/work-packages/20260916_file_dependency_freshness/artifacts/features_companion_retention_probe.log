@@ -1,0 +1,14 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/features_companion_retention_probe.py
+{
+  "first_conversion": "real GDAL OpenFileGDB",
+  "second_conversion": "injected ENOSPC at native converter call",
+  "accepted_sha256": "bef8f8d168ccaf09a1201c1fb0dae18ec58fb2f65347e0a6351f40bfbe989025",
+  "accepted_size": 9760,
+  "failure": {
+    "type": "OSError",
+    "errno": 28
+  },
+  "accepted_artifact_still_exists": false,
+  "cache_index_unchanged": true,
+  "accepted_artifact_relpath": "export/features/artifacts/a243936b63f74b64834963bf5cb4c212/features_export.gdb.zip"
+}

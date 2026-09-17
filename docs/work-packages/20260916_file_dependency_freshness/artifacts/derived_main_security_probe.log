@@ -1,0 +1,16 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_main_security_probe.py
+{
+  "new_signature_error_errno": 22,
+  "previous_signature_accepts": [
+    "/tmp/derived-main-security-njt79ecv/source.zarr",
+    1789611417185926234,
+    4096
+  ],
+  "read_error_object_preserved": true,
+  "unchanged_symlink": true,
+  "zarr_driver_available": true,
+  "zarr_is_directory": true,
+  "zarr_native_summary": {
+    "1": 25.0
+  }
+}

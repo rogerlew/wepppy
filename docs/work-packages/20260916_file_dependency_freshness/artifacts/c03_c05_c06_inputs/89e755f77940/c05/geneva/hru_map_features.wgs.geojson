@@ -1,0 +1,50 @@
+{
+  "bbox": [
+    -117.0,
+    45.153477,
+    -116.999618,
+    45.154017
+  ],
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -117.0,
+              45.154017
+            ],
+            [
+              -117.0,
+              45.153477
+            ],
+            [
+              -116.999618,
+              45.153477
+            ],
+            [
+              -116.999618,
+              45.154017
+            ],
+            [
+              -117.0,
+              45.154017
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {
+        "burn_severity_class": "low",
+        "hru_id": "alt2",
+        "hru_value": 2,
+        "hsg_group": "B",
+        "hydrophobic_class": null,
+        "is_water": null,
+        "landuse_class": 42
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

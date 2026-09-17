@@ -1,0 +1,424 @@
+{
+  "fixture_root": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/c03_c05_c06_inputs/89e755f77940",
+  "uid": 1000,
+  "gid": 993,
+  "C03": {
+    "metadata": {
+      "same_size": true,
+      "same_mtime": true
+    },
+    "first": {
+      "counts": {
+        "11": {
+          "1": 3,
+          "2": 1
+        }
+      },
+      "managements": {
+        "0": {
+          "area_ha": 0.27,
+          "pct": 75.0
+        },
+        "11": {
+          "area_ha": 0.09,
+          "pct": 25.0
+        }
+      }
+    },
+    "cached_after_rewrite": {
+      "counts": {
+        "11": {
+          "1": 3,
+          "2": 1
+        }
+      },
+      "managements": {
+        "0": {
+          "area_ha": 0.27,
+          "pct": 75.0
+        },
+        "11": {
+          "area_ha": 0.09,
+          "pct": 25.0
+        }
+      }
+    },
+    "direct_native_counts": {
+      "11": {
+        "1": 1,
+        "2": 3
+      }
+    },
+    "after_invalidation": {
+      "counts": {
+        "11": {
+          "1": 1,
+          "2": 3
+        }
+      },
+      "managements": {
+        "0": {
+          "area_ha": 0.09,
+          "pct": 25.0
+        },
+        "11": {
+          "area_ha": 0.27,
+          "pct": 75.0
+        }
+      }
+    },
+    "scope": "Actual build_managements/native output; owner bindings and persistence hooks isolated"
+  },
+  "C05": {
+    "raster_metadata": {
+      "same_size": true,
+      "same_mtime": true
+    },
+    "first": {
+      "properties": [
+        {
+          "burn_severity_class": "low",
+          "hru_id": "hru1",
+          "hru_value": 1,
+          "hsg_group": "B",
+          "hydrophobic_class": null,
+          "is_water": null,
+          "landuse_class": 42
+        }
+      ],
+      "bounds": [
+        -117.0,
+        45.153477,
+        -116.999237,
+        45.154017
+      ],
+      "count": 1
+    },
+    "cached_raster": {
+      "properties": [
+        {
+          "burn_severity_class": "low",
+          "hru_id": "hru1",
+          "hru_value": 1,
+          "hsg_group": "B",
+          "hydrophobic_class": null,
+          "is_water": null,
+          "landuse_class": 42
+        }
+      ],
+      "bounds": [
+        -117.0,
+        45.153477,
+        -116.999237,
+        45.154017
+      ],
+      "count": 1
+    },
+    "fresh_raster": {
+      "properties": [
+        {
+          "burn_severity_class": "low",
+          "hru_id": "hru2",
+          "hru_value": 2,
+          "hsg_group": "B",
+          "hydrophobic_class": null,
+          "is_water": null,
+          "landuse_class": 42
+        }
+      ],
+      "bounds": [
+        -117.0,
+        45.153477,
+        -116.999237,
+        45.154017
+      ],
+      "count": 1
+    },
+    "legend_metadata": {
+      "same_size": true,
+      "same_mtime": true
+    },
+    "cached_legend": {
+      "properties": [
+        {
+          "burn_severity_class": "low",
+          "hru_id": "hru2",
+          "hru_value": 2,
+          "hsg_group": "B",
+          "hydrophobic_class": null,
+          "is_water": null,
+          "landuse_class": 42
+        }
+      ],
+      "bounds": [
+        -117.0,
+        45.153477,
+        -116.999237,
+        45.154017
+      ],
+      "count": 1
+    },
+    "fresh_legend": {
+      "properties": [
+        {
+          "burn_severity_class": "low",
+          "hru_id": "alt2",
+          "hru_value": 2,
+          "hsg_group": "B",
+          "hydrophobic_class": null,
+          "is_water": null,
+          "landuse_class": 42
+        }
+      ],
+      "bounds": [
+        -117.0,
+        45.153477,
+        -116.999237,
+        45.154017
+      ],
+      "count": 1
+    },
+    "external_mask": {
+      "sidecar_exists": true,
+      "main_sha_unchanged": true,
+      "before": {
+        "properties": [
+          {
+            "burn_severity_class": "low",
+            "hru_id": "alt2",
+            "hru_value": 2,
+            "hsg_group": "B",
+            "hydrophobic_class": null,
+            "is_water": null,
+            "landuse_class": 42
+          }
+        ],
+        "bounds": [
+          -117.0,
+          45.153477,
+          -116.999237,
+          45.154017
+        ],
+        "count": 1
+      },
+      "cached": {
+        "properties": [
+          {
+            "burn_severity_class": "low",
+            "hru_id": "alt2",
+            "hru_value": 2,
+            "hsg_group": "B",
+            "hydrophobic_class": null,
+            "is_water": null,
+            "landuse_class": 42
+          }
+        ],
+        "bounds": [
+          -117.0,
+          45.153477,
+          -116.999237,
+          45.154017
+        ],
+        "count": 1
+      },
+      "fresh": {
+        "properties": [
+          {
+            "burn_severity_class": "low",
+            "hru_id": "alt2",
+            "hru_value": 2,
+            "hsg_group": "B",
+            "hydrophobic_class": null,
+            "is_water": null,
+            "landuse_class": 42
+          }
+        ],
+        "bounds": [
+          -117.0,
+          45.153477,
+          -116.999618,
+          45.154017
+        ],
+        "count": 1
+      }
+    }
+  },
+  "C06": {
+    "source_metadata": {
+      "same_size": true,
+      "same_mtime": true
+    },
+    "first": {
+      "values": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "cached_after_rewrite": {
+      "values": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "fresh_after_rewrite": {
+      "values": [
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "different_source_cached": {
+      "values": [
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "different_source_fresh": {
+      "values": [
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "bound_metadata": {
+      "same_size": true,
+      "same_mtime": true
+    },
+    "changed_bound_cached": {
+      "values": [
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500000.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    },
+    "changed_bound_fresh": {
+      "values": [
+        [
+          3,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "transform": [
+        30.0,
+        0.0,
+        500030.0,
+        0.0,
+        -30.0,
+        5000060.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "crs": "EPSG:32611"
+    }
+  }
+}

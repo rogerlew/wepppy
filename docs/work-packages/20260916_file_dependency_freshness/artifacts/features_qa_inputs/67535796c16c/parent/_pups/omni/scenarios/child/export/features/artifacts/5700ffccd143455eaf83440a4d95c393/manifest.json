@@ -1,0 +1,160 @@
+{
+  "artifact": {
+    "artifact_path": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/parent/_pups/omni/scenarios/child/export/features/artifacts/5700ffccd143455eaf83440a4d95c393/features_export.parquet.zip",
+    "artifact_relpath": "features_export.parquet.zip",
+    "format": "parquet",
+    "packaged_member_relpaths": [
+      "README.md",
+      "freshness-sbs_map-subcatchments.parquet",
+      "manifest.json"
+    ]
+  },
+  "artifact_id": "5700ffccd143455eaf83440a4d95c393",
+  "cache_hit": false,
+  "catalog": {
+    "catalog_version": "wp2-test",
+    "schema_version": 2
+  },
+  "columns": {
+    "output_layer_metadata": {
+      "freshness-sbs_map-subcatchments": {
+        "description_mapping": {
+          "id": "ID.",
+          "topaz_id": "Topaz ID.",
+          "value": "Value.",
+          "wepp_id": "WEPP ID."
+        },
+        "materialization": {
+          "carrier_layer": "sbs_map-subcatchments",
+          "core_row_count": 1,
+          "strategy": "key_first_tabular_no_geometry"
+        },
+        "selected_columns": [
+          "topaz_id",
+          "wepp_id",
+          "id",
+          "value"
+        ],
+        "source_layer_ids": [
+          "test.attributes"
+        ],
+        "unit_mapping": {
+          "id": "non-unitized",
+          "topaz_id": "non-unitized",
+          "value": "non-unitized",
+          "wepp_id": "non-unitized"
+        }
+      }
+    }
+  },
+  "conversion_summary": {},
+  "crs": {
+    "requested_crs": "wgs",
+    "resolved_crs": "wgs",
+    "resolved_epsg": null
+  },
+  "dependency_preparation": [],
+  "dependency_snapshot": {
+    "catalog_signature": "88b00e7ac05ca183b73dbedb180ce228ae0e04083e23f9643ba63be818cf5f68",
+    "entries": [
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "47ec91829467ec9886cda2cc433d7d473b65c1656f72a3a9224a7a22fd2c1d7c",
+        "dependency_id": "geometry",
+        "dependency_role": "geometry",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614084411275295,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "../../../../geometry.geojson",
+        "size": 181
+      },
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "59b802005718d8bf08115e57e1ecf2f184bcd4f862cfac379f16d98dbcd10bea",
+        "dependency_id": "attrs",
+        "dependency_role": "source",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614084413275334,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "attrs.parquet",
+        "size": 1726
+      }
+    ],
+    "fingerprint": "75bb6497c4bb65122a1cde2fab4c352970d6e565a51fc7fa14428970e461f06a"
+  },
+  "dependency_verification": {
+    "after_fingerprint": "75bb6497c4bb65122a1cde2fab4c352970d6e565a51fc7fa14428970e461f06a",
+    "before_fingerprint": "75bb6497c4bb65122a1cde2fab4c352970d6e565a51fc7fa14428970e461f06a",
+    "scope": "catalog_dependency_observations",
+    "status": "verified"
+  },
+  "generated_at_utc": "2026-09-17T03:01:24.475323+00:00",
+  "generator_version": "features-export-wp14-publication-registry",
+  "layers": [
+    {
+      "artifact_relpath": "freshness-sbs_map-subcatchments.parquet",
+      "carrier_layer": "sbs_map-subcatchments",
+      "context": "base",
+      "family": "test",
+      "feature_count": 1,
+      "layer_id": "test.sbs_map-subcatchments",
+      "output_layer_id": "freshness-sbs_map-subcatchments",
+      "row_count": 1,
+      "scope": "baseline",
+      "scope_class": "scope_invariant",
+      "selected_columns": [
+        "topaz_id",
+        "wepp_id",
+        "id",
+        "value"
+      ],
+      "selector_id": null,
+      "source_layer_ids": [
+        "test.attributes"
+      ],
+      "temporal_mode": null,
+      "unit_mapping": {
+        "id": "non-unitized",
+        "topaz_id": "non-unitized",
+        "value": "non-unitized",
+        "wepp_id": "non-unitized"
+      }
+    }
+  ],
+  "request": {
+    "column_selection_by_layer_id": {},
+    "layers_requested": [
+      "test.attributes"
+    ],
+    "output_scopes_requested": [
+      "baseline"
+    ],
+    "resolved": {
+      "crs": "wgs",
+      "format": "parquet",
+      "layers": [
+        "test.attributes"
+      ],
+      "output_scopes": [
+        "baseline"
+      ],
+      "swat_run_id": "none",
+      "tabular": {
+        "concatenate_tables": false,
+        "temporal_layout": "wide"
+      },
+      "units": "si"
+    }
+  },
+  "run_context": {
+    "config": "test",
+    "runid": "freshness"
+  },
+  "schema_version": 1,
+  "source_job_id": null,
+  "swat_table_resolution": {},
+  "temporal": {},
+  "warnings": []
+}

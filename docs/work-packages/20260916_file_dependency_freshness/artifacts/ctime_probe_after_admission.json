@@ -1,0 +1,20 @@
+[
+  {
+    "filesystem_parent": "/tmp",
+    "identical_versions": 933,
+    "stale_cache_hits": 0,
+    "sample": null
+  },
+  {
+    "filesystem_parent": "/workdir/wepppy",
+    "identical_versions": 33,
+    "stale_cache_hits": 0,
+    "sample": null
+  },
+  {
+    "filesystem_parent": "/wc1/runs",
+    "identical_versions": 0,
+    "stale_cache_hits": 0,
+    "sample": null
+  }
+]

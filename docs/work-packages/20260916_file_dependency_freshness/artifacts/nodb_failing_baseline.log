@@ -1,0 +1,57 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_hydration_snapshot.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 4 items
+
+tests/nodb/test_hydration_snapshot.py F
+
+=================================== FAILURES ===================================
+________ test_decode_time_replacement_cannot_relabel_old_bytes[hydrate] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-20/test_decode_time_replacement_c0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7473201abb30>
+loader = 'hydrate'
+
+    @pytest.mark.parametrize('loader', ['hydrate', 'detached'])
+    def test_decode_time_replacement_cannot_relabel_old_bytes(tmp_path, monkeypatch, loader):
+        monkeypatch.setattr(base, 'redis_nodb_cache_client', None)
+        (tmp_path/'READONLY').touch()
+        first = SnapshotProbe.__new__(SnapshotProbe)
+        first.wd = str(tmp_path)
+        first.value = 'A'
+        target = tmp_path/SnapshotProbe.filename
+        target.write_text(jsonpickle.encode(first))
+        first_stat = target.stat()
+        first.value = 'B'
+        replacement = tmp_path/'replacement'
+        replacement.write_text(jsonpickle.encode(first))
+        os.utime(replacement, ns=(first_stat.st_atime_ns, first_stat.st_mtime_ns + 2000000000))
+        monkeypatch.setattr(SnapshotProbe, 'replacement', (replacement, target))
+        if loader == 'hydrate':
+            observed = SnapshotProbe._hydrate_instance(str(tmp_path), False, False, True, use_redis_cache=False)
+        else:
+            observed = SnapshotProbe.load_detached(str(tmp_path))
+        assert observed.value == 'A'
+>       assert observed._nodb_mtime == first_stat.st_mtime
+E       assert 1789610024.8073094 == 1789610022.8073094
+E        +  where 1789610024.8073094 = <test_hydration_snapshot.SnapshotProbe object at 0x7473201ab740>._nodb_mtime
+E        +  and   1789610022.8073094 = os.stat_result(st_mode=33188, st_ino=24267364, st_dev=95, st_nlink=1, st_uid=1000, st_gid=993, st_size=156, st_atime=1789610022, st_mtime=1789610022, st_ctime=1789610022).st_mtime
+
+tests/nodb/test_hydration_snapshot.py:51: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_hydration_snapshot.py::test_decode_time_replacement_cannot_relabel_old_bytes[hydrate]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 2 warnings in 9.45s =========================

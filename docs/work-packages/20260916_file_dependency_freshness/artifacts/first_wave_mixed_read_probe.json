@@ -1,0 +1,21 @@
+{
+  "expected": {
+    "old": "5b766f6d76a999636fd93b4e039d5a32187f84a19c0950449f0c721da0223914",
+    "new": "7995dfceebfb9fa8972d361d53d899f6e268ecd6d823b5737198041fabc02e20",
+    "mixed": "16d4332fd09b6be31ddfdfec0407650920805f02dd2c0ec0dbd4a2f8b6d23f09"
+  },
+  "results": [
+    {
+      "parent": "/tmp",
+      "detected": 150,
+      "returned": 0,
+      "sample": null
+    },
+    {
+      "parent": "/workdir/wepppy",
+      "detected": 150,
+      "returned": 0,
+      "sample": null
+    }
+  ]
+}

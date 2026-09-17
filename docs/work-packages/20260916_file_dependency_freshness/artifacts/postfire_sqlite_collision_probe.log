@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/postfire_sqlite_collision_probe.py
+{
+  "accepted_source_false_current": 0,
+  "filesystem": "canonical container temporary directory",
+  "iterations": 300,
+  "journal_mode": "delete",
+  "mtime_restored_by_probe": true,
+  "same_complete_inventory_after_committed_row_change": 0
+}

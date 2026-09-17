@@ -1,0 +1,40 @@
+{
+  "same_cache_key": true,
+  "first_result": {
+    "artifact_id": "26c520c27dad4760b3681245d8ee095e",
+    "artifact_relpath": "export/features/artifacts/26c520c27dad4760b3681245d8ee095e/features_export.parquet.zip",
+    "download_url": "/rq-engine/api/runs/probe/test/export/features/job/first/download",
+    "cache_hit": false,
+    "source_job_id": null,
+    "manifest_relpath": "export/features/jobs/first/manifest.json",
+    "warnings": []
+  },
+  "second_result": {
+    "artifact_id": "26c520c27dad4760b3681245d8ee095e",
+    "artifact_relpath": "export/features/artifacts/26c520c27dad4760b3681245d8ee095e/features_export.parquet.zip",
+    "download_url": "/rq-engine/api/runs/probe/test/export/features/job/second/download",
+    "cache_hit": true,
+    "source_job_id": "first",
+    "manifest_relpath": "export/features/jobs/second/manifest.json",
+    "warnings": []
+  },
+  "actual_source": [
+    {
+      "id": 1,
+      "value": 75.0
+    }
+  ],
+  "exported": {
+    "probe-sbs_map-subcatchments.parquet": [
+      {
+        "topaz_id": null,
+        "wepp_id": null,
+        "id": 1,
+        "value": 25.0,
+        "output_scope": "baseline",
+        "omni_scenario": null,
+        "omni_contrast_id": null
+      }
+    ]
+  }
+}

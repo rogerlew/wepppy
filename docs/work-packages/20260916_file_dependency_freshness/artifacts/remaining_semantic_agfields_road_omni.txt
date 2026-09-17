@@ -1,0 +1,277 @@
+wepppy/rq/omni_rq.py:332:    signature: Optional[str] = None,
+wepppy/rq/omni_rq.py:354:        scenario_signature = signature
+wepppy/rq/omni_rq.py:356:        if dependency_target_key is None or dependency_loss_path is None or scenario_signature is None:
+wepppy/rq/omni_rq.py:360:            scenario_signature = omni._scenario_signature(scenario_payload)
+wepppy/rq/omni_rq.py:371:            'signature': scenario_signature,
+wepppy/rq/omni_rq.py:521:            signature_value = omni._scenario_signature(scenario_def)
+wepppy/rq/omni_rq.py:526:                and previous.get('signature') == signature_value
+wepppy/rq/omni_rq.py:529:            return scenario_name, target_key, dependency_path, dependency_hash, signature_value, up_to_date
+wepppy/rq/omni_rq.py:549:                signature_value,
+wepppy/rq/omni_rq.py:561:                    'signature': signature_value,
+wepppy/rq/omni_rq.py:584:                    'signature': signature_value,
+wepppy/rq/omni_rq.py:602:                signature_value,
+wepppy/rq/omni_rq.py:614:                    'signature': signature_value,
+wepppy/rq/omni_rq.py:637:                    'signature': signature_value,
+wepppy/rq/omni_rq.py:667:                        'signature': task['signature'],
+wepppy/rq/omni_rq.py:685:                        'signature': task['signature'],
+wepppy/wepp/interchange/ag_fields_interchange.py:322:        "size_bytes": path.stat().st_size,
+wepppy/wepp/interchange/ag_fields_interchange.py:334:    source_mapping_sha256: str,
+wepppy/wepp/interchange/ag_fields_interchange.py:340:        "source_mapping_sha256": source_mapping_sha256,
+wepppy/wepp/interchange/ag_fields_interchange.py:356:        if not _manifest_is_current(final_dir):
+wepppy/wepp/interchange/ag_fields_interchange.py:373:    if not _manifest_is_current(final_dir):
+wepppy/wepp/interchange/ag_fields_interchange.py:399:def _manifest_is_current(
+wepppy/wepp/interchange/ag_fields_interchange.py:418:    source_mapping_sha256 = payload.get("source_mapping_sha256")
+wepppy/wepp/interchange/ag_fields_interchange.py:419:    if not isinstance(source_mapping_sha256, str) or len(source_mapping_sha256) != 64:
+wepppy/wepp/interchange/ag_fields_interchange.py:426:                or _sha256(subfields_parquet_path) != source_mapping_sha256
+wepppy/wepp/interchange/ag_fields_interchange.py:475:                or target_path.stat().st_size != summary["size_bytes"]
+wepppy/wepp/interchange/ag_fields_interchange.py:510:    return _manifest_is_current(
+wepppy/wepp/interchange/ag_fields_interchange.py:527:def _sha256(path: Path) -> str:
+wepppy/wepp/interchange/ag_fields_interchange.py:528:    digest = hashlib.sha256()
+wepppy/wepp/interchange/ag_fields_interchange.py:546:    source_mapping_sha256 = _sha256(mapping_path)
+wepppy/wepp/interchange/ag_fields_interchange.py:548:    if _sha256(mapping_path) != source_mapping_sha256:
+wepppy/wepp/interchange/ag_fields_interchange.py:596:            if _sha256(mapping_path) != source_mapping_sha256:
+wepppy/wepp/interchange/ag_fields_interchange.py:603:                source_mapping_sha256=source_mapping_sha256,
+wepppy/nodb/mods/roads/specification.md:70:- `uploaded_geojson_sha256`: str | null
+wepppy/nodb/mods/roads/specification.md:253:- persist source checksum (`sha256`) and normalized ingest summary.
+wepppy/nodb/mods/ag_fields/corpus_execution.py:75:def _sha256(path: Path) -> str:
+wepppy/nodb/mods/ag_fields/corpus_execution.py:76:    digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/corpus_execution.py:124:            ("pass_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:125:            ("stdout_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:126:            ("stderr_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:328:    if pass_path.is_file() and pass_path.stat().st_size > 0:
+wepppy/nodb/mods/ag_fields/corpus_execution.py:336:        and pass_path.stat().st_size > 0
+wepppy/nodb/mods/ag_fields/corpus_execution.py:401:    stdout_sha256 = hashlib.sha256(stdout.encode("utf-8")).hexdigest()
+wepppy/nodb/mods/ag_fields/corpus_execution.py:402:    stderr_sha256 = hashlib.sha256(stderr.encode("utf-8")).hexdigest()
+wepppy/nodb/mods/ag_fields/corpus_execution.py:421:        "pass_size_bytes": pass_path.stat().st_size if pass_path.is_file() else 0,
+wepppy/nodb/mods/ag_fields/corpus_execution.py:422:        "pass_sha256": (
+wepppy/nodb/mods/ag_fields/corpus_execution.py:423:            _sha256(pass_path)
+wepppy/nodb/mods/ag_fields/corpus_execution.py:424:            if pass_path.is_file() and pass_path.stat().st_size > 0
+wepppy/nodb/mods/ag_fields/corpus_execution.py:427:        "stdout_sha256": stdout_sha256,
+wepppy/nodb/mods/ag_fields/corpus_execution.py:428:        "stderr_sha256": stderr_sha256,
+wepppy/nodb/mods/ag_fields/corpus_execution.py:509:        context_hashes[name] = _sha256(destination)
+wepppy/nodb/mods/ag_fields/corpus_execution.py:557:                    "pass_sha256": "",
+wepppy/nodb/mods/ag_fields/corpus_execution.py:558:                    "stdout_sha256": "",
+wepppy/nodb/mods/ag_fields/corpus_execution.py:559:                    "stderr_sha256": "",
+wepppy/nodb/mods/ag_fields/corpus_execution.py:584:        "ofe_plan_sha256": _sha256(ofe_plan),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:586:        "parent_summary_sha256": _sha256(parent_summary),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:590:        "wepp_bin_sha256": _sha256(wepp_bin),
+wepppy/nodb/mods/ag_fields/corpus_execution.py:591:        "runtime_context_sha256": context_hashes,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:364:            signature = omni._scenario_signature(scenario_def)
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:376:                prev_entry.get("signature") == signature
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:378:            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:396:                signature,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:411:                    "signature": signature,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:446:                "signature": signature,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:474:                signature,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:489:                    "signature": signature,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:524:                "signature": signature,
+wepppy/nodb/mods/ag_fields/ui_control_layout.md:133:- Re-upload invalidates downstream stages in the backend: boundary replacement clears the schema selections, refreshes boundary metadata/signatures, and causes server-computed sub-field/run staleness to block later stages. The controller renders those snapshot flags; it does not infer staleness from client-side hashes.
+wepppy/nodb/mods/ag_fields/ui_control_layout.md:219:The backend owns invalidation and computes explicit staleness from boundary, schema, sub-field, mapping, and run source signatures. The state snapshot carries those flags; the controller renders what the snapshot says and never diffs hashes itself.
+wepppy/nodb/mods/ag_fields/ui_control_layout.md:315:3. **Re-upload staleness:** boundary replacement clears schema selections; build/run source signatures drive server-side `subfields` and `wepp_runs` staleness.
+wepppy/nodb/mods/ag_fields/concept1_integration.py:33:    _sha256,
+wepppy/nodb/mods/ag_fields/concept1_integration.py:74:            ("pass_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/concept1_integration.py:125:            self.source_signature = self._build_concept1_source_signature()
+wepppy/nodb/mods/ag_fields/concept1_integration.py:176:    def _build_concept1_source_signature(self) -> str:
+wepppy/nodb/mods/ag_fields/concept1_integration.py:177:        digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/concept1_integration.py:221:            digest.update(_sha256(path).encode("ascii"))
+wepppy/nodb/mods/ag_fields/concept1_integration.py:363:            "pass_sha256": _sha256(pass_path),
+wepppy/nodb/mods/ag_fields/concept1_integration.py:401:            "source_signature": self.source_signature,
+wepppy/nodb/mods/ag_fields/concept1_integration.py:402:            "stage4_source_signature": getattr(
+wepppy/nodb/mods/ag_fields/concept1_integration.py:404:                "_wepp_source_signature",
+wepppy/nodb/mods/ag_fields/concept1_integration.py:456:                "source_signature": self.source_signature,
+wepppy/nodb/mods/omni/omni.py:1132:    def _scenario_signature(self, scenario_def: ScenarioDef) -> str:
+wepppy/nodb/mods/omni/omni.py:1133:        return _OMNI_STATION_CATALOG_SERVICE.scenario_signature(self, scenario_def)
+wepppy/nodb/mods/omni/omni.py:1135:    def _scenario_signature_impl(self, scenario_def: ScenarioDef) -> str:
+wepppy/nodb/mods/omni/omni.py:1136:        return _OMNI_STATION_CATALOG_SERVICE.scenario_signature(self, scenario_def)
+wepppy/nodb/mods/omni/omni.py:1150:    def _contrast_signature(self, contrast_name: str, contrast_payload: ContrastMapping) -> str:
+wepppy/nodb/mods/omni/omni.py:1157:    def _contrast_pair_signature(self, control_key: str, contrast_key: str, area_label: str) -> str:
+wepppy/nodb/mods/omni/omni.py:1160:    def _load_user_defined_signature_map(self) -> Dict[str, int]:
+wepppy/nodb/mods/omni/omni.py:1161:        signature_map: Dict[str, int] = {}
+wepppy/nodb/mods/omni/omni.py:1178:            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+wepppy/nodb/mods/omni/omni.py:1179:            signature_map[signature] = contrast_id
+wepppy/nodb/mods/omni/omni.py:1180:        if signature_map:
+wepppy/nodb/mods/omni/omni.py:1181:            return signature_map
+wepppy/nodb/mods/omni/omni.py:1195:            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+wepppy/nodb/mods/omni/omni.py:1196:            signature_map[signature] = contrast_id
+wepppy/nodb/mods/omni/omni.py:1197:        return signature_map
+wepppy/nodb/mods/omni/omni.py:1199:    def _load_user_defined_hillslope_group_signature_map(self) -> Dict[str, int]:
+wepppy/nodb/mods/omni/omni.py:1200:        signature_map: Dict[str, int] = {}
+wepppy/nodb/mods/omni/omni.py:1217:            signature = self._contrast_pair_signature(control_key, contrast_key, str(group_index))
+wepppy/nodb/mods/omni/omni.py:1218:            signature_map[signature] = contrast_id
+wepppy/nodb/mods/omni/omni.py:1219:        if signature_map:
+wepppy/nodb/mods/omni/omni.py:1220:            return signature_map
+wepppy/nodb/mods/omni/omni.py:1234:            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+wepppy/nodb/mods/omni/omni.py:1235:            signature_map[signature] = contrast_id
+wepppy/nodb/mods/omni/omni.py:1236:        return signature_map
+wepppy/nodb/mods/ag_fields/README.md:224:succeed. The controller persists a separate interchange source signature, and
+wepppy/nodb/mods/ag_fields/README.md:225:rq-engine reports Stage 4 complete only when the raw-run signature, interchange
+wepppy/nodb/mods/ag_fields/README.md:226:signature, current workflow signature, source mapping hash, and last-written
+wepppy/nodb/mods/ag_fields/README.md:231:failure, source signature, and terminal summary live in additive AgFields state.
+wepppy/nodb/mods/ag_fields/README.md:264:polygonization records the current boundary/schema signature; WEPP runs are
+wepppy/nodb/mods/ag_fields/README.md:265:stale when either that signature or `rotation_lookup.tsv` changes. Starting a
+wepppy/nodb/mods/ag_fields/README.md:268:Historical runs without both signatures are conservatively incomplete until
+wepppy/nodb/mods/omni/omni_station_catalog_service.py:219:    def scenario_signature(self, omni: "Omni", scenario_def: "ScenarioDef") -> str:
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:38:    _sha256,
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:71:            ("sub_field_map_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:72:            ("subwta_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:73:            ("wbt_flovec_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:74:            ("channel_mask_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:102:            ("pass_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:177:            self.source_signature = self._build_hybrid_source_signature()
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:280:            name: _sha256(path) if path is not None else None
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:305:                    "sub_field_map_sha256": identities["sub_field_map"],
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:306:                    "subwta_sha256": identities["subwta"],
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:307:                    "wbt_flovec_sha256": identities["wbt_flovec"],
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:308:                    "channel_mask_sha256": identities["channel_mask"],
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:330:    def _build_hybrid_source_signature(self) -> str:
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:331:        digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:332:        digest.update(self._build_concept1_source_signature().encode("ascii"))
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:333:        digest.update(_sha256(self._connectivity_detail_path).encode("ascii"))
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:335:        digest.update(_sha256(binary).encode("ascii"))
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:570:                    "pass_sha256": _sha256(pass_path),
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:597:            "source_signature": self.source_signature,
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:598:            "stage4_source_signature": getattr(
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:600:                "_wepp_source_signature",
+wepppy/nodb/mods/ag_fields/hybrid_integration.py:656:                "source_signature": self.source_signature,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:44:            return path.stat().st_mtime < build_subcatchments_ts
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:937:        existing_signature_map: Dict[str, int],
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:962:                    signature = omni._contrast_pair_signature(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:968:                        existing_signature_map,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:969:                        signature,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1042:        existing_signature_map = omni._load_user_defined_hillslope_group_signature_map()
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1043:        next_id = max(existing_signature_map.values(), default=0) + 1
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1052:            existing_signature_map=existing_signature_map,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1228:        existing_signature_map: Dict[str, int],
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1229:        signature: str,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1232:        contrast_id = existing_signature_map.get(signature)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1236:            existing_signature_map[signature] = contrast_id
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1314:        existing_signature_map: Dict[str, int],
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1335:                    signature = omni._contrast_pair_signature(control_key, contrast_key, label)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1337:                        existing_signature_map,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1338:                        signature,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1429:        existing_signature_map = omni._load_user_defined_signature_map()
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1430:        next_id = max(existing_signature_map.values(), default=0) + 1
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1443:            existing_signature_map=existing_signature_map,
+wepppy/nodb/mods/ag_fields/ag_fields.pyi:177:    def wepp_source_signature(self) -> Optional[str]: ...
+wepppy/nodb/mods/ag_fields/ag_fields.pyi:180:    def wepp_interchange_source_signature(self) -> Optional[str]: ...
+wepppy/nodb/mods/ag_fields/ag_fields.pyi:182:    def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None: ...
+wepppy/nodb/mods/omni/README.md:454:- Contrast IDs stable by signature `control|contrast|area_label`
+wepppy/nodb/mods/omni/README.md:474:- **Scenario signature**: `json.dumps(scenario_def, sort_keys=True)` (stable serialized scenario definition)
+wepppy/nodb/mods/omni/README.md:479:  - RQ concurrency path: skip when signature and dependency hash match prior `scenario_dependency_tree`
+wepppy/nodb/mods/omni/README.md:480:  - In-process path: same hash/signature check plus year-set parity (`loss_pw0.all_years.class_data.parquet`) with the base scenario
+wepppy/nodb/mods/omni/omni.pyi:423:    def _scenario_signature(self, scenario_def: ScenarioDef) -> str: ...
+wepppy/nodb/mods/omni/omni.pyi:424:    def _scenario_signature_impl(self, scenario_def: ScenarioDef) -> str: ...
+wepppy/nodb/mods/omni/omni.pyi:432:    def _contrast_signature(self, contrast_name: str, contrast_payload: ContrastMapping) -> str: ...
+wepppy/nodb/mods/omni/omni.pyi:434:    def _contrast_pair_signature(self, control_key: str, contrast_key: str, area_label: str) -> str: ...
+wepppy/nodb/mods/omni/omni.pyi:436:    def _load_user_defined_signature_map(self) -> Dict[str, int]: ...
+wepppy/nodb/mods/omni/omni.pyi:438:    def _load_user_defined_hillslope_group_signature_map(self) -> Dict[str, int]: ...
+wepppy/nodb/mods/ag_fields/management_corpus.py:66:def _sha256(path: Path) -> str:
+wepppy/nodb/mods/ag_fields/management_corpus.py:67:    digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/management_corpus.py:74:def _sha256_bytes(value: bytes) -> str:
+wepppy/nodb/mods/ag_fields/management_corpus.py:75:    return hashlib.sha256(value).hexdigest()
+wepppy/nodb/mods/ag_fields/management_corpus.py:145:            ("source_manifest_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/management_corpus.py:147:            ("generated_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/management_corpus.py:164:            ("source_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/management_corpus.py:286:    return reparsed, _sha256_bytes(payload)
+wepppy/nodb/mods/ag_fields/management_corpus.py:347:            hash_cache[resolved_path] = _sha256(resolved_path)
+wepppy/nodb/mods/ag_fields/management_corpus.py:358:                "source_sha256": hash_cache[resolved_path],
+wepppy/nodb/mods/ag_fields/management_corpus.py:367:    reparsed, generated_sha256 = _render_reparse_replace(
+wepppy/nodb/mods/ag_fields/management_corpus.py:377:    source_manifest_sha256 = _sha256_bytes(
+wepppy/nodb/mods/ag_fields/management_corpus.py:387:        "source_manifest_sha256": source_manifest_sha256,
+wepppy/nodb/mods/ag_fields/management_corpus.py:389:        "generated_sha256": generated_sha256,
+wepppy/nodb/mods/ag_fields/management_corpus.py:461:                "sha256": _sha256(ofe_plan_path),
+wepppy/nodb/mods/ag_fields/ag_fields.py:155:            self._subfields_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:156:            self._wepp_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:157:            self._wepp_interchange_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:159:            self._watershed_integration_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:588:            self._subfields_source_signature = self._schema_signature()
+wepppy/nodb/mods/ag_fields/ag_fields.py:643:            self._wepp_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:644:            self._wepp_interchange_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:651:            self._wepp_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:652:            self._wepp_interchange_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:660:            self._wepp_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:661:            self._wepp_interchange_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:664:    def wepp_source_signature(self) -> Optional[str]:
+wepppy/nodb/mods/ag_fields/ag_fields.py:665:        """Return the source signature for the current raw sub-field WEPP run."""
+wepppy/nodb/mods/ag_fields/ag_fields.py:666:        return getattr(self, '_wepp_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:669:    def wepp_interchange_source_signature(self) -> Optional[str]:
+wepppy/nodb/mods/ag_fields/ag_fields.py:670:        """Return the raw-run signature whose interchange bundle was published."""
+wepppy/nodb/mods/ag_fields/ag_fields.py:671:        return getattr(self, '_wepp_interchange_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:673:    def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None:
+wepppy/nodb/mods/ag_fields/ag_fields.py:680:            current_signature = self._workflow_signature()
+wepppy/nodb/mods/ag_fields/ag_fields.py:681:            raw_signature = getattr(self, '_wepp_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:683:                not expected_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:684:                or expected_signature != raw_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:685:                or expected_signature != current_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:688:                    "AgFields interchange completion signature does not match the current raw WEPP run"
+wepppy/nodb/mods/ag_fields/ag_fields.py:696:            self._wepp_interchange_source_signature = expected_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:704:        current_signature = self._workflow_signature()
+wepppy/nodb/mods/ag_fields/ag_fields.py:706:            current_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:707:            and current_signature == getattr(self, '_wepp_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:708:            and current_signature
+wepppy/nodb/mods/ag_fields/ag_fields.py:709:            == getattr(self, '_wepp_interchange_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:749:                    'source_signature': current.get('source_signature'),
+wepppy/nodb/mods/ag_fields/ag_fields.py:802:                    'source_signature': summary['source_signature'],
+wepppy/nodb/mods/ag_fields/ag_fields.py:980:            'source_signature': None,
+wepppy/nodb/mods/ag_fields/ag_fields.py:1020:            'source_signature': getattr(
+wepppy/nodb/mods/ag_fields/ag_fields.py:1022:                '_watershed_integration_source_signature',
+wepppy/nodb/mods/ag_fields/ag_fields.py:1059:        stage4_signature = getattr(self, '_wepp_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:1060:        stored_stage4_signature = summary.get('stage4_source_signature') if summary else None
+wepppy/nodb/mods/ag_fields/ag_fields.py:1080:            or (stored_stage4_signature is not None and stored_stage4_signature != stage4_signature)
+wepppy/nodb/mods/ag_fields/ag_fields.py:1088:            'source_signature': entry['source_signature'],
+wepppy/nodb/mods/ag_fields/ag_fields.py:1612:    def _schema_signature(self) -> Optional[str]:
+wepppy/nodb/mods/ag_fields/ag_fields.py:1621:    def _workflow_signature(self) -> Optional[str]:
+wepppy/nodb/mods/ag_fields/ag_fields.py:1622:        source = getattr(self, '_subfields_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:1631:            self._schema_signature() != getattr(self, '_subfields_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:1640:            or self._workflow_signature() != getattr(self, '_wepp_source_signature', None)
+wepppy/nodb/mods/ag_fields/ag_fields.py:1701:            self._wepp_interchange_source_signature = None
+wepppy/nodb/mods/ag_fields/ag_fields.py:1805:            self._wepp_source_signature = self._workflow_signature()
+wepppy/nodb/mods/ag_fields/watershed_integration.py:126:def _sha256(path: Path) -> str:
+wepppy/nodb/mods/ag_fields/watershed_integration.py:127:    digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/watershed_integration.py:203:            ("source_climate_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:205:            ("target_climate_sha256", pa.string()),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:310:        self.source_signature: str | None = None
+wepppy/nodb/mods/ag_fields/watershed_integration.py:367:            self.source_signature = self._build_source_signature()
+wepppy/nodb/mods/ag_fields/watershed_integration.py:580:    def _build_source_signature(self) -> str:
+wepppy/nodb/mods/ag_fields/watershed_integration.py:581:        digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/watershed_integration.py:587:            "subfields_source_signature": getattr(self.controller, "_subfields_source_signature", None),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:588:            "wepp_source_signature": getattr(self.controller, "_wepp_source_signature", None),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:598:            "weighted_kernel_sha256": self._weighted_kernel_sha256(),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:614:            digest.update(_sha256(path).encode("ascii"))
+wepppy/nodb/mods/ag_fields/watershed_integration.py:833:            self._climate_hashes[resolved] = _sha256(resolved)
+wepppy/nodb/mods/ag_fields/watershed_integration.py:866:                    "source_climate_sha256": source_sha,
+wepppy/nodb/mods/ag_fields/watershed_integration.py:868:                    "target_climate_sha256": target_sha,
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1075:            "sha256": _sha256(candidate.resolve()) if candidate.exists() else None,
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1079:    def _weighted_kernel_sha256() -> str:
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1082:        return _sha256(Path(wepp_interchange_rust.__file__).resolve())
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1098:            "source_signature": self.source_signature,
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1099:            "stage4_source_signature": getattr(self.controller, "_wepp_source_signature", None),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1144:            "source_signature": self.source_signature,
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1145:            "stage4_source_signature": getattr(self.controller, "_wepp_source_signature", None),
+wepppy/nodb/mods/ag_fields/watershed_integration.py:1209:`source_climate_sha256`, `target_climate_token`, `target_climate_sha256`;
+wepppy/nodb/mods/ag_fields/concept1_planner.py:618:def _sha256(path: Path) -> str:
+wepppy/nodb/mods/ag_fields/concept1_planner.py:619:    digest = hashlib.sha256()
+wepppy/nodb/mods/ag_fields/concept1_planner.py:989:            "subwta": {"path": str(subwta_path), "sha256": _sha256(subwta_path)},
+wepppy/nodb/mods/ag_fields/concept1_planner.py:990:            "discha": {"path": str(discha_path), "sha256": _sha256(discha_path)},
+wepppy/nodb/mods/ag_fields/concept1_planner.py:991:            "subfield_map": {"path": str(subfield_map_path), "sha256": _sha256(subfield_map_path)},
+wepppy/nodb/mods/ag_fields/concept1_planner.py:992:            "fields_parquet": {"path": str(fields_parquet_path), "sha256": _sha256(fields_parquet_path)},
+wepppy/nodb/mods/ag_fields/concept1_planner.py:994:                {"path": str(connectivity_detail_path), "sha256": _sha256(connectivity_detail_path)}
+wepppy/nodb/mods/roads/roads.py:168:            self._uploaded_geojson_sha256 = None
+wepppy/nodb/mods/roads/roads.py:196:        if not hasattr(instance, "_uploaded_geojson_sha256"):
+wepppy/nodb/mods/roads/roads.py:197:            instance._uploaded_geojson_sha256 = None
+wepppy/nodb/mods/roads/roads.py:661:    def _params_signature(params: Mapping[str, Any]) -> str:
+wepppy/nodb/mods/roads/roads.py:663:        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+wepppy/nodb/mods/roads/roads.py:721:        prepared_sha = prepare_summary.get("uploaded_geojson_sha256")
+wepppy/nodb/mods/roads/roads.py:722:        current_sha = getattr(self, "_uploaded_geojson_sha256", None)
+wepppy/nodb/mods/roads/roads.py:727:        prepared_signature = str(prepare_summary.get("roads_params_signature") or "")
+wepppy/nodb/mods/roads/roads.py:728:        current_signature = self._params_signature(current_params)
+wepppy/nodb/mods/roads/roads.py:729:        if not prepared_signature or prepared_signature != current_signature:
+wepppy/nodb/mods/roads/roads.py:1052:        if source_path.stat().st_size > max_upload_bytes:
+wepppy/nodb/mods/roads/roads.py:1098:        digest = hashlib.sha256(target_path.read_bytes()).hexdigest()
+wepppy/nodb/mods/roads/roads.py:1111:            self._uploaded_geojson_sha256 = digest
+wepppy/nodb/mods/roads/roads.py:1123:                "uploaded_geojson_sha256": digest,
+wepppy/nodb/mods/roads/roads.py:1138:            "uploaded_geojson_sha256": digest,
+wepppy/nodb/mods/roads/roads.py:1457:            "roads_params_signature": self._params_signature(params),
+wepppy/nodb/mods/roads/roads.py:1638:                "roads_params_signature": self._params_signature(params),
+wepppy/nodb/mods/roads/roads.py:1639:                "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),
+wepppy/nodb/mods/roads/roads.py:6215:            "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),

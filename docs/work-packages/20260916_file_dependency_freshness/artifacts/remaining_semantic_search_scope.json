@@ -1,0 +1,66 @@
+{
+  "revision": "90a8a3dc9ba8982e3edddff16e6118222c0520a9",
+  "utc": "2026-09-17T02:56:11.246981+00:00",
+  "scope": "Targeted semantic follow-up of retained M1 families; not an exhaustive repository audit",
+  "commands": {
+    "agfields_road_omni": {
+      "argv": [
+        "rg",
+        "-n",
+        "st_mtime|st_size|sha256|signature|fingerprint|is_current",
+        "wepppy/nodb/mods/ag_fields",
+        "wepppy/wepp/interchange/ag_fields_interchange.py",
+        "wepppy/nodb/mods/roads",
+        "wepppy/nodb/mods/omni",
+        "wepppy/rq/omni_rq.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "retained_output": "remaining_semantic_agfields_road_omni.txt"
+    },
+    "snapshots_profiles_reports": {
+      "argv": [
+        "rg",
+        "-n",
+        "st_mtime|st_size|sha256|signature|fingerprint|cache|snapshot",
+        "wepppy/nodb/config_builder/snapshot.py",
+        "wepppy/nodb/project_config_snapshot.py",
+        "wepppy/nodb/project_config_reader.py",
+        "wepppy/profile_recorder",
+        "wepppy/wepp/reports"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "retained_output": "remaining_semantic_snapshots_profiles_reports.txt"
+    },
+    "other_retained_hash_families": {
+      "argv": [
+        "rg",
+        "-n",
+        "st_mtime|st_size|sha256|signature|fingerprint|cache",
+        "wepppy/climates/gridmet/admission.py",
+        "wepppy/nodb/mods/path_ce/path_cost_effective.py",
+        "wepppy/nodb/mods/postfire_debris_flow/source_replay.py",
+        "wepppy/tools/migrations/unroll_root_resources_batch.py",
+        "tools/peakflow_phase1_replay.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "retained_output": "remaining_semantic_other_retained_hash_families.txt"
+    },
+    "omni_writers": {
+      "argv": [
+        "rg",
+        "-n",
+        "build_subcatchments|build_channels|symlink_channels_map|sbs_file_path|overwrite=True",
+        "wepppy/nodb/core/watershed_mixins.py",
+        "wepppy/microservices/rq_engine/omni_routes.py",
+        "wepppy/nodb/mods/omni/omni_input_parser.py",
+        "wepppy/rq/project_rq.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "retained_output": "remaining_semantic_omni_writers.txt"
+    }
+  }
+}

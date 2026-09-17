@@ -1,0 +1,12 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/shared_digest_security_probe.py
+{
+  "actual_observation_eviction_forces_fresh_admission": true,
+  "actual_read_access_loss_rejected": true,
+  "allowed_symlink_digest": true,
+  "digest_cache_size": 2,
+  "execute_access_loss_rejected": true,
+  "gid": 993,
+  "observation_cache_size": 512,
+  "settled_content_bytes_read": 0,
+  "uid": 1000
+}

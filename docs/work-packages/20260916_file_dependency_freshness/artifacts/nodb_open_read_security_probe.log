@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/nodb_open_read_security_probe.py
+{
+  "ctime_changed": true,
+  "link_counts": [
+    1,
+    0
+  ],
+  "old_inode": 24252099,
+  "iteration": 0,
+  "old_payload_and_old_version_preserved": true
+}

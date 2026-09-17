@@ -1,0 +1,760 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_probe.py raster_recursive_correctness_probe_revision4
+
+thread '<unnamed>' (48569) panicked at raster_characteristics/src/lib.rs:479:88:
+called `Result::unwrap()` on an `Err` value: NullPointer { method_name: "GDALOpenEx", msg: "" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+{
+  "gdal_version": "3100300",
+  "scope": "tiny disposable native fixtures",
+  "nested_vrt": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "9de99c5fe14850191b46f8288167687f6a19f3638f56c7249aee0cb443d878e9"
+      },
+      "bytes": 3365,
+      "seconds": 0.0028218859806656837
+    },
+    "after": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d"
+      },
+      "bytes": 3365,
+      "seconds": 0.0026135018561035395
+    },
+    "native_before": {
+      "1": 25.0
+    },
+    "native_after": {
+      "1": 75.0
+    },
+    "closure_changed": true
+  },
+  "sidecars": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d"
+      },
+      "bytes": 3365,
+      "seconds": 0.0031725780572742224
+    },
+    "with_mask": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif",
+            "<temporary>/source.tif.msk"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif.msk",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif.msk"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d",
+        "<temporary>/source.tif.msk": "4bdcfb70213a4971fc2bb1807158876fc6aa4c143de9af5ab1a946c125cfeda1"
+      },
+      "bytes": 3640,
+      "seconds": 0.0034836719278246164
+    },
+    "changed_mask": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif",
+            "<temporary>/source.tif.msk"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif.msk",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif.msk"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d",
+        "<temporary>/source.tif.msk": "82f551d1a718f461e4c58ec670fcebf8fdd3393957150dc92b9b88ad5cf87a19"
+      },
+      "bytes": 3640,
+      "seconds": 0.003452915931120515
+    },
+    "removed_mask": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d"
+      },
+      "bytes": 3365,
+      "seconds": 0.002724878955632448
+    },
+    "with_pam": {
+      "nodes": [
+        {
+          "selected": "<temporary>/outer.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/outer.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/inner.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/inner.vrt",
+            "<temporary>/source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif",
+            "<temporary>/source.tif.aux.xml"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif.aux.xml",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/inner.vrt": "a80ef9973520a80057cb5847ef4f574a849354a292014b80902b3b93a2cb7168",
+        "<temporary>/outer.vrt": "3459ed57b09d64a179a288450ee8451325ca0552a22e78b977f35fb8a646119a",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d",
+        "<temporary>/source.tif.aux.xml": "bb1ef4e0b5c23b686b8bff3254ca2c460371cba6fa0822e3c89d30ebdc8bed5f"
+      },
+      "bytes": 3465,
+      "seconds": 0.0030401090625673532
+    },
+    "mask_added_detected": true,
+    "mask_rewrite_detected": true,
+    "mask_removal_detected": true
+  },
+  "world_file": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "<temporary>/world-source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/world-source.tfw",
+            "<temporary>/world-source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/world-source.tfw",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/world-source.tfw": "317231dd164db974ea6440b5354cdfa41397b9211c582dff16534cda82c5ceef",
+        "<temporary>/world-source.tif": "db6e8173e0c61c570b9fe90e1abfa9a6363efda37f8a0b730598d9392257d86e"
+      },
+      "bytes": 188,
+      "seconds": 0.0010188489686697721
+    },
+    "after": {
+      "nodes": [
+        {
+          "selected": "<temporary>/world-source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/world-source.tfw",
+            "<temporary>/world-source.tif"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/world-source.tfw",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/world-source.tfw": "fe51d4d9f5b4f517ada460c0429b6bad8565db653fdf8ae36cd394061ba56372",
+        "<temporary>/world-source.tif": "db6e8173e0c61c570b9fe90e1abfa9a6363efda37f8a0b730598d9392257d86e"
+      },
+      "bytes": 188,
+      "seconds": 0.0011326209641993046
+    },
+    "before_transform": [
+      500000.0,
+      30.0,
+      0.0,
+      5000000.0,
+      0.0,
+      -30.0
+    ],
+    "after_transform": [
+      600000.0,
+      30.0,
+      0.0,
+      5000000.0,
+      0.0,
+      -30.0
+    ],
+    "closure_changed": true
+  },
+  "zarr": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "<temporary>/source.zarr",
+          "driver": "Zarr",
+          "members": [
+            "<temporary>/source.zarr",
+            "<temporary>/source.zarr/source/.zarray"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.zarr/source/.zarray",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/source.zarr/.zgroup": "e1e1914ae531ecb50e1ead685ef01895a5452faf5f25f35cd78f1f5de1367470",
+        "<temporary>/source.zarr/.zmetadata": "95327c1007b45be4b181083b328c0836d0f09b34c786a89013fae484e283b747",
+        "<temporary>/source.zarr/X/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/X/.zattrs": "b77c61475fe9cd255d3136d696a6371b9889b042e3d14a4faa2720bb0d599fab",
+        "<temporary>/source.zarr/X/0": "41b46aa358fff7858463e23022a6ae812b3e1d4e91b47623d20dc5a928337a7a",
+        "<temporary>/source.zarr/Y/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/Y/.zattrs": "aa5d3f7b6e2b83d91f74e0694ca3ef6e2794195756d452849807e9713532eefc",
+        "<temporary>/source.zarr/Y/0": "83e690d31c48820abe23a1dc26532062550da4290d6da4b940db8f303d0bd40a",
+        "<temporary>/source.zarr/source/.zarray": "4590ef463511ef16bfd5cea973de49d834bf4ab29be7702aab34cfe3ffce0cd8",
+        "<temporary>/source.zarr/source/.zattrs": "6bdf4447db2bd4d46b12b3158603dfab7b66e8bb5b0e64e3f243a6dfee6f6853",
+        "<temporary>/source.zarr/source/0.0": "a09fb57eb61cdb79131ba5ab8d55121786a079c9867ead0391af1c9794f7b42d"
+      },
+      "bytes": 9991,
+      "seconds": 0.004730192944407463
+    },
+    "after": {
+      "nodes": [
+        {
+          "selected": "<temporary>/source.zarr",
+          "driver": "Zarr",
+          "members": [
+            "<temporary>/source.zarr",
+            "<temporary>/source.zarr/source/.zarray"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.zarr/source/.zarray",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/source.zarr/.zgroup": "e1e1914ae531ecb50e1ead685ef01895a5452faf5f25f35cd78f1f5de1367470",
+        "<temporary>/source.zarr/.zmetadata": "95327c1007b45be4b181083b328c0836d0f09b34c786a89013fae484e283b747",
+        "<temporary>/source.zarr/X/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/X/.zattrs": "b77c61475fe9cd255d3136d696a6371b9889b042e3d14a4faa2720bb0d599fab",
+        "<temporary>/source.zarr/X/0": "41b46aa358fff7858463e23022a6ae812b3e1d4e91b47623d20dc5a928337a7a",
+        "<temporary>/source.zarr/Y/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/Y/.zattrs": "aa5d3f7b6e2b83d91f74e0694ca3ef6e2794195756d452849807e9713532eefc",
+        "<temporary>/source.zarr/Y/0": "83e690d31c48820abe23a1dc26532062550da4290d6da4b940db8f303d0bd40a",
+        "<temporary>/source.zarr/source/.zarray": "4590ef463511ef16bfd5cea973de49d834bf4ab29be7702aab34cfe3ffce0cd8",
+        "<temporary>/source.zarr/source/.zattrs": "6bdf4447db2bd4d46b12b3158603dfab7b66e8bb5b0e64e3f243a6dfee6f6853",
+        "<temporary>/source.zarr/source/0.0": "a1f7746b449edffa84e5950aebaeecb52d68d728d56e2fef7805afafdee2dec6"
+      },
+      "bytes": 9991,
+      "seconds": 0.0040075210854411125
+    },
+    "native_before": {
+      "1": 25.0
+    },
+    "native_after": {
+      "1": 75.0
+    },
+    "closure_changed": true
+  },
+  "zarr_symlinked_array": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "<temporary>/source.zarr",
+          "driver": "Zarr",
+          "members": [
+            "<temporary>/source.zarr",
+            "<temporary>/source.zarr/source/.zarray"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.zarr/source/.zarray",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/source.zarr/.zgroup": "e1e1914ae531ecb50e1ead685ef01895a5452faf5f25f35cd78f1f5de1367470",
+        "<temporary>/source.zarr/.zmetadata": "95327c1007b45be4b181083b328c0836d0f09b34c786a89013fae484e283b747",
+        "<temporary>/source.zarr/X/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/X/.zattrs": "b77c61475fe9cd255d3136d696a6371b9889b042e3d14a4faa2720bb0d599fab",
+        "<temporary>/source.zarr/X/0": "41b46aa358fff7858463e23022a6ae812b3e1d4e91b47623d20dc5a928337a7a",
+        "<temporary>/source.zarr/Y/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/Y/.zattrs": "aa5d3f7b6e2b83d91f74e0694ca3ef6e2794195756d452849807e9713532eefc",
+        "<temporary>/source.zarr/Y/0": "83e690d31c48820abe23a1dc26532062550da4290d6da4b940db8f303d0bd40a",
+        "<temporary>/source.zarr/source/.zarray": "4590ef463511ef16bfd5cea973de49d834bf4ab29be7702aab34cfe3ffce0cd8"
+      },
+      "bytes": 6064,
+      "seconds": 0.0040090258698910475
+    },
+    "after": {
+      "nodes": [
+        {
+          "selected": "<temporary>/source.zarr",
+          "driver": "Zarr",
+          "members": [
+            "<temporary>/source.zarr",
+            "<temporary>/source.zarr/source/.zarray"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.zarr/source/.zarray",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/source.zarr/.zgroup": "e1e1914ae531ecb50e1ead685ef01895a5452faf5f25f35cd78f1f5de1367470",
+        "<temporary>/source.zarr/.zmetadata": "95327c1007b45be4b181083b328c0836d0f09b34c786a89013fae484e283b747",
+        "<temporary>/source.zarr/X/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/X/.zattrs": "b77c61475fe9cd255d3136d696a6371b9889b042e3d14a4faa2720bb0d599fab",
+        "<temporary>/source.zarr/X/0": "41b46aa358fff7858463e23022a6ae812b3e1d4e91b47623d20dc5a928337a7a",
+        "<temporary>/source.zarr/Y/.zarray": "159b18e604ab48cea80b2f2274717e29632bdbbabb7d3d713c39d081bc461c16",
+        "<temporary>/source.zarr/Y/.zattrs": "aa5d3f7b6e2b83d91f74e0694ca3ef6e2794195756d452849807e9713532eefc",
+        "<temporary>/source.zarr/Y/0": "83e690d31c48820abe23a1dc26532062550da4290d6da4b940db8f303d0bd40a",
+        "<temporary>/source.zarr/source/.zarray": "4590ef463511ef16bfd5cea973de49d834bf4ab29be7702aab34cfe3ffce0cd8"
+      },
+      "bytes": 6064,
+      "seconds": 0.0037107381504029036
+    },
+    "native_before": {
+      "1": 75.0
+    },
+    "native_after": {
+      "1": 33.0
+    },
+    "closure_changed": false,
+    "actual_chunk": "<temporary>/detached-array/0.0",
+    "chunk_observed": false
+  },
+  "local_zip": {
+    "/vsizip/<temporary>/rasters.zip/": {
+      "graph": {
+        "nodes": [
+          {
+            "selected": "/vsizip/<temporary>/rasters.zip/outer.vrt",
+            "driver": "VRT",
+            "members": [
+              "/vsizip/<temporary>/rasters.zip/inner.vrt",
+              "/vsizip/<temporary>/rasters.zip/outer.vrt"
+            ],
+            "subdatasets": []
+          },
+          {
+            "selected": "/vsizip/<temporary>/rasters.zip/inner.vrt",
+            "driver": "VRT",
+            "members": [
+              "/vsizip/<temporary>/rasters.zip/inner.vrt",
+              "/vsizip/<temporary>/rasters.zip/source.tif"
+            ],
+            "subdatasets": []
+          },
+          {
+            "selected": "/vsizip/<temporary>/rasters.zip/source.tif",
+            "driver": "GTiff",
+            "members": [
+              "/vsizip/<temporary>/rasters.zip/source.tif"
+            ],
+            "subdatasets": []
+          }
+        ],
+        "digests": {
+          "<temporary>/rasters.zip": "948b8f367d28ee4edd24ce9d5c3759bbfd181b90448b3dea6d9d2b440193cfce"
+        },
+        "bytes": 5304,
+        "seconds": 0.0034359910059720278
+      },
+      "native": {
+        "1": 75.0
+      }
+    },
+    "/vsizip/{<temporary>/rasters.zip}/": {
+      "graph": {
+        "nodes": [
+          {
+            "selected": "/vsizip/{<temporary>/rasters.zip}/outer.vrt",
+            "driver": "VRT",
+            "members": [
+              "/vsizip/{<temporary>/rasters.zip}/inner.vrt",
+              "/vsizip/{<temporary>/rasters.zip}/outer.vrt"
+            ],
+            "subdatasets": []
+          },
+          {
+            "selected": "/vsizip/{<temporary>/rasters.zip}/inner.vrt",
+            "driver": "VRT",
+            "members": [
+              "/vsizip/{<temporary>/rasters.zip}/inner.vrt",
+              "/vsizip/{<temporary>/rasters.zip}/source.tif"
+            ],
+            "subdatasets": []
+          },
+          {
+            "selected": "/vsizip/{<temporary>/rasters.zip}/source.tif",
+            "driver": "GTiff",
+            "members": [
+              "/vsizip/{<temporary>/rasters.zip}/source.tif"
+            ],
+            "subdatasets": []
+          }
+        ],
+        "digests": {
+          "<temporary>/rasters.zip": "948b8f367d28ee4edd24ce9d5c3759bbfd181b90448b3dea6d9d2b440193cfce"
+        },
+        "bytes": 5304,
+        "seconds": 0.0028015391435474157
+      },
+      "native": {
+        "1": 75.0
+      }
+    }
+  },
+  "zip_external_reference": {
+    "before": {
+      "nodes": [
+        {
+          "selected": "/vsizip/<temporary>/rasters.zip/external.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/source.tif",
+            "/vsizip/<temporary>/rasters.zip/external.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif",
+            "<temporary>/source.tif.aux.xml"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif.aux.xml",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/rasters.zip": "948b8f367d28ee4edd24ce9d5c3759bbfd181b90448b3dea6d9d2b440193cfce",
+        "<temporary>/source.tif": "1755fa0bdd75a2df690f272c9f1f22de05e0fdf99987aad6b954e0b60397c08d",
+        "<temporary>/source.tif.aux.xml": "bb1ef4e0b5c23b686b8bff3254ca2c460371cba6fa0822e3c89d30ebdc8bed5f"
+      },
+      "bytes": 5780,
+      "seconds": 0.003445957088842988
+    },
+    "after": {
+      "nodes": [
+        {
+          "selected": "/vsizip/<temporary>/rasters.zip/external.vrt",
+          "driver": "VRT",
+          "members": [
+            "<temporary>/source.tif",
+            "/vsizip/<temporary>/rasters.zip/external.vrt"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif",
+          "driver": "GTiff",
+          "members": [
+            "<temporary>/source.tif",
+            "<temporary>/source.tif.aux.xml"
+          ],
+          "subdatasets": []
+        },
+        {
+          "selected": "<temporary>/source.tif.aux.xml",
+          "driver": null,
+          "members": []
+        }
+      ],
+      "digests": {
+        "<temporary>/rasters.zip": "948b8f367d28ee4edd24ce9d5c3759bbfd181b90448b3dea6d9d2b440193cfce",
+        "<temporary>/source.tif": "d1f166a527aaaecfb6a8c35528b6b65ef3f0897f4de5db30070d65ae60737544",
+        "<temporary>/source.tif.aux.xml": "bb1ef4e0b5c23b686b8bff3254ca2c460371cba6fa0822e3c89d30ebdc8bed5f"
+      },
+      "bytes": 5780,
+      "seconds": 0.003485671943053603
+    },
+    "native_before": {
+      "1": 75.0
+    },
+    "native_after": {
+      "1": 99.0
+    },
+    "archive_hash_unchanged": true,
+    "closure_changed": true
+  },
+  "unsupported": {
+    "identified": null,
+    "native_error_type": "PanicException",
+    "native_error": "called `Result::unwrap()` on an `Err` value: NullPointer { method_name: \"GDALOpenEx\", msg: \"\" }"
+  },
+  "tiny_repeat_seconds": [
+    0.0033452080097049475,
+    0.0029958069790154696,
+    0.0030861259438097477,
+    0.003285503014922142,
+    0.0031605828553438187,
+    0.0031354068778455257,
+    0.0030596961732953787,
+    0.0030382650438696146,
+    0.0031936371233314276,
+    0.0032216340769082308
+  ],
+  "zarr_over_lru_capacity": [
+    {
+      "pass": 1,
+      "member_count": 580,
+      "bytes": 1269,
+      "actual_digest_computations": 580,
+      "seconds": 0.16547566698864102,
+      "observation_cache": {
+        "hits": 0,
+        "misses": 580,
+        "maxsize": 512,
+        "currsize": 512
+      },
+      "digest_cache": {
+        "hits": 0,
+        "misses": 0,
+        "maxsize": 512,
+        "currsize": 0
+      }
+    },
+    {
+      "pass": 2,
+      "member_count": 580,
+      "bytes": 1269,
+      "actual_digest_computations": 580,
+      "seconds": 0.150921005057171,
+      "observation_cache": {
+        "hits": 0,
+        "misses": 1160,
+        "maxsize": 512,
+        "currsize": 512
+      },
+      "digest_cache": {
+        "hits": 0,
+        "misses": 0,
+        "maxsize": 512,
+        "currsize": 0
+      }
+    },
+    {
+      "pass": 3,
+      "member_count": 580,
+      "bytes": 1269,
+      "actual_digest_computations": 580,
+      "seconds": 0.1513195359148085,
+      "observation_cache": {
+        "hits": 0,
+        "misses": 1740,
+        "maxsize": 512,
+        "currsize": 512
+      },
+      "digest_cache": {
+        "hits": 0,
+        "misses": 0,
+        "maxsize": 512,
+        "currsize": 0
+      }
+    }
+  ]
+}

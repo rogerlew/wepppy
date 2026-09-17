@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_probe.py
+
+thread '<unnamed>' (48169) panicked at raster_characteristics/src/lib.rs:479:88:
+called `Result::unwrap()` on an `Err` value: NullPointer { method_name: "GDALOpenEx", msg: "" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_probe.py", line 177, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_probe.py", line 164, in main
+    summary(keys, invalid)
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_recursive_correctness_probe.py", line 37, in summary
+    return identify_median_single_raster_key(key_fn=str(keys), parameter_fn=str(source), band_indx=1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py", line 162, in identify_median_single_raster_key
+    return _identify_median_single_raster_key(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pyo3_runtime.PanicException: called `Result::unwrap()` on an `Err` value: NullPointer { method_name: "GDALOpenEx", msg: "" }

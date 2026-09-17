@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && python tools/check_stubs.py
+🔍 Checking sys.modules stubs for completeness...
+<unknown>:189: SyntaxWarning: invalid escape sequence '\s'
+
+✅ All stubs are complete!

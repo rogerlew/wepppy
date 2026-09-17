@@ -1,0 +1,89 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/remaining_semantic_baseline_probe.py
+{
+  "omni_reupload": {
+    "same_uploaded_path": true,
+    "statuses": [
+      "executed",
+      "skipped"
+    ],
+    "actual_current_pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "executor_observed_pixels": [
+      [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    ],
+    "scope": "actual upload/parser/orchestrator; scenario execution is a recording seam"
+  },
+  "profile_reupload": {
+    "recorded_event_count": 2,
+    "actual_current_pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "latest_named_seed_pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "canonical_seed_pixels": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "rebuilt_upload_pixels": [
+      [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    ],
+    "scope": "actual assembler and multipart reconstruction; no HTTP playback"
+  }
+}

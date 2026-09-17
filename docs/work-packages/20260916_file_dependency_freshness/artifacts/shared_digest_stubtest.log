@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.all_your_base.file_digest
+error: wepppy.all_your_base.file_digest.__all__ names exported from the stub do not correspond to the names exported at runtime. This is probably due to things being missing from the stub or an inaccurate `__all__` in the stub
+Stub: in file /workdir/wepppy/wepppy/all_your_base/file_digest.pyi
+Names exported in the stub but not at runtime: []
+Runtime:
+Names exported at runtime but not in the stub: ['sha256_file']
+
+Found 1 error (checked 1 module)

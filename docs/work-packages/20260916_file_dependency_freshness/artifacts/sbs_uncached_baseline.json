@@ -1,0 +1,8 @@
+{
+  "command": "wctl exec weppcloud python (read-only _summarize_sbs_raster_rust loop, 20 warm repetitions)",
+  "path": "/wc1/runs/th/thespian-cleanness/disturbed/baer.cropped.tif",
+  "bytes": 424964,
+  "cold_seconds": 0.5205166591331363,
+  "uncached_warm_seconds": 0.4887542116572149,
+  "interpretation": "Removing the native-summary cache would add about half a second per call on this representative compressed raster; investigate content-keyed reuse instead."
+}

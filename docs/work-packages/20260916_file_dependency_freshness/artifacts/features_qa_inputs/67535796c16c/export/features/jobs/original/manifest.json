@@ -1,0 +1,159 @@
+{
+  "artifact": {
+    "artifact_path": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/export/features/artifacts/bb30e73373f7441897ad8307b096e36e/features_export.geopackage.zip",
+    "artifact_relpath": "features_export.geopackage.zip",
+    "format": "geopackage",
+    "packaged_member_relpaths": [
+      "README.md",
+      "features_export.gpkg",
+      "manifest.json"
+    ]
+  },
+  "artifact_id": "bb30e73373f7441897ad8307b096e36e",
+  "cache_hit": false,
+  "catalog": {
+    "catalog_version": "wp2-test",
+    "schema_version": 2
+  },
+  "columns": {
+    "output_layer_metadata": {
+      "freshness-sbs_map-subcatchments": {
+        "description_mapping": {
+          "id": "ID.",
+          "topaz_id": "Topaz ID.",
+          "value": "Value.",
+          "wepp_id": "WEPP ID."
+        },
+        "materialization": {
+          "carrier_key_column": "id",
+          "carrier_layer": "sbs_map-subcatchments",
+          "core_row_count": 1,
+          "geometry_relpath": "geometry.geojson",
+          "geometry_row_count": 1,
+          "strategy": "key_first_geometry_last"
+        },
+        "selected_columns": [
+          "topaz_id",
+          "wepp_id",
+          "id",
+          "value"
+        ],
+        "source_layer_ids": [
+          "test.attributes"
+        ],
+        "unit_mapping": {
+          "id": "non-unitized",
+          "topaz_id": "non-unitized",
+          "value": "non-unitized",
+          "wepp_id": "non-unitized"
+        }
+      }
+    }
+  },
+  "conversion_summary": {},
+  "crs": {
+    "requested_crs": "wgs",
+    "resolved_crs": "wgs",
+    "resolved_epsg": null
+  },
+  "dependency_preparation": [],
+  "dependency_snapshot": {
+    "catalog_signature": "88b00e7ac05ca183b73dbedb180ce228ae0e04083e23f9643ba63be818cf5f68",
+    "entries": [
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "2188fb88d65dcbd6eb1f96c895d949421768a8d15b6468736ed3ae55ab8dfc4f",
+        "dependency_id": "attrs",
+        "dependency_role": "source",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614083791263132,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "attrs.parquet",
+        "size": 1726
+      },
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "47ec91829467ec9886cda2cc433d7d473b65c1656f72a3a9224a7a22fd2c1d7c",
+        "dependency_id": "geometry",
+        "dependency_role": "geometry",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614083786263034,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "geometry.geojson",
+        "size": 181
+      }
+    ],
+    "fingerprint": "188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255"
+  },
+  "dependency_verification": {
+    "after_fingerprint": "188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255",
+    "before_fingerprint": "188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255",
+    "scope": "catalog_dependency_observations",
+    "status": "verified"
+  },
+  "generated_at_utc": "2026-09-17T03:01:23.962987+00:00",
+  "generator_version": "features-export-wp14-publication-registry",
+  "layers": [
+    {
+      "artifact_relpath": "features_export.gpkg",
+      "carrier_layer": "sbs_map-subcatchments",
+      "context": "base",
+      "family": "test",
+      "feature_count": 1,
+      "layer_id": "test.sbs_map-subcatchments",
+      "output_layer_id": "freshness-sbs_map-subcatchments",
+      "row_count": 1,
+      "scope": "baseline",
+      "scope_class": "scope_invariant",
+      "selected_columns": [
+        "topaz_id",
+        "wepp_id",
+        "id",
+        "value"
+      ],
+      "selector_id": null,
+      "source_layer_ids": [
+        "test.attributes"
+      ],
+      "temporal_mode": null,
+      "unit_mapping": {
+        "id": "non-unitized",
+        "topaz_id": "non-unitized",
+        "value": "non-unitized",
+        "wepp_id": "non-unitized"
+      }
+    }
+  ],
+  "request": {
+    "column_selection_by_layer_id": {},
+    "layers_requested": [
+      "test.attributes"
+    ],
+    "output_scopes_requested": [
+      "baseline"
+    ],
+    "resolved": {
+      "crs": "wgs",
+      "format": "geopackage",
+      "layers": [
+        "test.attributes"
+      ],
+      "output_scopes": [
+        "baseline"
+      ],
+      "swat_run_id": "none",
+      "units": "si"
+    }
+  },
+  "run_context": {
+    "config": "test",
+    "runid": "freshness"
+  },
+  "schema_version": 1,
+  "source_job_id": null,
+  "swat_table_resolution": {},
+  "temporal": {},
+  "warnings": []
+}

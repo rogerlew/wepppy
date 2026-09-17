@@ -1,0 +1,35 @@
+{
+  "entries": {
+    "5f7ef787e7744c8e294f0baa97c72e5521e51f345b643bc074292080699aaa4d+75bb6497c4bb65122a1cde2fab4c352970d6e565a51fc7fa14428970e461f06a": {
+      "artifact_format": "parquet",
+      "artifact_id": "5700ffccd143455eaf83440a4d95c393",
+      "artifact_path": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/parent/_pups/omni/scenarios/child/export/features/artifacts/5700ffccd143455eaf83440a4d95c393/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/5700ffccd143455eaf83440a4d95c393/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/5700ffccd143455eaf83440a4d95c393/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1,
+          "format": "parquet",
+          "layer_id": "test.sbs_map-subcatchments",
+          "output_layer_id": "freshness-sbs_map-subcatchments",
+          "relpath": "freshness-sbs_map-subcatchments.parquet",
+          "row_count": 1,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/5700ffccd143455eaf83440a4d95c393/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "freshness-sbs_map-subcatchments.parquet",
+        "manifest.json"
+      ],
+      "source_job_id": "parent-source",
+      "updated_at_utc": "2026-09-17T03:01:24.486236+00:00",
+      "warnings": []
+    }
+  },
+  "schema_version": 1
+}

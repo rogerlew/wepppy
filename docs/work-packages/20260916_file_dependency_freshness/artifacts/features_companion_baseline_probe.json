@@ -1,0 +1,32 @@
+{
+  "backend": "real GDAL OpenFileGDB",
+  "source": [
+    {
+      "id": 1,
+      "value": 75.0
+    }
+  ],
+  "old_and_new_source_keys_differ": true,
+  "companion": {
+    "artifact_id": "4a246baae3d945f3bb804fea33acb0c1-geodatabase",
+    "artifact_relpath": "export/features/artifacts/4a246baae3d945f3bb804fea33acb0c1/features_export.gdb.zip",
+    "manifest_relpath": "export/features/jobs/original/manifest.json"
+  },
+  "later_result": {
+    "artifact_id": "4a246baae3d945f3bb804fea33acb0c1-geodatabase",
+    "artifact_relpath": "export/features/artifacts/4a246baae3d945f3bb804fea33acb0c1/features_export.gdb.zip",
+    "download_url": "/rq-engine/api/runs/probe/test/export/features/job/later/download",
+    "cache_hit": true,
+    "source_job_id": "original",
+    "manifest_relpath": "export/features/jobs/later/manifest.json",
+    "warnings": []
+  },
+  "exported": [
+    {
+      "id": 1.0,
+      "topaz_id": null,
+      "value": 25.0,
+      "wepp_id": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "rows": [
+    {
+      "burn_severity_class": "low",
+      "hru_id": "hru1",
+      "hru_value": 1,
+      "hsg_group": "B",
+      "landuse_class": 42
+    },
+    {
+      "burn_severity_class": "low",
+      "hru_id": "alt2",
+      "hru_value": 2,
+      "hsg_group": "B",
+      "landuse_class": 42
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,114 @@
+wepppy/nodb/project_config_reader.py:73:    config_sha256: str | None = None
+wepppy/nodb/project_config_reader.py:249:    digest = config.get("sha256")
+wepppy/nodb/project_config_reader.py:288:        declared = config_payload["sha256"]
+wepppy/nodb/project_config_reader.py:289:        if declared != hashlib.sha256(config_bytes).hexdigest():
+wepppy/nodb/project_config_reader.py:332:    declared = payload["config"]["sha256"]
+wepppy/nodb/project_config_reader.py:333:    observed = hashlib.sha256(config_bytes).hexdigest()
+wepppy/nodb/project_config_reader.py:459:                    hashlib.sha256(config_bytes).hexdigest(),
+wepppy/nodb/project_config_snapshot.py:36:    "materialize_preset_snapshot",
+wepppy/nodb/project_config_snapshot.py:39:    "resolve_preset_snapshot",
+wepppy/nodb/project_config_snapshot.py:63:    """Raised when a named preset cannot be safely snapshotted."""
+wepppy/nodb/project_config_snapshot.py:211:        "config": {"filename": config_filename, "sha256": config_digest},
+wepppy/nodb/project_config_snapshot.py:221:def resolve_preset_snapshot(
+wepppy/nodb/project_config_snapshot.py:263:        config_digest=hashlib.sha256(config_bytes).hexdigest(),
+wepppy/nodb/project_config_snapshot.py:265:        defaults_revision=hashlib.sha256(defaults_bytes).hexdigest(),
+wepppy/nodb/project_config_snapshot.py:266:        preset_revision=hashlib.sha256(preset_bytes).hexdigest(),
+wepppy/nodb/project_config_snapshot.py:310:    expected_config_sha256: str | None = None,
+wepppy/nodb/project_config_snapshot.py:354:        parent_chain[0].get("revision") != hashlib.sha256(defaults_bytes).hexdigest()
+wepppy/nodb/project_config_snapshot.py:355:        or parent_chain[1].get("revision") != hashlib.sha256(preset_bytes).hexdigest()
+wepppy/nodb/project_config_snapshot.py:361:        or config_payload.get("sha256") != hashlib.sha256(stored_bytes).hexdigest()
+wepppy/nodb/project_config_snapshot.py:363:            expected_config_sha256 is not None
+wepppy/nodb/project_config_snapshot.py:364:            and expected_config_sha256 != hashlib.sha256(stored_bytes).hexdigest()
+wepppy/nodb/project_config_snapshot.py:401:        replay = resolve_preset_snapshot(
+wepppy/nodb/project_config_snapshot.py:434:def materialize_preset_snapshot(
+wepppy/nodb/config_builder/snapshot.py:16:from wepppy.nodb.project_config_snapshot import PresetSnapshotCandidate
+wepppy/nodb/config_builder/snapshot.py:115:        "config": {"filename": "config.cfg", "sha256": hashlib.sha256(resolved.config_bytes).hexdigest()},
+wepppy/wepp/reports/hillslope_watbal.py:50:        cache = ReportCacheManager(self.wd)
+wepppy/wepp/reports/hillslope_watbal.py:51:        cache_key = self._resolve_cache_key()
+wepppy/wepp/reports/hillslope_watbal.py:52:        cache_path = cache.root / f"{cache_key}.parquet"
+wepppy/wepp/reports/hillslope_watbal.py:53:        dataframe = cache.read_parquet(cache_key, version=self._CACHE_VERSION)
+wepppy/wepp/reports/hillslope_watbal.py:54:        if dataframe is not None and self._source_is_newer_than_cache(source_path, cache_path):
+wepppy/wepp/reports/hillslope_watbal.py:57:            legacy_cache = (
+wepppy/wepp/reports/hillslope_watbal.py:62:                and legacy_cache.exists()
+wepppy/wepp/reports/hillslope_watbal.py:63:                and not self._source_is_newer_than_cache(source_path, legacy_cache)
+wepppy/wepp/reports/hillslope_watbal.py:65:                dataframe = pd.read_parquet(legacy_cache)
+wepppy/wepp/reports/hillslope_watbal.py:67:        if dataframe is None or not self._validate_cache_columns(dataframe):
+wepppy/wepp/reports/hillslope_watbal.py:109:    def _validate_cache_columns(self, dataframe: pd.DataFrame) -> bool:
+wepppy/wepp/reports/hillslope_watbal.py:110:        """Return ``True`` when the cached dataframe matches the expected schema."""
+wepppy/wepp/reports/hillslope_watbal.py:115:    def _source_is_newer_than_cache(source_path: Path, cache_path: Path) -> bool:
+wepppy/wepp/reports/hillslope_watbal.py:116:        """Return ``True`` when the source parquet is newer than the cached summary."""
+wepppy/wepp/reports/hillslope_watbal.py:117:        if not source_path.exists() or not cache_path.exists():
+wepppy/wepp/reports/hillslope_watbal.py:119:        return source_path.stat().st_mtime_ns > cache_path.stat().st_mtime_ns
+wepppy/wepp/reports/hillslope_watbal.py:199:        """Publish the compact cache natively, then load only its report rows."""
+wepppy/wepp/reports/hillslope_watbal.py:209:        cache = ReportCacheManager(self.wd)
+wepppy/wepp/reports/hillslope_watbal.py:210:        cache.root.mkdir(parents=True, exist_ok=True)
+wepppy/wepp/reports/hillslope_watbal.py:211:        cache_path = cache.root / f"{self._resolve_cache_key()}.parquet"
+wepppy/wepp/reports/hillslope_watbal.py:213:            str(source_path), str(cache_path), mapping, pandas_metadata=metadata
+wepppy/wepp/reports/hillslope_watbal.py:215:        cache_path.with_suffix(".meta.json").write_text(
+wepppy/wepp/reports/hillslope_watbal.py:218:        return pd.read_parquet(cache_path)
+wepppy/wepp/reports/hillslope_watbal.py:259:    def _resolve_cache_key(self) -> str:
+wepppy/wepp/reports/helpers.py:65:        """Verify that each dataset path is cataloged and refresh the cache if needed."""
+wepppy/wepp/reports/helpers.py:88:                except Exception:  # pragma: no cover - fallback to cached scan
+wepppy/wepp/reports/helpers.py:108:    """Centralizes cache path management and versioned parquet IO for reports."""
+wepppy/wepp/reports/helpers.py:111:        """Create a cache rooted in ``<run>/wepp/reports/cache[/namespace]``."""
+wepppy/wepp/reports/helpers.py:115:        cache_root = base / "wepp" / "reports" / "cache"
+wepppy/wepp/reports/helpers.py:119:                cache_root /= namespace
+wepppy/wepp/reports/helpers.py:120:        self._root = cache_root
+wepppy/wepp/reports/helpers.py:124:        """Return the resolved cache directory."""
+wepppy/wepp/reports/helpers.py:128:        """Return the data and metadata paths for the provided cache key."""
+wepppy/wepp/reports/helpers.py:135:        """Read a cached dataframe if present and optionally version-matched."""
+wepppy/wepp/reports/helpers.py:163:        """Remove the cached parquet + metadata files for ``key`` if they exist."""
+wepppy/wepp/reports/helpers.py:171:        """Read cached metadata JSON or return an empty mapping on failure."""
+wepppy/profile_recorder/AGENTS.md:7:- The assembler consumes those events on the fly, snapshots seed assets (configs, uploads, derived files) and writes promoted profiles under `/profiles/<slug>/`.
+wepppy/profile_recorder/AGENTS.md:12:- `profile_recorder/assembler.py` — Streaming event handler; responsible for seed snapshots and profile promotion.
+wepppy/wepp/reports/average_annuals_by_landuse.py:45:        cache = ReportCacheManager(self.wd)
+wepppy/wepp/reports/average_annuals_by_landuse.py:46:        dataframe = cache.read_parquet(self._CACHE_KEY, version=self._CACHE_VERSION)
+wepppy/wepp/reports/average_annuals_by_landuse.py:50:            cache.write_parquet(self._CACHE_KEY, dataframe, version=self._CACHE_VERSION, index=False)
+wepppy/wepp/reports/README.md:18:- Results are cached to `wepp/output/interchange/average_annuals_by_landuse.parquet`
+wepppy/wepp/reports/README.md:19:  so large watersheds do not re-query on every request. The cache is invalidated
+wepppy/wepp/reports/README.md:100:- **Runtime and cache split**:
+wepppy/wepp/reports/README.md:105:    JSON caches under `wepp/output/return_periods*.json`.
+wepppy/wepp/reports/README.md:107:    matching `wepp/output/return_periods*.json` cache files and leave
+wepppy/wepp/reports/README.md:120:cache must be rebuilt. Rust streams projected H.wat batches and writes the
+wepppy/wepp/reports/README.md:122:Existing baseline/Roads mappings, cache version, source freshness, legacy reads,
+wepppy/wepp/reports/README.md:127:See the [summary cache contract](../../../docs/schemas/output-scope-contract.md#hillslope-water-balance-summary-cache)
+wepppy/profile_recorder/playback.py:627:                snapshot = self.profile_run_root / "landuse" / "nlcd.tif"
+wepppy/profile_recorder/playback.py:628:                if snapshot.exists():
+wepppy/profile_recorder/playback.py:629:                    candidates = [snapshot]
+wepppy/profile_recorder/playback.py:675:        """Attach CLI uploads, falling back to capture snapshots when needed."""
+wepppy/profile_recorder/playback.py:1126:    parser.add_argument("--run-dir", type=Path, help="Optional run directory to use instead of cloning the profile snapshot.")
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:10:The stack favors append-only JSONL streams and direct filesystem snapshots over bespoke schemas. Profiles live alongside the application code while bulky run assets are mirrored into a sibling data repository.
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:35:- File hints and upload events snapshot seed assets into `seed/`:
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:38:- `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materializes a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:51:  run/                    # sandbox-friendly copy of the original working directory snapshot
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:82:  - Playback uses `profile;;tmp;;<sandbox_uuid>` run IDs (minted by the FastAPI service) to isolate mutations from the source snapshot while retaining the original identifier for reporting; standalone CLI usage without the service falls back to `profile;;tmp;;<original>`.
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:115:  - Copies the profile run snapshot into the sandbox.
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md:123:- Profile assembly stops at event preservation plus seed snapshots; higher level manifests (`profile.yaml`, ordered step descriptions, diff baselines) are future work.
+wepppy/profile_recorder/README.md:9:The Profile Recorder system transforms WEPPcloud user interactions into portable, replayable test scenarios. When a user builds a watershed, uploads data, runs WEPP simulations, or generates reports, the recorder captures every backend request, snapshots required input files, and packages everything into self-contained profiles. These profiles can then be replayed against any WEPPcloud instance to verify that workflows still function correctly after code changes, infrastructure updates, or WEPP model upgrades.
+wepppy/profile_recorder/README.md:17:The recorder operates transparently during normal WEPPcloud use. Frontend JavaScript intercepts all HTTP traffic, backend Flask middleware captures request/response payloads, and the assembler snapshots derived files as workflows progress. After a run completes, an operator promotes the draft into a named profile that CI pipelines, manual testers, or automated regression suites can replay indefinitely.
+wepppy/profile_recorder/README.md:79:- Hydrates `profiles/<slug>/run/` snapshot into clean sandbox workspace (`/workdir/wepppy-test-engine-data/playback/runs/<sandbox_uuid>`)
+wepppy/profile_recorder/README.md:129:        ├─→ Seed snapshots: seed/uploads/, seed/config/
+wepppy/profile_recorder/README.md:136:  └─→ Run snapshot: profiles/<slug>/run/
+wepppy/profile_recorder/README.md:318:       self._snapshot_shapefile_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/README.md:321:2. **Implement snapshot helper** – Create `_snapshot_shapefile_upload()` that copies source files from run directory into `seed/uploads/shapefile/` with canonical names
+wepppy/profile_recorder/README.md:402:| `profile_recorder/assembler.py` | `ProfileAssembler`, `TASK_RULES` | Streams events into `_drafts`, snapshots uploads/derived assets, enforces task-specific expectations, and promotes drafts into reusable profiles. | Event lifecycle, seed handling, and validation logging are described inline; stubs in `assembler.pyi`. Exercised by `tests/profile_recorder/test_assembler.py`. |
+wepppy/profile_recorder/README.md:438:Profiles grow quickly (typical capture: 1-5 MB for `events.jsonl`, 50-200 MB for `run/` snapshot). Consider:
+wepppy/profile_recorder/README.md:450:**Solution**: Inspect `profiles/<slug>/capture/seed/uploads/` for expected files. If missing, assembler capture was not implemented for that endpoint. Add snapshot logic to `_capture_file_upload()` and re-promote profile.
+wepppy/profile_recorder/assembler.py:92:                    self._snapshot_candidate(seed_root, label, candidate)
+wepppy/profile_recorder/assembler.py:154:    def _snapshot_candidate(seed_root: Path, label: str, candidate: Path) -> None:
+wepppy/profile_recorder/assembler.py:170:            LOGGER.debug("Failed to snapshot %s (%s): %s", label, candidate, exc)
+wepppy/profile_recorder/assembler.py:209:                    self._snapshot_candidate(seed_root, label, candidate)
+wepppy/profile_recorder/assembler.py:213:                    self._snapshot_candidate(seed_root, label, candidate)
+wepppy/profile_recorder/assembler.py:250:            self._snapshot_landuse_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:252:            self._snapshot_sbs_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:254:            self._snapshot_cover_transform_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:256:            self._snapshot_cli_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:258:            self._snapshot_landuse_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:260:            self._snapshot_ash_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:262:            self._snapshot_omni_upload(seed_root, Path(run_dir))
+wepppy/profile_recorder/assembler.py:264:    def _snapshot_landuse_upload(self, seed_root: Path, run_dir: Path) -> None:
+wepppy/profile_recorder/assembler.py:292:    def _snapshot_sbs_upload(self, seed_root: Path, run_dir: Path) -> None:
+wepppy/profile_recorder/assembler.py:337:    def _snapshot_cover_transform_upload(self, seed_root: Path, run_dir: Path) -> None:
+wepppy/profile_recorder/assembler.py:361:    def _snapshot_cli_upload(self, seed_root: Path, run_dir: Path) -> None:
+wepppy/profile_recorder/assembler.py:388:    def _snapshot_ash_upload(self, seed_root: Path, run_dir: Path) -> None:
+wepppy/profile_recorder/assembler.py:423:    def _snapshot_omni_upload(self, seed_root: Path, run_dir: Path) -> None:

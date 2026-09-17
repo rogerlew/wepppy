@@ -1,0 +1,18 @@
+{
+  "cold_state_seconds": 1.1737793621141464,
+  "warm_state_seconds": 0.21302440182771534,
+  "cache_before": {
+    "hits": 3,
+    "misses": 211,
+    "maxsize": 512,
+    "currsize": 211
+  },
+  "cache_after": {
+    "hits": 21403,
+    "misses": 211,
+    "maxsize": 512,
+    "currsize": 211
+  },
+  "warm_misses": 0,
+  "legacy_freshness": "stale"
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/climate/wepp.cli",
+    "bytes": 1177082,
+    "cold_seconds": 0.005760805914178491,
+    "warm_seconds_per_call": 0.000300813599023968,
+    "cache": "CacheInfo(hits=100, misses=1, maxsize=512, currsize=1)"
+  },
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/dem/dem.tif",
+    "bytes": 26410828,
+    "cold_seconds": 0.12217113305814564,
+    "warm_seconds_per_call": 0.00011358160991221666,
+    "cache": "CacheInfo(hits=100, misses=1, maxsize=512, currsize=1)"
+  },
+  {
+    "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/soil/snapshots/initial/cache.sqlite",
+    "bytes": 4096,
+    "cold_seconds": 0.0016822370234876871,
+    "warm_seconds_per_call": 0.00012503612088039518,
+    "cache": "CacheInfo(hits=100, misses=1, maxsize=512, currsize=1)"
+  }
+]

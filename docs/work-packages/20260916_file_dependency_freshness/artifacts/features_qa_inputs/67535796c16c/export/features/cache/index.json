@@ -1,0 +1,85 @@
+{
+  "entries": {
+    "59fa093d468236e49f71db7bbfe7439de30b542ea4d3459dc3f4bbe583771d70+188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255": {
+      "artifact_format": "geodatabase",
+      "artifact_id": "bc7dc5adc3704ab0a11d23f5cd8c0e43",
+      "artifact_path": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/export/features/artifacts/bc7dc5adc3704ab0a11d23f5cd8c0e43/features_export.gdb.zip",
+      "artifact_paths": [
+        "export/features/artifacts/bc7dc5adc3704ab0a11d23f5cd8c0e43/features_export.gdb.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/bc7dc5adc3704ab0a11d23f5cd8c0e43/features_export.gdb.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1,
+          "format": "geopackage",
+          "layer_id": "test.sbs_map-subcatchments",
+          "output_layer_id": "freshness-sbs_map-subcatchments",
+          "relpath": "features_export.gdb",
+          "row_count": 1,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/bc7dc5adc3704ab0a11d23f5cd8c0e43/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "features_export.gdb/",
+        "features_export.gdb/a00000001.gdbtable",
+        "features_export.gdb/a00000001.gdbtablx",
+        "features_export.gdb/a00000002.gdbtable",
+        "features_export.gdb/a00000002.gdbtablx",
+        "features_export.gdb/a00000003.gdbtable",
+        "features_export.gdb/a00000003.gdbtablx",
+        "features_export.gdb/a00000004.gdbtable",
+        "features_export.gdb/a00000004.gdbtablx",
+        "features_export.gdb/a00000005.gdbtable",
+        "features_export.gdb/a00000005.gdbtablx",
+        "features_export.gdb/a00000006.gdbtable",
+        "features_export.gdb/a00000006.gdbtablx",
+        "features_export.gdb/a00000007.gdbtable",
+        "features_export.gdb/a00000007.gdbtablx",
+        "features_export.gdb/a00000009.gdbindexes",
+        "features_export.gdb/a00000009.gdbtable",
+        "features_export.gdb/a00000009.gdbtablx",
+        "features_export.gdb/a00000009.spx",
+        "features_export.gdb/gdb",
+        "features_export.gdb/timestamps",
+        "manifest.json"
+      ],
+      "source_job_id": "same-byte-restoration",
+      "updated_at_utc": "2026-09-17T03:01:23.971252+00:00",
+      "warnings": []
+    },
+    "79dd292fe387534e203a5b5bad0e6876d229573ecbf629c6cebfacf7ca1d64c0+188d1845aa7f2b6fd251c486d901959006c64d1f99d29a459d1c7d4c740ad255": {
+      "artifact_format": "geopackage",
+      "artifact_id": "bb30e73373f7441897ad8307b096e36e",
+      "artifact_path": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/export/features/artifacts/bb30e73373f7441897ad8307b096e36e/features_export.geopackage.zip",
+      "artifact_paths": [
+        "export/features/artifacts/bb30e73373f7441897ad8307b096e36e/features_export.geopackage.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/bb30e73373f7441897ad8307b096e36e/features_export.geopackage.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1,
+          "format": "geopackage",
+          "layer_id": "test.sbs_map-subcatchments",
+          "output_layer_id": "freshness-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 1,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/bb30e73373f7441897ad8307b096e36e/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "features_export.gpkg",
+        "manifest.json"
+      ],
+      "source_job_id": "original",
+      "updated_at_utc": "2026-09-17T03:01:23.971252+00:00",
+      "warnings": []
+    }
+  },
+  "schema_version": 1
+}

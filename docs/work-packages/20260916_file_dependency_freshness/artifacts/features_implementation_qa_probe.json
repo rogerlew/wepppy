@@ -1,0 +1,107 @@
+{
+  "fixture_root": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c",
+  "uid": 1000,
+  "gid": 993,
+  "same_byte_cache_hit_companion": {
+    "cache_hit": true,
+    "producer_job": "original",
+    "archive_unchanged": true,
+    "producer_manifest_unchanged": true,
+    "job_manifest_has_run_context": false,
+    "companion_run_context": {
+      "config": "test",
+      "runid": "freshness"
+    },
+    "companion_value": 25.0,
+    "companion_source_artifact": "bb30e73373f7441897ad8307b096e36e",
+    "producer_artifact": "bb30e73373f7441897ad8307b096e36e"
+  },
+  "native_packaging_failure": {
+    "failure": {
+      "type": "FeaturesExportWriterError",
+      "message": "Failed to package OpenFileGDB output: /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/features_qa_inputs/67535796c16c/export/features/artifacts/3a49876cbbe641c7b172a1b1695faa5d/features_export.gdb.zip"
+    },
+    "accepted_archive_unchanged": true,
+    "candidate_members": {
+      "export/features/artifacts/3a49876cbbe641c7b172a1b1695faa5d": [
+        "features_export.gdb",
+        "features_export.gdb/a00000001.gdbtable",
+        "features_export.gdb/a00000001.gdbtablx",
+        "features_export.gdb/a00000002.gdbtable",
+        "features_export.gdb/a00000002.gdbtablx",
+        "features_export.gdb/a00000003.gdbtable",
+        "features_export.gdb/a00000003.gdbtablx",
+        "features_export.gdb/a00000004.gdbtable",
+        "features_export.gdb/a00000004.gdbtablx",
+        "features_export.gdb/a00000005.gdbtable",
+        "features_export.gdb/a00000005.gdbtablx",
+        "features_export.gdb/a00000006.gdbtable",
+        "features_export.gdb/a00000006.gdbtablx",
+        "features_export.gdb/a00000007.gdbtable",
+        "features_export.gdb/a00000007.gdbtablx",
+        "features_export.gdb/a00000009.gdbindexes",
+        "features_export.gdb/a00000009.gdbtable",
+        "features_export.gdb/a00000009.gdbtablx",
+        "features_export.gdb/a00000009.spx",
+        "features_export.gdb/gdb",
+        "features_export.gdb/timestamps",
+        "manifest.json"
+      ]
+    }
+  },
+  "parent_native_export": {
+    "cache_hit": false,
+    "entries": [
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "47ec91829467ec9886cda2cc433d7d473b65c1656f72a3a9224a7a22fd2c1d7c",
+        "dependency_id": "geometry",
+        "dependency_role": "geometry",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614084411275295,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "../../../../geometry.geojson",
+        "size": 181
+      },
+      {
+        "content_hash_marker": "sha256",
+        "content_hash_value": "59b802005718d8bf08115e57e1ecf2f184bcd4f862cfac379f16d98dbcd10bea",
+        "dependency_id": "attrs",
+        "dependency_role": "source",
+        "exists": true,
+        "layer_id": "test.attributes",
+        "mtime_ns": 1789614084413275334,
+        "output_layer_id": "shared__test.attributes",
+        "relpath": "attrs.parquet",
+        "size": 1726
+      }
+    ]
+  },
+  "directory_snapshot_only": [
+    {
+      "relpath": "attrs.parquet",
+      "exists": true,
+      "size": 1726,
+      "mtime_ns": 1789614085791263132,
+      "content_hash_marker": "sha256",
+      "content_hash_value": "2188fb88d65dcbd6eb1f96c895d949421768a8d15b6468736ed3ae55ab8dfc4f",
+      "layer_id": "test.attributes",
+      "output_layer_id": "shared__test.attributes",
+      "dependency_role": "source",
+      "dependency_id": "attrs"
+    },
+    {
+      "relpath": "directory.gdb",
+      "exists": true,
+      "size": 4096,
+      "mtime_ns": 1789614084487276785,
+      "content_hash_marker": null,
+      "content_hash_value": null,
+      "layer_id": "test.attributes",
+      "output_layer_id": "shared__test.attributes",
+      "dependency_role": "geometry",
+      "dependency_id": "geometry"
+    }
+  ]
+}

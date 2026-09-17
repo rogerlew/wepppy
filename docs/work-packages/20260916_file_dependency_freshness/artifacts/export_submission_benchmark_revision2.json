@@ -1,0 +1,20 @@
+{
+  "root": "/wc1/runs/th/thespian-cleanness",
+  "entries": 24,
+  "hash_entries_including_repeats": 24,
+  "unique_files": 14,
+  "first_prepare_seconds": 0.2697071370203048,
+  "metadata_resolver_seconds": 0.010460344841703773,
+  "single_snapshot_hash_seconds": 0.03576000896282494,
+  "cold_prepare_and_verify_seconds": 0.27454660297371447,
+  "baseline_metadata_prepare_seconds": 0.21405924702994525,
+  "budget_seconds": 0.4996385119855404,
+  "settled_prepare_and_verify_seconds": 0.225498667685315,
+  "settled_digest_misses": 0,
+  "verification": {
+    "status": "verified",
+    "scope": "catalog_dependency_observations",
+    "before_fingerprint": "771040c130f3df6de474483dbf4b2fe5c665f2c55b324ba8a8317a813fb08bf2",
+    "after_fingerprint": "771040c130f3df6de474483dbf4b2fe5c665f2c55b324ba8a8317a813fb08bf2"
+  }
+}

@@ -1,0 +1,130 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_hydration_snapshot.py tests/nodb/test_initial_read_retry.py tests/nodb/test_base_unit.py tests/nodb/test_base_misc.py tests/nodb/test_base_boundary_characterization.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 153 items
+
+tests/nodb/test_hydration_snapshot.py ....                               [  2%]
+tests/nodb/test_initial_read_retry.py ..................                 [ 14%]
+tests/nodb/test_base_unit.py ....................                        [ 27%]
+tests/nodb/test_base_misc.py ........................................... [ 55%]
+                                                                         [ 55%]
+tests/nodb/test_base_boundary_characterization.py ...................... [ 69%]
+......................F
+
+=================================== FAILURES ===================================
+_ test_initial_retry_hydrates_real_payload_after_transient_error[2-redis-getInstance] _
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-21/test_initial_retry_hydrates_re4')
+redis_lock_stub = <test_base_boundary_characterization._RedisStub object at 0x7aba9209da30>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7aba9209c3e0>
+load_method = 'getInstance', cache_kind = 'redis', error_number = 2
+
+    @pytest.mark.parametrize("load_method", ["getInstance", "load_detached"])
+    @pytest.mark.parametrize("cache_kind", ["cold", "singleton", "redis"])
+    @pytest.mark.parametrize("error_number", [errno.ENOENT, errno.ESTALE])
+    def test_initial_retry_hydrates_real_payload_after_transient_error(
+        tmp_path, redis_lock_stub, monkeypatch, load_method, cache_kind, error_number,
+    ):
+        from wepppy.nodb import _read_retry as retry
+    
+        _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+        monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+        nodb = _DummyNoDb(str(tmp_path))
+        with nodb.locked():
+            nodb.value = 27
+        path = str(tmp_path / nodb.filename)
+        if cache_kind == "singleton":
+            _DummyNoDb._instances[str(tmp_path)] = nodb
+        else:
+            _DummyNoDb._instances.pop(str(tmp_path), None)
+        if cache_kind == "redis":
+            cache = _RedisStub()
+            cache.set(path, Path(path).read_text())
+            monkeypatch.setattr(base, "redis_nodb_cache_client", cache)
+        now = [0.0]
+        calls = []
+        real_stat = os.stat
+        real_open = open
+    
+        def fail_once(action):
+            def wrapped(*args, **kwargs):
+                calls.append(args[0])
+                if len(calls) == 1:
+                    raise OSError(error_number, "injected visibility failure", path)
+                return action(*args, **kwargs)
+            return wrapped
+    
+        # Exercise actual decode and cache paths; only the first filesystem failure
+        # is injected. No controller hydration or signature policy is mocked.
+        if cache_kind == "cold" or (cache_kind == "singleton" and load_method == "load_detached"):
+            monkeypatch.setattr(retry, 'open', fail_once(real_open), raising=False)
+        else:
+            monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=fail_once(real_stat)))
+        monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: now[0], sleep=lambda delay: now.__setitem__(0, now[0] + delay)))
+        try:
+            with retry.initial_read_retry(runid="recover", job_id="job"):
+>               loaded = getattr(_DummyNoDb, load_method)(str(tmp_path))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/nodb/test_base_boundary_characterization.py:1067: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/base.py:1421: in getInstance
+    instance = cls._hydrate_instance(
+wepppy/nodb/base.py:1309: in _hydrate_instance
+    snapshot = _read_retry.read_text_snapshot(filepath, allow_missing=allow_nonexistent)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/_read_retry.py:121: in read_text_snapshot
+    return _call("open/read snapshot", path, read, allow_missing=allow_missing)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/_read_retry.py:56: in _call
+    result = action()
+             ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def read() -> tuple[str, os.stat_result]:
+        with open(path) as stream:
+>           before = os.fstat(stream.fileno())
+                     ^^^^^^^^
+E           AttributeError: 'types.SimpleNamespace' object has no attribute 'fstat'. Did you mean: 'stat'?
+
+wepppy/nodb/_read_retry.py:111: AttributeError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.nodb._read_retry:_read_retry.py:65 NoDb initial read retry operation=stat errno=2 path=/tmp/pytest-of-unknown/pytest-21/test_initial_retry_hydrates_re4/dummy.nodb attempts=1 elapsed_s=0.000 host=f535b3f1b047 runid=recover job_id=job
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+tests/nodb/test_base_unit.py::test_locked_context_round_trip
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_base_boundary_characterization.py::test_initial_retry_hydrates_real_payload_after_transient_error[2-redis-getInstance]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 129 passed, 8 warnings in 16.14s ==================
