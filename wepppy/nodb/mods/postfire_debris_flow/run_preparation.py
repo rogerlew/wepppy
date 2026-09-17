@@ -53,7 +53,7 @@ def prepare_for_run(wd, identity, expected, paths):
         eligible, readonly, checks, current_paths, snapshot = p.sources(wd,frequency=frequency,model='M3')
         if (not eligible or readonly
                 or not all(v for k,v in checks.items() if k != 'noaa' or frequency == 'noaa')
-                or _project_inputs(wd,snapshot) != _project_inputs(wd,expected['inputs'])
+                or not p._worker_source_snapshots_current(wd, _project_inputs(wd,expected['inputs']), _project_inputs(wd,snapshot))
                 or io.digest(Path(wd)/META,io.MAX_TEXT) != record['candidate_sha256']):
             raise p.WorkflowError('superseded', 'Project inputs changed after source preparation. Run again.', 409)
         rebased = dict(inputs=snapshot,dnbr=None,frequency=frequency)

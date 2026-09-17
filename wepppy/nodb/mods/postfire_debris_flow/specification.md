@@ -781,3 +781,11 @@ is the controlling amendment for new production M1.
 New production M1 replaces POLARIS/RUSLE K with module-owned Kf; M3 remains unchanged.
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+## Active CLI identity amendment — 2026-09-17
+
+The [shared active-worker amendment](../../../../docs/schemas/file-dependency-freshness-contract.md#2026-09-17-active-cli-hard-link-amendment)
+governs M1/M3 admission, source preparation and publication. WEPP link creation
+or removal may change only CLI ctime without invalidating identical admitted
+bytes; uncached coherent verification and all other identity checks remain
+required. Contract checkpoint: `567eacf7d`.

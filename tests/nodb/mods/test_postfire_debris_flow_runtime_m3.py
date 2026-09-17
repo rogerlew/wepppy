@@ -328,3 +328,78 @@ def test_source_or_authority_change_after_results_refuses_acceptance(project,mon
         assert (p.directory(wd,identity)/'results/manifest.json').is_file()
     finally:
         connection.close()
+
+@pytest.mark.parametrize('operation', ['link', 'unlink', 'rematerialize'])
+@pytest.mark.parametrize('stage', ['queued', 'preparation', 'results', 'locked'])
+def test_wepp_hardlink_during_m3_preserves_unchanged_climate(project, monkeypatch, stage, operation):
+    """Actual WEPP materialization must not supersede unchanged active inputs."""
+    from wepppy.runtime_paths.wepp_inputs import copy_input_file
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+    wd, dem, mask, catalog = project
+    linked = wd/'wepp/runs/pw0.cli'
+    mutations = []
+    if operation != 'link':
+        copy_input_file(str(wd), 'climate/owner.cli', linked)
+
+    def materialize():
+        if operation == 'unlink':
+            linked.unlink()
+        else:
+            copy_input_file(str(wd), 'climate/owner.cli', linked)
+            assert linked.stat().st_ino == (wd/'climate/owner.cli').stat().st_ino
+        mutations.append(stage)
+
+    def acquire(*args):
+        receipt = prepare_local_sources(wd, dem, mask, collection_catalog=catalog)
+        if stage == 'preparation':
+            materialize()
+        return receipt
+
+    monkeypatch.setattr(source_acquisition, 'acquire_sources', acquire)
+    if stage != 'preparation':
+        receipt = prepare_local_sources(wd, dem, mask, collection_catalog=catalog)
+        activate_sources(wd, receipt, expected_sha256=io.digest(receipt))
+    identity = enqueue_m3(wd)
+    if stage == 'queued':
+        materialize()
+    build = p.build_results
+
+    def results(*args, **kwargs):
+        result = build(*args, **kwargs)
+        if stage == 'results':
+            materialize()
+        return result
+
+    monkeypatch.setattr(p, 'build_results', results)
+    owner = p.mutable(wd)
+    change = owner.change
+
+    def locked(callback):
+        if stage == 'locked' and callback.__name__ == 'publish':
+            def wrapped(state):
+                materialize()
+                return callback(state)
+            return change(wrapped)
+        return change(callback)
+
+    monkeypatch.setattr(owner, 'change', locked)
+    p.execute_m3(wd, identity)
+    assert mutations == [stage]
+    assert p.state_at(wd)['last_successful_run']['id'] == identity
+    assert p.get_state(wd, 'config', model='M3', reconcile=False)['freshness'] == 'current'
+
+
+@pytest.mark.parametrize('mutation', ['extra_field', 'missing_dnbr', 'missing_inputs'])
+def test_m3_admission_keeps_exact_outer_snapshot_shape(project, mutation):
+    wd, _, _, _ = project
+    identity = enqueue_m3(wd)
+    def malformed(state):
+        snapshot = state['run_attempt']['snapshot']
+        if mutation == 'extra_field':
+            snapshot['unexpected'] = True
+        else:
+            snapshot.pop('dnbr' if mutation == 'missing_dnbr' else 'inputs')
+    p.mutable(wd).change(malformed)
+    with pytest.raises(p.WorkflowError, match='Required project data changed'):
+        p.execute_m3(wd, identity)
+    assert p.state_at(wd)['last_successful_run'] is None

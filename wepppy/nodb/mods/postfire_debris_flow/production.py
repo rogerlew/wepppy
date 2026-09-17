@@ -332,6 +332,32 @@ def _source_snapshots_current(accepted, current):
     return content(accepted) == content(current)
 
 
+def _worker_source_snapshots_current(wd, admitted, current):
+    """Allow only settled CLI ctime drift, verified against admission bytes."""
+    # Self-comparison validates complete hash maps without relaxing other identity.
+    if not all(_source_snapshots_current(value, value) for value in (admitted, current)):
+        return False
+    if ('content_sha256' in admitted and 'content_sha256' in current
+            and admitted['content_sha256'] != current['content_sha256']):
+        return False
+    before = {key: value for key, value in admitted.items() if key != 'content_sha256'}
+    after = {key: value for key, value in current.items() if key != 'content_sha256'}
+    if before == after:
+        return True
+    old = admitted.get('files', {}).get('active_cli')
+    new = current.get('files', {}).get('active_cli')
+    if ('content_sha256' not in admitted or not isinstance(old, list)
+            or not isinstance(new, list) or len(old) != 4 or len(new) != 4
+            or old[:3] != new[:3]):
+        return False
+    normalized = {**after, 'files': {**after['files'], 'active_cli': old}}
+    if before != normalized:
+        return False
+    # strong=True bypasses cached hashes and checks descriptor/path generations.
+    observed = signature(wd, Path(wd)/new[0], strong=True)
+    return observed[:4] == new and observed[4] == admitted['content_sha256']['active_cli']
+
+
 def artifacts_current(wd, record, *, strong=True, strict=False):
     """Content for accepted reads; strict stat identity for locked finalizers."""
     from .rainfall_io import hash_value
@@ -363,7 +389,7 @@ def artifacts_current(wd, record, *, strong=True, strict=False):
 
 def _current_authority(wd, frequency, model, snapshot):
     eligible,readonly,checks,_,current = sources(wd,frequency=frequency,model=model,content=False)
-    return eligible and not readonly and current == {key: value for key, value in snapshot.items() if key != 'content_sha256'} and all(
+    return eligible and not readonly and _worker_source_snapshots_current(wd, snapshot, current) and all(
         value for key,value in checks.items() if key != 'noaa' or frequency == 'noaa')
 
 
@@ -673,9 +699,13 @@ def execute_model(wd, identity, binary):
     frequency = attempt['snapshot']['frequency']
     update_attempt(wd,'run_attempt',identity,phase='running')
     eligible, readonly, checks, paths, snapshot = sources(wd,frequency=frequency)
-    expected={'inputs':snapshot,'dnbr':active['id'],'frequency':frequency}
-    if not eligible or readonly or expected != attempt['snapshot'] or not all(checks.values() if frequency=='noaa' else (v for k,v in checks.items() if k!='noaa')):
+    expected=deepcopy(attempt['snapshot'])
+    if (not eligible or readonly
+            or expected != {'inputs': expected.get('inputs'), 'dnbr': active['id'], 'frequency': frequency}
+            or not _worker_source_snapshots_current(wd, expected['inputs'], snapshot)
+            or not all(v for k,v in checks.items() if k != 'noaa' or frequency == 'noaa')):
         raise WorkflowError('superseded','Required project data changed. Run the model again.',409)
+    snapshot = expected['inputs']
     verified_active = {'artifacts': {relative: signature(wd, Path(wd)/relative)
                                      for relative in active['artifacts']}}
     if (not artifacts_current(wd, active)
@@ -757,9 +787,11 @@ def execute_m3(wd, identity):
     update_attempt(wd, 'run_attempt', identity, phase='running')
     frequency = attempt['snapshot']['frequency']
     eligible, readonly, checks, paths, snapshot = sources(wd, frequency=frequency, model='M3')
-    expected = {'inputs': snapshot, 'dnbr': None, 'frequency': frequency}
-    if not eligible or readonly or expected != attempt['snapshot'] or not all(
-            value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa'):
+    expected = deepcopy(attempt['snapshot'])
+    if (not eligible or readonly
+            or expected != {'inputs': expected.get('inputs'), 'dnbr': None, 'frequency': frequency}
+            or not _worker_source_snapshots_current(wd, expected['inputs'], snapshot)
+            or not all(value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa')):
         raise WorkflowError('superseded', 'Required project data changed. Run the model again.', 409)
     from .run_preparation import prepare_for_run
     paths, expected = prepare_for_run(wd, identity, expected, paths)

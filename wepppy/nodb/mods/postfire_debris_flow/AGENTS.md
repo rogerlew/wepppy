@@ -51,3 +51,5 @@
   Contract ancestors: `5c0a172ee`, `595816476`; follow contract-first for later behavior changes.
   That initial package supplied the minimal upload/run control. Do not invent
   UI controls or implementation-heavy user messages beyond the accepted design.
+
+- Active CLI ctime-only identity amendment: [shared contract](../../../../docs/schemas/file-dependency-freshness-contract.md#2026-09-17-active-cli-hard-link-amendment), checkpoint `567eacf7d`. Keep active-worker comparison separate from accepted-result freshness; require an uncached coherent hash and preserve all other identity checks.

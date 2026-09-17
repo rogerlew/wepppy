@@ -348,3 +348,10 @@ scientific limitation that implementation cannot resolve.
   removes the successful post-enqueue NoDb write that raced an immediately
   starting upload/model worker. Exact queued receipts persist before admission;
   85 focused tests and an actual retained-upload retry passed.
+
+## 2026-09-17 active CLI repair
+
+Worker admission, source preparation and publication accept only settled active
+CLI ctime drift verified against admission bytes. Contract checkpoint `567eacf7d`;
+[delivery evidence](../../../../docs/work-packages/20260917_postfire_active_cli_identity/package.md).
+Other source and artifact guards retain their existing semantics.

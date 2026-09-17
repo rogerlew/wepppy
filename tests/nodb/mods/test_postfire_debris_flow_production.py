@@ -82,9 +82,16 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     pd.DataFrame({'prcp':[20.]*30,'year':list(range(1,31)), 'month':[7.]*30,'day_of_month':[1.]*30,
                   'peak_intensity_15':[30.]*30,'peak_intensity_30':[20.]*30,'peak_intensity_60':[10.]*30}).to_parquet(parquet)
     paths={'dem':i.dem,'mask':i.mask,'outlet':i.outlet,'sbs':i.sbs,'k':i.k,'k_manifest':i.k_manifest,'cli':parquet}
-    snapshot={'selections':{'climate_mode':'Vanilla','engine_sha256':p.engine_identity()},'files':{}}
+    snapshot={'selections':{'climate_mode':'Vanilla','engine_sha256':p.engine_identity()},
+              'files':{'active_cli':p.signature(tmp_path,parquet)},
+              'content_sha256':{'active_cli':p.digest(parquet)}}
     def sources(wd,**kwargs):
-        return True,False,{'watershed':True,'soils':True,'sbs':True,'k':True,'climate':True,'noaa':False},dict(paths),snapshot
+        current={**snapshot,'files':{'active_cli':p.signature(tmp_path,parquet)}}
+        current_paths=dict(paths)
+        if kwargs.get('rainfall') is False:
+            current_paths.pop('cli')
+        if kwargs.get('content') is False: current.pop('content_sha256')
+        return True,False,{'watershed':True,'soils':True,'sbs':True,'k':True,'climate':True,'noaa':False},current_paths,current
     monkeypatch.setattr(p,'sources',sources)
     identity=uuid.uuid4().hex;folder=p.directory(tmp_path,identity);(folder/'source').mkdir(parents=True)
     import shutil
@@ -170,6 +177,32 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
         with pytest.raises(p.WorkflowError,match='Inputs changed'):
             p.execute_model(tmp_path,during_id,BINARY)
     assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+    # Shared M1 admission and both publication guards accept CLI link churn.
+    monkeypatch.setattr(p,'build_m1_results',build_results)
+    for stage in ('queued','results','locked'):
+        successful_id=uuid.uuid4().hex
+        controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+            'id':successful_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,
+            'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        def link_cli():
+            os.link(parquet,tmp_path/('cli-link-'+stage))
+        def build_and_link(*args,**kwargs):
+            result=build_results(*args,**kwargs)
+            link_cli()
+            return result
+        def publish_and_link(callback):
+            if callback.__name__=='publish':
+                def wrapped(state):
+                    link_cli()
+                    return callback(state)
+                return original_change(wrapped)
+            return original_change(callback)
+        with monkeypatch.context() as patch:
+            if stage=='queued': link_cli()
+            elif stage=='results': patch.setattr(p,'build_m1_results',build_and_link)
+            else: patch.setattr(controller,'change',publish_and_link)
+            p.execute_model(tmp_path,successful_id,BINARY)
+        assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==successful_id
     statistics.unlink()
     assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
     with (folder/'dem.tif').open('ab') as stream:

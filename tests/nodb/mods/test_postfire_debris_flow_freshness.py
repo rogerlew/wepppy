@@ -229,3 +229,121 @@ def test_default_open_closes_leaf_when_parent_changes(tmp_path, monkeypatch):
     with pytest.raises(OSError) as closed:
         os.fstat(leaf[0])
     assert closed.value.errno == errno.EBADF
+
+
+def worker_snapshot(root, path, *, content=True):
+    record = {'selections': {'model': 'M3'}, 'files': {'active_cli': p.signature(root, path)}}
+    if content:
+        record['content_sha256'] = {'active_cli': p.signature(root, path, strong=True)[4]}
+    return record
+
+
+@pytest.mark.parametrize('operation', ['link', 'unlink', 'rematerialize'])
+def test_worker_cli_hardlink_identity(tmp_path, operation):
+    path = tmp_path/'climate.cli'
+    path.write_bytes(b'original climate')
+    linked = tmp_path/'wepp/runs/pw0.cli'
+    if operation != 'link':
+        copy_input_file(str(tmp_path), path.name, linked)
+    admitted = worker_snapshot(tmp_path, path)
+    if operation == 'unlink':
+        linked.unlink()
+    else:
+        copy_input_file(str(tmp_path), path.name, linked)
+    current = worker_snapshot(tmp_path, path, content=False)
+    assert admitted['files'] != current['files']
+    assert p._worker_source_snapshots_current(tmp_path, admitted, current)
+    assert p._worker_source_snapshots_current(tmp_path, admitted, worker_snapshot(tmp_path, path))
+
+
+@pytest.mark.parametrize('change', ['bytes', 'mtime', 'path', 'selection', 'other_ctime',
+                                    'legacy', 'bad_old_hash', 'missing_old_hash', 'bad_new_hash'])
+def test_worker_cli_exception_rejects_other_changes(tmp_path, change):
+    from copy import deepcopy
+    path = tmp_path/'climate.cli'
+    path.write_bytes(b'original climate')
+    admitted = worker_snapshot(tmp_path, path)
+    st = path.stat()
+    os.link(path, tmp_path/'linked')
+    if change == 'bytes':
+        path.write_bytes(b'CHANGED! climate')
+        os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns))
+    if change == 'mtime':
+        os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns + 1))
+    current = worker_snapshot(tmp_path, path, content=False)
+    if change == 'path':
+        current['files']['active_cli'][0] = 'linked'
+    elif change == 'selection':
+        current['selections']['model'] = 'M1'
+    elif change == 'other_ctime':
+        admitted['files']['dem'] = deepcopy(admitted['files']['active_cli'])
+        admitted['content_sha256']['dem'] = admitted['content_sha256']['active_cli']
+        current['files']['dem'] = deepcopy(current['files']['active_cli'])
+    elif change == 'legacy':
+        admitted.pop('content_sha256')
+    elif change == 'bad_old_hash':
+        admitted['content_sha256']['active_cli'] = 'invalid'
+    elif change == 'missing_old_hash':
+        admitted['content_sha256'] = {}
+    elif change == 'bad_new_hash':
+        current['content_sha256'] = {'active_cli': '0'*64}
+    assert not p._worker_source_snapshots_current(tmp_path, admitted, current)
+
+
+def test_worker_cli_does_not_trust_cached_digest(tmp_path, monkeypatch):
+    path = tmp_path/'climate.cli'
+    path.write_bytes(b'before')
+    admitted = worker_snapshot(tmp_path, path)
+    st = path.stat()
+    path.write_bytes(b'AFTER!')
+    os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns))
+    current = worker_snapshot(tmp_path, path, content=False)
+    real = p._digest_version
+    def stale(*args, **kwargs):
+        return admitted['content_sha256']['active_cli']
+    stale.__wrapped__ = real.__wrapped__
+    monkeypatch.setattr(p, '_digest_version', stale)
+    assert not p._worker_source_snapshots_current(tmp_path, admitted, current)
+
+
+@pytest.mark.parametrize('mutation', ['symlink', 'replace', 'during_read', 'before_strong_read'])
+def test_worker_cli_generation_race_rejected(tmp_path, monkeypatch, mutation):
+    from contextlib import contextmanager
+    from wepppy.nodb.mods.postfire_debris_flow import rainfall_io
+    path = tmp_path/'climate.cli'
+    path.write_bytes(b'original climate')
+    admitted = worker_snapshot(tmp_path, path)
+    linked = tmp_path/'linked'
+    import time
+    time.sleep(.01)  # Filesystem timestamps can coalesce adjacent metadata operations.
+    os.link(path, linked)
+    current = worker_snapshot(tmp_path, path, content=False)
+    if mutation == 'symlink':
+        path.unlink()
+        path.symlink_to(linked)
+    elif mutation in ('replace', 'during_read'):
+        original = rainfall_io.open_local
+        @contextmanager
+        def racing(*args, **kwargs):
+            with original(*args, **kwargs) as stream:
+                if mutation == 'replace':
+                    replacement = tmp_path/'replacement'
+                    replacement.write_bytes(path.read_bytes())
+                    os.replace(replacement, path)
+                yield stream
+                if mutation == 'during_read':
+                    os.link(path, tmp_path/'another_link')
+        monkeypatch.setattr(rainfall_io, 'open_local', racing)
+    else:
+        original = p.signature
+        def racing(*args, **kwargs):
+            st = path.stat()
+            os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns + 1))
+            return original(*args, **kwargs)
+        monkeypatch.setattr(p, 'signature', racing)
+    try:
+        result = p._worker_source_snapshots_current(tmp_path, admitted, current)
+    except (p.WorkflowError, OSError, ValueError):
+        pass  # Explicit coherent-read/path failure is the established contract.
+    else:
+        assert result is False

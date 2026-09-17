@@ -128,7 +128,10 @@ The specification and detailed contracts map the implemented source and UI paths
   normal behavior. A source-code identity change may legitimately mark earlier
   results stale without changing their scientific values.
 - New source snapshots record file-content hashes. WEPP's unchanged climate
-  hard links preserve accepted currentness; changed bytes still invalidate it,
+  hard links preserve accepted currentness. Active M1/M3 jobs also tolerate
+  settled CLI ctime changes from WEPP link creation/removal after a fresh hash
+  matches the admitted bytes, with the same path, size and modification time.
+  Other source and publication guards remain strict. Changed bytes invalidate it,
   including equal-size rewrites with restored modification time. Older snapshots
   without hashes retain strict metadata checks and may need an explicit rerun.
   Do not rewrite historical hashes or rerun projects automatically. Soil/SQLite
