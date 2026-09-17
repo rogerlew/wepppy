@@ -232,3 +232,7 @@ is the controlling amendment for new production M1.
 M1 source preparation replaces its RUSLE prerequisite. Existing M1/M3 choice, M3 prerequisites and accepted-model identity remain unchanged.
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+## 2026-09-17 control summary placement
+
+Operator-authorized; implementation pending. The [control layout amendment](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md#2026-09-17-control-summary-layout-amendment) governs help placement, section spacing and the accepted-only Summary card/report link. It supersedes earlier direct control download/placement language. Report endpoints, empty direct-report behavior, saved artifacts and download authorization remain unchanged.

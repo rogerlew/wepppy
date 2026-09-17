@@ -1,0 +1,9 @@
+# Contract decision: post-fire summary presentation
+
+Starting revision: 996f191ae. Operator authorization: current explicit UI request; prior commit authority persists. Classification: intended presentation change. Security impact: low; no auth, endpoint, data, model or persistence change.
+
+Applicable authority: docs/ui-docs/controller-contract.md (unchanged shared presentation/lifecycle), postfire-debris-flow-control-contract.md, postfire-debris-flow-report-contract.md, and module docs/model_selection.md. The latter three receive a cross-linked layout amendment. Production scientific/download contracts remain satisfied by retained authorized report/artifact access.
+
+Exact delta: help before comparison; shared spacing before required data and design rainfall; a standard middle Summary panel hidden until server results exists; View likelihood report native link plus wc-control__panel-summary metadata table. Table includes Current result/Previous run, accepted model, completion time, valid coverage, coverage explanation, and unitized study-range warning when relevant. Hide direct events.parquet/design.parquet/inverse.parquet/valid_mask.tif/manifest.json links only in control. Preserve all files, report downloads, freshness and task behavior. Rationale: familiar control hierarchy and no dead report action before first success.
+
+State matrix: absent/empty/first queued/running/failed = hidden; accepted current/partial = visible; legacy = visible with missing coverage explicitly recorded; stale or replacement pending/failed = previous accepted remains visible and truthful. Malicious metadata remains textContent; report URL remains server-generated and authorized. No new user-reachable exceptions. Tests cover transitions and unchanged escaping/unitization. Reference: shared legacy_summary_panel and Features Export summary_panel_override. Preview uses the same three-panel arrangement and state rows.

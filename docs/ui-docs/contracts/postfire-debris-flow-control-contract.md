@@ -291,3 +291,26 @@ RUSLE: postfire remains checked and its controller/report link stays visible,
 without a reload. One and two reloads must retain that same state. Enabling
 postfire must not auto-enable POLARIS/RUSLE. This covers the owner-reported
 transient disappearance after RUSLE removal, not just persisted server state.
+
+## 2026-09-17 control summary layout amendment
+
+Status: operator authorized; implementation conformance pending.
+
+Place About this model before the M1/M3 comparison table. Add shared vertical
+spacing above Required project data and Design storm rainfall. Use the standard
+Summary card between Status and Details, hidden until state contains an accepted
+result. Put View likelihood report inside that card as a native report link,
+followed by a table inside wc-control__panel-summary. Include accepted currentness
+(Current result or Previous run), model, completion time, exact valid coverage,
+coverage explanation, and the unitized study-size warning when applicable.
+Legacy coverage is explicitly not recorded. A previous accepted result remains
+inspectable during or after a failed replacement; selected model never relabels it.
+Absent/empty state and first queued/running/failed attempts expose no report card.
+
+Remove direct events.parquet, design.parquet, inverse.parquet, valid_mask.tif and
+manifest.json links from the control. Files remain available through the report
+and authorized project artifact browser. No calculation, artifact, access or
+freshness change. This supersedes earlier control placement/download wording;
+the rationale is familiar summary placement and an actionable report link only
+after acceptance. Reuse control_shell summary_panel_override and shared panel
+classes, as in Features Export; no new card grid or custom visual system.
