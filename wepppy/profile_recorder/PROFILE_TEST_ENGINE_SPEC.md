@@ -38,6 +38,53 @@ Event payloads intentionally match what the playback runner expects: `stage` (`r
 - `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materializes a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
 - The assembler currently focuses on preservation. Higher-level YAML manifests or curated step lists do not exist yet; consumers read the JSONL stream directly.
 
+### SBS event identity (intended; checkpoint pending)
+
+New SBS response captures retain an immutable main-file seed and version1
+receipt at`seed/uploads/sbs/events/<sha256(event-id)>/`, binding the event ID,
+fixed local payload basename preserving the upload extension, length and SHA-256.
+New eligible SBS response records include`_sbs_seed_version: 1` in their original
+draft JSONL append, before fallible pointer/config/source/seed work. Playback
+requires an event receipt for marked events even if its directory was never
+created. Failed/partial capture evidence remains visible and promotion copies it.
+The capture observes the existing controller-selected file at response time; it
+is not a wire-level guarantee for arbitrary overlapping uploads.
+
+Playback uses the paired event ID and verified retained bytes for its multipart
+payload. An existing new event entry that is failed, incomplete, malformed or
+mismatched fails explicitly; it cannot fall back to a different event/canonical
+seed. Only an unmarked historical event without a new entry keeps legacy
+canonical-first behavior with unverified historical identity. Existing profiles are not rewritten or stamped
+on read. Receipt locations cannot select paths outside their event seed folder;
+receipts retain no request secrets or PII. Other upload families are unchanged.
+
+### SBS event performance acceptance (intended; checkpoint pending)
+
+Use the reviewed actual 599,196-byte and 747,242-byte SBS fixtures and labeled
+16,779,862-byte valid TIFF stress fixture. On local warm filesystem pages,
+complete event capture must average at most 100 ms real /450 ms stress for an
+established draft, and 125 ms real /550 ms stress for initial controller/draft/
+config capture. Include actual owner lookup, event append, config/legacy seed
+work, verified event copy and receipt publication. The first composed capture, including the complete configured primary seed,
+must be measured on final implementation; separate baseline components are not
+that acceptance evidence.
+
+Complete event-bound form preparation through Requests multipart encoding must
+average at most 20 ms real /150 ms stress, retaining the verified bytes, field,
+MIME and accepted extension. It should read the retained payload once and avoid
+an additional full-size retained copy beyond existing Requests buffering;
+report final Python allocation peak separately from process RSS. Network,
+server/native execution, promotion/archive and full HTTP playback are separate
+acceptance requirements.
+
+These are component mean budgets, not cold-storage or percentile guarantees and
+not a new size limit. Larger supported files need additional size-aware
+observation. Retain aggregate seed growth and follow existing seed/LFS guidance;
+do not discard per-event identity to reduce copies. Evidence/rationale live in
+`docs/work-packages/20260916_file_dependency_freshness/artifacts/sbs_receipts_profile_performance_qa.md`
+and its linked script/JSON/log. Final implementation must be remeasured with all
+required confinement and generation guards; the prototype is not a pass.
+
 ## Profile Layout
 ```
 profiles/<slug>/

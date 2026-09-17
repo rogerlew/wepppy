@@ -1,0 +1,12 @@
+{
+  "recorded_ids": [
+    "first",
+    "second"
+  ],
+  "second_event_entry_exists": false,
+  "multipart_contains_prior_bytes": true,
+  "multipart_contains_new_bytes": false,
+  "source_remains_new": true,
+  "promoted_events_preserved": true,
+  "scope": "real assembler/promotion/form-selection/multipart; injected unrelated capture failure"
+}
