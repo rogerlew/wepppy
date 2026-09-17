@@ -509,6 +509,43 @@ English/SI equivalence, negative/zero rainfall response, legacy missing provenan
 real browser keyboard/numeric-table use, export and reload, and proof that reads
 leave scientific state and artifacts unchanged.
 
+## 2026-09-17 presentation refinement
+
+Status: operator authorized; implementation conformance pending.
+
+Render **Assessment summary** as the shared `wc-summary-pane` definition-list
+component. Give model/time/area, currentness, input coverage and notices explicit
+terms and definitions. Keep the conditional-likelihood interpretation immediately
+after the pane. Missing legacy values remain “Not recorded”; the pane does not
+change result authority or invent metadata. When there are no assessment-specific
+notices, the Notices definition reads “None recorded.” rather than remaining
+empty.
+
+Chart text must paint after response lines, P50 and scenario markers so data
+marks cannot obscure it. Use a shared chart-label class whose fill is
+`--wc-color-text`, stroke is `--wc-color-surface`, and `paint-order` draws the
+stroke before the fill. Use a 3-pixel stroke with rounded joins, and make the
+final label layer pointer-transparent so it cannot intercept marker activation.
+The contrasting halo must follow theme tokens; do not hard-code a light or dark
+outline. Preserve fixed likelihood scale, accessible marker names, pointer and
+keyboard selection and the tabular alternative.
+
+Build the **Storm events** filter with canonical shared numeric/select fields,
+checkbox and button row. Place fields in a responsive grid or stack with at
+least `--wc-space-md` of row gap and bounded field widths; inputs must not stretch
+to the full report width or overflow at narrow viewports. Separate the canonical
+button row from the fields by at least `--wc-space-md`. Preserve field IDs,
+`data-pfr-field` selectors, value ranges, blank semantics, query encoding, focus
+order, Apply/Reset behavior, pagination and event selection. Acceptance covers
+all four filter hooks, decimal 0–100 minimum-likelihood bounds, integral year
+step, every sort option, descending checked and unchecked submissions,
+Apply-before-Reset order and unchanged query encoding. This amendment is
+presentation and accessibility only; no report API or scientific value changes.
+
+Rationale: these changes align the report with familiar WEPPcloud components,
+keep dense plot labels readable across themes and restore predictable form
+spacing without introducing a new visual system.
+
 ## 2026-09-17 control summary placement
 
 Implemented and browser-verified on forest, 2026-09-17 (ancestor ca3d58471). The [control layout amendment](postfire-debris-flow-control-contract.md#2026-09-17-control-summary-layout-amendment) governs help placement, section spacing and the accepted-only Summary card/report link. It supersedes earlier direct control download/placement language. Report endpoints, empty direct-report behavior, saved artifacts and download authorization remain unchanged.
