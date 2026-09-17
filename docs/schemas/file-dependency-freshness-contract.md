@@ -65,8 +65,9 @@ path checks on every access. Access loss must fail even on a cached hash.
 
 These cache hints assume normal filesystem metadata semantics, not a hostile
 privileged writer capable of restoring ctime/inode identity. Filesystem trust
-and existing path authorization remain unchanged. Equal-size restored-mtime
-writes on the supported development filesystem change ctime and force hashing.
+and existing path authorization remain unchanged. The initial assumption that every equal-size restored-mtime write changes
+ctime was refuted during execution; the timestamp-quantum admission amendment
+below is required.
 Ordinary warm reads must not reread unchanged raster bytes; cache eviction or
 metadata changes permit revalidation. No watcher or persistent hash database.
 
@@ -92,3 +93,17 @@ The executing package inventories non-postfire consumers separately. Each needs
 its own owner-contract amendment, compatibility decision, failing baseline and
 reviewed checkpoint before adopting this behavior. Unresolved confirmed defects
 block repository-wide package completion; first-wave completion is not closure.
+
+## Timestamp-quantum cache admission amendment (accepted; implementation pending)
+
+Real rapid rewrites demonstrated identical complete stat keys with different
+bytes on the development filesystems. The immediate-reuse assumption above is
+therefore insufficient. Per the
+[cache-admission ADR](../adrs/20260917-file-digest-cache-admission.md), a newly
+observed path/version must remain uncached for a one-second monotonic observation
+interval. Afterward, admit only a freshly computed digest, never one retained
+from the observation interval. Keep a bounded 512-entry observation LRU;
+eviction restarts this interval and uncached verification. Warm zero-byte-read
+acceptance applies after admission. The original rapid-rewrite probe must pass
+without sleeps or mocked filesystem timestamps. Coherent metadata-on-open remains
+a filesystem requirement; NFS acceptance must be measured on disposable runs.

@@ -1,0 +1,42 @@
+[
+  {
+    "filesystem_parent": "/tmp",
+    "identical_versions": 1,
+    "stale_cache_hits": 1,
+    "sample": {
+      "iteration": 1,
+      "version": [
+        95,
+        24249261,
+        6,
+        1789609235626534463,
+        1789609235626534463
+      ],
+      "actual_digest": "6db7d803e74f1ffa7d8f5adc0bf95b3e15bf4c8373fffadf546227cc6c6742cb",
+      "expected_digest": "a7b70603afa9575af9458adc5edccac707a5bcb8d311f62ec3fcde4dbbe3f9b7"
+    }
+  },
+  {
+    "filesystem_parent": "/workdir/wepppy",
+    "identical_versions": 1,
+    "stale_cache_hits": 1,
+    "sample": {
+      "iteration": 192,
+      "version": [
+        66305,
+        96044554,
+        6,
+        1789609236307549480,
+        1789609236307549480
+      ],
+      "actual_digest": "6db7d803e74f1ffa7d8f5adc0bf95b3e15bf4c8373fffadf546227cc6c6742cb",
+      "expected_digest": "a7b70603afa9575af9458adc5edccac707a5bcb8d311f62ec3fcde4dbbe3f9b7"
+    }
+  },
+  {
+    "filesystem_parent": "/wc1/runs",
+    "identical_versions": 0,
+    "stale_cache_hits": 0,
+    "sample": null
+  }
+]
