@@ -178,3 +178,33 @@ selected source. These are acceptance budgets, not runtime timeouts or universal
 claims about source sizes/storage. Retain separate final runtime measurements,
 cache-admission/eviction counts and actual Redis-backed controller acquisition;
 the baseline used detached NoDb hydration and an OS-warm filesystem.
+
+## Relocated landuse catalogs (implementation pending)
+
+A catalog's stored root records its original activation directory. Report-local
+selection MUST normalize that root to the requested RunContext base directory
+for both query SQL and dependency observations; DuckDB's home directory alone
+does not change SQL source selection. Clone catalog/context metadata in memory,
+without rewriting the stored catalog or changing shared query-engine behavior.
+Preserve schema/alias metadata.
+
+Relative `fs_path` entries retain existing traversal checks. For an absolute
+entry, preserve a selection already within the requested run's allowed roots.
+Otherwise, validate its old selection and translate an old-catalog-root reference
+to the same relative path in the requested root. Translate an inherited old-parent
+reference only when both old and requested roots have the corresponding allowed
+`_pups` parent relationship. Absence of an individual inherited file is historical
+state, not failure to establish that relationship. A standalone restored child
+without an allowed parent cannot silently use its former parent's file. Reject
+ambiguous or outside-allowed selections through the existing resolver; preserve
+current-root precedence when old/new ancestors overlap. Retain actual selected
+paths in attempt diagnostics and portable relative identities in cache metadata.
+
+This refines the portable-path obligation after actual copy/restore probes found
+that a saved absolute catalog root continued selecting the old directory.
+Maintained catalog activation always records its current base as root; supported
+parent inheritance is encoded in `fs_path`, not by redirecting the catalog root.
+Complete and partial relocations, absolute local and parent entries, existing
+current-root references, forbidden paths and query/observation agreement require
+real regression coverage. The initial report publication checkpoint remains the
+ancestor for its other behavior; this refinement precedes normalization code.
