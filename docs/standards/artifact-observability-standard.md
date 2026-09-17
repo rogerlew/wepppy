@@ -52,3 +52,36 @@ A visible historical migration inventory may retain old path strings and exact
 original metadata as audit evidence. Its physical files must remain visible and
 archivable. Storage migrations must preserve payload bytes, audit path/hash
 rebasing, and never silently bless changed science as current.
+
+## Project archive directory metadata
+
+New canonical project ZIP archives retain explicit entries for traversed,
+nonexcluded ordinary directories, including empty directories, with their modes.
+Keep the existing treatment of symlink directories, excluded paths, archive
+naming and file contents. Do not archive the working-directory root itself or
+introduce owner/group restoration from ZIP metadata.
+
+Restore validates the entire member/path inventory before removing current
+contents. For archives with explicit directory entries, create their ancestors
+and stage those directory permissions before extracting payloads: retain the
+recorded group/other restrictions while allowing the restoring owner to populate
+them. After extraction, restore recorded directory modes from deepest to
+shallowest. A mode application failure is explicit, not a successful permission
+parity result. In particular, a private attempt directory must never receive a
+payload while it has broader group/other access than its recorded mode.
+Existing file-mode restoration and source/destination path validation stay in
+force. ZIP order cannot determine whether private ancestry is applied in time.
+
+Legacy archives without directory entries retain their previous umask-derived
+directory behavior. Missing historical mode metadata cannot be reconstructed
+from current source directories or path naming conventions. Report this legacy
+limitation rather than inventing provenance. The additive directory records
+require no run schema migration; older readers may ignore their modes.
+
+A directory mode is present only when an explicit UNIX directory type is recorded
+in the ZIP's UNIX attributes; permission bits of0000 are valid metadata, not a
+missing value. Directory entries lacking that metadata retain legacy behavior.
+Reject conflicting explicit modes for the same resolved directory before
+removing current contents; repeated identical modes are harmless. Entries cannot
+authorize changing the working-directory root mode. Preserve existing path
+validation, including rejection of otherwise invalid root/member paths.

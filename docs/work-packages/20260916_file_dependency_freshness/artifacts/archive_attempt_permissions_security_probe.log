@@ -1,0 +1,87 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 1 item
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe.py::test_failed_attempt_permissions_survive_canonical_archive_restore {"uid": 1000, "gid": 993, "before": {"geneva/cache_attempts": 448, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25": 448, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/candidate.geojson": 420, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/status.json": 384, "ordinary": 488, "ordinary/private.txt": 384}, "after": {"geneva/cache_attempts": 493, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25": 493, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/candidate.geojson": 420, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/status.json": 384, "ordinary": 493, "ordinary/private.txt": 384}, "archive_mode": 420, "zip_members": {"geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/candidate.geojson": {"directory": false, "mode": 420, "create_system": 3}, "geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25/status.json": {"directory": false, "mode": 384, "create_system": 3}, "ordinary/private.txt": {"directory": false, "mode": 384, "create_system": 3}}, "all_bytes_preserved": true, "scope": "actual producer attempt and canonical archive/restore; job/Redis transport supplied by ArchiveRuntime"}
+FAILED
+
+=================================== FAILURES ===================================
+______ test_failed_attempt_permissions_survive_canonical_archive_restore _______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-153/test_failed_attempt_permission0')
+
+    def test_failed_attempt_permissions_survive_canonical_archive_restore(tmp_path):
+        run = tmp_path / 'disposable-run'
+        run.mkdir(mode=0o755)
+        geneva = SimpleNamespace(wd=str(run), artifact_io=GenevaArtifactIO())
+        with pytest.raises(RuntimeError, match='retained failure'):
+            with _Attempt(geneva, 'hru_map_features.wgs.geojson', 'hru_geometry') as attempt:
+                payload = attempt.candidate('candidate.geojson')
+                payload.write_text('retained partial project output')
+                raise RuntimeError('retained failure')
+        ordinary = run / 'ordinary'
+        ordinary.mkdir(mode=0o750)
+        (ordinary / 'private.txt').write_text('private file mode control')
+        (ordinary / 'private.txt').chmod(0o600)
+        paths = [attempt.root.parent, attempt.root, payload, attempt.root / 'status.json',
+                 ordinary, ordinary / 'private.txt']
+        before = {str(path.relative_to(run)): mode(path) for path in paths}
+        contents = {str(path.relative_to(run)): path.read_bytes() for path in paths if path.is_file()}
+        runtime = ArchiveRuntime(
+            get_current_job=lambda: SimpleNamespace(id='disposable-permission-probe'),
+            get_wd=lambda runid: str(run), get_prep_from_runid=lambda runid: None,
+            lock_statuses=lambda runid: {}, clear_nodb_file_cache=lambda runid: [],
+            publish_status=lambda channel, message: None, disk_usage=shutil.disk_usage,
+            zip_file_cls=zipfile.ZipFile, project_config_lifecycle_guard=project_config_lifecycle_guard,
+            project_config_authority_wd=lambda runid: str(run))
+        archive_rq('disposable-permission-probe', 'permission characterization', runtime=runtime)
+        archive = next((run / 'archives').glob('*.zip'))
+        with zipfile.ZipFile(archive) as zf:
+            members = {item.filename: {'directory': item.is_dir(),
+                                      'mode': stat.S_IMODE(item.external_attr >> 16),
+                                      'create_system': item.create_system} for item in zf.infolist()}
+            assert all(zf.read(name) == value for name, value in contents.items())
+        restore_archive_rq('disposable-permission-probe', archive.name, runtime=runtime)
+        after = {str(path.relative_to(run)): mode(path) for path in paths}
+        result = {'uid': os.geteuid(), 'gid': os.getegid(), 'before': before, 'after': after,
+                  'archive_mode': mode(archive), 'zip_members': members,
+                  'all_bytes_preserved': all((run / name).read_bytes() == value for name, value in contents.items()),
+                  'scope': 'actual producer attempt and canonical archive/restore; job/Redis transport supplied by ArchiveRuntime'}
+        Path(__file__).with_suffix('.json').write_text(json.dumps(result, indent=2) + '\n')
+        print(json.dumps(result))
+        assert result['all_bytes_preserved']
+>       assert after == before
+E       AssertionError: assert {'geneva/cach...on': 384, ...} == {'geneva/cach...on': 384, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'geneva/cache_attempts': 493} != {'geneva/cache_attempts': 448}
+E         {'geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25': 493} != {'geneva/cache_attempts/3681afe274dd48e8aff6346a0fa7ad25': 448}
+E         {'ordinary': 493} != {'ordinary': 488}
+E         ...
+E         
+E         ...Full output truncated (18 lines hidden), use '-vv' to show
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe.py:62: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe.py::test_failed_attempt_permissions_survive_canonical_archive_restore
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:282: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe.py::test_failed_attempt_permissions_survive_canonical_archive_restore
+======================== 1 failed, 3 warnings in 9.31s =========================
