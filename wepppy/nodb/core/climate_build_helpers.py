@@ -451,7 +451,8 @@ def build_observed_daymet(
         lng, lat, start_year, end_year, gridmet_wind=gridmet_wind, admission=admission
     )
     df.to_parquet(_join(cli_dir, f"daymet_{start_year}-{end_year}.parquet"))
-    df_to_prn(df, _join(cli_dir, prn_fn), "prcp(mm/day)", "tmax(degc)", "tmin(degc)")
+    # PRN serialization converts its input in place; keep source units intact.
+    df_to_prn(df.copy(), _join(cli_dir, prn_fn), "prcp(mm/day)", "tmax(degc)", "tmin(degc)")
 
     max_retries = 3
     for retry in range(max_retries):
@@ -486,7 +487,7 @@ def build_observed_daymet(
         climate.replace_var("w-vl", dates, df["vs(m/s)"])
         climate.replace_var("w-dir", dates, df["th(DegreesClockwisefromnorth)"])
 
-    df.to_parquet(_join(cli_dir, f"daymet_{start_year}-{end_year}.parquet"))
+    # Radiation provenance is retained in the CSV, never over the source parquet.
     climate.write(cli_path)
 
 
@@ -543,7 +544,7 @@ def build_observed_daymet_interpolated(
     if wind_dir is not None:
         _replace_finite_observed_prefix(climate, "w-dir", dates, wind_dir)
 
-    df.to_parquet(_join(cli_dir, _parquet_fn))
+    # This parquet belongs to acquisition; downstream preparation only reads it.
     climate.write(cli_path)
     return topaz_id, bool(quality_guard_bypassed)
 

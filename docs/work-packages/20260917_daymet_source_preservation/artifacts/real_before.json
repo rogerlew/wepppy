@@ -1,0 +1,9 @@
+{
+  "phase": "before",
+  "source_equals_input": false,
+  "cli_sha256": "ddce2c07b25818b58b94411464f692cfd589d2157ab16f2a1783fc69825f5b8e",
+  "prn_sha256": "4ef338666dc68d4331cc56e75faa5300545b9fd2e58f8d1ef6e3f7735b7c8354",
+  "source_sha256": "937803bca51ddac21d8dd0c435119f2855abb3c48c7cd63bf155112186f7f454",
+  "radiation_csv_exists": true,
+  "cligen_quality_error": false
+}

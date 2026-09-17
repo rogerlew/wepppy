@@ -1,0 +1,12 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20260917_daymet_source_preservation/artifacts/verify_real_build.py after
+{
+  "phase": "after",
+  "source_equals_input": true,
+  "cli_sha256": "ddce2c07b25818b58b94411464f692cfd589d2157ab16f2a1783fc69825f5b8e",
+  "prn_sha256": "4ef338666dc68d4331cc56e75faa5300545b9fd2e58f8d1ef6e3f7735b7c8354",
+  "source_sha256": "d0bd1806b5cd92e52d3dbf514c1849b9eb7a1c1fd1f465608c0fc083a81312d8",
+  "radiation_csv_exists": true,
+  "cligen_quality_error": false,
+  "cli_bytes_unchanged": true,
+  "prn_bytes_unchanged": true
+}

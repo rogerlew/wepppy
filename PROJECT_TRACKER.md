@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Completed: [Daymet source preservation](docs/work-packages/20260917_daymet_source_preservation/package.md)
+— source overwrite removed; 42 focused tests and real CLIGEN byte-parity checks pass.
+Full suite: 8,983 passed, 99 skipped; archive and browser artifact checks pass.
+
 Completed: [File dependency freshness audit and fixes](docs/work-packages/20260916_file_dependency_freshness/package.md)
 — implementation and independent reviews complete;8,924 Python/899 frontend
 tests pass. Rebuilt development UI/RQ/WEPP, native Omni, archive/recovery and

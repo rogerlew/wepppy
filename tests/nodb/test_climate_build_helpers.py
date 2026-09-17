@@ -415,7 +415,7 @@ def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication
 ) -> None:
     df = pd.DataFrame(
         {
-            "prcp(mm/day)": [0.0, 0.0],
+            "prcp(mm/day)": [15.24, 2.54],
             "tmax(degc)": [0.0, 1.0],
             "tmin(degc)": [-6.0, -5.0],
             "srad(l/day)": [300.0, 486.0],
@@ -429,9 +429,10 @@ def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication
     monkeypatch.setattr(
         daymet_module,
         "retrieve_historical_timeseries",
-        lambda *_args, **_kwargs: df.copy(),
+        lambda *_args, **_kwargs: df,
     )
 
+    original = df.copy(deep=True)
     helper_module.build_observed_daymet(
         _ObservedDaymetCligenStub(tmp_path),
         -111.12,
@@ -449,15 +450,19 @@ def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication
     assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
 
     exported = pd.read_parquet(tmp_path / "daymet_1990-1990.parquet")
-    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.0)
-    assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
-    assert exported["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
-    assert exported["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
+    pd.testing.assert_frame_equal(exported, original)
+    pd.testing.assert_frame_equal(df[original.columns[:3]], original[original.columns[:3]])
+    prn = pd.read_csv(tmp_path / "ws.prn", sep=r"\s+", header=None)
+    assert prn.iloc[:2, 3].tolist() == [60, 10]
+    assert prn.iloc[:2, 4].tolist() == [32, 34]
+    provenance = pd.read_csv(tmp_path / "daymet_radiation_toa_normalization_wepp.csv")
+    assert len(provenance) == 1
     assert (tmp_path / "daymet_radiation_toa_normalization_wepp.csv").exists()
 
 
-def test_build_observed_daymet_interpolated_persists_radiation_normalization(
-    tmp_path: Path,
+@pytest.mark.parametrize("legacy", [False, True])
+def test_build_observed_daymet_interpolated_preserves_source_and_normalizes_cli(
+    tmp_path: Path, legacy: bool,
 ) -> None:
     df = pd.DataFrame(
         {
@@ -466,8 +471,12 @@ def test_build_observed_daymet_interpolated_persists_radiation_normalization(
         },
         index=pd.to_datetime(["1990-02-17", "1990-02-18"]),
     )
+    if legacy:
+        df["srad_source(l/day)"] = df["srad(l/day)"]
+        df["srad(l/day)"] = [300.0, 453.0]
     source_path = tmp_path / "daymet_observed_p1_1990-1990.parquet"
     df.to_parquet(source_path)
+    source_bytes = source_path.read_bytes()
 
     topaz_id, bypassed = helper_module.build_observed_daymet_interpolated(
         _ObservedDaymetCligenStub(tmp_path),
@@ -488,10 +497,31 @@ def test_build_observed_daymet_interpolated_persists_radiation_normalization(
     assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
 
     exported = pd.read_parquet(source_path)
-    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.0)
-    assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
-    assert exported["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
-    assert exported["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
+    pd.testing.assert_frame_equal(exported, df)
+    assert source_path.read_bytes() == source_bytes
+    assert (tmp_path / "daymet_radiation_toa_normalization_p1.csv").exists()
+
+
+def test_daymet_interpolated_failed_cli_write_preserves_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "daymet_observed_p1_1990-1990.parquet"
+    pd.DataFrame(
+        {"srad(l/day)": [300.0, 486.0], "tdew(degc)": [-7.0, -6.0]},
+        index=pd.to_datetime(["1990-02-17", "1990-02-18"]),
+    ).to_parquet(source)
+    before = source.read_bytes()
+
+    def fail_write(*_args, **_kwargs):
+        raise OSError("injected CLI publication failure")
+
+    monkeypatch.setattr(helper_module.ClimateFile, "write", fail_write)
+    with pytest.raises(OSError, match="injected CLI publication failure"):
+        helper_module.build_observed_daymet_interpolated(
+            _ObservedDaymetCligenStub(tmp_path), "p1", -111.12, 43.73,
+            1990, 1990, str(tmp_path), "wepp.cli", "ws.prn",
+        )
+    assert source.read_bytes() == before
     assert (tmp_path / "daymet_radiation_toa_normalization_p1.csv").exists()
 
 

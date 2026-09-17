@@ -1,0 +1,13 @@
+{
+  "files": {
+    "climate/wepp.cli": "ddce2c07b25818b58b94411464f692cfd589d2157ab16f2a1783fc69825f5b8e",
+    "climate/daymet_radiation_toa_normalization_wepp.csv": "79936006ebbf6aa53178386eea9fbf1b53d4e4ca3d3c9e880bfca3589a2b44ac",
+    "climate/co053359.par": "98de096746ccde337adf35cd9d2ecfe0b33c06fb2a8f56643dc317c337cc01ca",
+    "climate/ws.prn": "4ef338666dc68d4331cc56e75faa5300545b9fd2e58f8d1ef6e3f7735b7c8354",
+    "climate/cligen_wepp.log": "9e7b65c647b9436b932672b8777e0aae9e874c219f78b87a734d6bb3871e7add",
+    "climate/daymet_2021-2021.parquet": "d0bd1806b5cd92e52d3dbf514c1849b9eb7a1c1fd1f465608c0fc083a81312d8"
+  },
+  "all_members_match": true,
+  "restored_bytes_match": true,
+  "runtime_scope": "isolated fixture; orchestration metadata stubs, real canonical archive and restore filesystem I/O"
+}

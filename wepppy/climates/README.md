@@ -72,6 +72,15 @@ HTTP still requires a confirmed active lease. See the
 - **Data Source**: Oak Ridge National Laboratory (ORNL) REST API (`daymet.ornl.gov/single-pixel/api/data`)
 - **Variables**: Precipitation, tmax, tmin, solar radiation, vapor pressure, snow water equivalent
 - **Usage Pattern**: Query by lon/lat → convert to WEPP `.cli` format → optionally blend with GridMET wind
+- **Retained source**: Daymet acquisition parquets keep their original values and
+  physical units. PRN/CLI preparation reads them without overwriting them;
+  radiation normalization is recorded separately in
+  `daymet_radiation_toa_normalization_<label>.csv`. This applies to both single
+  and interpolated builds. Older single-location artifacts may contain PRN
+  precipitation/temperature units under incorrect labels; do not infer a
+  correction from value magnitude. An explicit climate rebuild reacquires the
+  source. Existing accepted assessments are not changed by this code repair.
+  See [source preservation contract](../../docs/schemas/climate-parquet-lineage-contract.md#daymet-acquisition-source-preservation).
 - **Strengths**: High spatial resolution, covers full historical period, widely validated
 - **Limitations**: North America only, 18-month data lag, no sub-daily timesteps
 

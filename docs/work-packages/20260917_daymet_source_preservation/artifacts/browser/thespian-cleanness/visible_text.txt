@@ -1,0 +1,81 @@
+Compare project
+Parquet Data Filter
+
+Showing items 201 to 232 of 232
+
+[1] [101] [201] 
+
+☁️ thespian-cleanness ❯ climate ❯ 
+
+   Name [↑]                                     Modified        Size        Actions
+
+
+ ├ _841.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _842.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _843.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _852.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _853.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _861.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _862.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _863.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _871.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _872.cli                                     2026-09-17 18:20      1.1 MB    download                                         
+
+ ├ _873.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _881.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _882.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _883.cli                                     2026-09-17 18:21      1.1 MB    download                                         
+
+ ├ _91.cli                                      2026-09-17 18:20      1.1 MB    download                                         
+
+ ├ _92.cli                                      2026-09-17 18:20      1.1 MB    download                                         
+
+ ├ _93.cli                                      2026-09-17 18:20      1.1 MB    download                                         
+
+ ├ atlas14_intensity_pds_mean_metric.csv        2026-09-17 18:21      1.1 KB    download                   d-tale              
+
+ ├ cligen_wepp.log                              2026-09-17 18:18    10.49 KB    download                                         
+
+ ├ co053359.par                                 2026-09-17 18:18     6.86 KB    download                                         
+
+ ├ daymet_1980-2024.parquet                     2026-09-17 18:18  1016.43 KB    download  .csv             d-tale  schema    
+
+ ├ daymet_radiation_toa_normalization_wepp.csv  2026-09-17 18:18    47.29 KB    download                   d-tale              
+
+ ├ ppt.tif                                      2026-09-17 18:19   302.08 MB    download  gdalinfo                                   
+
+ ├ ppt.tif.meta                                 2026-09-17 18:19     1.59 KB    download                                         
+
+ ├ tmax.tif                                     2026-09-17 18:20   302.08 MB    download  gdalinfo                                   
+
+ ├ tmax.tif.meta                                2026-09-17 18:20     1.59 KB    download                                         
+
+ ├ tmin.tif                                     2026-09-17 18:20   302.08 MB    download  gdalinfo                                   
+
+ ├ tmin.tif.meta                                2026-09-17 18:20     1.59 KB    download                                         
+
+ ├ wepp.cli                                     2026-09-17 18:18      1.1 MB    download                                         
+
+ ├ wepp_cli.parquet                             2026-09-17 18:21   613.01 KB    download  .csv             d-tale  schema    
+
+ ├ wepp_cli_pds_mean_metric.csv                 2026-09-17 18:21     1.14 KB    download                   d-tale              
+
+ └ ws.prn                                       2026-09-17 18:18   513.66 KB    download                                         
+
+
+
+[1] [101] [201] 
+
+

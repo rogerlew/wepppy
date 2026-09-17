@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20260917_daymet_source_preservation/artifacts/verify_archive.py
+PASS: archive members and restored bytes match all generated climate artifacts

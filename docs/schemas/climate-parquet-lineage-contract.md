@@ -150,4 +150,5 @@ previously mislabeled precipitation/temperature artifacts require an explicit
 rebuild from original data, not an unqualified unit conversion. CLI-derived
 parquet producer lineage and interpretation versions are unaffected.
 
-Implementation conformance for this amendment: pending source-preservation fix.
+Implementation conformance: source-preservation fix verified by focused tests
+and real CLIGEN replay; see the 20260917_daymet_source_preservation work package.

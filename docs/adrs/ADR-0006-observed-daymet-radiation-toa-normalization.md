@@ -155,5 +155,5 @@ in-place PRN unit conversions under incorrect physical-unit labels. Both single
 and interpolated builders must preserve acquisition artifacts; use the existing
 normalization CSV for derived values and provenance. Numerical bounds, source
 radiation handling (including legacy source columns), CLI units and publication
-rounding are unchanged. Conformance pending implementation. This supersedes the
+rounding are unchanged. Conformance verified by focused tests and real CLIGEN replay. This supersedes the
 original requirement to persist normalization columns into the source parquet.

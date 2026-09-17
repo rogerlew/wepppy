@@ -1,0 +1,4 @@
+date,year,julian,latitude_deg,source_column,original_srad_l_day,toa_bound_l_day,toa_publication_bound_l_day,normalized_srad_l_day,published_original_srad_l_day,excess_l_day,normalization_reason
+2021-03-01,2021,60,39.52,srad(l/day),584.1595309799235,571.4051788184362,571.0,571.0,584.0,12.754352161487304,daymet_over_toa
+2021-03-31,2021,90,39.52,srad(l/day),760.8756547442638,747.2070845664581,747.0,747.0,761.0,13.668570177805691,daymet_over_toa
+2021-04-01,2021,91,39.52,srad(l/day),756.5220321582217,752.8083450320078,752.0,752.0,757.0,3.7136871262139266,daymet_over_toa
