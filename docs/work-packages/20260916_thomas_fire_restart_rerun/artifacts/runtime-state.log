@@ -1,0 +1,24 @@
+Thu Sep 17 03:31:19 UTC 2026
+c0bf57cf3ff0907f80cdad3bb68e50ad315af5d3
+ebe68362bd6a693714b831a1a3ff654e42b77fa070ed89f9584b5b324ae5c086  PROJECT_TRACKER.md
+cd4a37f6c97feffa72394de2c1db84976783c6489e31010a94682a0d0e68ca97  code-quality-report.json
+f0ddc38ea29e6cfd95bcd1d144e9a53521a2b7623392e0e567a65f9e8864221c  code-quality-summary.md
+e1f778422a67c401c0867bdd34cd40cfb4a60ff70b2855844ce007737244e3ee  docs/standards/broad-exception-boundary-allowlist.md
+98fcbf98b1ca0d237cb14a837b10d5b705e1db8c85edf069a8e784a21d19f953  docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_digest.py
+e3ffe164aaea153cb84e1e5e9d1b70b75cc83f7cdc8262b6d13874c1e1f7a7e7  docs/work-packages/20260916_file_dependency_freshness/artifacts/first_wave_security_review.md
+e1d8d2c0674c3106263717bea8fa77314d6fc673f8f4ce51e66ca55a0d58698f  docs/work-packages/20260916_file_dependency_freshness/artifacts/operation_matrix.md
+97fd150f5e5f4ba123a18c1ccf0b0ab66e6769099627439564e2208000aea12c  docs/work-packages/20260916_file_dependency_freshness/prompts/active/file_dependency_freshness_execplan.md
+3519a49f62aaba285338b5d0442b98b1de89c7ffa0d4e9386a88426216539ea8  docs/work-packages/20260916_file_dependency_freshness/tracker.md
+ebd6443a17da1060a89a117eb61eeacb8d90e96b873c9d91be67e0d990504eec  tests/microservices/test_browse_dtale.py
+9d8812f8276f2c00d37aa1696c52b1f8db898657a6d2f5f5c68e1bb5c6778b81  wepppy/webservices/dtale/AGENTS.md
+a5c150af6a57a40fa6a773b685cad7b0aec1fc518051998157d270c210851ea7  wepppy/webservices/dtale/dtale.py
+8e10e5cd37e03fb95f9e5b7145ea4856a13341f6d6eabedb93a701411ca372cc  wepppy/webservices/dtale/dtale.pyi
+/weppcloud running 2026-09-17T03:29:44.949557505Z 
+/wepppy-rq-engine running 2026-09-17T03:29:34.195514515Z 
+/wepppy-rq-worker running 2026-09-17T03:29:43.196719492Z 
+/wepppy-rq-worker-batch running 2026-09-17T03:29:44.950191744Z 
+/wepppy-rq-worker-fork-archive running 2026-09-17T03:29:40.695670691Z 
+/wepppy-redis running 2026-09-17T03:29:39.695602502Z healthy
+/wepppy-postgres running 2026-09-17T03:29:43.197896692Z healthy
+/weppcloud-preflight running 2026-09-17T03:29:24.281880992Z 
+/wepppy-download running 2026-09-17T03:29:24.382837422Z healthy

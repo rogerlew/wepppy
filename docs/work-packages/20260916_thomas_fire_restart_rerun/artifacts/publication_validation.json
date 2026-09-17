@@ -1,0 +1,12 @@
+{
+  "attempt_id": "b9b523bda3f34ca684b7790145d4e43c",
+  "published_and_downloaded": [
+    "design.parquet",
+    "events.parquet",
+    "inverse.parquet",
+    "manifest.json",
+    "valid_mask.tif"
+  ],
+  "runtime_engine_files_verified": 26,
+  "downloaded_csv_matches": true
+}

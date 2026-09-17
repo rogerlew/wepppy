@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20260917_dead_horse_storm_correspondence/artifacts/analyze.py
+      date  source  precipitation_mm  intensity_mm_per_hour  probability
+2021-07-30  Daymet              17.0              37.381583     0.709907
+2021-07-31  Daymet              13.2              24.752922     0.340570
+2021-08-01  Daymet              11.7              11.872013     0.095564
+2021-08-02  Daymet               8.1              14.138446     0.122569
+2021-07-30 GridMET              11.4              10.363636     0.080666
+2021-07-31 GridMET               7.1               9.837868     0.075991
+2021-08-01 GridMET              22.9              14.466822     0.126986
+2021-08-02 GridMET               1.5               2.142857     0.030888
+{'Daymet': 50.0, 'GridMET': 42.9}

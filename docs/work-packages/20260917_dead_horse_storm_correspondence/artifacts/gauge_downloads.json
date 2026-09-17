@@ -1,0 +1,23 @@
+[
+  {
+    "name": "1a_Storm_matrix_2021_gr1mmhr.csv",
+    "status": 200,
+    "url": "https://www.sciencebase.gov/catalog/file/get/6357f335d34ebe4425031f93?f=__disk__f8%2F95%2Fba%2Ff895ba88e32ea2214aadc9b695efc25cef49ec26",
+    "sha256": "06fbc6bf3d03e36db06ebdbcad18c47ed651405fd44a54b47b3d897805f75b0a",
+    "bytes": 7837
+  },
+  {
+    "name": "2a_All_Verification_2021.csv",
+    "status": 200,
+    "url": "https://www.sciencebase.gov/catalog/file/get/6357f335d34ebe4425031f93?f=__disk__1f%2Fd1%2F9a%2F1fd19a0ef28113e193f38d6927a3e27b9d7420e6",
+    "sha256": "c05dad099d158b181e7ecdda731ecb3836486e205e738b8f83b7d82b4389e110",
+    "bytes": 169385
+  },
+  {
+    "name": "4_Gauge_Location.csv",
+    "status": 200,
+    "url": "https://www.sciencebase.gov/catalog/file/get/6357f335d34ebe4425031f93?f=__disk__ab%2Fe5%2F4d%2Fabe54da958249e485daf5d1586a87632a727c485",
+    "sha256": "c8a27bf7cf31140f54e18ed638f2b3ed7feca4831491279b90d79fdfbda1d13d",
+    "bytes": 489
+  }
+]

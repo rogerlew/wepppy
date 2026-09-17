@@ -1,0 +1,34 @@
+Thu Sep 17 03:30:11 UTC 2026
+c0bf57cf3ff0907f80cdad3bb68e50ad315af5d3
+weppcloud-preflight Up 46 seconds
+wepppy-caddy Up 39 seconds
+profile-playback Up 43 seconds
+wepppy-rq-worker-fork-archive Up 30 seconds
+weppcloud Up 26 seconds
+wepppy-rq-worker Up 27 seconds
+wepppy-scheduler Up 15 seconds
+wepppy-rq-worker-batch Up 26 seconds
+wepppy-dtale Up 29 seconds
+wepppy-postgres-backup Up 26 seconds (healthy)
+wepppy-rq-dashboard Up 40 seconds
+weppcloud-status-build Exited (0) 27 seconds ago
+weppcloud-status Up 42 seconds
+weppcloud-preflight-build Exited (0) 33 seconds ago
+wepppy-rq-engine Up 36 seconds
+wepppy-wmesque2 Up 34 seconds
+wepppy-browse Up 41 seconds
+wepppy-elevationquery Up 35 seconds
+wepppy-download Up 46 seconds (health: starting)
+wepppy-metquery Up 32 seconds
+wepppy-wmesque Up 33 seconds
+wepppy-shape-converter Up 38 seconds
+wepppy-query-engine Up 39 seconds
+weppcloudr Up 21 seconds
+docker-fcgiwrap-1 Up 46 seconds
+wepppy-postgres Up 27 seconds (healthy)
+wepppy-redis Up 31 seconds (healthy)
+wepppy-cap Up 41 seconds
+wepppy-f-esri Exited (143) 2 weeks ago
+neo4j Up 2 weeks
+web_login_http=200
+OK

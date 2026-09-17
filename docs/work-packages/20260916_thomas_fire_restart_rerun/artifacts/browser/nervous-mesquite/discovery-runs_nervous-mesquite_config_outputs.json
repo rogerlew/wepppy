@@ -1,0 +1,75 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:nervous-mesquite:2fd121c5cf76",
+    "run_state_domain": "outputs",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:nervous-mesquite:f228e4e5cf24",
+      "outputs_revision": "runstate:nervous-mesquite:2fd121c5cf76"
+    },
+    "updated_at": "2026-09-17T03:31:30Z",
+    "data_state": "not_materialized",
+    "data_updated_at": null,
+    "etag": "W/\"outputs:nervous-mesquite:2fd121c5cf76\"",
+    "artifacts": [],
+    "exports": [
+      {
+        "operation_id": "rq_engine_export_ermit",
+        "path": "/api/runs/{runid}/{config}/export/ermit",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_ermit_submit",
+        "path": "/api/runs/{runid}/{config}/export/ermit",
+        "method": "POST",
+        "response_mode": "json"
+      },
+      {
+        "operation_id": "rq_engine_export_ermit_download",
+        "path": "/api/runs/{runid}/{config}/export/ermit/job/{job_id}/download",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_geopackage",
+        "path": "/api/runs/{runid}/{config}/export/geopackage",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_geodatabase",
+        "path": "/api/runs/{runid}/{config}/export/geodatabase",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_prep_details",
+        "path": "/api/runs/{runid}/{config}/export/prep_details",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_features_submit",
+        "path": "/api/runs/{runid}/{config}/export/features",
+        "method": "POST",
+        "response_mode": "json"
+      },
+      {
+        "operation_id": "rq_engine_export_features_download",
+        "path": "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
+        "method": "GET",
+        "response_mode": "file"
+      },
+      {
+        "operation_id": "rq_engine_export_features_download_published",
+        "path": "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
+        "method": "GET",
+        "response_mode": "file"
+      }
+    ]
+  }
+}

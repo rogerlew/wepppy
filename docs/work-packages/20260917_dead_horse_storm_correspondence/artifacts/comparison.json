@@ -1,0 +1,90 @@
+{
+  "checks": [
+    {
+      "source": "Daymet",
+      "attempt": "8190121c8a4b45e1952861e74d909693",
+      "events_sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24",
+      "max_probability_error": 5.551115123125783e-17,
+      "predictors": {
+        "T": 0.2757535126256827,
+        "F": 0.42879427480654897,
+        "S": 0.5595864610102531
+      }
+    },
+    {
+      "source": "GridMET",
+      "attempt": "f493a714df9d4fbfbfd4370c46ad54f8",
+      "events_sha256": "88f7ad8650e8faad2c47b5cff63aea98a0c5b5c9a0ff18b5a20aeacbf7354d23",
+      "max_probability_error": 5.551115123125783e-17,
+      "predictors": {
+        "T": 0.2757535126256827,
+        "F": 0.42879427480654897,
+        "S": 0.5595864610102531
+      }
+    }
+  ],
+  "candidate_15": [
+    {
+      "date": "2021-07-30T00:00:00.000",
+      "source": "Daymet",
+      "precipitation_mm": 17.0,
+      "intensity_mm_per_hour": 37.3815834144,
+      "probability": 0.7099071741
+    },
+    {
+      "date": "2021-07-31T00:00:00.000",
+      "source": "Daymet",
+      "precipitation_mm": 13.2,
+      "intensity_mm_per_hour": 24.7529224251,
+      "probability": 0.3405697279
+    },
+    {
+      "date": "2021-08-01T00:00:00.000",
+      "source": "Daymet",
+      "precipitation_mm": 11.7,
+      "intensity_mm_per_hour": 11.8720133785,
+      "probability": 0.0955636252
+    },
+    {
+      "date": "2021-08-02T00:00:00.000",
+      "source": "Daymet",
+      "precipitation_mm": 8.1,
+      "intensity_mm_per_hour": 14.1384463215,
+      "probability": 0.1225690054
+    },
+    {
+      "date": "2021-07-30T00:00:00.000",
+      "source": "GridMET",
+      "precipitation_mm": 11.4,
+      "intensity_mm_per_hour": 10.3636363636,
+      "probability": 0.080665989
+    },
+    {
+      "date": "2021-07-31T00:00:00.000",
+      "source": "GridMET",
+      "precipitation_mm": 7.1,
+      "intensity_mm_per_hour": 9.8378678063,
+      "probability": 0.0759914539
+    },
+    {
+      "date": "2021-08-01T00:00:00.000",
+      "source": "GridMET",
+      "precipitation_mm": 22.9,
+      "intensity_mm_per_hour": 14.4668221456,
+      "probability": 0.1269862571
+    },
+    {
+      "date": "2021-08-02T00:00:00.000",
+      "source": "GridMET",
+      "precipitation_mm": 1.5,
+      "intensity_mm_per_hour": 2.1428571429,
+      "probability": 0.0308875522
+    }
+  ],
+  "totals_cli_mm": {
+    "Daymet": 50.0,
+    "GridMET": 42.9
+  },
+  "publisher_candidate_total_mm": 50.16,
+  "note": "Saved CLI peaks are generated, not measured subdaily rainfall; no joint multi-day event probability is calculated."
+}

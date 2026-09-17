@@ -1,0 +1,2388 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "configs": [
+      {
+        "config_id": "0",
+        "display_name": "us",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "0-wbt",
+        "display_name": "us",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "13",
+        "display_name": "ned13",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "2006",
+        "display_name": "us",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "ag-fields",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "ash",
+          "treatments",
+          "ag_fields"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "ash_transport",
+          "treatments",
+          "ag_fields"
+        ]
+      },
+      {
+        "config_id": "au",
+        "display_name": "au",
+        "active_mods": [],
+        "supported_regions": [
+          "au"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "au-disturbed",
+        "display_name": "au-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "au"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "au-fire",
+        "display_name": "au-pep",
+        "active_mods": [
+          "baer",
+          "ash"
+        ],
+        "supported_regions": [
+          "au"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "august_complex",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "baer",
+        "display_name": "pep",
+        "active_mods": [
+          "baer",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "baer-exp",
+        "display_name": "pep",
+        "active_mods": [
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "baer-legacy",
+        "display_name": "pep",
+        "active_mods": [
+          "baer",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "baer-rred",
+        "display_name": "us",
+        "active_mods": [
+          "baer",
+          "rred",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "baer-ssurgo",
+        "display_name": "pep",
+        "active_mods": [
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "bc-ca-disturbed9002",
+        "display_name": "bc-ca-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "bc-ca"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "beachie-fire",
+        "display_name": "riversidefire",
+        "active_mods": [
+          "general",
+          "baer",
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "ca_disturbed",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2015",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2015_smallbasins",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2016",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2016_smallbasins",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2017",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2017_smallbasins",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "ca_hindcast_2018",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "canada",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "canada"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "canada-wbt",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "canada"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "canada-wbt-mofe",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "canada"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "cda",
+        "display_name": "cda",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "cedar23",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "ChileCayumanque",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "ChileCayumanque"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "creek_fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "culvert",
+        "display_name": "culvert",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "czu_region",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "disturbed",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-ak",
+        "display_name": "disturbed-ak",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "alaska"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-anu-ash",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-caldor",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-hi",
+        "display_name": "disturbedi-hi",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "hawaii"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-hubbar-brook",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-hubbar-brook-10m",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-hubbar-brook-2m",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-mofe",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-mofe-us-rap-covers",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-tree-observed",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap_ts"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-treecanopy",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treecanopy"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-us-rap-covers",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-vi",
+        "display_name": "disturbed-virginislands",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "virgin_islands"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-vi-10m-mofe",
+        "display_name": "disturbed-virginislands-10m-ofe",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "virgin_islands"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed-wbt-profile",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments",
+          "rap_ts"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed10",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed10-oyster-creek",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "oyster-creek"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed60",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed9002",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-10-mofe",
+        "display_name": "disturbed9002-10-mofe",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-10m",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-10m-wbt",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-alexash",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-mofe",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed9002-wbt-mofe",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments",
+          "rap_ts"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed9002_wbt",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "treatments"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "disturbed9003",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "disturbed9003-10m",
+        "display_name": "Disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "dolan",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "earth",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "earth"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu",
+        "display_name": "eu",
+        "active_mods": [],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "eu-75",
+        "display_name": "eu",
+        "active_mods": [],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "eu-aragon-disturbed",
+        "display_name": "eu-aragon-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-disturbed",
+        "display_name": "eu-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-disturbed-50",
+        "display_name": "eu-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-disturbed-75",
+        "display_name": "EU-Disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-fire",
+        "display_name": "eu-pep",
+        "active_mods": [
+          "baer",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-fire2",
+        "display_name": "eu-pep",
+        "active_mods": [
+          "baer",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "eu-schandau-disturbed",
+        "display_name": "EU-Schandau-Disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "fishfire",
+        "display_name": "fishfire",
+        "active_mods": [
+          "general"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "fishfire-fire",
+        "display_name": "fishfire",
+        "active_mods": [
+          "general",
+          "baer",
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "gaviota_2004_fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "general",
+        "display_name": "seattle",
+        "active_mods": [
+          "general"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "lt",
+        "display_name": "laketahoe",
+        "active_mods": [
+          "lt"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-fire-future-snow",
+        "display_name": "laketahoe-fire-future",
+        "active_mods": [
+          "lt",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-fire-snow",
+        "display_name": "laketahoe-fire",
+        "active_mods": [
+          "lt",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-fire-snow-caldor",
+        "display_name": "laketahoe-fire",
+        "active_mods": [
+          "lt",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-fire-snow-caldor-tr",
+        "display_name": "laketahoe-fire",
+        "active_mods": [
+          "lt",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-wepp_347f3bd",
+        "display_name": "laketahoe",
+        "active_mods": [
+          "lt"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-wepp_bd16b69-snow",
+        "display_name": "laketahoe",
+        "active_mods": [
+          "lt"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "lt-wepp_latest",
+        "display_name": "laketahoe",
+        "active_mods": [
+          "lt"
+        ],
+        "supported_regions": [
+          "us",
+          "laketahoe"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "lake_tahoe"
+        ]
+      },
+      {
+        "config_id": "nigeria",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "nigeria"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "omni",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "omni",
+          "treatments"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "omni",
+          "treatments"
+        ]
+      },
+      {
+        "config_id": "or-disturbed",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "or-disturbed-beachie-fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "or-disturbed-holiday-fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "or-disturbed-riverside-fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "oregon",
+        "display_name": "oregon",
+        "active_mods": [
+          "general"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "palouse",
+        "display_name": "us",
+        "active_mods": [],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "palouse9002",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "portland-10-mofe",
+        "display_name": "disturbed9002-10-mofe",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland-disturbed",
+        "display_name": "portland-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland-disturbed-simfire-eagle",
+        "display_name": "portland-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland-disturbed-simfire-norse",
+        "display_name": "portland-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland-disturbed9003",
+        "display_name": "Portland-Disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "portland-simfire-eagle-snow",
+        "display_name": "portland",
+        "active_mods": [
+          "portland",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "portland-simfire-norse-snow",
+        "display_name": "portland",
+        "active_mods": [
+          "portland",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "portland-snow",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "portland-wepp_347f3bd",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "portland-wepp_64bf5aa_snow",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "portland-wepp_bd16b69",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "portland-wepp_bd16b69_snow",
+        "display_name": "portland",
+        "active_mods": [
+          "portland"
+        ],
+        "supported_regions": [
+          "us",
+          "portland"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "reveg",
+        "display_name": "reveg",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap_ts",
+          "revegetation"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "reveg-10m-mofe",
+        "display_name": "reveg-10m-mofe",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap_ts",
+          "revegetation"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "reveg-mofe",
+        "display_name": "reveg",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash",
+          "rap_ts",
+          "revegetation"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "rhem",
+        "display_name": "rhem",
+        "active_mods": [
+          "rap",
+          "shrubland",
+          "rangeland_cover",
+          "rhem"
+        ],
+        "supported_regions": [
+          "rhem"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "rhem"
+        ]
+      },
+      {
+        "config_id": "rhem_rap",
+        "display_name": "rhem",
+        "active_mods": [
+          "rap",
+          "shrubland",
+          "rangeland_cover",
+          "rhem"
+        ],
+        "supported_regions": [
+          "rhem"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "rhem"
+        ]
+      },
+      {
+        "config_id": "riverside-fire",
+        "display_name": "riversidefire",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "salvage_logging",
+        "display_name": "salvage logging",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "scu_lightning_complex",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "seattle-simfire-eagle-snow",
+        "display_name": "seattle",
+        "active_mods": [
+          "seattle",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "seattle"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "seattle-simfire-norse-snow",
+        "display_name": "seattle",
+        "active_mods": [
+          "seattle",
+          "baer",
+          "debris_flow"
+        ],
+        "supported_regions": [
+          "us",
+          "seattle"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow"
+        ]
+      },
+      {
+        "config_id": "seattle-snow",
+        "display_name": "seattle",
+        "active_mods": [
+          "seattle"
+        ],
+        "supported_regions": [
+          "us",
+          "seattle"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      },
+      {
+        "config_id": "seattle-snow-9002",
+        "display_name": "seattle-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "seattle"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "seattle-snow-9002-simfire",
+        "display_name": "seattle-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us",
+          "seattle"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "soberanes_fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "tenerife-5m-disturbed",
+        "display_name": "tenerife-5m-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu",
+          "tenerife"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "tenerife-disturbed",
+        "display_name": "tenerife-disturbed",
+        "active_mods": [
+          "disturbed",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "eu",
+          "tenerife"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "us-ash",
+        "display_name": "pep",
+        "active_mods": [
+          "baer",
+          "debris_flow",
+          "ash"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "debris_flow",
+          "ash_transport"
+        ]
+      },
+      {
+        "config_id": "wepp-swat-wbt",
+        "display_name": "wepp-swat-wbt",
+        "active_mods": [
+          "disturbed",
+          "swat"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire",
+          "swat"
+        ]
+      },
+      {
+        "config_id": "whis_carr_fire",
+        "display_name": "disturbed",
+        "active_mods": [
+          "disturbed"
+        ],
+        "supported_regions": [
+          "us"
+        ],
+        "required_upload_steps": [
+          "upload-sbs"
+        ],
+        "recommended_for": [
+          "post_fire"
+        ]
+      },
+      {
+        "config_id": "yasin",
+        "display_name": "turkey",
+        "active_mods": [
+          "turkey"
+        ],
+        "supported_regions": [
+          "turkey"
+        ],
+        "required_upload_steps": [],
+        "recommended_for": [
+          "baseline_watershed"
+        ]
+      }
+    ]
+  }
+}

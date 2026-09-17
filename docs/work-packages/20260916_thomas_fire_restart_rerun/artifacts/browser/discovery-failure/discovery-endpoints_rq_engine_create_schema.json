@@ -1,0 +1,245 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "operation_id": "rq_engine_create",
+    "run_scoped": false,
+    "method": "POST",
+    "path": "/create/",
+    "operation_descriptor": {
+      "operation_id": "rq_engine_create",
+      "run_scoped": false,
+      "method": "POST",
+      "path": "/create/",
+      "path_aliases": [
+        "/api/create/"
+      ],
+      "config_catalog_url": "/api/configs",
+      "accepted_auth": [
+        "rq_token",
+        "bearer_jwt",
+        "session_cookie_same_origin",
+        "captcha"
+      ],
+      "auth_requirements": {
+        "rq_token": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        },
+        "bearer_jwt": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        },
+        "session_cookie_same_origin": {
+          "same_origin_required": true
+        },
+        "captcha": {
+          "challenge_required": true,
+          "required_if_no_authenticated_token": true
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_create/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "not_supported",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync_redirect",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        303
+      ],
+      "response_mode": "redirect",
+      "result_contract": {
+        "kind": "sync_redirect",
+        "required_response_fields": [],
+        "location_header_required": true,
+        "terminal_signal": "http_status_303"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 2
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "creates_new_run",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    "schema_version": 1,
+    "request": {
+      "type": "object",
+      "required": [
+        "config"
+      ],
+      "properties": {
+        "config": {
+          "type": "string",
+          "catalog_url": "/api/configs",
+          "dynamic_enum_from": "/api/configs",
+          "enum": [
+            "0",
+            "0-wbt",
+            "13",
+            "2006",
+            "ag-fields",
+            "au",
+            "au-disturbed",
+            "au-fire",
+            "august_complex",
+            "baer",
+            "baer-exp",
+            "baer-legacy",
+            "baer-rred",
+            "baer-ssurgo",
+            "bc-ca-disturbed9002",
+            "beachie-fire",
+            "ca_disturbed",
+            "ca_hindcast",
+            "ca_hindcast_2015",
+            "ca_hindcast_2015_smallbasins",
+            "ca_hindcast_2016",
+            "ca_hindcast_2016_smallbasins",
+            "ca_hindcast_2017",
+            "ca_hindcast_2017_smallbasins",
+            "ca_hindcast_2018",
+            "canada",
+            "canada-wbt",
+            "canada-wbt-mofe",
+            "cda",
+            "cedar23",
+            "ChileCayumanque",
+            "creek_fire",
+            "culvert",
+            "czu_region",
+            "disturbed",
+            "disturbed-ak",
+            "disturbed-anu-ash",
+            "disturbed-caldor",
+            "disturbed-hi",
+            "disturbed-hubbar-brook",
+            "disturbed-hubbar-brook-10m",
+            "disturbed-hubbar-brook-2m",
+            "disturbed-mofe",
+            "disturbed-mofe-us-rap-covers",
+            "disturbed-tree-observed",
+            "disturbed-treecanopy",
+            "disturbed-us-rap-covers",
+            "disturbed-vi",
+            "disturbed-vi-10m-mofe",
+            "disturbed-wbt-profile",
+            "disturbed10",
+            "disturbed10-oyster-creek",
+            "disturbed60",
+            "disturbed9002",
+            "disturbed9002-10-mofe",
+            "disturbed9002-10m",
+            "disturbed9002-10m-wbt",
+            "disturbed9002-alexash",
+            "disturbed9002-mofe",
+            "disturbed9002-wbt-mofe",
+            "disturbed9002_wbt",
+            "disturbed9003",
+            "disturbed9003-10m",
+            "dolan",
+            "earth",
+            "eu",
+            "eu-75",
+            "eu-aragon-disturbed",
+            "eu-disturbed",
+            "eu-disturbed-50",
+            "eu-disturbed-75",
+            "eu-fire",
+            "eu-fire2",
+            "eu-schandau-disturbed",
+            "fishfire",
+            "fishfire-fire",
+            "gaviota_2004_fire",
+            "general",
+            "lt",
+            "lt-fire-future-snow",
+            "lt-fire-snow",
+            "lt-fire-snow-caldor",
+            "lt-fire-snow-caldor-tr",
+            "lt-wepp_347f3bd",
+            "lt-wepp_bd16b69-snow",
+            "lt-wepp_latest",
+            "nigeria",
+            "omni",
+            "or-disturbed",
+            "or-disturbed-beachie-fire",
+            "or-disturbed-holiday-fire",
+            "or-disturbed-riverside-fire",
+            "oregon",
+            "palouse",
+            "palouse9002",
+            "portland",
+            "portland-10-mofe",
+            "portland-disturbed",
+            "portland-disturbed-simfire-eagle",
+            "portland-disturbed-simfire-norse",
+            "portland-disturbed9003",
+            "portland-simfire-eagle-snow",
+            "portland-simfire-norse-snow",
+            "portland-snow",
+            "portland-wepp_347f3bd",
+            "portland-wepp_64bf5aa_snow",
+            "portland-wepp_bd16b69",
+            "portland-wepp_bd16b69_snow",
+            "reveg",
+            "reveg-10m-mofe",
+            "reveg-mofe",
+            "rhem",
+            "rhem_rap",
+            "riverside-fire",
+            "salvage_logging",
+            "scu_lightning_complex",
+            "seattle-simfire-eagle-snow",
+            "seattle-simfire-norse-snow",
+            "seattle-snow",
+            "seattle-snow-9002",
+            "seattle-snow-9002-simfire",
+            "soberanes_fire",
+            "tenerife-5m-disturbed",
+            "tenerife-disturbed",
+            "us-ash",
+            "wepp-swat-wbt",
+            "whis_carr_fire",
+            "yasin"
+          ]
+        },
+        "rq_token": {
+          "type": "string"
+        },
+        "cap_token": {
+          "type": "string"
+        }
+      },
+      "additional_properties": true
+    },
+    "responses": {
+      "success": {
+        "required": [],
+        "location_header_required": true
+      }
+    }
+  }
+}

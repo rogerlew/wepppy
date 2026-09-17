@@ -1,0 +1,16 @@
+Date,GCCC2_CinnamonCreek 15-minute Intensity (mm/h),GCDC2_Deadman 15-minute Intensity (mm/h),GCEC2_EastForkDeadHorse 15-minute Intensity (mm/h),GCFC2_CoffeePot 15-minute Intensity (mm/h),GCIC2_Windy_Point 15-minute Intensity (mm/h),GCNC2_NoName 15-minute Intensity (mm/h),GCTC2_CinnamonCreekComplex 15-minute Intensity (mm/h),USGS_gc1 15-minute Intensity (mm/h),USGS_gc2 15-minute Intensity (mm/h),USGS_gc3 15-minute Intensity (mm/h),Bair Ranch ﻿15-minute Intensity (mm/h) ,Max 15 min Rainfall (mm/hr),GCCC2_CinnamonCreek 15-minute Accumulation (in),GCDC2_Deadman 15-minute Accumulation (in),GCEC2_EastForkDeadHorse 15-minute Accumulation (in),GCFC2_CoffeePot 15-minute Accumulation (in),GCIC2_Windy_Point 15-minute Accumulation (in),GCNC2_NoName 15-minute Accumulation (in),GCTC2_CinnamonCreekComplex 15-minute Accumulation (in),USGS_gc1 15-minute Accumulation (in),USGS_gc2 15-minute Accumulation (in),USGS_gc3 15-minute Accumulation (in),Bair Ranch ﻿15-minute Accumulation (in),Max 15 min Accumulation of Rainfall (in),"Debris Flow (1 = debris flow, 0 = no debris flow)",date
+7/25/21,6.096,,32.512,,,1.016,,,12.933,,9.144,32.512,0.06,,0.32,,,0.01,,,0.127293307,,0.09,0.32,0,2021-07-25
+7/26/21,9.144,5.08,,,,,,12.0,,,,12.0,0.09,0.05,,,,,,0.118110236,,,,0.118110236,0,2021-07-26
+7/28/21,,2.032,28.651,5.08,10.16,4.064,,,4.006,5.309,,28.651,,0.02,0.281998031,0.05,0.1,0.04,,,0.039429134,0.052253937,,0.281998031,0,2021-07-28
+7/29/21,49.784,67.056,52.832,64.008,20.32,,,29.6,56.8,73.867,104.648,104.648,0.49,0.66,0.52,0.63,0.2,,,0.291338583,0.559055118,0.727037402,1.03,1.03,1,2021-07-29
+7/30/21,3.048,6.096,,7.112,6.096,,,4.0,3.2,4.014,,7.112,0.03,0.06,,0.07,0.06,,,0.039370079,0.031496063,0.039507874,,0.07,0,2021-07-30
+7/31/21,44.704,37.998,77.216,1.016,26.416,,,40.0,22.8,,,77.216,0.44,0.373996063,0.76,0.01,0.26,,,0.393700787,0.224409449,,,0.76,1,2021-07-31
+8/1/21,,,5.08,,1.016,,,,,,,5.08,,,0.05,,0.01,,,,,,,0.05,0,2021-08-01
+8/2/21,,2.032,78.232,10.16,,,,2.411,,9.333,,78.232,,0.02,0.77,0.1,,,,0.023730315,,0.091860236,,0.77,0,2021-08-02
+8/3/21,8.128,12.192,33.782,33.528,6.096,,,5.867,13.2,40.8,,40.8,0.08,0.12,0.3325,0.33,0.06,,,0.057746063,0.12992126,0.401574803,,0.401574803,1,2021-08-03
+8/6/21,2.032,16.459,4.064,3.048,2.032,,,3.689,,,,16.459,0.02,0.161998031,0.04,0.03,0.02,,,0.036309055,,,,0.161998031,0,2021-08-06
+8/10/21,,,,6.096,,,,,,,,6.096,,,,0.06,,,,,,,,0.06,0,2021-08-10
+8/13/21,,,,,4.064,,,,,,,4.064,,,,,0.04,,,,,,,0.04,0,2021-08-13
+8/14/21,,,2.032,,,,,,,,,2.032,,,0.02,,,,,,,,,0.02,0,2021-08-14
+8/15/21,,5.08,,,,,,,,,,5.08,,0.05,,,,,,,,,,0.05,0,2021-08-15
+8/16/21,,,2.032,,,,,,,,,2.032,,,0.02,,,,,,,,,0.02,0,2021-08-16

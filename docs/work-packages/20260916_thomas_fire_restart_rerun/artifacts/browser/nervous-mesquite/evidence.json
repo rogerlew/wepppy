@@ -1,0 +1,404 @@
+[
+  {
+    "utc": "2026-09-17T03:31:13.911Z",
+    "stage": "discovery",
+    "path": "configs",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:14.897Z",
+    "stage": "discovery",
+    "path": "endpoints",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:14.958Z",
+    "stage": "discovery",
+    "path": "endpoints/rq_engine_create/schema",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:15.275Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/pipeline",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:15.468Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/readiness",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:15.810Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/endpoints?include_operation_docs=true",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:15.812Z",
+    "stage": "operation_discovery",
+    "postfire_catalog_entries": false
+  },
+  {
+    "utc": "2026-09-17T03:31:16.087Z",
+    "stage": "discovery_catalog_gap",
+    "action": "Use registered OpenAPI route and existing browser controller payload; no direct guessed mutation."
+  },
+  {
+    "utc": "2026-09-17T03:31:16.373Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "noaa",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "job_id": "9441ae68-2648-419f-8f4d-10898d133155",
+        "phase": "complete",
+        "created_at": "2026-09-16T20:53:01.376470+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif"
+      },
+      "run": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "job_id": "b5232960-674f-4468-ba0f-a67588bed59d",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:09:54.987978+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "noaa"
+      },
+      "dnbr": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -1367.7366943359375,
+          1235.358642578125
+        ],
+        "prepared_range": [
+          -0.037987105548381805,
+          1.0205727815628052
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T20:53:08.999857+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "model": "M1",
+        "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+        "completed_at": "2026-09-16T23:10:07.030929+00:00",
+        "partial": false,
+        "area_warning": false,
+        "coverage": {
+          "excluded_cells": 2,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 77669,
+          "valid_cells": 77667,
+          "valid_fraction": 0.9999742497006527
+        },
+        "partial_reason": null,
+        "current": false,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/manifest.json"
+          }
+        ]
+      },
+      "freshness": "stale"
+    }
+  },
+  {
+    "utc": "2026-09-17T03:31:17.988Z",
+    "stage": "submitted",
+    "response": {
+      "job_id": "7583d48c-014f-46e8-9e55-cb09f948f68c",
+      "result": {
+        "attempt_id": "b9b523bda3f34ca684b7790145d4e43c"
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T03:31:32.703Z",
+    "stage": "completed",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "noaa",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "job_id": "9441ae68-2648-419f-8f4d-10898d133155",
+        "phase": "complete",
+        "created_at": "2026-09-16T20:53:01.376470+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif"
+      },
+      "run": {
+        "id": "b9b523bda3f34ca684b7790145d4e43c",
+        "job_id": "7583d48c-014f-46e8-9e55-cb09f948f68c",
+        "phase": "complete",
+        "created_at": "2026-09-17T03:31:17.166476+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "noaa"
+      },
+      "dnbr": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -1367.7366943359375,
+          1235.358642578125
+        ],
+        "prepared_range": [
+          -0.037987105548381805,
+          1.0205727815628052
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T20:53:08.999857+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "b9b523bda3f34ca684b7790145d4e43c",
+        "model": "M1",
+        "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+        "completed_at": "2026-09-17T03:31:29.935495+00:00",
+        "partial": false,
+        "area_warning": false,
+        "coverage": {
+          "excluded_cells": 2,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 77669,
+          "valid_cells": 77667,
+          "valid_fraction": 0.9999742497006527
+        },
+        "partial_reason": null,
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/b9b523bda3f34ca684b7790145d4e43c/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/b9b523bda3f34ca684b7790145d4e43c/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/b9b523bda3f34ca684b7790145d4e43c/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/b9b523bda3f34ca684b7790145d4e43c/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/b9b523bda3f34ca684b7790145d4e43c/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-17T03:31:32.950Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/pipeline",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:33.110Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/readiness",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:33.192Z",
+    "stage": "discovery",
+    "path": "runs/nervous-mesquite/config/outputs",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:43.173Z",
+    "stage": "artifact",
+    "name": "design.parquet",
+    "sha256": "3204f7dd5e47d899ec26b3c1ca959f8c2856e7716d67c5864d5655d3e3f7e036",
+    "bytes": 3184
+  },
+  {
+    "utc": "2026-09-17T03:31:43.846Z",
+    "stage": "artifact",
+    "name": "events.parquet",
+    "sha256": "4c4c8c9e7fece190c3c15f544fe152a021e638ebe0032e0ea1a7829edcb4bca1",
+    "bytes": 322718
+  },
+  {
+    "utc": "2026-09-17T03:31:44.546Z",
+    "stage": "artifact",
+    "name": "inverse.parquet",
+    "sha256": "2a42ecc7f88b6f37560c985b9b71584665fa9575735a77dcddf87e33dc527449",
+    "bytes": 2213
+  },
+  {
+    "utc": "2026-09-17T03:31:45.206Z",
+    "stage": "artifact",
+    "name": "manifest.json",
+    "sha256": "7b7ac41149a748fa397181e44df2c34f74bd0880c31b201fcf3baf1adc9fd0c0",
+    "bytes": 18572
+  },
+  {
+    "utc": "2026-09-17T03:31:45.912Z",
+    "stage": "artifact",
+    "name": "valid_mask.tif",
+    "sha256": "ef8bb093171986de8adf7da00ab00c65f58105832b233c382164550582b75508",
+    "bytes": 6035
+  },
+  {
+    "utc": "2026-09-17T03:31:45.983Z",
+    "stage": "source_browse",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T03:31:47.146Z",
+    "stage": "report_verified",
+    "attempt_id": "b9b523bda3f34ca684b7790145d4e43c",
+    "soil_source": "NRCS-derived STATSGO fine-earth Kf",
+    "curve_points": 105
+  },
+  {
+    "utc": "2026-09-17T03:31:47.158Z",
+    "stage": "PASS",
+    "attempt_id": "b9b523bda3f34ca684b7790145d4e43c"
+  }
+]

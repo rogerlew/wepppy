@@ -1,0 +1,12 @@
+{
+  "protected_files": 387,
+  "byte_changes": [
+    "climate.nodb"
+  ],
+  "serialization_timestamp_only": [
+    "climate.nodb"
+  ],
+  "scientific_changes": [],
+  "prior_module_files": 136,
+  "replaced_attempt_files": []
+}

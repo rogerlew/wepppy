@@ -1,0 +1,178 @@
+{
+  "gauge": "GCEC2_EastForkDeadHorse",
+  "coordinates": [
+    -107.197311,
+    39.628533
+  ],
+  "inside_modeled_basin": true,
+  "daymet_query": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.628533&lon=-107.197311&year=2021",
+  "daymet_raw_sha256": "f4a9141b2e0c0ef221436f625884d8b3545c4cb43825a2c5b6b3b0f6e57873e7",
+  "rows": [
+    {
+      "date": "2021-07-25T00:00:00.000",
+      "gauge_I15_mm_h": 32.512,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 3.66,
+      "Daymet_CLI_I15_mm_h": 5.3115802018,
+      "Daymet_CLI_M3": 0.0449728321,
+      "GridMET_CLI_I15_mm_h": 2.6592647862,
+      "GridMET_CLI_M3": 0.0328496597,
+      "M3_using_gauge_I15": 0.5732351425
+    },
+    {
+      "date": "2021-07-26T00:00:00.000",
+      "gauge_I15_mm_h": null,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.4208935542,
+      "GridMET_CLI_M3": 0.0251322168,
+      "M3_using_gauge_I15": null
+    },
+    {
+      "date": "2021-07-28T00:00:00.000",
+      "gauge_I15_mm_h": 28.651,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 12.98,
+      "Daymet_CLI_I15_mm_h": 15.5,
+      "Daymet_CLI_M3": 0.1417782713,
+      "GridMET_CLI_I15_mm_h": 4.5957526816,
+      "GridMET_CLI_M3": 0.0413338144,
+      "M3_using_gauge_I15": 0.4549814898
+    },
+    {
+      "date": "2021-07-29T00:00:00.000",
+      "gauge_I15_mm_h": 52.832,
+      "regional_debris_flow_flag": 1,
+      "Daymet_at_gauge_daily_mm": 10.15,
+      "Daymet_CLI_I15_mm_h": 20.6079594017,
+      "Daymet_CLI_M3": 0.2366087373,
+      "GridMET_CLI_I15_mm_h": 13.7634701614,
+      "GridMET_CLI_M3": 0.1176871981,
+      "M3_using_gauge_I15": 0.9425799444
+    },
+    {
+      "date": "2021-07-30T00:00:00.000",
+      "gauge_I15_mm_h": null,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 15.99,
+      "Daymet_CLI_I15_mm_h": 37.3815834144,
+      "Daymet_CLI_M3": 0.7099071741,
+      "GridMET_CLI_I15_mm_h": 10.3636363636,
+      "GridMET_CLI_M3": 0.080665989,
+      "M3_using_gauge_I15": null
+    },
+    {
+      "date": "2021-07-31T00:00:00.000",
+      "gauge_I15_mm_h": 77.216,
+      "regional_debris_flow_flag": 1,
+      "Daymet_at_gauge_daily_mm": 12.46,
+      "Daymet_CLI_I15_mm_h": 24.7529224251,
+      "Daymet_CLI_M3": 0.3405697279,
+      "GridMET_CLI_I15_mm_h": 9.8378678063,
+      "GridMET_CLI_M3": 0.0759914539,
+      "M3_using_gauge_I15": 0.996987669
+    },
+    {
+      "date": "2021-08-01T00:00:00.000",
+      "gauge_I15_mm_h": 5.08,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 9.52,
+      "Daymet_CLI_I15_mm_h": 11.8720133785,
+      "Daymet_CLI_M3": 0.0955636252,
+      "GridMET_CLI_I15_mm_h": 14.4668221456,
+      "GridMET_CLI_M3": 0.1269862571,
+      "M3_using_gauge_I15": 0.0437633409
+    },
+    {
+      "date": "2021-08-02T00:00:00.000",
+      "gauge_I15_mm_h": 78.232,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 8.2,
+      "Daymet_CLI_I15_mm_h": 14.1384463215,
+      "Daymet_CLI_M3": 0.1225690054,
+      "GridMET_CLI_I15_mm_h": 2.1428571429,
+      "GridMET_CLI_M3": 0.0308875522,
+      "M3_using_gauge_I15": 0.9973411055
+    },
+    {
+      "date": "2021-08-03T00:00:00.000",
+      "gauge_I15_mm_h": 33.782,
+      "regional_debris_flow_flag": 1,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 4.172348774,
+      "GridMET_CLI_M3": 0.0393157737,
+      "M3_using_gauge_I15": 0.610998331
+    },
+    {
+      "date": "2021-08-06T00:00:00.000",
+      "gauge_I15_mm_h": 4.064,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.13,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.0,
+      "GridMET_CLI_M3": null,
+      "M3_using_gauge_I15": 0.0388147382
+    },
+    {
+      "date": "2021-08-10T00:00:00.000",
+      "gauge_I15_mm_h": null,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.0,
+      "GridMET_CLI_M3": null,
+      "M3_using_gauge_I15": null
+    },
+    {
+      "date": "2021-08-13T00:00:00.000",
+      "gauge_I15_mm_h": null,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.0,
+      "GridMET_CLI_M3": null,
+      "M3_using_gauge_I15": null
+    },
+    {
+      "date": "2021-08-14T00:00:00.000",
+      "gauge_I15_mm_h": 2.032,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.0,
+      "GridMET_CLI_M3": null,
+      "M3_using_gauge_I15": 0.030481383
+    },
+    {
+      "date": "2021-08-15T00:00:00.000",
+      "gauge_I15_mm_h": null,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.0,
+      "GridMET_CLI_M3": null,
+      "M3_using_gauge_I15": null
+    },
+    {
+      "date": "2021-08-16T00:00:00.000",
+      "gauge_I15_mm_h": 2.032,
+      "regional_debris_flow_flag": 0,
+      "Daymet_at_gauge_daily_mm": 0.0,
+      "Daymet_CLI_I15_mm_h": 0.0,
+      "Daymet_CLI_M3": null,
+      "GridMET_CLI_I15_mm_h": 0.624211009,
+      "GridMET_CLI_M3": 0.0257532147,
+      "M3_using_gauge_I15": 0.030481383
+    }
+  ],
+  "interpretation": "Gauge-forced M3 probabilities use the unchanged whole-basin predictors; illustrative forcing comparison, not a rerun or independent validation of basin-scale M3. Regional flag is not a Dead Horse Creek event label. Missing gauge entries remain NaN."
+}

@@ -1,0 +1,67 @@
+[
+  "/api/runs/{runid}/{config}/postfire-debris-flow/run",
+  {
+    "post": {
+      "tags": [
+        "rq-engine",
+        "runs"
+      ],
+      "summary": "Run the selected Staley model",
+      "operationId": "rq_engine_postfire_run",
+      "parameters": [
+        {
+          "name": "runid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Runid"
+          }
+        },
+        {
+          "name": "config",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Config"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Job admitted.",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "400": {
+          "description": "Invalid model or rainfall request."
+        },
+        "401": {
+          "description": "Unauthorized. Returns the canonical error payload."
+        },
+        "403": {
+          "description": "Forbidden. Returns the canonical error payload."
+        },
+        "409": {
+          "description": "Busy or changed project data."
+        },
+        "413": {
+          "description": "Request too large."
+        },
+        "422": {
+          "description": "Required project data unavailable."
+        },
+        "500": {
+          "description": "Server error. Returns the canonical error payload."
+        },
+        "503": {
+          "description": "Service unavailable."
+        }
+      }
+    }
+  }
+]

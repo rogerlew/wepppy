@@ -3,6 +3,9 @@
 > WBT-based postfire debris-flow likelihood and rainfall-threshold
 > assessment using Staley et al. (2017), with NRCS-derived STATSGO fine-earth Kf for M1.
 
+For setup, report interpretation and the Thomas Fire M1 / Grizzly Creek M3
+validation case studies, see the [end-user guide](ENDUSER.md).
+
 ## Status
 
 The production M1 control, NoDb state, dNBR upload and RQ execution are implemented.

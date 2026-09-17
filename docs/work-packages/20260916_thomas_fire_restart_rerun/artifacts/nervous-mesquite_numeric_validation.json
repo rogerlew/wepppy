@@ -1,0 +1,57 @@
+{
+  "runid": "nervous-mesquite",
+  "attempt_id": "b9b523bda3f34ca684b7790145d4e43c",
+  "job_id": "7583d48c-014f-46e8-9e55-cb09f948f68c",
+  "model": "M1",
+  "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+  "predictors": {
+    "F": 0.5410453359946719,
+    "S": 0.1393960061975289,
+    "T": 0.7412672048617817
+  },
+  "independent_raster_predictors": {
+    "S": 0.1393960061975289,
+    "F": 0.5410453359946719,
+    "T": 0.7412672048617817
+  },
+  "coverage": {
+    "excluded_cells": 2,
+    "mask": "valid_mask.tif",
+    "policy": "common_valid_v1",
+    "total_cells": 77669,
+    "valid_cells": 77667,
+    "valid_fraction": 0.9999742497006527
+  },
+  "probability_i15_24": 0.7219154455948592,
+  "p50_mm_per_hour": {
+    "15": 19.005306910602027,
+    "30": 15.25024047567399,
+    "60": 12.118163949899476
+  },
+  "checks": {
+    "events": 8067,
+    "design": 12,
+    "inverse": 3,
+    "curve-15.csv": 105,
+    "curve-30.csv": 105,
+    "curve-60.csv": 103,
+    "curve-english.csv": 103
+  },
+  "english_display_factor": 0.0393701,
+  "source_url": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/statsgo-KFFACT.tif",
+  "source_identity": [
+    "\"978b86438e7a437429ccf062285e4de7\"",
+    353845954,
+    "Tue, 10 Dec 2024 19:47:23 GMT"
+  ],
+  "source_valid_cells": 77669,
+  "source_missing_cells": 0,
+  "source_request_files": 19,
+  "rainfall_provenance": {
+    "climate_mode": "GridMetPRISM",
+    "date_semantics": "calendar",
+    "design_origin": "NOAA Atlas 14 statistical design rainfall",
+    "event_origin": "Project climate events",
+    "subdaily_origin": "modeled_disaggregated"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "method": "Five domain cells nearest 20/80 percent bounding-box targets and center; points snapped inside basin. Screening only, not all Daymet pixels.",
+  "points": [
+    {
+      "label": "SW",
+      "longitude": -107.22640965626077,
+      "latitude": 39.61559160700338,
+      "url": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.61559160700338&lon=-107.22640965626077&year=2021",
+      "sha256": "a02af70bd015b510a7c99e136d4cc1dfca129ba66efc3b70371e2f77c8e34cd2"
+    },
+    {
+      "label": "NW",
+      "longitude": -107.23322661714053,
+      "latitude": 39.6645601730596,
+      "url": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.6645601730596&lon=-107.23322661714053&year=2021",
+      "sha256": "741ca960f3df098963f4c6aa1e0fade9be4e1e3f99026504c91427f85b470f19"
+    },
+    {
+      "label": "SE",
+      "longitude": -107.1936458930649,
+      "latitude": 39.610899757954286,
+      "url": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.610899757954286&lon=-107.1936458930649&year=2021",
+      "sha256": "c4ca45ff4d46890b292f215a5b2342a06a3da7aed95a7775d12bdb2a108f953a"
+    },
+    {
+      "label": "NE",
+      "longitude": -107.20072140242478,
+      "latitude": 39.66509085882046,
+      "url": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.66509085882046&lon=-107.20072140242478&year=2021",
+      "sha256": "8bb336740117c22bbe7eb8ae0679bcd840a2e38b5a35a0c768c666ff12fd333f"
+    },
+    {
+      "label": "center",
+      "longitude": -107.21442401398961,
+      "latitude": 39.637893121733924,
+      "url": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.637893121733924&lon=-107.21442401398961&year=2021",
+      "sha256": "7ad2e859cb9b89041f36209005ced3c6e2cf1b5c72c0d81c125209d9b92d56b3"
+    }
+  ],
+  "candidate_totals_mm": {
+    "NE": 49.3,
+    "NW": 53.120000000000005,
+    "SE": 35.68,
+    "SW": 51.239999999999995,
+    "center": 50.16
+  },
+  "later_window_totals_mm": {
+    "NE": 0.0,
+    "NW": 0.0,
+    "SE": 0.16,
+    "SW": 0.0,
+    "center": 0.0
+  }
+}
