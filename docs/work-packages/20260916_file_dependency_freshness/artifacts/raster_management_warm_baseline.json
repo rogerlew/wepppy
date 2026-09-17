@@ -1,0 +1,177 @@
+{
+  "scope": "Actual warmed-owner build_managements with native counting, NoDb lock/persist and Parquet publication; disposable existing clones only",
+  "cases": {
+    "curable-program": {
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810",
+      "measurements": [
+        {
+          "phase": "warm_hit",
+          "repeats": 5,
+          "seconds": [
+            0.09134960803203285,
+            0.08802676713094115,
+            0.08320019207894802,
+            0.23161878413520753,
+            0.08284672698937356
+          ],
+          "mean_seconds": 0.11540841567330062,
+          "native_seconds": [],
+          "locks": [
+            {
+              "seconds": 0.06447789398953319,
+              "body_seconds": 0.02225775201804936,
+              "acquire_seconds": 0.001743297092616558,
+              "persist_unlock_seconds": 0.04047684487886727
+            },
+            {
+              "seconds": 0.06264174496755004,
+              "body_seconds": 0.02297602384351194,
+              "acquire_seconds": 0.0012263641692698002,
+              "persist_unlock_seconds": 0.0384393569547683
+            },
+            {
+              "seconds": 0.05974095594137907,
+              "body_seconds": 0.021136281080543995,
+              "acquire_seconds": 0.0009081088937819004,
+              "persist_unlock_seconds": 0.037696565967053175
+            },
+            {
+              "seconds": 0.05586686008609831,
+              "body_seconds": 0.021227756049484015,
+              "acquire_seconds": 0.0011103148572146893,
+              "persist_unlock_seconds": 0.03352878917939961
+            },
+            {
+              "seconds": 0.06192734185606241,
+              "body_seconds": 0.02188788284547627,
+              "acquire_seconds": 0.0019069539848715067,
+              "persist_unlock_seconds": 0.038132505025714636
+            }
+          ]
+        },
+        {
+          "phase": "warm_forced_miss",
+          "repeats": 3,
+          "seconds": [
+            0.14601167105138302,
+            0.12852678704075515,
+            0.12881643208675086
+          ],
+          "mean_seconds": 0.13445163005962968,
+          "native_seconds": [
+            0.05605185800231993,
+            0.03888087789528072,
+            0.0382392939645797
+          ],
+          "locks": [
+            {
+              "seconds": 0.11742427386343479,
+              "body_seconds": 0.07682859990745783,
+              "acquire_seconds": 0.0007736389525234699,
+              "persist_unlock_seconds": 0.03982203500345349
+            },
+            {
+              "seconds": 0.10281007317826152,
+              "body_seconds": 0.061029522912576795,
+              "acquire_seconds": 0.0018495072145015001,
+              "persist_unlock_seconds": 0.039931043051183224
+            },
+            {
+              "seconds": 0.10197081696242094,
+              "body_seconds": 0.06025176006369293,
+              "acquire_seconds": 0.0011811929289251566,
+              "persist_unlock_seconds": 0.040537863969802856
+            }
+          ]
+        }
+      ],
+      "rows_types_values_preserved": true
+    },
+    "beneficiary-forfeit": {
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1",
+      "measurements": [
+        {
+          "phase": "warm_hit",
+          "repeats": 5,
+          "seconds": [
+            0.8995095670688897,
+            0.8711269688792527,
+            0.870472403941676,
+            0.884621171047911,
+            0.9173644951079041
+          ],
+          "mean_seconds": 0.8886189212091267,
+          "native_seconds": [],
+          "locks": [
+            {
+              "seconds": 0.768162677064538,
+              "body_seconds": 0.5228836329188198,
+              "acquire_seconds": 0.001461896114051342,
+              "persist_unlock_seconds": 0.24381714803166687
+            },
+            {
+              "seconds": 0.7399673261679709,
+              "body_seconds": 0.48952039889991283,
+              "acquire_seconds": 0.0013565171975642443,
+              "persist_unlock_seconds": 0.24909041007049382
+            },
+            {
+              "seconds": 0.739865685813129,
+              "body_seconds": 0.49211644497700036,
+              "acquire_seconds": 0.0014558290131390095,
+              "persist_unlock_seconds": 0.24629341182298958
+            },
+            {
+              "seconds": 0.7553223550785333,
+              "body_seconds": 0.5057424700353295,
+              "acquire_seconds": 0.0012410830240696669,
+              "persist_unlock_seconds": 0.24833880201913416
+            },
+            {
+              "seconds": 0.7588944430463016,
+              "body_seconds": 0.4986360599286854,
+              "acquire_seconds": 0.001292722998186946,
+              "persist_unlock_seconds": 0.25896566011942923
+            }
+          ]
+        },
+        {
+          "phase": "warm_forced_miss",
+          "repeats": 3,
+          "seconds": [
+            1.680566952098161,
+            1.664373795967549,
+            1.6810139510780573
+          ],
+          "mean_seconds": 1.6753182330479224,
+          "native_seconds": [
+            0.7783718041609973,
+            0.7254097128752619,
+            0.7272841951344162
+          ],
+          "locks": [
+            {
+              "seconds": 1.545733586885035,
+              "body_seconds": 1.2843718291260302,
+              "acquire_seconds": 0.0013528468552976847,
+              "persist_unlock_seconds": 0.26000891090370715
+            },
+            {
+              "seconds": 1.4956106080207974,
+              "body_seconds": 1.2255233761388808,
+              "acquire_seconds": 0.0012029879726469517,
+              "persist_unlock_seconds": 0.26888424390926957
+            },
+            {
+              "seconds": 1.533231819048524,
+              "body_seconds": 1.2517600171267986,
+              "acquire_seconds": 0.0019492970313876867,
+              "persist_unlock_seconds": 0.2795225048903376
+            }
+          ]
+        }
+      ],
+      "rows_types_values_preserved": true
+    }
+  }
+}

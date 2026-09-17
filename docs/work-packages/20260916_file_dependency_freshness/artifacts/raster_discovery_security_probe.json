@@ -1,0 +1,24 @@
+{
+  "gdal": "3100300",
+  "scope": "loopback disposable HTTP fixture only",
+  "observations": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "VRT",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": []
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-102/test_local_vrt_discovery_remot0/selected.vrt",
+        "/vsicurl/http://127.0.0.1:37111/source.tif"
+      ],
+      "requests": []
+    }
+  ],
+  "discovery_network_requests": 0
+}

@@ -1,0 +1,691 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_management_interleaved.py
+2026-09-17 05:21:38 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=False: 130.978 ms
+2026-09-17 05:21:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=True: 119.010 ms
+2026-09-17 05:21:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=True: 97.668 ms
+2026-09-17 05:21:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=False: 244.619 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=False: 87.382 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit composed=True: 101.981 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=False: 117.770 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=True: 153.610 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=True: 142.883 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=False: 121.292 ms
+2026-09-17 05:21:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=False: 124.647 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss composed=True: 148.151 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=False: 123.955 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=True: 144.891 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=True: 143.068 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=False: 121.274 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=False: 115.665 ms
+2026-09-17 05:21:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss composed=True: 149.592 ms
+2026-09-17 05:21:42 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:21:43 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=False: 878.835 ms
+2026-09-17 05:21:45 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=True: 922.828 ms
+2026-09-17 05:21:46 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=True: 924.791 ms
+2026-09-17 05:21:47 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=False: 882.050 ms
+2026-09-17 05:21:48 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=False: 920.419 ms
+2026-09-17 05:21:49 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit composed=True: 987.713 ms
+2026-09-17 05:21:50 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=False: 1622.686 ms
+2026-09-17 05:21:51 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=True: 1651.195 ms
+2026-09-17 05:21:53 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=True: 1697.717 ms
+2026-09-17 05:21:55 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=False: 1583.842 ms
+2026-09-17 05:21:56 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=False: 1604.980 ms
+2026-09-17 05:21:58 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss composed=True: 1635.544 ms
+2026-09-17 05:22:00 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=False: 1604.025 ms
+2026-09-17 05:22:01 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=True: 1901.761 ms
+2026-09-17 05:22:03 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=True: 1948.481 ms
+2026-09-17 05:22:05 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=False: 1581.587 ms
+2026-09-17 05:22:07 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=False: 1555.852 ms
+2026-09-17 05:22:08 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss composed=True: 1897.941 ms
+2026-09-17 05:22:10 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+{
+  "scope": "Paired whole-consumer controls; this simple-file observer is only a cost probe.\n\nRetained fixtures are local GTiff/AAIGrid without unproven companions. The probe\ndoes not implement the contract's pre-open eligibility/security checks, so its\ncost is a baseline, never implementation acceptance. All owner writes are to\nuniquely named disposable clones from benchmark_raster_consumers.py.\n",
+  "cache_note": "Warm NFS/filesystem; helper cold does not mean cold storage",
+  "cases": {
+    "curable-program": {
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810",
+      "measurements": [
+        {
+          "phase": "settled_hit",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 0.13097830512560904,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.09580224403180182,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.03464687196537852,
+            "acquire_seconds": 0.0019170681480318308,
+            "persist_unlock_seconds": 0.059238303918391466
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 0.11901023401878774,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.09561073291115463,
+            "validation_seconds": 0.02092825318686664,
+            "body_seconds": 0.04860803694464266,
+            "acquire_seconds": 0.0012000950518995523,
+            "persist_unlock_seconds": 0.04580260091461241
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 0.09766779886558652,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.07969587994739413,
+            "validation_seconds": 0.018402633955702186,
+            "body_seconds": 0.041861040983349085,
+            "acquire_seconds": 0.0015938200522214174,
+            "persist_unlock_seconds": 0.03624101891182363
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 0.24461901001632214,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.061091837007552385,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.02380494005046785,
+            "acquire_seconds": 0.0014045939315110445,
+            "persist_unlock_seconds": 0.03588230302557349
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 0.08738230797462165,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.062121480936184525,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.02150710509158671,
+            "acquire_seconds": 0.0014798629563301802,
+            "persist_unlock_seconds": 0.039134512888267636
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 0.1019814289174974,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.07828262401744723,
+            "validation_seconds": 0.018840079894289374,
+            "body_seconds": 0.0404412189964205,
+            "acquire_seconds": 0.0008899851236492395,
+            "persist_unlock_seconds": 0.03695141989737749
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 0.11776950606144965,
+          "native_seconds": [
+            0.03293111687526107
+          ],
+          "lock": {
+            "seconds": 0.09384723799303174,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.05546336993575096,
+            "acquire_seconds": 0.0012082189787179232,
+            "persist_unlock_seconds": 0.037175649078562856
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 0.15361014707013965,
+          "native_seconds": [
+            0.04635450500063598
+          ],
+          "lock": {
+            "seconds": 0.12909894110634923,
+            "validation_seconds": 0.017911146860569715,
+            "body_seconds": 0.08573690918274224,
+            "acquire_seconds": 0.001290071988478303,
+            "persist_unlock_seconds": 0.04207195993512869
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 0.14288271497935057,
+          "native_seconds": [
+            0.038715089904144406
+          ],
+          "lock": {
+            "seconds": 0.11815940891392529,
+            "validation_seconds": 0.01789553789421916,
+            "body_seconds": 0.07711164304055274,
+            "acquire_seconds": 0.0010348448995500803,
+            "persist_unlock_seconds": 0.040012920973822474
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 0.12129170703701675,
+          "native_seconds": [
+            0.037797887809574604
+          ],
+          "lock": {
+            "seconds": 0.0983941110316664,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.05889647896401584,
+            "acquire_seconds": 0.0011326479725539684,
+            "persist_unlock_seconds": 0.03836498409509659
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 0.12464711396023631,
+          "native_seconds": [
+            0.039161483058705926
+          ],
+          "lock": {
+            "seconds": 0.10110875405371189,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.062098757131025195,
+            "acquire_seconds": 0.0010552899911999702,
+            "persist_unlock_seconds": 0.037954706931486726
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 0.148151254048571,
+          "native_seconds": [
+            0.043188150972127914
+          ],
+          "lock": {
+            "seconds": 0.1237914978992194,
+            "validation_seconds": 0.01812832080759108,
+            "body_seconds": 0.08333445806056261,
+            "acquire_seconds": 0.0008653448894619942,
+            "persist_unlock_seconds": 0.03959169494919479
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 0.12395518599078059,
+          "native_seconds": [
+            0.03812284395098686
+          ],
+          "lock": {
+            "seconds": 0.10005207196809351,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.059936489909887314,
+            "acquire_seconds": 0.0009085061028599739,
+            "persist_unlock_seconds": 0.03920707595534623
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 0.1448910180479288,
+          "native_seconds": [
+            0.038168190978467464
+          ],
+          "lock": {
+            "seconds": 0.12030326086096466,
+            "validation_seconds": 0.021034160163253546,
+            "body_seconds": 0.08062386116944253,
+            "acquire_seconds": 0.001018195878714323,
+            "persist_unlock_seconds": 0.0386612038128078
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 0.14306790800765157,
+          "native_seconds": [
+            0.037683828035369515
+          ],
+          "lock": {
+            "seconds": 0.11990264896303415,
+            "validation_seconds": 0.021242863964289427,
+            "body_seconds": 0.080476398114115,
+            "acquire_seconds": 0.0010381429456174374,
+            "persist_unlock_seconds": 0.038388107903301716
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 0.1212744431104511,
+          "native_seconds": [
+            0.03772553987801075
+          ],
+          "lock": {
+            "seconds": 0.09857340692542493,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.0592791719827801,
+            "acquire_seconds": 0.0009768570307642221,
+            "persist_unlock_seconds": 0.03831737791188061
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 0.11566483182832599,
+          "native_seconds": [
+            0.03880114806815982
+          ],
+          "lock": {
+            "seconds": 0.0968341059051454,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.06063268706202507,
+            "acquire_seconds": 0.0010031219571828842,
+            "persist_unlock_seconds": 0.03519829688593745
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 0.1495916829444468,
+          "native_seconds": [
+            0.03953601885586977
+          ],
+          "lock": {
+            "seconds": 0.12499596504494548,
+            "validation_seconds": 0.021411455934867263,
+            "body_seconds": 0.08253963803872466,
+            "acquire_seconds": 0.00084513402543962,
+            "persist_unlock_seconds": 0.0416111929807812
+          }
+        }
+      ],
+      "summary": {
+        "settled_hit": {
+          "baseline_mean_seconds": 0.15432654103885093,
+          "composed_mean_seconds": 0.10621982060062389,
+          "whole_added_seconds": -0.048106720438227044,
+          "lock_added_seconds": 0.011524558300152421,
+          "validation_mean_seconds": 0.0193903223456194
+        },
+        "settled_miss": {
+          "baseline_mean_seconds": 0.12123610901956756,
+          "composed_mean_seconds": 0.1482147053660204,
+          "whole_added_seconds": 0.026978596346452846,
+          "lock_added_seconds": 0.025899914947027966,
+          "validation_mean_seconds": 0.017978335187459987
+        },
+        "cold_miss": {
+          "baseline_mean_seconds": 0.1202981536431859,
+          "composed_mean_seconds": 0.14585020300000906,
+          "whole_added_seconds": 0.02555204935682316,
+          "lock_added_seconds": 0.023247430023426816,
+          "validation_mean_seconds": 0.021229493354136746
+        }
+      },
+      "rows_types_values_preserved": true
+    },
+    "beneficiary-forfeit": {
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1",
+      "measurements": [
+        {
+          "phase": "settled_hit",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 0.8788350059185177,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.747987779090181,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.5037532879505306,
+            "acquire_seconds": 0.0010933370795100927,
+            "persist_unlock_seconds": 0.24314115406014025
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 0.9228279290255159,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.7941077200230211,
+            "validation_seconds": 0.0430915430188179,
+            "body_seconds": 0.5412943090777844,
+            "acquire_seconds": 0.000904130982235074,
+            "persist_unlock_seconds": 0.2519092799630016
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 0.9247911870479584,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.7875258128624409,
+            "validation_seconds": 0.04482864402234554,
+            "body_seconds": 0.5354412719607353,
+            "acquire_seconds": 0.0009947419166564941,
+            "persist_unlock_seconds": 0.25108979898504913
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 0.882049567066133,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.739230653969571,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.48890660610049963,
+            "acquire_seconds": 0.0012746239081025124,
+            "persist_unlock_seconds": 0.24904942396096885
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 0.9204194189514965,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.7848939911928028,
+            "validation_seconds": 0.0,
+            "body_seconds": 0.5183990700170398,
+            "acquire_seconds": 0.0017315000295639038,
+            "persist_unlock_seconds": 0.2647634211461991
+          }
+        },
+        {
+          "phase": "settled_hit",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 0.9877128209918737,
+          "native_seconds": [],
+          "lock": {
+            "seconds": 0.853342151036486,
+            "validation_seconds": 0.06408344022929668,
+            "body_seconds": 0.5924589519854635,
+            "acquire_seconds": 0.0017445110715925694,
+            "persist_unlock_seconds": 0.25913868797942996
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 1.6226861199829727,
+          "native_seconds": [
+            0.7309405419509858
+          ],
+          "lock": {
+            "seconds": 1.4873247488867491,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.2300656659062952,
+            "acquire_seconds": 0.0010886439122259617,
+            "persist_unlock_seconds": 0.256170439068228
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 1.6511952239088714,
+          "native_seconds": [
+            0.7091866508126259
+          ],
+          "lock": {
+            "seconds": 1.5188879210036248,
+            "validation_seconds": 0.04741533100605011,
+            "body_seconds": 1.2566241039894521,
+            "acquire_seconds": 0.001301031094044447,
+            "persist_unlock_seconds": 0.2609627859201282
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 1.6977171178441495,
+          "native_seconds": [
+            0.7413023267872632
+          ],
+          "lock": {
+            "seconds": 1.5622515990398824,
+            "validation_seconds": 0.04720681603066623,
+            "body_seconds": 1.279822708107531,
+            "acquire_seconds": 0.000993106048554182,
+            "persist_unlock_seconds": 0.28143578488379717
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 1.5838418318890035,
+          "native_seconds": [
+            0.695369599852711
+          ],
+          "lock": {
+            "seconds": 1.4507868029177189,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.19612947688438,
+            "acquire_seconds": 0.0010911240242421627,
+            "persist_unlock_seconds": 0.25356620200909674
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 1.6049804030917585,
+          "native_seconds": [
+            0.6938045329879969
+          ],
+          "lock": {
+            "seconds": 1.4698322229087353,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.197754757013172,
+            "acquire_seconds": 0.0010393199045211077,
+            "persist_unlock_seconds": 0.27103814599104226
+          }
+        },
+        {
+          "phase": "settled_miss",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 1.6355441480409354,
+          "native_seconds": [
+            0.704273367067799
+          ],
+          "lock": {
+            "seconds": 1.5009697219356894,
+            "validation_seconds": 0.04659330612048507,
+            "body_seconds": 1.2461783247999847,
+            "acquire_seconds": 0.0012012880761176348,
+            "persist_unlock_seconds": 0.2535901090595871
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 0,
+          "composed": false,
+          "seconds": 1.604024610016495,
+          "native_seconds": [
+            0.683204374043271
+          ],
+          "lock": {
+            "seconds": 1.4673006001394242,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.2144726761616766,
+            "acquire_seconds": 0.0010526890400797129,
+            "persist_unlock_seconds": 0.25177523493766785
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 0,
+          "composed": true,
+          "seconds": 1.9017613751348108,
+          "native_seconds": [
+            0.6883189310319722
+          ],
+          "lock": {
+            "seconds": 1.7683478379622102,
+            "validation_seconds": 0.3181672270875424,
+            "body_seconds": 1.5171495790127665,
+            "acquire_seconds": 0.0011000840459018946,
+            "persist_unlock_seconds": 0.2500981749035418
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 1,
+          "composed": true,
+          "seconds": 1.9484807690605521,
+          "native_seconds": [
+            0.6861357518937439
+          ],
+          "lock": {
+            "seconds": 1.8110330989584327,
+            "validation_seconds": 0.34539794991724193,
+            "body_seconds": 1.5451961369253695,
+            "acquire_seconds": 0.0017730409745126963,
+            "persist_unlock_seconds": 0.2640639210585505
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 1,
+          "composed": false,
+          "seconds": 1.5815874580293894,
+          "native_seconds": [
+            0.6916948908474296
+          ],
+          "lock": {
+            "seconds": 1.4507851370144635,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.1980348080396652,
+            "acquire_seconds": 0.0009888100903481245,
+            "persist_unlock_seconds": 0.2517615188844502
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 2,
+          "composed": false,
+          "seconds": 1.5558516760356724,
+          "native_seconds": [
+            0.6802271248307079
+          ],
+          "lock": {
+            "seconds": 1.42498087300919,
+            "validation_seconds": 0.0,
+            "body_seconds": 1.1751966420561075,
+            "acquire_seconds": 0.0008470630273222923,
+            "persist_unlock_seconds": 0.24893716792576015
+          }
+        },
+        {
+          "phase": "cold_miss",
+          "iteration": 2,
+          "composed": true,
+          "seconds": 1.8979405860882252,
+          "native_seconds": [
+            0.6816540469881147
+          ],
+          "lock": {
+            "seconds": 1.7660287979524583,
+            "validation_seconds": 0.32135277590714395,
+            "body_seconds": 1.512422172119841,
+            "acquire_seconds": 0.000895253848284483,
+            "persist_unlock_seconds": 0.2527113719843328
+          }
+        }
+      ],
+      "summary": {
+        "settled_hit": {
+          "baseline_mean_seconds": 0.893767997312049,
+          "composed_mean_seconds": 0.9451106456884494,
+          "whole_added_seconds": 0.051342648376400346,
+          "lock_added_seconds": 0.054287753223131174,
+          "validation_mean_seconds": 0.050667875756820045
+        },
+        "settled_miss": {
+          "baseline_mean_seconds": 1.6038361183212448,
+          "composed_mean_seconds": 1.6614854965979855,
+          "whole_added_seconds": 0.05764937827674066,
+          "lock_added_seconds": 0.05805515575533127,
+          "validation_mean_seconds": 0.047071817719067134
+        },
+        "cold_miss": {
+          "baseline_mean_seconds": 1.5804879146938522,
+          "composed_mean_seconds": 1.9160609100945294,
+          "whole_added_seconds": 0.3355729954006772,
+          "lock_added_seconds": 0.33411437490334106,
+          "validation_mean_seconds": 0.3283059843039761
+        }
+      },
+      "rows_types_values_preserved": true
+    }
+  }
+}

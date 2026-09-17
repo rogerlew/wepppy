@@ -1,0 +1,35 @@
+{
+  "gdal": "3100300",
+  "scope": "loopback disposable HTTP fixture only",
+  "kind": "gtiff_mask",
+  "observations": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "GTiff",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": []
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-105/test_local_vrt_discovery_remot0/source.tif",
+        "/tmp/pytest-of-unknown/pytest-105/test_local_vrt_discovery_remot0/source.tif.msk",
+        "/vsicurl/http://127.0.0.1:36977/source.tif"
+      ],
+      "requests": [
+        {
+          "method": "HEAD",
+          "path": "/source.tif"
+        },
+        {
+          "method": "GET",
+          "path": "/source.tif"
+        }
+      ]
+    }
+  ],
+  "discovery_network_requests": 2
+}

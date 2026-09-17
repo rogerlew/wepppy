@@ -1,0 +1,43 @@
+{
+  "gdal": "3100300",
+  "scope": "loopback disposable HTTP fixture only",
+  "kind": "warped",
+  "observations": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "VRT",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": [
+        {
+          "method": "HEAD",
+          "path": "/source.tif"
+        },
+        {
+          "method": "GET",
+          "path": "/source.tif"
+        }
+      ]
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-103/test_local_vrt_discovery_remot1/selected.vrt",
+        "/vsicurl/http://127.0.0.1:40143/source.tif"
+      ],
+      "requests": [
+        {
+          "method": "HEAD",
+          "path": "/source.tif"
+        },
+        {
+          "method": "GET",
+          "path": "/source.tif"
+        }
+      ]
+    }
+  ],
+  "discovery_network_requests": 2
+}

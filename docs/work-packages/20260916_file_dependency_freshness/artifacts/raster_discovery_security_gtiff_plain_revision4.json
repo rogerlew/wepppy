@@ -1,0 +1,32 @@
+{
+  "gdal": "3100300",
+  "kind": "gtiff_plain",
+  "stages": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "GTiff",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": []
+    },
+    {
+      "stage": "GetMetadata_OVERVIEWS",
+      "metadata": {},
+      "requests": []
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co0/source.tif"
+      ],
+      "requests": []
+    }
+  ],
+  "local_members": [
+    "child.tif",
+    "source.tif"
+  ],
+  "discovery_network_requests": 0
+}

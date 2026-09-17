@@ -1,0 +1,15 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_discovery_security_probe_revision2.py -q -s
+RASTER_DISCOVERY_NETWORK {"gdal": "3100300", "scope": "loopback disposable HTTP fixture only", "kind": "simple", "observations": [{"stage": "IdentifyDriver", "driver": "VRT", "requests": []}, {"stage": "OpenEx", "requests": []}, {"stage": "GetFileList", "members": ["/tmp/pytest-of-unknown/pytest-103/test_local_vrt_discovery_remot0/selected.vrt", "/vsicurl/http://127.0.0.1:37435/source.tif"], "requests": []}], "discovery_network_requests": 0}
+.RASTER_DISCOVERY_NETWORK {"gdal": "3100300", "scope": "loopback disposable HTTP fixture only", "kind": "warped", "observations": [{"stage": "IdentifyDriver", "driver": "VRT", "requests": []}, {"stage": "OpenEx", "requests": [{"method": "HEAD", "path": "/source.tif"}, {"method": "GET", "path": "/source.tif"}]}, {"stage": "GetFileList", "members": ["/tmp/pytest-of-unknown/pytest-103/test_local_vrt_discovery_remot1/selected.vrt", "/vsicurl/http://127.0.0.1:40143/source.tif"], "requests": [{"method": "HEAD", "path": "/source.tif"}, {"method": "GET", "path": "/source.tif"}]}], "discovery_network_requests": 2}
+.
+=============================== warnings summary ===============================
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_discovery_security_probe_revision2.py:10
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_discovery_security_probe_revision2.py:10: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_discovery_security_probe_revision2.py::test_local_vrt_discovery_remote_child_boundary[simple]
+  /opt/venv/lib/python3.12/site-packages/osgeo/gdal.py:314: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2 passed, 2 warnings in 1.61s

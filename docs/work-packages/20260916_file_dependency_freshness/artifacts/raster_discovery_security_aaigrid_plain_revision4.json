@@ -1,0 +1,34 @@
+{
+  "gdal": "3100300",
+  "kind": "aaigrid_plain",
+  "stages": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "AAIGrid",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": []
+    },
+    {
+      "stage": "GetMetadata_OVERVIEWS",
+      "metadata": {},
+      "requests": []
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co2/source.asc",
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co2/source.prj"
+      ],
+      "requests": []
+    }
+  ],
+  "local_members": [
+    "child.tif",
+    "source.asc",
+    "source.prj"
+  ],
+  "discovery_network_requests": 0
+}

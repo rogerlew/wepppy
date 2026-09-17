@@ -1,0 +1,46 @@
+{
+  "gdal": "3100300",
+  "kind": "aaigrid_mask",
+  "stages": [
+    {
+      "stage": "IdentifyDriver",
+      "driver": "AAIGrid",
+      "requests": []
+    },
+    {
+      "stage": "OpenEx",
+      "requests": []
+    },
+    {
+      "stage": "GetMetadata_OVERVIEWS",
+      "metadata": {},
+      "requests": []
+    },
+    {
+      "stage": "GetFileList",
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co3/source.asc",
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co3/source.asc.msk",
+        "/vsicurl/http://127.0.0.1:46513/child.tif",
+        "/tmp/pytest-of-unknown/pytest-106/test_local_driver_authority_co3/source.prj"
+      ],
+      "requests": [
+        {
+          "method": "HEAD",
+          "path": "/child.tif"
+        },
+        {
+          "method": "GET",
+          "path": "/child.tif"
+        }
+      ]
+    }
+  ],
+  "local_members": [
+    "child.tif",
+    "source.asc",
+    "source.asc.msk",
+    "source.prj"
+  ],
+  "discovery_network_requests": 2
+}

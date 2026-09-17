@@ -1,0 +1,1603 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_consumers.py
+GrizzlyCreek_SBS_final.tif actual_summary_cold: 44.933 ms
+GrizzlyCreek_SBS_final.tif actual_summary_hit: 0.009 ms
+GrizzlyCreek_SBS_final.tif actual_native_summary_uncached: 42.373 ms
+GrizzlyCreek_SBS_final.tif composed_summary_hit_cold_observation: 13.477 ms
+GrizzlyCreek_SBS_final.tif composed_summary_hit_settled: 9.975 ms
+GrizzlyCreek_SBS_final.tif composed_summary_miss_settled_observation: 54.607 ms
+GrizzlyCreek_SBS_final.tif composed_summary_miss_cold_observation: 53.232 ms
+baer.cropped.tif actual_summary_cold: 462.451 ms
+baer.cropped.tif actual_summary_hit: 0.015 ms
+baer.cropped.tif actual_native_summary_uncached: 476.183 ms
+baer.cropped.tif composed_summary_hit_cold_observation: 12.050 ms
+baer.cropped.tif composed_summary_hit_settled: 9.186 ms
+baer.cropped.tif composed_summary_miss_settled_observation: 482.471 ms
+baer.cropped.tif composed_summary_miss_cold_observation: 486.101 ms
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810 != /wc1/runs/cu/curable-program
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810 != /wc1/runs/cu/curable-program
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810 != /wc1/runs/cu/curable-program
+curable-program actual_native_pair_count: 40.593 ms
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810 != /wc1/runs/cu/curable-program
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810 != /wc1/runs/cu/curable-program
+2026-09-17 05:15:05 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program actual_management_miss: 3895.861 ms
+2026-09-17 05:15:05 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:05 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:05 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program actual_management_hit: 109.047 ms
+curable-program pair_observation_cold: 11.888 ms
+curable-program pair_observation_settled: 10.888 ms
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program composed_management_hit_settled_observation: 109.613 ms
+2026-09-17 05:15:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program composed_management_miss_settled_observation: 168.267 ms
+2026-09-17 05:15:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program composed_management_miss_cold_observation: 150.587 ms
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1 != /wc1/runs/be/beneficiary-forfeit
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1 != /wc1/runs/be/beneficiary-forfeit
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1 != /wc1/runs/be/beneficiary-forfeit
+beneficiary-forfeit actual_native_pair_count: 762.076 ms
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1 != /wc1/runs/be/beneficiary-forfeit
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1 != /wc1/runs/be/beneficiary-forfeit
+2026-09-17 05:15:14 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit actual_management_miss: 1798.143 ms
+2026-09-17 05:15:15 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:16 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:17 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:18 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:19 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:20 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:21 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:22 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:23 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:24 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit actual_management_hit: 1000.905 ms
+beneficiary-forfeit pair_observation_cold: 161.635 ms
+beneficiary-forfeit pair_observation_settled: 22.886 ms
+2026-09-17 05:15:27 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:29 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:30 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:31 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:32 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:33 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:34 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:35 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:36 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:15:37 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit composed_management_hit_settled_observation: 1043.117 ms
+2026-09-17 05:15:39 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit composed_management_miss_settled_observation: 1807.068 ms
+2026-09-17 05:15:41 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit composed_management_miss_cold_observation: 2067.615 ms
+{
+  "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95",
+  "uid": 1000,
+  "gid": 993,
+  "scope": "Actual existing native SBS and MOFE/management consumers; probe-only coherent simple-file observations",
+  "cache_note": "Copied inputs prime NFS page cache; no OS cache drop; helper-cold is not cold storage",
+  "gdal_version": "3100300",
+  "cases": {
+    "GrizzlyCreek_SBS_final.tif": {
+      "name": "GrizzlyCreek_SBS_final.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif",
+      "bytes": 599196,
+      "inventory": {
+        "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif",
+        "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif",
+        "driver": "GTiff",
+        "members": [
+          "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif"
+        ],
+        "shape": [
+          714,
+          836
+        ]
+      },
+      "measurements": [
+        {
+          "name": "actual_summary_cold",
+          "repeats": 1,
+          "seconds": [
+            0.044933024095371366
+          ],
+          "mean_seconds": 0.044933024095371366,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04491482814773917
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "actual_summary_hit",
+          "repeats": 100,
+          "seconds": [
+            2.522510476410389e-05,
+            1.1168885976076126e-05,
+            2.3639993742108345e-05,
+            8.61799344420433e-06,
+            7.770024240016937e-06,
+            7.724855095148087e-06,
+            7.661059498786926e-06,
+            7.560010999441147e-06,
+            2.2819964215159416e-05,
+            8.265022188425064e-06,
+            7.695984095335007e-06,
+            7.512979209423065e-06,
+            7.5499992817640305e-06,
+            7.531139999628067e-06,
+            7.541151717305183e-06,
+            7.461989298462868e-06,
+            7.370952516794205e-06,
+            7.414957508444786e-06,
+            7.404014468193054e-06,
+            7.503200322389603e-06,
+            7.5178686529397964e-06,
+            2.205604687333107e-05,
+            8.415896445512772e-06,
+            8.084112778306007e-06,
+            7.72089697420597e-06,
+            8.08783806860447e-06,
+            7.76117667555809e-06,
+            7.831957191228867e-06,
+            7.656868547201157e-06,
+            7.842900231480598e-06,
+            7.661990821361542e-06,
+            7.825205102562904e-06,
+            7.700873538851738e-06,
+            7.726950570940971e-06,
+            7.690861821174622e-06,
+            7.661990821361542e-06,
+            7.587950676679611e-06,
+            7.702037692070007e-06,
+            7.700175046920776e-06,
+            7.61193223297596e-06,
+            7.690861821174622e-06,
+            7.627997547388077e-06,
+            2.3012980818748474e-05,
+            7.683876901865005e-06,
+            7.4750278145074844e-06,
+            7.504131644964218e-06,
+            7.534865289926529e-06,
+            7.468042895197868e-06,
+            7.342081516981125e-06,
+            7.526017725467682e-06,
+            7.416121661663055e-06,
+            7.581897079944611e-06,
+            7.488997653126717e-06,
+            7.4319541454315186e-06,
+            7.502967491745949e-06,
+            2.2278865799307823e-05,
+            7.75814987719059e-06,
+            7.180031388998032e-06,
+            7.128110155463219e-06,
+            7.158145308494568e-06,
+            7.362803444266319e-06,
+            7.357914000749588e-06,
+            2.2005988284945488e-05,
+            7.244991138577461e-06,
+            7.2249677032232285e-06,
+            7.034977898001671e-06,
+            7.070833817124367e-06,
+            6.960006430745125e-06,
+            6.912974640727043e-06,
+            3.3952994272112846e-05,
+            7.479917258024216e-06,
+            7.618917152285576e-06,
+            7.372815161943436e-06,
+            2.1144049242138863e-05,
+            8.034054189920425e-06,
+            7.546041160821915e-06,
+            7.468974217772484e-06,
+            7.76420347392559e-06,
+            7.502967491745949e-06,
+            7.451977580785751e-06,
+            7.4820127338171005e-06,
+            7.681082934141159e-06,
+            7.472001016139984e-06,
+            7.359078153967857e-06,
+            7.333001121878624e-06,
+            7.375841960310936e-06,
+            7.417984306812286e-06,
+            7.421011105179787e-06,
+            7.364898920059204e-06,
+            7.397960871458054e-06,
+            7.458031177520752e-06,
+            7.538823410868645e-06,
+            7.3390547186136246e-06,
+            7.5569842010736465e-06,
+            7.44406133890152e-06,
+            7.58306123316288e-06,
+            7.309019565582275e-06,
+            7.530907168984413e-06,
+            7.394002750515938e-06,
+            7.526949048042297e-06
+          ],
+          "mean_seconds": 9.06574074178934e-06,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "actual_native_summary_uncached",
+          "repeats": 3,
+          "seconds": [
+            0.042901552049443126,
+            0.04130419506691396,
+            0.04291175794787705
+          ],
+          "mean_seconds": 0.042372501688078046,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04289607098326087
+            },
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04129791306331754
+            },
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04289912711828947
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_hit_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            0.013477085158228874
+          ],
+          "mean_seconds": 0.013477085158228874,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_hit_settled",
+          "repeats": 30,
+          "seconds": [
+            0.01078263414092362,
+            0.011282149003818631,
+            0.011818910948932171,
+            0.010936653008684516,
+            0.011275696102529764,
+            0.011778829153627157,
+            0.011164408875629306,
+            0.011056785006076097,
+            0.010885016061365604,
+            0.010818660026416183,
+            0.010198700008913875,
+            0.010525184916332364,
+            0.010197929805144668,
+            0.010095288045704365,
+            0.009839634178206325,
+            0.0099055259488523,
+            0.010044933063909411,
+            0.009871014161035419,
+            0.009444858180359006,
+            0.009075889131054282,
+            0.009146079886704683,
+            0.008940197993069887,
+            0.008772897999733686,
+            0.00888612400740385,
+            0.009058644995093346,
+            0.008984460961073637,
+            0.008479072945192456,
+            0.008615127066150308,
+            0.008718888042494655,
+            0.008642659988254309
+          ],
+          "mean_seconds": 0.009974761788422862,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_miss_settled_observation",
+          "repeats": 1,
+          "seconds": [
+            0.05460652010515332
+          ],
+          "mean_seconds": 0.05460652010515332,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.0456589360255748
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_miss_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            0.05323226796463132
+          ],
+          "mean_seconds": 0.05323226796463132,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04078391310758889
+            }
+          ],
+          "locks": []
+        }
+      ]
+    },
+    "baer.cropped.tif": {
+      "name": "baer.cropped.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif",
+      "bytes": 424964,
+      "inventory": {
+        "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif",
+        "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif",
+        "driver": "GTiff",
+        "members": [
+          "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif"
+        ],
+        "shape": [
+          2630,
+          2509
+        ]
+      },
+      "measurements": [
+        {
+          "name": "actual_summary_cold",
+          "repeats": 1,
+          "seconds": [
+            0.46245123189873993
+          ],
+          "mean_seconds": 0.46245123189873993,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4624338638968766
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "actual_summary_hit",
+          "repeats": 100,
+          "seconds": [
+            5.556503310799599e-05,
+            2.1472806110978127e-05,
+            3.679492510855198e-05,
+            1.9620172679424286e-05,
+            1.781294122338295e-05,
+            1.7551006749272346e-05,
+            1.759990118443966e-05,
+            1.7164042219519615e-05,
+            1.750304363667965e-05,
+            1.7472077161073685e-05,
+            1.7364975064992905e-05,
+            1.7344020307064056e-05,
+            1.7917947843670845e-05,
+            1.7422949895262718e-05,
+            1.7473939806222916e-05,
+            1.7404789105057716e-05,
+            1.7384067177772522e-05,
+            1.767696812748909e-05,
+            1.787603832781315e-05,
+            1.7396872863173485e-05,
+            1.720222644507885e-05,
+            1.7141923308372498e-05,
+            1.768302172422409e-05,
+            1.702900044620037e-05,
+            1.7260201275348663e-05,
+            1.7058802768588066e-05,
+            1.737195998430252e-05,
+            1.7669983208179474e-05,
+            1.747487112879753e-05,
+            1.7100945115089417e-05,
+            1.7212005332112312e-05,
+            1.7783138900995255e-05,
+            1.776008866727352e-05,
+            1.7135869711637497e-05,
+            1.7595943063497543e-05,
+            1.71540305018425e-05,
+            1.724204048514366e-05,
+            1.7434824258089066e-05,
+            1.7103971913456917e-05,
+            1.7209211364388466e-05,
+            1.750793308019638e-05,
+            1.7654849216341972e-05,
+            1.7229001969099045e-05,
+            1.730700023472309e-05,
+            1.7688842490315437e-05,
+            1.7456011846661568e-05,
+            1.723901368677616e-05,
+            1.7524929717183113e-05,
+            1.7425045371055603e-05,
+            1.7519807443022728e-05,
+            1.7452985048294067e-05,
+            1.7177080735564232e-05,
+            1.8246937543153763e-05,
+            1.713191159069538e-05,
+            1.6846926882863045e-05,
+            1.6770092770457268e-05,
+            3.663497045636177e-05,
+            3.614579327404499e-05,
+            1.1387979611754417e-05,
+            1.0140938684344292e-05,
+            9.832903742790222e-06,
+            1.0177958756685257e-05,
+            1.0045012459158897e-05,
+            9.857118129730225e-06,
+            9.811948984861374e-06,
+            1.0287156328558922e-05,
+            1.006200909614563e-05,
+            1.0070158168673515e-05,
+            9.998911991715431e-06,
+            9.879935532808304e-06,
+            9.944895282387733e-06,
+            1.0316027328372002e-05,
+            9.773066267371178e-06,
+            9.817071259021759e-06,
+            9.918119758367538e-06,
+            1.0296935215592384e-05,
+            1.0073184967041016e-05,
+            1.0474119335412979e-05,
+            1.0067829862236977e-05,
+            9.906943887472153e-06,
+            9.926967322826385e-06,
+            1.0084128007292747e-05,
+            9.85804945230484e-06,
+            1.0001007467508316e-05,
+            1.0061077773571014e-05,
+            9.917886927723885e-06,
+            9.858980774879456e-06,
+            9.95490700006485e-06,
+            9.9970493465662e-06,
+            9.906943887472153e-06,
+            9.940005838871002e-06,
+            1.0109972208738327e-05,
+            9.78098250925541e-06,
+            1.0336050763726234e-05,
+            9.75397415459156e-06,
+            9.841052815318108e-06,
+            9.75094735622406e-06,
+            9.982846677303314e-06,
+            9.919051080942154e-06,
+            1.012696884572506e-05
+          ],
+          "mean_seconds": 1.532650785520673e-05,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "actual_native_summary_uncached",
+          "repeats": 3,
+          "seconds": [
+            0.4795210571028292,
+            0.47124330000951886,
+            0.4777841989416629
+          ],
+          "mean_seconds": 0.47618285201800364,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4795151969883591
+            },
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4712315830402076
+            },
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.47777250595390797
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_hit_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            0.012050376972183585
+          ],
+          "mean_seconds": 0.012050376972183585,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_hit_settled",
+          "repeats": 30,
+          "seconds": [
+            0.010086509166285396,
+            0.010076918872073293,
+            0.010467789135873318,
+            0.010111198062077165,
+            0.01029575290158391,
+            0.010511535918340087,
+            0.010240839095786214,
+            0.01042074104771018,
+            0.010034614009782672,
+            0.009862097213044763,
+            0.010460921097546816,
+            0.009977958863601089,
+            0.00939762289635837,
+            0.009575514821335673,
+            0.009257368044927716,
+            0.009149344870820642,
+            0.008993159048259258,
+            0.008743193000555038,
+            0.008627224946394563,
+            0.008462182944640517,
+            0.00802771095186472,
+            0.00807441002689302,
+            0.008319121086969972,
+            0.00805018492974341,
+            0.00843238108791411,
+            0.00778554892167449,
+            0.008036083076149225,
+            0.008002128917723894,
+            0.007821256062015891,
+            0.008292169077321887
+          ],
+          "mean_seconds": 0.00918644933650891,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_miss_settled_observation",
+          "repeats": 1,
+          "seconds": [
+            0.4824710979592055
+          ],
+          "mean_seconds": 0.4824710979592055,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4732354001607746
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "composed_summary_miss_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            0.48610136308707297
+          ],
+          "mean_seconds": 0.48610136308707297,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native_calls": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4736591980326921
+            }
+          ],
+          "locks": []
+        }
+      ]
+    },
+    "curable-program": {
+      "name": "curable-program",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810",
+      "hillslopes": 115,
+      "inventories": [
+        {
+          "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif",
+          "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif",
+          "driver": "GTiff",
+          "members": [
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif"
+          ],
+          "shape": [
+            306,
+            263
+          ]
+        },
+        {
+          "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif",
+          "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif",
+          "driver": "GTiff",
+          "members": [
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif"
+          ],
+          "shape": [
+            306,
+            263
+          ]
+        }
+      ],
+      "measurements": [
+        {
+          "name": "actual_native_pair_count",
+          "repeats": 3,
+          "seconds": [
+            0.04505555611103773,
+            0.03915952891111374,
+            0.03756301593966782
+          ],
+          "mean_seconds": 0.04059270032060643,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04504730715416372
+            },
+            {
+              "operation": "pair_count",
+              "seconds": 0.03913745516911149
+            },
+            {
+              "operation": "pair_count",
+              "seconds": 0.03754860605113208
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "actual_management_miss",
+          "repeats": 1,
+          "seconds": [
+            3.895860994933173
+          ],
+          "mean_seconds": 3.895860994933173,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04206385090947151
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 3.828141035977751,
+              "acquire_seconds": 0.001516516087576747,
+              "body_seconds": 0.08989260392263532,
+              "persist_unlock_seconds": 3.736731915967539,
+              "probe_observation_enabled": false
+            }
+          ]
+        },
+        {
+          "name": "actual_management_hit",
+          "repeats": 10,
+          "seconds": [
+            0.10115875117480755,
+            0.25535819213837385,
+            0.09913505497388542,
+            0.09185146098025143,
+            0.0923766908235848,
+            0.09600616502575576,
+            0.0911979740485549,
+            0.08378177811391652,
+            0.08839491405524313,
+            0.09120540414005518
+          ],
+          "mean_seconds": 0.10904663854744286,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": [
+            {
+              "total_seconds": 0.0716844901908189,
+              "acquire_seconds": 0.001184483990073204,
+              "body_seconds": 0.024283136008307338,
+              "persist_unlock_seconds": 0.046216870192438364,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.07004620088264346,
+              "acquire_seconds": 0.0016029879916459322,
+              "body_seconds": 0.026513827964663506,
+              "persist_unlock_seconds": 0.041929384926334023,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06866121478378773,
+              "acquire_seconds": 0.0016324277967214584,
+              "body_seconds": 0.023699616082012653,
+              "persist_unlock_seconds": 0.043329170905053616,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06465034303255379,
+              "acquire_seconds": 0.0016759091522544622,
+              "body_seconds": 0.02351275202818215,
+              "persist_unlock_seconds": 0.03946168185211718,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06564220413565636,
+              "acquire_seconds": 0.0013399231247603893,
+              "body_seconds": 0.023041702806949615,
+              "persist_unlock_seconds": 0.04126057820394635,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.0681996748317033,
+              "acquire_seconds": 0.001659926027059555,
+              "body_seconds": 0.02516189101152122,
+              "persist_unlock_seconds": 0.04137785779312253,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.0647477952297777,
+              "acquire_seconds": 0.001160547137260437,
+              "body_seconds": 0.0234428308904171,
+              "persist_unlock_seconds": 0.04014441720210016,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06141767115332186,
+              "acquire_seconds": 0.0012207161635160446,
+              "body_seconds": 0.023606400936841965,
+              "persist_unlock_seconds": 0.03659055405296385,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06346135609783232,
+              "acquire_seconds": 0.0010381410829722881,
+              "body_seconds": 0.02427393989637494,
+              "persist_unlock_seconds": 0.03814927511848509,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.06447022804059088,
+              "acquire_seconds": 0.0012395039666444063,
+              "body_seconds": 0.023134676041081548,
+              "persist_unlock_seconds": 0.04009604803286493,
+              "probe_observation_enabled": false
+            }
+          ]
+        },
+        {
+          "name": "pair_observation_cold",
+          "repeats": 1,
+          "seconds": [
+            0.011888037901371717
+          ],
+          "mean_seconds": 0.011888037901371717,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 325098,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 81950
+          },
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "pair_observation_settled",
+          "repeats": 30,
+          "seconds": [
+            0.016646756092086434,
+            0.016948756063356996,
+            0.016193213872611523,
+            0.015791573794558644,
+            0.014954544836655259,
+            0.013338354881852865,
+            0.013251886004582047,
+            0.012779629090800881,
+            0.011346835875883698,
+            0.011015075026080012,
+            0.010546263074502349,
+            0.010303904069587588,
+            0.010099550010636449,
+            0.009714219020679593,
+            0.009424259886145592,
+            0.009751114062964916,
+            0.009265224216505885,
+            0.008690424030646682,
+            0.008621018845587969,
+            0.009022771148011088,
+            0.009268224006518722,
+            0.009139464003965259,
+            0.008847001008689404,
+            0.008506190963089466,
+            0.009201467968523502,
+            0.008863330818712711,
+            0.008889673976227641,
+            0.0089683688711375,
+            0.008343738969415426,
+            0.008908179821446538
+          ],
+          "mean_seconds": 0.010888033810382088,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_management_hit_settled_observation",
+          "repeats": 10,
+          "seconds": [
+            0.10725804208777845,
+            0.11242351913824677,
+            0.12497352808713913,
+            0.10632621007971466,
+            0.10678145498968661,
+            0.11166123999282718,
+            0.10774266812950373,
+            0.10518394690006971,
+            0.10714201396331191,
+            0.10663620010018349
+          ],
+          "mean_seconds": 0.10961288234684616,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": [
+            {
+              "total_seconds": 0.08180258003994823,
+              "acquire_seconds": 0.0012740560341626406,
+              "body_seconds": 0.03974481695331633,
+              "persist_unlock_seconds": 0.040783707052469254,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08585541206412017,
+              "acquire_seconds": 0.0011586900800466537,
+              "body_seconds": 0.04236485413275659,
+              "persist_unlock_seconds": 0.04233186785131693,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.09744085604324937,
+              "acquire_seconds": 0.008167135063558817,
+              "body_seconds": 0.04335047607310116,
+              "persist_unlock_seconds": 0.04592324490658939,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08212803211063147,
+              "acquire_seconds": 0.0012833240907639265,
+              "body_seconds": 0.0407273608725518,
+              "persist_unlock_seconds": 0.04011734714731574,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08066186215728521,
+              "acquire_seconds": 0.00132965506054461,
+              "body_seconds": 0.040613607969135046,
+              "persist_unlock_seconds": 0.03871859912760556,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08313151216134429,
+              "acquire_seconds": 0.0010571540333330631,
+              "body_seconds": 0.040744267171248794,
+              "persist_unlock_seconds": 0.04133009095676243,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08274875418283045,
+              "acquire_seconds": 0.0011753621511161327,
+              "body_seconds": 0.04074637498706579,
+              "persist_unlock_seconds": 0.04082701704464853,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08026036201044917,
+              "acquire_seconds": 0.00109282904304564,
+              "body_seconds": 0.040823737159371376,
+              "persist_unlock_seconds": 0.038343795808032155,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08123547793366015,
+              "acquire_seconds": 0.0012386320158839226,
+              "body_seconds": 0.03976799687370658,
+              "persist_unlock_seconds": 0.04022884904406965,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.08084206306375563,
+              "acquire_seconds": 0.0012982790358364582,
+              "body_seconds": 0.040915110148489475,
+              "persist_unlock_seconds": 0.0386286738794297,
+              "probe_observation_enabled": true
+            }
+          ]
+        },
+        {
+          "name": "composed_management_miss_settled_observation",
+          "repeats": 1,
+          "seconds": [
+            0.16826746612787247
+          ],
+          "mean_seconds": 0.16826746612787247,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04879682790488005
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 0.14090495510026813,
+              "acquire_seconds": 0.0012875290121883154,
+              "body_seconds": 0.09846419794484973,
+              "persist_unlock_seconds": 0.04115322814323008,
+              "probe_observation_enabled": true
+            }
+          ]
+        },
+        {
+          "name": "composed_management_miss_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            0.15058745513670146
+          ],
+          "mean_seconds": 0.15058745513670146,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.040245587937533855
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 0.1246935990639031,
+              "acquire_seconds": 0.0010635480284690857,
+              "body_seconds": 0.08367880899459124,
+              "persist_unlock_seconds": 0.03995124204084277,
+              "probe_observation_enabled": true
+            }
+          ]
+        }
+      ],
+      "management_rows": 115,
+      "management_values_unchanged": true,
+      "management_parquet_unchanged": true,
+      "persisted_owner_bytes": 20403,
+      "output_bytes": 12368
+    },
+    "beneficiary-forfeit": {
+      "name": "beneficiary-forfeit",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1",
+      "hillslopes": 4903,
+      "inventories": [
+        {
+          "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC",
+          "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC",
+          "driver": "AAIGrid",
+          "members": [
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC",
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ"
+          ],
+          "shape": [
+            2413,
+            2452
+          ]
+        },
+        {
+          "selected": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif",
+          "resolved": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif",
+          "driver": "GTiff",
+          "members": [
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif"
+          ],
+          "shape": [
+            2413,
+            2452
+          ]
+        }
+      ],
+      "measurements": [
+        {
+          "name": "actual_native_pair_count",
+          "repeats": 3,
+          "seconds": [
+            0.8415349081624299,
+            0.7451659559737891,
+            0.6995258941315114
+          ],
+          "mean_seconds": 0.7620755860892435,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.8415206079371274
+            },
+            {
+              "operation": "pair_count",
+              "seconds": 0.7447171269450337
+            },
+            {
+              "operation": "pair_count",
+              "seconds": 0.6991488891653717
+            }
+          ],
+          "locks": []
+        },
+        {
+          "name": "actual_management_miss",
+          "repeats": 1,
+          "seconds": [
+            1.798143066931516
+          ],
+          "mean_seconds": 1.798143066931516,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7325197199825197
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 1.573696234030649,
+              "acquire_seconds": 0.001691990066319704,
+              "body_seconds": 1.2846513700205833,
+              "persist_unlock_seconds": 0.2873528739437461,
+              "probe_observation_enabled": false
+            }
+          ]
+        },
+        {
+          "name": "actual_management_hit",
+          "repeats": 10,
+          "seconds": [
+            1.0243307740893215,
+            0.9766344570089132,
+            1.0492171130608767,
+            1.0102336928248405,
+            0.987261792877689,
+            0.9815731330309063,
+            0.9977098689414561,
+            0.9983951859176159,
+            0.9882566158194095,
+            0.9954386739991605
+          ],
+          "mean_seconds": 1.000905130757019,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": [
+            {
+              "total_seconds": 0.8023151110392064,
+              "acquire_seconds": 0.001502858940511942,
+              "body_seconds": 0.5285117570310831,
+              "persist_unlock_seconds": 0.27230049506761134,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.769414195092395,
+              "acquire_seconds": 0.0019226109143346548,
+              "body_seconds": 0.5006984891369939,
+              "persist_unlock_seconds": 0.2667930950410664,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.8449671920388937,
+              "acquire_seconds": 0.0014975511003285646,
+              "body_seconds": 0.5443693548440933,
+              "persist_unlock_seconds": 0.2991002860944718,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.8060748379211873,
+              "acquire_seconds": 0.001144208014011383,
+              "body_seconds": 0.5251914109103382,
+              "persist_unlock_seconds": 0.27973921899683774,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7853646969888359,
+              "acquire_seconds": 0.0015923639293760061,
+              "body_seconds": 0.5130368620157242,
+              "persist_unlock_seconds": 0.27073547104373574,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7789849399123341,
+              "acquire_seconds": 0.0015944489277899265,
+              "body_seconds": 0.504638068145141,
+              "persist_unlock_seconds": 0.27275242283940315,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7858955380506814,
+              "acquire_seconds": 0.002051959978416562,
+              "body_seconds": 0.5077355750836432,
+              "persist_unlock_seconds": 0.2761080029886216,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7974583760369569,
+              "acquire_seconds": 0.002263409085571766,
+              "body_seconds": 0.5024206428788602,
+              "persist_unlock_seconds": 0.2927743240725249,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7896908149123192,
+              "acquire_seconds": 0.002234024927020073,
+              "body_seconds": 0.5177771940361708,
+              "persist_unlock_seconds": 0.26967959594912827,
+              "probe_observation_enabled": false
+            },
+            {
+              "total_seconds": 0.7925880989059806,
+              "acquire_seconds": 0.001205601030960679,
+              "body_seconds": 0.49675880186259747,
+              "persist_unlock_seconds": 0.29462369601242244,
+              "probe_observation_enabled": false
+            }
+          ]
+        },
+        {
+          "name": "pair_observation_cold",
+          "repeats": 1,
+          "seconds": [
+            0.16163492598570883
+          ],
+          "mean_seconds": 0.16163492598570883,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 35502567,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 403,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 5926770
+          },
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "pair_observation_settled",
+          "repeats": 30,
+          "seconds": [
+            0.02340681804344058,
+            0.022958444198593497,
+            0.022245618980377913,
+            0.023317811079323292,
+            0.02306423196569085,
+            0.023131010122597218,
+            0.023370377952232957,
+            0.023229207145050168,
+            0.023487427970394492,
+            0.022955460008233786,
+            0.02313809492625296,
+            0.023099259939044714,
+            0.022426771000027657,
+            0.022853830130770802,
+            0.022747955983504653,
+            0.022227587178349495,
+            0.02276938804425299,
+            0.022125074872747064,
+            0.022926546167582273,
+            0.02270422806032002,
+            0.023366060107946396,
+            0.02264373702928424,
+            0.022131705889478326,
+            0.022988917073234916,
+            0.022806569002568722,
+            0.02247473201714456,
+            0.02280941396020353,
+            0.023063010070472956,
+            0.02327589993365109,
+            0.022847628919407725
+          ],
+          "mean_seconds": 0.02288642725907266,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": []
+        },
+        {
+          "name": "composed_management_hit_settled_observation",
+          "repeats": 10,
+          "seconds": [
+            1.0418220378924161,
+            1.0600071910303086,
+            1.0479989498853683,
+            1.031853408087045,
+            1.03610372194089,
+            1.0534346019849181,
+            1.0588562788907439,
+            1.0416972320526838,
+            1.0363234078977257,
+            1.023072944022715
+          ],
+          "mean_seconds": 1.0431169773684814,
+          "digest_read_bytes": {},
+          "native_calls": [],
+          "locks": [
+            {
+              "total_seconds": 0.8253082789015025,
+              "acquire_seconds": 0.0016215520445257425,
+              "body_seconds": 0.551290760980919,
+              "persist_unlock_seconds": 0.27239596587605774,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8518595739733428,
+              "acquire_seconds": 0.0013681869022548199,
+              "body_seconds": 0.5693270210176706,
+              "persist_unlock_seconds": 0.2811643660534173,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8484846961218864,
+              "acquire_seconds": 0.0012287839781492949,
+              "body_seconds": 0.579205455025658,
+              "persist_unlock_seconds": 0.26805045711807907,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8310563338454813,
+              "acquire_seconds": 0.0010227258317172527,
+              "body_seconds": 0.5537496500182897,
+              "persist_unlock_seconds": 0.27628395799547434,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8294761711731553,
+              "acquire_seconds": 0.001416121143847704,
+              "body_seconds": 0.5543142829556018,
+              "persist_unlock_seconds": 0.2737457670737058,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8367268568836153,
+              "acquire_seconds": 0.0013463569339364767,
+              "body_seconds": 0.5658548001665622,
+              "persist_unlock_seconds": 0.2695256997831166,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8526076190173626,
+              "acquire_seconds": 0.001174916047602892,
+              "body_seconds": 0.5760289779864252,
+              "persist_unlock_seconds": 0.27540372498333454,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8422898261342198,
+              "acquire_seconds": 0.0014114880468696356,
+              "body_seconds": 0.5690372800454497,
+              "persist_unlock_seconds": 0.2718410580419004,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8338617200497538,
+              "acquire_seconds": 0.0012650461867451668,
+              "body_seconds": 0.5553747289814055,
+              "persist_unlock_seconds": 0.2772219448816031,
+              "probe_observation_enabled": true
+            },
+            {
+              "total_seconds": 0.8238889451604337,
+              "acquire_seconds": 0.001425272086635232,
+              "body_seconds": 0.5477455360814929,
+              "persist_unlock_seconds": 0.2747181369923055,
+              "probe_observation_enabled": true
+            }
+          ]
+        },
+        {
+          "name": "composed_management_miss_settled_observation",
+          "repeats": 1,
+          "seconds": [
+            1.8070677970536053
+          ],
+          "mean_seconds": 1.8070677970536053,
+          "digest_read_bytes": {},
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7683332569431514
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 1.6072892539668828,
+              "acquire_seconds": 0.0013028529938310385,
+              "body_seconds": 1.329238103935495,
+              "persist_unlock_seconds": 0.27674829703755677,
+              "probe_observation_enabled": true
+            }
+          ]
+        },
+        {
+          "name": "composed_management_miss_cold_observation",
+          "repeats": 1,
+          "seconds": [
+            2.067614847095683
+          ],
+          "mean_seconds": 2.067614847095683,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native_calls": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7323660659603775
+            }
+          ],
+          "locks": [
+            {
+              "total_seconds": 1.8572386838495731,
+              "acquire_seconds": 0.001208439003676176,
+              "body_seconds": 1.5786656478885561,
+              "persist_unlock_seconds": 0.27736459695734084,
+              "probe_observation_enabled": true
+            }
+          ]
+        }
+      ],
+      "management_rows": 4903,
+      "management_values_unchanged": true,
+      "management_parquet_unchanged": true,
+      "persisted_owner_bytes": 415780,
+      "output_bytes": 76665
+    }
+  },
+  "named_inputs": {
+    "/wc1/runs/th/thespian-cleanness/disturbed/GrizzlyCreek_SBS_final.tif": {
+      "version": [
+        64,
+        1189251,
+        599196,
+        1789604873876050046,
+        1789604873876050046
+      ],
+      "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+    },
+    "/wc1/runs/th/thespian-cleanness/disturbed/baer.cropped.tif": {
+      "version": [
+        64,
+        1184198,
+        424964,
+        1789605319903862950,
+        1789605319903862950
+      ],
+      "sha256": "7a08b85e992fe5ae9f2fba3502f23b0400ddd91f4d61cb71bdd2db11ea3524f4"
+    },
+    "/wc1/runs/cu/curable-program/ron.nodb": {
+      "version": [
+        64,
+        5717733,
+        1227,
+        1784226122674438000,
+        1784438784680781445
+      ],
+      "sha256": "459e709eded39732b11c6ffbd78891e969b4500c40d470b4c0e115fa33a9dc60"
+    },
+    "/wc1/runs/cu/curable-program/watershed.nodb": {
+      "version": [
+        64,
+        5738636,
+        6679,
+        1784226122736438000,
+        1784438784702781594
+      ],
+      "sha256": "53146fe2bb8dca966fd91c2dec70585462a6ca57b9944d1ee870d998d64683bf"
+    },
+    "/wc1/runs/cu/curable-program/landuse.nodb": {
+      "version": [
+        64,
+        5727895,
+        20273,
+        1784226122632462000,
+        1784438784657781289
+      ],
+      "sha256": "b9bd3774e459d48498ab3855772d2aaa714a92f7cc0de7ecb9728c173d82e986"
+    },
+    "/wc1/runs/cu/curable-program/wepp.nodb": {
+      "version": [
+        64,
+        5738637,
+        2343,
+        1784226122745444000,
+        1784438784709781641
+      ],
+      "sha256": "e5522e81bf9a466aac7cde42c84bce0728886ca365941791840efe886c854454"
+    },
+    "/wc1/runs/cu/curable-program/disturbed.nodb": {
+      "version": [
+        64,
+        5717727,
+        7866,
+        1784226122601440000,
+        1784438784649781234
+      ],
+      "sha256": "20dab21325f0f61f307dd0289f4948ea726ed512784afe372519ebd2d49cc078"
+    },
+    "/wc1/runs/cu/curable-program/nodb.version": {
+      "version": [
+        64,
+        5749305,
+        5,
+        1784443130749294826,
+        1784443130750294832
+      ],
+      "sha256": "83c02ac2d48c863dab2ccf6870455aadfc2cec073b8db269b517c879d76aa6d9"
+    },
+    "/wc1/runs/cu/curable-program/watershed/hillslopes.parquet": {
+      "version": [
+        64,
+        5740122,
+        21865,
+        1782858701405733000,
+        1784438998932217288
+      ],
+      "sha256": "6e728a2a12bf706f70b5c943333d8e87f22f16ea5d94eb8134f00b93ed578206"
+    },
+    "/wc1/runs/cu/curable-program/watershed/channels.parquet": {
+      "version": [
+        64,
+        5740121,
+        14429,
+        1782858701415733000,
+        1784438998930217275
+      ],
+      "sha256": "5878fd28bc1b5f99b3dff69a37f5d0aade38add1c3b30e440f7a4f79a0732f37"
+    },
+    "/wc1/runs/cu/curable-program/watershed/mofe.tif": {
+      "version": [
+        64,
+        5740123,
+        81950,
+        1782858714820819000,
+        1784438998934217301
+      ],
+      "sha256": "e67436d7efaa824f635c34b9204c6fe49ceaffe28e7608346f3aa6a8762c1172"
+    },
+    "/wc1/runs/cu/curable-program/dem/wbt/subwta.tif": {
+      "version": [
+        64,
+        5746694,
+        325098,
+        1782858699441720000,
+        1784438996724202641
+      ],
+      "sha256": "4aa0eecb4562ac8b073f5c477a3a7d8e3b2fae9574f3ef2e0feb8ce6e9134427"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/ron.nodb": {
+      "version": [
+        64,
+        5755847,
+        1070,
+        1784651562590331438,
+        1784651562590331438
+      ],
+      "sha256": "84795821ede4f38c921359d8473110a43d51aebb761ed31ceac149a98c77b8c7"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/watershed.nodb": {
+      "version": [
+        64,
+        737918,
+        252126,
+        1784664637621744732,
+        1784664637621744732
+      ],
+      "sha256": "fa9d2da7aaafbbe123edc761f99e0d73862633ca414c31907b643f547ca91cad"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/landuse.nodb": {
+      "version": [
+        64,
+        5765457,
+        415625,
+        1784651561998328207,
+        1784651561998328207
+      ],
+      "sha256": "5fc4e501c459194b77146ef3529391cadd922178fb38e907562648b1e3001e22"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/wepp.nodb": {
+      "version": [
+        64,
+        736573,
+        2577,
+        1784664726955233423,
+        1784664726956233429
+      ],
+      "sha256": "d950563739c2ef9649381ccd3112604ab059af97813ed92c31b7cbd1ff242e42"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/disturbed.nodb": {
+      "version": [
+        64,
+        5765445,
+        678,
+        1784651561863327471,
+        1784651561863327471
+      ],
+      "sha256": "67c4eec59adb094323be70cc2d56a3947ad201038959a55cb0943cb4a8062dd8"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/nodb.version": {
+      "version": [
+        64,
+        677364,
+        5,
+        1784739983037878631,
+        1784739983038878637
+      ],
+      "sha256": "83c02ac2d48c863dab2ccf6870455aadfc2cec073b8db269b517c879d76aa6d9"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/watershed/hillslopes.parquet": {
+      "version": [
+        64,
+        586320,
+        346729,
+        1784652310704699582,
+        1784652310704699582
+      ],
+      "sha256": "caf99e8858d5d74cf9a19c2c8c011397e44d6936e29bd6513b0fc95d38109b5a"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/watershed/channels.parquet": {
+      "version": [
+        64,
+        596671,
+        171657,
+        1784652310630699132,
+        1784652310630699132
+      ],
+      "sha256": "e47b71911fbce792f97dac125d72007abf8eca11ab3d782f4ea173e3913ac052"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/watershed/mofe.tif": {
+      "version": [
+        64,
+        596672,
+        5926770,
+        1784652310868700578,
+        1784652310868700578
+      ],
+      "sha256": "631a7ec1d802421bf349967ce294e0c3bc1d804cd79b8caa64161493c6f909d4"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/dem/topaz/SUBWTA.ARC": {
+      "version": [
+        64,
+        584412,
+        35502567,
+        1784652198640021231,
+        1784652198640021231
+      ],
+      "sha256": "f415e6bcb791b8016d8c367d2f8dbb15deabc0617304c64c967e5c4f027d7ec1"
+    },
+    "/wc1/runs/be/beneficiary-forfeit/dem/topaz/SUBWTA.PRJ": {
+      "version": [
+        64,
+        577225,
+        403,
+        1784652198433019983,
+        1784652198433019983
+      ],
+      "sha256": "ab78490474b2fb27a27ad2566802a7f49338602419540dd07cbcf22af5e50b6f"
+    }
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/core/landuse.py": "c57a21ca8e10bfd30bec969c808cd16834f5c26c56d6e1d3e12c99a1ebe561a3",
+    "/workdir/wepppy/wepppy/nodb/mods/baer/sbs_map.py": "d3bb671e241a6a99b9de264d9e49475987894f68b4a2679ec19b051fed2dff74"
+  },
+  "named_inputs_unchanged": true
+}
