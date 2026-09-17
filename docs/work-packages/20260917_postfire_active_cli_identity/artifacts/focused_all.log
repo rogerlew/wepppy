@@ -1,0 +1,224 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_freshness.py tests/nodb/mods/test_postfire_debris_flow_production.py tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 153 items
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py ................. [ 11%]
+....................                                                     [ 24%]
+tests/nodb/mods/test_postfire_debris_flow_production.py .........F
+
+=================================== FAILURES ===================================
+_____________________ test_upload_and_model_real_artifacts _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-5/test_upload_and_model_real_art0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76301ce79430>
+prepared_inputs = M1Inputs(dem=PosixPath('/tmp/pytest-of-unknown/pytest-5/test_upload_and_model_real_art0/sources/dem.tif'), mask=PosixP...test_upload_and_model_real_art0/sources/raw-dnbr.tif'),), elevation_units='m', sbs_alignment='exact', soil_policy=None)
+
+    def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
+        from tests.nodb.mods.test_postfire_debris_flow_kf import fake_native
+        from wepppy.nodb.mods.postfire_debris_flow import kf_source
+        monkeypatch.setattr(kf_source, "_native_window", fake_native)
+        import json, uuid
+        import pandas as pd
+        from types import SimpleNamespace
+        from tests.nodb.mods.test_postfire_debris_flow_integration import BINARY
+        i=prepared_inputs
+        from wepppy.nodb.core import Ron
+        Ron(str(tmp_path),'disturbed9002_wbt.cfg')
+        monkeypatch.setattr(preflight,'notify',lambda wd:None)
+        controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
+        monkeypatch.setattr(p,'mutable',lambda wd:controller)
+        parquet=tmp_path/'climate.parquet'
+        pd.DataFrame({'prcp':[20.]*30,'year':list(range(1,31)), 'month':[7.]*30,'day_of_month':[1.]*30,
+                      'peak_intensity_15':[30.]*30,'peak_intensity_30':[20.]*30,'peak_intensity_60':[10.]*30}).to_parquet(parquet)
+        paths={'dem':i.dem,'mask':i.mask,'outlet':i.outlet,'sbs':i.sbs,'k':i.k,'k_manifest':i.k_manifest,'cli':parquet}
+        snapshot={'selections':{'climate_mode':'Vanilla','engine_sha256':p.engine_identity()},
+                  'files':{'active_cli':p.signature(tmp_path,parquet)},
+                  'content_sha256':{'active_cli':p.digest(parquet)}}
+        def sources(wd,**kwargs):
+            current={**snapshot,'files':{'active_cli':p.signature(tmp_path,parquet)}}
+            if kwargs.get('content') is False: current.pop('content_sha256')
+            return True,False,{'watershed':True,'soils':True,'sbs':True,'k':True,'climate':True,'noaa':False},dict(paths),current
+        monkeypatch.setattr(p,'sources',sources)
+        identity=uuid.uuid4().hex;folder=p.directory(tmp_path,identity);(folder/'source').mkdir(parents=True)
+        import shutil
+        shutil.copyfile(i.lineage_sources[0],folder/'source'/'dnbr.tif')
+        controller.change(lambda state:state.update(upload_attempt={'id':identity,'job_id':None,'phase':'queued','created_at':p.now(),
+            'retryable':False,'error':None,'snapshot':snapshot,'source_id':identity,'source_sha256':{str((folder/'source'/'dnbr.tif').relative_to(tmp_path)):p.digest(folder/'source'/'dnbr.tif')},'filename':'dnbr.tif','encoding':{'mode':'auto'}}))
+        statistics = Path(str(i.dem) + '.aux.xml')
+        statistics.write_text('<PAMDataset><PAMRasterBand band="1"><Metadata><MDI key="STATISTICS_MINIMUM">0</MDI></Metadata></PAMRasterBand></PAMDataset>')
+        p.execute_upload(tmp_path,identity)
+        import numpy as np
+        before, before_valid, before_grid = p.read_raster(i.dem)
+        after, after_valid, after_grid = p.read_raster(folder/'dem.tif')
+        assert before_grid == after_grid
+        np.testing.assert_array_equal(before_valid, after_valid)
+        np.testing.assert_array_equal(before[before_valid], after[after_valid])
+        manifest = json.loads((folder/'normalized'/'manifest.json').read_text())
+        assert str(folder/'dem.tif') in manifest['input_sha256']
+        assert str((folder/'dem.tif').relative_to(tmp_path)) in PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr']['artifacts']
+        loaded=PostfireDebrisFlow.load_detached(str(tmp_path))
+        assert loaded.state['active_dnbr']['scale_factor']==.001
+        runid=uuid.uuid4().hex;p.directory(tmp_path,runid).mkdir()
+        controller.change(lambda state:state.update(run_attempt={'id':runid,'job_id':None,'phase':'queued','created_at':p.now(),
+            'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        # A metadata-only change before admission remains a usable accepted upload.
+        import os
+        os.link(folder/'normalized'/'dnbr.tif', folder/'same-content-link.tif')
+        p.execute_model(tmp_path,runid,BINARY)
+        accepted=PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']
+        assert accepted['id']==runid
+        assert accepted['area_warning'] is True
+        result=json.loads((p.directory(tmp_path,runid)/'results'/'manifest.json').read_text())
+        assert result['status']=='complete'
+        assert not (tmp_path/'postfire_debris_flow'/'runs').exists()
+        assert len(pd.read_parquet(p.directory(tmp_path,runid)/'results'/'events.parquet'))==90
+    
+        statistics.write_text(statistics.read_text().replace('>0<', '>1<'))
+        assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
+        # A new Kf run owns a fresh source preparation and predictor bundle.
+        next_id=uuid.uuid4().hex;p.directory(tmp_path,next_id).mkdir()
+        controller.change(lambda state:state.update(run_attempt={'id':next_id,'job_id':None,'phase':'queued','created_at':p.now(),
+            'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        p.execute_model(tmp_path,next_id,BINARY)
+        assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+        acquire = kf_source.acquire_kf
+        for selection in ({'model':'M3'},{'frequency_source':'noaa'}):
+            stale_id=uuid.uuid4().hex
+            controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+                'id':stale_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+            def superseded_acquire(*args):
+                result=acquire(*args)
+                controller.change(lambda state:state.update(selection))
+                return result
+            monkeypatch.setattr(kf_source,'acquire_kf',superseded_acquire)
+            with pytest.raises(p.WorkflowError,match='superseded'):
+                p.execute_model(tmp_path,stale_id,BINARY)
+            assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+        monkeypatch.setattr(kf_source,'acquire_kf',acquire)
+        original_change=controller.change
+        def change_at_publish(callback):
+            if callback.__name__=='publish':
+                original_change(lambda state:state.update(frequency_source='noaa'))
+            return original_change(callback)
+        monkeypatch.setattr(controller,'change',change_at_publish)
+        stale_id=uuid.uuid4().hex
+        controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+            'id':stale_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        with pytest.raises(p.WorkflowError,match='superseded'):
+            p.execute_model(tmp_path,stale_id,BINARY)
+        assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+        # Unlike pre-admission metadata churn, drift during this run rejects publication.
+        monkeypatch.setattr(controller, 'change', original_change)
+        during_id=uuid.uuid4().hex
+        controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+            'id':during_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        build_results=p.build_m1_results
+        def drift_during_build(*args,**kwargs):
+            result=build_results(*args,**kwargs)
+            path=folder/'normalized'/'dnbr.tif'; st=path.stat()
+            os.utime(path,ns=(st.st_atime_ns,st.st_mtime_ns+1))
+            return result
+        with monkeypatch.context() as patch:
+            patch.setattr(p,'build_m1_results',drift_during_build)
+            with pytest.raises(p.WorkflowError,match='Inputs changed'):
+                p.execute_model(tmp_path,during_id,BINARY)
+        assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+        # Shared M1 admission and both publication guards accept CLI link churn.
+        monkeypatch.setattr(p,'build_m1_results',build_results)
+        for stage in ('queued','results','locked'):
+            successful_id=uuid.uuid4().hex
+            controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+                'id':successful_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,
+                'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+            def link_cli():
+                os.link(parquet,tmp_path/('cli-link-'+stage))
+            def build_and_link(*args,**kwargs):
+                result=build_results(*args,**kwargs)
+                link_cli()
+                return result
+            def publish_and_link(callback):
+                if callback.__name__=='publish':
+                    def wrapped(state):
+                        link_cli()
+                        return callback(state)
+                    return original_change(wrapped)
+                return original_change(callback)
+            with monkeypatch.context() as patch:
+                if stage=='queued': link_cli()
+                elif stage=='results': patch.setattr(p,'build_m1_results',build_and_link)
+                else: patch.setattr(controller,'change',publish_and_link)
+>               p.execute_model(tmp_path,successful_id,BINARY)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/postfire_debris_flow/production.py:775: in execute_model
+    mutable(wd).change(publish)
+wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py:71: in change
+    callback(state)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+current = {'active_dnbr': {'add_offset': 0.0, 'artifacts': {'climate.parquet': ['climate.parquet', 5365, 1789670329208385304, 17...ed_cells': 0, 'mask': 'valid_mask.tif', 'policy': 'common_valid_v1', 'total_cells': 25, ...}, ...}, 'model': 'M1', ...}
+
+    def publish(current):
+        check_attempt(current)
+        if (current['run_attempt']['id']!=identity or current['active_dnbr']['id']!=active['id']
+                or not _current_authority(wd,frequency,'M1',snapshot)
+                or not artifacts_current(wd, verified_active, strong=False, strict=True)
+                or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False, strict=True)
+                or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False, strict=True)):
+>           raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
+E           wepppy.nodb.mods.postfire_debris_flow.production.WorkflowError: Inputs changed. Run the model again.
+
+wepppy/nodb/mods/postfire_debris_flow/production.py:770: WorkflowError
+----------------------------- Captured stderr call -----------------------------
+2026-09-17 18:38:49 [INFO] wepppy.run.test_upload_and_model_real_art0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=4236) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 46 passed, 16 warnings in 20.50s ==================

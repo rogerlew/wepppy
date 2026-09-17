@@ -140,7 +140,7 @@ The specification and detailed contracts map the implemented source and UI paths
   proofless climate exports through normal **Build climate**. Reports retain
   their supported legacy reads. See the
   [freshness contract](../../../../docs/schemas/file-dependency-freshness-contract.md)
-  for compatibility and pending development acceptance.
+  for compatibility and active-worker verification requirements.
 - Known M3 limitation: metadata changes in soil inputs, prepared source evidence
   and SQLite main/WAL/SHM files can still mark an assessment stale when their
   scientific content is unchanged. Byte-identical replacement, archive restore,

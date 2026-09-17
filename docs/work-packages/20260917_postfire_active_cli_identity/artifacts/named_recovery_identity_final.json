@@ -1,0 +1,22 @@
+{
+  "runid": "thespian-cleanness",
+  "job_id": "0c3bb451-0e7a-4814-95f5-3f1d2f219d49",
+  "attempt": "8190121c8a4b45e1952861e74d909693",
+  "phase": "complete",
+  "climate_mode": "ObservedPRISM",
+  "active_cli": [
+    "climate/wepp.cli",
+    1151532,
+    1789669084921817962,
+    1789669418696089259
+  ],
+  "active_cli_sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "original_failure_retained": true,
+  "previous_acceptance_retained": true,
+  "all_admitted_source_hashes_match_failed_attempt": true,
+  "changed_selection_keys": [
+    "engine_sha256"
+  ],
+  "engine_snapshot_matches_final_source": true,
+  "implementation_commit": "1003fe9ad"
+}

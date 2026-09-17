@@ -1,0 +1,107 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_freshness.py tests/nodb/mods/test_postfire_debris_flow_production.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 93 items
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py ................. [ 18%]
+....................                                                     [ 39%]
+tests/nodb/mods/test_postfire_debris_flow_production.py .........F
+
+=================================== FAILURES ===================================
+_____________________ test_upload_and_model_real_artifacts _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_upload_and_model_real_art0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7c09b4a8a240>
+prepared_inputs = M1Inputs(dem=PosixPath('/tmp/pytest-of-unknown/pytest-2/test_upload_and_model_real_art0/sources/dem.tif'), mask=PosixP...test_upload_and_model_real_art0/sources/raw-dnbr.tif'),), elevation_units='m', sbs_alignment='exact', soil_policy=None)
+
+    def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
+        from tests.nodb.mods.test_postfire_debris_flow_kf import fake_native
+        from wepppy.nodb.mods.postfire_debris_flow import kf_source
+        monkeypatch.setattr(kf_source, "_native_window", fake_native)
+        import json, uuid
+        import pandas as pd
+        from types import SimpleNamespace
+        from tests.nodb.mods.test_postfire_debris_flow_integration import BINARY
+        i=prepared_inputs
+        from wepppy.nodb.core import Ron
+        Ron(str(tmp_path),'disturbed9002_wbt.cfg')
+        monkeypatch.setattr(preflight,'notify',lambda wd:None)
+        controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
+        monkeypatch.setattr(p,'mutable',lambda wd:controller)
+        parquet=tmp_path/'climate.parquet'
+        pd.DataFrame({'prcp':[20.]*30,'year':list(range(1,31)), 'month':[7.]*30,'day_of_month':[1.]*30,
+                      'peak_intensity_15':[30.]*30,'peak_intensity_30':[20.]*30,'peak_intensity_60':[10.]*30}).to_parquet(parquet)
+        paths={'dem':i.dem,'mask':i.mask,'outlet':i.outlet,'sbs':i.sbs,'k':i.k,'k_manifest':i.k_manifest,'cli':parquet}
+        snapshot={'selections':{'climate_mode':'Vanilla','engine_sha256':p.engine_identity()},
+                  'files':{'active_cli':p.signature(tmp_path,parquet)},
+                  'content_sha256':{'active_cli':p.digest(parquet)}}
+        def sources(wd,**kwargs):
+            return True,False,{'watershed':True,'soils':True,'sbs':True,'k':True,'climate':True,'noaa':False},dict(paths),{**snapshot,'files':{'active_cli':p.signature(tmp_path,parquet)}}
+        monkeypatch.setattr(p,'sources',sources)
+        identity=uuid.uuid4().hex;folder=p.directory(tmp_path,identity);(folder/'source').mkdir(parents=True)
+        import shutil
+        shutil.copyfile(i.lineage_sources[0],folder/'source'/'dnbr.tif')
+        controller.change(lambda state:state.update(upload_attempt={'id':identity,'job_id':None,'phase':'queued','created_at':p.now(),
+            'retryable':False,'error':None,'snapshot':snapshot,'source_id':identity,'source_sha256':{str((folder/'source'/'dnbr.tif').relative_to(tmp_path)):p.digest(folder/'source'/'dnbr.tif')},'filename':'dnbr.tif','encoding':{'mode':'auto'}}))
+        statistics = Path(str(i.dem) + '.aux.xml')
+        statistics.write_text('<PAMDataset><PAMRasterBand band="1"><Metadata><MDI key="STATISTICS_MINIMUM">0</MDI></Metadata></PAMRasterBand></PAMDataset>')
+>       p.execute_upload(tmp_path,identity)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/postfire_debris_flow/production.py:577: in execute_upload
+    mutable(wd).change(publish)
+wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py:71: in change
+    callback(state)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+current = {'active_dnbr': None, 'frequency_source': 'cli', 'last_successful_run': None, 'model': 'M1', ...}
+
+    def publish(current):
+        if any(signature(wd, Path(wd)/rel)!=sig for rel,sig in verified_sources.items()):
+            raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
+        if current['upload_attempt']['id'] != identity or sources(wd,rainfall=False,content=False)[4] != {key: value for key, value in snapshot.items() if key != 'content_sha256'}:
+>           raise WorkflowError('superseded', 'Upload was superseded.', 409)
+E           wepppy.nodb.mods.postfire_debris_flow.production.WorkflowError: Upload was superseded.
+
+wepppy/nodb/mods/postfire_debris_flow/production.py:574: WorkflowError
+----------------------------- Captured stderr call -----------------------------
+2026-09-17 18:37:06 [INFO] wepppy.run.test_upload_and_model_real_art0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_real_nodb_roundtrip
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 46 passed, 8 warnings in 14.81s ===================

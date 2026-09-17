@@ -1,0 +1,16 @@
+{
+  "job_id": "fa299be5-45b0-448b-b1d1-718445c1529a",
+  "runid": "qa-active-cli-20260917",
+  "status": "finished",
+  "result": {
+    "message": "Model run complete."
+  },
+  "started_at": "2026-09-17 18:49:11.714302",
+  "ended_at": "2026-09-17 18:49:44.229146",
+  "description": "wepppy.rq.postfire_debris_flow_rq.run_m3_rq('qa-active-cli-20260917', '68186dc8d0d74673a04be41ca9767853')",
+  "elapsed_s": 32.514844,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

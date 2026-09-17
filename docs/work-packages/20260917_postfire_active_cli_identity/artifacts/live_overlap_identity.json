@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "attempt": "68186dc8d0d74673a04be41ca9767853",
+  "admitted_active_cli": [
+    "climate/wepp.cli",
+    1151532,
+    1789669084921817962,
+    1789670233637306862
+  ],
+  "admitted_sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "mutation": {
+    "mode": "overlap",
+    "runid": "qa-active-cli-20260917",
+    "attempt": "68186dc8d0d74673a04be41ca9767853",
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "utc_unix": 1789670959.176399,
+    "before": {
+      "sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+      "stat": [
+        64,
+        1380310,
+        1151532,
+        1789669084921817962,
+        1789670233637306862
+      ],
+      "nlink": 1
+    },
+    "after": {
+      "sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+      "stat": [
+        64,
+        1380310,
+        1151532,
+        1789669084921817962,
+        1789670959164274455
+      ],
+      "nlink": 2
+    },
+    "predictors_present": true
+  }
+}

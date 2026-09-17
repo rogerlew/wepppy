@@ -1,0 +1,16 @@
+COPY 250/3988 files
+COPY 500/3988 files
+COPY 750/3988 files
+COPY 1000/3988 files
+COPY 1250/3988 files
+COPY 1500/3988 files
+COPY 1750/3988 files
+COPY 2000/3988 files
+COPY 2250/3988 files
+COPY 2500/3988 files
+COPY 2750/3988 files
+COPY 3000/3988 files
+COPY 3250/3988 files
+COPY 3500/3988 files
+COPY 3750/3988 files
+{"status": "prepared", "runid": "qa-active-cli-20260917", "destination": "/wc1/runs/qa/qa-active-cli-20260917", "manifest": "docs/work-packages/20260917_postfire_active_cli_identity/artifacts/copy_manifest.json", "files": 3988, "bytes": 6840257872}

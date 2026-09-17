@@ -1,0 +1,297 @@
+[
+  {
+    "utc": "2026-09-17T18:49:07.184Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M3",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "soils",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#soils"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": null,
+      "run": {
+        "id": "d59f7eadde674ddb923127a65005a39e",
+        "job_id": "b90f3e6a-cb6e-47f4-adef-63bbbccb45fe",
+        "phase": "failed",
+        "created_at": "2026-09-17T18:47:05.113827+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M3",
+        "frequency_source": "cli"
+      },
+      "dnbr": null,
+      "results": {
+        "id": "f493a714df9d4fbfbfd4370c46ad54f8",
+        "model": "M3",
+        "completed_at": "2026-09-17T00:57:50.186605+00:00",
+        "partial": false,
+        "partial_reason": null,
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 122168,
+          "fallback_valid_cells": 11272,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "primary_valid_cells": 134889,
+          "total_cells": 268329,
+          "valid_cells": 146161,
+          "valid_fraction": 0.5447081754115284
+        },
+        "current": false,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/manifest.json"
+          }
+        ]
+      },
+      "freshness": "stale"
+    }
+  },
+  {
+    "utc": "2026-09-17T18:49:11.737Z",
+    "stage": "submitted",
+    "response": {
+      "job_id": "fa299be5-45b0-448b-b1d1-718445c1529a",
+      "result": {
+        "attempt_id": "68186dc8d0d74673a04be41ca9767853"
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T18:49:19.247Z",
+    "stage": "mutation",
+    "result": {
+      "mode": "overlap",
+      "runid": "qa-active-cli-20260917",
+      "attempt": "68186dc8d0d74673a04be41ca9767853",
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "utc_unix": 1789670959.176399,
+      "before": {
+        "sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+        "stat": [
+          64,
+          1380310,
+          1151532,
+          1789669084921817900,
+          1789670233637307000
+        ],
+        "nlink": 1
+      },
+      "after": {
+        "sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+        "stat": [
+          64,
+          1380310,
+          1151532,
+          1789669084921817900,
+          1789670959164274400
+        ],
+        "nlink": 2
+      },
+      "predictors_present": true
+    }
+  },
+  {
+    "utc": "2026-09-17T18:49:46.135Z",
+    "stage": "completed",
+    "state": {
+      "schema_version": 1,
+      "model": "M3",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "soils",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#soils"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": null,
+      "run": {
+        "id": "68186dc8d0d74673a04be41ca9767853",
+        "job_id": "fa299be5-45b0-448b-b1d1-718445c1529a",
+        "phase": "complete",
+        "created_at": "2026-09-17T18:49:10.791614+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M3",
+        "frequency_source": "cli"
+      },
+      "dnbr": null,
+      "results": {
+        "id": "68186dc8d0d74673a04be41ca9767853",
+        "model": "M3",
+        "completed_at": "2026-09-17T18:49:44.078519+00:00",
+        "partial": false,
+        "partial_reason": null,
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 122168,
+          "fallback_valid_cells": 11272,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "primary_valid_cells": 134889,
+          "total_cells": 268329,
+          "valid_cells": 146161,
+          "valid_fraction": 0.5447081754115284
+        },
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/68186dc8d0d74673a04be41ca9767853/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/68186dc8d0d74673a04be41ca9767853/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/68186dc8d0d74673a04be41ca9767853/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/68186dc8d0d74673a04be41ca9767853/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/qa-active-cli-20260917/config/postfire-debris-flow/files/68186dc8d0d74673a04be41ca9767853/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-17T18:49:46.214Z",
+    "stage": "attempt_browse",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T18:49:55.100Z",
+    "stage": "artifact",
+    "name": "design.parquet",
+    "bytes": 3472,
+    "sha256": "d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"
+  },
+  {
+    "utc": "2026-09-17T18:49:57.534Z",
+    "stage": "artifact",
+    "name": "events.parquet",
+    "bytes": 476092,
+    "sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"
+  },
+  {
+    "utc": "2026-09-17T18:49:58.955Z",
+    "stage": "artifact",
+    "name": "inverse.parquet",
+    "bytes": 2213,
+    "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+  },
+  {
+    "utc": "2026-09-17T18:50:00.464Z",
+    "stage": "artifact",
+    "name": "manifest.json",
+    "bytes": 14479,
+    "sha256": "eafd878254cd715ffceb62cc4ddb6bfc63099d2b432b1bcbaeb40736d000d351"
+  },
+  {
+    "utc": "2026-09-17T18:50:01.821Z",
+    "stage": "artifact",
+    "name": "valid_mask.tif",
+    "bytes": 42972,
+    "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  {
+    "utc": "2026-09-17T18:50:01.842Z",
+    "stage": "PASS",
+    "mode": "overlap",
+    "attempt_id": "68186dc8d0d74673a04be41ca9767853",
+    "job_id": "fa299be5-45b0-448b-b1d1-718445c1529a"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "job_id": "5bff6acb-16ad-4252-aeae-f3668c4e3509",
+  "runid": "qa-active-cli-20260917",
+  "status": "failed",
+  "result": null,
+  "started_at": "2026-09-17 18:50:22.133905",
+  "ended_at": "2026-09-17 18:50:51.823139",
+  "description": "wepppy.rq.postfire_debris_flow_rq.run_m3_rq('qa-active-cli-20260917', '0de91c1f867b463d946c40364d3e8051')",
+  "elapsed_s": 29.689234,
+  "exc_info": "Traceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/rq/worker.py\", line 1430, in perform_job\n    rv = job.perform()\n         ^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1280, in perform\n    self._result = self._execute()\n                   ^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1317, in _execute\n    result = self.func(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/exception_logging.py\", line 57, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/postfire_debris_flow_rq.py\", line 73, in run_m3_rq\n    return _execute(runid, identity, 'run_attempt', model='M3')\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/postfire_debris_flow_rq.py\", line 50, in _execute\n    if phase!='needs_scale':raise RuntimeError(f'Postfire operation failed ({code}). See protected run logs.') from None\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: Postfire operation failed (superseded). See protected run logs.\n",
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

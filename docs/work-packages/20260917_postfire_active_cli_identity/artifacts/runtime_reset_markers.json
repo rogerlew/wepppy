@@ -1,0 +1,21 @@
+{
+  "root": "/wc1/runs/qa/qa-active-cli-20260917",
+  "redis_identity": "qa-active-cli-20260917",
+  "canonical_helper": "_reset_forked_run_job_markers",
+  "removed": {
+    "rq:fetch_dem_and_build_channels_rq": "a015c674-49c6-4f09-a0c3-6fc8038bf92e",
+    "rq:set_outlet_rq": "be4c6272-b55c-4fd6-97c2-f6bdf1a1fe50",
+    "rq:build_subcatchments_and_abstract_watershed_rq": "2a8b38ee-5d9e-4236-8eec-03966585e8b6",
+    "rq:build_landuse_rq": "fa147763-32c6-48b8-a0d1-4e755f6f0f58",
+    "rq:build_soils_rq": "fa696505-a800-4ae8-afb2-cae31a9be5a6",
+    "rq:build_climate_rq": "f5e014a0-ce25-40e6-a6c4-3c4b6265ed25",
+    "rq:postfire_m3_rq": "bb219a65-e71a-4c6c-bbaa-40814a8e2aac",
+    "rq:run_wepp_rq": "b7478bcd-5bba-499b-8e28-59ad75bc8af1"
+  },
+  "changed": {
+    "last_modified": {
+      "before": "1789670827",
+      "after": "1789670932"
+    }
+  }
+}

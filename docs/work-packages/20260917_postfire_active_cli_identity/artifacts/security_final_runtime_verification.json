@@ -1,0 +1,83 @@
+{
+  "review_utc": "2026-09-17T19:15:01.879140+00:00",
+  "status": "PASS",
+  "final_commit": "1003fe9addfcfc308ecdfdce56a3f36011845536",
+  "accepted": "8190121c8a4b45e1952861e74d909693",
+  "run_attempt_phase": "complete",
+  "job_id": "0c3bb451-0e7a-4814-95f5-3f1d2f219d49",
+  "code_matches_accepted_engine": {
+    "wepppy/nodb/mods/postfire_debris_flow/production.py": "0758aba06c7c9fde2c86daed4253a1296b2be953bf66a170274931d72dbd69c5",
+    "wepppy/nodb/mods/postfire_debris_flow/run_preparation.py": "82c0e60de632e2dd43881a7767960622fd8e099a150b9082fffcb3d31645bb49"
+  },
+  "original_cli_signature_unchanged": [
+    "climate/wepp.cli",
+    1151532,
+    1789669084921817962,
+    1789669418696089259
+  ],
+  "original_cli_sha256_unchanged": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "original_failure_retained": true,
+  "prior_acceptance_retained": true,
+  "final_downloads_match_disk": [
+    {
+      "stage": "artifact",
+      "name": "design.parquet",
+      "bytes": 3472,
+      "sha256": "d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"
+    },
+    {
+      "stage": "artifact",
+      "name": "events.parquet",
+      "bytes": 476092,
+      "sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"
+    },
+    {
+      "stage": "artifact",
+      "name": "inverse.parquet",
+      "bytes": 2213,
+      "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+    },
+    {
+      "stage": "artifact",
+      "name": "manifest.json",
+      "bytes": 14351,
+      "sha256": "3f3e0cbcf327ea01984844b48de69e29bc49a8655cc700e6aac53df61297fe31"
+    },
+    {
+      "stage": "artifact",
+      "name": "valid_mask.tif",
+      "bytes": 42972,
+      "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+    }
+  ],
+  "prior_records_match_before_repair": [
+    {
+      "relative": "postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/status.json",
+      "sha256": "43e962eda3e37c67fdd8ff69e2e8ccdee54eb09a236fb4555ac5e37a26c54a76"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/error.log",
+      "sha256": "6a72c232722c8ee7e8bcb9a9f32d46b7765d3a9a35e08918e7d56714122160cf"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/results/manifest.json",
+      "sha256": "3e828092f6ed8ca308af1dbe72633dd075feafe40fcf5e940fcd274ca81c1251"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/results/design.parquet",
+      "sha256": "701ba4723f72e0d0f750c462cf60f4bd9ae69defff7513b34ef16efc65ebdcb3"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/results/events.parquet",
+      "sha256": "88f7ad8650e8faad2c47b5cff63aea98a0c5b5c9a0ff18b5a20aeacbf7354d23"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/results/inverse.parquet",
+      "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+    },
+    {
+      "relative": "postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/results/valid_mask.tif",
+      "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+    }
+  ]
+}

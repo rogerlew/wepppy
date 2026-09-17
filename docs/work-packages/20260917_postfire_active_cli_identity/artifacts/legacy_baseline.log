@@ -1,0 +1,77 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py -k hashless_admission --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 68 items / 66 deselected / 2 selected
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py F
+
+=================================== FAILURES ===================================
+_ test_hashless_admission_stays_strict_after_source_preparation[western-key7] __
+
+project = (PosixPath('/tmp/pytest-of-unknown/pytest-9/test_hashless_admission_stays_0'), PosixPath('/tmp/pytest-of-unknown/pytes...stays_0/dem/wbt/bound.tif'), PosixPath('/tmp/pytest-of-unknown/pytest-9/test_hashless_admission_stays_0/lineage.json'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x797c3920b440>
+
+    def test_hashless_admission_stays_strict_after_source_preparation(project, monkeypatch):
+        from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+        from wepppy.nodb.mods.postfire_debris_flow.run_preparation import prepare_for_run
+        from wepppy.runtime_paths.wepp_inputs import copy_input_file
+        wd, dem, mask, catalog = project
+        monkeypatch.setattr(source_acquisition, 'acquire_sources',
+                            lambda *args: prepare_local_sources(wd, dem, mask, collection_catalog=catalog))
+        identity = enqueue_m3(wd)
+        def legacy(state):
+            state['run_attempt']['phase'] = 'running'
+            state['run_attempt']['snapshot']['inputs'].pop('content_sha256')
+        p.mutable(wd).change(legacy)
+        expected = p.state_at(wd)['run_attempt']['snapshot']
+        paths = p.sources(wd, model='M3')[3]
+        _, rebased = prepare_for_run(wd, identity, expected, paths)
+>       assert 'content_sha256' not in rebased['inputs']
+E       AssertionError: assert 'content_sha256' not in {'content_sha256': {'active_cli': '6ac1e3447c53aa42e0994bd9c08796e7100e49417620ec2d2388f0aa7ae4b64b', 'cli': '193d2e98...li', 'climate': {'adjust_mx_pt5': False, 'catalog_id': None, 'climatestation': None, 'future_end_year': '', ...}, ...}}
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py:423: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+2026-09-17 19:05:05 [INFO] wepppy.run.test_hashless_admission_stays_0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 19:05:05 [INFO] wepppy.run.test_hashless_admission_stays_0.soils: soils.dump_soils_parquet()
+2026-09-17 19:05:05 [INFO] wepppy.run.test_hashless_admission_stays_0.climate: Exported CLI parquet with peak intensities
+2026-09-17 19:05:05 [INFO] wepppy.run.test_hashless_admission_stays_0.climate: Exported CLI parquet with peak intensities
+------------------------------ Captured log setup ------------------------------
+WARNING  wepppy.weppcloud.app:agent_auth.py:40 AGENT_JWT_SECRET not configured; falling back to SECRET_KEY for agent JWTs
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_hashless_admission_stays_strict_after_source_preparation[western-key7]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================ 1 failed, 66 deselected, 8 warnings in 21.31s =================

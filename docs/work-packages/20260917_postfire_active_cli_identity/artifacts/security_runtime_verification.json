@@ -1,0 +1,38 @@
+{
+  "review_utc": "2026-09-17T18:54:30.334566+00:00",
+  "status": "PASS",
+  "overlap_job": "fa299be5-45b0-448b-b1d1-718445c1529a",
+  "mutation_inside_job_seconds": 7.462096929550171,
+  "restored_cli_sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "downloaded_artifacts_match_disk": [
+    {
+      "name": "design.parquet",
+      "bytes": 3472,
+      "sha256": "d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"
+    },
+    {
+      "name": "events.parquet",
+      "bytes": 476092,
+      "sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"
+    },
+    {
+      "name": "inverse.parquet",
+      "bytes": 2213,
+      "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+    },
+    {
+      "name": "manifest.json",
+      "bytes": 14479,
+      "sha256": "eafd878254cd715ffceb62cc4ddb6bfc63099d2b432b1bcbaeb40736d000d351"
+    },
+    {
+      "name": "valid_mask.tif",
+      "bytes": 42972,
+      "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+    }
+  ],
+  "current_code_matches_runtime_snapshot": {
+    "production.py": "12d49285d720c55bf009279cf395af315f7383e62fe0e5b2f74f377bc3fd6a37",
+    "run_preparation.py": "283ffcd3d7a6f29fb32b9410884e5455371311d4b3358db86d685349dea534af"
+  }
+}

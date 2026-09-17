@@ -1,0 +1,43 @@
+{
+  "utc": "2026-09-17T18:37:22.625053+00:00",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "umask": "0o22",
+  "python": "3.12.14",
+  "gdal": "3100300",
+  "rasterio": "1.3.10",
+  "queues": [
+    {
+      "queue": "default",
+      "queued": 0,
+      "started": []
+    },
+    {
+      "queue": "batch",
+      "queued": 0,
+      "started": []
+    },
+    {
+      "queue": "fork-archive",
+      "queued": 0,
+      "started": []
+    }
+  ],
+  "paths": {
+    "/workdir/wepppy": {
+      "resolved": "/workdir/wepppy",
+      "mode": "0o775"
+    },
+    "/wc1": {
+      "resolved": "/wc1",
+      "mode": "0o755"
+    },
+    "/geodata": {
+      "resolved": "/geodata",
+      "mode": "0o755"
+    }
+  }
+}

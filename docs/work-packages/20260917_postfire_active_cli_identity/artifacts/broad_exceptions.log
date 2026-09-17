@@ -1,0 +1,19 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 0b5d063d3947e8a2ed56f7d9b3f73a7fd6ac7cc5
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 2
+
+Files:
+  M wepppy/nodb/mods/postfire_debris_flow/production.py
+  M wepppy/nodb/mods/postfire_debris_flow/run_preparation.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/nodb/mods/postfire_debris_flow/production.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/run_preparation.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

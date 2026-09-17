@@ -1,0 +1,72 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_freshness.py -k worker_cli --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 37 items / 20 deselected / 17 selected
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py ................F
+
+=================================== FAILURES ===================================
+_____________ test_worker_cli_generation_race_rejected[after_read] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-4/test_worker_cli_generation_rac3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x723a882bfaa0>
+mutation = 'after_read'
+
+    @pytest.mark.parametrize('mutation', ['symlink', 'replace', 'during_read', 'after_read'])
+    def test_worker_cli_generation_race_rejected(tmp_path, monkeypatch, mutation):
+        from contextlib import contextmanager
+        from wepppy.nodb.mods.postfire_debris_flow import rainfall_io
+        path = tmp_path/'climate.cli'
+        path.write_bytes(b'original climate')
+        admitted = worker_snapshot(tmp_path, path)
+        linked = tmp_path/'linked'
+        os.link(path, linked)
+        current = worker_snapshot(tmp_path, path, content=False)
+        if mutation == 'symlink':
+            path.unlink()
+            path.symlink_to(linked)
+        elif mutation in ('replace', 'during_read'):
+            original = rainfall_io.open_local
+            @contextmanager
+            def racing(*args, **kwargs):
+                with original(*args, **kwargs) as stream:
+                    if mutation == 'replace':
+                        replacement = tmp_path/'replacement'
+                        replacement.write_bytes(path.read_bytes())
+                        os.replace(replacement, path)
+                    yield stream
+                    if mutation == 'during_read':
+                        os.link(path, tmp_path/'another_link')
+            monkeypatch.setattr(rainfall_io, 'open_local', racing)
+        else:
+            original = p.signature
+            def racing(*args, **kwargs):
+                os.link(path, tmp_path/'another_link')
+                return original(*args, **kwargs)
+            monkeypatch.setattr(p, 'signature', racing)
+        try:
+            result = p._worker_source_snapshots_current(tmp_path, admitted, current)
+        except (p.WorkflowError, OSError, ValueError):
+            pass  # Explicit coherent-read/path failure is the established contract.
+        else:
+>           assert result is False
+E           assert True is False
+
+tests/nodb/mods/test_postfire_debris_flow_freshness.py:346: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_freshness.py::test_worker_cli_generation_race_rejected[after_read]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=========== 1 failed, 16 passed, 20 deselected, 2 warnings in 9.32s ============

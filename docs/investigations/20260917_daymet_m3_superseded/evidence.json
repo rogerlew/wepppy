@@ -1,0 +1,64 @@
+{
+  "job_id": "bb219a65-e71a-4c6c-bbaa-40814a8e2aac",
+  "attempt_id": "932b890ecffa4f659d438bcf0dad68e5",
+  "phase": "superseded",
+  "snapshot_differences": [
+    {
+      "field": "/files/active_cli",
+      "accepted_at_admission": [
+        "climate/wepp.cli",
+        1151532,
+        1789669084921817962,
+        1789669084921817962
+      ],
+      "now": [
+        "climate/wepp.cli",
+        1151532,
+        1789669084921817962,
+        1789669418696089259
+      ]
+    }
+  ],
+  "content_sha256_maps_equal": true,
+  "active_cli_sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "cli_links": 2,
+  "same_inode_as_pw0": true,
+  "cli_ctime_utc": "2026-09-17T18:23:38.696089+00:00",
+  "prepared_result_identity": {
+    "assessment_id": "932b890ecffa4f659d438bcf0dad68e5",
+    "climate_mode": "ObservedPRISM",
+    "date_semantics": "calendar",
+    "project_id": "thespian-cleanness"
+  },
+  "prepared_result_source_hash_checks": {
+    "/wc1/runs/th/thespian-cleanness/climate/wepp_cli.parquet": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/manifest.json": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/prepared/domain.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/prepared/sbs.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/soil/manifest.json": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/soil/source.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/soil/thickness_cm.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/terrain/manifest.json": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/terrain/wbt/watershed.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/valid_mask.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/wbt/area.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/wbt/coverage.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/wbt/relief.tif": true,
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/932b890ecffa4f659d438bcf0dad68e5/predictors/wbt/summary.json": true
+  },
+  "prepared_tables": {
+    "design": {
+      "rows": 12,
+      "sha256": "d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"
+    },
+    "events": {
+      "rows": 14010,
+      "sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"
+    },
+    "inverse": {
+      "rows": 3,
+      "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+    }
+  },
+  "last_accepted_attempt": "f493a714df9d4fbfbfd4370c46ad54f8"
+}

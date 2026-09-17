@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose restart rq-engine rq-worker
+ Container wepppy-rq-engine Restarting 
+ Container wepppy-rq-worker Restarting 
+ Container wepppy-rq-engine Started 
+ Container wepppy-rq-worker Started 

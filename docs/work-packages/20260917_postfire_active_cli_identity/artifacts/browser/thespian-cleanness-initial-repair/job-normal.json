@@ -1,0 +1,16 @@
+{
+  "job_id": "0fd409ce-8e3c-480a-af2c-8a5fd571c7f8",
+  "runid": "thespian-cleanness",
+  "status": "finished",
+  "result": {
+    "message": "Model run complete."
+  },
+  "started_at": "2026-09-17 18:55:21.886230",
+  "ended_at": "2026-09-17 18:55:56.497407",
+  "description": "wepppy.rq.postfire_debris_flow_rq.run_m3_rq('thespian-cleanness', '0c7899f7ac6f464e80e3f873a4c75fe1')",
+  "elapsed_s": 34.611177,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

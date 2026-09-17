@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose exec -T rq-worker python docs/work-packages/20260917_postfire_active_cli_identity/artifacts/runtime_reset_markers.py
+[2026-09-17 18:48:54,009] WARNING in agent_auth: AGENT_JWT_SECRET not configured; falling back to SECRET_KEY for agent JWTs
+Cleared inherited job markers on qa-active-cli-20260917 ; removed keys: 8

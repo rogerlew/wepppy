@@ -4286,3 +4286,9 @@ If this tracker format isn't working or you have suggestions:
 - Completed 2026-09-11: [Artifact observability and Staley intermediate records](docs/work-packages/20260911_artifact_observability/package.md).
 
 - Completed 2026-09-11: [Staley enqueue handoff conformance fix](docs/work-packages/20260911_staley_enqueue_handoff/package.md).
+
+- Completed 2026-09-17: [Post-fire active CLI identity repair](docs/work-packages/20260917_postfire_active_cli_identity/package.md).
+  Fixed active M1/M3 hard-link ctime rejection, retained strict legacy identity,
+  and verified restarted worker overlap/content rejection plus named recovery.
+  Final correctness/security PASS; main full suite 8,971 passed / 99 skipped,
+  with final targeted conformance checks passing. Code `1003fe9ad`.

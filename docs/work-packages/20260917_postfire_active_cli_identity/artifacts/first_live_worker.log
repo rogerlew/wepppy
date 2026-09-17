@@ -1,0 +1,56 @@
+INFO:wctl2:docker compose logs --tail 55 rq-worker
+wepppy-rq-worker  | 18:42:13 Worker 6b30b34a78714511b5bc531b155b55d4 [PID 365]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Worker 87a2e5c626f74e72acf14c2ed4b52b37 [PID 35173]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Worker 4a06f547db9340f1a735ec3eb98b190c [PID 361]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Worker f96eb9d47de8483cb4ff2312a4742f6f [PID 360]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Worker 08417e53e4da436bb20e2aac2c06648c [PID 367]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Worker 737d51e07a464a67a42a0ab7cc05dce5 [PID 370]: warm shut down requested
+wepppy-rq-worker  | 18:42:13 Unsubscribing from channel rq:pubsub:6b30b34a78714511b5bc531b155b55d4
+wepppy-rq-worker  | 18:42:13 Unsubscribing from channel rq:pubsub:08417e53e4da436bb20e2aac2c06648c
+wepppy-rq-worker  | 18:42:13 Unsubscribing from channel rq:pubsub:4a06f547db9340f1a735ec3eb98b190c
+wepppy-rq-worker  | 18:42:13 Unsubscribing from channel rq:pubsub:87a2e5c626f74e72acf14c2ed4b52b37
+wepppy-rq-worker  | 18:42:13 Unsubscribing from channel rq:pubsub:737d51e07a464a67a42a0ab7cc05dce5
+wepppy-rq-worker  | 18:42:14 Worker 08417e53e4da436bb20e2aac2c06648c with pid 367 is dead
+wepppy-rq-worker  | 18:42:14 Worker 87a2e5c626f74e72acf14c2ed4b52b37 with pid 35173 is dead
+wepppy-rq-worker  | 18:42:14 Scheduler stopping, releasing locks for default...
+wepppy-rq-worker  | 18:42:14 Scheduler with PID 366 has stopped
+wepppy-rq-worker  | 18:42:14 Unsubscribing from channel rq:pubsub:f96eb9d47de8483cb4ff2312a4742f6f
+wepppy-rq-worker  | 18:42:15 Worker f96eb9d47de8483cb4ff2312a4742f6f with pid 360 is dead
+wepppy-rq-worker  | 18:42:15 Worker 4a06f547db9340f1a735ec3eb98b190c with pid 361 is dead
+wepppy-rq-worker  | 18:42:15 Worker 6b30b34a78714511b5bc531b155b55d4 with pid 365 is dead
+wepppy-rq-worker  | 18:42:15 Worker 737d51e07a464a67a42a0ab7cc05dce5 with pid 370 is dead
+wepppy-rq-worker  | 18:42:15 All workers stopped, exiting...
+wepppy-rq-worker  | >>> WEPPpyo3 interchange import OK: /workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so
+wepppy-rq-worker  | >>> WEPPpyo3 interchange SHA256: c6b746bb77be39d38321a365df1762fd8d88ce0522f3a51215d5bb8bfdddf248
+wepppy-rq-worker  | 18:42:30 Starting worker pool b45904f80da94f68bbf2650e7fed9680 with pid 7...
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 357
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:14ddf1ebcec24658a003ce41ca9062a9 started with PID 357, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:14ddf1ebcec24658a003ce41ca9062a9
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 358
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:7f46298741574406ab030caf0ec1ebc9 started with PID 358, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:7f46298741574406ab030caf0ec1ebc9
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 360
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:24f156f8236141f185a38ee3a9a7559d started with PID 360, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:24f156f8236141f185a38ee3a9a7559d
+wepppy-rq-worker  | 18:42:30 Scheduler for default started with PID 362
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 363
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:8ff14fedca9a488b895996d23557b505 started with PID 363, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:8ff14fedca9a488b895996d23557b505
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 365
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:555dd94d17ed409eb867ccab72fadbd2 started with PID 365, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:555dd94d17ed409eb867ccab72fadbd2
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default
+wepppy-rq-worker  | 18:42:30 Starting worker started with PID 367
+wepppy-rq-worker  | 18:42:30 Worker rq:worker:8653ffce0f3c4245ac47e563624740e0 started with PID 367, version 1.16.2
+wepppy-rq-worker  | 18:42:30 Subscribing to channel rq:pubsub:8653ffce0f3c4245ac47e563624740e0
+wepppy-rq-worker  | 18:42:30 *** Listening on default...
+wepppy-rq-worker  | 18:42:30 Cleaning registries for queue: default

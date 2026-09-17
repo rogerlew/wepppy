@@ -1,0 +1,30 @@
+INFO:wctl2:docker compose logs --since 8m rq-engine
+wepppy-rq-engine  | INFO:     Shutting down
+wepppy-rq-engine  | INFO:     Waiting for application shutdown.
+wepppy-rq-engine  | INFO:     Application shutdown complete.
+wepppy-rq-engine  | INFO:     Finished server process [7]
+wepppy-rq-engine  | >>> WEPPpyo3 interchange import OK: /workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so
+wepppy-rq-engine  | >>> WEPPpyo3 interchange SHA256: c6b746bb77be39d38321a365df1762fd8d88ce0522f3a51215d5bb8bfdddf248
+wepppy-rq-engine  | INFO:     Started server process [7]
+wepppy-rq-engine  | INFO:     Waiting for application startup.
+wepppy-rq-engine  | INFO:     Application startup complete.
+wepppy-rq-engine  | INFO:     Uvicorn running on http://0.0.0.0:8042 (Press CTRL+C to quit)
+wepppy-rq-engine  | [2026-09-17 18:46:55,250] WARNING in agent_auth: AGENT_JWT_SECRET not configured; falling back to SECRET_KEY for agent JWTs
+wepppy-rq-engine  | INFO:     172.28.0.26:51686 - "POST /api/runs/qa-active-cli-20260917/config/session-token HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51736 - "GET /api/jobstatus/fa147763-32c6-48b8-a0d1-4e755f6f0f58?_=1789670813871 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51746 - "GET /api/jobstatus/fa696505-a800-4ae8-afb2-cae31a9be5a6?_=1789670813875 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51710 - "GET /api/jobstatus/be4c6272-b55c-4fd6-97c2-f6bdf1a1fe50?_=1789670813860 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51752 - "GET /api/jobstatus/f5e014a0-ce25-40e6-a6c4-3c4b6265ed25?_=1789670813882 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51700 - "GET /api/jobstatus/a015c674-49c6-4f09-a0c3-6fc8038bf92e?_=1789670813856 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/jobstatus/2a8b38ee-5d9e-4236-8eec-03966585e8b6?_=1789670813868 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51766 - "GET /api/jobstatus/b7478bcd-5bba-499b-8e28-59ad75bc8af1?_=1789670813886 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51766 - "GET /api/runs/qa-active-cli-20260917/config/project-config/update-availability HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/state HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/state HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/state HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/jobstatus/bb219a65-e71a-4c6c-bbaa-40814a8e2aac?_=1789670824037 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "GET /api/jobinfo/bb219a65-e71a-4c6c-bbaa-40814a8e2aac HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51722 - "POST /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/run HTTP/1.1" 409 Conflict
+wepppy-rq-engine  | INFO:     172.28.0.26:51766 - "GET /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/state HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51766 - "GET /api/runs/qa-active-cli-20260917/config/postfire-debris-flow/state HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:51766 - "GET /api/jobstatus/b90f3e6a-cb6e-47f4-adef-63bbbccb45fe?_=1789670830502 HTTP/1.1" 404 Not Found

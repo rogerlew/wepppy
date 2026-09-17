@@ -1,0 +1,8 @@
+{
+  "contract_checkpoint": "567eacf7d",
+  "implementation_commit": "1003fe9addfcfc308ecdfdce56a3f36011845536",
+  "files": {
+    "wepppy/nodb/mods/postfire_debris_flow/production.py": "0758aba06c7c9fde2c86daed4253a1296b2be953bf66a170274931d72dbd69c5",
+    "wepppy/nodb/mods/postfire_debris_flow/run_preparation.py": "82c0e60de632e2dd43881a7767960622fd8e099a150b9082fffcb3d31645bb49"
+  }
+}

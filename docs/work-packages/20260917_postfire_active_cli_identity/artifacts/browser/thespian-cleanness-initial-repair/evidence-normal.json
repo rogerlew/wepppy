@@ -1,0 +1,506 @@
+[
+  {
+    "utc": "2026-09-17T18:55:06.851Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/rq-engine/api/runs/thespian-cleanness/config/session-token"
+  },
+  {
+    "utc": "2026-09-17T18:55:06.947Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:06.963Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:07.041Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:07.228Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/tasks/set_unit_preferences/"
+  },
+  {
+    "utc": "2026-09-17T18:55:07.258Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:07.303Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:07.316Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:09.128Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:09.293Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:11.088Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:12.205Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:14.462Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:16.462Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:16.483Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M3",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "soils",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#soils"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": null,
+      "run": {
+        "id": "932b890ecffa4f659d438bcf0dad68e5",
+        "job_id": "bb219a65-e71a-4c6c-bbaa-40814a8e2aac",
+        "phase": "superseded",
+        "created_at": "2026-09-17T18:23:07.512160+00:00",
+        "error": {
+          "code": "superseded",
+          "message": "The operation could not finish. Check the project inputs and job log."
+        },
+        "retryable": true,
+        "filename": null,
+        "model": "M3",
+        "frequency_source": "cli"
+      },
+      "dnbr": null,
+      "results": {
+        "id": "f493a714df9d4fbfbfd4370c46ad54f8",
+        "model": "M3",
+        "completed_at": "2026-09-17T00:57:50.186605+00:00",
+        "partial": false,
+        "partial_reason": null,
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 122168,
+          "fallback_valid_cells": 11272,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "primary_valid_cells": 134889,
+          "total_cells": 268329,
+          "valid_cells": 146161,
+          "valid_fraction": 0.5447081754115284
+        },
+        "current": false,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/f493a714df9d4fbfbfd4370c46ad54f8/manifest.json"
+          }
+        ]
+      },
+      "freshness": "stale"
+    }
+  },
+  {
+    "utc": "2026-09-17T18:55:17.425Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:19.488Z",
+    "stage": "page_mutations_settled"
+  },
+  {
+    "utc": "2026-09-17T18:55:19.607Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/run"
+  },
+  {
+    "utc": "2026-09-17T18:55:21.909Z",
+    "stage": "submitted",
+    "response": {
+      "job_id": "0fd409ce-8e3c-480a-af2c-8a5fd571c7f8",
+      "result": {
+        "attempt_id": "0c7899f7ac6f464e80e3f873a4c75fe1"
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T18:55:22.108Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:23.311Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:25.326Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:25.942Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:26.866Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:28.873Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:29.149Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:31.149Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:33.161Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:35.175Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:35.757Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:37.758Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:39.773Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:41.786Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:43.800Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:44.111Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:46.114Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:48.127Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:50.140Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:50.681Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:52.681Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:54.693Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:56.742Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:57.915Z",
+    "stage": "request",
+    "method": "POST",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/recorder/events"
+  },
+  {
+    "utc": "2026-09-17T18:55:59.694Z",
+    "stage": "completed",
+    "state": {
+      "schema_version": 1,
+      "model": "M3",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "soils",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#soils"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": null,
+      "run": {
+        "id": "0c7899f7ac6f464e80e3f873a4c75fe1",
+        "job_id": "0fd409ce-8e3c-480a-af2c-8a5fd571c7f8",
+        "phase": "complete",
+        "created_at": "2026-09-17T18:55:20.905137+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M3",
+        "frequency_source": "cli"
+      },
+      "dnbr": null,
+      "results": {
+        "id": "0c7899f7ac6f464e80e3f873a4c75fe1",
+        "model": "M3",
+        "completed_at": "2026-09-17T18:55:56.302512+00:00",
+        "partial": false,
+        "partial_reason": null,
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 122168,
+          "fallback_valid_cells": 11272,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "primary_valid_cells": 134889,
+          "total_cells": 268329,
+          "valid_cells": 146161,
+          "valid_fraction": 0.5447081754115284
+        },
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/0c7899f7ac6f464e80e3f873a4c75fe1/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/0c7899f7ac6f464e80e3f873a4c75fe1/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/0c7899f7ac6f464e80e3f873a4c75fe1/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/0c7899f7ac6f464e80e3f873a4c75fe1/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/thespian-cleanness/config/postfire-debris-flow/files/0c7899f7ac6f464e80e3f873a4c75fe1/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-17T18:55:59.745Z",
+    "stage": "attempt_browse",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T18:56:08.548Z",
+    "stage": "artifact",
+    "name": "design.parquet",
+    "bytes": 3472,
+    "sha256": "d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"
+  },
+  {
+    "utc": "2026-09-17T18:56:09.914Z",
+    "stage": "artifact",
+    "name": "events.parquet",
+    "bytes": 476092,
+    "sha256": "518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"
+  },
+  {
+    "utc": "2026-09-17T18:56:11.365Z",
+    "stage": "artifact",
+    "name": "inverse.parquet",
+    "bytes": 2213,
+    "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+  },
+  {
+    "utc": "2026-09-17T18:56:12.913Z",
+    "stage": "artifact",
+    "name": "manifest.json",
+    "bytes": 14351,
+    "sha256": "0df7b1426ac100fd8a14b2dbb2d7f684b615e961dbe8be28e61dd259b74905b3"
+  },
+  {
+    "utc": "2026-09-17T18:56:14.402Z",
+    "stage": "artifact",
+    "name": "valid_mask.tif",
+    "bytes": 42972,
+    "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  {
+    "utc": "2026-09-17T18:56:14.418Z",
+    "stage": "PASS",
+    "mode": "normal",
+    "attempt_id": "0c7899f7ac6f464e80e3f873a4c75fe1",
+    "job_id": "0fd409ce-8e3c-480a-af2c-8a5fd571c7f8"
+  }
+]

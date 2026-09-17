@@ -220,7 +220,8 @@ with the actual D-Tale UI, including same-schema and changed-schema source edits
 ## 2026-09-17 active CLI hard-link amendment
 
 Owner requested repair after concurrent WEPP preparation superseded an M3 job
-with identical source bytes. Implementation pending this checkpoint. This narrow
+with identical source bytes. Implemented in `2b00c4165` after contract checkpoint
+`567eacf7d`. This narrow
 amendment supersedes strict active-worker equality only for `files.active_cli`
 ctime-only drift. At admission, source-preparation rebase and pre/locked
 publication, unchanged CLI path, size and mtime may remain equivalent when the
