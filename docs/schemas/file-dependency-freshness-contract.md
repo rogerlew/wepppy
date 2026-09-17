@@ -128,3 +128,36 @@ would cost more and provide no needed identity: the generated header is the
 existing UI contract. Same-size/restored-time deployments must expose the new
 header without restarting the reading process. Header format, asset path,
 served-file alignment, client comparison and authorization remain unchanged.
+
+## Shared ordinary-file digest reuse (implementation pending)
+
+Ordinary local-file SHA-256 consumers MAY use one owned helper for verified,
+bounded reads and the observation-guarded cache specified by the digest-cache
+admission ADR. Cache reuse requires the complete device/inode/size/mtime/ctime
+version, fresh read access and descriptor/path agreement on every call. A
+changed version restarts admission; a failed read never supplies a digest.
+Return the digest of actual bytes, not an empty substitute, and raise an explicit
+`OSError` on observable read/version drift. Missing and access failures retain
+their original filesystem exception. Reuse MUST NOT add path authority: existing
+caller containment, symlink, execute-access and authorization policies still run.
+This helper follows ordinary symlinks where callers already permit them; it is
+not a replacement for post-fire's project-local no-follow opener.
+
+Apply this to output-discovery export SHA-256 and project-config executable
+identity. The former MUST NOT return an old digest after an equal-size/restored-
+mtime export rewrite; caller-provided size/mtime are consistency expectations,
+not permission to reuse a hash. Check those expectations against the verified
+read observation or both before and after the helper call, so a wrapper precheck
+cannot pair old advertised metadata with a new digest. A mismatch leaves the artifact unavailable via
+its existing best-effort discovery boundary. Executable identity retains its
+required read/execute checks and RegistryError translation. Same-content
+metadata churn retains the same SHA-256. No persisted key, response schema,
+executable selection or route access rule changes.
+
+The helper's reusable cache and observation records each have the same bounded
+512-entry capacity and 1-second admission interval already ratified in
+`docs/adrs/20260917-file-digest-cache-admission.md`. Keep cold/changed reads
+explicitly distinct from settled warm reads in validation. Introducing a
+shared helper is justified by reproduced stale output digests and the existing
+executable digest consumer using the same defective metadata shortcut; no
+watcher, daemon, datastore, dependency or new deployment topology is authorized.
