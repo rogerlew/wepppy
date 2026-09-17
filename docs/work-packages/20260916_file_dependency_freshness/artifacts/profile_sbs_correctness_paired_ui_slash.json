@@ -1,0 +1,23 @@
+{
+  "response_markers": [
+    1,
+    1
+  ],
+  "wire_count": 2,
+  "results": [
+    [
+      "event-one",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (3ms)"
+    ],
+    [
+      "event-three",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"
+    ]
+  ],
+  "paired_bytes": true,
+  "retained_suffix_mime": true,
+  "sandbox_urls": [
+    "https://disposable.invalid/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/",
+    "https://disposable.invalid/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/"
+  ]
+}

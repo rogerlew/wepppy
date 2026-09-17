@@ -1,0 +1,44 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/profile_recorder --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 21 items
+
+tests/profile_recorder/test_assembler.py ..                              [  9%]
+tests/profile_recorder/test_expectations.py ....                         [ 28%]
+tests/profile_recorder/test_playback_session.py ......                   [ 57%]
+tests/profile_recorder/test_profile_recorder.py ....                     [ 76%]
+tests/profile_recorder/test_sbs_seed.py .....                            [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+tests/profile_recorder/test_assembler.py::test_config_slug_prefers_event_metadata
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:66: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import MARKER
+
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:345: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import capture_event_seed
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 21 passed, 12 warnings in 3.65s ========================

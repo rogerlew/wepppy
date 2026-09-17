@@ -225,6 +225,9 @@ class PlaybackSession:
                     self._await_pending_jobs()
                 try:
                     start_time = time.time()
+                    if '_sbs_seed_version' in event and (
+                            type(event['_sbs_seed_version']) is not int or event['_sbs_seed_version'] != 1):
+                        raise requests.RequestException('Unsupported SBS seed expectation version')
                     response = self._execute_request(
                         method,
                         url,
@@ -233,6 +236,8 @@ class PlaybackSession:
                         expected_status,
                         effective_path,
                         summary,
+                        sbs_event_id=request_id,
+                        sbs_seed_required=event.get('_sbs_seed_version') is not None,
                     )
                     response_time_ms = int((time.time() - start_time) * 1000)
                     self.results.append((request_id, f"{effective_path}: HTTP {response.status_code} ({response_time_ms}ms)"))
@@ -283,6 +288,9 @@ class PlaybackSession:
         expected_status: int,
         path: str,
         request_meta: Dict[str, Any],
+        *,
+        sbs_event_id: str | None = None,
+        sbs_seed_required: bool = False,
     ) -> requests.Response:
         """Send a single HTTP request and coordinate follow-up bookkeeping."""
         kwargs: Dict[str, object] = {"timeout": 60}
@@ -292,7 +300,8 @@ class PlaybackSession:
         if params:
             kwargs["params"] = params
         if method == "POST":
-            form_data, files_info = self._build_form_request(path, request_meta)
+            form_data, files_info = self._build_form_request(path, request_meta, sbs_event_id=sbs_event_id,
+                                                            sbs_seed_required=sbs_seed_required)
         if method == "POST" and json_payload is not None:
             kwargs["json"] = json_payload
         elif method == "POST" and request_meta.get("bodyType") == "form-data":
@@ -304,8 +313,12 @@ class PlaybackSession:
             if files_info:
                 prepared_files: Dict[str, Tuple[str, Any, str]] = {}
                 for field, (file_path, mime) in files_info.items():
-                    file_handle = files_stack.enter_context(open(file_path, "rb"))
-                    prepared_files[field] = (os.path.basename(file_path), file_handle, mime)
+                    from wepppy.profile_recorder.sbs_seed import SbsSeed
+                    if isinstance(file_path, SbsSeed):
+                        prepared_files[field] = (file_path.name, file_path.payload, mime)
+                    else:
+                        file_handle = files_stack.enter_context(open(file_path, "rb"))
+                        prepared_files[field] = (os.path.basename(file_path), file_handle, mime)
                 kwargs["files"] = prepared_files
                 body_supplied = True
             elif requires_file:
@@ -529,6 +542,9 @@ class PlaybackSession:
         self,
         path: str,
         request_meta: Dict[str, Any],
+        *,
+        sbs_event_id: str | None = None,
+        sbs_seed_required: bool = False,
     ) -> Tuple[Dict[str, Any], Dict[str, Tuple[Path, str]]]:
         """Reconstruct form-data payloads using captured seed files when possible."""
         data: Dict[str, Any] = {}
@@ -544,7 +560,7 @@ class PlaybackSession:
             elif normalized.endswith("build-soils"):
                 self._populate_soils_form(data)
             elif normalized.endswith("tasks/upload_sbs") or normalized.endswith("tasks/upload-sbs"):
-                self._populate_sbs_form(data, files)
+                self._populate_sbs_form(data, files, event_id=sbs_event_id, required=sbs_seed_required)
             elif normalized.endswith("tasks/upload_cover_transform") or normalized.endswith("tasks/upload-cover-transform"):
                 self._populate_cover_transform_form(files)
             elif normalized.endswith("tasks/upload_cli") or normalized.endswith("tasks/upload-cli"):
@@ -553,6 +569,8 @@ class PlaybackSession:
                 self._populate_ash_form(data, files)
             elif normalized.endswith("run-omni"):
                 self._populate_omni_form(data, files)
+        except requests.RequestException:
+            raise
         except Exception as exc:
             self._log(f"Failed to build form-data payload for {path}: {exc}")
 
@@ -634,8 +652,15 @@ class PlaybackSession:
         self,
         data: Dict[str, Any],
         files: Dict[str, Tuple[Path, str]],
+        *, event_id: str | None = None, required: bool = False,
     ) -> None:
         """Populate SBS upload metadata and attach any available rasters."""
+        from wepppy.profile_recorder.sbs_seed import read_event_seed
+        if event_id is not None or required:
+            seed = read_event_seed(self.seed_upload_root, event_id, required=required)
+            if seed is not None:
+                files["input_upload_sbs"] = (seed, "application/octet-stream")
+                return
         upload_dir = self.seed_upload_root / "sbs"
         candidates = sorted(upload_dir.glob("input_upload_sbs*")) if upload_dir.exists() else []
         search_roots: List[Path] = []

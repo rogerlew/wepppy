@@ -1,0 +1,32 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 8 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_capture_replaced_event_directory_cannot_write_outside_root {"error": {"type": "ValueError", "message": "SBS event seed escapes upload root"}, "swapped": true, "outside_written": false, "retained_working_status": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_denied_selected_controller_path_does_not_capture_fallback {"error": {"type": "PermissionError", "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-159/test_denied_selected_controlle0/run/selected/selected.tif'"}, "captured": null}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_initial_outside_event_alias_is_rejected_without_write PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_completed_duplicate_is_immutable_and_wrong_bytes_rejected PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_required_missing_seed_fails_and_unmarked_absence_is_legacy PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_seed_payload_path_escape_rejected PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_selected_disturbed_source_does_not_require_unused_baer_access {"error": null}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_security_probe_revision3.py::test_existing_seed_root_and_selected_source_aliases_still_work PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 8 passed, 2 warnings in 8.94s =========================

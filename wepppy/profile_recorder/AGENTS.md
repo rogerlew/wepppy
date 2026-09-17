@@ -50,3 +50,13 @@ When adding support for a new multipart/form-data workflow:
 | `/rq-engine/api/batch/_/<batch_name>/upload-geojson` | `geojson_file` / `file` | `batch/<batch_name>/resources/` | Batch runner GeoJSON ingest (outside run context). Capture optional; treat as future enhancement. |
 
 Happy recording!
+
+New SBS response events carry `_sbs_seed_version: 1` in their original draft
+append. Their immutable main-file receipt/payload lives under
+`seed/uploads/sbs/events/<sha256(event-id)>/`; playback verifies that event and
+uses the verified bytes in multipart encoding. Missing/failed/corrupt marked
+captures fail explicitly. Inspect retained event status and recapture the failed
+upload; do not repair it by copying a different event's canonical seed. Unmarked
+historical events without an entry retain the legacy, unverified seed selection.
+See `PROFILE_TEST_ENGINE_SPEC.md` for the response-time capture limitation and
+complete capture/HTTP acceptance requirements.

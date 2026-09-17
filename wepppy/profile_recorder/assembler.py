@@ -63,6 +63,13 @@ class ProfileAssembler:
             draft_root = self.data_repo_root / "profiles" / "_drafts" / run_key / capture_key
             draft_root.mkdir(parents=True, exist_ok=True)
 
+            from .sbs_seed import MARKER
+            endpoint = self._normalise_endpoint(event) or ''
+            if (event.get('stage') == 'response' and event.get('ok') is not False
+                    and event.get('category') == 'file_upload'
+                    and endpoint.rstrip('/').endswith(('tasks/upload_sbs', 'tasks/upload-sbs'))):
+                event = dict(event, **{MARKER: 1})
+
             events_path = draft_root / "events.jsonl"
             with events_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(event, separators=(",", ":")) + "\n")
@@ -248,8 +255,8 @@ class ProfileAssembler:
 
         if endpoint == "rq-engine/api/build-landuse":
             self._snapshot_landuse_upload(seed_root, Path(run_dir))
-        elif endpoint.endswith("tasks/upload_sbs") or endpoint.endswith("tasks/upload-sbs"):
-            self._snapshot_sbs_upload(seed_root, Path(run_dir))
+        elif endpoint.rstrip("/").endswith(("tasks/upload_sbs", "tasks/upload-sbs")):
+            self._snapshot_sbs_upload(seed_root, Path(run_dir), event_id=event.get("id"))
         elif endpoint.endswith("tasks/upload_cover_transform") or endpoint.endswith("tasks/upload-cover-transform"):
             self._snapshot_cover_transform_upload(seed_root, Path(run_dir))
         elif endpoint.endswith("tasks/upload_cli") or endpoint.endswith("tasks/upload-cli"):
@@ -289,7 +296,7 @@ class ProfileAssembler:
             if not canonical.exists():
                 self._copy_seed_file(lc_fn, canonical)
 
-    def _snapshot_sbs_upload(self, seed_root: Path, run_dir: Path) -> None:
+    def _snapshot_sbs_upload(self, seed_root: Path, run_dir: Path, *, event_id=None) -> None:
         """Capture soil burn severity rasters from both Disturbed and Baer."""
         candidates: list[Path] = []
 
@@ -301,8 +308,13 @@ class ProfileAssembler:
                 path = Path(disturbed_path)
                 if path.exists():
                     candidates.append(path)
-        except Exception:
+        except FileNotFoundError:
             pass
+        except Exception:
+            # Legacy snapshots retain their optional discovery behavior; a new
+            # event cannot grant provenance to fallback bytes after read failure.
+            if event_id is not None and not candidates:
+                raise
 
         try:
             from wepppy.nodb.mods.baer import Baer
@@ -312,8 +324,13 @@ class ProfileAssembler:
                 path = Path(baer_path)
                 if path.exists():
                     candidates.append(path)
-        except Exception:
+        except FileNotFoundError:
             pass
+        except Exception:
+            # Legacy snapshots retain their optional discovery behavior; a new
+            # event cannot grant provenance to fallback bytes after read failure.
+            if event_id is not None and not candidates:
+                raise
 
         search_roots = [run_dir / "disturbed", run_dir / "baer"]
         for root in search_roots:
@@ -323,7 +340,10 @@ class ProfileAssembler:
                         candidates.append(candidate)
 
         if not candidates:
-            return
+            raise FileNotFoundError('No selected SBS source available for event capture')
+        if event_id is not None:
+            from .sbs_seed import capture_event_seed
+            capture_event_seed(seed_root, str(event_id), candidates[0])
 
         target_dir = seed_root / "sbs"
         target_dir.mkdir(parents=True, exist_ok=True)

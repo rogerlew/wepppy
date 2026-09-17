@@ -1,0 +1,180 @@
+{
+  "scope": "S02 actual complete capture and multipart preparation component acceptance; no HTTP",
+  "contract": "wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md#sbs-event-performance-acceptance-intended-checkpoint-pending",
+  "measurement_file": "profile_sbs_implementation_performance.json",
+  "measurement_sha256": "c5dc74fbc4e855b32dccde1e706c47efb36f07ea1b1c9180d09ed18c9af5886a",
+  "source_module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/profile_recorder/assembler.py": "881d3963013726e401f5d9cf99c3479d6add3714ddb3ab10ed8743a8bfc94aeb",
+    "/workdir/wepppy/wepppy/profile_recorder/playback.py": "1339b90b9a9de633dc2447b1ac217f1659187cb9682d670c2b2e858c0e4e9c53",
+    "/workdir/wepppy/wepppy/profile_recorder/sbs_seed.py": "a67475c34382fbd647dfd13b7b4be0f5f3da3be6dd987997af89e0ad5a218b86"
+  },
+  "gates": [
+    {
+      "name": "grizzly_complete_first_capture_ms",
+      "actual": 106.99716404390831,
+      "limit": 125,
+      "passed": true
+    },
+    {
+      "name": "grizzly_cold_capture_ms",
+      "actual": 49.410212179645896,
+      "limit": 100,
+      "passed": true
+    },
+    {
+      "name": "grizzly_settled_capture_ms",
+      "actual": 40.796690713614225,
+      "limit": 100,
+      "passed": true
+    },
+    {
+      "name": "grizzly_complete_dispatch_ms",
+      "actual": 8.779751881957054,
+      "limit": 20,
+      "passed": true
+    },
+    {
+      "name": "grizzly_dispatch_payload_read_bytes_0",
+      "actual": 599196,
+      "limit": 599196,
+      "passed": true
+    },
+    {
+      "name": "grizzly_dispatch_payload_read_bytes_1",
+      "actual": 599196,
+      "limit": 599196,
+      "passed": true
+    },
+    {
+      "name": "grizzly_dispatch_payload_read_bytes_2",
+      "actual": 599196,
+      "limit": 599196,
+      "passed": true
+    },
+    {
+      "name": "grizzly_dispatch_payload_read_bytes_3",
+      "actual": 599196,
+      "limit": 599196,
+      "passed": true
+    },
+    {
+      "name": "grizzly_dispatch_payload_read_bytes_4",
+      "actual": 599196,
+      "limit": 599196,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_complete_first_capture_ms",
+      "actual": 109.14206303035219,
+      "limit": 125,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_cold_capture_ms",
+      "actual": 53.33009636960924,
+      "limit": 100,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_settled_capture_ms",
+      "actual": 53.9005630183965,
+      "limit": 100,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_complete_dispatch_ms",
+      "actual": 8.508706837892532,
+      "limit": 20,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_dispatch_payload_read_bytes_0",
+      "actual": 747242,
+      "limit": 747242,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_dispatch_payload_read_bytes_1",
+      "actual": 747242,
+      "limit": 747242,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_dispatch_payload_read_bytes_2",
+      "actual": 747242,
+      "limit": 747242,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_dispatch_payload_read_bytes_3",
+      "actual": 747242,
+      "limit": 747242,
+      "passed": true
+    },
+    {
+      "name": "rattlesnake_dispatch_payload_read_bytes_4",
+      "actual": 747242,
+      "limit": 747242,
+      "passed": true
+    },
+    {
+      "name": "stress16m_complete_first_capture_ms",
+      "actual": 545.6026062990228,
+      "limit": 550,
+      "passed": true
+    },
+    {
+      "name": "stress16m_cold_capture_ms",
+      "actual": 342.29382034391165,
+      "limit": 450,
+      "passed": true
+    },
+    {
+      "name": "stress16m_settled_capture_ms",
+      "actual": 291.73512356355786,
+      "limit": 450,
+      "passed": true
+    },
+    {
+      "name": "stress16m_complete_dispatch_ms",
+      "actual": 95.50489159300923,
+      "limit": 150,
+      "passed": true
+    },
+    {
+      "name": "stress16m_dispatch_payload_read_bytes_0",
+      "actual": 16779862,
+      "limit": 16779862,
+      "passed": true
+    },
+    {
+      "name": "stress16m_dispatch_payload_read_bytes_1",
+      "actual": 16779862,
+      "limit": 16779862,
+      "passed": true
+    },
+    {
+      "name": "stress16m_dispatch_payload_read_bytes_2",
+      "actual": 16779862,
+      "limit": 16779862,
+      "passed": true
+    },
+    {
+      "name": "stress16m_dispatch_payload_read_bytes_3",
+      "actual": 16779862,
+      "limit": 16779862,
+      "passed": true
+    },
+    {
+      "name": "stress16m_dispatch_payload_read_bytes_4",
+      "actual": 16779862,
+      "limit": 16779862,
+      "passed": true
+    }
+  ],
+  "accepted": true,
+  "stress_first_capture_mean_ms": 545.6026062990228,
+  "first_capture_mean_budget_is_not_a_per_request_guarantee": true,
+  "full_http_profile_runtime_acceptance": false
+}

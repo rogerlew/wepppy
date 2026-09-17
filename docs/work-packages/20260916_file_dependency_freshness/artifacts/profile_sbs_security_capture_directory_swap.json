@@ -1,0 +1,9 @@
+{
+  "error": {
+    "type": "ValueError",
+    "message": "SBS event member escapes its directory"
+  },
+  "swapped": true,
+  "outside_written": true,
+  "retained_working_status": true
+}

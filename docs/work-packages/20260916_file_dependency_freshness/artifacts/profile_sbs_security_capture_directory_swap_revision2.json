@@ -1,0 +1,9 @@
+{
+  "error": {
+    "type": "ValueError",
+    "message": "SBS event seed escapes upload root"
+  },
+  "swapped": true,
+  "outside_written": false,
+  "retained_working_status": true
+}

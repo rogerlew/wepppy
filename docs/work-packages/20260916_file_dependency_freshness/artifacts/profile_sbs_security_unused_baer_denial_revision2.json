@@ -1,0 +1,6 @@
+{
+  "error": {
+    "type": "PermissionError",
+    "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-157/test_selected_disturbed_source0/run/unused/unused.tif'"
+  }
+}

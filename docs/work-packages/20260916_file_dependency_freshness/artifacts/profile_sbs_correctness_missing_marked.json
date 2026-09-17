@@ -1,0 +1,15 @@
+{
+  "events_preserved": 4,
+  "wire_count": 1,
+  "results": [
+    [
+      "event-one",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"
+    ],
+    [
+      "event-three",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: [Errno 2] No such file or directory: '4a4efd5e55362ed79f63e76aaed4fea2bbf08351992bd3a906fb454a1c233523' (1ms)"
+    ]
+  ],
+  "third_fails": true
+}

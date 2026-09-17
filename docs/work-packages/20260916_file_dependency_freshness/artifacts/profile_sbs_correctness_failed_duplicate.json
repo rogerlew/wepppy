@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "partial_retained": true,
+  "receipt_present": false,
+  "wire_count": 0,
+  "results": [
+    [
+      "failed",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: SBS event capture is not complete (1ms)"
+    ],
+    [
+      "failed",
+      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: SBS event capture is not complete (1ms)"
+    ]
+  ]
+}

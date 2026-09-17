@@ -1,0 +1,89 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 11 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_actual_ui_slash_two_events_pair_and_encode_own_bytes [playback] Loaded 4 events from /tmp/pytest-of-unknown/pytest-160/test_actual_ui_slash_two_event0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_actual_ui_slash_two_event0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS paired_ui_slash {"paired_bytes": true, "response_markers": [1, 1], "results": [["event-one", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (3ms)"], ["event-three", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"]], "retained_suffix_mime": true, "sandbox_urls": ["https://disposable.invalid/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/", "https://disposable.invalid/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/"], "wire_count": 2}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_missing_new_entry_stays_failed_after_promotion_and_paired_run [playback] Loaded 4 events from /tmp/pytest-of-unknown/pytest-160/test_missing_new_entry_stays_f0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_missing_new_entry_stays_f0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS missing_marked {"events_preserved": 4, "results": [["event-one", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"], ["event-three", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: [Errno 2] No such file or directory: '4a4efd5e55362ed79f63e76aaed4fea2bbf08351992bd3a906fb454a1c233523' (1ms)"]], "third_fails": true, "wire_count": 1}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_unmarked_history_without_entry_keeps_legacy_bytes [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_unmarked_history_without_0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_unmarked_history_without_0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS legacy {"results": [["historical-no-entry", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (1ms)"]], "wire_count": 1}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_bad_marker_fails_through_existing_result_boundary[True] [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_0/sandbox
+[playback] Beginning playback
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_bad_marker_fails_through_existing_result_boundary[0] [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_1/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_1/sandbox
+[playback] Beginning playback
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_bad_marker_fails_through_existing_result_boundary[1] [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_2/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_2/sandbox
+[playback] Beginning playback
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_bad_marker_fails_through_existing_result_boundary[None] [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_3/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_bad_marker_fails_through_3/sandbox
+[playback] Beginning playback
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_changed_path_after_verification_cannot_change_wire [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_changed_path_after_verifi0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_changed_path_after_verifi0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS verified_wire {"path_is_replaced": true, "results": [["event", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"]], "wire_is_verified_prior": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_duplicate_complete_does_not_rewrite_receipt SBS_CORRECTNESS duplicate {"all_four_events_retained": true, "completed_original_preserved": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_failed_capture_partial_is_promoted_and_retry_cannot_bless_it [playback] Loaded 4 events from /tmp/pytest-of-unknown/pytest-160/test_failed_capture_partial_is0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_failed_capture_partial_is0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS failed_duplicate {"partial_retained": true, "receipt_present": false, "results": [["failed", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: SBS event capture is not complete (1ms)"], ["failed", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: error Unable to verify SBS event seed: SBS event capture is not complete (1ms)"]], "status": "failed", "wire_count": 0}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_sbs_implementation_correctness_probe.py::test_unselected_optional_controller_failure_does_not_block_selected_source [playback] Loaded 2 events from /tmp/pytest-of-unknown/pytest-160/test_unselected_optional_contr0/data/profiles/probe/capture
+[playback] Resolved run id: disposable-correctness
+[playback] Using playback run id: profile;;tmp;;independent
+[playback] Using existing run directory: /tmp/pytest-of-unknown/pytest-160/test_unselected_optional_contr0/sandbox
+[playback] Beginning playback
+SBS_CORRECTNESS unselected_denial {"results": [["selected-disturbed", "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (2ms)"]], "selected_disturbed_sent": true, "wire_count": 1}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 11 passed, 2 warnings in 9.05s ========================

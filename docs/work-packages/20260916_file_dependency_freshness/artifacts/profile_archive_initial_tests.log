@@ -1,0 +1,67 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/profile_recorder tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_archive_helpers.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 45 items
+
+tests/profile_recorder/test_assembler.py ..                              [  4%]
+tests/profile_recorder/test_expectations.py ....                         [ 13%]
+tests/profile_recorder/test_playback_session.py ......                   [ 26%]
+tests/profile_recorder/test_profile_recorder.py ....                     [ 35%]
+tests/profile_recorder/test_sbs_seed.py ....                             [ 44%]
+tests/rq/test_project_rq_archive.py ......................               [ 93%]
+tests/rq/test_project_rq_archive_helpers.py ...                          [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+tests/profile_recorder/test_assembler.py::test_config_slug_prefers_event_metadata
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:66: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import MARKER
+
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:345: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import capture_event_seed
+
+tests/rq/test_project_rq_archive.py::test_archive_rq_fails_fast_when_nodb_files_are_locked
+tests/rq/test_project_rq_archive.py::test_archive_rq_checks_disk_headroom_before_writing_archive
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_validates_zip_integrity_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_rechecks_locks_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_checks_disk_headroom_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_fails_when_nodb_cache_clear_fails
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/rq/test_project_rq_archive.py::test_archive_rq_preserves_nodir_cache_entries
+tests/rq/test_project_rq_archive.py::test_archive_recovers_pending_update_and_preserves_one_pair
+tests/rq/test_project_rq_archive.py::test_archive_restore_preserves_owned_config_and_manifest_bytes
+tests/rq/test_project_rq_archive.py::test_archive_composite_run_uses_top_level_config_authority
+tests/rq/test_project_rq_archive.py::test_postfire_records_survive_canonical_archive_and_restore
+tests/rq/test_project_rq_archive.py::test_batch_handoff_records_survive_archive_restore[working]
+tests/rq/test_project_rq_archive.py::test_batch_handoff_records_survive_archive_restore[failed]
+tests/rq/test_project_rq_archive.py::test_batch_handoff_records_survive_archive_restore[success]
+tests/rq/test_project_rq_archive.py::test_batch_handoff_records_survive_archive_restore[restored]
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:300: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 45 passed, 27 warnings in 4.92s ========================

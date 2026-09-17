@@ -1,0 +1,39 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/profile_recorder --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+__________ ERROR collecting tests/profile_recorder/test_assembler.py ___________
+ImportError while importing test module '/workdir/wepppy/tests/profile_recorder/test_assembler.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.12/importlib/__init__.py:90: in import_module
+    ???
+tests/profile_recorder/test_assembler.py:12: in <module>
+    _ASSEMBLER_MODULE = load_profile_module(
+tests/profile_recorder/stubdeps.py:245: in load_profile_module
+    spec.loader.exec_module(module)  # type: ignore[attr-defined]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/profile_recorder/assembler.py:14: in <module>
+    from .utils import sanitise_component
+wepppy/profile_recorder/__init__.py:3: in <module>
+    from .profile_recorder import ProfileRecorder, get_profile_recorder
+wepppy/profile_recorder/profile_recorder.py:12: in <module>
+    from wepppy.weppcloud.utils.helpers import get_wd
+wepppy/weppcloud/utils/helpers.py:21: in <module>
+    from flask import Request, Response, abort, current_app, g, jsonify, make_response, request, url_for
+E   ImportError: cannot import name 'Request' from 'flask' (unknown location)
+=============================== warnings summary ===============================
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/profile_recorder/test_assembler.py
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 1 error in 0.27s ==========================
