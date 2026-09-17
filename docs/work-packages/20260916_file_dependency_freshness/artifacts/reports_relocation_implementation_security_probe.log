@@ -1,0 +1,98 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_relocation_implementation_security_probe.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 5 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_relocation_implementation_security_probe.py::test_missing_catalog_changed_complete_source_rebuilds_in_one_call FAILED
+
+=================================== FAILURES ===================================
+______ test_missing_catalog_changed_complete_source_rebuilds_in_one_call _______
+
+run = PosixPath('/tmp/pytest-of-unknown/pytest-72/test_missing_catalog_changed_c0/run')
+
+    def test_missing_catalog_changed_complete_source_rebuilds_in_one_call(run):
+        AverageAnnualsByLanduseReport(run)
+        _rewrite(run / AverageAnnualsByLanduseReport._LOSS_DATASET, 'Runoff Volume', 900.)
+        shutil.rmtree(run / '_query_engine')
+>       report = AverageAnnualsByLanduseReport(run)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_relocation_implementation_security_probe.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/wepp/reports/average_annuals_by_landuse.py:88: in __init__
+    dataframe = self._load_or_build()
+                ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.wepp.reports.average_annuals_by_landuse.AverageAnnualsByLanduseReport object at 0x7f513c0814f0>
+
+    def _load_or_build(self) -> pd.DataFrame:
+        cache_path = ReportCacheManager(self.wd).root / f"{self._CACHE_KEY}.parquet"
+        loaded = _read_cache(cache_path, self._CACHE_KEY)
+        dataframe = None if loaded is None else loaded[0].to_pandas()
+        proof = None if loaded is None else loaded[1]
+        if dataframe is not None and list(dataframe.columns) != self._DISPLAY_COLUMNS:
+            dataframe = None
+        history = None if proof is None else proof["dependencies"]
+        if history is not None:
+            paths = (self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
+            if set(history) != {*paths, *(f"{path}:aliases" for path in paths)}:
+                raise ValueError("Invalid report cache dependency set")
+            _cache_verdict(history, history)  # Validate before any historical path use.
+        context, before = self._observe_inputs(history_dependencies=history if dataframe is not None else None)
+        missing = [key for key, value in before.items()
+                   if isinstance(value, dict) and value["sha256"] is None]
+        if dataframe is not None:
+            verdict = ("historical_unverified" if missing else None) if proof is None else _cache_verdict(
+                proof["dependencies"], before)
+            if verdict is not None:
+                self.cache_status = verdict
+                if verdict == "historical_unverified":
+                    if proof is None:
+                        # Unverified history has no prior digest to validate the
+                        # surviving files against. Parse actual available tables.
+                        for logical in (self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET):
+                            if before[logical]["sha256"] is not None:
+                                pq.read_table(self.wd / before[logical]["path"])
+                    _LOG.warning("Using historical landuse report cache; incomplete catalog or missing sources %s: %s", self.wd, missing)
+                return dataframe
+        if missing:
+            raise FileNotFoundError(f"Missing report inputs: {', '.join(missing)}")
+        with _CacheBuild(cache_path, self._CACHE_KEY) as attempt:
+            attempt.observations = {"before": before, "selected_paths": {
+                logical: str((self.wd / value["path"]).resolve())
+                for logical, value in before.items() if isinstance(value, dict)
+            }}
+            dataframe = self._build_dataframe(context=context)
+            table = pa.Table.from_pandas(dataframe, preserve_index=False)
+            with attempt.open_payload("query.parquet") as outgoing:
+                pq.write_table(table, outgoing)
+            _, after = self._observe_inputs()
+            attempt.observations["after"] = after
+            if before != after:
+>               raise RuntimeError("Report dependencies changed during landuse query")
+E               RuntimeError: Report dependencies changed during landuse query
+
+wepppy/wepp/reports/average_annuals_by_landuse.py:174: RuntimeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wepp/reports/test_report_cache_freshness.py:19
+  /workdir/wepppy/tests/wepp/reports/test_report_cache_freshness.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_relocation_implementation_security_probe.py::test_missing_catalog_changed_complete_source_rebuilds_in_one_call
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 3 warnings in 9.39s =========================

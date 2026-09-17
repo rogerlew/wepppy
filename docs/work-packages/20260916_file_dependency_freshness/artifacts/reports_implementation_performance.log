@@ -1,0 +1,34 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py
+c08_legacy_upgrade_build: 1609.301 ms; {'wepp/output/interchange/H.wat.parquet': 162301956}; {'id_scan': 1, 'summary': 1}
+c08_matching_settled: 16.882 ms; {}; {}
+c08_matching_helper_cold: 298.963 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_during_admission: 308.654 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_readmitting: 307.308 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_after_readmission: 14.820 ms; {}; {}
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py", line 190, in <module>
+    measured('c09_new_build', lambda: AverageAnnualsByLanduseReport(CLONE))
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py", line 157, in measured
+    report = factory()
+             ^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py", line 190, in <lambda>
+    measured('c09_new_build', lambda: AverageAnnualsByLanduseReport(CLONE))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/average_annuals_by_landuse.py", line 52, in __init__
+    dataframe = self._load_or_build()
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/average_annuals_by_landuse.py", line 86, in _load_or_build
+    context, before = self._observe_inputs()
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/average_annuals_by_landuse.py", line 71, in _observe_inputs
+    observation = _observe_file(self.wd, selected)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/_cache_freshness.py", line 23, in _observe_file
+    digest = sha256_file(path)
+             ^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py", line 124, in counted_hash
+    checks[str(path.relative_to(CLONE))] += 1
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/wc1/runs/th/thespian-cleanness/wepp/output/interchange/loss_pw0.hill.parquet' is not in the subpath of '/tmp/report-implementation-qa-h8ts2vh0'

@@ -1,0 +1,24 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_implementation_correctness_probe.py
+Using historical report cache; source verification unavailable: /tmp/reports-implementation-correctness-ukxubbhd/translator (hillslope_watbal_summary)
+Using historical landuse report cache; missing sources /tmp/reports-implementation-correctness-ukxubbhd/relocated: ['landuse/landuse.parquet']
+Using historical landuse report cache; missing sources /tmp/reports-implementation-correctness-ukxubbhd/malformed_alias: ['landuse/landuse.parquet']
+{
+  "actual_translator_absence": {
+    "error": "No sub_ids/chn_ids available for translator (no summaries or parquet files)",
+    "initial_implementation_expected": "No sub_ids/chns_ids available for translator (no summaries or parquet files)",
+    "initial_error_literal_matched": false
+  },
+  "current_missing_translator": {
+    "cache_status": "historical_unverified"
+  },
+  "relocated_partial_archive": {
+    "error_type": "FileNotFoundError",
+    "error": "Missing report inputs: wepp/output/interchange/loss_pw0.hill.parquet, watershed/hillslopes.parquet, landuse/landuse.parquet"
+  },
+  "relocated_rebased_catalog_control": {
+    "cache_status": "historical_unverified"
+  },
+  "malformed_alias_proof_with_missing_source": {
+    "cache_status": "historical_unverified"
+  }
+}

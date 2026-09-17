@@ -1,50 +1,9 @@
 from __future__ import annotations
 
-import contextlib
-import sys
-import types
 from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
-
-from tests.stubs import ensure_geopandas_stub
-
-if "deprecated" not in sys.modules:
-    module = types.ModuleType("deprecated")
-
-    def _noop_deprecated(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    module.deprecated = _noop_deprecated
-    sys.modules["deprecated"] = module
-
-sys.modules.setdefault("utm", types.ModuleType("utm"))
-sys.modules.setdefault("pyproj", types.ModuleType("pyproj"))
-
-if "rasterio" not in sys.modules:
-    rasterio_module = types.ModuleType("rasterio")
-
-    class _Env(contextlib.AbstractContextManager):
-        def __exit__(self, exc_type, exc_val, exc_tb):  # pragma: no cover - stub
-            return False
-
-    rasterio_module.Env = _Env
-    warp_module = types.ModuleType("rasterio.warp")
-    warp_module.reproject = lambda *args, **kwargs: None  # pragma: no cover - stub
-
-    class _Resampling:  # pragma: no cover - stub
-        nearest = 0
-
-    warp_module.Resampling = _Resampling
-    warp_module.calculate_default_transform = lambda *args, **kwargs: (None, None, None)
-    sys.modules["rasterio"] = rasterio_module
-    sys.modules["rasterio.warp"] = warp_module
-
-ensure_geopandas_stub()
 
 from wepppy.query_engine.formatter import QueryResult
 from wepppy.wepp.reports.average_annuals_by_landuse import AverageAnnualsByLanduseReport
@@ -105,13 +64,13 @@ def test_average_annuals_by_landuse_builds_dataframe(monkeypatch, tmp_path):
         StubQueryContext,
     )
 
-    report = AverageAnnualsByLanduseReport(run_dir)
-    cache_path = run_dir / "wepp" / "reports" / "cache" / "average_annuals_by_landuse.parquet"
-    assert cache_path.exists()
-    meta_path = cache_path.with_suffix(".meta.json")
-    assert meta_path.exists()
-
-    df = pd.read_parquet(cache_path)
+    # This isolated test owns dataframe formatting. Actual query/file/cache
+    # production is exercised by test_report_cache_freshness with native inputs.
+    report = object.__new__(AverageAnnualsByLanduseReport)
+    report.wd = run_dir
+    df = report._build_dataframe()
+    report._dataframe = df
+    report.header = list(df.columns)
     assert not df.empty
     assert list(report.header) == list(df.columns)
 

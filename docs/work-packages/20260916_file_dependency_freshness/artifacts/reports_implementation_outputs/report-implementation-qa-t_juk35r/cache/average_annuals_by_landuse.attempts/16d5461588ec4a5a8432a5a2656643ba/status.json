@@ -1,0 +1,43 @@
+{
+  "status": "complete",
+  "attempt_id": "16d5461588ec4a5a8432a5a2656643ba",
+  "key": "average_annuals_by_landuse",
+  "target": "/tmp/report-implementation-qa-t_juk35r/wepp/reports/cache/average_annuals_by_landuse.parquet",
+  "observations": {
+    "before": {
+      "wepp/output/interchange/loss_pw0.hill.parquet": {
+        "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+        "sha256": "2f0f87cf2c42d37fd1d01d6183b4d3a6f9e4991d2459e9687454760a40d1378f"
+      },
+      "wepp/output/interchange/loss_pw0.hill.parquet:aliases": "(SELECT *, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+      "watershed/hillslopes.parquet": {
+        "path": "watershed/hillslopes.parquet",
+        "sha256": "3fc5a756c53adf616d2aad6a66d8bbf66375434ef912b2863f3f4f6407f9a8c0"
+      },
+      "watershed/hillslopes.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+      "landuse/landuse.parquet": {
+        "path": "landuse/landuse.parquet",
+        "sha256": "01a9f219f15251e54701b98282ce46f5576e89a00271b0ad2c0ad74e7196abcd"
+      },
+      "landuse/landuse.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)"
+    },
+    "after": {
+      "wepp/output/interchange/loss_pw0.hill.parquet": {
+        "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+        "sha256": "2f0f87cf2c42d37fd1d01d6183b4d3a6f9e4991d2459e9687454760a40d1378f"
+      },
+      "wepp/output/interchange/loss_pw0.hill.parquet:aliases": "(SELECT *, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+      "watershed/hillslopes.parquet": {
+        "path": "watershed/hillslopes.parquet",
+        "sha256": "3fc5a756c53adf616d2aad6a66d8bbf66375434ef912b2863f3f4f6407f9a8c0"
+      },
+      "watershed/hillslopes.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+      "landuse/landuse.parquet": {
+        "path": "landuse/landuse.parquet",
+        "sha256": "01a9f219f15251e54701b98282ce46f5576e89a00271b0ad2c0ad74e7196abcd"
+      },
+      "landuse/landuse.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)"
+    }
+  },
+  "error": null
+}

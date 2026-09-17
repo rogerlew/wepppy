@@ -1,0 +1,36 @@
+{
+  "actual_translator_absence": {
+    "error": "No sub_ids/chn_ids available for translator (no summaries or parquet files)",
+    "initial_implementation_expected": "No sub_ids/chns_ids available for translator (no summaries or parquet files)",
+    "initial_error_literal_matched": false
+  },
+  "current_missing_translator": {
+    "cache_status": "historical_unverified"
+  },
+  "relocated_partial_archive": {
+    "cache_status": "historical_unverified"
+  },
+  "relocated_rebased_catalog_control": {
+    "cache_status": "historical_unverified"
+  },
+  "complete_relocation_current_local_runoff": {
+    "cache_status": "built",
+    "local_input_runoff_m3": 900.0,
+    "returned_runoff_mm": 900.0
+  },
+  "malformed_alias_proof_with_missing_source": {
+    "error_type": "ValueError",
+    "error": "Invalid report cache alias provenance"
+  },
+  "legacy_partial_archive_with_malformed_remaining_input": {
+    "error_type": "ArrowInvalid",
+    "error": "Error creating dataset. Could not read schema from '/tmp/reports-implementation-correctness-c7v5mv8o/legacy_partial_corrupt/watershed/hillslopes.parquet'. Is this a 'parquet' file?: Could not open Parquet input source '/tmp/reports-implementation-correctness-c7v5mv8o/legacy_partial_corrupt/watershed/hillslopes.parquet': Parquet magic bytes not found in footer. Either the file is corrupted or this is not a parquet file."
+  },
+  "missing_catalog_with_redirected_historical_source": {
+    "error_type": "FileNotFoundError",
+    "error": "Missing report inputs: wepp/output/interchange/loss_pw0.hill.parquet, watershed/hillslopes.parquet, landuse/landuse.parquet"
+  },
+  "redirected_historical_catalog_control": {
+    "cache_status": "historical_unverified"
+  }
+}

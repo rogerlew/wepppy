@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_unrelated_catalog_security_probe.py
+{
+  "status": "current",
+  "rows_equal": true,
+  "requested_sources_complete": true
+}
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_unrelated_catalog_security_probe.py", line 42, in <module>
+    assert 'error' in observed and 'allowed parent' in observed['error']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

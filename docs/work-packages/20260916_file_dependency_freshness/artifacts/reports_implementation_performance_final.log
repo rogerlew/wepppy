@@ -1,0 +1,2357 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_implementation.py reports_implementation_performance_final --preserve-catalog-root
+c08_legacy_upgrade_build: 1574.489 ms; {'wepp/output/interchange/H.wat.parquet': 162301956}; {'id_scan': 1, 'summary': 1}
+c08_matching_settled: 17.817 ms; {}; {}
+c08_matching_helper_cold: 346.151 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_during_admission: 291.407 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_readmitting: 316.710 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c08_matching_after_readmission: 16.355 ms; {}; {}
+c08_matching_isolated_parquet_fallback: 32.521 ms; {}; {}
+c09_new_build: 51.475 ms; {'wepp/output/interchange/loss_pw0.hill.parquet': 26118, 'watershed/hillslopes.parquet': 64828, 'landuse/landuse.parquet': 27954}; {'landuse_query': 1}
+c09_matching_admitting: 13.564 ms; {'wepp/output/interchange/loss_pw0.hill.parquet': 13059, 'watershed/hillslopes.parquet': 32414, 'landuse/landuse.parquet': 13977}; {}
+c09_matching_settled: 11.264 ms; {}; {}
+c09_matching_helper_cold: 8.475 ms; {'wepp/output/interchange/loss_pw0.hill.parquet': 13059, 'watershed/hillslopes.parquet': 32414, 'landuse/landuse.parquet': 13977}; {}
+c08_matching_after_digest_eviction: 298.066 ms; {'wepp/output/interchange/H.wat.parquet': 81150978}; {}
+c09_matching_after_digest_eviction: 9.697 ms; {'wepp/output/interchange/loss_pw0.hill.parquet': 13059, 'watershed/hillslopes.parquet': 32414, 'landuse/landuse.parquet': 13977}; {}
+{
+  "named_run": "/wc1/runs/th/thespian-cleanness",
+  "disposable_source_clone": "/tmp/report-implementation-qa-kr_98xyw",
+  "retained_outputs": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_implementation_outputs/report-implementation-qa-kr_98xyw",
+  "uid": 1000,
+  "gid": 993,
+  "source_bytes": {
+    "wepp/output/interchange/H.wat.parquet": 81150978,
+    "watershed.nodb": 8994,
+    "nodb.version": 5,
+    "watershed/hillslopes.parquet": 32414,
+    "watershed/channels.parquet": 17710,
+    "landuse/landuse.parquet": 13977,
+    "wepp/output/interchange/loss_pw0.hill.parquet": 13059,
+    "_query_engine/catalog.json": 136693,
+    "wepp/reports/cache/hillslope_watbal_summary.parquet": 292036,
+    "wepp/reports/cache/hillslope_watbal_summary.meta.json": 20
+  },
+  "modules_before": {
+    "/workdir/wepppy/wepppy/wepp/reports/hillslope_watbal.py": "5cabf49f33faa18aa22bf56e78fd07d8cf614c6b3b8b7363cd3e76495da687db",
+    "/workdir/wepppy/wepppy/wepp/reports/average_annuals_by_landuse.py": "5c1980eff28a91a5c72f847d6c5cf8369ff70eb3ff92730776a9f7c5153d55ca",
+    "/workdir/wepppy/wepppy/wepp/reports/_cache_freshness.py": "9b84e9c2ccf621976b1c7f47b762161a0d2bda5c15481a77437a6f967a4896c3"
+  },
+  "scope": "Actual report constructors on copied real sources; actual detached Watershed filesystem hydration replaces singleton acquisition only; Redis disabled in this process",
+  "filesystem_note": "No OS cache drop; helper-cold means digest cache cold, not physical storage cold",
+  "catalog_rebase_workaround": {
+    "applied": false,
+    "before": "/wc1/runs/th/thespian-cleanness",
+    "after": "/wc1/runs/th/thespian-cleanness",
+    "scope": "disposable fixture only; an applied workaround does not prove restoration compatibility"
+  },
+  "measurements": [
+    {
+      "name": "c08_legacy_upgrade_build",
+      "repeats": 1,
+      "seconds": [
+        1.5744886500760913
+      ],
+      "mean_seconds": 1.5744886500760913,
+      "statuses": [
+        "built"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/H.wat.parquet": 162301956
+      },
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 2
+      },
+      "native_calls": {
+        "id_scan": 1,
+        "summary": 1
+      },
+      "process_rchar_delta": 213840728,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_settled",
+      "repeats": 20,
+      "seconds": [
+        0.02733682608231902,
+        0.030534346122294664,
+        0.026843712897971272,
+        0.023878712207078934,
+        0.020274618873372674,
+        0.018183608073741198,
+        0.01655244594439864,
+        0.015665197977796197,
+        0.014875776134431362,
+        0.015232498059049249,
+        0.014358532149344683,
+        0.014397445134818554,
+        0.014944397145882249,
+        0.013985993107780814,
+        0.01484770979732275,
+        0.014632759848609567,
+        0.015149857848882675,
+        0.014805810991674662,
+        0.015203485963866115,
+        0.014631299069151282
+      ],
+      "mean_seconds": 0.017816751671489328,
+      "statuses": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "hash_bytes": {},
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 20
+      },
+      "native_calls": {},
+      "process_rchar_delta": 7225622,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_helper_cold",
+      "repeats": 1,
+      "seconds": [
+        0.3461509910412133
+      ],
+      "mean_seconds": 0.3461509910412133,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/H.wat.parquet": 81150978
+      },
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 81512376,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_during_admission",
+      "repeats": 1,
+      "seconds": [
+        0.2914066209923476
+      ],
+      "mean_seconds": 0.2914066209923476,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/H.wat.parquet": 81150978
+      },
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 81512376,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_readmitting",
+      "repeats": 1,
+      "seconds": [
+        0.31671043997630477
+      ],
+      "mean_seconds": 0.31671043997630477,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/H.wat.parquet": 81150978
+      },
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 81512376,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_after_readmission",
+      "repeats": 20,
+      "seconds": [
+        0.01711762696504593,
+        0.016364186070859432,
+        0.016018333146348596,
+        0.01652722479775548,
+        0.016144185094162822,
+        0.016490729060024023,
+        0.01604707702063024,
+        0.016157574951648712,
+        0.015614907955750823,
+        0.016536334063857794,
+        0.016950217075645924,
+        0.016984940972179174,
+        0.01725004706531763,
+        0.016986530041322112,
+        0.01668053795583546,
+        0.01661754702217877,
+        0.016134069999679923,
+        0.016091535100713372,
+        0.015004904009401798,
+        0.015373208094388247
+      ],
+      "mean_seconds": 0.016354585823137313,
+      "statuses": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "hash_bytes": {},
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 20
+      },
+      "native_calls": {},
+      "process_rchar_delta": 7225623,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_isolated_parquet_fallback",
+      "repeats": 20,
+      "seconds": [
+        0.04233681783080101,
+        0.050758097087964416,
+        0.034099698998034,
+        0.031033548060804605,
+        0.03211768809705973,
+        0.03243400203064084,
+        0.03518460993655026,
+        0.031224956968799233,
+        0.03107280097901821,
+        0.03353910497389734,
+        0.03039575507864356,
+        0.028800227912142873,
+        0.02955908002331853,
+        0.03160663810558617,
+        0.03030107286758721,
+        0.029288199031725526,
+        0.029330553952604532,
+        0.030206331983208656,
+        0.0281293080188334,
+        0.028994944877922535
+      ],
+      "mean_seconds": 0.03252067184075713,
+      "statuses": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "hash_bytes": {},
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 20
+      },
+      "native_calls": {},
+      "process_rchar_delta": 7582483,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c09_new_build",
+      "repeats": 1,
+      "seconds": [
+        0.05147525016218424
+      ],
+      "mean_seconds": 0.05147525016218424,
+      "statuses": [
+        "built"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 26118,
+        "watershed/hillslopes.parquet": 64828,
+        "landuse/landuse.parquet": 27954
+      },
+      "hash_checks": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 2,
+        "watershed/hillslopes.parquet": 2,
+        "landuse/landuse.parquet": 2
+      },
+      "native_calls": {
+        "landuse_query": 1
+      },
+      "process_rchar_delta": 425630,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c09_matching_admitting",
+      "repeats": 1,
+      "seconds": [
+        0.013564473949372768
+      ],
+      "mean_seconds": 0.013564473949372768,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 13059,
+        "watershed/hillslopes.parquet": 32414,
+        "landuse/landuse.parquet": 13977
+      },
+      "hash_checks": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 1,
+        "watershed/hillslopes.parquet": 1,
+        "landuse/landuse.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 210237,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c09_matching_settled",
+      "repeats": 20,
+      "seconds": [
+        0.017525452189147472,
+        0.01760477013885975,
+        0.017752785934135318,
+        0.01625735405832529,
+        0.015026685083284974,
+        0.013765334151685238,
+        0.01307474891655147,
+        0.011279915925115347,
+        0.01053501688875258,
+        0.010499253869056702,
+        0.010031483136117458,
+        0.009604934137314558,
+        0.009020669152960181,
+        0.008942916989326477,
+        0.007992465980350971,
+        0.007560296915471554,
+        0.007452813908457756,
+        0.007043958175927401,
+        0.007234274875372648,
+        0.0070656409952789545
+      ],
+      "mean_seconds": 0.011263538571074604,
+      "statuses": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "hash_bytes": {},
+      "hash_checks": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 20,
+        "watershed/hillslopes.parquet": 20,
+        "landuse/landuse.parquet": 20
+      },
+      "native_calls": {},
+      "process_rchar_delta": 3013403,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c09_matching_helper_cold",
+      "repeats": 1,
+      "seconds": [
+        0.008475467097014189
+      ],
+      "mean_seconds": 0.008475467097014189,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 13059,
+        "watershed/hillslopes.parquet": 32414,
+        "landuse/landuse.parquet": 13977
+      },
+      "hash_checks": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 1,
+        "watershed/hillslopes.parquet": 1,
+        "landuse/landuse.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 210237,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c08_matching_after_digest_eviction",
+      "repeats": 1,
+      "seconds": [
+        0.2980661268811673
+      ],
+      "mean_seconds": 0.2980661268811673,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/H.wat.parquet": 81150978
+      },
+      "hash_checks": {
+        "wepp/output/interchange/H.wat.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 81512376,
+      "process_physical_read_bytes_delta": 0
+    },
+    {
+      "name": "c09_matching_after_digest_eviction",
+      "repeats": 1,
+      "seconds": [
+        0.009697005851194263
+      ],
+      "mean_seconds": 0.009697005851194263,
+      "statuses": [
+        "current"
+      ],
+      "hash_bytes": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 13059,
+        "watershed/hillslopes.parquet": 32414,
+        "landuse/landuse.parquet": 13977
+      },
+      "hash_checks": {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 1,
+        "watershed/hillslopes.parquet": 1,
+        "landuse/landuse.parquet": 1
+      },
+      "native_calls": {},
+      "process_rchar_delta": 210237,
+      "process_physical_read_bytes_delta": 0
+    }
+  ],
+  "c08_rows_equal_original": true,
+  "c08_mode_after_build": "0o600",
+  "c09_rows_equal_native_baseline": true,
+  "c09_first_creation_mode": "0o644",
+  "digest_cache_after_512_pressure_paths": {
+    "observations": {
+      "hits": 512,
+      "misses": 515,
+      "maxsize": 512,
+      "currsize": 512
+    },
+    "digests": {
+      "hits": 0,
+      "misses": 512,
+      "maxsize": 512,
+      "currsize": 512
+    }
+  },
+  "named_generations_unchanged": {
+    "wepp/output/interchange/H.wat.parquet": true,
+    "watershed.nodb": true,
+    "nodb.version": true,
+    "watershed/hillslopes.parquet": true,
+    "watershed/channels.parquet": true,
+    "landuse/landuse.parquet": true,
+    "wepp/output/interchange/loss_pw0.hill.parquet": true,
+    "_query_engine/catalog.json": true,
+    "wepp/reports/cache/hillslope_watbal_summary.parquet": true,
+    "wepp/reports/cache/hillslope_watbal_summary.meta.json": true
+  },
+  "modules_after": {
+    "/workdir/wepppy/wepppy/wepp/reports/hillslope_watbal.py": "5cabf49f33faa18aa22bf56e78fd07d8cf614c6b3b8b7363cd3e76495da687db",
+    "/workdir/wepppy/wepppy/wepp/reports/average_annuals_by_landuse.py": "5c1980eff28a91a5c72f847d6c5cf8369ff70eb3ff92730776a9f7c5153d55ca",
+    "/workdir/wepppy/wepppy/wepp/reports/_cache_freshness.py": "9b84e9c2ccf621976b1c7f47b762161a0d2bda5c15481a77437a6f967a4896c3"
+  },
+  "output_files": {
+    "cache/average_annuals_by_landuse.parquet": {
+      "bytes": 9858,
+      "mode": "0o644"
+    },
+    "cache/average_annuals_by_landuse.meta.json": {
+      "bytes": 17,
+      "mode": "0o644"
+    },
+    "cache/hillslope_watbal_summary.meta.json": {
+      "bytes": 20,
+      "mode": "0o644"
+    },
+    "cache/hillslope_watbal_summary.parquet": {
+      "bytes": 296710,
+      "mode": "0o600"
+    },
+    "cache/average_annuals_by_landuse.attempts/2949d79bdaf442919e0e3b04acc6f995/query.parquet": {
+      "bytes": 7450,
+      "mode": "0o644"
+    },
+    "cache/average_annuals_by_landuse.attempts/2949d79bdaf442919e0e3b04acc6f995/status.json": {
+      "bytes": 2317,
+      "mode": "0o644"
+    },
+    "cache/hillslope_watbal_summary.attempts/78b57029950c4b7bab8b050963e97fef/native.parquet": {
+      "bytes": 292036,
+      "mode": "0o600"
+    },
+    "cache/hillslope_watbal_summary.attempts/78b57029950c4b7bab8b050963e97fef/status.json": {
+      "bytes": 22145,
+      "mode": "0o600"
+    }
+  },
+  "output_directory_modes": {
+    "cache": "0o755",
+    "cache/average_annuals_by_landuse.attempts": "0o755",
+    "cache/hillslope_watbal_summary.attempts": "0o755",
+    "cache/average_annuals_by_landuse.attempts/2949d79bdaf442919e0e3b04acc6f995": "0o755",
+    "cache/hillslope_watbal_summary.attempts/78b57029950c4b7bab8b050963e97fef": "0o700"
+  },
+  "attempt_statuses": [
+    {
+      "status": "complete",
+      "attempt_id": "2949d79bdaf442919e0e3b04acc6f995",
+      "key": "average_annuals_by_landuse",
+      "target": "/tmp/report-implementation-qa-kr_98xyw/wepp/reports/cache/average_annuals_by_landuse.parquet",
+      "observations": {
+        "before": {
+          "wepp/output/interchange/loss_pw0.hill.parquet": {
+            "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+            "sha256": "2f0f87cf2c42d37fd1d01d6183b4d3a6f9e4991d2459e9687454760a40d1378f"
+          },
+          "wepp/output/interchange/loss_pw0.hill.parquet:aliases": "(SELECT *, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+          "watershed/hillslopes.parquet": {
+            "path": "watershed/hillslopes.parquet",
+            "sha256": "3fc5a756c53adf616d2aad6a66d8bbf66375434ef912b2863f3f4f6407f9a8c0"
+          },
+          "watershed/hillslopes.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+          "landuse/landuse.parquet": {
+            "path": "landuse/landuse.parquet",
+            "sha256": "01a9f219f15251e54701b98282ce46f5576e89a00271b0ad2c0ad74e7196abcd"
+          },
+          "landuse/landuse.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)"
+        },
+        "after": {
+          "wepp/output/interchange/loss_pw0.hill.parquet": {
+            "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+            "sha256": "2f0f87cf2c42d37fd1d01d6183b4d3a6f9e4991d2459e9687454760a40d1378f"
+          },
+          "wepp/output/interchange/loss_pw0.hill.parquet:aliases": "(SELECT *, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+          "watershed/hillslopes.parquet": {
+            "path": "watershed/hillslopes.parquet",
+            "sha256": "3fc5a756c53adf616d2aad6a66d8bbf66375434ef912b2863f3f4f6407f9a8c0"
+          },
+          "watershed/hillslopes.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)",
+          "landuse/landuse.parquet": {
+            "path": "landuse/landuse.parquet",
+            "sha256": "01a9f219f15251e54701b98282ce46f5576e89a00271b0ad2c0ad74e7196abcd"
+          },
+          "landuse/landuse.parquet:aliases": "(SELECT *, CAST(topaz_id AS BIGINT) AS TopazID, CAST(wepp_id AS BIGINT) AS WeppID FROM selected_reader)"
+        }
+      },
+      "error": null
+    },
+    {
+      "status": "complete",
+      "attempt_id": "78b57029950c4b7bab8b050963e97fef",
+      "key": "hillslope_watbal_summary",
+      "target": "/tmp/report-implementation-qa-kr_98xyw/wepp/reports/cache/hillslope_watbal_summary.parquet",
+      "observations": {
+        "before": {
+          "source": {
+            "path": "wepp/output/interchange/H.wat.parquet",
+            "sha256": "12eed26e275f85da789de5ce350ade623a799ac670c7bb94fba2c8ddcd7a9c85"
+          },
+          "mapping": [
+            [
+              1,
+              22
+            ],
+            [
+              2,
+              23
+            ],
+            [
+              3,
+              32
+            ],
+            [
+              4,
+              33
+            ],
+            [
+              5,
+              42
+            ],
+            [
+              6,
+              43
+            ],
+            [
+              7,
+              52
+            ],
+            [
+              8,
+              53
+            ],
+            [
+              9,
+              62
+            ],
+            [
+              10,
+              63
+            ],
+            [
+              11,
+              71
+            ],
+            [
+              12,
+              73
+            ],
+            [
+              13,
+              81
+            ],
+            [
+              14,
+              82
+            ],
+            [
+              15,
+              83
+            ],
+            [
+              16,
+              91
+            ],
+            [
+              17,
+              92
+            ],
+            [
+              18,
+              93
+            ],
+            [
+              19,
+              102
+            ],
+            [
+              20,
+              103
+            ],
+            [
+              21,
+              112
+            ],
+            [
+              22,
+              113
+            ],
+            [
+              23,
+              121
+            ],
+            [
+              24,
+              122
+            ],
+            [
+              25,
+              123
+            ],
+            [
+              26,
+              131
+            ],
+            [
+              27,
+              132
+            ],
+            [
+              28,
+              133
+            ],
+            [
+              29,
+              142
+            ],
+            [
+              30,
+              143
+            ],
+            [
+              31,
+              152
+            ],
+            [
+              32,
+              153
+            ],
+            [
+              33,
+              161
+            ],
+            [
+              34,
+              162
+            ],
+            [
+              35,
+              163
+            ],
+            [
+              36,
+              172
+            ],
+            [
+              37,
+              173
+            ],
+            [
+              38,
+              182
+            ],
+            [
+              39,
+              183
+            ],
+            [
+              40,
+              191
+            ],
+            [
+              41,
+              192
+            ],
+            [
+              42,
+              193
+            ],
+            [
+              43,
+              202
+            ],
+            [
+              44,
+              203
+            ],
+            [
+              45,
+              212
+            ],
+            [
+              46,
+              213
+            ],
+            [
+              47,
+              222
+            ],
+            [
+              48,
+              223
+            ],
+            [
+              49,
+              232
+            ],
+            [
+              50,
+              233
+            ],
+            [
+              51,
+              241
+            ],
+            [
+              52,
+              242
+            ],
+            [
+              53,
+              243
+            ],
+            [
+              54,
+              252
+            ],
+            [
+              55,
+              253
+            ],
+            [
+              56,
+              262
+            ],
+            [
+              57,
+              263
+            ],
+            [
+              58,
+              272
+            ],
+            [
+              59,
+              273
+            ],
+            [
+              60,
+              282
+            ],
+            [
+              61,
+              283
+            ],
+            [
+              62,
+              291
+            ],
+            [
+              63,
+              292
+            ],
+            [
+              64,
+              293
+            ],
+            [
+              65,
+              302
+            ],
+            [
+              66,
+              303
+            ],
+            [
+              67,
+              311
+            ],
+            [
+              68,
+              312
+            ],
+            [
+              69,
+              313
+            ],
+            [
+              70,
+              321
+            ],
+            [
+              71,
+              322
+            ],
+            [
+              72,
+              323
+            ],
+            [
+              73,
+              331
+            ],
+            [
+              74,
+              332
+            ],
+            [
+              75,
+              333
+            ],
+            [
+              76,
+              341
+            ],
+            [
+              77,
+              342
+            ],
+            [
+              78,
+              343
+            ],
+            [
+              79,
+              352
+            ],
+            [
+              80,
+              353
+            ],
+            [
+              81,
+              362
+            ],
+            [
+              82,
+              363
+            ],
+            [
+              83,
+              371
+            ],
+            [
+              84,
+              372
+            ],
+            [
+              85,
+              373
+            ],
+            [
+              86,
+              381
+            ],
+            [
+              87,
+              382
+            ],
+            [
+              88,
+              383
+            ],
+            [
+              89,
+              391
+            ],
+            [
+              90,
+              392
+            ],
+            [
+              91,
+              393
+            ],
+            [
+              92,
+              402
+            ],
+            [
+              93,
+              403
+            ],
+            [
+              94,
+              411
+            ],
+            [
+              95,
+              412
+            ],
+            [
+              96,
+              413
+            ],
+            [
+              97,
+              422
+            ],
+            [
+              98,
+              423
+            ],
+            [
+              99,
+              431
+            ],
+            [
+              100,
+              432
+            ],
+            [
+              101,
+              433
+            ],
+            [
+              102,
+              442
+            ],
+            [
+              103,
+              443
+            ],
+            [
+              104,
+              452
+            ],
+            [
+              105,
+              453
+            ],
+            [
+              106,
+              462
+            ],
+            [
+              107,
+              463
+            ],
+            [
+              108,
+              471
+            ],
+            [
+              109,
+              472
+            ],
+            [
+              110,
+              473
+            ],
+            [
+              111,
+              481
+            ],
+            [
+              112,
+              482
+            ],
+            [
+              113,
+              483
+            ],
+            [
+              114,
+              492
+            ],
+            [
+              115,
+              493
+            ],
+            [
+              116,
+              501
+            ],
+            [
+              117,
+              502
+            ],
+            [
+              118,
+              503
+            ],
+            [
+              119,
+              511
+            ],
+            [
+              120,
+              512
+            ],
+            [
+              121,
+              513
+            ],
+            [
+              122,
+              521
+            ],
+            [
+              123,
+              522
+            ],
+            [
+              124,
+              523
+            ],
+            [
+              125,
+              531
+            ],
+            [
+              126,
+              532
+            ],
+            [
+              127,
+              533
+            ],
+            [
+              128,
+              542
+            ],
+            [
+              129,
+              543
+            ],
+            [
+              130,
+              551
+            ],
+            [
+              131,
+              552
+            ],
+            [
+              132,
+              553
+            ],
+            [
+              133,
+              561
+            ],
+            [
+              134,
+              562
+            ],
+            [
+              135,
+              563
+            ],
+            [
+              136,
+              572
+            ],
+            [
+              137,
+              573
+            ],
+            [
+              138,
+              581
+            ],
+            [
+              139,
+              582
+            ],
+            [
+              140,
+              583
+            ],
+            [
+              141,
+              591
+            ],
+            [
+              142,
+              592
+            ],
+            [
+              143,
+              593
+            ],
+            [
+              144,
+              602
+            ],
+            [
+              145,
+              603
+            ],
+            [
+              146,
+              612
+            ],
+            [
+              147,
+              613
+            ],
+            [
+              148,
+              622
+            ],
+            [
+              149,
+              623
+            ],
+            [
+              150,
+              631
+            ],
+            [
+              151,
+              632
+            ],
+            [
+              152,
+              633
+            ],
+            [
+              153,
+              641
+            ],
+            [
+              154,
+              642
+            ],
+            [
+              155,
+              643
+            ],
+            [
+              156,
+              652
+            ],
+            [
+              157,
+              653
+            ],
+            [
+              158,
+              662
+            ],
+            [
+              159,
+              663
+            ],
+            [
+              160,
+              671
+            ],
+            [
+              161,
+              672
+            ],
+            [
+              162,
+              673
+            ],
+            [
+              163,
+              682
+            ],
+            [
+              164,
+              683
+            ],
+            [
+              165,
+              692
+            ],
+            [
+              166,
+              693
+            ],
+            [
+              167,
+              701
+            ],
+            [
+              168,
+              702
+            ],
+            [
+              169,
+              703
+            ],
+            [
+              170,
+              711
+            ],
+            [
+              171,
+              712
+            ],
+            [
+              172,
+              713
+            ],
+            [
+              173,
+              721
+            ],
+            [
+              174,
+              722
+            ],
+            [
+              175,
+              723
+            ],
+            [
+              176,
+              731
+            ],
+            [
+              177,
+              732
+            ],
+            [
+              178,
+              733
+            ],
+            [
+              179,
+              742
+            ],
+            [
+              180,
+              743
+            ],
+            [
+              181,
+              751
+            ],
+            [
+              182,
+              752
+            ],
+            [
+              183,
+              753
+            ],
+            [
+              184,
+              761
+            ],
+            [
+              185,
+              762
+            ],
+            [
+              186,
+              763
+            ],
+            [
+              187,
+              772
+            ],
+            [
+              188,
+              773
+            ],
+            [
+              189,
+              782
+            ],
+            [
+              190,
+              783
+            ],
+            [
+              191,
+              791
+            ],
+            [
+              192,
+              792
+            ],
+            [
+              193,
+              793
+            ],
+            [
+              194,
+              801
+            ],
+            [
+              195,
+              802
+            ],
+            [
+              196,
+              803
+            ],
+            [
+              197,
+              812
+            ],
+            [
+              198,
+              813
+            ],
+            [
+              199,
+              821
+            ],
+            [
+              200,
+              822
+            ],
+            [
+              201,
+              823
+            ],
+            [
+              202,
+              832
+            ],
+            [
+              203,
+              833
+            ],
+            [
+              204,
+              841
+            ],
+            [
+              205,
+              842
+            ],
+            [
+              206,
+              843
+            ],
+            [
+              207,
+              852
+            ],
+            [
+              208,
+              853
+            ],
+            [
+              209,
+              861
+            ],
+            [
+              210,
+              862
+            ],
+            [
+              211,
+              863
+            ],
+            [
+              212,
+              871
+            ],
+            [
+              213,
+              872
+            ],
+            [
+              214,
+              873
+            ],
+            [
+              215,
+              881
+            ],
+            [
+              216,
+              882
+            ],
+            [
+              217,
+              883
+            ]
+          ]
+        },
+        "after": {
+          "source": {
+            "path": "wepp/output/interchange/H.wat.parquet",
+            "sha256": "12eed26e275f85da789de5ce350ade623a799ac670c7bb94fba2c8ddcd7a9c85"
+          },
+          "mapping": [
+            [
+              1,
+              22
+            ],
+            [
+              2,
+              23
+            ],
+            [
+              3,
+              32
+            ],
+            [
+              4,
+              33
+            ],
+            [
+              5,
+              42
+            ],
+            [
+              6,
+              43
+            ],
+            [
+              7,
+              52
+            ],
+            [
+              8,
+              53
+            ],
+            [
+              9,
+              62
+            ],
+            [
+              10,
+              63
+            ],
+            [
+              11,
+              71
+            ],
+            [
+              12,
+              73
+            ],
+            [
+              13,
+              81
+            ],
+            [
+              14,
+              82
+            ],
+            [
+              15,
+              83
+            ],
+            [
+              16,
+              91
+            ],
+            [
+              17,
+              92
+            ],
+            [
+              18,
+              93
+            ],
+            [
+              19,
+              102
+            ],
+            [
+              20,
+              103
+            ],
+            [
+              21,
+              112
+            ],
+            [
+              22,
+              113
+            ],
+            [
+              23,
+              121
+            ],
+            [
+              24,
+              122
+            ],
+            [
+              25,
+              123
+            ],
+            [
+              26,
+              131
+            ],
+            [
+              27,
+              132
+            ],
+            [
+              28,
+              133
+            ],
+            [
+              29,
+              142
+            ],
+            [
+              30,
+              143
+            ],
+            [
+              31,
+              152
+            ],
+            [
+              32,
+              153
+            ],
+            [
+              33,
+              161
+            ],
+            [
+              34,
+              162
+            ],
+            [
+              35,
+              163
+            ],
+            [
+              36,
+              172
+            ],
+            [
+              37,
+              173
+            ],
+            [
+              38,
+              182
+            ],
+            [
+              39,
+              183
+            ],
+            [
+              40,
+              191
+            ],
+            [
+              41,
+              192
+            ],
+            [
+              42,
+              193
+            ],
+            [
+              43,
+              202
+            ],
+            [
+              44,
+              203
+            ],
+            [
+              45,
+              212
+            ],
+            [
+              46,
+              213
+            ],
+            [
+              47,
+              222
+            ],
+            [
+              48,
+              223
+            ],
+            [
+              49,
+              232
+            ],
+            [
+              50,
+              233
+            ],
+            [
+              51,
+              241
+            ],
+            [
+              52,
+              242
+            ],
+            [
+              53,
+              243
+            ],
+            [
+              54,
+              252
+            ],
+            [
+              55,
+              253
+            ],
+            [
+              56,
+              262
+            ],
+            [
+              57,
+              263
+            ],
+            [
+              58,
+              272
+            ],
+            [
+              59,
+              273
+            ],
+            [
+              60,
+              282
+            ],
+            [
+              61,
+              283
+            ],
+            [
+              62,
+              291
+            ],
+            [
+              63,
+              292
+            ],
+            [
+              64,
+              293
+            ],
+            [
+              65,
+              302
+            ],
+            [
+              66,
+              303
+            ],
+            [
+              67,
+              311
+            ],
+            [
+              68,
+              312
+            ],
+            [
+              69,
+              313
+            ],
+            [
+              70,
+              321
+            ],
+            [
+              71,
+              322
+            ],
+            [
+              72,
+              323
+            ],
+            [
+              73,
+              331
+            ],
+            [
+              74,
+              332
+            ],
+            [
+              75,
+              333
+            ],
+            [
+              76,
+              341
+            ],
+            [
+              77,
+              342
+            ],
+            [
+              78,
+              343
+            ],
+            [
+              79,
+              352
+            ],
+            [
+              80,
+              353
+            ],
+            [
+              81,
+              362
+            ],
+            [
+              82,
+              363
+            ],
+            [
+              83,
+              371
+            ],
+            [
+              84,
+              372
+            ],
+            [
+              85,
+              373
+            ],
+            [
+              86,
+              381
+            ],
+            [
+              87,
+              382
+            ],
+            [
+              88,
+              383
+            ],
+            [
+              89,
+              391
+            ],
+            [
+              90,
+              392
+            ],
+            [
+              91,
+              393
+            ],
+            [
+              92,
+              402
+            ],
+            [
+              93,
+              403
+            ],
+            [
+              94,
+              411
+            ],
+            [
+              95,
+              412
+            ],
+            [
+              96,
+              413
+            ],
+            [
+              97,
+              422
+            ],
+            [
+              98,
+              423
+            ],
+            [
+              99,
+              431
+            ],
+            [
+              100,
+              432
+            ],
+            [
+              101,
+              433
+            ],
+            [
+              102,
+              442
+            ],
+            [
+              103,
+              443
+            ],
+            [
+              104,
+              452
+            ],
+            [
+              105,
+              453
+            ],
+            [
+              106,
+              462
+            ],
+            [
+              107,
+              463
+            ],
+            [
+              108,
+              471
+            ],
+            [
+              109,
+              472
+            ],
+            [
+              110,
+              473
+            ],
+            [
+              111,
+              481
+            ],
+            [
+              112,
+              482
+            ],
+            [
+              113,
+              483
+            ],
+            [
+              114,
+              492
+            ],
+            [
+              115,
+              493
+            ],
+            [
+              116,
+              501
+            ],
+            [
+              117,
+              502
+            ],
+            [
+              118,
+              503
+            ],
+            [
+              119,
+              511
+            ],
+            [
+              120,
+              512
+            ],
+            [
+              121,
+              513
+            ],
+            [
+              122,
+              521
+            ],
+            [
+              123,
+              522
+            ],
+            [
+              124,
+              523
+            ],
+            [
+              125,
+              531
+            ],
+            [
+              126,
+              532
+            ],
+            [
+              127,
+              533
+            ],
+            [
+              128,
+              542
+            ],
+            [
+              129,
+              543
+            ],
+            [
+              130,
+              551
+            ],
+            [
+              131,
+              552
+            ],
+            [
+              132,
+              553
+            ],
+            [
+              133,
+              561
+            ],
+            [
+              134,
+              562
+            ],
+            [
+              135,
+              563
+            ],
+            [
+              136,
+              572
+            ],
+            [
+              137,
+              573
+            ],
+            [
+              138,
+              581
+            ],
+            [
+              139,
+              582
+            ],
+            [
+              140,
+              583
+            ],
+            [
+              141,
+              591
+            ],
+            [
+              142,
+              592
+            ],
+            [
+              143,
+              593
+            ],
+            [
+              144,
+              602
+            ],
+            [
+              145,
+              603
+            ],
+            [
+              146,
+              612
+            ],
+            [
+              147,
+              613
+            ],
+            [
+              148,
+              622
+            ],
+            [
+              149,
+              623
+            ],
+            [
+              150,
+              631
+            ],
+            [
+              151,
+              632
+            ],
+            [
+              152,
+              633
+            ],
+            [
+              153,
+              641
+            ],
+            [
+              154,
+              642
+            ],
+            [
+              155,
+              643
+            ],
+            [
+              156,
+              652
+            ],
+            [
+              157,
+              653
+            ],
+            [
+              158,
+              662
+            ],
+            [
+              159,
+              663
+            ],
+            [
+              160,
+              671
+            ],
+            [
+              161,
+              672
+            ],
+            [
+              162,
+              673
+            ],
+            [
+              163,
+              682
+            ],
+            [
+              164,
+              683
+            ],
+            [
+              165,
+              692
+            ],
+            [
+              166,
+              693
+            ],
+            [
+              167,
+              701
+            ],
+            [
+              168,
+              702
+            ],
+            [
+              169,
+              703
+            ],
+            [
+              170,
+              711
+            ],
+            [
+              171,
+              712
+            ],
+            [
+              172,
+              713
+            ],
+            [
+              173,
+              721
+            ],
+            [
+              174,
+              722
+            ],
+            [
+              175,
+              723
+            ],
+            [
+              176,
+              731
+            ],
+            [
+              177,
+              732
+            ],
+            [
+              178,
+              733
+            ],
+            [
+              179,
+              742
+            ],
+            [
+              180,
+              743
+            ],
+            [
+              181,
+              751
+            ],
+            [
+              182,
+              752
+            ],
+            [
+              183,
+              753
+            ],
+            [
+              184,
+              761
+            ],
+            [
+              185,
+              762
+            ],
+            [
+              186,
+              763
+            ],
+            [
+              187,
+              772
+            ],
+            [
+              188,
+              773
+            ],
+            [
+              189,
+              782
+            ],
+            [
+              190,
+              783
+            ],
+            [
+              191,
+              791
+            ],
+            [
+              192,
+              792
+            ],
+            [
+              193,
+              793
+            ],
+            [
+              194,
+              801
+            ],
+            [
+              195,
+              802
+            ],
+            [
+              196,
+              803
+            ],
+            [
+              197,
+              812
+            ],
+            [
+              198,
+              813
+            ],
+            [
+              199,
+              821
+            ],
+            [
+              200,
+              822
+            ],
+            [
+              201,
+              823
+            ],
+            [
+              202,
+              832
+            ],
+            [
+              203,
+              833
+            ],
+            [
+              204,
+              841
+            ],
+            [
+              205,
+              842
+            ],
+            [
+              206,
+              843
+            ],
+            [
+              207,
+              852
+            ],
+            [
+              208,
+              853
+            ],
+            [
+              209,
+              861
+            ],
+            [
+              210,
+              862
+            ],
+            [
+              211,
+              863
+            ],
+            [
+              212,
+              871
+            ],
+            [
+              213,
+              872
+            ],
+            [
+              214,
+              873
+            ],
+            [
+              215,
+              881
+            ],
+            [
+              216,
+              882
+            ],
+            [
+              217,
+              883
+            ]
+          ]
+        }
+      },
+      "error": null
+    }
+  ]
+}

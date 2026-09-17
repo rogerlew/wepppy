@@ -10,6 +10,7 @@ __all__ = ["HillslopeWatbalReport", "HillslopeWatbal"]
 
 
 class HillslopeWatbalReport(ReportBase):
+    cache_status: str
     header: list[str]
     years: list[int]
     areas: dict[int, float]

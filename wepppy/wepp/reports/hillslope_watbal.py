@@ -10,10 +10,14 @@ from typing import Iterable, Iterator, Mapping
 
 import pandas as pd
 import pyarrow as pa
+import pyarrow.parquet as pq
 
-from wepppy.wepp.interchange._rust_interchange import require_wepppyo3_interchange
+from wepppy.wepp.interchange._rust_interchange import (
+    require_wepppyo3_interchange, WeppInterchangeUnavailableError,
+)
 
 from .helpers import ReportCacheManager
+from ._cache_freshness import _CacheBuild, _cache_verdict, _observe_file, _read_cache
 from .output_scope import normalize_output_scope, scoped_dataset_path
 from .report_base import ReportBase
 from .row_data import RowData, parse_units
@@ -21,6 +25,10 @@ from .row_data import RowData, parse_units
 __all__ = ["HillslopeWatbalReport", "HillslopeWatbal"]
 
 LOGGER = logging.getLogger(__name__)
+
+
+class _MappingUnavailable(FileNotFoundError):
+    """Required translator resources are physically absent."""
 
 
 class HillslopeWatbalReport(ReportBase):
@@ -46,26 +54,7 @@ class HillslopeWatbalReport(ReportBase):
             raise FileNotFoundError(self.wd)
         self._output_scope = normalize_output_scope(output_scope)
 
-        source_path = self._resolve_source_path()
-        cache = ReportCacheManager(self.wd)
-        cache_key = self._resolve_cache_key()
-        cache_path = cache.root / f"{cache_key}.parquet"
-        dataframe = cache.read_parquet(cache_key, version=self._CACHE_VERSION)
-        if dataframe is not None and self._source_is_newer_than_cache(source_path, cache_path):
-            dataframe = None
-        if dataframe is None:
-            legacy_cache = (
-                self.wd / "wepp" / "output" / "interchange" / f"{self._CACHE_KEY}.parquet"
-            )
-            if (
-                self._output_scope == "baseline"
-                and legacy_cache.exists()
-                and not self._source_is_newer_than_cache(source_path, legacy_cache)
-            ):
-                dataframe = pd.read_parquet(legacy_cache)
-
-        if dataframe is None or not self._validate_cache_columns(dataframe):
-            dataframe = self._build_summary()
+        dataframe = self._load_or_build()
 
         if dataframe.empty:
             self._initialise_empty()
@@ -106,6 +95,80 @@ class HillslopeWatbalReport(ReportBase):
             .sort_values("WaterYear")
         )
 
+    def _historical(self, dataframe: pd.DataFrame, reason: str) -> pd.DataFrame:
+        self.cache_status = "historical_unverified"
+        LOGGER.warning("Using historical report cache; %s: %s (%s)",
+                       reason, self.wd, self._resolve_cache_key())
+        return dataframe
+
+    def _load_or_build(self) -> pd.DataFrame:
+        source = self._resolve_source_path()
+        key = self._resolve_cache_key()
+        cache_path = ReportCacheManager(self.wd).root / f"{key}.parquet"
+        loaded = _read_cache(cache_path, key)
+        if loaded is None and self._output_scope == "baseline":
+            cache_path = self.wd / "wepp/output/interchange" / f"{self._CACHE_KEY}.parquet"
+            loaded = _read_cache(cache_path, key, require_version=False)
+        dataframe = None if loaded is None else loaded[0].to_pandas()
+        proof = None if loaded is None else loaded[1]
+        if dataframe is not None and not self._validate_cache_columns(dataframe):
+            dataframe = None
+        before = _observe_file(self.wd, source)
+        if dataframe is not None and proof is not None:
+            ids = proof.get("source_ids")
+            if (not isinstance(ids, list) or any(type(value) is not int for value in ids)
+                    or len(set(ids)) != len(ids) or (not ids and not dataframe.empty)):
+                raise ValueError("Invalid report cache source IDs")
+            mapping = proof["dependencies"].get("mapping")
+            if (not isinstance(mapping, list) or len(mapping) != len(ids) or
+                    any(not isinstance(pair, list) or len(pair) != 2 or
+                        any(type(value) is not int for value in pair) for pair in mapping) or
+                    sorted(pair[0] for pair in mapping) != sorted(ids)):
+                raise ValueError("Invalid report cache translator mapping")
+            if set(proof["dependencies"]) != {"source", "mapping"}:
+                raise ValueError("Invalid report cache dependency set")
+            source_verdict = _cache_verdict({"source": proof["dependencies"]["source"]}, {"source": before})
+            verdict = None
+            if source_verdict is not None:
+                dependencies = self._dependencies(ids, before, allow_missing=True)
+                verdict = _cache_verdict(proof["dependencies"], dependencies)
+            if verdict is not None:
+                self.cache_status = verdict
+                if verdict == "historical_unverified":
+                    missing = []
+                    if before["sha256"] is None:
+                        missing.append(str(source))
+                    if dependencies["mapping"] is None:
+                        missing.append("Watershed translator prerequisites")
+                    return self._historical(dataframe, f"missing {', '.join(missing)}")
+                return dataframe
+            # A known mismatch cannot fall through to the older legacy location.
+            dataframe = None
+        if dataframe is not None and before["sha256"] is None:
+            return self._historical(dataframe, f"missing source {source}")
+        try:
+            result = self._build_summary(initial_source=before)
+        except _MappingUnavailable as exc:
+            if dataframe is None:
+                raise
+            return self._historical(dataframe, str(exc))
+        except WeppInterchangeUnavailableError:
+            if dataframe is None or self._source_is_newer_than_cache(source, cache_path):
+                raise
+            return self._historical(dataframe, "native summary API unavailable")
+        self.cache_status = "built"
+        return result
+
+    def _dependencies(self, ids: list[int], source: dict, *, allow_missing: bool = False) -> dict:
+        try:
+            mapping = self._resolve_mapping(ids)
+        except _MappingUnavailable:
+            if not allow_missing:
+                raise
+            mapping = None
+        return {"source": source, "mapping": None if mapping is None else
+                [[int(key), int(value)] for key, value in sorted(mapping.items())]}
+
     def _validate_cache_columns(self, dataframe: pd.DataFrame) -> bool:
         """Return ``True`` when the cached dataframe matches the expected schema."""
         expected = {"TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()}
@@ -129,23 +192,61 @@ class HillslopeWatbalReport(ReportBase):
         self.wsarea = 0.0
         self.years = []
 
-    def _build_summary(self) -> pd.DataFrame:
-        """Prepare bounded mapping data for the required native summary producer."""
+    def _build_summary(self, *, initial_source: dict | None = None) -> pd.DataFrame:
+        """Build native rows and bind observations before atomic publication."""
         source_path = self._resolve_source_path()
-        if not source_path.exists():
+        before_source = initial_source if initial_source is not None else _observe_file(self.wd, source_path)
+        if before_source["sha256"] is None:
             raise FileNotFoundError(source_path)
-
-        from wepppy.nodb.core import Watershed
-
         native = require_wepppyo3_interchange(
             "hillslope water balance", "hillslope_watbal_wepp_ids", "hillslope_watbal_to_parquet"
         )
-        wepp_ids = native.hillslope_watbal_wepp_ids(str(source_path))
-        if not wepp_ids:
-            return self._write_native_summary(native, source_path, {})
+        cache_path = ReportCacheManager(self.wd).root / f"{self._resolve_cache_key()}.parquet"
+        with _CacheBuild(cache_path, self._resolve_cache_key(), native_source=source_path) as attempt:
+            attempt.observations = {"source_before": before_source}
+            ids = native.hillslope_watbal_wepp_ids(str(source_path))
+            before = self._dependencies(ids, before_source)
+            attempt.observations = {"before": before, "selected_source": str(source_path.resolve())}
+            mapping = dict(before["mapping"])
+            table = self._write_native_summary(native, source_path, mapping, attempt)
+            after = self._dependencies(ids, _observe_file(self.wd, source_path))
+            attempt.observations["after"] = after
+            if before != after:
+                raise RuntimeError("Report dependencies changed during native build")
+            dataframe = table.to_pandas()
+            attempt.publish(table, before, source_ids=ids)
+            return dataframe
 
-        watershed = Watershed.getInstance(str(self.wd))
-        translator = watershed.translator_factory()
+    def _resolve_mapping(self, wepp_ids: list[int]) -> dict[int, int]:
+        if not wepp_ids:
+            return {}
+        from wepppy.nodb.core import Watershed
+
+        try:
+            watershed = Watershed.getInstance(str(self.wd))
+        except FileNotFoundError as exc:
+            raise _MappingUnavailable("Watershed controller is absent") from exc
+        try:
+            translator = watershed.translator_factory()
+        except RuntimeError as exc:
+            if str(exc) != "No sub_ids/chn_ids available for translator (no summaries or parquet files)":
+                raise
+            # The native translator's missing-resource error is RuntimeError.
+            # Prove physical absence; never hide schema/access/unknown-ID errors.
+            if (getattr(watershed, "_subs_summary", None) is None or
+                    getattr(watershed, "_chns_summary", None) is None):
+                missing = []
+                for relative in ("watershed/hillslopes.parquet", "watershed/channels.parquet"):
+                    try:
+                        # Inspect every surviving prerequisite before absence is
+                        # classified; a missing peer must not hide denied reads.
+                        with (self.wd / relative).open("rb") as incoming:
+                            pq.read_schema(incoming)
+                    except FileNotFoundError:
+                        missing.append(relative)
+                if missing:
+                    raise _MappingUnavailable(f"Translator source absent: {', '.join(missing)}") from exc
+            raise
         roads_segment_targets = self._load_roads_segment_target_map()
         fallback_ids: set[int] = set()
         manifest_mapped_ids: set[int] = set()
@@ -193,10 +294,11 @@ class HillslopeWatbalReport(ReportBase):
                 },
             )
 
-        return self._write_native_summary(native, source_path, topaz_lookup)
+        return topaz_lookup
 
-    def _write_native_summary(self, native, source_path: Path, mapping: dict[int, int]) -> pd.DataFrame:
-        """Publish the compact cache natively, then load only its report rows."""
+    def _write_native_summary(self, native, source_path: Path, mapping: dict[int, int],
+                              attempt: _CacheBuild) -> pa.Table:
+        """Keep full H.wat aggregation native; annotate only the compact result."""
         names = ["TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()]
         if mapping:
             template = pd.DataFrame({
@@ -206,16 +308,13 @@ class HillslopeWatbalReport(ReportBase):
         else:
             template = pd.DataFrame(columns=names)
         metadata = pa.Schema.from_pandas(template, preserve_index=False).metadata[b"pandas"].decode()
-        cache = ReportCacheManager(self.wd)
-        cache.root.mkdir(parents=True, exist_ok=True)
-        cache_path = cache.root / f"{self._resolve_cache_key()}.parquet"
+        with attempt.open_payload("native.parquet"):
+            pass
+        candidate = attempt.root / "native.parquet"
         native.hillslope_watbal_to_parquet(
-            str(source_path), str(cache_path), mapping, pandas_metadata=metadata
+            str(source_path), str(candidate), mapping, pandas_metadata=metadata
         )
-        cache_path.with_suffix(".meta.json").write_text(
-            json.dumps({"version": self._CACHE_VERSION}, indent=2)
-        )
-        return pd.read_parquet(cache_path)
+        return pq.read_table(candidate)
 
     def _load_roads_segment_target_map(self) -> dict[int, int]:
         """Return Roads segment run ID -> target hillslope WEPP ID map when available."""

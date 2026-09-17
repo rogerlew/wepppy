@@ -15,9 +15,43 @@ This guide captures the DuckDB-backed report pipelines that translate WEPP inter
 - Python post-processing converts volumes to depth using the total contributing
   area (`volume * 1000 / area_m²`) and assembles the report columns:
   `Avg Runoff/Lateral/Baseflow Depth (mm/yr)` plus the sediment annual totals.
-- Results are cached to `wepp/output/interchange/average_annuals_by_landuse.parquet`
-  so large watersheds do not re-query on every request. The cache is invalidated
-  automatically if the stored column layout no longer matches the current schema.
+- Results are cached to `wepp/reports/cache/average_annuals_by_landuse.parquet`.
+  Selected source content and effective catalog aliases are checked on reuse;
+  changes rebuild the report through DuckDB, even with restored timestamps.
+
+## Water-balance and landuse cache freshness
+
+Water-balance summaries use the required streaming native producer and also
+verify the effective WEPP-to-Topaz mapping, including Roads segment targets.
+Touching or hard-linking unchanged inputs does not rebuild either report. Actual
+source or mapping changes rebuild before returning new rows. Scientific columns,
+units, calculations and baseline/Roads scope are unchanged.
+
+Retained reports remain available after required source files are archived or
+removed, provided no remaining verified dependency is known to have changed.
+These are historical reports, not a claim that current project inputs match.
+Report objects expose `cache_status` (`current`, `built` or
+`historical_unverified`); historical use is logged. Existing HTML and CSV do not
+add a freshness badge or scientific column. Legacy caches without provenance
+rebuild once when prerequisites exist; legacy water-balance reads retain their
+native-unavailable compatibility rule. Failed rebuilds never silently replace a
+known-stale result with historical rows.
+
+New compact cache Parquet files contain their dependency provenance. Version-1
+JSON sidecars remain readable by older releases. Inspect build observations,
+status, native/query intermediates and failed candidates under
+`wepp/reports/cache/<key>.attempts/<id>/` through normal project browse. These are
+included in canonical archive/restore. An atomic Parquet replacement commits the
+new cache; a later diagnostic-write failure is logged without rolling it back.
+An interrupted attempt's embedded ID can be compared with the accepted Parquet
+metadata. Do not delete the attempt to hide a failed build.
+
+Developers should use the [report cache contract](../../../docs/schemas/report-cache-freshness-contract.md)
+for dependency selection, legacy behavior, publication/access preservation and
+performance limits. Run `wctl run-pytest tests/wepp/reports` after changes. Source
+hashing uses the bounded shared digest cache; native H.wat ID scanning and
+DuckDB aggregation occur only on rebuild. Before/after source checks detect
+observable drift but do not provide arbitrary-writer snapshot isolation.
 
 ## Loss Summary Reports
 

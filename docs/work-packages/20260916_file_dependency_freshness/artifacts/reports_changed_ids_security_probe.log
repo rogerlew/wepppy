@@ -1,0 +1,46 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_changed_ids_security_probe.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 1 item
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_changed_ids_security_probe.py::test_characterize_changed_source_reuses_obsolete_ids FAILED
+
+=================================== FAILURES ===================================
+_____________ test_characterize_changed_source_reuses_obsolete_ids _____________
+
+run = PosixPath('/tmp/pytest-of-unknown/pytest-67/test_characterize_changed_sour0/run')
+
+    def test_characterize_changed_source_reuses_obsolete_ids(run):
+        source = run / 'wepp/output/interchange/H.wat.parquet'
+        _rewrite(source, 'wepp_id', 2)
+        previous = HillslopeWatbalReport(run)
+        _rewrite(source, 'wepp_id', 1)
+        _table(run / 'watershed/hillslopes.parquet', [
+            {'topaz_id': 101, 'wepp_id': 1, 'area': 1000.}])
+>       with pytest.raises(KeyError) as error:
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'KeyError'>
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_changed_ids_security_probe.py:17: Failed
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wepp/reports/test_report_cache_freshness.py:19
+  /workdir/wepppy/tests/wepp/reports/test_report_cache_freshness.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_changed_ids_security_probe.py::test_characterize_changed_source_reuses_obsolete_ids
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 3 warnings in 9.16s =========================

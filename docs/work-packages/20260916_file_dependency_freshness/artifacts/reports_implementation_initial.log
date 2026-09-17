@@ -1,0 +1,112 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/wepp/reports/test_hillslope_watbal.py tests/wepp/reports/test_average_annuals_by_landuse.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 12 items
+
+tests/wepp/reports/test_hillslope_watbal.py ...........                  [ 91%]
+tests/wepp/reports/test_average_annuals_by_landuse.py F
+
+=================================== FAILURES ===================================
+_______________ test_average_annuals_by_landuse_builds_dataframe _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7337f9510080>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-62/test_average_annuals_by_landus0')
+
+    def test_average_annuals_by_landuse_builds_dataframe(monkeypatch, tmp_path):
+        run_dir = tmp_path / "example_run"
+        cache_dir = run_dir / "wepp" / "reports" / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+    
+        records = [
+            {
+                "landuse_id": 101,
+                "management_description": "Forest",
+                "sum_runoff_m3": 100.0,
+                "sum_subrunoff_m3": 200.0,
+                "sum_baseflow_m3": 50.0,
+                "sum_soil_loss": 5.0,
+                "sum_sediment_yield": 4.0,
+                "sum_sediment_deposition": 1.5,
+                "sum_area_m2": 5_000.0,
+            },
+            {
+                "landuse_id": 202,
+                "management_description": "Pasture",
+                "sum_runoff_m3": 20.0,
+                "sum_subrunoff_m3": 40.0,
+                "sum_baseflow_m3": 10.0,
+                "sum_soil_loss": 2.5,
+                "sum_sediment_yield": 1.5,
+                "sum_sediment_deposition": 0.2,
+                "sum_area_m2": 20_000.0,
+            },
+        ]
+    
+        class StubQueryContext:
+            def __init__(self, run_directory, *, run_interchange=False, auto_activate=True):
+                assert Path(run_directory) == run_dir
+                required = {
+                    "wepp/output/interchange/loss_pw0.hill.parquet",
+                    "watershed/hillslopes.parquet",
+                    "landuse/landuse.parquet",
+                }
+                self.catalog = SimpleNamespace(has=lambda path: path in required)
+    
+            def ensure_datasets(self, *paths: str) -> None:
+                missing = [path for path in paths if not self.catalog.has(path)]
+                if missing:
+                    raise FileNotFoundError(', '.join(missing))
+    
+            def query(self, payload):
+                assert payload.joins[0]["left_on"] == ["wepp_id"]
+                assert payload.joins[0]["right_on"] == ["wepp_id"]
+                return QueryResult(records=records, schema=None, row_count=len(records))
+    
+        monkeypatch.setattr(
+            "wepppy.wepp.reports.average_annuals_by_landuse.ReportQueryContext",
+            StubQueryContext,
+        )
+    
+>       report = AverageAnnualsByLanduseReport(run_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/wepp/reports/test_average_annuals_by_landuse.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/wepp/reports/average_annuals_by_landuse.py:51: in __init__
+    dataframe = self._load_or_build()
+                ^^^^^^^^^^^^^^^^^^^^^
+wepppy/wepp/reports/average_annuals_by_landuse.py:85: in _load_or_build
+    context, before = self._observe_inputs()
+                      ^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.wepp.reports.average_annuals_by_landuse.AverageAnnualsByLanduseReport object at 0x7337f950bfb0>
+
+    def _observe_inputs(self):
+        context = ReportQueryContext(self.wd, run_interchange=False)
+        paths = (self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
+        # Repair an incomplete catalog only for actually present local sources,
+        # retaining historical reads when a required source has been archived.
+        present = [path for path in paths if not context.catalog.has(path) and (self.wd / path).is_file()]
+        if present:
+            context.ensure_datasets(*present)
+        dependencies = {}
+        for logical in paths:
+>           entry = context.catalog.get(logical)
+                    ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'types.SimpleNamespace' object has no attribute 'get'
+
+wepppy/wepp/reports/average_annuals_by_landuse.py:66: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/wepp/reports/test_average_annuals_by_landuse.py::test_average_annuals_by_landuse_builds_dataframe
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 11 passed, 1 warning in 4.30s ====================

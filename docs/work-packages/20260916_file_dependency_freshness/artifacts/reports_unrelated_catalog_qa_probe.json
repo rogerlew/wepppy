@@ -1,0 +1,18 @@
+{
+  "run": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_unrelated_catalog_inputs/dd22471e2d25",
+  "baseline_status": "current",
+  "unused_entry": {
+    "extension": ".json",
+    "modified": "2026-09-17T01:03:13.539020+00:00",
+    "path": "unused/unrelated.parquet",
+    "size_bytes": 82154,
+    "fs_path": "/tmp/qa-unconsumed-outside.parquet"
+  },
+  "source": "Copied disposable benchmark output, no named-run mutation",
+  "with_unused_entry": {
+    "status": "current",
+    "rows_equal": true
+  },
+  "control_status": "current",
+  "control_rows_equal": true
+}

@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.wepp.reports.hillslope_watbal wepppy.wepp.reports.average_annuals_by_landuse
+Success: no issues found in 2 modules
