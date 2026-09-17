@@ -51,7 +51,6 @@ from plotly import graph_objs as go
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepppy.config.secrets import get_secret
-from wepppy.all_your_base.file_digest import sha256_file
 from wepppy.microservices.parquet_filters import (
     CompiledParquetFilter,
     ParquetFilterError,
@@ -125,7 +124,6 @@ class DatasetMeta:
     fingerprint: str
     name: str
     last_loaded: float
-    resolved_path: Path | None = None
 
 
 DATASETS: dict[str, DatasetMeta] = {}
@@ -144,32 +142,9 @@ _IDENTIFIER_STRING_ALIASES: tuple[tuple[str, str], ...] = (
 
 
 def _fingerprint(path: Path) -> str:
-    """Observe source bytes without treating metadata as content identity."""
-    try:
-        return sha256_file(path)
-    except OSError as exc:
-        raise _SourceChangedError(_SOURCE_CHANGED_MESSAGE) from exc
-
-
-_SOURCE_CHANGED_MESSAGE = "The source file changed or is unavailable. Reopen this dataset from browse."
-
-
-class _SourceChangedError(RuntimeError):
-    """The accepted dataset generation cannot serve this read."""
-
-
-def _resolve_source_path(path: Path) -> Path:
-    try:
-        return path.resolve()
-    except (OSError, RuntimeError) as exc:
-        # Python 3.12 reports a symlink-resolution loop as RuntimeError.
-        raise _SourceChangedError(_SOURCE_CHANGED_MESSAGE) from exc
-
-
-def _verify_source(path: Path, fingerprint: str, resolved_path: Path) -> None:
-    current_path = _resolve_source_path(path)
-    if current_path != resolved_path or _fingerprint(path) != fingerprint:
-        raise _SourceChangedError(_SOURCE_CHANGED_MESSAGE)
+    """Return a stable fingerprint for ``path`` using mtime and file size."""
+    stats = path.stat()
+    return f"{stats.st_mtime_ns}:{stats.st_size}"
 
 
 def _is_parquet_path(path: Path) -> bool:
@@ -300,19 +275,15 @@ def _register_geojson_asset(
     """Register a GeoJSON overlay with D-Tale, returning the key and feature id."""
     if dtale_custom_geojson is None:
         return (None, None)
-    geojson_key = f"{runid}-{slug}"
     if not path:
-        _remove_geojson_asset(geojson_key)
         return (None, None)
     path = Path(path)
-    try:
-        resolved_path = _resolve_source_path(path)
-        fingerprint = _fingerprint(path)
-    except (OSError, _SourceChangedError):
-        logger.debug("GeoJSON asset unavailable for %s at %s", slug, path, exc_info=True)
-        _remove_geojson_asset(geojson_key)
+    if not path.exists() or not path.is_file():
+        logger.debug("GeoJSON asset missing for %s at %s", slug, path)
         return (None, None)
 
+    geojson_key = f"{runid}-{slug}"
+    fingerprint = _fingerprint(path)
     existing_entry = next(
         (entry for entry in dtale_custom_geojson.CUSTOM_GEOJSON if entry.get("key") == geojson_key),
         None,
@@ -322,13 +293,6 @@ def _register_geojson_asset(
     else:
         data = _load_geojson(path)
         if not data:
-            _remove_geojson_asset(geojson_key)
-            return (None, None)
-        try:
-            _verify_source(path, fingerprint, resolved_path)
-        except _SourceChangedError:
-            logger.debug("GeoJSON asset changed during load: %s", path, exc_info=True)
-            _remove_geojson_asset(geojson_key)
             return (None, None)
 
         properties: list[str] = []
@@ -340,7 +304,6 @@ def _register_geojson_asset(
             "type": data.get("type"),
             "label": label or slug.replace("_", " ").title(),
             "_fingerprint": fingerprint,
-            "loc_candidates": tuple(loc_candidates or ()),
         }
 
         if record["type"] == "FeatureCollection":
@@ -384,22 +347,11 @@ def _register_geojson_asset(
         REGISTERED_GEOJSON[geojson_key] = fingerprint
         existing_entry = record
 
-    # The upstream overlay record is shared across datasets; keep all of its
-    # choice/default references on the same feature-ID schema.
-    for related_id, choices in list(MAP_CHOICES.items()):
-        matching = [entry for entry in choices if entry[1] == geojson_key]
-        if matching:
-            MAP_CHOICES[related_id] = [entry for entry in choices if entry[1] != geojson_key] + [
-                (matching[0][0], geojson_key, featureidkey)
-            ]
-    for defaults in MAP_DEFAULTS.values():
-        if defaults.get("geojson") == geojson_key:
-            defaults["featureidkey"] = featureidkey or "id"
-            defaults["loc_candidates"] = tuple(loc_candidates or ())
     if data_id:
         entry = (label or slug, geojson_key, featureidkey)
-        choices = [choice for choice in MAP_CHOICES.get(data_id, []) if choice[1] != geojson_key]
-        MAP_CHOICES[data_id] = [*choices, entry]
+        choices = MAP_CHOICES.setdefault(data_id, [])
+        if entry not in choices:
+            choices.append(entry)
         defaults = MAP_DEFAULTS.get(data_id)
         if make_default or defaults is None:
             MAP_DEFAULTS[data_id] = {
@@ -412,39 +364,15 @@ def _register_geojson_asset(
 
     return (geojson_key, featureidkey)
 
-def _remove_geojson_asset(geojson_key: str) -> None:
-    """Drop only the unavailable overlay and references to it."""
-    REGISTERED_GEOJSON.pop(geojson_key, None)
-    if dtale_custom_geojson is not None:
-        dtale_custom_geojson.CUSTOM_GEOJSON = [
-            entry for entry in dtale_custom_geojson.CUSTOM_GEOJSON
-            if entry.get("key") != geojson_key
-        ]
-    records = dtale_custom_geojson.CUSTOM_GEOJSON if dtale_custom_geojson is not None else []
-    for data_id, choices in list(MAP_CHOICES.items()):
-        retained = [entry for entry in choices if entry[1] != geojson_key]
-        if retained:
-            MAP_CHOICES[data_id] = retained
-        else:
-            MAP_CHOICES.pop(data_id, None)
-    for data_id, defaults in list(MAP_DEFAULTS.items()):
-        if defaults.get("geojson") == geojson_key:
-            MAP_DEFAULTS.pop(data_id)
-            for _, key, featureidkey in MAP_CHOICES.get(data_id, []):
-                record = next((entry for entry in records if entry.get("key") == key), None)
-                if record is not None:
-                    MAP_DEFAULTS[data_id] = {
-                        "map_type": "choropleth", "loc_mode": "geojson-id",
-                        "geojson": key, "featureidkey": featureidkey or "id",
-                        "loc_candidates": record.get("loc_candidates", ()),
-                    }
-                    break
+    logger.debug("Registered geojson asset %s for %s", geojson_key, runid)
+    return (geojson_key, featureidkey)
 
 
 def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
     """Populate default GeoJSON overlays for the given run/dataset combo."""
     if dtale_custom_geojson is None:
         return
+    defaults_set = data_id in MAP_DEFAULTS if data_id else False
     def _register(
         slug: str,
         path: Path | str | None,
@@ -455,7 +383,7 @@ def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
         loc_candidates: Iterable[str] | None = None,
         property_aliases: Iterable[tuple[str, str]] | None = None,
     ):
-        defaults_set = data_id in MAP_DEFAULTS if data_id else False
+        nonlocal defaults_set
         key, featureidkey = _register_geojson_asset(
             runid,
             slug,
@@ -467,6 +395,8 @@ def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
             loc_candidates=loc_candidates,
             property_aliases=property_aliases,
         )
+        if key and make_default or (key and not defaults_set):
+            defaults_set = True
         return key, featureidkey
 
     watershed = None
@@ -505,26 +435,17 @@ def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
                 ("ChannelID", "channel_id"),
             ),
         )
-    else:
-        _remove_geojson_asset(f"{runid}-subcatchments")
-        _remove_geojson_asset(f"{runid}-channels")
 
     if AgFields is None:
-        _remove_geojson_asset(f"{runid}-ag-fields-boundaries")
-        _remove_geojson_asset(f"{runid}-ag-fields-subfields")
         return
 
     try:
         ag_fields = AgFields.tryGetInstance(str(wd), allow_nonexistent=True, ignore_lock=True)
     except Exception:  # pragma: no cover - optional module, fallthrough
         logger.debug("Unable to resolve AgFields instance for %s", runid, exc_info=True)
-        _remove_geojson_asset(f"{runid}-ag-fields-boundaries")
-        _remove_geojson_asset(f"{runid}-ag-fields-subfields")
         return
 
     if not ag_fields:
-        _remove_geojson_asset(f"{runid}-ag-fields-boundaries")
-        _remove_geojson_asset(f"{runid}-ag-fields-subfields")
         return
 
     # Canonical boundary file (fields.WGS.geojson)
@@ -542,8 +463,6 @@ def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
                 ("WeppID", "wepp_id"),
             ),
         )
-    else:
-        _remove_geojson_asset(f"{runid}-ag-fields-boundaries")
 
     _register(
         "ag-fields-subfields",
@@ -634,18 +553,10 @@ class LazyParquetDtaleInstance:
     ) -> None:
         self.path = Path(path)
         self.compiled_filter = compiled_filter
-        self._source_path = _resolve_source_path(self.path)
-        self._source_fingerprint = _fingerprint(self.path)
-        try:
-            self._schema = pq.read_schema(self.path)
-        finally:
-            self._assert_current()
+        self._schema = pq.read_schema(self.path)
         self._base_columns = [field.name for field in self._schema]
         self._rows: int | None = None
         self._base_df: pd.DataFrame | None = None
-
-    def _assert_current(self) -> None:
-        _verify_source(self.path, self._source_fingerprint, self._source_path)
 
     @property
     def base_columns(self) -> list[str]:
@@ -663,25 +574,18 @@ class LazyParquetDtaleInstance:
         if kwargs:
             unsupported = ", ".join(sorted(kwargs))
             raise ValueError(f"Unsupported lazy parquet row-count options: {unsupported}")
-        self._assert_current()
         if self._rows is None:
-            try:
-                if self.compiled_filter is None:
-                    metadata = pq.ParquetFile(self.path).metadata
-                    rows = int(metadata.num_rows)
-                else:
-                    rows = count_filtered_parquet_rows(self.path, self.compiled_filter)
-            finally:
-                self._assert_current()
-            self._rows = rows
+            if self.compiled_filter is None:
+                metadata = pq.ParquetFile(self.path).metadata
+                self._rows = int(metadata.num_rows)
+            else:
+                self._rows = count_filtered_parquet_rows(self.path, self.compiled_filter)
         return self._rows
 
     @property
     def base_df(self) -> pd.DataFrame:
         if self._base_df is None:
             self._base_df = self.load_data(row_range=[0, 1], columns=self._base_columns)
-        else:
-            self._assert_current()
         return self._base_df
 
     @property
@@ -756,12 +660,8 @@ class LazyParquetDtaleInstance:
             raise ValueError(f"Unsupported lazy parquet load options: {unsupported}")
         columns_to_read = self._resolve_columns_to_read(columns)
         sql, params = self._select_sql(columns_to_read, row_range=row_range, sort=sort)
-        self._assert_current()
-        try:
-            with duckdb.connect() as conn:
-                df = conn.execute(sql, params).fetchdf()
-        finally:
-            self._assert_current()
+        with duckdb.connect() as conn:
+            df = conn.execute(sql, params).fetchdf()
         df = _postprocess_dataframe(df)
         if columns:
             ordered_columns = [column for column in columns if column in df.columns]
@@ -832,12 +732,6 @@ def _initialize_dtale_dataset(data_id: str, display_name: str, df: pd.DataFrame)
             global_state.set_dtypes(data_id, fallback_dtypes)
 
     return instance
-
-
-def _discard_dataset(data_id: str) -> None:
-    global_state.cleanup(data_id)
-    LAZY_PARQUET_DATASETS.pop(data_id, None)
-    DATASETS.pop(data_id, None)
 
 
 if dtale_custom_geojson is not None:
@@ -1008,14 +902,6 @@ if dtale_custom_geojson is not None:
 app = build_app(reaper_on=False, app_root=APP_ROOT)
 
 
-@app.errorhandler(_SourceChangedError)
-def _source_changed_response(error):
-    return jsonify({
-        "error": {"code": "changed_source", "message": str(error)},
-        "description": str(error),
-    }), 409
-
-
 def _format_lazy_rows(
     data_id: str,
     lazy_instance: LazyParquetDtaleInstance,
@@ -1081,12 +967,7 @@ def _lazy_parquet_get_data(data_id: str):
     if not export and ids is None:
         return jsonify({})
 
-    try:
-        results, total = _format_lazy_rows(data_id, lazy_instance, ids)
-    except _SourceChangedError as exc:
-        # Upstream grid transport discards non-2xx bodies; use its visible
-        # error envelope without returning successful row data.
-        return jsonify({"success": False, "error": str(exc), "code": "changed_source"})
+    results, total = _format_lazy_rows(data_id, lazy_instance, ids)
     return_data = {
         "results": results,
         "columns": [
@@ -1166,12 +1047,8 @@ def load_into_dtale():
 
     rel_path = _normalize_rel(rel_path)
     wd, target = _resolve_target(runid, rel_path, config=config or None)
-    try:
-        resolved_target = _resolve_source_path(target)
-        size_mb = target.stat().st_size / (1024 * 1024)
-    except OSError as exc:
-        raise _SourceChangedError(_SOURCE_CHANGED_MESSAGE) from exc
     if MAX_FILE_MB > 0:
+        size_mb = target.stat().st_size / (1024 * 1024)
         if size_mb > MAX_FILE_MB:
             abort(413, description=f"File size {size_mb:.1f} MB exceeds limit ({MAX_FILE_MB:.0f} MB).")
 
@@ -1195,7 +1072,7 @@ def load_into_dtale():
 
     meta = DATASETS.get(data_id)
     reuse_ready = False
-    if meta and meta.fingerprint == fingerprint and meta.resolved_path == resolved_target and meta.path == target:
+    if meta and meta.fingerprint == fingerprint:
         lazy_instance = LAZY_PARQUET_DATASETS.get(data_id)
         if lazy_instance is not None and global_state.get_dtypes(data_id) is not None:
             reuse_ready = True
@@ -1210,9 +1087,11 @@ def load_into_dtale():
                 LAZY_PARQUET_DATASETS.pop(data_id, None)
         else:
             logger.info("Refreshing D-Tale dataset %s; no active state found.", data_id)
-    elif meta:
+    elif meta and meta.fingerprint != fingerprint:
         logger.info("File changed, resetting cached dataset %s", data_id)
-        _discard_dataset(data_id)
+        global_state.cleanup(data_id)
+        LAZY_PARQUET_DATASETS.pop(data_id, None)
+        DATASETS.pop(data_id, None)
 
     if reuse_ready:
         logger.debug("Reusing cached D-Tale dataset %s for %s", data_id, target)
@@ -1233,18 +1112,9 @@ def load_into_dtale():
                 compiled_filter=compiled,
             )
             lazy_rows = LAZY_PARQUET_DATASETS[data_id].rows()
-            lazy_columns = len(LAZY_PARQUET_DATASETS[data_id].base_df.columns)
-            _verify_source(target, fingerprint, resolved_target)
-        except _SourceChangedError:
-            _discard_dataset(data_id)
-            raise
         except ParquetFilterError as err:
-            _discard_dataset(data_id)
-            _verify_source(target, fingerprint, resolved_target)
             return _parquet_filter_error_response(err)
         except (duckdb.Error, OSError, ValueError) as exc:
-            _discard_dataset(data_id)
-            _verify_source(target, fingerprint, resolved_target)
             logger.exception("Failed to lazily load parquet %s", target)
             abort(500, description=str(exc))
 
@@ -1262,14 +1132,13 @@ def load_into_dtale():
             fingerprint=fingerprint,
             name=display_name,
             last_loaded=time.time(),
-            resolved_path=resolved_target,
         )
 
         logger.info(
             "Registered lazy parquet %s in D-Tale (rows=%d, cols=%d, data_id=%s)",
             target.relative_to(wd),
             lazy_rows,
-            lazy_columns,
+            len(LAZY_PARQUET_DATASETS[data_id].base_df.columns),
             data_id,
         )
 
@@ -1278,14 +1147,11 @@ def load_into_dtale():
     try:
         df = _load_dataframe(target)
     except ParquetFilterError as err:
-        _verify_source(target, fingerprint, resolved_target)
         return _parquet_filter_error_response(err)
     except Exception as exc:  # pragma: no cover - surface full error to caller
-        _verify_source(target, fingerprint, resolved_target)
         logger.exception("Failed to load %s", target)
         abort(500, description=str(exc))
 
-    _verify_source(target, fingerprint, resolved_target)
     if MAX_ROWS and len(df) > MAX_ROWS:
         abort(
             413,
@@ -1293,19 +1159,13 @@ def load_into_dtale():
             "Adjust DTALE_MAX_ROWS to override.",
         )
 
-    try:
-        instance = _initialize_dtale_dataset(data_id, display_name, df)
-    except Exception:  # Third-party initialization boundary: remove partially registered state, then propagate.
-        logger.exception("Failed to initialize D-Tale dataset %s", data_id)
-        _discard_dataset(data_id)
-        raise
+    instance = _initialize_dtale_dataset(data_id, display_name, df)
 
     DATASETS[data_id] = DatasetMeta(
         path=target,
         fingerprint=fingerprint,
         name=display_name,
         last_loaded=time.time(),
-        resolved_path=resolved_target,
     )
 
     logger.info(

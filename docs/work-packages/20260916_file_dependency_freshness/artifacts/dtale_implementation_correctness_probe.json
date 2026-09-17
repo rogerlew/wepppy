@@ -1,0 +1,83 @@
+{
+  "overlay_identifier_change": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-vvdw9oe1-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "after_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-vvdw9oe1-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "record_featureidkey": "reach_id",
+    "record_properties": [
+      "reach_id"
+    ],
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-vvdw9oe1-channels",
+        "channel_id"
+      ],
+      [
+        "Channels",
+        "dtale-correctness-vvdw9oe1-channels",
+        "reach_id"
+      ]
+    ]
+  },
+  "remaining_valid_overlay": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-vvdw9oe1-ag-fields-boundaries",
+      "featureidkey": "field_id",
+      "loc_candidates": [
+        "field_id",
+        "FieldID",
+        "field_name",
+        "FieldName",
+        "wepp_id",
+        "WeppID"
+      ]
+    },
+    "after_default": null,
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-vvdw9oe1-channels",
+        "channel_id"
+      ]
+    ]
+  },
+  "eager_startup_failure": {
+    "response_status": 500,
+    "global_state_contains": true,
+    "metadata_published": false,
+    "rows_retained": [
+      1,
+      2
+    ]
+  }
+}

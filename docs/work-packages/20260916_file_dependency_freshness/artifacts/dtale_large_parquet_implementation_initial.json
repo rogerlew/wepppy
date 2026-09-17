@@ -1,0 +1,962 @@
+{
+  "source": "/wc1/runs/th/thespian-cleanness/wepp/output/interchange/H.wat.parquet",
+  "bytes": 81150978,
+  "rows": 3646034,
+  "columns": 32,
+  "row_groups": 217,
+  "uid": 1000,
+  "gid": 993,
+  "dtale_source_sha256": "dca609281cf34f1e7b3641cb40cb51f2c23d4179e7b21ec26d82648771709bd1",
+  "scope": "isolated actual lazy accessors; no service/global-state registration",
+  "measurements": [
+    {
+      "name": "lazy_constructor",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.5452061370015144
+      ],
+      "mean_seconds": 0.5452061370015144,
+      "fingerprint_checks": 2,
+      "target_hash_bytes": 162301956,
+      "all_instrumented_hash_bytes": 162301956,
+      "target_read_calls": 158,
+      "process_rchar_delta": 163069087,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 1,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "native_first_count",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.5351287790108472
+      ],
+      "mean_seconds": 0.5351287790108472,
+      "fingerprint_checks": 2,
+      "target_hash_bytes": 162301956,
+      "all_instrumented_hash_bytes": 162301956,
+      "target_read_calls": 158,
+      "process_rchar_delta": 163069088,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 3,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_count": 3646034
+    },
+    {
+      "name": "cached_count",
+      "repeats": 50,
+      "elapsed_seconds": [
+        0.2629554078448564,
+        0.0003343850839883089,
+        0.0002655230928212404,
+        0.0002149019856005907,
+        0.00021420116536319256,
+        0.00021924194879829884,
+        0.0002094751689583063,
+        0.00021043792366981506,
+        0.0002074800431728363,
+        0.00021038902923464775,
+        0.00021513691172003746,
+        0.00020853709429502487,
+        0.00020611914806067944,
+        0.00020399689674377441,
+        0.00020444020628929138,
+        0.00021273107267916203,
+        0.00020323996432125568,
+        0.00020410306751728058,
+        0.00020182598382234573,
+        0.000202657887712121,
+        0.00021480582654476166,
+        0.00020256801508367062,
+        0.00020393985323607922,
+        0.00020226207561790943,
+        0.0002031950280070305,
+        0.00021335110068321228,
+        0.00020156102254986763,
+        0.0002014541532844305,
+        0.0002016378566622734,
+        0.0002033580094575882,
+        0.00021316297352313995,
+        0.00020176288671791553,
+        0.0002013689372688532,
+        0.0002020860556513071,
+        0.000212118960916996,
+        0.000203428091481328,
+        0.0002034751232713461,
+        0.0002016399521380663,
+        0.00020164204761385918,
+        0.00021278904750943184,
+        0.00020578200928866863,
+        0.00021941517479717731,
+        0.00020675198175013065,
+        0.00022025383077561855,
+        0.00021449290215969086,
+        0.0002033771015703678,
+        0.00020053493790328503,
+        0.0002008338924497366,
+        0.00020185206085443497,
+        0.0002129941713064909
+      ],
+      "mean_seconds": 0.005465842531993986,
+      "fingerprint_checks": 50,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151096,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 53,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 49,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_count": 3646034
+    },
+    {
+      "name": "first_sample",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.06390172196552157
+      ],
+      "mean_seconds": 0.06390172196552157,
+      "fingerprint_checks": 2,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015659,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 55,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 51,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        1,
+        32
+      ]
+    },
+    {
+      "name": "cached_sample",
+      "repeats": 50,
+      "elapsed_seconds": [
+        0.0003057480789721012,
+        0.0002938332036137581,
+        0.00021695089526474476,
+        0.00021072104573249817,
+        0.00024390197359025478,
+        0.0002767539117485285,
+        0.00020755804143846035,
+        0.0002058648969978094,
+        0.00020720087923109531,
+        0.000258023152127862,
+        0.0002290438860654831,
+        0.0002041549887508154,
+        0.0002040560357272625,
+        0.00022929604165256023,
+        0.0002473040949553251,
+        0.00024240813218057156,
+        0.00020547397434711456,
+        0.0002313100267201662,
+        0.00024218414910137653,
+        0.00024166284129023552,
+        0.000204429030418396,
+        0.0002022329717874527,
+        0.0002492559142410755,
+        0.0002582068555057049,
+        0.00021366006694734097,
+        0.00020428304560482502,
+        0.0002344569656997919,
+        0.00021165213547647,
+        0.0002187378704547882,
+        0.00025073904544115067,
+        0.00022572814486920834,
+        0.0002172968816012144,
+        0.00020246882922947407,
+        0.00020110304467380047,
+        0.00020097894594073296,
+        0.00021125911734998226,
+        0.0002066129818558693,
+        0.00021908804774284363,
+        0.00020914594642817974,
+        0.00022029108367860317,
+        0.00020993896760046482,
+        0.0002034509088844061,
+        0.00020087393932044506,
+        0.0002001610118895769,
+        0.00020101596601307392,
+        0.00021284190006554127,
+        0.00020402180962264538,
+        0.00020169303752481937,
+        0.00020095985382795334,
+        0.00020150397904217243
+      ],
+      "mean_seconds": 0.00022203077096492053,
+      "fingerprint_checks": 50,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 119,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 105,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 101,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        1,
+        32
+      ]
+    },
+    {
+      "name": "bounded_100_row_page",
+      "repeats": 5,
+      "elapsed_seconds": [
+        0.05802676104940474,
+        0.052618890069425106,
+        0.05591180291958153,
+        0.056148940930143,
+        0.05563653400167823
+      ],
+      "mean_seconds": 0.05566858579404652,
+      "fingerprint_checks": 10,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 5077819,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 116,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 112,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "bounded_middle_page",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.5690934609156102,
+        0.584467665059492,
+        0.5569994470570236
+      ],
+      "mean_seconds": 0.5701868576773753,
+      "fingerprint_checks": 6,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 126362757,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 122,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 118,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "bounded_sorted_page",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.23626220412552357,
+        0.24682216602377594,
+        0.25049617304466665
+      ],
+      "mean_seconds": 0.24452684773132205,
+      "fingerprint_checks": 6,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 243166742,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 128,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 124,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_after_cache_clear",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.8589496139902622
+      ],
+      "mean_seconds": 0.8589496139902622,
+      "fingerprint_checks": 3,
+      "target_hash_bytes": 243452934,
+      "all_instrumented_hash_bytes": 243452934,
+      "target_read_calls": 237,
+      "process_rchar_delta": 244468597,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_during_admission",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.576446324121207,
+        0.054579098941758275,
+        0.05551635101437569
+      ],
+      "mean_seconds": 0.22884725802578032,
+      "fingerprint_checks": 9,
+      "target_hash_bytes": 162301956,
+      "all_instrumented_hash_bytes": 162301956,
+      "target_read_calls": 158,
+      "process_rchar_delta": 165348700,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 11,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 7,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_admitting",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.06702541396953166
+      ],
+      "mean_seconds": 0.06702541396953166,
+      "fingerprint_checks": 3,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015664,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 14,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 10,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_settled",
+      "repeats": 10,
+      "elapsed_seconds": [
+        0.054192820098251104,
+        0.056907543912529945,
+        0.05325957713648677,
+        0.054554450092837214,
+        0.05435340106487274,
+        0.05612527602352202,
+        0.052621988113969564,
+        0.05509674595668912,
+        0.053495610831305385,
+        0.060706428019329906
+      ],
+      "mean_seconds": 0.05513138412497938,
+      "fingerprint_checks": 30,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 10155524,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 44,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 40,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "digest_forced_uncached",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.30102122691459954
+      ],
+      "mean_seconds": 0.30102122691459954,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151102,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_first_observation",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.27781813498586416
+      ],
+      "mean_seconds": 0.27781813498586416,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151102,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_during_admission",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.27117145201191306,
+        0.2670354109723121,
+        0.2687183408997953
+      ],
+      "mean_seconds": 0.26897506796134013,
+      "fingerprint_checks": 3,
+      "target_hash_bytes": 243452934,
+      "all_instrumented_hash_bytes": 243452934,
+      "target_read_calls": 237,
+      "process_rchar_delta": 243453058,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 3,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_admitting",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.2766854378860444
+      ],
+      "mean_seconds": 0.2766854378860444,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151102,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 4,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "digest_settled",
+      "repeats": 100,
+      "elapsed_seconds": [
+        0.00021449895575642586,
+        0.00015416089445352554,
+        0.00012725312262773514,
+        0.00011268421076238155,
+        0.00012397789396345615,
+        0.00010663410648703575,
+        0.00013154302723705769,
+        0.00011028489097952843,
+        0.00011188187636435032,
+        0.0001239089760929346,
+        0.00010987790301442146,
+        0.00010761106386780739,
+        0.00010944693349301815,
+        0.00010826112702488899,
+        0.0001074611209332943,
+        0.00013408600352704525,
+        0.00010633585043251514,
+        0.00010293000377714634,
+        0.00010212580673396587,
+        0.00010347203351557255,
+        0.00012180511839687824,
+        0.00011021597310900688,
+        0.00010725599713623524,
+        0.00011859298683702946,
+        0.00011470494791865349,
+        0.00010557589121162891,
+        0.00010364595800638199,
+        0.00010369112715125084,
+        0.00010449811816215515,
+        0.0001047840341925621,
+        0.00013588392175734043,
+        0.00014412100426852703,
+        0.00011616596020758152,
+        0.00012869993224740028,
+        0.0001338459551334381,
+        0.00013707694597542286,
+        0.00010302499867975712,
+        0.00010633887723088264,
+        0.00010173209011554718,
+        0.00010310392826795578,
+        0.00010136119090020657,
+        0.00012587709352374077,
+        0.00010721408762037754,
+        0.0001370580866932869,
+        0.00014104321599006653,
+        0.00012996001169085503,
+        0.00011552916839718819,
+        0.00011485116556286812,
+        0.00014721299521625042,
+        0.00014502601698040962,
+        0.00010578101500868797,
+        0.00010614795610308647,
+        0.0001194169744849205,
+        0.0001016249880194664,
+        0.00010187621228396893,
+        0.00010086712427437305,
+        0.00010085292160511017,
+        0.00010037212632596493,
+        0.00013356609269976616,
+        0.0001063027884811163,
+        0.0001039351336658001,
+        0.00010429206304252148,
+        0.00011772895231842995,
+        0.00010079680941998959,
+        0.00010468089021742344,
+        0.00010116701014339924,
+        0.00010102195665240288,
+        0.0001198439858853817,
+        0.0001345491036772728,
+        0.00011677085421979427,
+        0.00010954588651657104,
+        0.0001204370055347681,
+        0.00011727889068424702,
+        0.00010255910456180573,
+        0.00010091299191117287,
+        0.00010085199028253555,
+        0.00012789596803486347,
+        0.0001255599781870842,
+        0.00010787392966449261,
+        0.00010691001079976559,
+        0.00012213201262056828,
+        0.00011933594942092896,
+        0.00010133092291653156,
+        0.00010248296894133091,
+        0.00010182894766330719,
+        0.00012982403859496117,
+        0.000108364038169384,
+        0.00012446497566998005,
+        0.00012899283319711685,
+        0.00011438806541264057,
+        0.0001245611347258091,
+        0.00011800113134086132,
+        0.00010152719914913177,
+        0.00010200217366218567,
+        0.0001294650137424469,
+        0.00010374817065894604,
+        0.00011806399561464787,
+        0.00010163895785808563,
+        0.00011901580728590488,
+        0.00010398984886705875
+      ],
+      "mean_seconds": 0.00011554911499843001,
+      "fingerprint_checks": 100,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 124,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 104,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "observe_512_other_paths",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.09393353713676333
+      ],
+      "mean_seconds": 0.09393353713676333,
+      "fingerprint_checks": 512,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 2048,
+      "target_read_calls": 0,
+      "process_rchar_delta": 2174,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 104,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "admit_512_other_paths",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.09612503694370389
+      ],
+      "mean_seconds": 0.09612503694370389,
+      "fingerprint_checks": 512,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 2048,
+      "target_read_calls": 0,
+      "process_rchar_delta": 2174,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 616,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "target_after_512_path_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.27283223206177354
+      ],
+      "mean_seconds": 0.27283223206177354,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151104,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 616,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "normal_page_after_512_path_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.8862588480114937
+      ],
+      "mean_seconds": 0.8862588480114937,
+      "fingerprint_checks": 3,
+      "target_hash_bytes": 243452934,
+      "all_instrumented_hash_bytes": 243452934,
+      "target_read_calls": 237,
+      "process_rchar_delta": 244468600,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 619,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "target_readmit_after_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.28814040520228446
+      ],
+      "mean_seconds": 0.28814040520228446,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151104,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 620,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "normal_page_settled_after_eviction",
+      "repeats": 5,
+      "elapsed_seconds": [
+        0.06270853104069829,
+        0.05359798786230385,
+        0.05743633699603379,
+        0.05503379087895155,
+        0.05642897495999932
+      ],
+      "mean_seconds": 0.05704112434759736,
+      "fingerprint_checks": 15,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 5077826,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 635,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 115,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    }
+  ],
+  "requested_grid_columns": [
+    "wepp_id",
+    "ofe_id",
+    "year",
+    "sim_day_index",
+    "julian",
+    "month",
+    "day_of_month",
+    "water_year",
+    "OFE",
+    "P",
+    "RM",
+    "Q",
+    "Ep",
+    "Es",
+    "Er",
+    "Dp",
+    "UpStrmQ",
+    "SubRIn",
+    "latqcc",
+    "Total-Soil Water",
+    "frozwt",
+    "Snow-Water",
+    "QOFE",
+    "Tile",
+    "Irr",
+    "Area",
+    "SoilWaterTotal",
+    "ProfileDepth",
+    "ProfilePorosityCap",
+    "ProfileFCStore",
+    "ProfileWPStore",
+    "InterceptionStorage"
+  ],
+  "source_generation_unchanged": true,
+  "hash_read_byte_definition": "exact bytes returned by Python binary reads on target/pressure files; native readers use process IO counters instead",
+  "filesystem_cache_note": "No OS page-cache drop; cold means helper-cache cold, not guaranteed physical-storage cold"
+}

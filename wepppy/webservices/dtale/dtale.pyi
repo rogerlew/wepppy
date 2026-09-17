@@ -44,6 +44,7 @@ class DatasetMeta:
     fingerprint: str
     name: str
     last_loaded: float
+    resolved_path: Optional[Path] = ...
 
 
 def _clean_prefix(value: Optional[str]) -> Optional[str]: ...

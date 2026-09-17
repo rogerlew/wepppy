@@ -1,0 +1,964 @@
+INFO:wctl2:docker compose exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_dtale_large_parquet.py dtale_large_parquet_baseline docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_native_baseline_snapshot.py
+{
+  "source": "/wc1/runs/th/thespian-cleanness/wepp/output/interchange/H.wat.parquet",
+  "bytes": 81150978,
+  "rows": 3646034,
+  "columns": 32,
+  "row_groups": 217,
+  "uid": 1000,
+  "gid": 993,
+  "dtale_source_sha256": "6f2acc6f824e8a52585dcfc8087963bba949fdc37df9397f4f1d692e79fd59cf",
+  "dtale_source_file": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_native_baseline_snapshot.py",
+  "scope": "isolated actual lazy accessors; no service/global-state registration",
+  "measurements": [
+    {
+      "name": "lazy_constructor",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.011156314052641392
+      ],
+      "mean_seconds": 0.011156314052641392,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 767126,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "native_first_count",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.011650250991806388
+      ],
+      "mean_seconds": 0.011650250991806388,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 767126,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_count": 3646034
+    },
+    {
+      "name": "cached_count",
+      "repeats": 50,
+      "elapsed_seconds": [
+        1.5951227396726608e-06,
+        5.068723112344742e-07,
+        4.0512531995773315e-07,
+        3.0314549803733826e-07,
+        2.0884908735752106e-07,
+        1.9278377294540405e-07,
+        2.100132405757904e-07,
+        2.4400651454925537e-07,
+        1.9301660358905792e-07,
+        2.600718289613724e-07,
+        2.100132405757904e-07,
+        2.5704503059387207e-07,
+        2.169981598854065e-07,
+        2.1816231310367584e-07,
+        1.9604340195655823e-07,
+        1.9790604710578918e-07,
+        2.00001522898674e-07,
+        1.9581057131290436e-07,
+        1.9604340195655823e-07,
+        1.939479261636734e-07,
+        1.939479261636734e-07,
+        1.9720755517482758e-07,
+        1.969747245311737e-07,
+        1.9790604710578918e-07,
+        2.2188760340213776e-07,
+        1.9790604710578918e-07,
+        2.50060111284256e-07,
+        2.139713615179062e-07,
+        1.9418075680732727e-07,
+        1.9511207938194275e-07,
+        1.939479261636734e-07,
+        1.9511207938194275e-07,
+        1.9487924873828888e-07,
+        1.9511207938194275e-07,
+        2.3213215172290802e-07,
+        1.9907020032405853e-07,
+        1.9604340195655823e-07,
+        1.9487924873828888e-07,
+        2.169981598854065e-07,
+        1.969747245311737e-07,
+        1.9301660358905792e-07,
+        1.969747245311737e-07,
+        1.9907020032405853e-07,
+        2.1513551473617554e-07,
+        2.4400651454925537e-07,
+        2.1792948246002197e-07,
+        1.9511207938194275e-07,
+        1.9604340195655823e-07,
+        2.200249582529068e-07,
+        1.9511207938194275e-07
+      ],
+      "mean_seconds": 2.469541504979134e-07,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 112,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_count": 3646034
+    },
+    {
+      "name": "first_sample",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.06706466781906784
+      ],
+      "mean_seconds": 0.06706466781906784,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015653,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        1,
+        32
+      ]
+    },
+    {
+      "name": "cached_sample",
+      "repeats": 50,
+      "elapsed_seconds": [
+        2.237968146800995e-06,
+        8.111819624900818e-07,
+        3.080349415540695e-07,
+        1.969747245311737e-07,
+        4.849862307310104e-07,
+        2.2095628082752228e-07,
+        1.7206184566020966e-07,
+        1.6996636986732483e-07,
+        1.8300488591194153e-07,
+        1.7299316823482513e-07,
+        1.8207356333732605e-07,
+        1.739244908094406e-07,
+        2.100132405757904e-07,
+        1.909211277961731e-07,
+        1.6996636986732483e-07,
+        1.7206184566020966e-07,
+        1.739244908094406e-07,
+        1.739244908094406e-07,
+        1.7904676496982574e-07,
+        1.739244908094406e-07,
+        1.6903504729270935e-07,
+        1.9301660358905792e-07,
+        1.6903504729270935e-07,
+        1.7182901501655579e-07,
+        1.6996636986732483e-07,
+        1.739244908094406e-07,
+        1.7601996660232544e-07,
+        1.8998980522155762e-07,
+        1.739244908094406e-07,
+        1.7508864402770996e-07,
+        1.7299316823482513e-07,
+        1.6810372471809387e-07,
+        1.73225998878479e-07,
+        1.7415732145309448e-07,
+        2.360902726650238e-07,
+        1.7601996660232544e-07,
+        1.7206184566020966e-07,
+        1.708976924419403e-07,
+        1.708976924419403e-07,
+        1.7113052308559418e-07,
+        1.739244908094406e-07,
+        1.8603168427944183e-07,
+        1.8882565200328827e-07,
+        1.7415732145309448e-07,
+        1.8184073269367218e-07,
+        1.869630068540573e-07,
+        1.8719583749771118e-07,
+        1.7508864402770996e-07,
+        1.9418075680732727e-07,
+        1.739244908094406e-07
+      ],
+      "mean_seconds": 2.4254899471998215e-07,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 113,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        1,
+        32
+      ]
+    },
+    {
+      "name": "bounded_100_row_page",
+      "repeats": 5,
+      "elapsed_seconds": [
+        0.06237043789587915,
+        0.0568449751008302,
+        0.05336521798744798,
+        0.05451514711603522,
+        0.05241518304683268
+      ],
+      "mean_seconds": 0.05590219222940505,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 5077813,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "bounded_middle_page",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.5435525497887284,
+        0.5413896520622075,
+        0.5421616819221526
+      ],
+      "mean_seconds": 0.5423679612576962,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 126362751,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "bounded_sorted_page",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.2317511411383748,
+        0.24091909895651042,
+        0.25770677300170064
+      ],
+      "mean_seconds": 0.24345900436552861,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 243166737,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_after_cache_clear",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.06249970709905028
+      ],
+      "mean_seconds": 0.06249970709905028,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015658,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_during_admission",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.062177245039492846,
+        0.0544261469040066,
+        0.054033779073506594
+      ],
+      "mean_seconds": 0.05687905700566868,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 3046738,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_admitting",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.06562684313394129
+      ],
+      "mean_seconds": 0.06562684313394129,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015658,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "normal_page_settled",
+      "repeats": 10,
+      "elapsed_seconds": [
+        0.06590632605366409,
+        0.05498284311033785,
+        0.0543571999296546,
+        0.051694323075935245,
+        0.05416348413564265,
+        0.052330055041238666,
+        0.053987429942935705,
+        0.05364247295074165,
+        0.056793422903865576,
+        0.05373617890290916
+      ],
+      "mean_seconds": 0.055159373604692516,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 10155518,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "digest_forced_uncached",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.2749304610770196
+      ],
+      "mean_seconds": 0.2749304610770196,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151096,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_first_observation",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.2628038909751922
+      ],
+      "mean_seconds": 0.2628038909751922,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151096,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 0,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_during_admission",
+      "repeats": 3,
+      "elapsed_seconds": [
+        0.2646258450113237,
+        0.27451546490192413,
+        0.2712423950433731
+      ],
+      "mean_seconds": 0.27012790165220696,
+      "fingerprint_checks": 3,
+      "target_hash_bytes": 243452934,
+      "all_instrumented_hash_bytes": 243452934,
+      "target_read_calls": 237,
+      "process_rchar_delta": 243453052,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 3,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        }
+      }
+    },
+    {
+      "name": "digest_admitting",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.2698931258637458
+      ],
+      "mean_seconds": 0.2698931258637458,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151096,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 4,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 0,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "digest_settled",
+      "repeats": 100,
+      "elapsed_seconds": [
+        0.0001813550479710102,
+        0.00010960991494357586,
+        0.0001023709774017334,
+        0.00013045291416347027,
+        0.00011958181858062744,
+        0.00012068706564605236,
+        0.00011658994480967522,
+        0.00012510293163359165,
+        0.00011694710701704025,
+        0.00011539109982550144,
+        0.0001158339437097311,
+        0.00011492706835269928,
+        0.00011545885354280472,
+        0.00011661788448691368,
+        0.00011527584865689278,
+        0.00012516113929450512,
+        0.00011587701737880707,
+        0.00011378712952136993,
+        0.00011442508548498154,
+        0.00011698296293616295,
+        0.00012216600589454174,
+        0.00011880300007760525,
+        0.00013513700105249882,
+        0.00011543906293809414,
+        0.00012476788833737373,
+        0.00011418410576879978,
+        0.00011439691297709942,
+        0.00011251494288444519,
+        0.00011021411046385765,
+        0.00011268910020589828,
+        0.00012586615048348904,
+        0.00010535586625337601,
+        0.0001120460219681263,
+        0.00010342919267714024,
+        0.00010585109703242779,
+        0.0001026601530611515,
+        0.00010330998338758945,
+        0.00010224897414445877,
+        0.0001001870259642601,
+        0.00010483292862772942,
+        0.00010559079237282276,
+        0.00010262709110975266,
+        0.00010863994248211384,
+        0.00010435516014695168,
+        0.00010155094787478447,
+        0.00010368088260293007,
+        0.00010446691885590553,
+        0.00010464806109666824,
+        0.0001187638845294714,
+        0.00010519102215766907,
+        0.00010511302389204502,
+        0.00012923497706651688,
+        0.00011157314293086529,
+        0.00010311906225979328,
+        0.00010365317575633526,
+        0.00010589882731437683,
+        0.00010432791896164417,
+        0.00010492093861103058,
+        0.00010228785686194897,
+        0.00010337005369365215,
+        0.0001339439768344164,
+        0.0001160958781838417,
+        0.00011164182797074318,
+        0.0001117149367928505,
+        0.00010826298967003822,
+        0.00010701804421842098,
+        0.00010574585758149624,
+        0.00010648905299603939,
+        0.00010678009130060673,
+        0.0001242451835423708,
+        0.00011337199248373508,
+        0.00010766391642391682,
+        0.00010629091411828995,
+        0.00010725785978138447,
+        0.00010689301416277885,
+        0.00010628905147314072,
+        0.00010721711441874504,
+        0.00010847393423318863,
+        0.00011579715646803379,
+        0.00011264183558523655,
+        0.00010671117343008518,
+        0.00010654795914888382,
+        0.00010742084123194218,
+        0.00011067301966249943,
+        0.00010635005310177803,
+        0.00010634493082761765,
+        0.00010597100481390953,
+        0.00010680709965527058,
+        0.00011786608956754208,
+        0.00010633794590830803,
+        0.00010778382420539856,
+        0.00010678498074412346,
+        0.00010684714652597904,
+        0.00010770210064947605,
+        0.00010655587539076805,
+        0.00010688812471926212,
+        0.0001065738033503294,
+        0.00011327606625854969,
+        0.0001234870869666338,
+        0.00010321009904146194
+      ],
+      "mean_seconds": 0.0001117552281357348,
+      "fingerprint_checks": 100,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 118,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 104,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "observe_512_other_paths",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.09419733216054738
+      ],
+      "mean_seconds": 0.09419733216054738,
+      "fingerprint_checks": 512,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 2048,
+      "target_read_calls": 0,
+      "process_rchar_delta": 2168,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 104,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      }
+    },
+    {
+      "name": "admit_512_other_paths",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.0984864009078592
+      ],
+      "mean_seconds": 0.0984864009078592,
+      "fingerprint_checks": 512,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 2048,
+      "target_read_calls": 0,
+      "process_rchar_delta": 2168,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 616,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "target_after_512_path_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.27405025996267796
+      ],
+      "mean_seconds": 0.27405025996267796,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151098,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 616,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "normal_page_after_512_path_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.05952070886269212
+      ],
+      "mean_seconds": 0.05952070886269212,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 1015661,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 616,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    },
+    {
+      "name": "target_readmit_after_eviction",
+      "repeats": 1,
+      "elapsed_seconds": [
+        0.26431296789087355
+      ],
+      "mean_seconds": 0.26431296789087355,
+      "fingerprint_checks": 1,
+      "target_hash_bytes": 81150978,
+      "all_instrumented_hash_bytes": 81150978,
+      "target_read_calls": 79,
+      "process_rchar_delta": 81151099,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 617,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "name": "normal_page_settled_after_eviction",
+      "repeats": 5,
+      "elapsed_seconds": [
+        0.059312294935807586,
+        0.05092313187196851,
+        0.053377236938104033,
+        0.04999798792414367,
+        0.053278748178854585
+      ],
+      "mean_seconds": 0.05337787996977568,
+      "fingerprint_checks": 0,
+      "target_hash_bytes": 0,
+      "all_instrumented_hash_bytes": 0,
+      "target_read_calls": 0,
+      "process_rchar_delta": 5077821,
+      "process_physical_read_bytes_delta": 0,
+      "cache": {
+        "observation": {
+          "hits": 617,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "digest": {
+          "hits": 100,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "returned_shape": [
+        100,
+        32
+      ]
+    }
+  ],
+  "requested_grid_columns": [
+    "wepp_id",
+    "ofe_id",
+    "year",
+    "sim_day_index",
+    "julian",
+    "month",
+    "day_of_month",
+    "water_year",
+    "OFE",
+    "P",
+    "RM",
+    "Q",
+    "Ep",
+    "Es",
+    "Er",
+    "Dp",
+    "UpStrmQ",
+    "SubRIn",
+    "latqcc",
+    "Total-Soil Water",
+    "frozwt",
+    "Snow-Water",
+    "QOFE",
+    "Tile",
+    "Irr",
+    "Area",
+    "SoilWaterTotal",
+    "ProfileDepth",
+    "ProfilePorosityCap",
+    "ProfileFCStore",
+    "ProfileWPStore",
+    "InterceptionStorage"
+  ],
+  "source_generation_unchanged": true,
+  "hash_read_byte_definition": "exact bytes returned by Python binary reads on target/pressure files; native readers use process IO counters instead",
+  "filesystem_cache_note": "No OS page-cache drop; cold means helper-cache cold, not guaranteed physical-storage cold"
+}

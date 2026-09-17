@@ -1,0 +1,62 @@
+INFO:wctl2:docker compose exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_optional_overlay_security_probe.py
+Failed to parse geojson at /tmp/dtale-overlay-security-js40co3v/map.geojson
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/webservices/dtale/dtale.py", line 226, in _load_geojson
+    with path.open("r", encoding="utf-8") as fp:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/dtale-overlay-security-js40co3v/map.geojson'
+{
+  "uid": 1000,
+  "gid": 993,
+  "initial_result": [
+    "dtale-overlay-security-js40co3v-map",
+    "id"
+  ],
+  "denied_result": [
+    null,
+    null
+  ],
+  "after_denial": {
+    "registered": true,
+    "upstream_record": true,
+    "choices": [
+      [
+        "map",
+        "dtale-overlay-security-js40co3v-map",
+        "id"
+      ]
+    ],
+    "defaults": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-overlay-security-js40co3v-map",
+      "featureidkey": "id",
+      "loc_candidates": []
+    }
+  },
+  "missing_result": [
+    null,
+    null
+  ],
+  "after_removal": {
+    "registered": true,
+    "upstream_record": true,
+    "choices": [
+      [
+        "map",
+        "dtale-overlay-security-js40co3v-map",
+        "id"
+      ]
+    ],
+    "defaults": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-overlay-security-js40co3v-map",
+      "featureidkey": "id",
+      "loc_candidates": []
+    }
+  }
+}

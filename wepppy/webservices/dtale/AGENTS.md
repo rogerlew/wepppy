@@ -83,3 +83,19 @@ Keep workers at 1—D-Tale keeps state in-process.
   fields surface.
 - When modifying D-Tale behavior, wrap patches with `_wepppy_patched` guards to
   avoid double-wrapping during reloads.
+
+## Source Generation Contract
+
+Follow `docs/schemas/file-dependency-freshness-contract.md` (D-Tale dataset
+ generations). Loader reuse requires verified byte identity and the same selected
+resolved target; keep logical path authorization separate from identity. Lazy
+schema, count, sample and pages belong to one accepted generation. Before/after
+checks also run when native queries raise. Assign cached counts only after the
+post-read check succeeds. Grid source conflicts use upstream HTTP200
+`success=false,error:string,code=changed_source`; loader conflicts use409.
+Do not replace this with a grid409: upstream drops its message.
+
+Optional overlay failure removes only the affected GeoJSON registration and map
+choice/default references, including when controller discovery returns absent
+state. It must not block valid table loads. See [README](README.md) for user and
+operator behavior and `tests/microservices/test_dtale_freshness.py` for real reads.

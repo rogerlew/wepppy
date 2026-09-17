@@ -1,0 +1,30 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py -v --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 5 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py::test_actual_read_denial_rejects_cached_lazy_reads_and_loader PASSED [ 20%]
+docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py::test_actual_filtered_count_exception_rechecks_source PASSED [ 40%]
+docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py::test_optional_denial_removes_only_affected_overlay PASSED [ 60%]
+docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py::test_absent_controllers_clear_only_run_assets PASSED [ 80%]
+docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_security_probe.py::test_config_fallback_selection_rebinds_equal_bytes PASSED [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/microservices/test_dtale_freshness.py:12
+  /workdir/wepppy/tests/microservices/test_dtale_freshness.py:12: PytestUnknownMarkWarning: Unknown pytest.mark.microservice - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.microservice
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 5 passed, 3 warnings in 11.53s ========================

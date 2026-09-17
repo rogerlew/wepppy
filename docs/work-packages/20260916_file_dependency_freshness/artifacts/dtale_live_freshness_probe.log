@@ -1,0 +1,363 @@
+INFO:wctl2:docker compose exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_live_freshness_probe.py
+{
+  "uid": 1000,
+  "gid": 993,
+  "health": {
+    "status": 200,
+    "elapsed_seconds": 0.02580127096734941,
+    "body": {
+      "status": "ok"
+    }
+  },
+  "disposable_batch": "/wc1/batch/freshness-c11-r5ltg0mz",
+  "eager_csv": {
+    "bytes": 12,
+    "equal_size": true,
+    "restored_mtime": true,
+    "first_load": {
+      "status": 200,
+      "elapsed_seconds": 0.050820362055674195,
+      "body": {
+        "data_id": "04841d766b0d",
+        "fingerprint": "1789612710744484055:12",
+        "name": "freshness-c11-r5ltg0mz/batch/table.csv",
+        "url": "/weppcloud/dtale/main/04841d766b0d"
+      }
+    },
+    "before_grid": {
+      "status": 200,
+      "elapsed_seconds": 0.002626789966598153,
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 2,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 0.5,
+              "upper": 2.5
+            },
+            "skew": "nan",
+            "unique_ct": 2,
+            "visible": true
+          },
+          {
+            "dtype": "string",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "name": "b",
+            "unique_ct": 2,
+            "visible": true
+          }
+        ],
+        "final_query": "",
+        "results": {
+          "0": {
+            "a": 1,
+            "b": "x",
+            "dtale_index": 0
+          },
+          "1": {
+            "a": 2,
+            "b": "y",
+            "dtale_index": 1
+          }
+        },
+        "total": 2
+      }
+    },
+    "same_metadata_load": {
+      "status": 200,
+      "elapsed_seconds": 0.002187137957662344,
+      "body": {
+        "data_id": "04841d766b0d",
+        "fingerprint": "1789612710744484055:12",
+        "name": "freshness-c11-r5ltg0mz/batch/table.csv",
+        "url": "/weppcloud/dtale/main/04841d766b0d"
+      }
+    },
+    "after_grid": {
+      "status": 200,
+      "elapsed_seconds": 0.0018543179612606764,
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 2,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 0.5,
+              "upper": 2.5
+            },
+            "skew": "nan",
+            "unique_ct": 2,
+            "visible": true
+          },
+          {
+            "dtype": "string",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "name": "b",
+            "unique_ct": 2,
+            "visible": true
+          }
+        ],
+        "final_query": "",
+        "results": {
+          "0": {
+            "a": 1,
+            "b": "x",
+            "dtale_index": 0
+          },
+          "1": {
+            "a": 2,
+            "b": "y",
+            "dtale_index": 1
+          }
+        },
+        "total": 2
+      }
+    },
+    "changed_mtime_control_load": {
+      "status": 200,
+      "elapsed_seconds": 0.01514425384812057,
+      "body": {
+        "data_id": "04841d766b0d",
+        "fingerprint": "1789612712744484055:12",
+        "name": "freshness-c11-r5ltg0mz/batch/table.csv",
+        "url": "/weppcloud/dtale/main/04841d766b0d"
+      }
+    },
+    "control_grid": {
+      "status": 200,
+      "elapsed_seconds": 0.001815540948882699,
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 9,
+            "min": 8,
+            "name": "a",
+            "outlierRange": {
+              "lower": 7.5,
+              "upper": 9.5
+            },
+            "skew": "nan",
+            "unique_ct": 2,
+            "visible": true
+          },
+          {
+            "dtype": "string",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "name": "b",
+            "unique_ct": 2,
+            "visible": true
+          }
+        ],
+        "final_query": "",
+        "results": {
+          "0": {
+            "a": 8,
+            "b": "x",
+            "dtale_index": 0
+          },
+          "1": {
+            "a": 9,
+            "b": "y",
+            "dtale_index": 1
+          }
+        },
+        "total": 2
+      }
+    }
+  },
+  "lazy_parquet": {
+    "bytes": 367,
+    "equal_size": true,
+    "restored_mtime": true,
+    "first_load": {
+      "status": 200,
+      "elapsed_seconds": 0.04259492503479123,
+      "body": {
+        "data_id": "ae5704c2755a",
+        "fingerprint": "1789612712153493500:367",
+        "name": "freshness-c11-r5ltg0mz/batch/table.parquet",
+        "url": "/weppcloud/dtale/main/ae5704c2755a"
+      }
+    },
+    "before_grid": {
+      "status": 200,
+      "elapsed_seconds": 0.015873249853029847,
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "a": 1,
+            "dtale_index": 0
+          },
+          "1": {
+            "a": 2,
+            "dtale_index": 1
+          }
+        },
+        "total": 2
+      }
+    },
+    "same_metadata_load": {
+      "status": 200,
+      "elapsed_seconds": 0.0019852190744131804,
+      "body": {
+        "data_id": "ae5704c2755a",
+        "fingerprint": "1789612712153493500:367",
+        "name": "freshness-c11-r5ltg0mz/batch/table.parquet",
+        "url": "/weppcloud/dtale/main/ae5704c2755a"
+      }
+    },
+    "after_grid": {
+      "status": 500,
+      "elapsed_seconds": 0.03780125291086733,
+      "body": "<!doctype html>\n<html style=\"\">\n    <head>\n\t<meta charset=\"utf-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=yes\">\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n        <script type=\"text/javascript\">\n            window.resourceBaseUrl = '/weppcloud';\n        </script>\n\t<link rel=\"shortcut icon\" href=\"/weppcloud/dtale/static/images/favicon.png\">\n    <link rel=\"preload\" href=\"/weppcloud/dtale/static/fonts/istok.woff\" as=\"font\" type=\"font/woff\" crossorigin>\n    <link rel=\"preload\" href=\"/weppcloud/dtale/static/fonts/istok-bold.woff\" as=\"font\" type=\"font/woff\" crossorigin>\n    <link rel=\"preload\" href=\"/weppcloud/dtale/static/fonts/Road_Rage.woff\" as=\"font\" type=\"font/woff\" crossorigin>\n    <title></title>\n        <script type=\"text/javascript\" src=\"/weppcloud/dtale/static/dist/base_styles_bundle.js\"></script>\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"/weppcloud/dtale/static/css/main.css\" />\n    </head>\n    <body class=\"-mode\" style=\"\">\n        <input type=\"hidden\" id=\"data_id\" value=\"\" />\n        <input type=\"hidden\" id=\"xarray\" value=\"\" />\n        <input type=\"hidden\" id=\"xarray_dim\" value=\"\" />\n        <input type=\"hidden\" id=\"app_settings\" value=\"\" />\n        <input type=\"hidden\" id=\"settings\" value=\"\" />\n        <input type=\"hidden\" id=\"version\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_shutdown\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_header_editor\" value=\"\" />\n        <input type=\"hidden\" id=\"lock_header_menu\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_header_menu\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_main_menu\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_column_menus\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_row_expanders\" value=\"\" />\n        <input type=\"hidden\" id=\"enable_custom_filters\" value=\"\" />\n        <input type=\"hidden\" id=\"enable_web_uploads\" value=\"\" />\n        <input type=\"hidden\" id=\"allow_cell_edits\" value=\"\" />\n        <input type=\"hidden\" id=\"hide_drop_rows\" value=\"\" />\n        <input type=\"hidden\" id=\"is_vscode\" value=\"\" />\n        <input type=\"hidden\" id=\"is_arcticdb\" value=\"\" />\n        <input type=\"hidden\" id=\"arctic_conn\" value=\"\" />\n        <input type=\"hidden\" id=\"column_count\" value=\"\" />\n        <input type=\"hidden\" id=\"processes\" value= />\n        <input type=\"hidden\" id=\"theme\" value=\"\" />\n        <input type=\"hidden\" id=\"pin_menu\" value=\"\" />\n        <input type=\"hidden\" id=\"language\" value=\"\" />\n        <input type=\"hidden\" id=\"python_version\" value=\"\" />\n        <input type=\"hidden\" id=\"auth\" value=\"False\" />\n        <input type=\"hidden\" id=\"username\" value=\"None\" />\n        <input type=\"hidden\" id=\"predefined_filters\" value=\"\" />\n        <input type=\"hidden\" id=\"max_column_width\" value= />\n        <input type=\"hidden\" id=\"max_row_height\" value= />\n        <input type=\"hidden\" id=\"main_title\" value=\"\" />\n        <input type=\"hidden\" id=\"main_title_font\" value=\"\" />\n        <input type=\"hidden\" id=\"query_engine\" value=\"\" />\n        <input type=\"hidden\" id=\"open_custom_filter_on_startup\" value=\"\" />\n        <input type=\"hidden\" id=\"open_predefined_filters_on_startup\" value=\"\" />\n<div class=\"container-fluid\">\n    <h1>Internal Server Error</h1>\n    <p>Error:</p>\n    <pre>500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</pre>\n    <p>Stacktrace:</p>\n    <pre>Traceback (most recent call last):\n  File &#34;/opt/venv/lib/python3.12/site-packages/flask/app.py&#34;, line 1511, in wsgi_app\n    response = self.full_dispatch_request()\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/opt/venv/lib/python3.12/site-packages/flask/app.py&#34;, line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/opt/venv/lib/python3.12/site-packages/flask/app.py&#34;, line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/opt/venv/lib/python3.12/site-packages/flask/app.py&#34;, line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/workdir/wepppy/wepppy/webservices/dtale/dtale.py&#34;, line 970, in _lazy_parquet_get_data\n    results, total = _format_lazy_rows(data_id, lazy_instance, ids)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/workdir/wepppy/wepppy/webservices/dtale/dtale.py&#34;, line 945, in _format_lazy_rows\n    data = lazy_instance.load_data(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File &#34;/workdir/wepppy/wepppy/webservices/dtale/dtale.py&#34;, line 663, in load_data\n    with duckdb.connect() as conn:\n         ^^^^^^^^^^^^^^^^\n  File &#34;/workdir/wepppy/wepppy/webservices/dtale/dtale.py&#34;, line 664, in load_data\n    df = conn.execute(sql, params).fetchdf()\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\nduckdb.duckdb.BinderException: Binder Error: Referenced column &#34;a&#34; not found in FROM clause!\nCandidate bindings: &#34;read_parquet.z&#34;\nLINE 1: SELECT &#34;a&#34; FROM read_parquet(?) LIMIT ? OFFSET...\n               ^\n</pre>\n</div>\n        <script type=\"text/javascript\" src=\"/weppcloud/dtale/static/dist/polyfills_bundle.js\"></script>\n        <link rel=\"stylesheet\" type=\"text/css\" href=\"/weppcloud/dtale/static/css/main.css\" />\n        <script type=\"text/javascript\" >\n            const msg = {\n                data_id: '',\n                xarray: '',\n                xarray_dim: '',\n                settings: '',\n                version: '',\n                hide_shutdown: '',\n                processes: '',\n            };\n            window.addEventListener(\n                'load',\n                function() { window.parent.postMessage(msg, '*'); },\n                false\n            );\n        </script>\n    </body>\n</html>"
+    },
+    "changed_mtime_control_load": {
+      "status": 200,
+      "elapsed_seconds": 0.029057004023343325,
+      "body": {
+        "data_id": "ae5704c2755a",
+        "fingerprint": "1789612714153493500:367",
+        "name": "freshness-c11-r5ltg0mz/batch/table.parquet",
+        "url": "/weppcloud/dtale/main/ae5704c2755a"
+      }
+    },
+    "control_grid": {
+      "status": 200,
+      "elapsed_seconds": 0.015748211881145835,
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 8,
+            "min": 8,
+            "name": "z",
+            "outlierRange": {
+              "lower": 8.0,
+              "upper": 8.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "dtale_index": 0,
+            "z": 8
+          },
+          "1": {
+            "dtale_index": 1,
+            "z": 9
+          }
+        },
+        "total": 2
+      }
+    }
+  },
+  "cleanup_live_datasets": {
+    "status": 200,
+    "elapsed_seconds": 0.0010606220457702875,
+    "body": {
+      "success": true
+    }
+  },
+  "isolated_real_geojson_registration": {
+    "bytes": 149,
+    "first": {
+      "fingerprint": "1789612722236510074:149",
+      "label": "old"
+    },
+    "same_metadata": {
+      "fingerprint": "1789612722236510074:149",
+      "label": "old"
+    },
+    "changed_mtime_control": {
+      "fingerprint": "1789612724236510074:149",
+      "label": "new"
+    }
+  }
+}

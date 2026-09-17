@@ -1,0 +1,16 @@
+[
+  {
+    "status": 409,
+    "intercepted": 0,
+    "alerts": [],
+    "guidance_visible": false,
+    "errors": []
+  },
+  {
+    "status": 200,
+    "intercepted": 0,
+    "alerts": [],
+    "guidance_visible": false,
+    "errors": []
+  }
+]

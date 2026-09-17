@@ -1,0 +1,20 @@
+[
+  {
+    "status": 409,
+    "intercepted": 1,
+    "alerts": [],
+    "guidance_visible": false,
+    "errors": [],
+    "proxy_prefix_mapping": "/weppcloud/dtale/* -> /dtale/* on same local service"
+  },
+  {
+    "status": 200,
+    "intercepted": 1,
+    "alerts": [
+      "This file changed or cannot be verified. Reopen the dataset from browse."
+    ],
+    "guidance_visible": true,
+    "errors": [],
+    "proxy_prefix_mapping": "/weppcloud/dtale/* -> /dtale/* on same local service"
+  }
+]

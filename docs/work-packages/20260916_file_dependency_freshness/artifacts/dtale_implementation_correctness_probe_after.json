@@ -1,0 +1,89 @@
+{
+  "overlay_identifier_change": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "after_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "reach_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "record_featureidkey": "reach_id",
+    "record_properties": [
+      "reach_id"
+    ],
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-b0ai7d9x-channels",
+        "reach_id"
+      ]
+    ]
+  },
+  "remaining_valid_overlay": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-ag-fields-boundaries",
+      "featureidkey": "field_id",
+      "loc_candidates": [
+        "field_id",
+        "FieldID",
+        "field_name",
+        "FieldName",
+        "wepp_id",
+        "WeppID"
+      ]
+    },
+    "after_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-b0ai7d9x-channels",
+        "channel_id"
+      ]
+    ]
+  },
+  "eager_startup_failure": {
+    "response_status": 500,
+    "global_state_contains": false,
+    "metadata_published": false,
+    "rows_retained": null
+  }
+}

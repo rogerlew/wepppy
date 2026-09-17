@@ -111,11 +111,8 @@ def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse, extension
 
     app = browse.create_app()
 
-    with TestClient(app) as client:
+    with TestClient(app, follow_redirects=False) as client:
         response = client.get(f"/weppcloud/runs/run-1/default/dtale/wepp/output/output{extension}")
-
-    if response.status_code == 404:
-        pytest.skip(f"D-Tale loader unavailable (status=404, path={touched.get('path')})")
 
     assert response.status_code == 303
     assert response.headers["location"] == "/weppcloud/dtale/main/abc123"
@@ -155,7 +152,7 @@ def test_dtale_open_rejects_unsupported_extension(tmp_path: Path, monkeypatch, l
 
     app = browse.create_app()
 
-    with TestClient(app) as client:
+    with TestClient(app, follow_redirects=False) as client:
         response = client.get("/weppcloud/runs/run-1/default/dtale/wepp/output/notes.txt")
 
     assert response.status_code == 415
@@ -223,8 +220,7 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
             "/internal/load",
             json={"runid": "run-1", "config": "default", "path": "landuse/landuse.csv"},
         )
-        if first.status_code != 200:
-            pytest.skip(f"D-Tale service unavailable in test environment (status={first.status_code})")
+        assert first.status_code == 200
         assert init_calls["count"] == 1
 
         state["dtypes"] = None  # simulate missing dtype metadata
@@ -311,7 +307,7 @@ def test_geojson_defaults_applied(tmp_path: Path, load_dtale_service):
     assert "wepp_id" in geojson_entry.get("properties", [])
 
 
-def test_dtale_open_falls_back_to_config_subdir(tmp_path: Path, monkeypatch, load_browse):
+def test_dtale_open_config_subdir_uses_logical_browse_path(tmp_path: Path, monkeypatch, load_browse):
     config = "disturbed"
     data_dir = tmp_path / config / "landuse"
     data_dir.mkdir(parents=True)
@@ -358,15 +354,16 @@ def test_dtale_open_falls_back_to_config_subdir(tmp_path: Path, monkeypatch, loa
 
     app = browse.create_app()
 
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/run-2/{config}/dtale/landuse/landuse.parquet")
-
-    if response.status_code == 404:
-        pytest.skip("Config subdir fallback not available in this environment")
+    with TestClient(app, follow_redirects=False) as client:
+        # NoDir browse paths are run-relative. The internal loader's legacy
+        # config fallback is tested separately through its actual Flask route.
+        missing = client.get(f"/weppcloud/runs/run-2/{config}/dtale/landuse/landuse.parquet")
+        assert missing.status_code == 404
+        response = client.get(f"/weppcloud/runs/run-2/{config}/dtale/{config}/landuse/landuse.parquet")
 
     assert response.status_code == 303
     assert response.headers["location"] == "/weppcloud/dtale/main/xyz789"
-    assert captured["json"]["path"] == "landuse/landuse.parquet"
+    assert captured["json"]["path"] == f"{config}/landuse/landuse.parquet"
 
 
 def _encode_filter_payload(payload: dict) -> str:
@@ -429,11 +426,9 @@ def test_dtale_open_forwards_parquet_filter_payload(tmp_path: Path, monkeypatch,
     )
 
     app = browse.create_app()
-    with TestClient(app) as client:
+    with TestClient(app, follow_redirects=False) as client:
         response = client.get(f"/weppcloud/runs/run-3/default/dtale/wepp/output/output.parquet?pqf={pqf}")
 
-    if response.status_code == 404:
-        pytest.skip("D-Tale loader unavailable in test environment")
     assert response.status_code == 303
     assert captured["url"] == "http://dtale-service/internal/load"
     assert captured["json"]["pqf"] == pqf

@@ -1,0 +1,142 @@
+INFO:wctl2:docker compose exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_correctness_probe.py dtale_implementation_correctness_probe_after
+Failed to initialize D-Tale dataset 63151d7bdf46
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/webservices/dtale/dtale.py", line 1292, in load_into_dtale
+    instance = _initialize_dtale_dataset(data_id, display_name, df)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/webservices/dtale/dtale.py", line 806, in _initialize_dtale_dataset
+    instance = startup(
+               ^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_correctness_probe.py", line 75, in interrupted_startup
+    raise ValueError("injected failure after actual upstream state publication")
+ValueError: injected failure after actual upstream state publication
+[2026-09-17 03:25:25,083] ERROR in app: Exception on /internal/load [POST]
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/webservices/dtale/dtale.py", line 1292, in load_into_dtale
+    instance = _initialize_dtale_dataset(data_id, display_name, df)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/webservices/dtale/dtale.py", line 806, in _initialize_dtale_dataset
+    instance = startup(
+               ^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_implementation_correctness_probe.py", line 75, in interrupted_startup
+    raise ValueError("injected failure after actual upstream state publication")
+ValueError: injected failure after actual upstream state publication
+{
+  "overlay_identifier_change": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "after_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "reach_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "record_featureidkey": "reach_id",
+    "record_properties": [
+      "reach_id"
+    ],
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-b0ai7d9x-channels",
+        "reach_id"
+      ]
+    ]
+  },
+  "remaining_valid_overlay": {
+    "before_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-ag-fields-boundaries",
+      "featureidkey": "field_id",
+      "loc_candidates": [
+        "field_id",
+        "FieldID",
+        "field_name",
+        "FieldName",
+        "wepp_id",
+        "WeppID"
+      ]
+    },
+    "after_default": {
+      "map_type": "choropleth",
+      "loc_mode": "geojson-id",
+      "geojson": "dtale-correctness-b0ai7d9x-channels",
+      "featureidkey": "channel_id",
+      "loc_candidates": [
+        "channel_id",
+        "ChannelID",
+        "reach_id",
+        "ReachID",
+        "wepp_id",
+        "WeppID",
+        "TopazID"
+      ]
+    },
+    "choices": [
+      [
+        "Channels",
+        "dtale-correctness-b0ai7d9x-channels",
+        "channel_id"
+      ]
+    ]
+  },
+  "eager_startup_failure": {
+    "response_status": 500,
+    "global_state_contains": false,
+    "metadata_published": false,
+    "rows_retained": null
+  }
+}

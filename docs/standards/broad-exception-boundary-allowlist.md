@@ -1002,3 +1002,4 @@ Use this file for approved boundary handlers that should be excluded from `tools
 | `BEA-20260426-P11-0011` | `wepppy/nodb/core/landuse.py` | 827 | `except Exception` | nodb maintainers | Grouped landuse mode+selection boundary restores in-memory snapshot on any grouped mutation failure and re-raises original exception. | `2026-09-30` |
 
 | `BEA-20260910-PFDF-0001` | `wepppy/rq/postfire_debris_flow_rq.py` | 51 | `except Exception` | postfire / RQ maintainers | Worker boundary records terminal attempt failure, logs protected context and raises a sanitized job error so unexpected failures remain retryable. | `2026-12-10` |
+| `BEA-20260917-DTALE-0001` | `wepppy/webservices/dtale/dtale.py` | 1298 | `except Exception` | D-Tale maintainers | Third-party eager registration boundary logs the dataset ID, removes partial upstream state and re-raises the original error; no stale-row fallback. | `2026-12-17` |

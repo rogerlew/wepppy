@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_ui_contract_probe.py
+{"data_id": "b9e83f53c9b4", "fingerprint": "1789614625698505268:512", "name": "qa-dtale-ui-1clamzol/batch/fixture.parquet", "url": "/weppcloud/dtale/main/b9e83f53c9b4", "fixture_root": "/wc1/batch/qa-dtale-ui-1clamzol", "uid": 1000, "gid": 993}

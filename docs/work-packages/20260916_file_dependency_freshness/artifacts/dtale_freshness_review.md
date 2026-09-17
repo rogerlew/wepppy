@@ -1,0 +1,178 @@
+# C11 D-Tale freshness: maintained-service review
+
+Reviewer: independent `freshness_qa`, 2026-09-17 UTC. Scope: remaining inventory
+consumer C11 only. No production or test files were changed. The reviewer added
+and ran retained probes using disposable files and the installed service.
+
+## Disposition and demonstrated failures
+
+**C11 remains OPEN and is now confirmed at the actual service boundary.** The
+earlier predicate-only evidence understated the available validation: the
+development D-Tale container is running with its real dependencies. A live
+authenticated `/internal/load` followed by `/dtale/data/<id>` reproduces stale
+CSV data and a stale-Parquet-schema failure without any service stub or restart.
+
+| Surface | Actual observation | Consequence |
+| --- | --- | --- |
+| Eager CSV | A 12-byte file initially holds `a=[1,2]`. After a same-size rewrite to `[8,9]` with restored mtime, `/internal/load` returns 200 with its old fingerprint and grid rows remain `[1,2]`. | Silent reuse of obsolete analysis data. |
+| Lazy Parquet | A 367-byte file initially has column `a`. An equal-size/restored-mtime rewrite changes the schema to `z`; the loader still returns 200 with its old fingerprint. Grid access returns 500 with DuckDB `BinderException`: cached column `a` is absent from the current file. | Cached schema and current pathname reads refer to different generations. |
+| GeoJSON registration | The actual maintained registration function retains an `old` feature label after a same-size/restored-mtime rewrite to `new`. | Registered map data remains obsolete. This probe runs in an isolated real D-Tale process, not through a map HTTP endpoint. |
+
+For each case, a subsequent mtime change followed by the same load/registration
+refreshes the result correctly. The CSV grid then returns `[8,9]`; the Parquet
+grid returns column `z` and `[8,9]`; GeoJSON registration returns `new`. These
+controls distinguish fingerprint reuse from malformed fixtures or absent
+service dependencies.
+
+## Retained reproduction and environment
+
+- `dtale_live_freshness_probe.py`: reproducible live-loader/grid probe and real
+  isolated GeoJSON registration. It does not monkeypatch the application,
+  readers, fingerprint, routing, or D-Tale state.
+- `dtale_live_freshness_probe.json` and `.log`: complete requests' response
+  status/body/timing, including the actual Parquet error traceback.
+- `dtale_probe_inputs/`: exact before/after CSV, Parquet and GeoJSON bytes.
+- Command: `wctl exec dtale python docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_live_freshness_probe.py`.
+- Actual container identity: UID **1000**, GID **993**. Installed D-Tale,
+  DuckDB and PyArrow are available. The running service's `/health` returns 200.
+- The probe reads the configured internal token without logging it. It creates
+  a random temporary child of `/wc1/batch`, uses the maintained `config=batch`
+  root resolver, and removes only its own temporary files. No existing project
+  is mutated. Upstream cleanup for the probe's two data IDs returns 200;
+  service-wide caches are not cleared or restarted. Small wrapper metadata may
+  remain under those unique probe IDs until the worker's normal lifecycle.
+
+This is internal-service evidence. It is not an authenticated browser-to-browse-
+to-D-Tale end-to-end acceptance run, map rendering proof, or deployment approval.
+
+## Maintained consumers and producers
+
+`wepppy/webservices/dtale/dtale.py:_fingerprint` returns only
+`mtime_ns:size`. Its two maintained consumers are:
+
+1. `load_into_dtale` compares that string with `DatasetMeta.fingerprint` before
+   reusing either eager global state or a `LazyParquetDtaleInstance`. Dataset ID
+   scope includes run, configuration, relative path and active filter payload.
+   Changed fingerprints trigger upstream cleanup and removal of lazy metadata.
+2. `_register_geojson_asset` compares the same predicate with
+   `REGISTERED_GEOJSON` and the upstream custom-GeoJSON entry. Equal predicates
+   skip parsing and retain prior feature properties/geometry.
+
+The lazy object captures schema, base columns, row count and a one-row sample.
+`load_data` later opens the pathname through DuckDB for each bounded grid slice.
+`_lazy_parquet_get_data` currently does not revalidate its loaded generation.
+Fixing launch fingerprint equality alone therefore does not define what an
+already-open lazy session should do when its input changes before another
+`/internal/load` call. That lifecycle needs explicit C11 acceptance scope.
+
+These are consumers of mutable generated artifacts, not owners of immutable
+files. Representative maintained producers include:
+
+- WEPP interchange native Parquet adapters under `wepppy/wepp/interchange/`
+  and `wepppy/wepp/reports/helpers.py:ReportCacheManager.write_parquet`.
+- `Watershed.subwta_shp` / `channels_shp`, which point to the current
+  TOPAZ/WBT/TauDEM GeoJSON products generated by their terrain paths.
+- `AgFields` boundary publication, which stages via `shutil.copy2` and replaces
+  canonical GeoJSON and rotation parquet under its NoDb lock in
+  `wepppy/nodb/mods/ag_fields/ag_fields.py`.
+- The browse bridge's explicit NoDir archive materialization, which hands a
+  filesystem path to D-Tale under the existing materialization contract.
+
+The disposable rewrite is a controlled acceptance operation, not evidence that
+every listed producer deliberately restores mtime. It demonstrates that the
+consumer cannot distinguish different accepted file generations when that
+operation occurs during restoration, copying or external artifact replacement.
+
+## Current authority and documentation gap
+
+The nearest instructions are `wepppy/webservices/dtale/AGENTS.md`: preserve the
+single-process service, in-process dataset behavior, bounded lazy Parquet pages,
+one-row shell, aliases, and explicit unsupported full-frame actions. They forbid
+falling back to full Parquet pandas materialization. Current shared contracts:
+
+- `docs/schemas/weppcloud-browse-auth-contract.md`: browse launch access rules.
+- `docs/schemas/weppcloud-browse-parquet-filter-contract.md`: `pqf`, filter
+  validation and matching error/status behavior.
+- `docs/schemas/nodir_interface_spec.md` and
+  `docs/schemas/nodir-thaw-freeze-contract.md`: filesystem materialization and
+  prohibition on request-side thaw/freeze cleanup.
+
+The initial inventory names a lazy-Parquet contract/README, but no standalone
+maintained D-Tale README or schema contract was located. The older lazy-Parquet
+package remains an implementation/observation record and is not a substitute
+for durable freshness authority. Before implementation, add the bounded D-Tale
+adoption/lifecycle decision to the current file-dependency-freshness contract
+and update the local service guide. Keep the existing auth/filter/NoDir rules.
+
+## Smallest compatible correction to review
+
+The demonstrated relaunch failure can be addressed by replacing the existing
+fingerprint predicate with verified ordinary-file content identity, using the
+owned shared digest helper after its caller/path-policy compatibility is ratified.
+Retain stable dataset IDs, filter scope, cache cleanup, eager/lazy selection,
+row/file limits, aliases, and response keys. Treat the fingerprint string as an
+opaque observation token in the amendment; no persisted dataset migration is
+needed because this cache is in-process.
+
+Bind the recorded fingerprint to the loaded data/schema/GeoJSON generation:
+verify around acquisition and reject detectable drift explicitly, rather than
+tagging data loaded later with an earlier path digest. Do not present a hash as
+arbitrary-writer snapshot isolation. For lazy pages, first decide whether an
+input change invalidates the current session with a reload requirement or
+refreshes it coherently; specify that outcome before adding a guard. Leaving
+page coherence unspecified cannot support a claim of complete C11 closure.
+
+Preserve content-equivalent readable touch/chmod/hard-link/replacement without
+discarding user session settings solely because metadata changed. Preserve
+current path/access policy independently of digest equality. Do not turn this
+repair into a new persistent cache, watcher, service, upstream fork, or eager
+Parquet conversion.
+
+## Test gaps and required acceptance
+
+The existing command
+`wctl run-pytest tests/microservices/test_browse_dtale.py --maxfail=1 -ra`
+completed **5 passed, 4 skipped**; output is retained in
+`dtale_existing_tests.log`. All four skips are browse launch tests accepting
+404 as environment unavailability, including config-subdirectory and filter
+forwarding cases. They do not establish the running launch bridge's behavior.
+The loader-refresh test replaces DataFrame loading and D-Tale global state with
+test doubles and addresses missing state, not changed file bytes. Existing
+actual lazy tests verify initial paging/sorting and distinct filter IDs, with
+no replacement between load/reload/page requests. The GeoJSON test checks
+defaults and aliases but never changes the source after initial registration.
+
+Add regressions using real D-Tale state and actual parsers for the retained
+CSV, Parquet and GeoJSON failures. Include equal-size/restored-time replacement,
+readable metadata churn, missing/unreadable/empty/malformed input, old-session
+lazy page behavior, row-count/schema changes and filtered datasets whose
+selected values change. Assert refreshed aliases/defaults as well as rows.
+Schedule a change between fingerprint and acquisition to test coherent
+registration. Retain the no-eager-Parquet guard and unsupported export behavior.
+Provide strict service-enabled integration execution that fails rather than
+skips a 404 when the service fixture is configured and available.
+
+## Performance constraints and limits
+
+The running service is configured with a **512 MB** file limit; the bridge's
+HTTP timeout is **60 seconds** with a **5-second** connect timeout. The default
+row cap is zero unless configured. The live tiny-fixture baseline measured
+50.8 ms initial CSV registration, 42.6 ms initial Parquet registration, and
+about 2 ms for each stale warm loader reuse. Grid pages took roughly 2 ms for
+CSV and 16 ms for Parquet. These are single disposable observations, not a
+representative performance budget or throughput claim.
+
+Content identity may add a full streaming byte scan even though lazy Parquet
+must still avoid full DataFrame materialization. Measure cold load, repeated
+warm launch and page cadence on representative large Parquet and GeoJSON files
+under the actual service identity/mounts before setting a shipping budget.
+With the shared helper, include its first-second uncached admission interval,
+settled zero-byte-read reuse and bounded interleaved-dataset eviction. Rehashing
+a large file on each page during admission can matter even with bounded memory.
+Do not assume the earlier utility benchmark measures D-Tale startup, concurrent
+readers, or NFS behavior. No new dependency or owned-native replacement is
+needed for the confirmed predicate correction.
+
+No service/dependency blocker remains for local C11 reproduction. Contract
+checkpoint, implementation, strict regression evidence and final supported
+browser/runtime acceptance remain required before closing this consumer.
