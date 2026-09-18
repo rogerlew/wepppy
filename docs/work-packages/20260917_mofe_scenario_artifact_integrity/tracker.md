@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: Forest accepted; awaiting Roger's WEPPcloud deployment
+**Current phase**: wepp1/wepp2/wepp3 deployment PASS at accepted revision f22ac0d54
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: present evidence and wait for Roger's WEPPcloud deployment
+**Next milestone**: eight production run repairs and generated-artifact validation; none started
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -60,12 +60,18 @@ caveats are in the Forest artifact. No production repair has run.
 
 ### In Progress
 
-- [ ] Resume production repair only after explicit deployment confirmation.
+- [ ] Perform per-run preservation and preflight before production repair;
+      operator-authorized deployment is complete, but no repair has started.
 
 ### Blocked
 
-- [ ] Production repair is blocked until Roger explicitly confirms deployment
-      of the Forest-accepted revision to WEPPcloud.
+- [x] Roger approved preserving wepp1's 2,023 matching untracked files. Named
+      stash retained; two missing documentation LFS objects were copied from
+      verified local cache. wepp1 fast-forwarded cleanly to `f22ac0d54` and the
+      canonical deployment started at 2026-09-18 09:21 UTC. See the production
+      deployment artifact for recovery references and per-host results.
+- [x] Roger delegated deployment of the Forest-accepted revision; all three
+      hosts passed by 2026-09-18 10:44 UTC. The deployment blocker is resolved.
 
 ### Done
 

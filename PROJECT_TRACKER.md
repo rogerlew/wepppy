@@ -10,8 +10,8 @@
 Active incident remediation: [MOFE scenario artifact integrity and Abdisa run repair](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md)
 — correct classified SBS consumption, global mapping artifact regeneration, and
 thinning canopy propagation. Actual-project Forest acceptance is a hard gate;
-Roger owns WEPPcloud deployment, after which all eight named runs require manual
-rebuild/rerun and retained evidence. The operator rejected an expanded runtime
+Roger authorized the completed wepp1/wepp2/wepp3 deployment; all eight named runs
+still require manual rebuild/rerun and retained evidence. The operator rejected an expanded runtime
 publication/recovery design; the package is back to three minimal producer fixes
 with focused artifact tests and Forest acceptance.
 
@@ -569,8 +569,10 @@ switch. Roger approved the one-line missing fork-worker secret-mount correction
 `253188229`; startup tests and both reviews passed. All eight real scenarios
 completed 15/15 WEPP jobs each, with parsed generated/prepared inputs, fresh
 distinct summaries, browser/download, failure/retry, and archive/restore checks
-passing (7,897 restored hashes). Final independent correctness and QA PASS. Roger
-retains the WEPPcloud deployment gate; production runs remain unrepaired.
+passing (7,897 restored hashes). Final independent correctness and QA PASS.
+Roger-authorized deployment of `f22ac0d54` passed on wepp1/wepp2/wepp3 by
+2026-09-18 10:44 UTC, including approved recovery of idle worker shutdown hangs.
+Production runs remain unrepaired; see the package's production deployment artifact.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

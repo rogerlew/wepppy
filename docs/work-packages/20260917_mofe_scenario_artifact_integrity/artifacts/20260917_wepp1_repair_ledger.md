@@ -1,9 +1,9 @@
 # wepp1 repair ledger - Abdisa Rithet Creek runs
 
-**Status**: blocked; no production mutation authorized yet
+**Status**: deployment complete; production scientific repairs unstarted
 **Prerequisite 1**: Forest acceptance PASS, 2026-09-18 UTC
-**Prerequisite 2**: Roger must deploy the accepted revision to WEPPcloud and
-explicitly confirm completion
+**Prerequisite 2**: Roger-authorized deployment PASS on all three production hosts,
+2026-09-18 by 10:44 UTC; see [deployment evidence](20260918_production_deployment.md).
 
 ## Deployment Confirmation Gate
 
@@ -12,11 +12,14 @@ explicitly confirm completion
   do not change runtime source; verify deployed hashes against the Forest record.
 - Forest acceptance reviewers: independent `correctness_review` and `qa_review`,
   both PASS on 2026-09-18 UTC; see the Forest artifact's Acceptance Verdict.
-- Roger deployment confirmation text: pending.
-- Confirmation timestamp and timezone: pending.
-- Deployed wepp1 revision: pending.
-- Deployed relevant container revisions/checksums: pending.
-- Queue/service health: pending.
+- Roger delegated deployment: "proceed with deploy on wepp1, wepp2, and wepp3."
+  This superseded the earlier operator-only deployment gate, not the repair checks.
+- Deployment completion timestamp: 2026-09-18 by 10:44 UTC (all hosts).
+- Deployed wepp1 revision: `f22ac0d549c141c8784dc1b5e2364e2ffd889421`.
+- Relevant live source hashes and 1002:130 identities: PASS; deployment evidence
+  records exact values for web/API/default/batch/fork workers.
+- Queue/service health: canonical deployment gates PASS; web HTTP 200 and
+  rq-engine health `ok`. Repeat live queue/run preflight before each repair.
 
 Do not submit a repair job until every item above is populated and the deployed
 revision equals the Forest-accepted revision or an explicitly reviewed descendant.

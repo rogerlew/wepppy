@@ -50,6 +50,11 @@ files, and completed result summaries.
 - [x] Close final independent Forest reviews (both PASS, no High/Medium findings)
   and present the deployment gate.
 - [x] Stop at Roger's explicit WEPPcloud deployment confirmation gate.
+- [x] (2026-09-18) Execute Roger's subsequent explicit request to deploy the
+  Forest-accepted revision to wepp1, then wepp2, then wepp3; record host gates.
+  wepp1 passed by 09:34 UTC; wepp2 passed by 10:10 UTC after approved recovery
+  of stuck idle worker pools. wepp3 passed by 10:44 UTC after separately approved
+  idle-container force-stop. See production deployment artifact.
 - [ ] Preflight wepp1, preserve pre-repair evidence, manually rebuild/rerun all
   eight Abdisa runs, and validate the refreshed hillslope response summary.
 - [ ] Close reviews, update package/tracker/root board, and archive this plan under
@@ -57,6 +62,19 @@ files, and completed result summaries.
 
 ## Surprises & Discoveries
 
+- Production deployment (2026-09-18 09:52 UTC): wepp2 worker pools have not
+  exited after graceful shutdown and the normal queue-read timeout. The
+  canonical deployment remains active with its global suspension fence; no
+  force-stop issued. Two maintenance jobs started on wepp1 after suspension.
+  Root cause is unconfirmed; request operator direction before intervention.
+  Resolved at 10:09 UTC: Roger instructed continuation after stopping the batch
+  job; fresh checks found zero active jobs. Force-stopping only the two stuck
+  wepp2 containers let the existing deployment finish and resume its fence.
+- Production preflight (2026-09-18): wepp1 has 2,023 untracked files, all
+  byte-identical to accepted target files, but Git refuses the fast-forward.
+  No tracked/index changes exist; no deployment or restart occurred. Request
+  approval for a recoverable named stash rather than deleting these files or
+  bypassing deployment cleanliness checks. wepp2/wepp3 are clean; queues idle.
 - The saved baseline has 13 class-200 segments whose original management files
   were stale forest. Correct regeneration changes exactly eight hillslopes;
   baseline sediment rises from 12.6926 to 128.4518 tonnes/year. Class 200's
@@ -129,6 +147,26 @@ files, and completed result summaries.
 
 ## Decision Log
 
+- Decision: Roger separately approved force-stopping only wepp3's lingering
+  idle fork/archive container after its normal shutdown timeout elapsed.
+  Rationale: fresh checks found zero active jobs and zero registered consumers;
+  the existing canonical deployment could then complete its normal validation.
+  Date/Author: 2026-09-18 / Codex, under Roger's explicit approval.
+
+- Decision: after Roger's continuation approval, force-stop only wepp2's two
+  stuck idle worker containers, preserving the existing deployment process.
+  Rationale: graceful shutdown had waited over 25 minutes; fresh Redis checks
+  found no active jobs. No code, timeout policy or queue history was changed.
+  Date/Author: 2026-09-18 / Codex, under Roger's explicit continuation direction.
+
+- Decision: Roger explicitly delegated production deployment with "proceed with
+  deploy on wepp1, wepp2, and wepp3." This supersedes the earlier operator-only
+  deployment restriction for these three hosts. Use the canonical script and
+  existing presets, exact accepted revision `f22ac0d54`, idle-job gates, and
+  post-deploy checks. This turn does not start production scenario repair.
+  Rationale: explicit authority now exists; preserve the reviewed rollout and
+  separate deployment evidence from scientific run mutations.
+  Date/Author: 2026-09-18 UTC, Roger and Codex.
 - Decision: Roger approved the separate minimal fork-worker dependency fix on
   2026-09-18. Add the existing Discord token-file secret alias to Forest's
   production Compose fork profile, matching the dedicated wepp3 worker.
@@ -201,6 +239,12 @@ files, and completed result summaries.
 
 ## Outcomes & Retrospective
 
+Production rollout passed on wepp1, wepp2, and wepp3 at `f22ac0d54` by
+2026-09-18 10:44 UTC. All canonical deployments exited zero; live identities,
+source hashes and worker registrations passed. No deployment fence remains.
+The eight production scientific runs remain unrepaired. Details and
+recovery stash IDs are in `artifacts/20260918_production_deployment.md`.
+
 The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
 broader validation and Forest deployment passed. Roger approved the separately
 evidenced one-line fork-worker mount correction `253188229`. All eight real
@@ -212,8 +256,8 @@ matches all 7,897 recorded files. Final browser/download checks pass.
 Failed-job evidence and exact source hashes remain in the Forest artifact.
 No production scientific data has been changed. Independent correctness and QA
 passed both code and final Forest acceptance with no High/Medium findings.
-The package remains open solely for operator-confirmed WEPPcloud deployment,
-eight-run production repair, and its final evidence/review. Do not archive this
+The package remains open for eight-run production repair and its final
+evidence/review; operator-authorized deployment is complete. Do not archive this
 active plan until that authorized phase is complete.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;

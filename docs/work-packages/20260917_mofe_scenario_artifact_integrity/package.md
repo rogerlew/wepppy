@@ -3,6 +3,11 @@
 **Status**: Open (2026-09-17)
 **Timezone**: UTC
 
+**Deployment authority update (2026-09-18)**: Roger explicitly requested deployment
+on wepp1, wepp2, and wepp3. That request supersedes the earlier operator-only
+deployment restriction below for this ordered canonical rollout. Production
+scenario repair remains separate from this deployment turn.
+
 ## Overview
 
 Rithet Creek scenario runs persisted the requested burn or thinning state in
