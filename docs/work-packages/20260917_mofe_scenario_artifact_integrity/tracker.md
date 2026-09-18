@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: local gates passed; Forest acceptance next
+**Current phase**: local gates and Forest deployment passed; live acceptance blocked
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: finish broad gates and Forest candidate deployment
+**Next milestone**: operator direction on unrelated fork-worker dependency
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -24,8 +24,13 @@ Forest preflight verified `forest1`
 at `192.168.1.108` with its saved `forest1.local` host key, clean revision
 `a4877628676388817b4a68671f6144e91d174683`, idle queues, and full production
 Compose deployment plan. Its current branch is `feature/project-owned-config`;
-the candidate can fast-forward that existing branch without a branch switch.
-No Forest deployment or production repair has occurred.
+the candidate fast-forwarded that existing branch without a branch switch.
+Forest now runs `ffa241766`; canonical deployment and exact worker source hashes
+passed. The first clone job `d947f1db-f1fc-4e68-bcd1-47a5070950b2` failed before
+copying because the dedicated worker lacks the import-time Discord token file.
+Archive/restore share the same dependency. No scenario or production repair has
+run. See the Forest artifact's **Blocking Forest Dependency** section; a separate
+configuration/dependency correction needs operator direction.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A

@@ -564,9 +564,10 @@ all eight Abdisa production runs.
 91 focused tests passed and independent correctness/QA reviews PASS. The public
 canopy mutation now invokes the existing writer, and MOFE summary rebuilding
 retains the selection. All 8,994 repository tests passed (99 skipped). Forest preflight passed identity
-and idle-queue checks; its existing branch can fast-forward to the candidate
-without a branch switch. Forest acceptance and production repair are
-pending; Roger retains the WEPPcloud deployment gate.
+and idle-queue checks; candidate `ffa241766` deployed successfully without a branch
+switch. Live acceptance is blocked before cloning: the dedicated fork worker
+lacks an import-time Discord token file. Separate dependency/configuration
+direction is needed; Roger retains the WEPPcloud deployment gate.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

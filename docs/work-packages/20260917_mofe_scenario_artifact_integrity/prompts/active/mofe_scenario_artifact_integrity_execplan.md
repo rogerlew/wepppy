@@ -36,6 +36,10 @@ files, and completed result summaries.
   writer call and preservation of MOFE canopy overrides during summary rebuild.
 - [x] Pass focused (91), related (4,192), full-suite (8,994), correctness, QA,
   and documentation gates; full suite also passed 12 subtests, with 99 skipped.
+- [x] Deploy exact candidate `ffa241766` to Forest; canonical health/image gates
+  and worker source hashes pass.
+- [ ] Resolve the separate fork-worker import blocker with operator direction:
+  missing Discord token file prevents supported clone/archive/restore jobs.
 - [ ] Deploy the exact accepted candidate to `forest1.local` and exercise an
   actual Rithet Creek clone or supported restored archive through all scenarios.
 - [ ] Record Forest artifacts and present the hard-gate evidence to the operator.
@@ -47,6 +51,11 @@ files, and completed result summaries.
 
 ## Surprises & Discoveries
 
+- Forest fork job `d947f1db-f1fc-4e68-bcd1-47a5070950b2` failed before its body
+  because importing the WEPP finalizer reads a Discord token file absent from
+  the dedicated worker's Compose mounts. No target directory was created. This
+  is a separate runtime dependency issue, not a MOFE artifact failure; do not
+  expand credential access or change notification behavior without direction.
 - Takeover review found that `modify_coverage` never invoked the MOFE writer,
   and `build_managements` discarded persisted canopy overrides. Fixing synthesis
   alone would not repair the public thinning workflow. The reviewed clarification
@@ -167,7 +176,9 @@ files, and completed result summaries.
 ## Outcomes & Retrospective
 
 The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
-broader validation passed; Forest acceptance remains pending. No production data has
+broader validation and Forest deployment passed; Forest acceptance is blocked by
+the dedicated fork worker's missing Discord token-file dependency. The failed
+job and exact source hashes are recorded in the Forest artifact. No production data has
 been changed. Independent correctness and QA passed with no High/Medium code findings.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;
