@@ -55,7 +55,8 @@ and module, so neither is an alternate path around this failure. No generated
 scenario artifacts exist; deployment success is not scenario acceptance.
 The eight-run validation and production repair remain unexecuted.
 
-Stop the newly started idle fork consumer, retaining the failed job for diagnosis.
+The newly started fork consumer was stopped after confirming zero queued and
+zero started fork/archive jobs; the failed job remains available for diagnosis.
 Do not silently add credential access, change queue dispatch, patch notification
 behavior, or hand-copy a project to bypass the supported workflow. Request
 operator direction for this separate dependency/configuration fix. Source
