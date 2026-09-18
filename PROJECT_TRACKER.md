@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Active: [Omni MOFE segment eligibility](docs/work-packages/20260918_omni_mofe_segment_eligibility/package.md)
+— fix dominant-hillslope filtering of eligible treatment segments; preserve
+existing numerical parameters and single-OFE behavior.
+
 Completed incident remediation: [MOFE scenario artifact integrity and Abdisa run repair](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md)
 — bounded producer fixes, Forest acceptance, authorized three-host deployment,
 and all eight production repairs PASS. Retained archives, 120 WEPP jobs,

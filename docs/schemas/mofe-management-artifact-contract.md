@@ -4,13 +4,14 @@
 
 ## Scope
 
-This contract governs three existing multiple-overland-flow-element (MOFE)
+This contract governs four existing multiple-overland-flow-element (MOFE)
 landuse generation paths:
 
 1. soil-burn-severity (SBS) values consumed during MOFE landuse build;
 2. combined MOFE management files regenerated after global class-to-class
-   landuse mapping; and
-3. persisted canopy-cover overrides used during MOFE management synthesis.
+   landuse mapping;
+3. persisted canopy-cover overrides used during MOFE management synthesis; and
+4. per-segment eligibility during Omni treatment selection.
 
 It corrects propagation of existing user intent. It does not add a runtime
 artifact store, publication protocol, recovery system, event format, queue,
@@ -70,6 +71,24 @@ No canopy percentage, RAP formula, disturbed lookup, severity threshold, soil
 parameter, or fallback value changes.
 
 ## Compatibility matrix
+
+### Omni treatment eligibility (accepted 2026-09-18; implementation pending)
+
+MOFE Omni treatment selection must inspect per-segment assignments, not reject
+an entire hillslope because its dominant class is ineligible. A hillslope with
+any eligible segment reaches the existing Treatments segment loop. Thinning
+retains the existing exact forest/deciduous forest/mixed forest rules;
+prescribed fire retains the existing forest/shrub/grass segment mapping; mulch
+retains its existing nine grass/shrub/forest low/moderate/high severity fire
+classes. Ineligible segments keep their
+assignments. This removes the scalar gate without changing treatment parameters.
+Single-OFE selection, channel exclusion and configured hillslope slope/burn
+filters retain their existing behavior. MOFE missing/malformed segment state
+must fail explicitly rather than silently substitute scalar assignments.
+Regression evidence must parse combined and prepared managements for a mixed
+hillslope whose dominant class is ineligible. Existing saved results require
+an explicit rebuild/rerun; deployment alone does not refresh them.
+
 
 | State | Required result |
 | --- | --- |
