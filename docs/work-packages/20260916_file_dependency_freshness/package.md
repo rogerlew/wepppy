@@ -130,6 +130,6 @@ is intended; any formulas/defaults/unit-policy change requires a separate ADR.
 
 - [Seed inventory](artifacts/seed_inventory.md)
 - [Operation matrix](artifacts/operation_matrix.md)
-- [Trigger evidence](../../investigations/20260917_dead_horse_cli_freshness/findings.md)
+- Trigger evidence: `20260917_dead_horse_cli_freshness/findings.md` (retained in the originating worktree)
 - [Tracker](tracker.md)
 - [ExecPlan](prompts/completed/file_dependency_freshness_execplan.md)

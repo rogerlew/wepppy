@@ -21,7 +21,7 @@ Completed: [Daymet source preservation](docs/work-packages/20260917_daymet_sourc
 — source overwrite removed; 42 focused tests and real CLIGEN byte-parity checks pass.
 Full suite: 8,983 passed, 99 skipped; archive and browser artifact checks pass.
 
-Completed audit: [Dead Horse Creek Daymet M3](docs/work-packages/20260917_dead_horse_daymet_audit/package.md)
+Completed audit: Dead Horse Creek Daymet M3 (package artifact retained in the originating worktree)
 — numerical/browser checks pass; paper-window rainfall remains zero. Found mislabeled
 Daymet source-parquet units and retained CLIGEN quality warning; 858 protected files unchanged.
 
@@ -31,11 +31,11 @@ tests pass. Rebuilt development UI/RQ/WEPP, native Omni, archive/recovery and
 interleaved cache acceptance complete. Explicit unresolved boundaries and
 existing runtime failures remain documented; no production deployment.
 
-Completed audit: [Dead Horse Creek GridMET rerun](docs/work-packages/20260916_dead_horse_gridmet_audit/package.md)
+Completed audit: Dead Horse Creek GridMET rerun (package artifact retained in the originating worktree)
 — numerical checks pass; August 5–12 source rainfall is zero, P50 unchanged,
 CLI ctime change explains stale status. No live mutation.
 
-Completed audit: [Dead Horse Creek M3](docs/work-packages/20260916_dead_horse_m3_audit/package.md)
+Completed audit: Dead Horse Creek M3 (package artifact retained in the originating worktree)
 — saved calculations/source/report pass; Rengers et al. (2024) comparison identifies
 SBS coverage, basin-size and storm-pairing limits. No run or production changes.
 

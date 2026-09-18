@@ -72,9 +72,9 @@ generates climate inputs for workflows that select it; WEPPpy also supports
 other climate-data workflows. WEPP performs the physical simulation. WEPPpy
 coordinates those stages and exposes their results.
 
-Sources for the added components: [TOPAZ repository](../../topaz/README.md),
+Sources for the added components: [TOPAZ repository](https://github.com/rogerlew/topaz/blob/main/README.md),
 [WEPPpy TOPAZ adapter](../wepppy/topo/topaz/topaz.py),
-[CLIGEN repository](../../jimf-cligen532/README.md), and
+[CLIGEN repository](https://github.com/rogerlew/jimf-cligen532/blob/master/README.md), and
 [WEPPpy CLIGEN wrapper](../wepppy/climates/cligen/README.md).
 
 ## Repository details
@@ -195,7 +195,7 @@ terrain, flow-direction, hillslope, and network products. WBT is one supported
 delineation backend; some WEPPcloud workflows specifically require it, including
 automatic outlet discovery and reuse of precomputed channel rasters.
 
-Sources: [toolkit README](../../weppcloud-wbt/README.md),
+Sources: [toolkit README](https://github.com/rogerlew/weppcloud-wbt/blob/master/README.md),
 [WEPPpy adapter](../wepppy/topo/wbt/wbt_topaz_emulator.py), and
 [release/cutover guide](dev-notes/weppcloud-wbt-release-cutover.md).
 
@@ -224,8 +224,8 @@ output in `_peridot.log`, and performs downstream table/manifest processing.
 The sibling Rust checkout is the development source; its presence alone does
 not replace those vendored executables.
 
-Sources: [Peridot overview](../../peridot/README.md),
-[output contract](../../peridot/docs/contracts/watershed-output-contract.md), and
+Sources: [Peridot overview](https://github.com/wepp-in-the-woods/peridot/blob/main/README.md),
+[output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md), and
 [WEPPpy runner](../wepppy/topo/peridot/peridot_runner.py).
 
 ### rosetta — soil hydraulic parameter estimation
@@ -246,7 +246,7 @@ associated Parquet files. This is a bundled model-data store, separate from the
 WEPPcloud account database and the per-run query engine. Docker image builds
 install Rosetta as a Python package.
 
-Sources: [Rosetta README](../../rosetta/README.md),
+Sources: [Rosetta README](https://github.com/rogerlew/rosetta/blob/main/README.md),
 [SSURGO implementation](../wepppy/soils/ssurgo/ssurgo.py), and
 [soil-building documentation](../wepppy/soils/README.md).
 
@@ -268,7 +268,7 @@ The source checkout and the server's selected release are separate identities.
 Editing or building the sibling repository does not automatically change the
 binary selected for a WEPPcloud run.
 
-Sources: [model README](../../wepp-forest/README.md),
+Sources: [model README](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/README.md),
 [runner implementation](../wepp_runner/wepp_runner.py), and
 [prompt/capability contract](../wepp_runner/README.md#watershed-prompt-contracts-legacy-vs-modern-binaries).
 
@@ -290,10 +290,10 @@ The desktop bootstrap explicitly selects `bin/wepp_reveg.exe` with its
 revegetation run uses a binary built from this exact checkout, or that the
 current forest and revegetation branches have identical fixes.
 
-Sources: [build README](../../wepp-forest-revegetation/README.md),
-[soil input reader](../../wepp-forest-revegetation/src/input.for),
-[infiltration parameters](../../wepp-forest-revegetation/src/infpar.for), and
-[growth code](../../wepp-forest-revegetation/src/grow.for).
+Sources: [build README](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/README.md),
+[soil input reader](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/src/input.for),
+[infiltration parameters](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/src/infpar.for), and
+[growth code](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/src/grow.for).
 
 ### wepppy-win-bootstrap — local project execution
 
@@ -319,8 +319,8 @@ The similarly named **WEPPcloud Bootstrap** feature inside WEPPpy is a separate
 Git-backed, server-side input-editing workflow. See its
 [specification](weppcloud-bootstrap-spec.md).
 
-Sources: [desktop README](../../wepppy-win-bootstrap/README.md) and
-[project runner](../../wepppy-win-bootstrap/scripts/run_project.py).
+Sources: [desktop README](https://github.com/rogerlew/wepppy-win-bootstrap/blob/master/README.md) and
+[project runner](https://github.com/rogerlew/wepppy-win-bootstrap/blob/master/scripts/run_project.py).
 
 ## End-to-end data flow
 
@@ -643,7 +643,7 @@ release and handoff. This is distinct from the GitHub workflow that subsequently
 builds and publishes the WEPPcloud container image.
 
 The authoritative instructions are
-[wepp-forest/AGENTS.md](../../wepp-forest/AGENTS.md),
+[wepp-forest/AGENTS.md](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/AGENTS.md),
 [wepp_runner/AGENTS.md](../wepp_runner/AGENTS.md), and the
 [binary lifecycle policy](binary-lifecycle.md).
 
@@ -655,7 +655,7 @@ The authoritative instructions are
    Retain evidence of any source changes not represented by that commit; a
    directory name or a HEAD hash alone cannot describe a dirty build tree.
 2. **Build both model roles.** The
-   [dated release builder](../../wepp-forest/tools/build_wepp_dated_release.sh)
+   [dated release builder](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/tools/build_wepp_dated_release.sh)
    defaults to `/usr/bin/gfortran` and builds watershed and hillslope executables
    sequentially to avoid include-file copy races. It installs dated artifacts
    under `wepp-forest/release/`, generates their sidecars, prints hashes/compiler
@@ -696,7 +696,7 @@ wepp_runner/bin/
   wepp_<tag>_hill.json
 ```
 
-The [sidecar generator](../../wepp-forest/tools/generate_wepp_release_sidecar.py)
+The [sidecar generator](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/tools/generate_wepp_release_sidecar.py)
 emits schema `wepp-binary-release-metadata-v1`. A retained example is
 [wepp_260803.json](../wepp_runner/bin/wepp_260803.json).
 
@@ -776,7 +776,7 @@ interchange suite, as noted in the repository details above.
 
 ### peridot
 
-[Rust integration tests](../../peridot/tests/) cover hillslope slope scalars,
+[Rust integration tests](https://github.com/wepp-in-the-woods/peridot/tree/main/tests) cover hillslope slope scalars,
 edge flowpaths, channel walking, downstream road traces, field-flowpath schemas,
 centroid projection, and Parquet/README output contracts. Inline Rust tests also
 exercise raster operations, interpolation helpers, flowpath selection, CLI
@@ -785,8 +785,8 @@ cases with retained watershed fixtures.
 
 `cargo test` is the Cargo test entry point; building requires the repository's
 GDAL/PROJ toolchain. See the
-[manifest tests](../../peridot/tests/watershed_parquet_manifest.rs) and
-[centroid tests](../../peridot/tests/centroid_projection.rs) for artifact and
+[manifest tests](https://github.com/wepp-in-the-woods/peridot/blob/main/tests/watershed_parquet_manifest.rs) and
+[centroid tests](https://github.com/wepp-in-the-woods/peridot/blob/main/tests/centroid_projection.rs) for artifact and
 coordinate checks.
 
 ### weppcloud-wbt
@@ -797,48 +797,48 @@ stream pruning, raster clipping, and VRT/windowed GeoTIFF reads. Small raster
 fixtures and retained terrain examples support the checks. The README documents
 `cargo test -p whitebox_raster --tests` and `cargo test -p whitebox-tools-app`.
 
-[Python wrapper tests](../../weppcloud-wbt/tests/) separately check argument
+[Python wrapper tests](https://github.com/rogerlew/weppcloud-wbt/tree/master/tests) separately check argument
 forwarding for iterative pruning and subprocess failure/timeout containment.
 The forwarding test probes the wrapper without executing the hydrologic tool;
 the containment tests use a controlled fake executable. See also
-[raster I/O tests](../../weppcloud-wbt/whitebox-raster/tests/).
+[raster I/O tests](https://github.com/rogerlew/weppcloud-wbt/tree/master/whitebox-raster/tests).
 
 ### rosetta
 
-[Regression tests](../../rosetta/tests/test_rosetta_regression.py) compare
+[Regression tests](https://github.com/rogerlew/rosetta/blob/main/tests/test_rosetta_regression.py) compare
 Rosetta2/Rosetta3 predictions with fixed numerical baselines for retention
 parameters, conductivity, field capacity, and wilting point. The repository
 also retains input/output/validation datasets and an older PTF test script.
 
-The [performance suite](../../rosetta/tests/test_performance.py) is an opt-in
+The [performance suite](https://github.com/rogerlew/rosetta/blob/main/tests/test_performance.py) is an opt-in
 timing harness, enabled with `ROSETTA_RUN_BENCHMARKS=1`; it is skipped by default.
 Prediction tests need the package dependencies and bundled model database.
 
 ### wepp-forest
 
-[Pytest suites](../../wepp-forest/tests/) include numerical-instability
+[Pytest suites](https://github.com/wepp-in-the-woods/wepp-forest/tree/wepp_260430_negmeltfix_comparator/tests) include numerical-instability
 regressions, hillslope/watershed input and output contracts, pass metadata and
 calendar guards, output-comparison tools, and fixture/watchlist validation.
 Some checks inspect source or retained outputs; they do not all execute a new
 simulation.
 
 Executable validation uses host smoke runs, fixture replay, and the permanent
-[hillslope watchlist](../../wepp-forest/docs/ablation/hillslope_watchlist.csv).
-The [test matrix](../../wepp-forest/docs/test-matrix.md) specifies builds of both
+[hillslope watchlist](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/docs/ablation/hillslope_watchlist.csv).
+The [test matrix](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/docs/test-matrix.md) specifies builds of both
 `wepp` and `wepp_hill`, model smoke checks, and pytest according to change type.
 These checks require compatible compiled binaries and the specified run fixtures.
 
 ### wepp-forest-revegetation
 
 No automated test suite or dedicated regression harness was found in this
-checkout. Its [README](../../wepp-forest-revegetation/README.md) documents
+checkout. Its [README](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/README.md) documents
 compilation. Tests in `wepp-forest` do not establish parity or coverage for this
 separate source tree and executable lineage.
 
 ### wepppy-win-bootstrap
 
-The repository retains [sample parser/output files](../../wepppy-win-bootstrap/scripts/wepp/out/test/)
-and paired [WEPPcloud/Apple Silicon loss outputs](../../wepppy-win-bootstrap/validation/unsupported-watercolor/).
+The repository retains [sample parser/output files](https://github.com/rogerlew/wepppy-win-bootstrap/tree/master/scripts/wepp/out/test/)
+and paired [WEPPcloud/Apple Silicon loss outputs](https://github.com/rogerlew/wepppy-win-bootstrap/tree/master/validation/unsupported-watercolor/).
 These support inspection and manual comparisons. No automated test runner or
 assertion-based regression suite was found; the presence of these data files
 does not establish an automated cross-platform parity check.
@@ -846,14 +846,14 @@ does not establish an automated cross-platform parity check.
 ### topaz
 
 No automated test suite was found in the inspected
-[TOPAZ repository](../../topaz/README.md). WEPPpy maintains downstream TOPAZ
+[TOPAZ repository](https://github.com/rogerlew/topaz/blob/main/README.md). WEPPpy maintains downstream TOPAZ
 adapter tests and terrain fixtures, including subprocess guards, but those
 belong to WEPPpy and are not a standalone TOPAZ numerical regression suite.
 
 ### jimf-cligen532
 
-The repository contains a [broken station-parameter fixture](../../jimf-cligen532/test/broken_pars/NuevaAldea.par).
-Its [GitLab CI definition](../../jimf-cligen532/.gitlab-ci.yml) builds Linux and
+The repository contains a [broken station-parameter fixture](https://github.com/rogerlew/jimf-cligen532/blob/master/test/broken_pars/NuevaAldea.par).
+Its [GitLab CI definition](https://github.com/rogerlew/jimf-cligen532/blob/master/.gitlab-ci.yml) builds Linux and
 Windows artifacts; it does not define a numerical test stage. No automated
 assertion-based suite was found in the checkout. Downstream WEPPpy tests cover
 station selection, climate wrappers, retries, and selected parity cases, such
@@ -987,14 +987,14 @@ precompiled executables with separate provenance.
 | --- | --- | --- |
 | `wepppy` | BSD 3-Clause (`BSD-3-Clause`) | Root [license.txt](../license.txt); copyright University of Idaho, 2018 |
 | `wepppyo3` | BSD 3-Clause (`BSD-3-Clause`) | Root [LICENSE](../../wepppyo3/LICENSE); copyright WEPP in the Woods, 2023 |
-| `peridot` | MIT (`MIT`) | Root [LICENSE](../../peridot/LICENSE); copyright Roger Lew, 2026; [Cargo.toml](../../peridot/Cargo.toml) also declares MIT. The README preserves separate terms for bundled third-party components |
-| `weppcloud-wbt` | MIT (`MIT`) | Root [LICENSE.txt](../../weppcloud-wbt/LICENSE.txt) names John Lindsay for core WBT/tools and Roger Lew for WEPPcloud tools/amendments; [Python package metadata](../../weppcloud-wbt/pyproject.toml) also declares MIT |
-| `rosetta` | GNU GPL version 2 or later (`GPL-2.0-or-later`) | Root [license.txt](../../rosetta/license.txt) explicitly permits version 2 or any later version; the README's shorter “GNU GPL V2” description omits that qualifier |
-| `wepp-forest` | No repository-level license declaration found; `CC0-1.0` on five rewritten routines | SPDX headers declare CC0 in [imppol.f90](../../wepp-forest/src/imppol.f90), [imppow.f90](../../wepp-forest/src/imppow.f90), [impris.f90](../../wepp-forest/src/impris.f90), [impsvb.f90](../../wepp-forest/src/impsvb.f90), and [impsvd.f90](../../wepp-forest/src/impsvd.f90); these are file-level declarations |
-| `wepp-forest-revegetation` | No repository-level license declaration found | Source includes Numerical Recipes Software copyright notices in `imppol.for`, `imppow.for`, `impris.for`, `impsvb.for`, and [impsvd.for](../../wepp-forest-revegetation/src/impsvd.for); the forest repository's CC0 rewrite declarations do not describe these separate files |
-| `wepppy-win-bootstrap` | MIT (`MIT`) | Root [LICENSE](../../wepppy-win-bootstrap/LICENSE); copyright University of Idaho, 2026. The README applies MIT to repository-authored code and preserves separate terms/notices for bundled third-party code, executables, and datasets |
-| `topaz` | No repository-level license declaration found | No license file found; [README](../../topaz/README.md) credits Jurgen D. Garbrecht as author and Roger Lew as repository maintainer without declaring a license |
-| `jimf-cligen532` | No repository-level license declaration found | [README](../../jimf-cligen532/README.md) attributes source and executables to Jim Frankenberger at USDA-ARS without declaring a license; [cligen.f](../../jimf-cligen532/cligen532/cligen.f) describes its ACM chi-square code as public domain, a component-specific statement |
+| `peridot` | MIT (`MIT`) | Root [LICENSE](https://github.com/wepp-in-the-woods/peridot/blob/main/LICENSE); copyright Roger Lew, 2026; [Cargo.toml](https://github.com/wepp-in-the-woods/peridot/blob/main/Cargo.toml) also declares MIT. The README preserves separate terms for bundled third-party components |
+| `weppcloud-wbt` | MIT (`MIT`) | Root [LICENSE.txt](https://github.com/rogerlew/weppcloud-wbt/blob/master/LICENSE.txt) names John Lindsay for core WBT/tools and Roger Lew for WEPPcloud tools/amendments; [Python package metadata](https://github.com/rogerlew/weppcloud-wbt/blob/master/pyproject.toml) also declares MIT |
+| `rosetta` | GNU GPL version 2 or later (`GPL-2.0-or-later`) | Root [license.txt](https://github.com/rogerlew/rosetta/blob/main/license.txt) explicitly permits version 2 or any later version; the README's shorter “GNU GPL V2” description omits that qualifier |
+| `wepp-forest` | No repository-level license declaration found; `CC0-1.0` on five rewritten routines | SPDX headers declare CC0 in [imppol.f90](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/src/imppol.f90), [imppow.f90](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/src/imppow.f90), [impris.f90](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/src/impris.f90), [impsvb.f90](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/src/impsvb.f90), and [impsvd.f90](https://github.com/wepp-in-the-woods/wepp-forest/blob/wepp_260430_negmeltfix_comparator/src/impsvd.f90); these are file-level declarations |
+| `wepp-forest-revegetation` | No repository-level license declaration found | Source includes Numerical Recipes Software copyright notices in `imppol.for`, `imppow.for`, `impris.for`, `impsvb.for`, and [impsvd.for](https://github.com/wepp-in-the-woods/wepp-forest-revegetation/blob/master/src/impsvd.for); the forest repository's CC0 rewrite declarations do not describe these separate files |
+| `wepppy-win-bootstrap` | MIT (`MIT`) | Root [LICENSE](https://github.com/rogerlew/wepppy-win-bootstrap/blob/master/LICENSE); copyright University of Idaho, 2026. The README applies MIT to repository-authored code and preserves separate terms/notices for bundled third-party code, executables, and datasets |
+| `topaz` | No repository-level license declaration found | No license file found; [README](https://github.com/rogerlew/topaz/blob/main/README.md) credits Jurgen D. Garbrecht as author and Roger Lew as repository maintainer without declaring a license |
+| `jimf-cligen532` | No repository-level license declaration found | [README](https://github.com/rogerlew/jimf-cligen532/blob/master/README.md) attributes source and executables to Jim Frankenberger at USDA-ARS without declaring a license; [cligen.f](https://github.com/rogerlew/jimf-cligen532/blob/master/cligen532/cligen.f) describes its ACM chi-square code as public domain, a component-specific statement |
 
 “No repository-level license declaration found” describes the inspection result,
 not a public-domain designation. Copyright notices are recorded separately from
