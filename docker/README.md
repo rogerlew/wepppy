@@ -149,6 +149,11 @@ container identities before production.
 
 Then explicitly start the profiled serial consumer on Forest:
 
+The fork worker needs the same Discord token-file mount as the dedicated wepp3
+worker: importing the shared RQ task module reads that file even for fork jobs.
+The existing `DISCORD_BOT_TOKEN_FILE` setting defaults to `/dev/null` when
+notifications are disabled; do not bypass this dependency by changing queues.
+
 ```bash
 docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profile fork-archive up -d rq-worker-fork-archive
 ```

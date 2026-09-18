@@ -9,7 +9,7 @@
 **Started**: 2026-09-17 22:39 UTC
 **Current phase**: local gates and Forest deployment passed; live acceptance blocked
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: operator direction on unrelated fork-worker dependency
+**Next milestone**: apply approved missing fork-worker mount and resume acceptance
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -31,6 +31,10 @@ copying because the dedicated worker lacks the import-time Discord token file.
 Archive/restore share the same dependency. No scenario or production repair has
 run. See the Forest artifact's **Blocking Forest Dependency** section; a separate
 configuration/dependency correction needs operator direction.
+Roger subsequently approved that separate minimal fix. Forest's fork profile
+will reuse the existing Discord token-file secret alias, as wepp3 already does;
+no Python or queue behavior changes are needed. Validate resolved Compose,
+existing startup-contract tests, and a real clone under the worker identity.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A

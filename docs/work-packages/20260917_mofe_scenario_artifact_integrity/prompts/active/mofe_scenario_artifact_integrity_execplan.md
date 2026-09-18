@@ -111,6 +111,14 @@ files, and completed result summaries.
 
 ## Decision Log
 
+- Decision: Roger approved the separate minimal fork-worker dependency fix on
+  2026-09-18. Add the existing Discord token-file secret alias to Forest's
+  production Compose fork profile, matching the dedicated wepp3 worker.
+  Rationale: the retained import failure proves the missing mount; this restores
+  the existing worker import contract without changing Python, notifications,
+  queue dispatch, identities, or adding infrastructure. Recreate only the stopped
+  Forest fork worker with the already-validated image, then retry the real clone.
+
 - Decision: include the public canopy mutation's existing-writer call and retain
   explicit canopy overrides when rebuilding MOFE summaries. Preserve single-OFE
   behavior and RAP precedence. Two independent reviewers accepted the delta.
