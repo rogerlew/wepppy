@@ -1,12 +1,12 @@
 # Correctness and user-experience review - MOFE scenario artifact integrity
 
-> Code and Forest review PASS; production deployment remains operator-owned.
+> Code, Forest, and all eight production repairs PASS; no blocking findings.
 
 The compact pre-implementation contract at SHA-256
 `aab2b182422f900a5a4d8ce96d09b475bc77bdee3ac904e580e2fecb5361e896`
 passed independent correctness review with no unresolved High or Medium contract
-finding. Implementation and Forest evidence gates now pass; production repair
-remains pending explicit deployment confirmation.
+finding. Implementation, Forest, authorized deployment, and production repair
+gates now pass. Final production review independently recomputed 520 values.
 
 ## Metadata
 
@@ -100,8 +100,8 @@ remains pending explicit deployment confirmation.
 - **Implementation findings**: COR-01, COR-02, COR-03 resolved by direct artifact
   tests and bounded source correction. No unresolved High/Medium code finding.
 - **Forest gate**: PASS, independent `correctness_review`, 2026-09-18 UTC.
-- **Release recommendation**: hand off to Roger's deployment gate; no production
-  deployment or repair is authorized by this review.
+- **Production gate**: PASS, all eight runs, 2026-09-18 UTC. Roger separately
+  authorized deployment and repair; this review does not confer authority.
 - **Reviewer scope**: source and tests, including public canopy edit, retained
   MOFE overrides, real SBS classification, generated/prepared managements, writer
   failure/retry, absent state, and nonsequential segment IDs. Local tests isolate
@@ -116,6 +116,15 @@ remains pending explicit deployment confirmation.
   scientific caveats remain interpretation limits, not artifact mismatches.
 
 ## Artifact Observability Gate
+
+Final production review: verified all eight recoverable archives, exact intended
+maps/overrides, full generated/prepared soil and management checks, 120 completed
+WEPP jobs, 16 exact authorized downloads, and all 65 numeric columns per run.
+Consolidated schema/order and source hashes match; original four identical
+response pairs are gone. Bundle/CSV hashes and job receipts are in the
+[repair ledger](20260917_wepp1_repair_ledger.md). No blocking helper findings.
+Private owner-session UI remains untested; extreme gross erosion and baseline/SBS
+comparability remain scientific interpretation limits, not artifact failures.
 
 - [x] Comparable project layout and canonical artifact inventory are named in the
       canonical contract.

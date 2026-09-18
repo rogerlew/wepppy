@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+import shlex
 import sys
 from collections import Counter
 from pathlib import Path
@@ -47,10 +48,40 @@ def same_values(left, right):
                 and math.isclose(left, right, rel_tol=1e-5, abs_tol=1e-5))
     return left == right
 
+def soil_scientific_tokens(text):
+    rows = []
+    for line in text.splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        row = []
+        for token in shlex.split(line):
+            try:
+                value = float(token)
+            except ValueError:
+                value = token
+            else:
+                if not math.isfinite(value):
+                    raise ValueError(f'Non-finite soil token: {token}')
+            row.append(value)
+        rows.append(row)
+    return rows
+
 table = pd.read_parquet(root / 'watershed/hillslopes.parquet')
 wepp_ids = {str(int(row.topaz_id)): int(row.wepp_id) for row in table.itertuples()}
 failures = []
+if '--snapshot' in sys.argv:
+    before = json.loads(Path(sys.argv[sys.argv.index('--snapshot') + 1]).read_text())['states']['landuse']
+    for field in ('domlc_d', 'domlc_mofe_d', '_mapping'):
+        if state[field] != before[field]:
+            failures.append({'stage': 'persisted_intent_changed', 'field': field})
+    for key in classes:
+        prior = before['managements'][key]
+        current = state['managements'][key]
+        for field in ('cancov_override', 'inrcov_override', 'rilcov_override'):
+            if prior.get('py/state', prior).get(field) != current.get('py/state', current).get(field):
+                failures.append({'stage': 'cover_intent_changed', 'class': key, 'field': field})
 observations = []
+serialized_soil_cache = {}
 for topaz, segments in sorted(assignments.items()):
     keys = [str(v) for _, v in sorted(segments.items(), key=lambda kv: int(kv[0]))]
     wanted = [expected[key] for key in keys]
@@ -84,6 +115,18 @@ for topaz, segments in sorted(assignments.items()):
         prepared_soil = WeppSoilUtil(str(root / f'wepp/runs/p{wepp_ids[topaz]}.sol')).obj['ofes']
         if len(soil) != len(keys) or not same_values(expected_soil.obj['ofes'], prepared_soil):
             failures.append({'topaz': topaz, 'stage': 'soil_propagation'})
+        # Canonical prep serializes the transformed object, recomputing the 9002
+        # hydraulic columns that WeppSoilUtil.obj does not retain when parsing.
+        scientific_key = json.dumps(
+            {key: value for key, value in expected_soil.obj.items() if key != 'header'},
+            sort_keys=True,
+        )
+        if scientific_key not in serialized_soil_cache:
+            serialized_soil_cache[scientific_key] = soil_scientific_tokens(str(expected_soil))
+        if serialized_soil_cache[scientific_key] != soil_scientific_tokens(
+            (root / f'wepp/runs/p{wepp_ids[topaz]}.sol').read_text()
+        ):
+            failures.append({'topaz': topaz, 'stage': 'soil_serialized_propagation'})
         if any(not math.isclose(ofe['sat'], .75) for ofe in prepared_soil):
             failures.append({'topaz': topaz, 'stage': 'initial_saturation'})
     observations.append({'topaz': topaz, 'wepp_id': wepp_ids[topaz], 'classes': keys,

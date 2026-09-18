@@ -1,12 +1,17 @@
 # MOFE scenario artifact integrity and Abdisa run repair
 
-**Status**: Open (2026-09-17)
+**Status**: Closed 2026-09-18
 **Timezone**: UTC
 
 **Deployment authority update (2026-09-18)**: Roger explicitly requested deployment
 on wepp1, wepp2, and wepp3. That request supersedes the earlier operator-only
 deployment restriction below for this ordered canonical rollout. Production
-scenario repair remains separate from this deployment turn.
+scenario repair was subsequently authorized for all eight named runs and is
+complete. The [repair ledger](artifacts/20260917_wepp1_repair_ledger.md) retains
+archives, 120 completed WEPP jobs, 3,640-hillslope input checks, refreshed results,
+and independent review evidence. [Download the repaired summary](artifacts/mofe-production-hillslope-response-summary.csv).
+The [completed execution plan](prompts/completed/mofe_scenario_artifact_integrity_execplan.md)
+records the decisions and final outcome.
 
 ## Overview
 
@@ -56,8 +61,8 @@ revision to WEPPcloud.
 
 ### Explicitly Out of Scope
 
-- Deploying the candidate to wepp1, wepp2, or wepp3. The requesting operator
-  owns that deployment and must explicitly confirm it is complete.
+- Deploying without operator authorization. Roger subsequently authorized and
+  confirmed the ordered wepp1/wepp2/wepp3 rollout recorded above.
 - Mutating any Abdisa production run before that deployment confirmation.
 - Changing disturbed lookup values, treatment formulas, severity thresholds,
   cover percentages selected by the user, soil parameterization, or RAP formulas.
@@ -106,11 +111,13 @@ revision to WEPPcloud.
 
 Generated-artifact acceptance follows
 `docs/standards/generated-artifact-validation-standard.md`. The highest supported
-status is currently `environment validated`: implementation `f4152ac69` passed
+status is `incident resolved`: implementation `f4152ac69` passed
 focused and full-suite tests. Forest's eight real scenarios, parsed generated
 inputs, fresh outputs, browser/download, failure/retry, and archive/restore all
-pass, with final independent correctness and QA PASS. Production deployment,
-affected-run repair, and incident resolution remain separate future gates.
+pass, with final independent correctness and QA PASS. Production deployment and
+all eight affected-run repairs now pass the retained artifact gates. Saved
+scientific settings and private access are preserved; private owner-session UI
+was not tested. Scientific interpretation caveats remain explicit in the ledger.
 
 ## Stakeholders
 
@@ -140,9 +147,9 @@ affected-run repair, and incident resolution remain separate future gates.
 - [x] Forest evidence proves the prior false-positive condition is absent: a
       successful job and correct NoDb state are accompanied by correct generated
       `landuse` and `wepp/runs` artifacts.
-- [ ] The operator explicitly confirms the accepted revision has been deployed to
+- [x] The operator explicitly confirms the accepted revision has been deployed to
       WEPPcloud before any production run mutation begins.
-- [ ] All eight Abdisa runs are processed on wepp1, with pre-repair artifacts
+- [x] All eight Abdisa runs are processed on wepp1, with pre-repair artifacts
       retained, exact job IDs recorded, generated inputs verified, WEPP rerun,
       and a refreshed hillslope response summary compared with the report.
 - [x] Independent correctness and QA reviews pass with no unresolved high or
@@ -155,7 +162,7 @@ affected-run repair, and incident resolution remain separate future gates.
 - **ADR required**: no.
 - **ADR links**: not applicable.
 - **Decision provenance captured**: yes; the user requested correction of stored
-  scenario propagation and explicitly reserved production deployment to himself.
+  scenario propagation and subsequently delegated production deployment and repair.
 
 The fix propagates existing classified values, selected management classes, and
 stored cover overrides. If implementation would change formulas, thresholds,
@@ -175,10 +182,8 @@ ADR before proceeding.
 
 ### Blocks
 
-- Production repair is blocked until Forest acceptance passes and Roger confirms
-  his WEPPcloud deployment is complete.
-- Package closure is blocked until the production repair ledger covers all eight
-  named runs and the refreshed summary has been checked.
+- Resolved: Forest acceptance and authorized production rollout passed.
+- Resolved: all eight production repairs and the refreshed summary passed.
 
 ## Related Packages
 

@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: wepp1/wepp2/wepp3 deployment PASS at accepted revision f22ac0d54
+**Current phase**: Closed — deployment and all eight production repairs PASS
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: eight production run repairs and generated-artifact validation; none started
+**Next milestone**: none; any further scientific changes require separate scope
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -34,7 +34,10 @@ review passed. All eight supported scenarios completed 15/15 WEPP jobs each;
 all generated/prepared hillslope management and soil checks pass. Fresh summary,
 browser/download, real failure/retry, and archive/restore checks pass, including
 7,897 restored file hashes. Retained evidence and scientific interpretation
-caveats are in the Forest artifact. No production repair has run.
+caveats are in the Forest artifact and completed production ledger. All eight
+production repairs and pre-repair archives pass; final WEPP finished 15:41:51 UTC.
+Correctness and QA accepted all evidence, including 520 independently recomputed
+summary values. Retained bundle and CSV hashes are in the production ledger.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -54,14 +57,13 @@ caveats are in the Forest artifact. No production repair has run.
 - [x] Restore or clone the actual Rithet Creek project on Forest and run all
       scenario roles through landuse, WEPP preparation, WEPP, and summary export.
 - [x] Present Forest evidence and stop for Roger's WEPPcloud deployment.
-- [ ] After explicit deployment confirmation, manually process all eight Abdisa
+- [x] After explicit deployment confirmation, manually process all eight Abdisa
       runs on wepp1 and complete the repair ledger.
-- [ ] Compare the refreshed hillslope response summary and close the package.
+- [x] Compare the refreshed hillslope response summary and close the package.
 
 ### In Progress
 
-- [ ] Perform per-run preservation and preflight before production repair;
-      operator-authorized deployment is complete, but no repair has started.
+None. All repair and closure gates passed.
 
 ### Blocked
 
@@ -232,43 +234,43 @@ runtime coordination machinery.
 - [x] Standalone contract ancestor precedes implementation.
 - [x] Focused regressions fail before and pass after the correction.
 - [x] `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` passes.
-- [ ] `wctl run-pytest tests --maxfail=1` passes or a concrete unrelated blocker is retained.
+- [x] `wctl run-pytest tests --maxfail=1` passes (8,994 tests, 99 skipped).
 
 ### Correctness and Security
 
-- [ ] Correctness artifact passes with no unresolved high/medium findings.
-- [ ] QA review passes with no unresolved high/medium findings.
-- [ ] Existing authentication, path, locking, cache, and RQ status boundaries are
+- [x] Correctness artifact passes with no unresolved high/medium findings.
+- [x] QA review passes with no unresolved high/medium findings.
+- [x] Existing authentication, path, locking, cache, and RQ status boundaries are
       preserved.
-- [ ] Security impact remains low; any attack-surface expansion triggers a new
+- [x] Security impact remains low; any attack-surface expansion triggers a new
       security review.
 
 ### Documentation and Observability
 
 - [x] Canonical contract and affected operator/developer docs are updated.
-- [ ] All changed Markdown passes `wctl doc-lint` and spelling preview.
-- [ ] Working, failed, and completed generated artifacts remain browsable and
+- [x] All changed Markdown passes `wctl doc-lint` and spelling preview.
+- [x] Working, failed, and completed generated artifacts remain browsable and
       archivable under the normal project boundary.
-- [ ] No parameterization change occurred; otherwise an ADR exists first.
+- [x] No parameterization change occurred; otherwise an ADR exists first.
 
 ### Forest Acceptance
 
-- [ ] Exact candidate revision and container checksums recorded.
-- [ ] Actual project source and clone/restore provenance recorded.
-- [ ] All scenario jobs and IDs recorded.
-- [ ] `landuse` and `wepp/runs` management manifests and parsed values retained.
-- [ ] Soil artifacts and SBS class distributions retained where applicable.
-- [ ] WEPP outputs and refreshed hillslope summary compared.
-- [ ] Rollback/retry behavior exercised without destroying failure evidence.
+- [x] Exact candidate revision and container checksums recorded.
+- [x] Actual project source and clone/restore provenance recorded.
+- [x] All scenario jobs and IDs recorded.
+- [x] `landuse` and `wepp/runs` management manifests and parsed values retained.
+- [x] Soil artifacts and SBS class distributions retained where applicable.
+- [x] WEPP outputs and refreshed hillslope summary compared.
+- [x] Rollback/retry behavior exercised without destroying failure evidence.
 
 ### Production Repair
 
-- [ ] Roger's deployment confirmation and deployed revision recorded.
-- [ ] wepp1 host/path/service preflight passed.
-- [ ] Pre-repair snapshots and hashes retained for all eight runs.
-- [ ] All eight runs rebuilt/rerun with exact job IDs and terminal states.
-- [ ] Post-repair inputs, outputs, and summary comparison retained.
-- [ ] No run was deleted, renamed, or silently partially repaired.
+- [x] Roger's deployment confirmation and deployed revision recorded.
+- [x] wepp1 host/path/service preflight passed.
+- [x] Pre-repair snapshots and hashes retained for all eight runs.
+- [x] All eight runs rebuilt/rerun with exact job IDs or sync receipts and terminal states.
+- [x] Post-repair inputs, outputs, and summary comparison retained.
+- [x] No run was deleted, renamed, or silently partially repaired.
 
 ## Progress Notes
 

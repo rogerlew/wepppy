@@ -7,13 +7,11 @@
 
 ## Purpose
 
-Active incident remediation: [MOFE scenario artifact integrity and Abdisa run repair](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md)
-— correct classified SBS consumption, global mapping artifact regeneration, and
-thinning canopy propagation. Actual-project Forest acceptance is a hard gate;
-Roger authorized the completed wepp1/wepp2/wepp3 deployment; all eight named runs
-still require manual rebuild/rerun and retained evidence. The operator rejected an expanded runtime
-publication/recovery design; the package is back to three minimal producer fixes
-with focused artifact tests and Forest acceptance.
+Completed incident remediation: [MOFE scenario artifact integrity and Abdisa run repair](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md)
+— bounded producer fixes, Forest acceptance, authorized three-host deployment,
+and all eight production repairs PASS. Retained archives, 120 WEPP jobs,
+3,640-hillslope content checks, fresh summaries, and independent reviews close
+the incident without new runtime machinery or changed scientific parameters.
 
 Completed investigation: [Dead Horse earlier-storm correspondence](docs/work-packages/20260917_dead_horse_storm_correspondence/package.md)
 — measured East Fork gauge peaks support July 31/August 2 candidates; specific deposit
@@ -545,34 +543,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
-
-### MOFE Scenario Artifact Integrity and Abdisa Run Repair
-
-**Started**: 2026-09-17 UTC
-
-**Priority/Security**: Critical / `low`
-
-**Link**: [docs/work-packages/20260917_mofe_scenario_artifact_integrity/](docs/work-packages/20260917_mofe_scenario_artifact_integrity/)
-
-**Scope**: Correct three confirmed MOFE propagation defects, prove the exact
-candidate on an actual Rithet Creek clone/restored project on Forest, then stop
-for the operator's WEPPcloud deployment before manually rebuilding and rerunning
-all eight Abdisa production runs.
-
-**Status**: Bounded propagation correction implemented in two production files;
-91 focused tests passed and independent correctness/QA reviews PASS. The public
-canopy mutation now invokes the existing writer, and MOFE summary rebuilding
-retains the selection. All 8,994 repository tests passed (99 skipped). Forest preflight passed identity
-and idle-queue checks; candidate `ffa241766` deployed successfully without a branch
-switch. Roger approved the one-line missing fork-worker secret-mount correction
-`253188229`; startup tests and both reviews passed. All eight real scenarios
-completed 15/15 WEPP jobs each, with parsed generated/prepared inputs, fresh
-distinct summaries, browser/download, failure/retry, and archive/restore checks
-passing (7,897 restored hashes). Final independent correctness and QA PASS.
-Roger-authorized deployment of `f22ac0d54` passed on wepp1/wepp2/wepp3 by
-2026-09-18 10:44 UTC, including approved recovery of idle worker shutdown hangs.
-Production runs remain unrepaired; see the package's production deployment artifact.
 
 
 ### Batch and Culvert Climate Rehydration Hardening
@@ -1429,6 +1399,18 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### MOFE Scenario Artifact Integrity and Abdisa Run Repair (2026-09-18)
+
+**Status**: Complete. [Package](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md).
+
+Bounded corrections in two production files passed 91 focused and 8,994 full
+tests, actual-project Forest acceptance, and authorized wepp1/wepp2/wepp3 rollout.
+All eight affected production projects are preserved and repaired: 120/120 WEPP
+jobs, 3,640 hillslopes / 8,520 segments, exact generated/prepared content, and
+fresh summaries pass. Correctness independently recomputed 520 values; QA PASS.
+Normal private access is preserved; owner-session UI was not tested. Retained
+ledger records scientific interpretation limits and the original/repaired CSVs.
 
 ### Production Staley M1 Upload and Run (2026-09-10)
 

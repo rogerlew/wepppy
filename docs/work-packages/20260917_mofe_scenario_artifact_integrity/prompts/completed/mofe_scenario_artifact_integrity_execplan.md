@@ -1,5 +1,8 @@
 # Restore MOFE scenario inputs and repair the Rithet Creek runs
 
+Completed 2026-09-18 UTC: all eight production repairs accepted; see the repair
+ledger and retained production evidence bundle for exact jobs, hashes, and limits.
+
 This ExecPlan is a living document. The sections `Progress`, `Surprises &
 Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be updated at
 every stopping point. Maintain this plan in accordance with
@@ -55,12 +58,26 @@ files, and completed result summaries.
   wepp1 passed by 09:34 UTC; wepp2 passed by 10:10 UTC after approved recovery
   of stuck idle worker pools. wepp3 passed by 10:44 UTC after separately approved
   idle-container force-stop. See production deployment artifact.
-- [ ] Preflight wepp1, preserve pre-repair evidence, manually rebuild/rerun all
+- [x] (2026-09-18 11:02 UTC) Preflight production and capture all eight exact
+  persisted-intent snapshots and pre-repair management parses. Baseline canonical
+  full archive is running; no scientific mutation precedes archive verification.
+- [x] Finish recoverable preservation, manually rebuild/rerun all
   eight Abdisa runs, and validate the refreshed hillslope response summary.
-- [ ] Close reviews, update package/tracker/root board, and archive this plan under
+  All eight canonical archives verified. All eight runs completed
+  2026-09-18 UTC: 15/15 jobs each, full input/output/download checks, independent
+  correctness and QA PASS. Final WEPP job finished 15:41:51 UTC.
+- [x] Close reviews, update package/tracker/root board, and archive this plan under
   `prompts/completed/`.
 
 ## Surprises & Discoveries
+
+- Production thinning snapshots retain ground-cover override metadata (.9 for
+  thin30, .8 for thin50), outside this canopy-only propagation correction.
+  Identity mapping calls `build_managements`, which would clear those fields.
+  Before either thinning mutation, review selected the existing synchronous
+  same-value canopy endpoint instead; it preserves exact maps and all overrides.
+  MOFE ground cover continues to use the existing source-template .75; stored
+  ground overrides are not newly activated.
 
 - Production deployment (2026-09-18 09:52 UTC): wepp2 worker pools have not
   exited after graceful shutdown and the normal queue-read timeout. The
@@ -146,6 +163,57 @@ files, and completed result summaries.
   to the simplest correction.
 
 ## Decision Log
+
+- Decision (2026-09-18): repair thinning via synchronous
+  `modify-landuse-coverage` with dom 424, cover `cancov`, and the unchanged saved
+  value .3/.5. Retain response evidence instead of inventing a job ID. Verify
+  exact maps and all three saved override fields afterward. Rationale: identity
+  remapping would clear stored ground-cover overrides through `build_managements`;
+  the canopy operation invokes the corrected writer without that reset. Existing
+  template ground cover .75 remains unchanged; activating .9/.8 ground metadata
+  is outside this package. Independent correctness review confirms this path.
+
+- Decision: validate artifact serving without changing private-run access.
+  Public pages must render normally. For existing private runs, prove pre-repair
+  and current PUBLIC absence plus owner presence, require the normal post-CAP
+  anonymous denial, and verify run-scoped authorized management/output downloads
+  return matching bytes. Owner-authenticated UI remains explicitly not tested.
+  Rationale: low severity's anonymous 404 is the established privacy contract,
+  not a missing run or scientific failure. Production acceptance does not require
+  impersonating owners or exposing private projects. Independent review accepted
+  this correction to the initial public-page assumption.
+  Date/Author: 2026-09-18 UTC, Codex.
+
+- Decision: allow canonical preservation archives for untouched, idle inventory
+  targets to run ahead, one at a time, while the current run's model/checks finish.
+  Scientific repairs remain strictly sequential through acceptance. Verify every
+  archive and unchanged saved intent before mutation; monitor disk and shared I/O.
+  Rationale: preservation reads scientific artifacts and writes only existing
+  archive/status artifacts. Overlapping it with model work removes repeated idle
+  time without broadening scientific mutation scope or adding infrastructure.
+  Date/Author: 2026-09-18 UTC, Codex; independent scheduling review accepted.
+
+- Decision: reuse already-correct generated soils for the remaining seven
+  saved-intent repairs, conditional on post-management soil-intent proof,
+  unchanged preserved soil hashes, and full prepared-soil token comparison.
+  Rationale: baseline's 18-minute full ISRIC rebuild changed none of 455 generated
+  soils. Independent read-only canonical class/texture synthesis proves all
+  eight runs' 1,065 soil segments already correct, including 9002 hydraulic
+  columns and existing lookup-miss rules. Rebuilding unrelated source soils adds
+  no scientific correction. Any failed proof requires the supported soil rebuild
+  and renewed validation. This narrows the existing "where required" step;
+  no production code, parameterization, or saved intent changes.
+  Date/Author: 2026-09-18 UTC, Codex; independent correctness review PASS.
+
+- Decision: Roger explicitly authorized remediation and validation of all eight
+  named production runs after deployment. Preserve each run's actual saved
+  assignments: fire scenarios include classes 431/430/429/432 for 13 segments;
+  thinning has 1,021 class-424, 43 class-90 and one class-200 segment.
+  Compatibility/regression plan: archive each run before mutation, use supported
+  identity remapping to regenerate saved assignments (SBS uses its existing
+  raster build), retain 0.30/0.50 canopy and 0.75 saturation/0.0001 kslast,
+  validate all generated/prepared files, then validate fresh WEPP outputs.
+  No schema or scientific parameterization changes. Date: 2026-09-18.
 
 - Decision: Roger separately approved force-stopping only wepp3's lingering
   idle fork/archive container after its normal shutdown timeout elapsed.
@@ -242,8 +310,12 @@ files, and completed result summaries.
 Production rollout passed on wepp1, wepp2, and wepp3 at `f22ac0d54` by
 2026-09-18 10:44 UTC. All canonical deployments exited zero; live identities,
 source hashes and worker registrations passed. No deployment fence remains.
-The eight production scientific runs remain unrepaired. Details and
-recovery stash IDs are in `artifacts/20260918_production_deployment.md`.
+All eight production repairs now pass preservation, generated
+and prepared input checks, 15-job completion, fresh summaries, serving checks,
+and independent correctness/QA review. Deployment
+details and recovery stash IDs are
+in `artifacts/20260918_production_deployment.md`; live repair evidence is tracked
+in `artifacts/20260917_wepp1_repair_ledger.md`.
 
 The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
 broader validation and Forest deployment passed. Roger approved the separately
@@ -254,11 +326,18 @@ pairs differ. Real writer failure emits no completion; supported retry produces
 identical input manifests, failed logs survive archive, and successful restore
 matches all 7,897 recorded files. Final browser/download checks pass.
 Failed-job evidence and exact source hashes remain in the Forest artifact.
-No production scientific data has been changed. Independent correctness and QA
-passed both code and final Forest acceptance with no High/Medium findings.
-The package remains open for eight-run production repair and its final
-evidence/review; operator-authorized deployment is complete. Do not archive this
-active plan until that authorized phase is complete.
+Independent correctness and QA passed both code and final Forest acceptance
+with no High/Medium findings. Production work preserves existing private access;
+authorized downloads are verified, but owner-authenticated UI is not claimed.
+The package is complete: 120/120 production WEPP jobs, 3,640 hillslopes /
+8,520 segments, 16 authorized downloads, and 520 independently recomputed summary
+values pass. Production bundle SHA-256 is
+`ae4a365b4db44902135b36b2e2b7a1204271804df4e3a7b9e2650578f617aa80`;
+summary SHA-256 is `ba96a5381295dfa67b1f00c0d4fe5f6baa87b5241ed56d3eb77b23c98bd1ac51`.
+No originally duplicated response pair remains. No scientific parameter or
+access policy was changed. Baseline class-200/SBS comparability and extreme gross
+erosion interpretation limits are retained in the ledger. No further work is
+required for this package; any new scientific parameterization is separately scoped.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;
 the replacement contract adds no runtime mechanism. The earlier fix is now
@@ -483,7 +562,7 @@ Lint each changed Markdown file and preview spelling normalization:
 
     wctl doc-lint --path docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md
     wctl doc-lint --path docs/work-packages/20260917_mofe_scenario_artifact_integrity/tracker.md
-    wctl doc-lint --path docs/work-packages/20260917_mofe_scenario_artifact_integrity/prompts/active/mofe_scenario_artifact_integrity_execplan.md
+    wctl doc-lint --path docs/work-packages/20260917_mofe_scenario_artifact_integrity/prompts/completed/mofe_scenario_artifact_integrity_execplan.md
     wctl doc-lint --path docs/schemas/mofe-management-artifact-contract.md
     diff -u docs/schemas/mofe-management-artifact-contract.md <(uk2us docs/schemas/mofe-management-artifact-contract.md)
 
@@ -677,3 +756,9 @@ Forest scenarios accepted by independent correctness and QA. Retained source
 identity, parsed inputs, fresh results, failure/retry, browser/download, and
 archive/restore evidence. Stop at Roger's WEPPcloud deployment confirmation;
 production repair and package closure remain intentionally open.
+
+Revision note (2026-09-18): subsequent operator authority completed deployment
+and all eight preserved, supported production repairs. Added exact soil-token,
+served-byte, settings-preservation, and independent summary checks. Same-value
+canopy edits avoided clearing inactive ground-cover metadata. Final reviews pass;
+the completed plan is archived with evidence and explicit interpretation limits.

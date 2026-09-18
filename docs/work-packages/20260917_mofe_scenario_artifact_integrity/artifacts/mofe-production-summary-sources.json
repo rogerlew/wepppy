@@ -1,0 +1,50 @@
+[
+  {
+    "runid": "ventilated-gag",
+    "file": "/wc1/runs/ve/ventilated-gag/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "e2b61c31a3a92923651801b7f38c5d8ae0a89b6650505e96ef60241228be413a",
+    "mtime": 1789733393.701697
+  },
+  {
+    "runid": "equestrian-bonheur",
+    "file": "/wc1/runs/eq/equestrian-bonheur/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "d20424849b458bfd5d79d1e2f8d0abed4548437011a8edfc06716d5baa6a068e",
+    "mtime": 1789735750.367877
+  },
+  {
+    "runid": "neoliberal-dictate",
+    "file": "/wc1/runs/ne/neoliberal-dictate/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "8eeb4acb048e3f368ed5c2aa019c61a2b96d767bf46a27e906881981b168d71a",
+    "mtime": 1789743335.638414
+  },
+  {
+    "runid": "choice-feminist",
+    "file": "/wc1/runs/ch/choice-feminist/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "c2c06270f4eb05e951f93586c78b1ffaa37314be6e550b56059827f5ffa2f0e1",
+    "mtime": 1789741573.292274
+  },
+  {
+    "runid": "tactful-aging",
+    "file": "/wc1/runs/ta/tactful-aging/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "0e56c6bb31abe2435370c230803547850a9ccf65d35e916363371969cc6f89c8",
+    "mtime": 1789737896.816769
+  },
+  {
+    "runid": "incorporate-cerebrum",
+    "file": "/wc1/runs/in/incorporate-cerebrum/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "9521405695f5b580503c0fe598578ab96d99e74896e0fe5b117b23de5827b759",
+    "mtime": 1789739423.871407
+  },
+  {
+    "runid": "acetic-surprise",
+    "file": "/wc1/runs/ac/acetic-surprise/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "d7e703c8efacefd02e0be260dda5e44f6e3b98cfb4365b5ccad12c83b90966a8",
+    "mtime": 1789744681.566223
+  },
+  {
+    "runid": "uncrowned-bolt",
+    "file": "/wc1/runs/un/uncrowned-bolt/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "9fbb851c6e29a4e265e7a00c48a7822ee69284bdc17e9fbb184f3a6016349ff5",
+    "mtime": 1789746068.766187
+  }
+]

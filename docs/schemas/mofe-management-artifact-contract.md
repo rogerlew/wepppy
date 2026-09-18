@@ -1,6 +1,6 @@
 # MOFE management artifact contract
 
-**Status**: Accepted; local implementation validated, Forest acceptance pending.
+**Status**: Accepted; local, Forest, and eight-run production acceptance PASS (2026-09-18).
 
 ## Scope
 
@@ -59,6 +59,12 @@ map fails with build-first guidance rather than reclassifying the raster.
 MOFE summary rebuilding must preserve explicit canopy overrides for retained classes,
 so subsequent mapping and rebuild operations do not erase persisted selections.
 These are required links in the existing thinning workflow, not new operations.
+
+This canopy correction does not activate stored `inrcov_override` or
+`rilcov_override` in MOFE synthesis; existing source/RAP ground-cover behavior
+remains unchanged. For a canopy-only repair that must retain inactive ground
+metadata, reapply the saved canopy through the coverage operation. Do not use an
+identity mapping as a substitute: its summary rebuild may clear those fields.
 
 No canopy percentage, RAP formula, disturbed lookup, severity threshold, soil
 parameter, or fallback value changes.
