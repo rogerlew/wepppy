@@ -34,7 +34,8 @@ files, and completed result summaries.
   regeneration, explicit 0.30/0.50 canopy propagation, and writer failure.
 - [x] Implement the propagation corrections, including the missing public canopy
   writer call and preservation of MOFE canopy overrides during summary rebuild.
-- [ ] Pass focused, related, full-suite, correctness, QA, and documentation gates.
+- [x] Pass focused (91), related (4,192), full-suite (8,994), correctness, QA,
+  and documentation gates; full suite also passed 12 subtests, with 99 skipped.
 - [ ] Deploy the exact accepted candidate to `forest1.local` and exercise an
   actual Rithet Creek clone or supported restored archive through all scenarios.
 - [ ] Record Forest artifacts and present the hard-gate evidence to the operator.
@@ -52,8 +53,9 @@ files, and completed result summaries.
   in `f1a4a75b4` covers those two existing links without new runtime machinery.
 - Forest's `.local` name does not resolve here. Its documented address
   `192.168.1.108` works with `HostKeyAlias=forest1.local`, preserving saved-key
-  verification. The host is on `feature/project-owned-config`; branch-switch
-  direction is pending. `wctl rq-info --detailed` is unsupported there; plain
+  verification. The host is on `feature/project-owned-config`, whose revision is
+  an ancestor of the candidate: use a fast-forward and canonical `--skip-pull`,
+  preserving the branch name. `wctl rq-info --detailed` is unsupported there; plain
   `wctl rq-info` confirmed zero executing jobs.
 
 - Observation: `SoilBurnSeverityMap.data` reclassifies the source raster to codes
@@ -164,9 +166,9 @@ files, and completed result summaries.
 
 ## Outcomes & Retrospective
 
-The bounded source correction is implemented and 90 focused tests passed;
-broader validation and Forest acceptance remain pending. No production data has
-been changed. Independent correctness review passed with no High/Medium findings.
+The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
+broader validation passed; Forest acceptance remains pending. No production data has
+been changed. Independent correctness and QA passed with no High/Medium code findings.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;
 the replacement contract adds no runtime mechanism. The earlier fix is now

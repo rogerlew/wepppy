@@ -8,7 +8,7 @@ passes independent review
 ## Candidate Identity
 
 - Reviewed contract revisions: `ecda89e45`, `f1a4a75b4`.
-- Candidate implementation revision: pending.
+- Candidate implementation revision: `f4152ac69` (local broad gates passed).
 - Forest pre-deploy revision: `a4877628676388817b4a68671f6144e91d174683`.
 - Forest post-deploy revision: pending.
 - Relevant host/container image and source checksums: pending.
@@ -21,14 +21,16 @@ default/batch jobs. The documented IP `192.168.1.108` works with SSH
 `HostKeyAlias=forest1.local`; local name resolution fails. The saved host key
 matches. Plain `wctl rq-info` works; `--detailed` is unsupported by the installed
 RQ version. Deployment `--print-plan` selects full production Compose.
-Switching this host to the validated master candidate requires operator branch
-direction under root instructions; the question is pending. No deployment was
-attempted.
+The initial branch-switch question was resolved without a switch: Git verifies
+the existing Forest revision is an ancestor of `f4152ac69`. Fast-forward the
+existing branch to the exact validated candidate, then use the canonical script's
+supported `--skip-pull --no-flush-rq-db --skip-docker-prune` options. The existing
+branch name and history remain intact. No deployment has yet been attempted.
 
 ## Preconditions
 
-- [ ] Local focused and broad gates pass.
-- [ ] Correctness and QA reviews have no unresolved high/medium findings.
+- [x] Local focused and broad gates pass.
+- [x] Correctness and QA reviews have no unresolved high/medium findings.
 - [ ] Candidate revision is available to the canonical Forest deployment path.
 - [ ] `hostname`, repository path, installed `wctl` preset, queue state, and
       service health are verified.
@@ -37,6 +39,12 @@ attempted.
       recorded without mutating the production source.
 
 ## Project Provenance
+
+Read-only source discovery found `/wc1/runs/ve/ventilated-gag` on the shared
+run storage with landuse, soils, watershed, and WEPP artifacts. Its README names
+configuration `canada-wbt-mofe`. This is a candidate source for a supported Forest
+fork; source provenance and disposable-clone identity still need verification.
+It has not been mutated by this work.
 
 - Production source run/archive: pending.
 - Supported transfer method: pending; use normal clone or archive/restore only.

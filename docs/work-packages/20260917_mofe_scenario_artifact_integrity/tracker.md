@@ -7,7 +7,7 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: implementation validated locally; broad gates running
+**Current phase**: local gates passed; Forest acceptance next
 **Last updated**: 2026-09-18 UTC
 **Next milestone**: finish broad gates and Forest candidate deployment
 
@@ -17,12 +17,14 @@ and two independent review dispositions are in the contract decision artifact.
 
 Takeover implementation remains confined to two production files. Real artifact
 regressions reproduced baseline SBS collapse and 0.40 canopy before correction;
-90 focused tests then passed. Correctness review PASS, no High/Medium findings.
-Broad tests and secondary QA are running. Forest preflight verified `forest1`
+91 focused tests pass on implementation `f4152ac69`. Correctness and secondary
+QA reviews PASS, no High/Medium code findings. Related suite: 4,192 passed,
+55 skipped; full repository suite passed 8,994 tests, 99 skipped, and 12 subtests.
+Forest preflight verified `forest1`
 at `192.168.1.108` with its saved `forest1.local` host key, clean revision
 `a4877628676388817b4a68671f6144e91d174683`, idle queues, and full production
 Compose deployment plan. Its current branch is `feature/project-owned-config`;
-the requested switch to the validated master candidate awaits operator direction.
+the candidate can fast-forward that existing branch without a branch switch.
 No Forest deployment or production repair has occurred.
 **Security impact**: `low`
 **Dedicated security review**: `no`
@@ -32,11 +34,11 @@ No Forest deployment or production repair has occurred.
 
 ### Ready / Backlog
 
-- [ ] Ratify the canonical MOFE management artifact contract and commit the
+- [x] Ratify the canonical MOFE management artifact contract and commit the
       reviewed checkpoint as a standalone ancestor.
-- [ ] Write regressions that fail against the real SBS classification contract,
+- [x] Write regressions that fail against the real SBS classification contract,
       class-to-class writer path, and 0.30/0.50 canopy propagation.
-- [ ] Implement the three bounded corrections without changing parameter values,
+- [x] Implement the bounded propagation corrections without changing parameter values,
       RAP precedence, schemas, or queue topology.
 - [ ] Complete focused, related, broad, documentation, correctness, and QA gates.
 - [ ] Deploy the exact candidate revision to Forest through the canonical script.
@@ -49,8 +51,7 @@ No Forest deployment or production repair has occurred.
 
 ### In Progress
 
-- [ ] Prepare the contract decision, incident evidence, acceptance record, and
-      production repair ledger for review.
+- [ ] Finish full tests and deploy the exact candidate to Forest.
 
 ### Blocked
 
@@ -210,11 +211,11 @@ runtime coordination machinery.
 
 ### Contract and Code Quality
 
-- [ ] Contract decision records every affected current contract and state.
-- [ ] Two independent read-only contract reviews are dispositioned.
-- [ ] Standalone contract ancestor precedes implementation.
-- [ ] Focused regressions fail before and pass after the correction.
-- [ ] `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` passes.
+- [x] Contract decision records every affected current contract and state.
+- [x] Two independent read-only contract reviews are dispositioned.
+- [x] Standalone contract ancestor precedes implementation.
+- [x] Focused regressions fail before and pass after the correction.
+- [x] `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` passes.
 - [ ] `wctl run-pytest tests --maxfail=1` passes or a concrete unrelated blocker is retained.
 
 ### Correctness and Security
@@ -228,7 +229,7 @@ runtime coordination machinery.
 
 ### Documentation and Observability
 
-- [ ] Canonical contract and affected operator/developer docs are updated.
+- [x] Canonical contract and affected operator/developer docs are updated.
 - [ ] All changed Markdown passes `wctl doc-lint` and spelling preview.
 - [ ] Working, failed, and completed generated artifacts remain browsable and
       archivable under the normal project boundary.

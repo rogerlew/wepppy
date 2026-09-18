@@ -2,7 +2,8 @@
 
 ## Candidate and scope
 
-Contract ancestors: `ecda89e45` and `f1a4a75b4`. Implementation changes only
+Contract ancestors: `ecda89e45` and `f1a4a75b4`; implementation `f4152ac69`.
+Implementation changes only
 `wepppy/nodb/core/landuse.py` and `wepppy/rq/project_rq.py`. No new queue edge,
 schema, dependency, scientific value, or recovery mechanism.
 
@@ -37,10 +38,13 @@ nonsequential segments, and RAP taking precedence over an explicit 0.3 override.
 ## Commands and results
 
 - Focused suite: `wctl run-pytest tests/nodb/test_mofe_scenario_artifacts.py tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py tests/nodb/test_landuse_mofe_process_pool.py tests/nodb/test_landuse_modify.py tests/rq/test_project_rq_mutation_guards.py -q --maxfail=1`
-  passed 90 tests before the additional nonsequential regression.
+  passed all 91 tests in 12.71 seconds, including the nonsequential regression;
+  transcript `/tmp/mofe-focused-tests.log`.
 - Related suite: `wctl run-pytest tests/nodb tests/rq tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1 -q`;
-  running, transcript `/tmp/mofe-related-tests.log`.
-- Repository suite: `wctl run-pytest tests --maxfail=1 -q`; running, transcript
+  passed 4,192 tests, 55 skipped, in 818.67 seconds; transcript
+  `/tmp/mofe-related-tests.log`.
+- Repository suite: `wctl run-pytest tests --maxfail=1 -q`; 8,994 passed,
+  99 skipped, 12 subtests passed in 1,420.17 seconds; transcript
   `/tmp/mofe-full-tests.log`.
 - `wctl check-test-stubs`: PASS.
 - `wctl check-rq-graph`: PASS after regenerating source-line references. All 146
@@ -50,12 +54,17 @@ nonsequential segments, and RAP taking precedence over an explicit 0.3 override.
 - Code-quality observability ran in observe-only mode, outputs
   `/tmp/mofe-code-quality.json` and `/tmp/mofe-code-quality.md`; local Radon is
   unavailable, so no cyclomatic-complexity result is claimed.
+  Committed-candidate telemetry records +10 production SLOC in landuse and +4
+  in project RQ; maximum function lengths are unchanged. Existing file-size
+  bands remain red; unrelated refactoring would expand this incident fix.
 - Eleven changed Markdown files passed `wctl doc-lint`; canonical contract
   spelling preview and `git diff --check` passed.
 - Independent correctness and secondary QA: PASS, no blocking code findings.
 
 ## Remaining gate
 
-Actual-project Forest acceptance has not run. Forest is clean and idle but on
-`feature/project-owned-config`, so the explicit branch-switch instruction is
-pending. Production repair remains separately gated on Roger's deployment.
+Actual-project Forest acceptance has not run. Forest is clean and idle on
+`feature/project-owned-config`. Its revision is an ancestor of the candidate,
+so a fast-forward of the existing branch avoids any branch switch. The canonical
+deployment supports `--skip-pull` for the already-updated checkout. Production
+repair remains separately gated on Roger's deployment.
