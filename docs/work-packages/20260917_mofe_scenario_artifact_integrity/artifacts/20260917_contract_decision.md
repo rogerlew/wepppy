@@ -1,12 +1,22 @@
 # MOFE management artifact contract decision checkpoint
 
-**Status**: draft; implementation is blocked
+**Status**: simplified contract accepted for execution; both independent reviews
+passed; standalone checkpoint committed before implementation.
 **Starting local revision**: `714693a00c1ce47def86ba0b984065262b9f49bd`
 **Observed wepp1 revision**: `97800607c` (abbreviated host revision captured
 during diagnosis; record the full revision at the next preflight)
 **Prepared**: 2026-09-17 22:39 UTC
+**Simplified contract SHA-256**:
+`aab2b182422f900a5a4d8ce96d09b475bc77bdee3ac904e580e2fecb5361e896`
 
 ## Operator Direction
+
+The takeover instruction to complete this package authorizes execution of the
+bounded three-fix plan and its required checkpoint commit. No additional runtime
+mechanism is approved. The separately recorded operator-owned production
+deployment boundary remains in force. The reviewed contract hash below is
+unchanged; its proposed label is historical checkpoint metadata, with acceptance
+recorded here.
 
 The operator requested a work package to fix the failed MOFE behavior, required
 actual validation on Forest before deployment, reserved the WEPPcloud deployment
@@ -14,6 +24,13 @@ to himself, and directed Codex to manually repair all Abdisa runs after that
 deployment. This approves the outcome and sequencing. The exact canonical
 contract text, independent reviews, and standalone checkpoint commit remain
 pending; no implementation file may be edited under this checkpoint yet.
+
+On 2026-09-18, the operator rejected an expanded draft because its attempt
+storage, publication ledger, recovery, retention, event-deduplication, and
+full-workflow fencing would make this bounded fix fragile. Those mechanisms and
+their proposed ADR were removed. The replacement contract is limited to the
+three confirmed propagation defects, existing failure behavior, direct artifact
+tests, and Forest acceptance.
 
 ## Classification
 
@@ -52,13 +69,13 @@ Stable remediation ID: `MOFE-ARTIFACT-20260917-01`.
 3. A persisted `ManagementSummary.cancov_override` applies to MOFE segment
    synthesis when present. If RAP is active, its existing segment-specific cover
    calculation retains precedence. No cover value, formula, or threshold changes.
-4. Prepared `wepp/runs/*.man` files must be generated from the corrected landuse
-   artifacts. Success requires agreement among persisted intent, combined
-   managements, prepared managements, and summaries.
-5. Writer failure is explicit and cannot publish a completion event. Partial or
-   mixed-generation artifacts remain visible with diagnostics and are not treated
-   as complete. Retry uses the persisted final assignment through the same
-   supported writer.
+4. Later WEPP preparation continues to copy the corrected landuse artifacts
+   through the existing workflow. Forest acceptance requires agreement among
+   persisted intent, combined managements, prepared managements, and summaries;
+   the landuse mapping event does not claim WEPP preparation or execution.
+5. Writer failure follows the existing RQ exception path and cannot publish a
+   completion event. No new staging, rollback, retry, or recovery subsystem is
+   authorized.
 6. Single-OFE projects, no-SBS projects, unburned/nodata SBS areas, configured
    buffer precedence, supported legacy assignments, request/response shape,
    authentication, run paths, locks, caches, and queue topology remain unchanged.
@@ -70,8 +87,10 @@ baseline files. Correctness therefore belongs at the artifact-generation boundar
 
 Rejected alternatives are direct production file edits, rewriting NoDb to match
 the wrong files, forcing result values to differ, applying `class_pixel_map` a
-second time with more fallback keys, and adding a repair queue/service. These
-would hide the producer defect, change scientific intent, or add unnecessary
+second time with more fallback keys, and adding a repair queue/service. Also
+rejected are a new attempt store, publication ledger, event protocol, retention
+policy, and cross-workflow transaction fence. These would hide the producer
+defect, change scientific intent, or add unnecessary failure modes and
 operational mechanisms.
 
 ## Compatibility and Data Impact
@@ -119,7 +138,7 @@ default, threshold, unit conversion, or fallback requires an ADR before code.
 | Explicit canopy override present, RAP present | Preserve current RAP segment-specific precedence. |
 | Writer working | Request remains pending; file existence is not completion. |
 | Writer failed | Explicit failure, no completion event, visible partial artifacts and diagnostics. |
-| Writer completed | NoDb, combined managements, summaries, and prepared WEPP inputs agree. |
+| Writer completed | NoDb, combined managements, and summaries agree; prepared-input agreement is checked later after normal WEPP preparation. |
 | Archived/restored project | Preserve artifact and diagnostic bytes; restoration does not certify failed artifacts as complete. |
 
 ## Regression Evidence Required
@@ -138,10 +157,16 @@ default, threshold, unit conversion, or fallback requires an ADR before code.
 
 ## Review and Checkpoint Status
 
-- Independent contract review 1: pending.
-- Independent contract review 2: pending.
-- Finding disposition: pending.
-- Operator approval of exact contract text: pending.
-- Canonical contract amendment/addition: pending.
-- Standalone ancestor commit: pending.
-- Implementation authorization: blocked until all items above are complete.
+- Independent governance review: PASS on the simplified exact hash; no unresolved
+  High or Medium findings.
+- Independent correctness review: PASS on the simplified exact hash; no
+  unresolved High or Medium findings.
+- Initial compact review: correctness PASS; governance HOLD on missing proposed
+  status and a writer/preparation boundary wording conflict. Both wording issues
+  are corrected and independently confirmed in the simplified hash above.
+- Finding disposition: complete for the contract checkpoint.
+- Operator approval: takeover instruction to complete the bounded package.
+- Canonical contract amendment/addition: included in this checkpoint.
+- Standalone ancestor commit: this documentation-only checkpoint; revision will
+  be recorded in the tracker immediately after commit.
+- Implementation authorization: effective after this checkpoint commit.

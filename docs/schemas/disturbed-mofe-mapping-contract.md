@@ -4,6 +4,9 @@
 
 This contract governs management identifiers assigned by Disturbed.remap_mofe_landuse. The operator approved mapping-aware lookup on 2026-09-07 after the aliquot-shoji incident. Repository implementation conforms as of 2026-09-07 (implementation commit 1ea4b8d52); production rollout is separate.
 
+The earlier SBS build and combined-management generation boundary is defined by
+the [MOFE management artifact contract](mofe-management-artifact-contract.md).
+
 ## Mapping resolution
 
 For an SBS-present MOFE remap, resolve burn targets by DisturbedClass from Landuse.get_mapping_dict through the existing get_disturbed_key_lookup. This includes the effective custom map when configured. Do not embed identifiers from disturbed.json or apply numeric offsets.

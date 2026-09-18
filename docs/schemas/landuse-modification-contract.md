@@ -7,6 +7,9 @@ MOFE management files and include the modified class in the landuse summary.
 Implementation conformance is implemented; production-equivalent archive/browser/downstream validation remains pending. This contract governs the selected-Topaz-ID
 `modify-landuse` operation, not the separate class-to-class mapping operation.
 
+The separate global mapping regeneration behavior is defined by the
+[MOFE management artifact contract](mofe-management-artifact-contract.md).
+
 ## Required outcome
 
 For a built multi-OFE project, apply the requested management class to the selected
