@@ -1,0 +1,78 @@
+key,value,units,scenario
+Total contributing area to outlet,1810.92,ha,undisturbed
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,undisturbed
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,undisturbed
+Avg. Ann. water discharge from outlet,20069265.0,m^3/yr,undisturbed
+Avg. Ann. total hillslope soil loss,1005970.9,tonne/yr,undisturbed
+Avg. Ann. total channel soil loss,227.6,tonne/yr,undisturbed
+Avg. Ann. sediment discharge from outlet,306.3,tonne/yr,undisturbed
+Avg. Ann. Sed. delivery per unit area of watershed,0.2,tonne/ha/yr,undisturbed
+Sediment Delivery Ratio for Watershed,0.0,"",undisturbed
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,undisturbed
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,undisturbed
+Total contributing area to outlet,1810.92,ha,uniform_low
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,uniform_low
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,uniform_low
+Avg. Ann. water discharge from outlet,20046158.0,m^3/yr,uniform_low
+Avg. Ann. total hillslope soil loss,121.6,tonne/yr,uniform_low
+Avg. Ann. total channel soil loss,234.4,tonne/yr,uniform_low
+Avg. Ann. sediment discharge from outlet,237.3,tonne/yr,uniform_low
+Avg. Ann. Sed. delivery per unit area of watershed,0.1,tonne/ha/yr,uniform_low
+Sediment Delivery Ratio for Watershed,0.667,"",uniform_low
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,uniform_low
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,uniform_low
+Total contributing area to outlet,1810.92,ha,uniform_moderate
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,uniform_moderate
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,uniform_moderate
+Avg. Ann. water discharge from outlet,20046158.0,m^3/yr,uniform_moderate
+Avg. Ann. total hillslope soil loss,121.6,tonne/yr,uniform_moderate
+Avg. Ann. total channel soil loss,234.4,tonne/yr,uniform_moderate
+Avg. Ann. sediment discharge from outlet,237.3,tonne/yr,uniform_moderate
+Avg. Ann. Sed. delivery per unit area of watershed,0.1,tonne/ha/yr,uniform_moderate
+Sediment Delivery Ratio for Watershed,0.667,"",uniform_moderate
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,uniform_moderate
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,uniform_moderate
+Total contributing area to outlet,1810.92,ha,uniform_high
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,uniform_high
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,uniform_high
+Avg. Ann. water discharge from outlet,20075650.0,m^3/yr,uniform_high
+Avg. Ann. total hillslope soil loss,246.8,tonne/yr,uniform_high
+Avg. Ann. total channel soil loss,236.8,tonne/yr,uniform_high
+Avg. Ann. sediment discharge from outlet,265.4,tonne/yr,uniform_high
+Avg. Ann. Sed. delivery per unit area of watershed,0.1,tonne/ha/yr,uniform_high
+Sediment Delivery Ratio for Watershed,0.549,"",uniform_high
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,uniform_high
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,uniform_high
+Total contributing area to outlet,1810.92,ha,prescribed_fire
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,prescribed_fire
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,prescribed_fire
+Avg. Ann. water discharge from outlet,20137835.0,m^3/yr,prescribed_fire
+Avg. Ann. total hillslope soil loss,931367.6,tonne/yr,prescribed_fire
+Avg. Ann. total channel soil loss,228.3,tonne/yr,prescribed_fire
+Avg. Ann. sediment discharge from outlet,288.1,tonne/yr,prescribed_fire
+Avg. Ann. Sed. delivery per unit area of watershed,0.2,tonne/ha/yr,prescribed_fire
+Sediment Delivery Ratio for Watershed,0.0,"",prescribed_fire
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,prescribed_fire
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,prescribed_fire
+Total contributing area to outlet,1810.92,ha,thinning_40_75
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,thinning_40_75
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,thinning_40_75
+Avg. Ann. water discharge from outlet,20156975.0,m^3/yr,thinning_40_75
+Avg. Ann. total hillslope soil loss,931358.2,tonne/yr,thinning_40_75
+Avg. Ann. total channel soil loss,228.3,tonne/yr,thinning_40_75
+Avg. Ann. sediment discharge from outlet,281.8,tonne/yr,thinning_40_75
+Avg. Ann. Sed. delivery per unit area of watershed,0.2,tonne/ha/yr,thinning_40_75
+Sediment Delivery Ratio for Watershed,0.0,"",thinning_40_75
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,thinning_40_75
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,thinning_40_75
+Total contributing area to outlet,1810.92,ha,thinning_65_85
+Avg. Ann. Precipitation volume in contributing area,32733947.0,m^3/yr,thinning_65_85
+Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr,thinning_65_85
+Avg. Ann. water discharge from outlet,20145464.0,m^3/yr,thinning_65_85
+Avg. Ann. total hillslope soil loss,931357.1,tonne/yr,thinning_65_85
+Avg. Ann. total channel soil loss,228.2,tonne/yr,thinning_65_85
+Avg. Ann. sediment discharge from outlet,280.7,tonne/yr,thinning_65_85
+Avg. Ann. Sed. delivery per unit area of watershed,0.2,tonne/ha/yr,thinning_65_85
+Sediment Delivery Ratio for Watershed,0.0,"",thinning_65_85
+Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr,thinning_65_85
+Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr,thinning_65_85
