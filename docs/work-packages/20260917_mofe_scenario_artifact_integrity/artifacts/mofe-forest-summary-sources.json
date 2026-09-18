@@ -1,0 +1,50 @@
+[
+  {
+    "runid": "mofe-0918-baseline",
+    "file": "/wc1/runs/mo/mofe-0918-baseline/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "a81e56183efc54416701d6d77130241b0e8d935603f452d60ad9326206726495",
+    "mtime": 1789705960.883641
+  },
+  {
+    "runid": "mofe-0918-low",
+    "file": "/wc1/runs/mo/mofe-0918-low/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "f5d88a3ebf201950a3d0bbc2718d1d258de684c9832160bf25407fa8a37897eb",
+    "mtime": 1789705207.9428208
+  },
+  {
+    "runid": "mofe-0918-prescribed",
+    "file": "/wc1/runs/mo/mofe-0918-prescribed/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "9e5709d7a81614fd2eb7edb61f4cebfd5f29dba23a308a8e9d0fd7a525d550cd",
+    "mtime": 1789705548.8580132
+  },
+  {
+    "runid": "mofe-0918-sbs",
+    "file": "/wc1/runs/mo/mofe-0918-sbs/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "85c424f69af40608324e28f2a8c75a0dff7becbf0659b6d726d8ec06a6113907",
+    "mtime": 1789705661.4157326
+  },
+  {
+    "runid": "mofe-0918-moderate",
+    "file": "/wc1/runs/mo/mofe-0918-moderate/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "540e023adb64d27145c565fed8fed6f4bafb8e6cd50ed5a5a89fbc55b0cd7a94",
+    "mtime": 1789705239.9420278
+  },
+  {
+    "runid": "mofe-0918-high",
+    "file": "/wc1/runs/mo/mofe-0918-high/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "1f9044eea0362b57fb96086d81f42c117198111896bbd4a0b78502069d8a5936",
+    "mtime": 1789705426.4222283
+  },
+  {
+    "runid": "mofe-0918-thin30",
+    "file": "/wc1/runs/mo/mofe-0918-thin30/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "64f6e8ce1e6c292b4636d596c559976b11014d8c2efcae3c71f94c204d7959a1",
+    "mtime": 1789705933.1814647
+  },
+  {
+    "runid": "mofe-0918-thin50",
+    "file": "/wc1/runs/mo/mofe-0918-thin50/wepp/output/interchange/loss_pw0.hill.parquet",
+    "sha256": "1bed93ee6eb3f2aeaabc4b2a17d201b0910c7faff0f9585ace7021ca1c348254",
+    "mtime": 1789706046.757187
+  }
+]

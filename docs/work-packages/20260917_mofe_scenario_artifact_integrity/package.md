@@ -101,9 +101,11 @@ revision to WEPPcloud.
 
 Generated-artifact acceptance follows
 `docs/standards/generated-artifact-validation-standard.md`. The highest supported
-status is currently `diagnosed`: implementation, local validation, Forest
-validation, deployment, affected-run repair, and incident resolution remain
-separate future gates.
+status is currently `environment validated`: implementation `f4152ac69` passed
+focused and full-suite tests. Forest's eight real scenarios, parsed generated
+inputs, fresh outputs, browser/download, failure/retry, and archive/restore all
+pass, with final independent correctness and QA PASS. Production deployment,
+affected-run repair, and incident resolution remain separate future gates.
 
 ## Stakeholders
 
@@ -115,22 +117,22 @@ separate future gates.
 
 ## Success Criteria
 
-- [ ] A reviewed canonical contract checkpoint is committed as a standalone
+- [x] A reviewed canonical contract checkpoint is committed as a standalone
       ancestor before implementation edits.
-- [ ] A real `SoilBurnSeverityMap` regression fails on the current double
+- [x] A real `SoilBurnSeverityMap` regression fails on the current double
       classification and passes after the correction.
-- [ ] The class-to-class RQ operation regenerates MOFE files from the updated
+- [x] The class-to-class RQ operation regenerates MOFE files from the updated
       assignments and fails explicitly without reporting completion if generation
       fails.
-- [ ] Explicit 30% and 50% canopy overrides are visible as 0.30 and 0.50 in the
+- [x] Explicit 30% and 50% canopy overrides are visible as 0.30 and 0.50 in the
       generated MOFE and prepared WEPP management inputs; existing RAP behavior
       remains covered and unchanged.
-- [ ] Focused tests, related NoDb/RQ tests, broad exception enforcement, and
+- [x] Focused tests, related NoDb/RQ tests, broad exception enforcement, and
       `wctl run-pytest tests --maxfail=1` pass.
-- [ ] The exact candidate revision is deployed to Forest and an actual project
+- [x] The exact candidate revision is deployed to Forest and an actual project
       exercises all eight scenario roles with retained content hashes, parsed
       management values, job IDs, and output comparisons.
-- [ ] Forest evidence proves the prior false-positive condition is absent: a
+- [x] Forest evidence proves the prior false-positive condition is absent: a
       successful job and correct NoDb state are accompanied by correct generated
       `landuse` and `wepp/runs` artifacts.
 - [ ] The operator explicitly confirms the accepted revision has been deployed to
@@ -138,7 +140,7 @@ separate future gates.
 - [ ] All eight Abdisa runs are processed on wepp1, with pre-repair artifacts
       retained, exact job IDs recorded, generated inputs verified, WEPP rerun,
       and a refreshed hillslope response summary compared with the report.
-- [ ] Independent correctness and QA reviews pass with no unresolved high or
+- [x] Independent correctness and QA reviews pass with no unresolved high or
       medium findings; package, tracker, contracts, and operator documentation are
       current.
 

@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -57,7 +58,8 @@ for order, (role, label) in enumerate(zip(ROLES, LABELS), 1):
                         sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                         mtime=path.stat().st_mtime))
 result = pd.DataFrame(rows)
-result.to_csv('/tmp/mofe-forest-hillslope-response-summary.csv', index=False)
-Path('/tmp/mofe-forest-summary-sources.json').write_text(json.dumps(sources, indent=2))
+output_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('/tmp')
+result.to_csv(output_dir / 'mofe-forest-hillslope-response-summary.csv', index=False)
+(output_dir / 'mofe-forest-summary-sources.json').write_text(json.dumps(sources, indent=2))
 print(result[['scenario', 'area_weighted_runoff_depth_mm_per_yr',
               'total_sediment_yield_tonne_per_yr']].to_string(index=False))

@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: fork dependency fixed; eight-clone Forest acceptance in progress
+**Current phase**: Forest accepted; awaiting Roger's WEPPcloud deployment
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: finish soils, execute WEPP, verify prepared files and outputs
+**Next milestone**: present evidence and wait for Roger's WEPPcloud deployment
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -30,9 +30,11 @@ worker source hashes passed. The first clone failed before copying because the
 dedicated worker lacked its import-time Discord token file. Roger approved the
 one-line Compose correction `253188229`, matching the existing wepp3 mount.
 Resolved Compose, seven startup tests, real worker import, correctness and QA
-review passed. All eight supported forks and landuse artifact checks passed.
-Soil builds and WEPP execution are in progress; archive/restore and final output
-acceptance remain pending. No production repair has run.
+review passed. All eight supported scenarios completed 15/15 WEPP jobs each;
+all generated/prepared hillslope management and soil checks pass. Fresh summary,
+browser/download, real failure/retry, and archive/restore checks pass, including
+7,897 restored file hashes. Retained evidence and scientific interpretation
+caveats are in the Forest artifact. No production repair has run.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -49,21 +51,21 @@ acceptance remain pending. No production repair has run.
       RAP precedence, schemas, or queue topology.
 - [x] Complete focused, related, broad, documentation, correctness, and QA gates.
 - [x] Deploy the exact candidate revision to Forest through the canonical script.
-- [ ] Restore or clone the actual Rithet Creek project on Forest and run all
+- [x] Restore or clone the actual Rithet Creek project on Forest and run all
       scenario roles through landuse, WEPP preparation, WEPP, and summary export.
-- [ ] Present Forest evidence and stop for Roger's WEPPcloud deployment.
+- [x] Present Forest evidence and stop for Roger's WEPPcloud deployment.
 - [ ] After explicit deployment confirmation, manually process all eight Abdisa
       runs on wepp1 and complete the repair ledger.
 - [ ] Compare the refreshed hillslope response summary and close the package.
 
 ### In Progress
 
-- [ ] Finish all eight Forest executions and generated-artifact acceptance.
+- [ ] Resume production repair only after explicit deployment confirmation.
 
 ### Blocked
 
-- [ ] Production repair is blocked until Forest acceptance passes and Roger
-      explicitly confirms deployment of the accepted revision to WEPPcloud.
+- [ ] Production repair is blocked until Roger explicitly confirms deployment
+      of the Forest-accepted revision to WEPPcloud.
 
 ### Done
 
@@ -194,11 +196,11 @@ runtime coordination machinery.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Tests repeat the old unrealistic SBS stub | High | Medium | Exercise real `SoilBurnSeverityMap.data`/`build_lcgrid` behavior and inspect files | Open |
-| Existing writer fails after touching a file | Medium | Medium | Preserve existing exception/no-completion behavior and inject a writer failure; do not add rollback machinery | Open |
-| Forest uses a different revision than the reviewed candidate | High | Low | Record host/container revision and source checksum before acceptance | Open |
+| Tests repeat the old unrealistic SBS stub | High | Medium | Exercise real `SoilBurnSeverityMap.data`/`build_lcgrid` behavior and inspect files | Mitigated: real SBS and Forest PASS |
+| Existing writer fails after touching a file | Medium | Medium | Preserve existing exception/no-completion behavior and inject a writer failure; do not add rollback machinery | Mitigated: live failure/retry PASS |
+| Forest uses a different revision than the reviewed candidate | High | Low | Record host/container revision and source checksum before acceptance | Mitigated: five service hashes match |
 | Production repair starts before deployment | High | Low | Hard block and explicit operator confirmation in the ledger | Open |
-| Output equality is misread as either proof or failure | Medium | Medium | Verify input semantics first and explain any legitimate equal output | Open |
+| Output equality is misread as either proof or failure | Medium | Medium | Verify input semantics first and explain any legitimate equal output | Mitigated: verified inputs and distinct fresh outputs |
 | Existing dirty worktree is overwritten | High | Low | Restrict edits to this package and a surgical root tracker addition | Mitigated |
 
 ## Hardening Signal Log
@@ -206,7 +208,9 @@ runtime coordination machinery.
 - **Baseline health signals**: low/moderate/prescribed management manifests are
   identical; 30%/50% manifests are identical; NoDb intent disagrees with files;
   the September 7 clone reproduced baseline files after a green job.
-- **Post-change health signals**: pending local, Forest, and production evidence.
+- **Post-change health signals**: local and Forest gates PASS, both independent
+  reviews PASS; production deployment/repair intentionally pending. Forest queues
+  idle at 2026-09-18 04:40 UTC. Full evidence is retained in the package bundle.
 - **Danger signals observed**: the previous test double returned raw SBS values,
   unlike production's already-classified values; prior validation explicitly
   omitted a complete live landuse/WEPP replay.

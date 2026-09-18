@@ -40,12 +40,16 @@ files, and completed result summaries.
   and worker source hashes pass.
 - [x] Resolve the operator-approved fork-worker import blocker in `253188229`;
   same-image import and real clone retry passed, seven existing tests passed.
-- [x] Create all eight real Rithet clones through the normal fork API; initial
-  management-file checks pass for seven scenarios while soil builds execute.
-- [ ] Deploy the exact accepted candidate to `forest1.local` and exercise an
+- [x] Create all eight real Rithet clones through the normal fork API.
+- [x] Deploy the exact accepted candidate to `forest1.local` and exercise an
   actual Rithet Creek clone or supported restored archive through all scenarios.
-- [ ] Record Forest artifacts and present the hard-gate evidence to the operator.
-- [ ] Stop until Roger explicitly confirms his WEPPcloud deployment is complete.
+- [x] Record all eight successful 15-job trees, parsed management/soil inputs,
+  fresh summaries, browser/download checks, real writer failure/retry, and
+  archive restoration matching 7,897 files. Retained bundle SHA-256 is
+  `d99c9c85ff79e203a0f3fe7b222b733b8df41333d081fbcfe7b1f35ba1f49b21`.
+- [x] Close final independent Forest reviews (both PASS, no High/Medium findings)
+  and present the deployment gate.
+- [x] Stop at Roger's explicit WEPPcloud deployment confirmation gate.
 - [ ] Preflight wepp1, preserve pre-repair evidence, manually rebuild/rerun all
   eight Abdisa runs, and validate the refreshed hillslope response summary.
 - [ ] Close reviews, update package/tracker/root board, and archive this plan under
@@ -53,6 +57,18 @@ files, and completed result summaries.
 
 ## Surprises & Discoveries
 
+- The saved baseline has 13 class-200 segments whose original management files
+  were stale forest. Correct regeneration changes exactly eight hillslopes;
+  baseline sediment rises from 12.6926 to 128.4518 tonnes/year. Class 200's
+  established "Bare areas" mapping uses bromegrass, not a new bare-soil model.
+  Very large gross erosion/deposition in raw WEPP output is a scientific
+  interpretation concern, not an interchange error; see Forest evidence.
+- SBS rebuild follows the original raster (including those 13 segments as
+  forest), so its difference from the saved-assignment baseline includes a
+  landcover difference. Do not attribute that comparison solely to fire.
+- Run-WEPP discovery omits the existing `kslast` field; an omitted field clears
+  the source's saved 0.0001. Canceled the first submission before it started and
+  preserved the source option through the existing UI/handler payload contract.
 - Forest fork job `d947f1db-f1fc-4e68-bcd1-47a5070950b2` failed before its body
   because importing the WEPP finalizer reads a Discord token file absent from
   the dedicated worker's Compose mounts. No target directory was created. This
@@ -75,7 +91,7 @@ files, and completed result summaries.
   raw source pixels such as 0, 1, 2, and 3. Missing keys default to 130, so burned
   segments become unburned during management-file generation.
   Evidence: `wepppy/nodb/mods/baer/sbs_map.py` defines the classified `data`
-  property; `wepppy/nodb/core/landuse.py` currently calls
+  property; pre-fix `wepppy/nodb/core/landuse.py` called
   `class_pixel_map.get(val, '130')` after `build_lcgrid()`.
 
 - Observation: the existing SBS regression encodes the opposite contract. Its
@@ -187,12 +203,18 @@ files, and completed result summaries.
 
 The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
 broader validation and Forest deployment passed. Roger approved the separately
-evidenced one-line fork-worker mount correction `253188229`; eight real clones
-and all generated landuse checks now pass. Soil builds and WEPP execution are
-in progress. Baseline's 455 prepared management/soil files pass parsed-content
-checks. Failed-job evidence and exact source hashes remain in the Forest artifact.
+evidenced one-line fork-worker mount correction `253188229`. All eight real
+clones completed WEPP (15/15 jobs each); all 3,640 hillslopes / 8,520 segments
+pass generated/prepared content checks. All eight refreshed runoff/sediment
+pairs differ. Real writer failure emits no completion; supported retry produces
+identical input manifests, failed logs survive archive, and successful restore
+matches all 7,897 recorded files. Final browser/download checks pass.
+Failed-job evidence and exact source hashes remain in the Forest artifact.
 No production scientific data has been changed. Independent correctness and QA
-passed with no High/Medium code findings.
+passed both code and final Forest acceptance with no High/Medium findings.
+The package remains open solely for operator-confirmed WEPPcloud deployment,
+eight-run production repair, and its final evidence/review. Do not archive this
+active plan until that authorized phase is complete.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;
 the replacement contract adds no runtime mechanism. The earlier fix is now
@@ -605,3 +627,9 @@ The simplified contract SHA-256 is
 `aab2b182422f900a5a4d8ce96d09b475bc77bdee3ac904e580e2fecb5361e896`;
 both required independent reviews returned PASS with zero unresolved High or
 Medium findings. Exact operator approval and the standalone commit are pending.
+
+Revision note (2026-09-18 04:42 UTC): bounded implementation and all eight real
+Forest scenarios accepted by independent correctness and QA. Retained source
+identity, parsed inputs, fresh results, failure/retry, browser/download, and
+archive/restore evidence. Stop at Roger's WEPPcloud deployment confirmation;
+production repair and package closure remain intentionally open.

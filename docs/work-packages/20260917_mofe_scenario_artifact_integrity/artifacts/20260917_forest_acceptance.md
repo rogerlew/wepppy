@@ -1,9 +1,9 @@
 # Forest acceptance - MOFE scenario artifact integrity
 
-**Status**: deployment and clone recovery PASS; scenario execution in progress
+**Status**: Forest acceptance PASS; correctness and QA PASS
 **Target**: `forest1.local` test production
-**Gate**: production deployment and run repair are blocked until this artifact
-passes independent review
+**Gate**: accepted for operator-owned deployment; run repair waits for Roger's
+explicit WEPPcloud deployment confirmation
 
 ## Candidate Identity
 
@@ -111,7 +111,7 @@ The source's classification breaks are `[-1, 0, 1, 2]`, nodata `[255]`.
 - No scientific state of the source was modified; fork metadata is recorded by
   the normal API. Production deployment/repair remains operator-gated.
 
-## Interim Artifact Checks
+## Artifact Checks
 
 Read-only parser checks passed for all 455 management files in every scenario,
 including 30% and 50% thinning. Checks compare segment counts,
@@ -127,12 +127,12 @@ SBS zonal classification independently returned 422/627/16 codes 131/132/133.
 The public coverage operations produced 0.30 and 0.50 canopy, respectively,
 with 0.75 interrill/rill cover on every applicable segment.
 
-Full soil builds use the supported API with saved initial saturation 0.75 and
-soil version 9002. The first six builds completed; both thinning builds remain
-active. All 455 prepared management and soil files pass semantic checks for
-baseline, low, moderate, high, prescribed, and SBS. Completed outputs,
-archive/restore, and final comparisons remain pending; these interim checks
-alone are not Forest acceptance.
+All eight full soil builds use the supported API with saved initial saturation
+0.75 and soil version 9002. All 455 hillslope management/soil files per scenario
+pass semantic checks at both generated and prepared boundaries. Each final
+manifest also retains the additional `pw0` watershed management/soil file.
+All eight complete WEPP trees contain 15 finished jobs, with fresh 22-year
+interchange outputs, 455 exact hillslope IDs, and finite summary metrics.
 
 | Class | Canopy | Interrill/rill cover |
 | --- | --- | --- |
@@ -151,6 +151,22 @@ layer transformations. For representative hillslope 101, baseline soil has
 not changed formulas or defaults. SBS output comparisons include the documented
 13 bare-to-forest assignments and must not be attributed solely to fire severity.
 
+The fresh baseline yields 738.9182 mm/year runoff and 128.4518 tonnes/year
+sediment, versus the reporter's 736.6318 and 12.6926. Independent comparison
+confirms that sediment/soil-loss changes occur only on the eight hillslopes with
+13 saved class-200 segments. All 455 slope/climate files are byte-identical and
+all parsed soils are identical to the original; only those eight prepared
+management files differ. Class 200 is labeled "Bare areas" but its established
+template is `GeoWEPP/grass.man` (bromegrass, cover 0.50/0.50/0.50), not a new
+bare-soil parameterization. This package preserves that mapping.
+
+Scientific interpretation caveat: gross soil loss and deposition become very
+large on several of those hillslopes. Hillslope 341's raw WEPP output itself
+reports 679,334,263.6 kg/year loss and 679,334,109.5 kg/year deposition; this is
+not an interchange/unit-conversion error. Artifact fidelity does not establish
+physical calibration. Outside the eight affected hillslopes, sediment and soil
+loss are unchanged; hillslope 82 has only a 0.1 m3/year runoff rounding difference.
+
 The first queued baseline WEPP submission
 `66f6d2bb-43b4-4581-aaaf-4c14ce299ea2` was canceled before starting when readback
 showed an omitted advanced `kslast` field cleared the saved 0.0001 value.
@@ -162,28 +178,34 @@ Baseline retry is `d79c99a7-8b52-4186-a1bd-d7cddbc1d552`. No API or scientific
 parameter code was changed; prepared-soil readback must account for this existing
 restrictive-layer override.
 
-Browser checks loaded all eight run pages through normal CAP verification.
-Sample management downloads used the existing run-scoped service bearer token,
-returned HTTP 200, and matched local bytes. Anonymous download returned HTTP 401
-and is not claimed to pass. Logs/screenshots are `/tmp/mofe-browser*`; repeat the
-check after final execution so the 50% sample reflects its completed mutation.
+Final browser checks loaded all eight run pages through normal CAP verification.
+Sample management and final hillslope-result parquet downloads used the existing
+run-scoped service bearer token, returned HTTP 200, and matched local bytes.
+The 30% and 50% sample hashes differ as intended. Anonymous download returned
+HTTP 401 and is not claimed to pass. Browser access/download is tested here;
+scientific mutations used the supported authenticated API, not browser clicks.
 
 ## Scenario Execution Inventory
 
 | Scenario role | Forest run ID | Landuse job ID | WEPP-prep job ID | WEPP job ID | Terminal state |
 | --- | --- | --- | --- | --- | --- |
-| Baseline | pending | pending | pending | pending | not run |
-| Low severity | pending | pending | pending | pending | not run |
-| Moderate severity | pending | pending | pending | pending | not run |
-| High severity | pending | pending | pending | pending | not run |
-| SBS | pending | pending | pending | pending | not run |
-| Prescribed burn | pending | pending | pending | pending | not run |
-| 30% thinning | pending | pending | pending | pending | not run |
-| 50% thinning | pending | pending | pending | pending | not run |
+| Baseline | mofe-0918-baseline | 66d34197-942a-43dc-8fde-7e92d93b1457 | de832c9c-7e4d-4cb0-9b7f-cb83c57000e8 | d79c99a7-8b52-4186-a1bd-d7cddbc1d552 | finished |
+| Low severity | mofe-0918-low | 1c5fb339-d5e1-4881-a74a-bdaee98a7dce | e29db012-0d94-40f0-9349-6e1a65025ef5 | 466b4804-e35d-4e93-ae7d-c18598520071 | finished |
+| Moderate severity | mofe-0918-moderate | a17a1b56-3338-4f72-8aec-6ff912302bc6 | 8c258b98-cbca-49bf-bf74-52d62c07fdd1 | 28b40fc7-5eaa-4f21-ac3b-50b45da37d3b | finished |
+| High severity | mofe-0918-high | 3d933c56-d248-49af-b088-174d372a59db | 2540bd15-393c-425f-b89b-40276cb30cf5 | d29e0159-debb-4e2b-bf94-a23b4787a171 | finished |
+| SBS | mofe-0918-sbs | 10a4b15f-3b3e-4c12-b3dd-7d266a4d703f | 73e13ce5-53cf-4dcd-9c34-b20032597279 | 90d66862-fcfa-443c-9b6d-bfad9b52c1bf | finished |
+| Prescribed burn | mofe-0918-prescribed | 4037aba0-b513-4d10-af37-c0374b7e970d | de355520-59e0-44ec-ac82-95abac2cae48 | 89e5ee57-f731-48ac-a11c-5f79124072a4 | finished |
+| 30% thinning | mofe-0918-thin30 | 5918022e-0ade-4c0d-a684-702cb4b355a9 | fc3ccc45-073e-4480-8b18-cf309c32373c | 82375362-d3fb-42eb-ad38-72c9fc0f3374 | finished |
+| 50% thinning | mofe-0918-thin50 | fa80d842-a6ef-49da-837f-c0c948717607 | cfbb40c5-f15d-404b-b92d-2a6bc692233b | 7d9dda07-7031-42f6-a0f3-4ca60899f40f | finished |
 
-## Required Generated-Artifact Evidence
+## Retained Generated-Artifact Evidence
 
-For every scenario, add links or paths to retained evidence for:
+The [evidence bundle](forest-evidence.tar.gz) retains every scenario's terminal
+job trees/status, complete parsed per-segment observations and sorted SHA-256
+manifests, failure/retry/restore captures, runtime identity, and final browser
+results/screenshots. Bundle SHA-256:
+`d99c9c85ff79e203a0f3fe7b222b733b8df41333d081fbcfe7b1f35ba1f49b21`.
+It contains no credentials. The following evidence is covered:
 
 - persisted `domlc_d`, `domlc_mofe_d`, effective management map, and cover
   overrides;
@@ -200,31 +222,85 @@ For every scenario, add links or paths to retained evidence for:
 
 | Comparison | Required observation | Result/evidence |
 | --- | --- | --- |
-| Baseline vs low | Effective eligible management classes encode low severity | pending |
-| Low vs moderate | Classified/selected management classes differ as configured | pending |
-| Moderate vs high | High-severity management and required soil inputs differ as configured | pending |
-| Baseline vs SBS | SBS spatial mix reaches generated management and soil inputs | pending |
-| Baseline vs prescribed | Prescribed class reaches generated managements | pending |
-| 30% vs 50% thinning | Applicable combined and prepared managements contain 0.30 vs 0.50 canopy | pending |
-| Landuse vs WEPP prep | Prepared files preserve the corrected combined input semantics | pending |
-| Inputs vs results | Any equal results are explained from verified effective inputs | pending |
+| Baseline vs low | Effective eligible management classes encode low severity | PASS: 453 management files and parsed soils differ |
+| Low vs moderate | Classified/selected management classes differ as configured | PASS: 453 management files and parsed soils differ |
+| Moderate vs high | High-severity management and required soil inputs differ as configured | PASS: 453 management files and parsed soils differ |
+| Baseline vs SBS | SBS spatial mix reaches generated management and soil inputs | PASS: all 455 management files and parsed soils differ |
+| Baseline vs prescribed | Prescribed class reaches generated managements | PASS: 453 management files and parsed soils differ |
+| 30% vs 50% thinning | Applicable combined and prepared managements contain 0.30 vs 0.50 canopy | PASS: 453 management files differ; parsed soils identical |
+| Landuse vs WEPP prep | Prepared files preserve the corrected combined input semantics | PASS: all 3,640 hillslopes / 8,520 segments |
+| Inputs vs results | Any equal results are explained from verified effective inputs | PASS: all eight aggregate runoff/sediment pairs differ |
+
+Two all-class-200 hillslopes legitimately retain identical management files across
+global scenarios. Soil file headers include run paths, so soil hashes differ
+even where parsed parameters match; thinning soil equivalence is semantic, not
+inferred from hashes.
+
+## Fresh Hillslope Summary
+
+[Full reporter-shaped CSV](mofe-forest-hillslope-response-summary.csv) and
+[output hashes/provenance](mofe-forest-summary-sources.json) were generated by
+`summarize_forest.py`. Formula checks independently reproduce the reporter's
+original baseline, including sample standard deviations. Annual interchange
+values are not divided by 22 again. Area is 1,807.5 ha for all eight scenarios.
+
+| Scenario | Runoff (mm/year) | Sediment yield (tonnes/year) |
+| --- | --- | --- |
+| Baseline | 738.9182 | 128.4518 |
+| Low | 943.5181 | 897.0849 |
+| Moderate | 951.6108 | 1,149.7958 |
+| High | 1,048.2389 | 4,875.6990 |
+| SBS | 948.6587 | 2,247.7876 |
+| Prescribed | 906.8019 | 364.5123 |
+| 30% thinning | 982.8661 | 10,528.0770 |
+| 50% thinning | 956.9823 | 7,433.2373 |
+
+These prove propagated scenario inputs and fresh outputs, not calibration or an
+expected severity ordering. The baseline/template and SBS comparability caveats
+above remain important when interpreting this table.
 
 ## Failure and Retry Evidence
 
-- Controlled disposable-project writer failure: pending.
-- No false completion event: pending.
-- Partial artifacts and diagnostics remain visible: pending.
-- Supported retry converges from persisted assignment state: pending.
-- Archive/restore retains completed and failed evidence: pending.
+- Controlled writer failure: job `5f258c9a-3788-40fb-9e2f-ccfc72d68b90`
+  failed with a real `PermissionError` at the combined-management `open()`.
+  Only disposable `landuse/hill_101.mofe.man` was temporarily changed from mode
+  0644 to 0444; verified regular file, one link, distinct source inode, worker
+  identity 1000:993. An EXIT trap restored exact mode 0644, including on errors.
+- No false completion: captured live landuse status stream has the exact job's
+  `EXCEPTION` and no `COMPLETED` or completion trigger. The log retains 114
+  completed synthesis tasks before the failure; prior files remain inspectable.
+- Persisted rollback: `domlc_d`, `domlc_mofe_d`, and management selections match
+  the successful pre-failure archive exactly. Full parsed-input readback still
+  passes because the injected identity remap preserves scientific intent.
+- Failed-state archive job `9d1152d0-5ef7-49d1-9241-3299dd8e4a7f` finished.
+  `archives/mofe-0918-baseline.20260918T042733Z.zip` contains the diagnostic
+  `landuse.log` byte-for-byte: SHA-256
+  `aca506cbacff518c85965bb42d5ec269304ac933f4971701ecf16d75b60e8ba7`.
+- Supported identity-remap retry `4ae64813-6ae5-41bf-9d4b-b00b59394553` finished;
+  every management/soil manifest matches the pre-failure result exactly.
+- Successful archive job `4b3b17c8-23e7-4a2e-9366-64a86d89fe79` finished.
+  `archives/mofe-0918-baseline.20260918T042149Z.zip` holds the completed baseline;
+  restore job `0456c405-426e-444d-861b-4b629cb8fc02` finished and all 7,897
+  pre-archive file hashes match. Restore replaced only the disposable baseline
+  contents; both completed and failed-state archives remain available.
+- Completed archive SHA-256:
+  `9d08ba831b22ab8c114e5d5dfce96a5f53ed1a71f4c09e1c840eca69fabae79c`.
+- Failed-state archive SHA-256:
+  `6b6b8d17d202aa711427a86859bb3c7b4457ea9e8ecaa1de77a962070704de8b`.
 
 ## Acceptance Verdict
 
-- Exact candidate verified in all relevant containers: no.
-- Actual-project generated-output gate: not run.
-- No unresolved correctness/QA findings: no.
-- **Forest gate**: fail / not run.
-- Reviewer and timestamp: pending.
+- Exact candidate verified in all relevant containers: yes, five services.
+- Actual-project generated-output gate: PASS, all eight scenarios.
+- No unresolved High/Medium correctness or QA findings: yes.
+- **Forest gate**: PASS, 2026-09-18 UTC.
+- Independent correctness: `correctness_review`, PASS; verified all 14,576 live
+  input-file hashes and recomputed all numeric summary fields.
+- Independent QA: `qa_review`, PASS, 2026-09-18 04:39 UTC; independently checked
+  job trees, observations, browser/provenance hashes, retries, restore, and bundle.
+- Final queue check at 04:40 UTC: zero queued/executing default, batch, and
+  fork/archive jobs. Intentional failed-job evidence remains available.
 
-When this gate passes, present the evidence to Roger and stop. Do not deploy to
+This gate passed. Present the evidence to Roger and stop. Do not deploy to
 WEPPcloud or mutate the Abdisa production runs. The next phase begins only after
 Roger records explicit deployment confirmation in the production repair ledger.

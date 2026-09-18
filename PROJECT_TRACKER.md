@@ -566,10 +566,11 @@ canopy mutation now invokes the existing writer, and MOFE summary rebuilding
 retains the selection. All 8,994 repository tests passed (99 skipped). Forest preflight passed identity
 and idle-queue checks; candidate `ffa241766` deployed successfully without a branch
 switch. Roger approved the one-line missing fork-worker secret-mount correction
-`253188229`; startup tests and both reviews passed. All eight supported clones
-and landuse artifact checks pass. Six scenarios also pass full prepared-input
-checks; model execution and archive/restore acceptance remain in progress.
-Roger retains the WEPPcloud deployment gate.
+`253188229`; startup tests and both reviews passed. All eight real scenarios
+completed 15/15 WEPP jobs each, with parsed generated/prepared inputs, fresh
+distinct summaries, browser/download, failure/retry, and archive/restore checks
+passing (7,897 restored hashes). Final independent correctness and QA PASS. Roger
+retains the WEPPcloud deployment gate; production runs remain unrepaired.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

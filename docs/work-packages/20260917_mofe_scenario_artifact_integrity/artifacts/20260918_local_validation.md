@@ -60,11 +60,14 @@ nonsequential segments, and RAP taking precedence over an explicit 0.3 override.
 - Eleven changed Markdown files passed `wctl doc-lint`; canonical contract
   spelling preview and `git diff --check` passed.
 - Independent correctness and secondary QA: PASS, no blocking code findings.
+- Approved one-line fork-worker Compose mount correction `253188229`:
+  `wctl run-pytest tests/docker/unit/test_rq_worker_startup_contract.py -q`
+  passed all seven tests in 9.08 seconds. Resolved Compose and actual worker
+  import/clone passed on Forest; no additional Python change or image rebuild.
 
 ## Remaining gate
 
-Actual-project Forest acceptance has not run. Forest is clean and idle on
-`feature/project-owned-config`. Its revision is an ancestor of the candidate,
-so a fast-forward of the existing branch avoids any branch switch. The canonical
-deployment supports `--skip-pull` for the already-updated checkout. Production
-repair remains separately gated on Roger's deployment.
+[Actual-project Forest acceptance](20260917_forest_acceptance.md) now records
+all eight completed scenarios and content-level checks. The existing branch
+fast-forwarded without switching. Production repair remains separately gated on
+Roger's explicit WEPPcloud deployment confirmation.

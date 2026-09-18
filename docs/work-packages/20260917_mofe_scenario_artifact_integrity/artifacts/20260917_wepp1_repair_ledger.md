@@ -1,14 +1,17 @@
 # wepp1 repair ledger - Abdisa Rithet Creek runs
 
 **Status**: blocked; no production mutation authorized yet
-**Prerequisite 1**: Forest acceptance must pass
+**Prerequisite 1**: Forest acceptance PASS, 2026-09-18 UTC
 **Prerequisite 2**: Roger must deploy the accepted revision to WEPPcloud and
 explicitly confirm completion
 
 ## Deployment Confirmation Gate
 
-- Forest-accepted revision: pending.
-- Forest acceptance reviewer/timestamp: pending.
+- Forest-accepted implementation: `f4152ac69`; image built at `ffa241766`,
+  config-only fork-worker correction `253188229`. Later package-evidence commits
+  do not change runtime source; verify deployed hashes against the Forest record.
+- Forest acceptance reviewers: independent `correctness_review` and `qa_review`,
+  both PASS on 2026-09-18 UTC; see the Forest artifact's Acceptance Verdict.
 - Roger deployment confirmation text: pending.
 - Confirmation timestamp and timezone: pending.
 - Deployed wepp1 revision: pending.
@@ -22,7 +25,7 @@ revision equals the Forest-accepted revision or an explicitly reviewed descendan
 
 | Scenario | Run ID | Intended state | Known pre-repair defect | Status |
 | --- | --- | --- | --- | --- |
-| Baseline | `ventilated-gag` | Unburned control | Control generation for comparison | Blocked |
+| Baseline | `ventilated-gag` | Saved unburned assignments, including 13 class-200 segments | Eight hillslopes still encode forest for class 200 | Blocked |
 | Low severity | `equestrian-bonheur` | Effective class 406 | Baseline-equivalent MOFE managements | Blocked |
 | Moderate severity | `tactful-aging` | Effective class 418 | Baseline-equivalent MOFE managements | Blocked |
 | High severity | `incorporate-cerebrum` | Effective class 405 | Baseline-equivalent managements; distinct soils | Blocked |
@@ -32,6 +35,13 @@ revision equals the Forest-accepted revision or an explicitly reviewed descendan
 | 50% thinning | `uncrowned-bolt` | Class 424; canopy 0.50 | Generated canopy 0.40 | Blocked |
 
 ## Preflight and Preservation
+
+Preserve saved scientific choices, including initial saturation 0.75 and
+`kslast=0.0001`; the existing run-WEPP payload must include the latter explicitly.
+Do not change the class-200 template or force the SBS raster's classes to match
+saved global-remap assignments. Carry forward the baseline/SBS comparability and
+large gross erosion/deposition caveats from the
+[Forest evidence](20260917_forest_acceptance.md#fresh-hillslope-summary).
 
 Before each run changes, record:
 
