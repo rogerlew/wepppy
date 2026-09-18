@@ -38,8 +38,10 @@ files, and completed result summaries.
   and documentation gates; full suite also passed 12 subtests, with 99 skipped.
 - [x] Deploy exact candidate `ffa241766` to Forest; canonical health/image gates
   and worker source hashes pass.
-- [ ] Resolve the separate fork-worker import blocker with operator direction:
-  missing Discord token file prevents supported clone/archive/restore jobs.
+- [x] Resolve the operator-approved fork-worker import blocker in `253188229`;
+  same-image import and real clone retry passed, seven existing tests passed.
+- [x] Create all eight real Rithet clones through the normal fork API; initial
+  management-file checks pass for seven scenarios while soil builds execute.
 - [ ] Deploy the exact accepted candidate to `forest1.local` and exercise an
   actual Rithet Creek clone or supported restored archive through all scenarios.
 - [ ] Record Forest artifacts and present the hard-gate evidence to the operator.
@@ -184,10 +186,13 @@ files, and completed result summaries.
 ## Outcomes & Retrospective
 
 The bounded source correction is committed as `f4152ac69` and 91 focused tests passed;
-broader validation and Forest deployment passed; Forest acceptance is blocked by
-the dedicated fork worker's missing Discord token-file dependency. The failed
-job and exact source hashes are recorded in the Forest artifact. No production data has
-been changed. Independent correctness and QA passed with no High/Medium code findings.
+broader validation and Forest deployment passed. Roger approved the separately
+evidenced one-line fork-worker mount correction `253188229`; eight real clones
+and all generated landuse checks now pass. Soil builds and WEPP execution are
+in progress. Baseline's 455 prepared management/soil files pass parsed-content
+checks. Failed-job evidence and exact source hashes remain in the Forest artifact.
+No production scientific data has been changed. Independent correctness and QA
+passed with no High/Medium code findings.
 The
 expanded unapproved design and its proposed ADR/review artifacts were removed;
 the replacement contract adds no runtime mechanism. The earlier fix is now

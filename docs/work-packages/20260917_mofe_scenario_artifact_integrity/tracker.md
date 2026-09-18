@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: local gates and Forest deployment passed; live acceptance blocked
+**Current phase**: fork dependency fixed; eight-clone Forest acceptance in progress
 **Last updated**: 2026-09-18 UTC
-**Next milestone**: apply approved missing fork-worker mount and resume acceptance
+**Next milestone**: finish soils, execute WEPP, verify prepared files and outputs
 
 Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
 (public canopy mutation and retained-summary clarification). Takeover authority
@@ -25,16 +25,14 @@ at `192.168.1.108` with its saved `forest1.local` host key, clean revision
 `a4877628676388817b4a68671f6144e91d174683`, idle queues, and full production
 Compose deployment plan. Its current branch is `feature/project-owned-config`;
 the candidate fast-forwarded that existing branch without a branch switch.
-Forest now runs `ffa241766`; canonical deployment and exact worker source hashes
-passed. The first clone job `d947f1db-f1fc-4e68-bcd1-47a5070950b2` failed before
-copying because the dedicated worker lacks the import-time Discord token file.
-Archive/restore share the same dependency. No scenario or production repair has
-run. See the Forest artifact's **Blocking Forest Dependency** section; a separate
-configuration/dependency correction needs operator direction.
-Roger subsequently approved that separate minimal fix. Forest's fork profile
-will reuse the existing Discord token-file secret alias, as wepp3 already does;
-no Python or queue behavior changes are needed. Validate resolved Compose,
-existing startup-contract tests, and a real clone under the worker identity.
+Forest runs the image built at `ffa241766`; canonical deployment and exact
+worker source hashes passed. The first clone failed before copying because the
+dedicated worker lacked its import-time Discord token file. Roger approved the
+one-line Compose correction `253188229`, matching the existing wepp3 mount.
+Resolved Compose, seven startup tests, real worker import, correctness and QA
+review passed. All eight supported forks and landuse artifact checks passed.
+Soil builds and WEPP execution are in progress; archive/restore and final output
+acceptance remain pending. No production repair has run.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -49,8 +47,8 @@ existing startup-contract tests, and a real clone under the worker identity.
       class-to-class writer path, and 0.30/0.50 canopy propagation.
 - [x] Implement the bounded propagation corrections without changing parameter values,
       RAP precedence, schemas, or queue topology.
-- [ ] Complete focused, related, broad, documentation, correctness, and QA gates.
-- [ ] Deploy the exact candidate revision to Forest through the canonical script.
+- [x] Complete focused, related, broad, documentation, correctness, and QA gates.
+- [x] Deploy the exact candidate revision to Forest through the canonical script.
 - [ ] Restore or clone the actual Rithet Creek project on Forest and run all
       scenario roles through landuse, WEPP preparation, WEPP, and summary export.
 - [ ] Present Forest evidence and stop for Roger's WEPPcloud deployment.
@@ -60,11 +58,10 @@ existing startup-contract tests, and a real clone under the worker identity.
 
 ### In Progress
 
-- [ ] Finish full tests and deploy the exact candidate to Forest.
+- [ ] Finish all eight Forest executions and generated-artifact acceptance.
 
 ### Blocked
 
-- [ ] Forest execution is blocked until implementation and local gates pass.
 - [ ] Production repair is blocked until Forest acceptance passes and Roger
       explicitly confirms deployment of the accepted revision to WEPPcloud.
 

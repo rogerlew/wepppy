@@ -565,9 +565,11 @@ all eight Abdisa production runs.
 canopy mutation now invokes the existing writer, and MOFE summary rebuilding
 retains the selection. All 8,994 repository tests passed (99 skipped). Forest preflight passed identity
 and idle-queue checks; candidate `ffa241766` deployed successfully without a branch
-switch. Live acceptance is blocked before cloning: the dedicated fork worker
-lacks an import-time Discord token file. Separate dependency/configuration
-direction is needed; Roger retains the WEPPcloud deployment gate.
+switch. Roger approved the one-line missing fork-worker secret-mount correction
+`253188229`; startup tests and both reviews passed. All eight supported clones
+and landuse artifact checks pass. Six scenarios also pass full prepared-input
+checks; model execution and archive/restore acceptance remain in progress.
+Roger retains the WEPPcloud deployment gate.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

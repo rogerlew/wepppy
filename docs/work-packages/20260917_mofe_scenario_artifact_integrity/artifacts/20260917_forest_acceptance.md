@@ -1,6 +1,6 @@
 # Forest acceptance - MOFE scenario artifact integrity
 
-**Status**: deployment PASS; scenario acceptance BLOCKED at fork-worker import
+**Status**: deployment and clone recovery PASS; scenario execution in progress
 **Target**: `forest1.local` test production
 **Gate**: production deployment and run repair are blocked until this artifact
 passes independent review
@@ -12,6 +12,9 @@ passes independent review
 - Forest pre-deploy revision: `a4877628676388817b4a68671f6144e91d174683`.
 - Exact candidate checkout: `ffa241766` (implementation `f4152ac69`, plus evidence).
 - Forest post-deploy revision: `ffa241766e2587c7e35726caa6f4e6dc32420711`.
+- Subsequent config-only correction: `253188229`; the same built image/source
+  remains in use. Only the stopped fork worker was recreated with the missing
+  token-file mount, matching the dedicated wepp3 service.
 - Worker identity: `uid=1000(roger) gid=993(docker)`.
 - Worker `landuse.py` SHA-256:
   `86be20117e7958a0dd23ded739e111984a5c0d470f2824d456057304ae176070`.
@@ -39,7 +42,7 @@ The latest idle-queue check at 02:19 UTC found zero queued or executing jobs.
 Docker's documented Forest procedure also requires explicitly starting the
 existing `fork-archive` profile before submitting disposable clone jobs.
 
-## Blocking Forest Dependency
+## Resolved Forest Dependency
 
 The canonical fork request for `mofe-0918-baseline` was accepted as job
 `d947f1db-f1fc-4e68-bcd1-47a5070950b2`, then failed at 02:32:40 UTC before
@@ -49,17 +52,19 @@ the task body or target directory creation. Retained job response:
 `FileNotFoundError` for
 `/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token`.
 
-The production Compose fork profile mounts only the Redis secret, unlike the
+The production Compose fork profile previously mounted only the Redis secret, unlike the
 other workers' Discord token-file mount. Archive and restore use the same queue
-and module, so neither is an alternate path around this failure. No generated
-scenario artifacts exist; deployment success is not scenario acceptance.
-The eight-run validation and production repair remain unexecuted.
+and module, so neither was an alternate path around this failure.
 
 The newly started fork consumer was stopped after confirming zero queued and
 zero started fork/archive jobs; the failed job remains available for diagnosis.
-Do not silently add credential access, change queue dispatch, patch notification
-behavior, or hand-copy a project to bypass the supported workflow. Request
-operator direction for this separate dependency/configuration fix. Source
+Roger explicitly approved the separate minimal dependency fix. Commit
+`253188229` adds the existing token-file secret alias to this profile. Seven
+existing worker-startup contract tests passed; resolved Compose validation and
+the real `project_rq` import passed as `1000:993`. Independent correctness review
+PASS. Retry job `75be1635-6808-4df0-bf13-0fec0a475d66` completed, followed by seven
+successful fork jobs for the remaining scenario roles. No Python, image,
+identity, queue, or notification behavior changed. Source
 `ron.nodb` and `landuse.nodb` hashes remained unchanged after the failed request.
 
 ## Preconditions
@@ -70,15 +75,15 @@ operator direction for this separate dependency/configuration fix. Source
 - [x] `hostname`, repository path, installed `wctl` preset, queue state, and
       service health are verified.
 - [x] No active default/batch job would be interrupted by deployment.
-- [ ] Actual Rithet Creek project clone/archive provenance and checksum are
+- [x] Actual Rithet Creek project clone/archive provenance and checksum are
       recorded without mutating the production source.
 
 ## Project Provenance
 
 Read-only source discovery found `/wc1/runs/ve/ventilated-gag` on the shared
 run storage with landuse, soils, watershed, and WEPP artifacts. Its README names
-configuration `canada-wbt-mofe`. This is a candidate source for a supported Forest
-fork; source provenance and disposable-clone identity still need verification.
+configuration `canada-wbt-mofe`. This is the verified source for the eight
+supported Forest forks.
 It has not been mutated by this work. Read-only checks on wepp1 and Forest's
 shared storage match both `ron.nodb` SHA-256
 `9a983dd4f64260909907edf6178b53b919aac15ff917aa869f448c256d43a717`
@@ -96,12 +101,72 @@ to `/tmp/mofe-original-sbs.tif`; SHA-256
 `47b4c7f7aeb603d0ecbf00cf736b1d0699d257ee6bff7833b9b5cf6ac87452cf`.
 The source's classification breaks are `[-1, 0, 1, 2]`, nodata `[255]`.
 
-- Production source run/archive: pending.
-- Supported transfer method: pending; use normal clone or archive/restore only.
-- Source archive SHA-256: pending.
-- Forest disposable run IDs: pending.
-- Configuration and project identity checks: pending.
-- Source remains read-only: pending confirmation.
+- Production source run: `ventilated-gag`, matching hashes above.
+- Supported transfer: normal authenticated `/fork` API, no hand-copy/NoDb edit.
+- Source archive SHA-256: not applicable (fork selected); source state and SBS
+  input hashes retained above.
+- Disposable IDs: `mofe-0918-` followed by `baseline`, `low`, `moderate`, `high`,
+  `sbs`, `prescribed`, `thin30`, or `thin50`.
+- Configuration: `canada-wbt-mofe`; original 22-year climate (2002-2023).
+- No scientific state of the source was modified; fork metadata is recorded by
+  the normal API. Production deployment/repair remains operator-gated.
+
+## Interim Artifact Checks
+
+Read-only parser checks passed for all 455 management files in every scenario,
+including 30% and 50% thinning. Checks compare segment counts,
+canopy/interrill/rill cover against intended class templates/explicit override,
+and synthesized source-stack entries against the effective map. Baseline and
+global scenarios retain 13 saved class-200 segments and alter only the 1,052
+class-90 forest segments. SBS regenerated from the byte-identical original C3S
+raster and real uploaded map yields 422 class-406, 627 class-418, and 16
+class-405 segments. Native zonal readback of the original C3S raster returns
+1,052 class-71 and 13 class-70 segments; both are forest classes, unlike the
+saved manual class-200 assignments retained by the global-mapping scenarios.
+SBS zonal classification independently returned 422/627/16 codes 131/132/133.
+The public coverage operations produced 0.30 and 0.50 canopy, respectively,
+with 0.75 interrill/rill cover on every applicable segment.
+
+Full soil builds use the supported API with saved initial saturation 0.75 and
+soil version 9002. The first six builds completed; both thinning builds remain
+active. All 455 prepared management and soil files pass semantic checks for
+baseline, low, moderate, high, prescribed, and SBS. Completed outputs,
+archive/restore, and final comparisons remain pending; these interim checks
+alone are not Forest acceptance.
+
+| Class | Canopy | Interrill/rill cover |
+| --- | --- | --- |
+| 90 baseline | 0.90 | 1.00 |
+| 406 low | 0.75 | 0.85 |
+| 418 moderate | 0.60 | 0.60 |
+| 405 high | 0.40 | 0.30 |
+| 410 prescribed | 0.85 | 0.85 |
+| 424 thinning | explicit 0.30 / 0.50 | 0.75 |
+
+Readback uses finite numeric checks and exact segment order. Prepared soils
+match generated soils after the source's existing saturation and restrictive-
+layer transformations. For representative hillslope 101, baseline soil has
+`ki=400000`, `kr=0.00003`, top-layer `ksat=50`; high severity has
+`ki=1000000`, `kr=0.0001`, `ksat=15`. These are observed existing model choices,
+not changed formulas or defaults. SBS output comparisons include the documented
+13 bare-to-forest assignments and must not be attributed solely to fire severity.
+
+The first queued baseline WEPP submission
+`66f6d2bb-43b4-4581-aaaf-4c14ce299ea2` was canceled before starting when readback
+showed an omitted advanced `kslast` field cleared the saved 0.0001 value.
+The discovery schema omits this existing UI field. Its supported form contract
+is `controls/wepp_pure_advanced_options/bedrock.htm`; the run-payload handler
+explicitly accepts it. All subsequent WEPP requests include `kslast: 0.0001`,
+`clip_soils: false`, and `initial_sat: 0.75`, preserving source choices.
+Baseline retry is `d79c99a7-8b52-4186-a1bd-d7cddbc1d552`. No API or scientific
+parameter code was changed; prepared-soil readback must account for this existing
+restrictive-layer override.
+
+Browser checks loaded all eight run pages through normal CAP verification.
+Sample management downloads used the existing run-scoped service bearer token,
+returned HTTP 200, and matched local bytes. Anonymous download returned HTTP 401
+and is not claimed to pass. Logs/screenshots are `/tmp/mofe-browser*`; repeat the
+check after final execution so the 50% sample reflects its completed mutation.
 
 ## Scenario Execution Inventory
 
