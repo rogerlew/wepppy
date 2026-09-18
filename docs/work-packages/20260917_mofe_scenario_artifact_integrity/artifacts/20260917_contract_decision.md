@@ -21,9 +21,16 @@ recorded here.
 The operator requested a work package to fix the failed MOFE behavior, required
 actual validation on Forest before deployment, reserved the WEPPcloud deployment
 to himself, and directed Codex to manually repair all Abdisa runs after that
-deployment. This approves the outcome and sequencing. The exact canonical
-contract text, independent reviews, and standalone checkpoint commit remain
-pending; no implementation file may be edited under this checkpoint yet.
+deployment. This approves the outcome and sequencing. The initial checkpoint is
+`ecda89e45`; its contract reviews passed before implementation.
+
+Takeover review also confirmed two missing links in the canopy workflow: the
+public coverage edit never calls the MOFE writer, and summary rebuilding drops
+stored overrides. The canonical canopy clarification requires existing-writer
+regeneration after canopy edits and preservation of retained MOFE canopy
+overrides. Independent correctness and QA reviewers both PASS this bounded
+clarification before source edits. Single-OFE behavior and RAP precedence stay
+unchanged. This clarification is committed as a second documentation checkpoint.
 
 On 2026-09-18, the operator rejected an expanded draft because its attempt
 storage, publication ledger, recovery, retention, event-deduplication, and

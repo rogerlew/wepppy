@@ -53,6 +53,13 @@ as the canopy override. When no summary override exists, current source behavior
 is unchanged. When RAP supplies its existing segment-specific canopy value, RAP
 retains precedence over the summary override.
 
+The existing canopy coverage mutation must regenerate MOFE managements from
+the current explicit assignments before returning success. A missing assignment
+map fails with build-first guidance rather than reclassifying the raster.
+MOFE summary rebuilding must preserve explicit canopy overrides for retained classes,
+so subsequent mapping and rebuild operations do not erase persisted selections.
+These are required links in the existing thinning workflow, not new operations.
+
 No canopy percentage, RAP formula, disturbed lookup, severity threshold, soil
 parameter, or fallback value changes.
 
