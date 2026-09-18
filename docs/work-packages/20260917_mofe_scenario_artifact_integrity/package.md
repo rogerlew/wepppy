@@ -22,6 +22,8 @@ revision to WEPPcloud.
   files from its updated segment assignments before reporting success.
 - Propagate an existing management summary's explicit canopy-cover override into
   MOFE management synthesis while preserving the existing RAP-specific override.
+  Invoke the existing writer from the public canopy edit and retain MOFE canopy
+  overrides during summary rebuilding, so the complete thinning workflow works.
 - Add regressions that reproduce the real contracts instead of test doubles that
   return raw SBS pixels where production returns classified codes.
 - Validate the candidate on Forest with an actual project clone and content-level
@@ -81,6 +83,10 @@ revision to WEPPcloud.
 - **Explicitly prohibited expansion**: new infrastructure, changed scientific
   parameter values, queue topology, authorization, run schemas, or hidden repair
   storage.
+- **Rejected design**: the operator rejected an unapproved attempt store,
+  publication ledger, recovery/retention protocol, event-deduplication change,
+  and full-workflow transaction fence as disproportionate and fragile. They are
+  not part of this package.
 
 ## Implementation Fidelity and Evidence
 

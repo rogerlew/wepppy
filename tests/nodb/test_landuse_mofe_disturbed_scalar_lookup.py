@@ -51,6 +51,7 @@ class _ManagementStub:
 
 
 class _ManagementSummaryStub:
+    cancov_override = None
     def __init__(self, management: _ManagementStub, disturbed_class: str) -> None:
         self._management = management
         self.disturbed_class = disturbed_class
@@ -225,6 +226,8 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
             landuse_module.RAP_Band.PERENNIAL_FORB_AND_GRASS: {"101": {"1": 5.0}},
         }
 
+    landuse.managements["forest-dom"].cancov_override = 0.3
+
     disturbed = _DisturbedStub()
     monkeypatch.setattr(
         "wepppy.nodb.mods.disturbed.Disturbed.tryGetInstance",
@@ -298,7 +301,8 @@ def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
 
         @staticmethod
         def build_lcgrid(_subwta: str, _mofe_map: str) -> dict[str, dict[str, str]]:
-            return {"101": {"1": "11"}, "102": {"1": "12"}}
+            # SBS.data has already classified raw pixels before zonal dominance.
+            return {"101": {"1": "131"}, "102": {"1": "132"}}
 
     class _DisturbedStub:
         burn_shrubs = False

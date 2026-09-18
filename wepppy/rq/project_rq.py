@@ -2203,6 +2203,8 @@ def modify_landuse_mapping_rq(
 
                 updated_domlc_d = dict(landuse.domlc_d)
                 updated_domlc_mofe_d = copy.deepcopy(domlc_mofe_d) if isinstance(domlc_mofe_d, dict) else None
+                if landuse.multi_ofe and not updated_domlc_mofe_d:
+                    raise ValueError('MOFE landuse assignments are unavailable; build landuse before modifying it.')
 
                 for edit in normalized_edits:
                     source_dom = edit["dom"]
@@ -2224,6 +2226,8 @@ def modify_landuse_mapping_rq(
                     landuse.domlc_mofe_d = updated_domlc_mofe_d
 
             try:
+                if landuse.multi_ofe:
+                    landuse._build_multiple_ofe(domlc_mofe_override=copy.deepcopy(updated_domlc_mofe_d))
                 landuse.build_managements()
             except Exception:
                 with landuse.locked():

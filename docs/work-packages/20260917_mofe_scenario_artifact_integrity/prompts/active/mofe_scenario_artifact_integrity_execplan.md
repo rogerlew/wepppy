@@ -25,11 +25,15 @@ files, and completed result summaries.
   artifacts, isolate three source boundaries, and scaffold this work package.
 - [x] (2026-09-17 22:55 UTC) Promote repository-wide generated-artifact evidence
   and completion-claim guidance into canonical agent-discoverable documentation.
-- [ ] Ratify a canonical MOFE management artifact contract through the required
-  reviewed standalone ancestor checkpoint.
-- [ ] Add failing regressions for classified SBS input, global mapping file
+- [x] (2026-09-18 UTC) Remove the rejected transaction/storage/recovery design
+  and replace it with a compact contract limited to the three propagation bugs,
+  existing failure behavior, focused tests, and Forest acceptance.
+- [x] Ratify the bounded contract through ancestors `ecda89e45` and `f1a4a75b4`;
+  both independent reviews PASS, takeover execution authorized.
+- [x] Add failing regressions for classified SBS input, global mapping file
   regeneration, explicit 0.30/0.50 canopy propagation, and writer failure.
-- [ ] Implement the three minimal corrections and update affected documentation.
+- [x] Implement the propagation corrections, including the missing public canopy
+  writer call and preservation of MOFE canopy overrides during summary rebuild.
 - [ ] Pass focused, related, full-suite, correctness, QA, and documentation gates.
 - [ ] Deploy the exact accepted candidate to `forest1.local` and exercise an
   actual Rithet Creek clone or supported restored archive through all scenarios.
@@ -41,6 +45,16 @@ files, and completed result summaries.
   `prompts/completed/`.
 
 ## Surprises & Discoveries
+
+- Takeover review found that `modify_coverage` never invoked the MOFE writer,
+  and `build_managements` discarded persisted canopy overrides. Fixing synthesis
+  alone would not repair the public thinning workflow. The reviewed clarification
+  in `f1a4a75b4` covers those two existing links without new runtime machinery.
+- Forest's `.local` name does not resolve here. Its documented address
+  `192.168.1.108` works with `HostKeyAlias=forest1.local`, preserving saved-key
+  verification. The host is on `feature/project-owned-config`; branch-switch
+  direction is pending. `wctl rq-info --detailed` is unsupported there; plain
+  `wctl rq-info` confirmed zero executing jobs.
 
 - Observation: `SoilBurnSeverityMap.data` reclassifies the source raster to codes
   130 through 133 before inherited zonal dominance runs. The full landuse builder
@@ -78,7 +92,19 @@ files, and completed result summaries.
   Evidence: incident artifact and the prior package's validation statement that
   it did not perform a complete live landuse or WEPP replay.
 
+- Observation: attempting to guarantee cross-file publication, recovery, event
+  delivery, and retained attempt evidence expanded a three-edit propagation fix
+  into a new runtime subsystem and increased fragility.
+  Evidence: Roger rejected that design on 2026-09-18 and directed the work back
+  to the simplest correction.
+
 ## Decision Log
+
+- Decision: include the public canopy mutation's existing-writer call and retain
+  explicit canopy overrides when rebuilding MOFE summaries. Preserve single-OFE
+  behavior and RAP precedence. Two independent reviewers accepted the delta.
+  Rationale: direct caller inspection proved the three original edits alone
+  would leave the user workflow broken. Date/Author: 2026-09-18 UTC, Codex.
 
 - Decision: treat this as a new recurrence package rather than reopening the
   closed September 7 package.
@@ -127,11 +153,24 @@ files, and completed result summaries.
   historical context rather than durable agent governance.
   Date/Author: 2026-09-17 22:55 UTC, Codex.
 
+- Decision: use no new runtime mechanism for this remediation. Reuse the current
+  MOFE writer, NoDb/RQ flow, status messages, locks, and WEPP preparation path.
+  Change only SBS classified-value consumption, post-mapping MOFE regeneration,
+  and canopy-override initialization while retaining RAP precedence.
+  Rationale: the operator rejected the expanded robustness design as a source of
+  fragility. Direct generated-file tests and actual Forest acceptance provide the
+  required evidence without adding a second publication/recovery architecture.
+  Date/Author: 2026-09-18 UTC, Roger and Codex.
+
 ## Outcomes & Retrospective
 
-The package is scaffolded and no source or production data has been changed. The
-root tracker and all nine package Markdown files pass `wctl doc-lint` with zero
-errors or warnings. The earlier fix is now correctly classified as partial: it
+The bounded source correction is implemented and 90 focused tests passed;
+broader validation and Forest acceptance remain pending. No production data has
+been changed. Independent correctness review passed with no High/Medium findings.
+The
+expanded unapproved design and its proposed ADR/review artifacts were removed;
+the replacement contract adds no runtime mechanism. The earlier fix is now
+correctly classified as partial: it
 corrected a mapping lookup but did not prove that a live build wrote those
 assignments into management files. Update this section after each milestone with
 exact commits, test counts, Forest run IDs, production job IDs, and unresolved
@@ -205,16 +244,15 @@ both generated management files use 0.40 canopy from the shared thinning source.
 
 ## Plan of Work
 
-Milestone 1 establishes normative intent before source edits. Add
+Milestone 1 establishes normative intent before source edits. Add the compact
 `docs/schemas/mofe-management-artifact-contract.md` and cross-link it from the
 existing disturbed MOFE and selected-hillslope contracts where their boundaries
 meet. The new contract must state that classified SBS zonal results are consumed
 once; every successful MOFE assignment mutation regenerates management files from
 the final segment map; explicit summary cover overrides propagate to MOFE files;
 RAP's current segment-specific precedence remains unchanged; and success is not
-published until durable artifacts and summaries agree. It must enumerate absent,
-empty, populated, supported legacy, malformed, working, failed, completed, and
-archive/restored states. Complete
+published when the existing writer path raises. It must not add persistence,
+staging, recovery, event, retention, or downstream transaction machinery. Complete
 `artifacts/20260917_contract_decision.md`, obtain two independent read-only
 reviews, disposition every finding, obtain the operator's approval of the exact
 contract, and commit that checkpoint as a standalone ancestor. Record its full
@@ -417,10 +455,9 @@ least one must inspect generated combined management text and its prepared
 failure path.
 
 Local acceptance also requires no new schema keys, payload fields, queue edges,
-or parameter values; preserved behavior for single-OFE projects, no SBS, unburned
-SBS, empty valid assignments, supported legacy assignments, RAP projects, stale
-jobs, unknown classes, malformed assignments, writer failures, retries, and
-archive/restore must be explicit in tests or contract exclusions.
+storage, event formats, or parameter values. Focus compatibility tests on the
+changed paths: single-OFE, SBS absent/unburned, explicit MOFE assignments, RAP,
+stale jobs, unknown mapping classes, and writer failure without completion.
 
 Forest acceptance requires all of the following:
 
@@ -532,3 +569,13 @@ points and review templates. Runtime status remains diagnosed only.
 
 Revision note (2026-09-17 22:57 UTC): recorded clean Markdown, root size, spelling
 preview, and inbound-reference validation for the new guidance.
+
+Revision note (2026-09-18 UTC): Roger rejected the expanded robustness design as
+fragile. Removed the proposed attempt store, publication/recovery protocol,
+retention and event machinery, workflow fencing, ADR-0069, and their review
+artifacts. Restored the bounded plan and drafted a compact no-new-mechanism
+contract for the three confirmed propagation defects.
+The simplified contract SHA-256 is
+`aab2b182422f900a5a4d8ce96d09b475bc77bdee3ac904e580e2fecb5361e896`;
+both required independent reviews returned PASS with zero unresolved High or
+Medium findings. Exact operator approval and the standalone commit are pending.

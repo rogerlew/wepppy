@@ -1230,7 +1230,12 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
             }
             self.domlc_d = {"100": "44", "200": "55", "300": "71"}
             self.domlc_mofe_d = {"100": {"1": "44", "2": "71"}}
+            self.multi_ofe = True
             self.build_managements_calls = 0
+
+        def _build_multiple_ofe(self, *, domlc_mofe_override):
+            assert domlc_mofe_override == {"100": {"1": "55", "2": "42"}}
+            assert domlc_mofe_override is not self.domlc_mofe_d
 
         @contextmanager
         def locked(self):
@@ -1442,6 +1447,7 @@ def test_modify_landuse_mapping_rq_rolls_back_state_when_build_managements_fails
             self.domlc_d = {"100": "44"}
             self.domlc_mofe_d = {"100": {"1": "44"}}
             self.build_managements_calls = 0
+            self.multi_ofe = False
 
         @contextmanager
         def locked(self):
@@ -1492,6 +1498,7 @@ def test_modify_landuse_mapping_rq_accepts_legacy_three_argument_signature(
             self.managements: dict[str, object] = {"44": object(), "71": object()}
             self.domlc_d = {"100": "44", "200": "71"}
             self.domlc_mofe_d = {}
+            self.multi_ofe = False
             self.build_managements_calls = 0
 
         @contextmanager

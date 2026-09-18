@@ -1,18 +1,29 @@
 # Forest acceptance - MOFE scenario artifact integrity
 
-**Status**: not run
+**Status**: preflight completed; deployment and scenario execution not run
 **Target**: `forest1.local` test production
 **Gate**: production deployment and run repair are blocked until this artifact
 passes independent review
 
 ## Candidate Identity
 
-- Reviewed contract revision: pending.
+- Reviewed contract revisions: `ecda89e45`, `f1a4a75b4`.
 - Candidate implementation revision: pending.
-- Forest pre-deploy revision: pending.
+- Forest pre-deploy revision: `a4877628676388817b4a68671f6144e91d174683`.
 - Forest post-deploy revision: pending.
 - Relevant host/container image and source checksums: pending.
-- Rollback revision and command path: pending.
+- Rollback revision: pre-deploy revision above; canonical entry point
+  `/workdir/wepppy/scripts/deploy-production.sh`.
+
+Preflight at 2026-09-18 01:50 UTC verified hostname `forest1`, repository
+`/workdir/wepppy`, clean branch `feature/project-owned-config`, and zero executing
+default/batch jobs. The documented IP `192.168.1.108` works with SSH
+`HostKeyAlias=forest1.local`; local name resolution fails. The saved host key
+matches. Plain `wctl rq-info` works; `--detailed` is unsupported by the installed
+RQ version. Deployment `--print-plan` selects full production Compose.
+Switching this host to the validated master candidate requires operator branch
+direction under root instructions; the question is pending. No deployment was
+attempted.
 
 ## Preconditions
 

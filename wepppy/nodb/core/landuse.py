@@ -1481,14 +1481,13 @@ class Landuse(NoDbBase):
                 _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 _wait_for_gdal_openable_raster(disturbed.disturbed_cropped, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 # Use direct zonal dominance over the SBS raster instead of global-mode fallback.
-                # Nodata/off-map OFE segments remain unburned (class 130 via class_pixel_map[255]).
+                # SBS.data already classifies pixels; nodata remains unburned.
                 sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
                 
                 for k, v in sbs_lc_d.items():
                     for k2, v2 in v.items():
                         sbs_lc_d[k][k2] = str(v2)
                         
-                class_pixel_map = sbs.class_pixel_map
             
                 meta = {}
                 for topaz_id, hill_sbs_d in sbs_lc_d.items():
@@ -1501,7 +1500,7 @@ class Landuse(NoDbBase):
                             managements[dom] = get_management_summary(dom, mapping_reference)
                         man = managements[dom]
 
-                        burn_class = class_pixel_map.get(val, '130')
+                        burn_class = val if val in ('130', '131', '132', '133') else '130'
 
                         if burn_class in ['131', '132', '133']:
                             if is_unburned_forest_disturbed_class(man.disturbed_class):
@@ -1553,7 +1552,8 @@ class Landuse(NoDbBase):
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
             mofe_ids = sorted([_id for _id in domlc_d[str(topaz_id)]])
-            #assert len(mofe_ids) == nsegments, (topaz_id, mofe_ids, nsegments, len(mofe_ids) )
+            if set(mofe_ids) != {str(index) for index in range(1, nsegments + 1)}:
+                raise ValueError(f'MOFE landuse assignments have incomplete OFE segments for Topaz ID: {topaz_id}')
 
             apply_buffer = watershed.mofe_buffer and not str(topaz_id).endswith('1')
             if apply_buffer:
@@ -1575,7 +1575,7 @@ class Landuse(NoDbBase):
                 disturbed_class = summary.disturbed_class
                 texid = 'sand loam'
                 replacements = None
-                cancov_override = None
+                cancov_override = getattr(summary, 'cancov_override', None)
                 rdmax = None
                 xmxlai = None
 
@@ -1886,7 +1886,14 @@ class Landuse(NoDbBase):
         value: float
     ) -> None:
         with self.locked():
+            if self.multi_ofe and cover == 'cancov':
+                assignments = getattr(self, 'domlc_mofe_d', None)
+                if not isinstance(assignments, dict) or not assignments:
+                    raise ValueError('MOFE landuse assignments are unavailable; build landuse before modifying it.')
             self._modify_coverage(dom, cover, value)
+
+        if self.multi_ofe and cover == 'cancov':
+            self._build_multiple_ofe(domlc_mofe_override=deepcopy(self.domlc_mofe_d))
 
     def modify_mapping(self, dom: str, newdom: str) -> None:
         with self.locked():
@@ -2035,6 +2042,9 @@ class Landuse(NoDbBase):
                         effective_map=effective_map,
                         base_map=base_map,
                     )
+                if self.multi_ofe:
+                    cached = existing_managements.get(str(dom_key))
+                    man.cancov_override = getattr(cached, 'cancov_override', None)
                 return man
 
             # create a dictionary of management keys and

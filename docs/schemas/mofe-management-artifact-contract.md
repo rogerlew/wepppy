@@ -1,6 +1,6 @@
 # MOFE management artifact contract
 
-**Status**: Proposed; implementation conformance pending.
+**Status**: Accepted; local implementation validated, Forest acceptance pending.
 
 ## Scope
 
@@ -85,6 +85,21 @@ in both `landuse/hill_*.mofe.man` and prepared `wepp/runs/*.man`; job status or
 NoDb state alone is not proof.
 
 ## Verification
+
+### User and operator workflow
+
+Global landuse mapping changes and canopy edits regenerate the combined MOFE
+managements. After changing a scenario, prepare and run WEPP again to refresh
+results; an existing report is not updated by the landuse edit alone. RAP-enabled
+projects continue to use RAP's segment canopy values.
+
+Existing affected projects need a supported rebuild and rerun after deployment.
+Check selected classes and canopy in `landuse/hill_*.mofe.man`, then in prepared
+`wepp/runs/*.man`, before accepting refreshed results. A failed writer can leave
+partial files: retain its diagnostics and rerun the failed operation successfully
+before preparing WEPP. Do not repair generated files by hand.
+
+### Developer evidence
 
 Regression evidence must cover classified SBS values `130` through `133`,
 nodata, explicit-assignment bypass, global mapping regeneration, writer failure

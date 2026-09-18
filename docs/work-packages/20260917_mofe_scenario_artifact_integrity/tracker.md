@@ -7,9 +7,23 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-17 22:39 UTC
-**Current phase**: contract and regression planning
-**Last updated**: 2026-09-17 22:57 UTC
-**Next milestone**: ratify the canonical generated-artifact contract before code edits
+**Current phase**: implementation validated locally; broad gates running
+**Last updated**: 2026-09-18 UTC
+**Next milestone**: finish broad gates and Forest candidate deployment
+
+Contract ancestors: `ecda89e45` (bounded propagation contract) and `f1a4a75b4`
+(public canopy mutation and retained-summary clarification). Takeover authority
+and two independent review dispositions are in the contract decision artifact.
+
+Takeover implementation remains confined to two production files. Real artifact
+regressions reproduced baseline SBS collapse and 0.40 canopy before correction;
+90 focused tests then passed. Correctness review PASS, no High/Medium findings.
+Broad tests and secondary QA are running. Forest preflight verified `forest1`
+at `192.168.1.108` with its saved `forest1.local` host key, clean revision
+`a4877628676388817b4a68671f6144e91d174683`, idle queues, and full production
+Compose deployment plan. Its current branch is `feature/project-owned-config`;
+the requested switch to the validated master candidate awaits operator direction.
+No Forest deployment or production repair has occurred.
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -60,6 +74,17 @@
       artifact validation standard and wired it into root agent guidance, package
       templates, tracker checks, correctness review, observability, and hardening
       guidance (2026-09-17 22:55 UTC).
+- [x] Removed the rejected attempt-storage/publication/recovery design and
+      ADR-0069; restored the bounded package and drafted a compact contract for
+      only the three confirmed propagation defects. Frozen SHA-256 is
+      `aab2b182422f900a5a4d8ce96d09b475bc77bdee3ac904e580e2fecb5361e896`
+      (2026-09-18 UTC).
+- [x] Dispositioned the compact review's two Medium documentation findings by
+      labeling the canonical contract proposed and separating writer completion
+      from later normal WEPP preparation (2026-09-18 UTC).
+- [x] Completed both independent exact-hash contract reviews; governance and
+      correctness returned PASS with zero unresolved High or Medium findings
+      (2026-09-18 UTC).
 
 ## Timeline
 
@@ -72,6 +97,11 @@
 - **2026-09-17 22:39 UTC** - New incident/remediation package opened.
 - **2026-09-17 22:55 UTC** - Durable generated-artifact validation and completion-
   claim guidance promoted outside the work package and made agent-discoverable.
+- **2026-09-18 UTC** - Operator rejected the expanded robustness design as
+  fragile. Removed its runtime mechanisms and returned to the original minimal
+  source corrections, focused generated-file tests, and Forest acceptance.
+- **2026-09-18 UTC** - The compact replacement contract passed both required
+  exact-hash reviews; operator approval and the standalone checkpoint remain.
 
 ## Decisions Log
 
@@ -138,12 +168,27 @@ environment validated, deployed, repaired, and incident resolved.
 observability, and hardening guidance now route agents to the canonical standard.
 The rule survives this package's closure.
 
+### 2026-09-18 UTC: Reject a second publication and recovery architecture
+
+**Context**: Contract review expanded the three producer defects into an attempt
+store, publication ledger, recovery and retention protocol, event changes, and a
+full-workflow identity fence.
+
+**Decision**: Remove that design. Reuse existing NoDb/RQ locks, status messages,
+files, writer, and WEPP preparation. Correct only classified SBS consumption,
+global mapping regeneration, and summary canopy override propagation while
+preserving RAP precedence.
+
+**Impact**: Security remains low, no ADR is needed, and acceptance relies on
+focused generated-file regressions plus actual Forest evidence rather than new
+runtime coordination machinery.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
 | Tests repeat the old unrealistic SBS stub | High | Medium | Exercise real `SoilBurnSeverityMap.data`/`build_lcgrid` behavior and inspect files | Open |
-| Successful rebuild leaves mixed generations after writer failure | High | Medium | Contract explicit failure/rollback semantics and inject a real writer failure | Open |
+| Existing writer fails after touching a file | Medium | Medium | Preserve existing exception/no-completion behavior and inject a writer failure; do not add rollback machinery | Open |
 | Forest uses a different revision than the reviewed candidate | High | Low | Record host/container revision and source checksum before acceptance | Open |
 | Production repair starts before deployment | High | Low | Hard block and explicit operator confirmation in the ledger | Open |
 | Output equality is misread as either proof or failure | Medium | Medium | Verify input semantics first and explain any legitimate equal output | Open |

@@ -11,17 +11,35 @@ Active incident remediation: [MOFE scenario artifact integrity and Abdisa run re
 — correct classified SBS consumption, global mapping artifact regeneration, and
 thinning canopy propagation. Actual-project Forest acceptance is a hard gate;
 Roger owns WEPPcloud deployment, after which all eight named runs require manual
-rebuild/rerun and retained evidence.
+rebuild/rerun and retained evidence. The operator rejected an expanded runtime
+publication/recovery design; the package is back to three minimal producer fixes
+with focused artifact tests and Forest acceptance.
+
+Completed investigation: [Dead Horse earlier-storm correspondence](docs/work-packages/20260917_dead_horse_storm_correspondence/package.md)
+— measured East Fork gauge peaks support July 31/August 2 candidates; specific deposit
+timing awaits the dated Planet scenes. No live changes.
 
 Completed: [Daymet source preservation](docs/work-packages/20260917_daymet_source_preservation/package.md)
 — source overwrite removed; 42 focused tests and real CLIGEN byte-parity checks pass.
 Full suite: 8,983 passed, 99 skipped; archive and browser artifact checks pass.
+
+Completed audit: [Dead Horse Creek Daymet M3](docs/work-packages/20260917_dead_horse_daymet_audit/package.md)
+— numerical/browser checks pass; paper-window rainfall remains zero. Found mislabeled
+Daymet source-parquet units and retained CLIGEN quality warning; 858 protected files unchanged.
 
 Completed: [File dependency freshness audit and fixes](docs/work-packages/20260916_file_dependency_freshness/package.md)
 — implementation and independent reviews complete;8,924 Python/899 frontend
 tests pass. Rebuilt development UI/RQ/WEPP, native Omni, archive/recovery and
 interleaved cache acceptance complete. Explicit unresolved boundaries and
 existing runtime failures remain documented; no production deployment.
+
+Completed audit: [Dead Horse Creek GridMET rerun](docs/work-packages/20260916_dead_horse_gridmet_audit/package.md)
+— numerical checks pass; August 5–12 source rainfall is zero, P50 unchanged,
+CLI ctime change explains stale status. No live mutation.
+
+Completed audit: [Dead Horse Creek M3](docs/work-packages/20260916_dead_horse_m3_audit/package.md)
+— saved calculations/source/report pass; Rengers et al. (2024) comparison identifies
+SBS coverage, basin-size and storm-pairing limits. No run or production changes.
 
 Completed: [Post-fire Kf and report revisions](docs/work-packages/20260916_postfire_kf_report_revisions/package.md)
 — replace new M1 RUSLE K with traceable Kf, remove RUSLE dependency, add a rainfall
@@ -542,10 +560,13 @@ candidate on an actual Rithet Creek clone/restored project on Forest, then stop
 for the operator's WEPPcloud deployment before manually rebuilding and rerunning
 all eight Abdisa production runs.
 
-**Status**: Incident evidence and active ExecPlan scaffolded. The broader evidence
-chain and completion vocabulary are now canonical and agent-discoverable. Contract
-checkpoint, implementation, local gates, and Forest acceptance remain. Production
-mutation is blocked until Forest passes and Roger explicitly confirms deployment.
+**Status**: Bounded propagation correction implemented in two production files;
+90 focused tests passed and independent correctness/QA reviews PASS. The public
+canopy mutation now invokes the existing writer, and MOFE summary rebuilding
+retains the selection. Broad gates are running. Forest preflight passed identity
+and idle-queue checks; switching its current feature branch to the master
+candidate awaits operator direction. Forest acceptance and production repair are
+pending; Roger retains the WEPPcloud deployment gate.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

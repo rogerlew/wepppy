@@ -9,6 +9,8 @@ Canonical behavioral contract:
   canonical-authority set, conflict handling, and ancestor-checkpoint gate.
 * `docs/schemas/nodb-persistence-concurrency-contract.md` is the authoritative
   lock/persistence/cache specification for `NoDbBase`.
+* MOFE scenario generation follows `docs/schemas/mofe-management-artifact-contract.md`;
+  regression evidence must read combined managements and prepared WEPP inputs.
 * Daymet acquisition artifact ownership follows the “Daymet acquisition source
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
 * Applicable current canonical domain and shared/cross-cutting contracts are

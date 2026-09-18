@@ -95,10 +95,15 @@ finding. This artifact's implementation and Forest evidence gates remain open.
 
 ## Verdict
 
-- **Gate status**: fail
-- **Unresolved findings**: High 4; Medium 0; Low 0
-- **Release recommendation**: hold
-- **Reviewer sign-off**: pending independent review after implementation evidence
+- **Implementation gate**: PASS, independent `correctness_review`, 2026-09-18 UTC.
+- **Implementation findings**: COR-01, COR-02, COR-03 resolved by direct artifact
+  tests and bounded source correction. No unresolved High/Medium code finding.
+- **Release recommendation**: hold for COR-04, actual Forest acceptance.
+- **Reviewer scope**: source and tests, including public canopy edit, retained
+  MOFE overrides, real SBS classification, generated/prepared managements, writer
+  failure/retry, absent state, and nonsequential segment IDs. Local tests isolate
+  NoDb locking and unrelated slope/soil preparation; they do not prove deployed
+  workflow equivalence.
 
 ## Artifact Observability Gate
 
