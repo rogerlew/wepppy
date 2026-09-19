@@ -11,15 +11,39 @@ several overland flow elements, each with its own management assignment.
 ## Progress
 
 - [x] (2026-09-18) Confirm scalar prefilter in all three treatment branches.
-- [ ] Commit reviewed contract checkpoint.
-- [ ] Implement segment-based candidate selection and failing regressions.
+- [x] Commit reviewed contract checkpoint (`df504d8f6`).
+- [x] Implement segment-based candidate selection and failing regressions.
+- [x] (2026-09-18) Restart local Forest and dispatch six saved scenarios;
+  job `8c88742d-defd-4b3e-ac33-a3efd622dd42`, awaiting completion notification.
 - [ ] Validate generated/prepared inputs, focused and broad tests, independent review.
 - [ ] Close package with retained evidence and outstanding audit dispositions.
+- [x] Fix user-reported channel selection in Modify Landuse under the unchanged
+  selected-hillslope contract; frontend/render gates and independent review pass.
+- [x] Complete full six-scenario generated/prepared management and soil readback:
+  455 hillslopes per scenario, zero failures.
+- [x] Verify user's manual low-severity 260803 rerun: all artifact checks pass;
+  current manual/Omni numeric summaries agree. Compare 447 unchanged-input
+  hillslopes against dcc52a6 to assess executable-associated sediment differences.
+- [x] (2026-09-18 19:42 UTC) Disposition low/prescribed-fire failures as
+  model-output overflow plus Rust map-reader panic; full-model acceptance blocked.
+- [x] (2026-09-18 20:03 UTC) User-authorized stop of remaining jobs, artifact
+  preservation, and all-six rerun with `wepp_260803`; replacement job
+  `ef226e0f-a5f7-4daf-bee6-9db5f420c7aa`, awaiting results.
+- [x] Verify all six 260803 leaves and finalizers finished, no plot overflow,
+  and generated/prepared management covers match all six mixed hillslopes in
+  prescribed fire and both thinning treatments.
+- [x] Compare new Omni outputs to verified manual summaries with the user's
+  acknowledged mixed-binary caveat; fire runoff passes 20%, sediment fails,
+  and full cross-workflow ordering differs around thinning.
 
 ## Surprises & Discoveries
 
 The prior audit never paired manual scenario outputs; its 20% and rank claims
 must not be treated as proof. Existing Treatments already loops over OFEs.
+
+Forest low/prescribed-fire outputs contain asterisk overflow fields; the Rust
+soil-loss map reader panics on them. Low also has overflow in its loss report,
+so merely relaxing map parsing is not a scientifically valid recovery.
 
 ## Decision Log
 
@@ -27,9 +51,29 @@ must not be treated as proof. Existing Treatments already loops over OFEs.
 share the same demonstrated failure. Keep existing segment treatment semantics,
 single-OFE behavior and hillslope masks. The user authorized segment eligibility.
 
+2026-09-18: Preserve failed-run evidence and block numerical acceptance rather
+than retry unchanged inputs or suppress invalid cells. Numerical/model diagnosis
+and contextual Rust reader errors are separately scoped remediation; see
+`artifacts/forest_failure_disposition.md` for exact jobs and reproduction leads.
+
+2026-09-18: User selected `wepp_260803` for the replacement six-scenario batch.
+Change only the local project binary, preserve old artifacts and treatment
+settings, and invalidate reuse. Baseline outputs are not rerun by this request.
+
+User subsequently requested the mixed-binary comparison without rerunning manual
+projects. Retain it as a descriptive comparison, not causal attribution or a
+matched-parameter acceptance gate; see `artifacts/manual_comparison_260803.md`.
+
 ## Outcomes & Retrospective
 
-Pending implementation. No production deployment or result parity claim yet.
+Implementation and 72 focused regressions pass; independent review passed.
+Broad suite was interrupted by the requested stack restart and remains pending.
+Local Forest actual-project validation has two output-parsing failures and is
+not accepted; their cause/disposition is retained in the failure artifact.
+The subsequent 260803 batch completed all six scenarios and mixed-segment
+management acceptance passes. Comprehensive soil/manifests audit and broad
+regressions remain pending; no matched-binary manual comparison is claimed.
+No production deployment or result parity claim yet.
 
 ## Context and Orientation
 

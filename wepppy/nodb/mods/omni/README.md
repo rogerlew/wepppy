@@ -181,6 +181,20 @@ for concurrency limits and direct/RQ compatibility.
 
 #### Thinning
 
+For MOFE projects, treatment eligibility is evaluated from each segment's
+management class. An ineligible dominant hillslope class cannot exclude eligible
+segments. Thinning keeps its forest/deciduous forest/mixed forest eligibility;
+prescribed fire uses forest/shrub/grass segment mappings, and mulch uses the
+existing severity-fire classes. Ineligible neighboring segments are preserved.
+Slope and burn-severity filters still mask whole hillslopes. Single-OFE behavior
+is unchanged. Candidate selection lives in `omni_mode_build_services.py`;
+`Treatments.build_treatments()` applies segment changes and rebuilds MOFE inputs.
+
+Existing scenario outputs are not repaired by upgrading code. Rebuild affected
+scenario children and rerun WEPP through the supported workflow; verify combined
+and prepared managements before accepting refreshed results. Omni can reuse
+unchanged scenario definitions, so an ordinary submission may skip old children.
+
 Pre-fire mechanical treatment that reduces canopy density and fuel loads. Configure:
 
 - **Target canopy cover**: 40% (aggressive) or 65% (moderate)
@@ -206,7 +220,9 @@ Mulch scenarios require a **base scenario** (typically a burn severity scenario)
 
 #### Prescribed Fire
 
-Low-intensity burns in mature forests that reduce ladder fuels and understory without triggering high-severity soil heating. Omni applies prescribed fire management only to forest vegetation types.
+Low-intensity burns that reduce fuels without triggering high-severity soil heating.
+Single-OFE Omni selection targets mature forests. MOFE selection follows each
+segment's existing forest, shrub, or grass prescribed-fire mapping.
 
 Prescribed fire scenarios require an **undisturbed** clone context (no SBS map). In Omni, this is enforced by running prescribed fire from the `undisturbed` scenario when needed.
 

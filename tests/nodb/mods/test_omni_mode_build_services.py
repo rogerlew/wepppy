@@ -14,6 +14,75 @@ from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize('kind,eligible', [
+    ('thinning', 'mixed forest'), ('prescribed_fire', 'shrub'),
+    ('mulch', 'forest moderate sev fire'),
+])
+@pytest.mark.parametrize('integer_ids', [False, True])
+def test_mofe_candidate_uses_segments_not_dominant(kind, eligible, integer_ids):
+    hill = 101 if integer_ids else '101'
+    landuse = SimpleNamespace(multi_ofe=True, domlc_d={hill: 'bare'},
+        domlc_mofe_d={hill: {'1': 'bare', '2': 'eligible'}},
+        managements={'bare': SimpleNamespace(disturbed_class=''),
+                     'eligible': SimpleNamespace(disturbed_class=eligible)})
+    service = OmniModeBuildServices()
+    assert service._has_eligible_treatment_segment(landuse, hill, 'bare', kind)
+    landuse.domlc_mofe_d[hill]['2'] = 'bare'
+    assert not service._has_eligible_treatment_segment(landuse, hill, 'bare', kind)
+
+
+@pytest.mark.parametrize('assignments', [None, {}, {'102': {'1': 'forest'}},
+    {'101': {}}, {'101': []}, {'101': {'': 'forest'}}, {'101': {'1': None}}])
+def test_mofe_candidate_rejects_missing_or_malformed_state(assignments):
+    landuse = SimpleNamespace(multi_ofe=True, domlc_mofe_d=assignments,
+        managements={'forest': SimpleNamespace(disturbed_class='forest')})
+    with pytest.raises(ValueError, match='MOFE'):
+        OmniModeBuildServices()._has_eligible_treatment_segment(
+            landuse, '101', 'forest', 'thinning')
+
+
+def test_mofe_candidate_unknown_management_fails():
+    landuse = SimpleNamespace(multi_ofe=True,
+        domlc_mofe_d={'101': {'1': 'missing'}}, managements={})
+    with pytest.raises(KeyError):
+        OmniModeBuildServices()._has_eligible_treatment_segment(
+            landuse, '101', 'forest', 'thinning')
+
+
+@pytest.mark.parametrize('kind,eligible', [
+    ('thinning', 'forest'), ('prescribed_fire', 'shrub'),
+    ('mulch', 'forest high sev fire'),
+])
+def test_mofe_candidates_preserve_channel_slope_and_burn_masks(tmp_path, monkeypatch, kind, eligible):
+    omni = _DummyOmni(tmp_path)
+    hills = ['101', '102', '103', '104', '111']
+    landuse = SimpleNamespace(multi_ofe=True,
+        domlc_d={hill: 'bare' for hill in hills},
+        domlc_mofe_d={hill: {'1': 'bare', '2': 'eligible'} for hill in hills},
+        managements={'bare': SimpleNamespace(disturbed_class=''),
+                     'eligible': SimpleNamespace(disturbed_class=eligible)},
+        build=lambda: None,
+        identify_burn_class=lambda hill: 'Low' if hill == '103' else 'High')
+    landuse.domlc_mofe_d['111']['2'] = 'bare'
+    watershed = SimpleNamespace(hillslope_slope=lambda hill: 0.1 if hill == '102' else 0.6)
+    monkeypatch.setattr('wepppy.nodb.core.Watershed.getInstance', lambda wd: watershed)
+    monkeypatch.setattr('wepppy.nodb.core.Landuse.getInstance', lambda wd: landuse)
+    treatments = SimpleNamespace(
+        treatments_lookup={'thinning_40_75': 'T', 'prescribed_fire': 'T', 'mulch_30': 'T'},
+        treatments_domlc_d={}, build_treatments=lambda: None)
+    monkeypatch.setattr('wepppy.nodb.mods.treatments.Treatments.getInstance', lambda wd: treatments)
+    OmniModeBuildServices().apply_scenario_mode(omni,
+        scenario_name=kind, scenario=omni_module.OmniScenario.parse(kind),
+        scenario_def={'type': kind, 'canopy_cover': '40%', 'ground_cover': '75%',
+                      'ground_cover_increase': '30%', 'filter_hill_min_slope_pct': 50,
+                      'filter_burn_severities': [3]},
+        new_wd=omni.wd, disturbed=SimpleNamespace(has_sbs=False), landuse=landuse,
+        soils=SimpleNamespace(build=lambda **kwargs: None),
+        omni_base_scenario_name='uniform_high' if kind == 'mulch' else None)
+    # 102 fails slope, 103 fails burn, 104 is a channel, 111 has no eligible OFE.
+    assert treatments.treatments_domlc_d == {'101': 'T'}
+
+
 class _DummyOmni:
     def __init__(self, tmp_path: Path) -> None:
         self.wd = str(tmp_path / "run")

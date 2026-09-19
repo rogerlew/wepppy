@@ -85,6 +85,86 @@ def test_canopy_reaches_combined_and_prepared_management(scenario, monkeypatch, 
     assert [ini.data.cancov for ini in prepared.inis] == pytest.approx([cover, cover])
 
 
+@pytest.mark.parametrize('kind,source,target', [
+    ('thinning', '90', '424'), ('prescribed_fire', '90', '410'),
+    ('mulch', '418', '418030'),
+])
+def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
+    scenario, monkeypatch, kind, source, target,
+):
+    from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
+    from wepppy.nodb.mods.omni.omni import OmniScenario
+    from wepppy.nodb.mods.treatments import Treatments
+    from wepppy.nodb.mods.disturbed import Disturbed
+    from wepppy.nodb.core import Soils, Watershed
+    import wepppy.nodb.core.wepp as wepp
+
+    landuse, watershed, root = scenario
+    # Both segments are real managements; scalar bare class must not hide forest.
+    for key in ('90', '200', '410'):
+        landuse.managements[key] = get_management_summary(key, 'c3s-disturbed')
+    landuse.domlc_d = {'101': '200'}
+    landuse.domlc_mofe_d = {'101': {'1': '200', '2': source}}
+    landuse._build_multiple_ofe(domlc_mofe_override=landuse.domlc_mofe_d)
+    before = _read(root / 'landuse/hill_101.mofe.man')
+    unchanged_cover = before.inis[0].data.inrcov
+    source_cover = before.inis[1].data.inrcov
+    landuse.build = lambda: None  # Existing burned-base build is independently tested.
+    landuse.build_managements = lambda: None
+    landuse.dump_landuse_parquet = lambda: None
+    watershed.translator_factory = lambda: object()
+    monkeypatch.setattr(Watershed, 'getInstance', lambda wd: watershed)
+    monkeypatch.setattr(lu.Landuse, 'getInstance', lambda wd: landuse)
+    soils = SimpleNamespace(build=lambda **kwargs: None)
+    monkeypatch.setattr(Soils, 'getInstance', lambda wd: soils)
+    soil_calls = []
+    disturbed = SimpleNamespace(has_sbs=False, land_soil_replacements_d={},
+        get_disturbed_key_lookup=lambda: {'thinning_40_75': '424',
+            'forest_prescribed_fire': '410'},
+        modify_mofe_soils=lambda: soil_calls.append('rebuilt'))
+    monkeypatch.setattr(Disturbed, 'getInstance', lambda wd: disturbed)
+    treatments = Treatments.__new__(Treatments)
+    treatments.wd = str(root)
+    treatments.logger = logging.getLogger(__name__)
+    treatments.locked = lambda: nullcontext()
+    monkeypatch.setattr(Treatments, 'getInstance', lambda wd: treatments)
+    omni = SimpleNamespace(wd=str(root), has_sbs=False, logger=logging.getLogger(__name__),
+        timed=lambda label: nullcontext(), rq_job_pool_max_worker_per_scenario_task=1)
+    definition = {'type': kind, 'canopy_cover': '40%', 'ground_cover': '75%',
+                  'ground_cover_increase': '30%'}
+    OmniModeBuildServices().apply_scenario_mode(omni, scenario_name=kind,
+        scenario={'thinning': OmniScenario.Thinning, 'prescribed_fire': OmniScenario.PrescribedFire,
+                  'mulch': OmniScenario.Mulch}[kind], scenario_def=definition,
+        new_wd=str(root), disturbed=disturbed, landuse=landuse, soils=soils,
+        omni_base_scenario_name='uniform_moderate' if kind == 'mulch' else None)
+    assert landuse.domlc_mofe_d['101'] == {'1': '200', '2': target}
+    assert soil_calls == ['rebuilt']
+    combined = _read(root / 'landuse/hill_101.mofe.man')
+    assert combined.inis[0].data.inrcov == pytest.approx(unchanged_cover)
+    if kind == 'mulch':
+        assert combined.inis[1].data.inrcov > source_cover
+    else:
+        expected = get_management_summary(target, 'c3s-disturbed').get_management()
+        assert combined.inis[1].data.inrcov == pytest.approx(expected.inis[0].data.inrcov)
+
+    monkeypatch.setattr(wepp, 'copy_input_file', lambda *args: None)
+    class Soil:
+        obj = {'ofes': []}
+        def __init__(self, path): pass
+        def modify_initial_sat(self, value): pass
+        def write(self, path): pass
+    monkeypatch.setattr(wepp, 'WeppSoilUtil', Soil)
+    (root / 'soils').mkdir()
+    (root / 'soils/hill_101.mofe.sol').touch()
+    runs = root / 'wepp/runs'
+    runs.mkdir(parents=True)
+    wepp.prep_multi_ofe_hillslope(('101', 1, str(root), str(runs), 2,
+                                 None, 0.5, False, None, False, None, False, None))
+    prepared = _read(runs / 'p1.man')
+    assert [ini.data.inrcov for ini in prepared.inis] == pytest.approx(
+        [ini.data.inrcov for ini in combined.inis])
+
+
 def test_real_sbs_classification_reaches_management_files(scenario, monkeypatch):
     landuse, watershed, root = scenario
     watershed.mofe_nsegments = {'101': 5}

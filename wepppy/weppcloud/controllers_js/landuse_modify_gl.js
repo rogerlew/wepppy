@@ -351,7 +351,8 @@ var LanduseModify = (function () {
             var seen = Object.create(null);
             ids.forEach(function (value) {
                 var normalized = normalizeTopazId(value);
-                if (!normalized || seen[normalized]) {
+                // TOPAZ IDs ending in 4 identify channels, not editable hillslopes.
+                if (!normalized || normalized.endsWith("4") || seen[normalized]) {
                     return;
                 }
                 seen[normalized] = true;
@@ -430,6 +431,15 @@ var LanduseModify = (function () {
                 form: formElement
             }).then(function (data) {
                 geoJsonData = data || null;
+                if (geoJsonData && Array.isArray(geoJsonData.features)) {
+                    geoJsonData = Object.assign({}, geoJsonData, {
+                        features: geoJsonData.features.filter(function (feature) {
+                            var id = feature && feature.properties
+                                ? normalizeTopazId(feature.properties.TopazID) : null;
+                            return id && !id.endsWith("4");
+                        })
+                    });
+                }
                 modify.data = geoJsonData;
                 rebuildGeoLayer();
             }).catch(function (error) {

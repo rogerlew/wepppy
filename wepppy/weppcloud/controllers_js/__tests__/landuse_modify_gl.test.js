@@ -71,7 +71,7 @@ describe("LanduseModify GL controller", () => {
 
         httpPostJsonMock = jest.fn((url) => {
             if (url === "tasks/sub_intersection/") {
-                return Promise.resolve({ body: ["5", "6"] });
+                return Promise.resolve({ body: ["5", "6", 104, "204"] });
             }
             return Promise.resolve({ body: {} });
         });
@@ -211,12 +211,38 @@ describe("LanduseModify GL controller", () => {
         expect(Array.from(landuseModify.selected)).toEqual(["5", "6"]);
     });
 
+    test("selection overlay and clicks exclude channel Topaz IDs", async () => {
+        const features = [101, "104", 204].map((TopazID) => ({
+            type: "Feature", properties: { TopazID },
+            geometry: { type: "Polygon", coordinates: [] }
+        }));
+        httpGetJsonMock.mockResolvedValueOnce({ type: "FeatureCollection", features });
+        checkboxEl.checked = true;
+        checkboxEl.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+        const layer = mapStub.addLayer.mock.calls.at(-1)[0];
+        expect(layer.props.data.features.map((f) => f.properties.TopazID)).toEqual([101]);
+        landuseModify.clearSelection();
+        layer.props.onClick({ object: features[1] });
+        layer.props.onClick({ object: features[2] });
+        expect(landuseModify.selected.size).toBe(0);
+        layer.props.onClick({ object: features[0] });
+        expect(Array.from(landuseModify.selected)).toEqual(["101"]);
+    });
+
+    test("channel-only pasted IDs leave an empty selection", () => {
+        textareaEl.value = "104, 204, 4";
+        textareaEl.dispatchEvent(new Event("input", { bubbles: true }));
+        expect(landuseModify.selected.size).toBe(0);
+        expect(textareaEl.value).toBe("");
+    });
+
     test("submit clears selection and disables selection mode", async () => {
         checkboxEl.checked = true;
         checkboxEl.dispatchEvent(new Event("change", { bubbles: true }));
         await flushPromises();
 
-        textareaEl.value = "4, 7";
+        textareaEl.value = "4, 7, 104, 204";
         textareaEl.dispatchEvent(new Event("input", { bubbles: true }));
 
         selectEl.value = "202";
@@ -231,7 +257,7 @@ describe("LanduseModify GL controller", () => {
         const options = global.WCHttp.requestWithSessionToken.mock.calls[0][1];
         expect(options.method).toBe("POST");
         expect(options.headers["Content-Type"]).toBe("application/json");
-        expect(JSON.parse(options.body)).toEqual({ topaz_ids: ["4", "7"], landuse: "202" });
+        expect(JSON.parse(options.body)).toEqual({ topaz_ids: ["7"], landuse: "202" });
         expect(statusEl.textContent).toContain("Success");
         expect(checkboxEl.checked).toBe(false);
         expect(landuseModify.selected.size).toBe(0);

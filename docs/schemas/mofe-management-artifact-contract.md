@@ -1,6 +1,8 @@
 # MOFE management artifact contract
 
-**Status**: Accepted; local, Forest, and eight-run production acceptance PASS (2026-09-18).
+**Status**: Accepted. The original SBS/mapping/canopy corrections passed local,
+Forest and eight-run production acceptance (2026-09-18). The later Omni
+eligibility amendment has separate validation and release status below.
 
 ## Scope
 

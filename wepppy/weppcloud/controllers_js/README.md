@@ -291,6 +291,11 @@ Keep this document updated when the bundling flow or controller contract changes
 - Rebuild the bundle with `python wepppy/weppcloud/controllers_js/build_controllers_js.py` after large refactors to catch syntax errors outside of Jest.
 
 ### Landuse Modify Controller Reference (2025 helper migration)
+
+- Selection is hillslope-only: channel TOPAZ IDs ending in `4` are excluded from
+  the selectable overlay, click/box selection, pasted IDs, and submitted IDs.
+  Refresh the page after deploying the rebuilt controller bundle. Existing saved
+  landuse assignments are not changed by this UI correction.
 - **DOM contract**: `modify_landuse.htm` now exposes `data-landuse-modify-action="toggle-selection|submit"` and `data-landuse-modify-field="topaz-ids|landuse-code"`. Selection mode wiring runs through `WCDom.delegate`, and map interactions continue to depend on `MapController`/Leaflet—use the existing hooks rather than reintroducing inline handlers when the UI grows.
 - **Event surface**: `LanduseModify.getInstance().events = WCEvents.useEventMap(['landuse:modify:started', 'landuse:modify:completed', 'landuse:modify:error', 'landuse:selection:changed', 'job:started', 'job:completed', 'job:error'])`. Consumers should subscribe to these signals instead of scraping textarea values or controller internals.
 - **Transport**: modification requests post JSON (`{ topaz_ids: [...], landuse: '<code>' }`) to `url_for_run("modify-landuse", { prefix: "/rq-engine/api" })` via `WCHttp.requestWithSessionToken`. Rectangle selections post JSON extents to `tasks/sub_intersection/`. Successful runs refresh dependent controllers (`Landuse`, `SubcatchmentDelineation`) via the emitter/`controlBase` lifecycle events.

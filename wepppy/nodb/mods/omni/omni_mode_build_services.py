@@ -112,6 +112,46 @@ class OmniModeBuildServices:
     _SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities"
 
     @staticmethod
+    def _has_eligible_treatment_segment(
+        landuse: Any, topaz_id: Any, dom: Any, scenario_key: str,
+    ) -> bool:
+        """MOFE eligibility belongs to segments, not the scalar display class."""
+        if not getattr(landuse, "multi_ofe", False):
+            disturbed_class = getattr(landuse.managements[dom], "disturbed_class", "")
+            if scenario_key == "mulch":
+                return isinstance(disturbed_class, str) and "fire" in disturbed_class
+            return "forest" in disturbed_class and "young" not in disturbed_class
+
+        assignments = getattr(landuse, "domlc_mofe_d", None)
+        segments = None
+        if isinstance(assignments, dict):
+            segments = assignments.get(str(topaz_id), assignments.get(topaz_id))
+        if not isinstance(segments, dict) or not segments or any(
+            not str(ofe).strip() or not isinstance(key, (str, int)) or not str(key).strip()
+            for ofe, key in segments.items()
+        ):
+            raise ValueError(
+                f"MOFE assignments missing or malformed for hillslope {topaz_id}; rebuild landuse."
+            )
+        classes = [
+            getattr(landuse.managements[str(key)], "disturbed_class", "")
+            for key in segments.values()
+        ]
+        if scenario_key == "thinning":
+            return any(value in {"forest", "deciduous forest", "mixed forest"} for value in classes)
+        if scenario_key == "prescribed_fire":
+            return any(
+                isinstance(value, str) and any(cover in value for cover in ("forest", "shrub", "grass"))
+                for value in classes
+            )
+        mulch_classes = {
+            f"{cover} {severity} sev fire"
+            for cover in ("forest", "shrub", "grass")
+            for severity in ("low", "moderate", "high")
+        }
+        return any(value in mulch_classes for value in classes)
+
+    @staticmethod
     def _parse_optional_int_percent(value: Any) -> Optional[int]:
         if value in (None, ""):
             return None
@@ -446,9 +486,7 @@ class OmniModeBuildServices:
                         if str(topaz_id).endswith("4"):
                             continue
 
-                        man_summary = landuse.managements[dom]
-                        disturbed_class = getattr(man_summary, "disturbed_class", "")
-                        if isinstance(disturbed_class, str) and "fire" in disturbed_class:
+                        if self._has_eligible_treatment_segment(landuse, topaz_id, dom, scenario_key):
                             if not self._passes_treatment_filter_mask(
                                 topaz_id=topaz_id,
                                 watershed=watershed,
@@ -527,9 +565,7 @@ class OmniModeBuildServices:
                         if str(topaz_id).endswith("4"):
                             continue
 
-                        man_summary = landuse.managements[dom]
-                        disturbed_class = getattr(man_summary, "disturbed_class", "")
-                        if "forest" in disturbed_class and "young" not in disturbed_class:
+                        if self._has_eligible_treatment_segment(landuse, topaz_id, dom, scenario_key):
                             if not self._passes_treatment_filter_mask(
                                 topaz_id=topaz_id,
                                 watershed=watershed,
@@ -598,9 +634,7 @@ class OmniModeBuildServices:
                         if str(topaz_id).endswith("4"):
                             continue
 
-                        man_summary = landuse.managements[dom]
-                        disturbed_class = getattr(man_summary, "disturbed_class", "")
-                        if "forest" in disturbed_class and "young" not in disturbed_class:
+                        if self._has_eligible_treatment_segment(landuse, topaz_id, dom, scenario_key):
                             if not self._passes_treatment_filter_mask(
                                 topaz_id=topaz_id,
                                 watershed=watershed,

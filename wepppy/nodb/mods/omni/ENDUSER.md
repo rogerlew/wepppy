@@ -160,6 +160,15 @@ Use this mode when your question is about drainage structure, such as which subc
 
 ## Interpreting Results
 
+In multiple-OFE projects, each hillslope segment is checked for treatment
+eligibility. A forest segment can receive thinning even when its hillslope's
+dominant landuse is nonforest. Prescribed fire uses each eligible segment's
+forest, shrub, or grass management; mulch applies to eligible burned segments.
+Other segments keep their existing landuse. Optional slope and burn filters
+continue to select whole hillslopes. Historical children need rebuilding and
+rerunning before their results reflect this behavior; upgrading code alone
+does not refresh stored results.
+
 ### Scenario Results
 
 Scenario outputs are most useful for:
