@@ -123,6 +123,57 @@ INVALID_CHANNEL_ID_PAYLOADS: tuple[Any, ...] = (
 )
 
 
+@pytest.mark.parametrize('saved', [None, 0.0, 0.0001])
+@pytest.mark.parametrize('payload', [{}, {'pmet_kcb': 0.95}])
+def test_omitted_kslast_preserves_saved_value(saved, payload):
+    wepp = _DummyWepp()
+    wepp._kslast = saved
+    WeppInputParser().parse(wepp, payload)
+    assert wepp._kslast == saved
+
+
+def test_omitted_kslast_preserves_legacy_absence():
+    wepp = _DummyWepp()
+    WeppInputParser().parse(wepp, {})
+    assert not hasattr(wepp, '_kslast')
+
+
+@pytest.mark.parametrize('value,expected', [
+    (None, None), ('', None), ('None (use soil)', None), ([], None),
+    ([None, ''], None), (0, 0.0), ('0.0001', 0.0001),
+    (['', '0.2'], 0.2), (('', '0.3'), 0.3), ({'0.4'}, 0.4),
+    ('invalid', 0.5), ({'bad': 'value'}, 0.5),
+])
+def test_explicit_kslast_preserves_existing_coercion(value, expected):
+    wepp = _DummyWepp()
+    wepp._kslast = 0.5
+    WeppInputParser().parse(wepp, {'kslast': value})
+    assert wepp._kslast == expected
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize('saved', [None, 0.0, 0.0001, 'legacy_absent'])
+def test_kslast_omission_survives_real_facade_persistence(tmp_path, monkeypatch, saved):
+    from wepppy.nodb.core.wepp import Wepp
+    # No output cleanup is needed in this fresh fixture; real parsing/locks/dump remain.
+    monkeypatch.setattr(Wepp, 'clean', lambda self: None)
+    wepp = Wepp(str(tmp_path), 'canada-wbt-mofe.cfg')
+    with wepp.locked():
+        if saved == 'legacy_absent':
+            del wepp._kslast
+        else:
+            wepp._kslast = saved
+    wepp.parse_inputs({})
+    reloaded = Wepp.load_detached(str(tmp_path))
+    assert reloaded.kslast == (None if saved == 'legacy_absent' else saved)
+    if saved == 'legacy_absent':
+        assert not hasattr(reloaded, '_kslast')
+    wepp.parse_inputs({'kslast': '0.2'})
+    assert Wepp.load_detached(str(tmp_path)).kslast == 0.2
+    wepp.parse_inputs({'kslast': None})
+    assert Wepp.load_detached(str(tmp_path)).kslast is None
+
+
 def test_parse_sets_delete_after_interchange_from_boolean_payload() -> None:
     parser = WeppInputParser()
     wepp = _DummyWepp(delete_after_interchange=False)

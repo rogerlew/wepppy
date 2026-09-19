@@ -35,6 +35,18 @@ Examples:
 - `GET /rq-engine/api/admin/jobs-detail` (admin debugging)
 
 ## Job Lifecycle Mental Model
+
+### WEPP partial requests and cover defaults
+
+Omitting `kslast` from a WEPP run request preserves its saved soil conductivity
+override. Send `"kslast": null` (JSON) or an explicit empty form value to clear
+it. Sending `{}` does not mean "clear kslast".
+
+For MOFE projects, configured cover defaults applied during landuse build or
+Modify Landuse now regenerate the management files as well as saved summaries.
+Default precedence is unchanged. Existing results require a rebuild and WEPP
+rerun to reflect corrected inputs; deployment alone does not repair old results.
+
 Most run operations are asynchronous (background jobs).
 
 Typical flow:

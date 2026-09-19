@@ -83,16 +83,17 @@ class WeppInputParser:
         if isfloat(_pmet_rawp):
             wepp._pmet_rawp = float(_pmet_rawp)
 
-        _kslast = kwds.get("kslast", "")
-        if isinstance(_kslast, (list, tuple, set)):
-            _kslast = next((item for item in _kslast if item not in (None, "")), "")
-        if isfloat(_kslast):
-            wepp._kslast = float(_kslast)
-        else:
-            if _kslast in (None, ""):
-                wepp._kslast = None
-            elif isinstance(_kslast, str) and _kslast.strip().lower().startswith("none"):
-                wepp._kslast = None
+        if "kslast" in kwds:
+            _kslast = kwds["kslast"]
+            if isinstance(_kslast, (list, tuple, set)):
+                _kslast = next((item for item in _kslast if item not in (None, "")), "")
+            if isfloat(_kslast):
+                wepp._kslast = float(_kslast)
+            else:
+                if _kslast in (None, ""):
+                    wepp._kslast = None
+                elif isinstance(_kslast, str) and _kslast.strip().lower().startswith("none"):
+                    wepp._kslast = None
 
         _wepp_bin = kwds.get("wepp_bin", None)
         if isinstance(_wepp_bin, (list, tuple, set)):

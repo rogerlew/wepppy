@@ -1,5 +1,5 @@
 """Read back actual MOFE managements at the three incident boundaries."""
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 import logging
@@ -33,6 +33,67 @@ def _read(path):
                       ManagementDir=str(path.parent), Description='test', Color=(0, 0, 0, 255))
 
 
+@pytest.mark.parametrize('cover', [0.0, 0.9, 1.0])
+def test_configured_defaults_reach_real_managements(scenario, cover):
+    landuse, _, root = scenario
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '50'}})
+    before = _read(root / 'landuse/hill_101.mofe.man')
+    landuse.cover_defaults_d = {'424': dict(cancov=cover, inrcov=cover, rilcov=cover)}
+    landuse.set_cover_defaults()
+    after = _read(root / 'landuse/hill_101.mofe.man')
+    for field in ('cancov', 'inrcov', 'rilcov'):
+        assert getattr(after.inis[0].data, field) == pytest.approx(cover)
+        assert getattr(after.inis[1].data, field) == getattr(before.inis[1].data, field)
+
+
+@pytest.mark.parametrize('defaults', [None, {}, {'missing': dict(cancov=0, inrcov=0, rilcov=0)}])
+def test_no_applicable_defaults_do_not_require_assignments(scenario, defaults):
+    landuse, _, _ = scenario
+    landuse.cover_defaults_d = defaults
+    landuse.domlc_mofe_d = None
+    landuse._build_multiple_ofe = lambda **kw: pytest.fail('unexpected regeneration')
+    landuse.set_cover_defaults()
+
+
+@pytest.mark.parametrize('assignments', [None, {}])
+def test_applicable_defaults_reject_unbuilt_assignments_before_mutation(scenario, assignments):
+    landuse, _, _ = scenario
+    landuse.cover_defaults_d = {'424': dict(cancov=0, inrcov=0, rilcov=0)}
+    landuse.domlc_mofe_d = assignments
+    before = landuse.managements['424'].cancov_override
+    with pytest.raises(ValueError, match='build landuse before modifying'):
+        landuse.set_cover_defaults()
+    assert landuse.managements['424'].cancov_override == before
+
+
+def test_default_writer_failure_retry_regenerates_already_saved_values(scenario):
+    landuse, _, root = scenario
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '424'}})
+    landuse.cover_defaults_d = {'424': dict(cancov=0.3, inrcov=0.9, rilcov=0.9)}
+    target = root / 'landuse/hill_101.mofe.man'
+    retained = target.with_suffix('.before')
+    target.rename(retained)
+    target.mkdir()  # Real filesystem writer failure, with old evidence retained.
+    with pytest.raises(IsADirectoryError):
+        landuse.set_cover_defaults()
+    assert landuse.managements['424'].inrcov_override == 0.9
+    assert retained.is_file()
+    target.rmdir()
+    landuse.set_cover_defaults()
+    after = _read(root / 'landuse/hill_101.mofe.man')
+    assert [ini.data.inrcov for ini in after.inis] == pytest.approx([0.9, 0.9])
+
+
+def test_single_ofe_defaults_do_not_generate_mofe(scenario, monkeypatch):
+    landuse, _, _ = scenario
+    monkeypatch.setattr(lu.Landuse, 'multi_ofe', property(lambda self: False))
+    landuse.cover_defaults_d = {'424': dict(cancov=0.3, inrcov=0.9, rilcov=0.9)}
+    landuse.domlc_mofe_d = None
+    landuse._build_multiple_ofe = lambda **kw: pytest.fail('unexpected MOFE generation')
+    landuse.set_cover_defaults()
+    assert landuse.managements['424'].inrcov_override == 0.9
+
+
 @pytest.fixture
 def scenario(tmp_path, monkeypatch):
     (tmp_path / 'landuse').mkdir()
@@ -59,11 +120,19 @@ def scenario(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize('field', ['cancov', 'inrcov', 'rilcov'])
 @pytest.mark.parametrize('cover', [0.0, 0.30, 0.50, 0.90, 1.0])
-def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, field, cover):
+@pytest.mark.parametrize('operation', ['coverage', 'defaults'])
+def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, field, cover, operation):
     landuse, watershed, root = scenario
     landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '50'}})
     before = _read(root / 'landuse/hill_101.mofe.man')
-    landuse.modify_coverage('424', field, cover)
+    if operation == 'coverage':
+        landuse.modify_coverage('424', field, cover)
+    else:
+        values = {attr: getattr(before.inis[0].data, attr)
+                  for attr in ('cancov', 'inrcov', 'rilcov')}
+        values[field] = cover
+        landuse.cover_defaults_d = {'424': values}
+        landuse.set_cover_defaults()
     combined = _read(root / 'landuse/hill_101.mofe.man')
     for index in range(2):
         for attr in ('cancov', 'inrcov', 'rilcov'):
@@ -90,6 +159,47 @@ def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, f
     for attr in ('cancov', 'inrcov', 'rilcov'):
         assert [getattr(ini.data, attr) for ini in prepared.inis] == pytest.approx(
             [getattr(ini.data, attr) for ini in combined.inis])
+
+
+@pytest.mark.parametrize('operation', ['initial_build', 'selected_modify'])
+def test_defaults_at_normal_build_and_modify_boundaries(scenario, monkeypatch, operation):
+    landuse, watershed, root = scenario
+    landuse.cover_defaults_d = {'424': dict(cancov=0.3, inrcov=0.9, rilcov=1.0)}
+    watershed.hillslope_area = lambda topaz_id: 0.18
+    watershed.is_abstracted = True
+    _raster(root / 'sub.tif', [101, 101])
+    _raster(root / 'mofe.tif', [1, 2])
+    monkeypatch.setattr(lu.Landuse, 'ron_instance', property(lambda self: SimpleNamespace(cellsize=30)))
+    monkeypatch.setattr(lu.Landuse, 'getInstance', lambda wd: landuse)
+    landuse.dump_landuse_parquet = lambda: None
+    landuse.trigger = lambda event: None
+    if operation == 'selected_modify':
+        landuse.modify(['101'], '424')
+    else:
+        locked = False
+        @contextmanager
+        def lock():
+            nonlocal locked
+            locked = True
+            try:
+                yield
+            finally:
+                locked = False
+        landuse.locked = lock
+        landuse.islocked = lambda: locked
+        landuse._mode = lu.LanduseMode.Gridded
+        landuse._locales = ['canada']
+        monkeypatch.setattr('wepppy.nodb.project_config_capabilities.resolve_run_capability_authority',
+                            lambda obj: SimpleNamespace(runtime_tokens=('canada',)))
+        landuse._build_NLCD = lambda **kw: None  # Isolate acquisition, not synthesis/default ordering.
+        landuse._build_fractionals = lambda: None
+        monkeypatch.setattr(lu, 'identify_mode_intersecting_raster_keys',
+                            lambda **kw: {'101': {'1': '424', '2': '424'}})
+        monkeypatch.setattr(lu, '_wait_for_gdal_openable_raster', lambda *a, **kw: None)
+        monkeypatch.setattr(lu.RedisPrep, 'getInstance', lambda wd: SimpleNamespace(timestamp=lambda task: None))
+        landuse.build(retrieve_nlcd=False)
+    man = _read(root / 'landuse/hill_101.mofe.man')
+    assert [(ini.data.cancov, ini.data.inrcov, ini.data.rilcov) for ini in man.inis] == [(0.3, 0.9, 1.0)] * 2
 
 
 @pytest.mark.parametrize('kind,source,target', [

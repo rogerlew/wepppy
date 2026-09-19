@@ -1858,11 +1858,21 @@ class Landuse(NoDbBase):
             return
 
         with self.locked():
+            applicable = any(str(dom) in defaults for dom in self.managements)
+            if applicable and self.multi_ofe:
+                assignments = getattr(self, 'domlc_mofe_d', None)
+                if not isinstance(assignments, dict) or not assignments:
+                    raise ValueError('MOFE landuse assignments are unavailable; build landuse before modifying it.')
+                assignments = deepcopy(assignments)
             for dom in self.managements:
                 dom = str(dom)
                 if dom in defaults:
                     for cover in ['cancov', 'inrcov', 'rilcov']:
                         self._modify_coverage(dom, cover, defaults[dom][cover])
+
+        if applicable and self.multi_ofe:
+            # Rebuild even when saved values match: a previous writer may have failed.
+            self._build_multiple_ofe(domlc_mofe_override=assignments)
 
     def _modify_coverage(
         self, 

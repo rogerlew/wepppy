@@ -16,7 +16,7 @@ identification/rejection and production rollout are excluded.
 
 
 - [x] (2026-09-19 UTC) Located both boundaries and drafted scope/contracts.
-- [ ] Obtain two independent contract reviews and commit standalone checkpoint.
+- [x] (2026-09-19 UTC) Two independent contract reviews passed; ancestor `acc192323` committed.
 - [ ] Reproduce both failures; implement bounded fixes and direct regressions.
 - [ ] Validate disposable Forest project, generated/prepared files, downloads and archive/restore.
 - [ ] Run focused/broad gates, independent correctness review, and close docs.

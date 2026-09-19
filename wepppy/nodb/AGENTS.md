@@ -12,6 +12,9 @@ Canonical behavioral contract:
 * MOFE scenario generation follows `docs/schemas/mofe-management-artifact-contract.md`;
   regression evidence must read combined managements and prepared WEPP inputs.
   Cover edits regenerate managements; summary rebuild preserves canopy and both ground overrides.
+  Applying configured cover defaults also regenerates once, including retries.
+* WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
+  omitted kslast preserves saved state; explicit clearing remains supported.
 * Daymet acquisition artifact ownership follows the “Daymet acquisition source
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
 * Applicable current canonical domain and shared/cross-cutting contracts are
