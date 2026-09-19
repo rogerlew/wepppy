@@ -78,6 +78,34 @@ def archive_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     return project, tmp_path, published, prep_by_run
 
 
+@pytest.mark.parametrize('state', ['working', 'failed', 'completed'])
+def test_mofe_ground_cover_records_survive_archive_restore(archive_rq_environment, state):
+    from wepppy.wepp.management import get_management_summary
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'demo'
+    (root / 'landuse').mkdir(parents=True)
+    (root / 'wepp/runs').mkdir(parents=True)
+    management = get_management_summary('424', 'c3s-disturbed').get_management()
+    management['ini.data.inrcov'] = 0.9
+    management['ini.data.rilcov'] = 0.9
+    expected = {
+        'landuse/hill_101.mofe.man': str(management).encode(),
+        'wepp/runs/p1.man': str(management).encode(),
+        'landuse.log': f'{state}: MOFE management synthesis\n'.encode(),
+    }
+    for relative, content in expected.items():
+        (root / relative).write_bytes(content)
+    project.archive_rq('demo', comment=state)
+    archive = next((root / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as z:
+        for relative, content in expected.items():
+            assert z.read(relative) == content
+    (root / 'landuse/hill_101.mofe.man').write_text('later partial overwrite')
+    project.restore_archive_rq('demo', archive.name)
+    for relative, content in expected.items():
+        assert (root / relative).read_bytes() == content
+
+
 def test_archive_rq_fails_fast_when_nodb_files_are_locked(
     archive_rq_environment,
     monkeypatch: pytest.MonkeyPatch,

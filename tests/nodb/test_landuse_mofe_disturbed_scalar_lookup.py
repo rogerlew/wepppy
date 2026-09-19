@@ -227,6 +227,8 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
         }
 
     landuse.managements["forest-dom"].cancov_override = 0.3
+    landuse.managements["forest-dom"].inrcov_override = 0.0
+    landuse.managements["forest-dom"].rilcov_override = 0.9
 
     disturbed = _DisturbedStub()
     monkeypatch.setattr(
@@ -241,6 +243,8 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
     landuse._build_multiple_ofe()
 
     assert management.cancov_values == [pytest.approx(1.0)]
+    assert management.overrides["ini.data.inrcov"] == 0.0
+    assert management.overrides["ini.data.rilcov"] == 0.9
     assert management.overrides["ini.data.cancov"] == pytest.approx(1.0)
     assert management.rdmax_values == [0.33]
     assert management.xmxlai_values == [5.7]

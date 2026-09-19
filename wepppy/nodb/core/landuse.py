@@ -170,6 +170,10 @@ def _materialize_mofe_management_segment(segment_plan: Mapping[str, Any]) -> Any
     cancov_override = segment_plan.get('cancov_override')
     if cancov_override is not None:
         management.set_cancov(float(cancov_override))
+    for cover in ('inrcov', 'rilcov'):
+        override = segment_plan.get(f'{cover}_override')
+        if override is not None:
+            management[f'ini.data.{cover}'] = float(override)
 
     rdmax = segment_plan.get('rdmax')
     if rdmax is not None and isfloat(rdmax):
@@ -1618,6 +1622,8 @@ class Landuse(NoDbBase):
                         'color': summary.color,
                         'replacements': replacements,
                         'cancov_override': cancov_override,
+                        'inrcov_override': getattr(summary, 'inrcov_override', None),
+                        'rilcov_override': getattr(summary, 'rilcov_override', None),
                         'rdmax': rdmax,
                         'xmxlai': xmxlai,
                     }
@@ -1627,6 +1633,10 @@ class Landuse(NoDbBase):
                         apply_disturbed_management_overrides(management, replacements)
                     if cancov_override is not None:
                         management.set_cancov(cancov_override)
+                    for cover in ('inrcov', 'rilcov'):
+                        override = getattr(summary, f'{cover}_override', None)
+                        if override is not None:
+                            management[f'ini.data.{cover}'] = float(override)
                     if rdmax is not None and isfloat(rdmax):
                         management.set_rdmax(float(rdmax))
                     if xmxlai is not None and isfloat(xmxlai):
@@ -1886,13 +1896,13 @@ class Landuse(NoDbBase):
         value: float
     ) -> None:
         with self.locked():
-            if self.multi_ofe and cover == 'cancov':
+            if self.multi_ofe and cover in ('cancov', 'inrcov', 'rilcov'):
                 assignments = getattr(self, 'domlc_mofe_d', None)
                 if not isinstance(assignments, dict) or not assignments:
                     raise ValueError('MOFE landuse assignments are unavailable; build landuse before modifying it.')
             self._modify_coverage(dom, cover, value)
 
-        if self.multi_ofe and cover == 'cancov':
+        if self.multi_ofe and cover in ('cancov', 'inrcov', 'rilcov'):
             self._build_multiple_ofe(domlc_mofe_override=deepcopy(self.domlc_mofe_d))
 
     def modify_mapping(self, dom: str, newdom: str) -> None:
@@ -2044,7 +2054,8 @@ class Landuse(NoDbBase):
                     )
                 if self.multi_ofe:
                     cached = existing_managements.get(str(dom_key))
-                    man.cancov_override = getattr(cached, 'cancov_override', None)
+                    for cover in ('cancov', 'inrcov', 'rilcov'):
+                        setattr(man, f'{cover}_override', getattr(cached, f'{cover}_override', None))
                 return man
 
             # create a dictionary of management keys and

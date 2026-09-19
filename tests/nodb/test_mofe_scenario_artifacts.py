@@ -57,13 +57,18 @@ def scenario(tmp_path, monkeypatch):
     return landuse, watershed, tmp_path
 
 
-@pytest.mark.parametrize('cover', [0.30, 0.50])
-def test_canopy_reaches_combined_and_prepared_management(scenario, monkeypatch, cover):
+@pytest.mark.parametrize('field', ['cancov', 'inrcov', 'rilcov'])
+@pytest.mark.parametrize('cover', [0.0, 0.30, 0.50, 0.90, 1.0])
+def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, field, cover):
     landuse, watershed, root = scenario
-    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '424'}})
-    landuse.modify_coverage('424', 'cancov', cover)
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '50'}})
+    before = _read(root / 'landuse/hill_101.mofe.man')
+    landuse.modify_coverage('424', field, cover)
     combined = _read(root / 'landuse/hill_101.mofe.man')
-    assert [ini.data.cancov for ini in combined.inis] == pytest.approx([cover, cover])
+    for index in range(2):
+        for attr in ('cancov', 'inrcov', 'rilcov'):
+            expected = cover if index == 0 and attr == field else getattr(before.inis[index].data, attr)
+            assert getattr(combined.inis[index].data, attr) == pytest.approx(expected)
 
     # Exercise the real MOFE preparation management reader/writer; unrelated
     # slope/soil preparation is isolated.
@@ -82,7 +87,9 @@ def test_canopy_reaches_combined_and_prepared_management(scenario, monkeypatch, 
     wepp.prep_multi_ofe_hillslope(('101', 1, str(root), str(runs), 2,
                                  None, 0.5, False, None, False, None, False, None))
     prepared = _read(runs / 'p1.man')
-    assert [ini.data.cancov for ini in prepared.inis] == pytest.approx([cover, cover])
+    for attr in ('cancov', 'inrcov', 'rilcov'):
+        assert [getattr(ini.data, attr) for ini in prepared.inis] == pytest.approx(
+            [getattr(ini.data, attr) for ini in combined.inis])
 
 
 @pytest.mark.parametrize('kind,source,target', [
@@ -222,12 +229,13 @@ def test_global_mapping_writes_files_before_completion(scenario, monkeypatch, wr
 
 
 @pytest.mark.parametrize('assignments', [None, {}])
-def test_canopy_rejects_unbuilt_assignments_before_mutation(scenario, assignments):
+@pytest.mark.parametrize('field', ['cancov', 'inrcov', 'rilcov'])
+def test_cover_rejects_unbuilt_assignments_before_mutation(scenario, assignments, field):
     landuse, _, _ = scenario
     landuse.domlc_mofe_d = assignments
     with pytest.raises(ValueError, match='build landuse before modifying'):
-        landuse.modify_coverage('424', 'cancov', 0.3)
-    assert landuse.managements['424'].cancov_override is None
+        landuse.modify_coverage('424', field, 0.3)
+    assert getattr(landuse.managements['424'], field + '_override') is None
 
 
 def test_explicit_assignments_reject_nonsequential_segments(scenario):
@@ -238,11 +246,12 @@ def test_explicit_assignments_reject_nonsequential_segments(scenario):
 
 
 @pytest.mark.parametrize('cover', [0.0, 0.3, 0.5])
-def test_summary_rebuild_preserves_mofe_canopy_selection(scenario, monkeypatch, cover):
+@pytest.mark.parametrize('field', ['cancov', 'inrcov', 'rilcov'])
+def test_summary_rebuild_preserves_mofe_cover_selection(scenario, monkeypatch, cover, field):
     landuse, watershed, root = scenario
     landuse.domlc_d = {'101': '424'}
     landuse.domlc_mofe_d = {'101': {'1': '424', '2': '424'}}
-    landuse.managements['424'].cancov_override = cover
+    setattr(landuse.managements['424'], field + '_override', cover)
     watershed.hillslope_area = lambda topaz_id: 0.18
     _raster(root / 'sub.tif', [101, 101])
     _raster(root / 'mofe.tif', [1, 2])
@@ -250,5 +259,68 @@ def test_summary_rebuild_preserves_mofe_canopy_selection(scenario, monkeypatch, 
     landuse.dump_landuse_parquet = lambda: None
     landuse.trigger = lambda event: None
     landuse.build_managements()
-    assert landuse.managements['424'].cancov_override == cover
+    assert getattr(landuse.managements['424'], field + '_override') == cover
     assert landuse.managements['424'].area == pytest.approx(0.18)
+
+
+@pytest.mark.parametrize('preloaded', [False, True])
+def test_ground_overrides_win_after_disturbed_replacements(scenario, monkeypatch, preloaded):
+    landuse, _, root = scenario
+    summary = landuse.managements['424']
+    summary.inrcov_override, summary.rilcov_override = 0.0, 1.0
+    if preloaded:
+        landuse.managements['424'] = SimpleNamespace(
+            disturbed_class=summary.disturbed_class, get_management=summary.get_management,
+            inrcov_override=0.0, rilcov_override=1.0)
+    disturbed = SimpleNamespace(land_soil_replacements_d={
+        ('sand loam', summary.disturbed_class): {
+            'ini.data.inrcov': '0.2', 'ini.data.rilcov': '0.4'}})
+    monkeypatch.setattr('wepppy.nodb.mods.disturbed.Disturbed.tryGetInstance', lambda wd: disturbed)
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '424'}})
+    actual = _read(root / 'landuse/hill_101.mofe.man')
+    assert [ini.data.inrcov for ini in actual.inis] == [0.0, 0.0]
+    assert [ini.data.rilcov for ini in actual.inis] == [1.0, 1.0]
+
+
+@pytest.mark.parametrize('missing', [False, True])
+def test_legacy_ground_override_absence_keeps_source(scenario, missing):
+    landuse, _, root = scenario
+    if missing:
+        del landuse.managements['424'].inrcov_override
+        del landuse.managements['424'].rilcov_override
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '424'}})
+    actual = _read(root / 'landuse/hill_101.mofe.man')
+    assert [ini.data.inrcov for ini in actual.inis] == [0.75, 0.75]
+    assert [ini.data.rilcov for ini in actual.inis] == [0.75, 0.75]
+
+
+def test_ground_overrides_cross_real_process_pool(scenario, monkeypatch):
+    landuse, watershed, root = scenario
+    watershed._subs_summary['102'] = {}
+    watershed.mofe_nsegments['102'] = 2
+    monkeypatch.setattr(lu.os, 'cpu_count', lambda: 2)
+    monkeypatch.setenv('WEPPPY_NCPU', '2')
+    landuse.managements['424'].inrcov_override = 0.9
+    landuse.managements['424'].rilcov_override = 0.6
+    landuse._build_multiple_ofe(domlc_mofe_override={
+        topaz: {'1': '424', '2': '424'} for topaz in ('101', '102')})
+    for topaz in ('101', '102'):
+        actual = _read(root / f'landuse/hill_{topaz}.mofe.man')
+        assert [ini.data.inrcov for ini in actual.inis] == [0.9, 0.9]
+        assert [ini.data.rilcov for ini in actual.inis] == [0.6, 0.6]
+
+
+@pytest.mark.parametrize('field', ['inrcov', 'rilcov'])
+def test_ground_writer_error_is_visible_and_operation_can_retry(scenario, monkeypatch, field):
+    landuse, _, root = scenario
+    landuse._build_multiple_ofe(domlc_mofe_override={'101': {'1': '424', '2': '424'}})
+    original = lu._write_mofe_management_file_task
+    def fail(task):
+        raise OSError('injected management writer failure')
+    monkeypatch.setattr(lu, '_write_mofe_management_file_task', fail)
+    with pytest.raises(OSError, match='injected management writer failure'):
+        landuse.modify_coverage('424', field, 0.9)
+    monkeypatch.setattr(lu, '_write_mofe_management_file_task', original)
+    landuse.modify_coverage('424', field, 0.9)
+    actual = _read(root / 'landuse/hill_101.mofe.man')
+    assert [getattr(ini.data, field) for ini in actual.inis] == [0.9, 0.9]

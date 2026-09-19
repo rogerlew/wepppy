@@ -11,6 +11,7 @@ Canonical behavioral contract:
   lock/persistence/cache specification for `NoDbBase`.
 * MOFE scenario generation follows `docs/schemas/mofe-management-artifact-contract.md`;
   regression evidence must read combined managements and prepared WEPP inputs.
+  Cover edits regenerate managements; summary rebuild preserves canopy and both ground overrides.
 * Daymet acquisition artifact ownership follows the “Daymet acquisition source
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
 * Applicable current canonical domain and shared/cross-cutting contracts are
