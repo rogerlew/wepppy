@@ -171,6 +171,32 @@ def _assert_invalid_watershed_abstraction_response(response) -> None:
     assert "job_id" not in payload
 
 
+@pytest.mark.parametrize('encoding,payload,expected', [
+    ('json', {}, 0.0001), ('json', {'kslast': None}, None),
+    ('json', {'kslast': ''}, None), ('json', {'kslast': 0}, 0.0),
+    ('form', {'pmet_kcb': '0.95'}, 0.0001),
+    ('form', {'kslast': ''}, None), ('form', {'kslast': '0.2'}, 0.2),
+])
+def test_run_wepp_kslast_presence_reaches_real_parser(monkeypatch, encoding, payload, expected):
+    from wepppy.nodb.core.wepp_input_parser import WeppInputParser
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    capture = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, 'get_wd', lambda runid: '/tmp/run')
+    wepp = capture['wepp']
+    wepp._kslast = 0.0001
+    for name in ('baseflow_opts', 'phosphorus_opts', 'tcr_opts', 'snow_opts', 'frost_opts'):
+        setattr(wepp, name, SimpleNamespace(parse_inputs=lambda kw: None))
+    wepp._guard_unitized_bounds = lambda: None
+    wepp.parse_inputs = lambda kw: WeppInputParser().parse(wepp, kw)
+    with TestClient(rq_engine.app) as client:
+        response = client.post('/api/runs/run-1/cfg/run-wepp',
+                               **({'json': payload} if encoding == 'json' else {'data': payload}))
+    assert response.status_code == 200
+    assert wepp._kslast == expected
+
+
 @pytest.mark.parametrize(
     ("build_timestamp", "abstract_timestamp"),
     ((None, "done"), ("done", None), (None, None)),

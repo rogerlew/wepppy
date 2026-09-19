@@ -171,7 +171,7 @@ classes. Configured defaults additionally follow the section below.
 
 ### Configured cover defaults
 
-Accepted 2026-09-19; implementation conformance pending. `set_cover_defaults`
+Accepted and Forest conformance validated 2026-09-19. `set_cover_defaults`
 must apply configured values to matching management classes, then regenerate
 MOFE management files once from the existing per-segment assignments. Preserve
 current precedence (applicable configured values replace saved overrides when
@@ -193,6 +193,6 @@ RAP precedence, failure/retry, prepared readback and the existing artifact
 browse/download/archive inventory. This closes the stale-file gap without
 changing when defaults are applied or making them absent-only fallbacks.
 
-Actual-project Forest acceptance remains the release gate. Production repair is
+Actual-project Forest acceptance passed 2026-09-19. Production repair is
 separately blocked until the operator deploys the accepted revision and confirms
 that deployment.

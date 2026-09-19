@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Active: [Cover defaults and API omission](docs/work-packages/20260919_cover_defaults_api_omission/package.md)
+Completed (Forest): [Cover defaults and API omission](docs/work-packages/20260919_cover_defaults_api_omission/package.md)
 — propagate configured MOFE covers and preserve omitted kslast; WEPP executable work deferred.
 
 Completed (Forest): [MOFE ground-cover propagation](docs/work-packages/20260918_mofe_ground_cover_propagation/package.md)

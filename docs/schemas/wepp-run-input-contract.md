@@ -2,7 +2,8 @@
 
 ## kslast omission
 
-Accepted 2026-09-19; implementation conformance pending. This bounded contract
+Accepted and Forest conformance validated 2026-09-19; production rollout is
+separate. This bounded contract
 covers the shared WEPP parser used by JSON/form run submissions and direct
 `Wepp.parse_inputs` callers. Other fields retain their current contracts.
 

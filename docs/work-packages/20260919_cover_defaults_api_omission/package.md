@@ -1,6 +1,7 @@
 # Cover defaults and WEPP API omission
 
-Status: active, 2026-09-19 UTC. Owner: requesting user; implementer: Codex.
+Status: completed and validated on Forest, 2026-09-19 UTC.
+Owner: requesting user; implementer: Codex. Production deployment excluded.
 
 Correct two bounded propagation defects: configured cover defaults update MOFE
 summaries after management generation, and an omitted `kslast` request field
@@ -22,6 +23,12 @@ Forest disposable-project validation; broad suite and independent final review.
 Source equestrian-bonheur remains untouched. Validation fixtures may supply
 explicit configured defaults because that source has none.
 
-See [plan](prompts/active/execplan.md), [tracker](tracker.md),
+Outcome: both fixes implemented; 286 focused tests and 9,079 broad tests pass
+(99 skipped). Forest execution, generated/prepared readback, normal downloads,
+archive/restore and independent final review pass. See retained
+[validation](artifacts/20260919_validation.md) and
+[review](artifacts/20260919_correctness_review.md).
+
+See [plan](prompts/completed/execplan.md), [tracker](tracker.md),
 [checkpoint](artifacts/20260919_contract_decision.md), and
 [ADR](../../adrs/ADR-0070-cover-defaults-and-kslast-omission.md).

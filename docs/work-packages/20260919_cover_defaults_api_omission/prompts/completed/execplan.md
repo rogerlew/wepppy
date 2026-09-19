@@ -17,9 +17,9 @@ identification/rejection and production rollout are excluded.
 
 - [x] (2026-09-19 UTC) Located both boundaries and drafted scope/contracts.
 - [x] (2026-09-19 UTC) Two independent contract reviews passed; ancestor `acc192323` committed.
-- [ ] Reproduce both failures; implement bounded fixes and direct regressions.
-- [ ] Validate disposable Forest project, generated/prepared files, downloads and archive/restore.
-- [ ] Run focused/broad gates, independent correctness review, and close docs.
+- [x] (2026-09-19 UTC) Both failures reproduced, bounded fixes committed `b1e857765`; 286 focused/archive/transport tests passed.
+- [x] (2026-09-19 16:24 UTC) Disposable Forest project, generated/prepared files, downloads and archive/restore pass; source unchanged.
+- [x] (2026-09-19 16:26 UTC) 286 focused and 9,079 broad tests pass (99 skipped); final independent review passes, docs closed.
 
 ## Surprises & Discoveries
 
@@ -40,16 +40,24 @@ Use disposable validation data and never overwrite the user's source project.
 ## Outcomes & Retrospective
 
 
-Scaffolded; no implementation or validation claim yet.
+Implementation and independent source review pass. Forest normal Modify Landuse
+produces defaults on all1,065 segments. Empty-payload WEPP submission preserves
+kslast 0.0001; all 455 prepared soils/climates/slopes match source and managements
+match after normalizing only intended ground-cover changes. Full execution,
+browser/download and archive/restore pass, including 2,734 exact retained
+model/state hashes after restore. Broad suite and independent final review pass.
+No production deployment, original-project repair or compiler changes performed.
+The only evidence-review gap was missing generated soils in the initial archive
+inventory; adding them and rerunning readback resolved it without source changes.
 
 ## Context and Orientation
 
 
 `wepppy/nodb/core/landuse.py` applies configured defaults in
 `Landuse.set_cover_defaults`, after normal builds and selected-hillslope edits.
-It currently updates only summary overrides. `_build_multiple_ofe` can reuse
+Before correction it updated only summary overrides. `_build_multiple_ofe` can reuse
 `domlc_mofe_d` (per-segment class assignments) and writes combined managements.
-`wepppy/nodb/core/wepp_input_parser.py` currently substitutes an empty string
+Before correction `wepppy/nodb/core/wepp_input_parser.py` substituted an empty string
 for omitted kslast, making omission indistinguishable from explicit clearing.
 The existing API adapter `wepp_run_payload.py` calls this parser through
 `Wepp.parse_inputs`, which owns the persistence lock.
@@ -122,4 +130,4 @@ Reuse existing Management/WeppSoilUtil readers, NoDb locks, MOFE builder,
 WEPP payload adapter, and archive/browser mechanisms. No signature changes,
 dependencies, schema migrations or new runtime subsystems are planned.
 
-Revision note: initial scaffold records exact authorized scope and retry correction.
+Revision note: closed after actual Forest output, restore, broad-suite and independent review acceptance.

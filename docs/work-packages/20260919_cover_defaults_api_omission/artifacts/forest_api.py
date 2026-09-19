@@ -14,7 +14,7 @@ BASE = 'https://wc.bearhive.duckdns.org/rq-engine/api'
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('operation', choices=['discover', 'fork', 'job', 'modify', 'run', 'archive', 'restore'])
+    parser.add_argument('operation', choices=['discover', 'discover-target', 'fork', 'job', 'modify', 'run', 'archive', 'restore'])
     parser.add_argument('--job')
     parser.add_argument('--archive')
     args = parser.parse_args()
@@ -35,6 +35,9 @@ def main():
                      source + '/pipeline', source + '/readiness',
                      source + '/endpoints?include_operation_docs=true']:
             call('GET', path)
+    elif args.operation == 'discover-target':
+        for suffix in ('/pipeline', '/readiness', '/endpoints?include_operation_docs=true', '/outputs'):
+            call('GET', target + suffix)
     elif args.operation == 'fork':
         call('POST', source + '/fork', {'target_runid': TARGET, 'undisturbify': False,
              'skip_wepp_runs_output': True, 'skip_omni_scenarios_contrasts': True})
