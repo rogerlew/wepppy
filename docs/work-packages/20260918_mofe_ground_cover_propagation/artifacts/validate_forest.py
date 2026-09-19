@@ -2,12 +2,16 @@
 import argparse
 import hashlib
 import json
+import math
+from datetime import datetime, timezone
 from pathlib import Path
 import zipfile
 
 import pandas as pd
+import pyarrow.parquet as pq
 from wepppy.nodb.core import Landuse, Wepp
 from wepppy.wepp.management import Management
+from wepppy.wepp.soils.utils import WeppSoilUtil
 
 SOURCE = Path('/wc1/runs/eq/equestrian-bonheur')
 TARGET = Path('/wc1/runs/mo/mofe-ground-cover-validation-20260918')
@@ -30,6 +34,8 @@ def main():
     parser.add_argument('--interrill', type=float, default=0.9)
     parser.add_argument('--rill', type=float, default=0.9)
     parser.add_argument('--archive', type=Path)
+    parser.add_argument('--soil-parity', action='store_true')
+    parser.add_argument('--outputs', action='store_true')
     args = parser.parse_args()
     for name, expected in SOURCE_NODB.items():
         assert hashlib.sha256((SOURCE / name).read_bytes()).hexdigest() == expected, name
@@ -64,16 +70,54 @@ def main():
                 assert (ini.data.cancov, ini.data.inrcov, ini.data.rilcov) == (0.75, 0.85, 0.85), source_path
         segments += len(mapping)
     assert segments == 1065
+    if args.soil_parity:
+        assert wepp.kslast == 0.0001
+        for wepp_id in ids.values():
+            relative_man = f'wepp/runs/p{wepp_id}.man'
+            normalized = read_management(TARGET / relative_man)
+            normalized['ini.data.inrcov'] = 0.85
+            normalized['ini.data.rilcov'] = 0.85
+            assert str(normalized) == str(read_management(SOURCE / relative_man)), relative_man
+            for suffix in ('cli', 'slp', 'sol'):
+                relative = f'wepp/runs/p{wepp_id}.{suffix}'
+                if suffix == 'sol':
+                    original = WeppSoilUtil(str(SOURCE / relative)).obj
+                    actual = WeppSoilUtil(str(TARGET / relative)).obj
+                    # Provenance comments are not model parameters.
+                    original.pop('header', None)
+                    actual.pop('header', None)
+                    assert actual == original, relative
+                else:
+                    assert (SOURCE / relative).read_bytes() == (TARGET / relative).read_bytes(), relative
     hashes = {str(p.relative_to(TARGET)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
     if args.archive:
         assert args.archive.parent == TARGET / 'archives'
         with zipfile.ZipFile(args.archive) as archive:
             for name, expected in hashes.items():
                 assert hashlib.sha256(archive.read(name)).hexdigest() == expected, name
+    outputs = []
+    if args.outputs:
+        for root in (SOURCE, TARGET):
+            path = root / 'wepp/output/interchange/loss_pw0.hill.parquet'
+            frame = pd.read_parquet(path)
+            assert len(frame) == 455 and frame.wepp_id.nunique() == 455
+            assert set(map(str, frame.wepp_id)) == set(map(str, ids.values()))
+            assert pq.read_schema(path).metadata[b'average_years'] == b'22'
+            for column in ('Hillslope Area', 'Runoff Volume', 'Sediment Yield'):
+                assert frame[column].map(math.isfinite).all()
+            assert (frame['Hillslope Area'] > 0).all()
+            if root == TARGET:
+                assert path.stat().st_mtime >= datetime(2026, 9, 19, 4, 24, 52, tzinfo=timezone.utc).timestamp()
+            outputs.append({'runid': root.name,
+                'runoff_mm_year': float(frame['Runoff Volume'].sum() / frame['Hillslope Area'].sum() / 10),
+                'hillslope_sediment_t_year': float(frame['Sediment Yield'].sum() / 1000),
+                'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
     print(json.dumps({'runid': TARGET.name, 'hillslopes': len(ids), 'segments': segments,
                       'checked_managements': len(paths), 'canopy': 0.75,
                       'interrill': args.interrill, 'rill': args.rill,
                       'wepp_binary': wepp.wepp_bin, 'source_nodb_unchanged': True,
+                      'prepared_soil_climate_slope_parity': args.soil_parity,
+                      'outputs': outputs,
                       'archive': str(args.archive) if args.archive else None,
                       'source_management_hashes': source_hashes,
                       'management_hashes': hashes}, sort_keys=True))

@@ -63,7 +63,10 @@ MOFE summary rebuilding must preserve explicit canopy overrides for retained cla
 so subsequent mapping and rebuild operations do not erase persisted selections.
 These are required links in the existing thinning workflow, not new operations.
 
-### Ground-cover propagation (accepted 2026-09-18; conformance pending)
+### Ground-cover propagation
+
+Accepted 2026-09-18; Forest conformance validated 2026-09-19. Production
+deployment and existing-project repairs remain separate operator actions.
 
 MOFE synthesis must apply saved `inrcov_override` (interrill ground cover) and
 `rilcov_override` (rill ground cover) independently, after source management and

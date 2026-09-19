@@ -324,3 +324,15 @@ def test_ground_writer_error_is_visible_and_operation_can_retry(scenario, monkey
     landuse.modify_coverage('424', field, 0.9)
     actual = _read(root / 'landuse/hill_101.mofe.man')
     assert [getattr(ini.data, field) for ini in actual.inis] == [0.9, 0.9]
+
+
+@pytest.mark.parametrize('field', ['cancov', 'inrcov', 'rilcov'])
+def test_single_ofe_coverage_does_not_require_mofe_assignments(scenario, monkeypatch, field):
+    landuse, _, _ = scenario
+    monkeypatch.setattr(lu.Landuse, 'multi_ofe', property(lambda self: False))
+    landuse.domlc_mofe_d = None
+    def unexpected_builder(**kwargs):
+        pytest.fail('Single-OFE coverage must not invoke MOFE synthesis')
+    landuse._build_multiple_ofe = unexpected_builder
+    landuse.modify_coverage('424', field, 0.9)
+    assert getattr(landuse.managements['424'], field + '_override') == 0.9

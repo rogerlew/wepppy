@@ -15,10 +15,13 @@ wired correction, not a surrogate or redesign.
 
 
 - [x] (2026-09-19 UTC) Identified four propagation seams; scaffolded package and contract amendment.
-- [ ] Obtain two independent contract reviews and commit checkpoint ancestor.
-- [ ] Add failing regression tests, implement minimal fix, run focused and broad tests.
-- [ ] Validate supported Forest fork of equestrian-bonheur through fresh WEPP execution.
-- [ ] Final independent correctness review, documentation gates and handoff.
+- [x] (2026-09-19 UTC) Both contract reviews approved; ancestor `824457074` committed.
+- [x] (2026-09-19 UTC) Failing regression reproduced 0.75 instead of selected 0.0; implemented four-seam fix in `0fd1a6eca`; 62 focused and 3 archive tests pass.
+- [x] (2026-09-19 UTC) Broad suite: 9,044 passed, 99 skipped; late-added cases pass in the separate 93-test run.
+- [x] (2026-09-19 04:32 UTC) Corrected Forest WEPP tree completed; 455-hillslope soil/climate/slope parity and ground-only management change proved.
+- [x] (2026-09-19 04:38 UTC) Browser/download and canonical archive checks pass; supported restore completed; 93 focused/archive tests pass.
+- [x] (2026-09-19 UTC) Post-restore semantic/hash readback passes; complete pre/post JSON is byte-identical.
+- [x] (2026-09-19 UTC) Final independent correctness/evidence review passes; documentation gates and handoff completed.
 
 ## Surprises & Discoveries
 
@@ -26,6 +29,15 @@ wired correction, not a surrogate or redesign.
 The current contract explicitly excludes ground overrides, so this requires an
 amendment rather than silently treating implementation as normative. MOFE
 summary rebuild also preserves only canopy; generation alone is insufficient.
+Archive/restore operation discovery returns 404 despite documented live routes;
+retain this metadata limitation without expanding the runtime repair. Initial
+prepared readback correctly failed while preparation was still incomplete, then
+passed after the preparation child finished. This was timing, not bad inputs.
+The first empty WEPP submission cleared saved kslast through existing parser
+behavior; input parity caught this. Superseded by explicit kslast=0.0001 and
+initial_sat=0.75 submission, which passed exact prepared-soil parity. Do not
+attribute the first attempt's outputs solely to ground cover or expand this
+package into API repair.
 
 ## Decision Log
 
@@ -37,7 +49,12 @@ protect the source low-severity comparison. No production deployment authorized.
 ## Outcomes & Retrospective
 
 
-Scaffold complete; implementation and acceptance pending.
+Implementation and focused tests pass. Independent correctness review found no
+production blocker and one validator inventory gap, corrected with exact key-set
+and 455/1,065 count assertions. Forest execution and fresh-result checks pass;
+post-restore readback and broad suite also pass. Independent reviewer reran the
+post-restore validation successfully. Authorized Forest scope complete; source
+project unchanged and production deployment/repair excluded.
 
 ## Context and Orientation
 
@@ -113,3 +130,5 @@ Reuse Landuse coverage/build methods, existing Management parser/writer, WEPP
 preparation, supported fork and run workflow. No new dependency, schema or API.
 
 Revision note: initial scaffold captures authorized scope and artifact acceptance.
+Closure revision: recorded passing tests, Forest artifact checks and independent
+final acceptance; retained validation fork for inspection.

@@ -4,7 +4,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const token = fs.readFileSync(0, 'utf8').trim();
 const run = 'mofe-ground-cover-validation-20260918';
-const url = 'http://127.0.0.1:8080/weppcloud/runs/' + run + '/canada-wbt-mofe/';
+const url = 'https://wc.bearhive.duckdns.org/weppcloud/runs/' + run + '/canada-wbt-mofe/';
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -15,7 +15,8 @@ const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
     if (response.status() !== 200) throw new Error('run page HTTP ' + response.status());
     await page.locator('#cap-gate').waitFor({ state: 'detached', timeout: 60000 });
     await page.locator('#landuse_form').waitFor({ state: 'attached', timeout: 60000 });
-    for (const relative of ['landuse/hill_101.mofe.man', 'wepp/runs/p1.man']) {
+    for (const relative of ['landuse/hill_101.mofe.man', 'wepp/runs/p1.man',
+      'wepp/output/interchange/loss_pw0.hill.parquet']) {
       const download = await context.request.get(url + 'download/' + relative, {
         headers: { Authorization: 'Bearer ' + token }
       });

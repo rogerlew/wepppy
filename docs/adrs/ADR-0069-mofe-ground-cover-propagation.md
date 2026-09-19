@@ -1,6 +1,7 @@
 # ADR-0069: Honor saved MOFE ground-cover selections
 
-Status: Accepted intent; implementation conformance pending.
+Status: Accepted; implementation and Forest conformance validated 2026-09-19.
+Production deployment is not included.
 
 ## Context and decision
 

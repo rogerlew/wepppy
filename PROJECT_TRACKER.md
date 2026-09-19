@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Active: [MOFE ground-cover propagation](docs/work-packages/20260918_mofe_ground_cover_propagation/package.md)
+Completed (Forest): [MOFE ground-cover propagation](docs/work-packages/20260918_mofe_ground_cover_propagation/package.md)
 — honor saved ground-cover selections and validate on a Forest equestrian-bonheur fork.
 
 Active: [Omni MOFE segment eligibility](docs/work-packages/20260918_omni_mofe_segment_eligibility/package.md)
