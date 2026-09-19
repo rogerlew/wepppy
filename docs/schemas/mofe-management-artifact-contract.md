@@ -167,7 +167,31 @@ Existing synchronous coverage requests expose working state until HTTP success
 or the existing error response; queued builds use existing RQ status/logs. A
 failed build is not a usable completed artifact even if partial files exist.
 This amendment concerns saved/direct cover overrides and retained summary
-classes; configured `cover_defaults_d` application ordering is not changed.
+classes. Configured defaults additionally follow the section below.
+
+### Configured cover defaults
+
+Accepted 2026-09-19; implementation conformance pending. `set_cover_defaults`
+must apply configured values to matching management classes, then regenerate
+MOFE management files once from the existing per-segment assignments. Preserve
+current precedence (applicable configured values replace saved overrides when
+defaults are applied) and RAP canopy semantics. No default value changes.
+Absent/empty defaults or no matching management classes require no regeneration.
+Single-OFE behavior is unchanged. Regenerate even when saved overrides already
+equal defaults so retry repairs files after a failed writer. Propagate existing
+writer and invalid-assignment failures, retaining partial artifacts/diagnostics;
+do not report completion or reconstruct assignments from the landcover raster.
+Malformed configured values retain existing validation/error semantics.
+When defaults apply in MOFE mode, absent/empty saved assignments produce the
+existing build-landuse-first error before changing overrides; they must not
+select the builder's raster-reconstruction path. This precheck does not apply
+to no-op default cases.
+
+Evidence covers normal initial builds and selected-hillslope modifications,
+all three cover fields including zero/one, unchanged classes, single-OFE,
+RAP precedence, failure/retry, prepared readback and the existing artifact
+browse/download/archive inventory. This closes the stale-file gap without
+changing when defaults are applied or making them absent-only fallbacks.
 
 Actual-project Forest acceptance remains the release gate. Production repair is
 separately blocked until the operator deploys the accepted revision and confirms
