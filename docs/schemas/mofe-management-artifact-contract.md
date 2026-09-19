@@ -12,7 +12,7 @@ landuse generation paths:
 1. soil-burn-severity (SBS) values consumed during MOFE landuse build;
 2. combined MOFE management files regenerated after global class-to-class
    landuse mapping;
-3. persisted canopy-cover overrides used during MOFE management synthesis; and
+3. persisted canopy and ground-cover overrides used during MOFE management synthesis; and
 4. per-segment eligibility during Omni treatment selection.
 
 It corrects propagation of existing user intent. It does not add a runtime
@@ -63,11 +63,29 @@ MOFE summary rebuilding must preserve explicit canopy overrides for retained cla
 so subsequent mapping and rebuild operations do not erase persisted selections.
 These are required links in the existing thinning workflow, not new operations.
 
-This canopy correction does not activate stored `inrcov_override` or
-`rilcov_override` in MOFE synthesis; existing source/RAP ground-cover behavior
-remains unchanged. For a canopy-only repair that must retain inactive ground
-metadata, reapply the saved canopy through the coverage operation. Do not use an
-identity mapping as a substitute: its summary rebuild may clear those fields.
+### Ground-cover propagation (accepted 2026-09-18; conformance pending)
+
+MOFE synthesis must apply saved `inrcov_override` (interrill ground cover) and
+`rilcov_override` (rill ground cover) independently, after source management and
+disturbed replacements. Each applies to the segment assigned that management
+class; zero and one are valid fractions, and absent/None leaves source behavior
+unchanged. RAP canopy precedence is unchanged; these ground overrides do not
+alter canopy or its RAP calculation.
+
+Editing either ground-cover field must regenerate combined managements from
+current explicit assignments before success, just like canopy editing. Missing
+or empty assignments fail with build-first guidance before the override changes;
+malformed populated assignments fail through existing builder validation. Writer
+failure remains visible and may leave partial files; retry successfully before
+WEPP preparation. Summary rebuilding preserves all three cover overrides for
+retained classes, including zero. No fields, keys, defaults, or units change.
+
+This activates previously ignored saved ground selections on the next supported
+rebuild. Deployment does not rewrite saved artifacts or reports. Operators must
+inspect saved selections before rebuilding existing projects, then prepare and
+rerun WEPP. Do not hand-edit generated managements. This supersedes the earlier
+deliberate ground-cover exclusion: honoring explicit user selections is required
+for agreement between displayed settings and executed inputs.
 
 No canopy percentage, RAP formula, disturbed lookup, severity threshold, soil
 parameter, or fallback value changes.
@@ -115,13 +133,13 @@ NoDb state alone is not proof.
 
 ### User and operator workflow
 
-Global landuse mapping changes and canopy edits regenerate the combined MOFE
+Global landuse mapping changes and canopy or ground-cover edits regenerate the combined MOFE
 managements. After changing a scenario, prepare and run WEPP again to refresh
 results; an existing report is not updated by the landuse edit alone. RAP-enabled
 projects continue to use RAP's segment canopy values.
 
 Existing affected projects need a supported rebuild and rerun after deployment.
-Check selected classes and canopy in `landuse/hill_*.mofe.man`, then in prepared
+Check selected classes, canopy, interrill and rill cover in `landuse/hill_*.mofe.man`, then in prepared
 `wepp/runs/*.man`, before accepting refreshed results. A failed writer can leave
 partial files: retain its diagnostics and rerun the failed operation successfully
 before preparing WEPP. Do not repair generated files by hand.
@@ -134,6 +152,19 @@ without completion, 0.30 and 0.50 stored canopy overrides, absent override, RAP
 precedence, single-OFE behavior, and prepared WEPP input propagation. At least
 one test for each corrected producer path must parse generated management
 content rather than only asserting calls or persisted metadata.
+
+Ground-cover evidence must additionally cover independent interrill/rill values,
+zero/one/None, edit-triggered regeneration, summary preservation, and unchanged
+RAP canopy. The artifact inventory is `landuse/hill_*.mofe.man` (generated),
+`wepp/runs/p*.man` (prepared), and existing WEPP output/log files (execution and
+diagnostics). Retain these using existing run browse/download and archive paths;
+validate downloaded management bytes and canonical archive/restore preservation
+on the disposable acceptance project. No new artifact lifecycle is introduced.
+Existing synchronous coverage requests expose working state until HTTP success
+or the existing error response; queued builds use existing RQ status/logs. A
+failed build is not a usable completed artifact even if partial files exist.
+This amendment concerns saved/direct cover overrides and retained summary
+classes; configured `cover_defaults_d` application ordering is not changed.
 
 Actual-project Forest acceptance remains the release gate. Production repair is
 separately blocked until the operator deploys the accepted revision and confirms
