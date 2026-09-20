@@ -6,6 +6,11 @@ the M1 and M3 equations from [Staley et al. (2017)](https://doi.org/10.1016/j.ge
 It also estimates the rainfall intensity at which the equation reaches 50%
 likelihood. It does not estimate debris-flow volume, travel distance or inundation.
 
+**Release status: Preview.** The workflow is available to users, but validation
+across fires and operational edge cases is still expanding. Review the documented
+limitations and independently verify results before using them for consequential
+decisions.
+
 ## Choose a model
 
 **M1 is the default and recommended model.** M3 provides an alternative when
