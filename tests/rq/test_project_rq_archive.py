@@ -79,13 +79,14 @@ def archive_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
 
 @pytest.mark.parametrize('state', ['working', 'failed', 'completed'])
-def test_mofe_ground_cover_records_survive_archive_restore(archive_rq_environment, state):
+@pytest.mark.parametrize('management_key', ['424', '443', '450'])
+def test_mofe_ground_cover_records_survive_archive_restore(archive_rq_environment, state, management_key):
     from wepppy.wepp.management import get_management_summary
     project, tmp_path, _, _ = archive_rq_environment
     root = tmp_path / 'demo'
     (root / 'landuse').mkdir(parents=True)
     (root / 'wepp/runs').mkdir(parents=True)
-    management = get_management_summary('424', 'c3s-disturbed').get_management()
+    management = get_management_summary(management_key, 'c3s-disturbed').get_management()
     management['ini.data.inrcov'] = 0.9
     management['ini.data.rilcov'] = 0.9
     expected = {

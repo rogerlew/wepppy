@@ -14,8 +14,8 @@ to load and rebuild. Deliver code and local input-artifact validation, not deplo
 
 
 - [x] (2026-09-20 19:32 UTC) Scope, compatibility plan and canonical amendment drafted.
-- [ ] Review and commit contract checkpoint.
-- [ ] Implement assets, catalogs and selector with focused evidence.
+- [x] Review and commit contract checkpoint `e56d610e1`.
+- [x] Implement assets, catalogs and selector; 188 focused tests pass.
 - [ ] Run gates, review and close package.
 
 ## Surprises & Discoveries

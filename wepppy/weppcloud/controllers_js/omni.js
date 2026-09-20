@@ -111,8 +111,11 @@ var Omni = (function () {
                     type: "select",
                     name: "canopy_cover",
                     label: "Canopy cover reduction to",
+                    defaultValue: "40%",
                     options: [
+                        { value: "30%", label: "30%" },
                         { value: "40%", label: "40%" },
+                        { value: "50%", label: "50%" },
                         { value: "65%", label: "65%" }
                     ]
                 },
@@ -488,7 +491,7 @@ var Omni = (function () {
         var name = control.name;
         var fieldWrap = createFieldWrapper(document, control);
         var row = fieldWrap.row;
-        var value = values && values[name] !== undefined ? values[name] : null;
+        var value = values && values[name] !== undefined ? values[name] : control.defaultValue;
 
         if (control.type === "select") {
             var select = document.createElement("select");

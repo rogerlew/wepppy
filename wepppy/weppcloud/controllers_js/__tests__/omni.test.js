@@ -203,6 +203,25 @@ describe("Omni controller", () => {
         expect(groundSelect.value).toBe("93%");
     });
 
+    test("new thinning rows preserve defaults with expanded canopy choices", () => {
+        const item = addScenarioAndSelect("thinning");
+        const canopy = item.querySelector("[data-omni-field='canopy_cover']");
+        expect(Array.from(canopy.options, option => option.value)).toEqual(["30%", "40%", "50%", "65%"]);
+        expect(canopy.value).toBe("40%");
+        expect(item.querySelector("[data-omni-field='ground_cover']").value).toBe("93%");
+    });
+
+    test.each(["30%", "40%", "50%", "65%"])("thinning %s survives hydration and serialization", async canopy => {
+        getJsonMock.mockResolvedValueOnce([
+            { type: "thinning", canopy_cover: canopy, ground_cover: "85%" }
+        ]);
+        await omni.load_scenarios_from_backend();
+        expect(document.querySelector("[data-omni-field='canopy_cover']").value).toBe(canopy);
+        expect(omni.serializeScenarios().scenarios).toEqual([
+            { type: "thinning", canopy_cover: canopy, ground_cover: "85%" }
+        ]);
+    });
+
     test("scenario filters render only for mulch/thinning/prescribed_fire and start collapsed", () => {
         const uniformItem = addScenarioAndSelect("uniform_low");
         expect(uniformItem.querySelector("[data-omni-role='scenario-filters']")).toBeNull();

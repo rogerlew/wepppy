@@ -565,5 +565,13 @@
 "129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
 "130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass moderate sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
 "131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
-"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"}
+"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"},
+"143": {"Key": 143, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_30_93", "Description": "Thinning 30/93 Cover (Cable)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_30_93.man"},
+"144": {"Key": 144, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_30_90", "Description": "Thinning 30/90 Cover (Forwarder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_30_90.man"},
+"145": {"Key": 145, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_30_85", "Description": "Thinning 30/85 Cover (Skidder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_30_85.man"},
+"146": {"Key": 146, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_30_75", "Description": "Thinning 30/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_30_75.man"},
+"147": {"Key": 147, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_93", "Description": "Thinning 50/93 Cover (Cable)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_93.man"},
+"148": {"Key": 148, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_90", "Description": "Thinning 50/90 Cover (Forwarder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_90.man"},
+"149": {"Key": 149, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_85", "Description": "Thinning 50/85 Cover (Skidder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_85.man"},
+"150": {"Key": 150, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_50_75", "Description": "Thinning 50/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_75.man"}
 }

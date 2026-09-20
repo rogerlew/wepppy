@@ -197,7 +197,7 @@ unchanged scenario definitions, so an ordinary submission may skip old children.
 
 Pre-fire mechanical treatment that reduces canopy density and fuel loads. Configure:
 
-- **Target canopy cover**: 40% (aggressive) or 65% (moderate)
+- **Target canopy cover**: 30%, 40% (default), 50%, or 65%
 - **Ground cover retention**: Depends on harvest equipment
   - 93% = Cable yarding (minimal ground disturbance)
   - 90% = Forwarder

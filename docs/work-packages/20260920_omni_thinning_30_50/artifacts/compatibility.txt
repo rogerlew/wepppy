@@ -1,0 +1,21 @@
+disturbed: 50 legacy records unchanged; 8 added
+c3s-disturbed: 65 legacy records unchanged; 8 added
+au-disturbed: 62 legacy records unchanged; 8 added
+eu-corine-disturbed: 64 legacy records unchanged; 8 added
+revegetation: 41 legacy records unchanged; 8 added
+Thinning_40_75.man: legacy sha256 7fc0b72d2fc5a6b12a1b80da2bebe31e3d5e79b264a8f8d389045ea756900568 unchanged
+Thinning_40_85.man: legacy sha256 8b82309db0d162b37f47295625343a66314b307f72478b71393acbb1925be7fe unchanged
+Thinning_40_90.man: legacy sha256 cc99a8a112cdb5a702d37d7f8024ed8ed2f857ff1fa090e9de28ef8e2206056e unchanged
+Thinning_40_93.man: legacy sha256 d61a0822adba732f2fe9dbd864e6ea4c05a3ecdcc939faa80605597fab55cd95 unchanged
+Thinning_65_75.man: legacy sha256 420b6b94ef73af08a100a22179a4524f33c912e2141e4d2e5abad27d889db734 unchanged
+Thinning_65_85.man: legacy sha256 b5b139e61c920056cbeb5a9ba55aa14d92a33956acc318675ffef10339a9b2cf unchanged
+Thinning_65_90.man: legacy sha256 447523cc350ee6470548b8b6a4b30e525a77377cf77040446e1af4b5ae9462b5 unchanged
+Thinning_65_93.man: legacy sha256 308dc3e888098a64b6669fecf87ba835efff743ebb673574191628baa9515da9 unchanged
+Thinning_30_75.man: canopy-only byte change verified
+Thinning_30_85.man: canopy-only byte change verified
+Thinning_30_90.man: canopy-only byte change verified
+Thinning_30_93.man: canopy-only byte change verified
+Thinning_50_75.man: canopy-only byte change verified
+Thinning_50_85.man: canopy-only byte change verified
+Thinning_50_90.man: canopy-only byte change verified
+Thinning_50_93.man: canopy-only byte change verified

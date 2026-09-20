@@ -202,12 +202,14 @@ def test_defaults_at_normal_build_and_modify_boundaries(scenario, monkeypatch, o
     assert [(ini.data.cancov, ini.data.inrcov, ini.data.rilcov) for ini in man.inis] == [(0.3, 0.9, 1.0)] * 2
 
 
-@pytest.mark.parametrize('kind,source,target', [
-    ('thinning', '90', '424'), ('prescribed_fire', '90', '410'),
-    ('mulch', '418', '418030'),
-])
+@pytest.mark.parametrize('kind,source,target,canopy,ground', [
+    ('thinning', '90', '424', 40, 75), ('prescribed_fire', '90', '410', 40, 75),
+    ('mulch', '418', '418030', 40, 75),
+] + [('thinning', '90', str(443 + ci * 4 + gi), canopy, ground)
+     for ci, canopy in enumerate((30, 50))
+     for gi, ground in enumerate((93, 90, 85, 75))])
 def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
-    scenario, monkeypatch, kind, source, target,
+    scenario, monkeypatch, kind, source, target, canopy, ground,
 ):
     from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
     from wepppy.nodb.mods.omni.omni import OmniScenario
@@ -236,7 +238,7 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
     monkeypatch.setattr(Soils, 'getInstance', lambda wd: soils)
     soil_calls = []
     disturbed = SimpleNamespace(has_sbs=False, land_soil_replacements_d={},
-        get_disturbed_key_lookup=lambda: {'thinning_40_75': '424',
+        get_disturbed_key_lookup=lambda: {f'thinning_{canopy}_{ground}': target,
             'forest_prescribed_fire': '410'},
         modify_mofe_soils=lambda: soil_calls.append('rebuilt'))
     monkeypatch.setattr(Disturbed, 'getInstance', lambda wd: disturbed)
@@ -247,7 +249,7 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
     monkeypatch.setattr(Treatments, 'getInstance', lambda wd: treatments)
     omni = SimpleNamespace(wd=str(root), has_sbs=False, logger=logging.getLogger(__name__),
         timed=lambda label: nullcontext(), rq_job_pool_max_worker_per_scenario_task=1)
-    definition = {'type': kind, 'canopy_cover': '40%', 'ground_cover': '75%',
+    definition = {'type': kind, 'canopy_cover': f'{canopy}%', 'ground_cover': f'{ground}%',
                   'ground_cover_increase': '30%'}
     OmniModeBuildServices().apply_scenario_mode(omni, scenario_name=kind,
         scenario={'thinning': OmniScenario.Thinning, 'prescribed_fire': OmniScenario.PrescribedFire,
@@ -280,6 +282,11 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
     prepared = _read(runs / 'p1.man')
     assert [ini.data.inrcov for ini in prepared.inis] == pytest.approx(
         [ini.data.inrcov for ini in combined.inis])
+    if kind == 'thinning':
+        for management in (combined, prepared):
+            assert (management.inis[1].data.cancov, management.inis[1].data.inrcov,
+                    management.inis[1].data.rilcov) == pytest.approx(
+                        (canopy / 100, ground / 100, ground / 100))
 
 
 def test_real_sbs_classification_reaches_management_files(scenario, monkeypatch):

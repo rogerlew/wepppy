@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py
+Generated ignored bundle wepppy/weppcloud/static/js/controllers-gl.js; SHA256 084f35aa69be228d8320021c07d5925563a74d71e648f0916c5711323c0c7b9c; expanded canopy descriptor verified.

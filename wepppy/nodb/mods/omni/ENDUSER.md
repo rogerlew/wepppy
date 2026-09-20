@@ -103,6 +103,12 @@ This is the right tool when your question is about comparing whole-run alternati
 - `thinning` and `prescribed_fire` run in an undisturbed context. If your project base is burned, include an Omni `undisturbed` scenario so those scenarios have the correct clone context.
 - Scenario list order is not the same as execution order. Omni resolves dependencies internally.
 
+Thinning offers target canopy cover of 30%, 40%, 50%, or 65%; new scenarios
+default to 40%. This is remaining canopy cover, not percent removed. Each new
+30%/50% choice supports 93% (Cable), 90% (Forward), 85% (Skidder), or 75% ground
+cover. Saved scenarios remain unchanged. Run a new scenario to obtain results
+for a new selection; changing software does not rewrite previous outputs.
+
 ## Omni Contrasts
 
 ### What Contrasts Do
