@@ -94,3 +94,5 @@ Each ADR should normally include:
 - `ADR-0059`: [Local M1 Prepared Predictor Composition](ADR-0059-staley-m1-prepared-predictors.md) (Accepted, 2026-09-09)
 - `ADR-0060`: [Pseudo-BARC256 Fixture Derivation](ADR-0060-pseudo-barc256-fixture-derivation.md) (Accepted for test artifacts, 2026-09-09)
 - `ADR-0062`: [Local Staley Rainfall and Results](ADR-0062-staley-local-rainfall-results.md) (Accepted; explicit R02 owner approval)
+
+- `ADR-0071`: [Omni thinning 30% and 50%](ADR-0071-omni-thinning-30-50.md) (Accepted, 2026-09-20)

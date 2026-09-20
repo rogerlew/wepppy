@@ -7,6 +7,9 @@
 
 ## Purpose
 
+Active: [Omni thinning 30% and 50%](docs/work-packages/20260920_omni_thinning_30_50/package.md)
+— eight additive management variants; preserve legacy files and 40% default.
+
 Completed (Forest): [Cover defaults and API omission](docs/work-packages/20260919_cover_defaults_api_omission/package.md)
 — propagate configured MOFE covers and preserve omitted kslast; WEPP executable work deferred.
 
