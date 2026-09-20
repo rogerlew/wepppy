@@ -16,7 +16,7 @@ to load and rebuild. Deliver code and local input-artifact validation, not deplo
 - [x] (2026-09-20 19:32 UTC) Scope, compatibility plan and canonical amendment drafted.
 - [x] Review and commit contract checkpoint `e56d610e1`.
 - [x] Implement assets, catalogs and selector; 188 focused tests pass.
-- [ ] Run gates, review and close package.
+- [x] (2026-09-20 20:06 UTC) Gates, independent review and local delivery complete.
 
 ## Surprises & Discoveries
 
@@ -94,7 +94,10 @@ NoDb serialization, treatment masks and soil rules unchanged. No dependency adde
 ## Outcomes & Retrospective
 
 
-Pending implementation and validation.
+Implementation and focused artifacts validated. Broad-suite snapshot required
+eight additive expected classes. File-level continuation unexpectedly opts native
+WBT integration tests in; directory-level continuation preserves original broad
+suite behavior. No unrelated runtime fix is in scope.
 
 ## Archive and inspection evidence
 
@@ -104,3 +107,14 @@ canonical project archive/restore implementation with these files and compare
 restored bytes. Run existing browse/download coverage. Live browser/download
 acceptance remains explicitly unverified unless exercised; operator owns that
 pre-deployment gate. Local code-delivery closure must state this limitation.
+
+## Final outcome
+
+Eight additive thinning variants and the selector are implemented. Legacy assets
+and records are unchanged. 188 focused, 911 frontend and 38 browse/download
+checks pass. Broad coverage completed with 9,169 passes and 99 skips across
+initial/continuation runs after an existing catalog snapshot update. All reviews
+approved. Local code delivery is complete; no deployment/live model claims.
+
+Revision note 2026-09-20: closed after generated-input and full collected-suite
+evidence. Retained continuation discovery so future runs preserve opt-in semantics.

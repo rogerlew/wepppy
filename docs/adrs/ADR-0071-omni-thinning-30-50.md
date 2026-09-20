@@ -1,6 +1,7 @@
 # ADR-0071: Add 30% and 50% Omni thinning canopy
 
-Status: accepted; implementation conformance pending.
+Status: accepted; implementation and generated-input conformance locally
+validated 2026-09-20. Deployment remains separate.
 
 ## Context and decision
 

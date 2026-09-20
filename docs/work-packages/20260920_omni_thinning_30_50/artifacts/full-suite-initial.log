@@ -1,0 +1,32 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 9267 items / 1 skipped
+
+[Routine passing progress and warning output omitted.]
+___________ TestGetDisturbedClasses.test_disturbed_classes_snapshot ____________
+
+self = <tests.test_2_validate_managements.TestGetDisturbedClasses testMethod=test_disturbed_classes_snapshot>
+
+    def test_disturbed_classes_snapshot(self):
+        classes = get_disturbed_classes()
+>       self.assertEqual(classes, EXPECTED_DISTURBED_CLASSES)
+E       AssertionError: Items in the first set but not the second:
+E       'thinning_30_75'
+E       'thinning_50_75'
+E       'thinning_30_85'
+E       'thinning_30_90'
+E       'thinning_30_93'
+E       'thinning_50_85'
+E       'thinning_50_93'
+E       'thinning_50_90'
+
+tests/test_2_validate_managements.py:63: AssertionError
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_2_validate_managements.py::TestGetDisturbedClasses::test_disturbed_classes_snapshot
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+==== 1 failed, 6677 passed, 92 skipped, 3109 warnings in 1160.94s (0:19:20) ====

@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/test_2_validate_managements.py tests/test_all_your_base.py tests/test_all_your_base_dateutils.py tests/test_all_your_base_hydro.py tests/test_all_your_base_objective_functions.py tests/test_all_your_base_stats.py tests/test_imports.py tests/test_managements_module.py tests/test_nodb_core_import_hygiene.py tests/test_observability_correlation.py tests/test_raster_freshness.py tests/test_redis_settings.py tests/test_webclients_elevation.py tests/test_wepp_top_translator.py tests/tools tests/topo tests/wepp tests/wepp_runner tests/weppcloud --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 2499 items
+
+[Routine passing progress and warning output omitted.]
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========== 2492 passed, 7 skipped, 66 warnings in 136.78s (0:02:16) ===========

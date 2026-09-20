@@ -3,7 +3,8 @@
 Reviewer: independent Codex `/root/contract_review_b`, 2026-09-20 UTC.
 Reviewed implementation against ancestor `e56d610e1` and
 `docs/ui-docs/contracts/omni-thinning-contract.md`. Verdict: approve; zero findings.
-Full Python suite pending at review; final result recorded in tracker.
+Full collected-suite coverage completed after snapshot follow-up: 9,169 passed,
+99 skipped across initial and continuation runs; see tracker.
 
 ## User outcome and valid states
 
@@ -44,3 +45,10 @@ Reviewer independently compared all 8 new files with their sources and parsed al
 records unchanged. Explicit default and hydration behavior approved. No high,
 medium or low findings. Local-input acceptance only; live browser inspection,
 production-equivalent execution and deployment remain operator-owned release gates.
+
+## Snapshot follow-up
+
+Independent reviewer rechecked the broad-suite snapshot fix: exactly eight
+new classes and count 47, all legacy classes preserved. No findings. Approved
+retaining initial and continuation evidence separately; only test expectations
+changed after the reviewed implementation.

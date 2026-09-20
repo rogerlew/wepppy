@@ -1,6 +1,6 @@
 # Omni thinning 30% and 50%
 
-Status: active, 2026-09-20 19:32 UTC. Owner: requesting operator; implementer: Codex.
+Status: closed 2026-09-20 20:06 UTC; implemented and locally validated. Owner: requesting operator; implementer: Codex.
 
 ## Scope and success criteria
 
@@ -39,8 +39,8 @@ existing browse/archive behavior. No writer/storage/lifecycle changes. Validate
 new selections through actual parser/writer and preparation boundaries in local
 fixtures. Fresh model results and live browser/deployment acceptance are outside
 this code-delivery scope; no numerical-output or deployed claim will be made.
-Highest current claim: scoped. Evidence and any unavailable gates go in tracker
-and correctness review.
+Highest current claim: locally validated. Evidence and unavailable live gates
+are recorded in tracker and correctness review.
 
 ## Archive and inspection evidence
 
@@ -50,3 +50,15 @@ canonical project archive/restore implementation with these files and compare
 restored bytes. Run existing browse/download coverage. Live browser/download
 acceptance remains explicitly unverified unless exercised; operator owns that
 pre-deployment gate. Local code-delivery closure must state this limitation.
+
+## Deliverables and closure
+
+Eight static assets, eight additive entries in each of five catalogs, matching
+CSV additions, four-choice selector with preserved defaults, documentation and
+ADR delivered. Legacy assets/records unchanged. Generated single-OFE/MOFE and
+prepared-input evidence plus canonical archive/restore tests pass. Full-suite
+coverage completed via documented continuation: 9,169 passed, 99 skipped;
+frontend 911 passed. Two contract reviews and final correctness review approved.
+No template refactor, migration or deployment. Live browser and fresh model
+execution remain operator-owned release gates. See tracker for exact evidence
+and the existing snapshot correction discovered during broad validation.

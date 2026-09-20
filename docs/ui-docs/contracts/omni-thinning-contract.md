@@ -1,6 +1,7 @@
 # Omni thinning canopy choices
 
-Status: accepted intent 2026-09-20; implementation conformance pending.
+Status: accepted 2026-09-20; implementation and generated-input conformance
+locally validated. Live browser acceptance and deployment remain separate.
 
 ## Choice and parameter contract
 

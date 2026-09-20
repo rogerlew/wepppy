@@ -45,10 +45,18 @@ EXPECTED_DISTURBED_CLASSES = {
     "shrub prescribed fire",
     "skid",
     "tall grass",
+    "thinning_30_75",
+    "thinning_30_85",
+    "thinning_30_90",
+    "thinning_30_93",
     "thinning_40_75",
     "thinning_40_85",
     "thinning_40_90",
     "thinning_40_93",
+    "thinning_50_75",
+    "thinning_50_85",
+    "thinning_50_90",
+    "thinning_50_93",
     "thinning_65_75",
     "thinning_65_85",
     "thinning_65_90",
@@ -61,7 +69,7 @@ class TestGetDisturbedClasses(unittest.TestCase):
     def test_disturbed_classes_snapshot(self):
         classes = get_disturbed_classes()
         self.assertEqual(classes, EXPECTED_DISTURBED_CLASSES)
-        self.assertEqual(len(classes), 39)
+        self.assertEqual(len(classes), 47)
 
 
 class TestLoadMap(unittest.TestCase):
