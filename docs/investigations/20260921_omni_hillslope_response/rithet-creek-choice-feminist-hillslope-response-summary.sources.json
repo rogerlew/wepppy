@@ -1,0 +1,98 @@
+{
+  "retrieved_utc": "2026-09-21T16:17:04.368543+00:00",
+  "host": "wepp1",
+  "runid": "choice-feminist",
+  "scenario_definitions": [
+    {
+      "type": "uniform_low"
+    },
+    {
+      "type": "uniform_moderate"
+    },
+    {
+      "type": "uniform_high"
+    },
+    {
+      "type": "undisturbed"
+    },
+    {
+      "type": "prescribed_fire"
+    },
+    {
+      "type": "thinning",
+      "canopy_cover": "30%",
+      "ground_cover": "90%"
+    },
+    {
+      "type": "thinning",
+      "canopy_cover": "50%",
+      "ground_cover": "90%"
+    }
+  ],
+  "sources": [
+    {
+      "scenario": "base",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "7498364cfb95c65dd687d9af82438905f770d4c0d19dcdc32e1da8e3a7f315c4",
+      "modified_utc": "2026-09-21T03:41:34+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "undisturbed",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "2f6e1b81ea8dde703908b0cb6e991712941d365fe3bbee47022f2b681349c7ec",
+      "modified_utc": "2026-09-21T05:53:31+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "uniform_low",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/uniform_low/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "9977cd13030c3a958f112af4c5f0845c8a39908f8052543a7e4b79f12e7b29f0",
+      "modified_utc": "2026-09-21T05:53:31+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "uniform_moderate",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/uniform_moderate/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "a495afad19f3954d51fd08893cb79ada56948f4d559d95ac66993970075a48cc",
+      "modified_utc": "2026-09-21T05:53:31+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "uniform_high",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/uniform_high/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "8c1545e9a30a7ff67c487007caa7ed862fb189a3befdfa31a40ffcc48e1a7318",
+      "modified_utc": "2026-09-21T06:01:01+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "prescribed_fire",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/prescribed_fire/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "1f98affc3172729512172bec94ebb072e443818b31cf3272ccae52c1a9532a48",
+      "modified_utc": "2026-09-21T07:06:16+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "thinning_30_90",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/thinning_30_90/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "1edd2a27fac4666be366e728d118c644ded59a13d7ba3a4c938d55fa1f6fd96b",
+      "modified_utc": "2026-09-21T07:07:21+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    },
+    {
+      "scenario": "thinning_50_90",
+      "file": "/geodata/wc1/runs/ch/choice-feminist/_pups/omni/scenarios/thinning_50_90/wepp/output/interchange/loss_pw0.hill.parquet",
+      "sha256": "0de7223cf197952e1f6774b108d0bf50ddd8431ddc4affc04f4a1ad44fb3ef90",
+      "modified_utc": "2026-09-21T07:01:20+00:00",
+      "average_years": 22,
+      "wepp_bin": "wepp_260803"
+    }
+  ]
+}
