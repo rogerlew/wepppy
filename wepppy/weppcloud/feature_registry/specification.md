@@ -195,6 +195,16 @@ When a feature is visible:
 
 Registry file order is authoritative for display order in MVP.
 
+### Standalone runners and the Mods menu
+
+Accepted 2026-09-21; implementation pending. The run-header Mods menu excludes
+`culvert_runner` and `batch_runner` for every role and backend, including
+`include_all` preview/test rendering and runs with either id already active.
+These are standalone workflows without run-level UI controls, so a run-level
+toggle is misleading. Keep their registry metadata, standalone entry points,
+authorization and persisted run state unchanged. This is a menu-only exclusion,
+not feature removal or disabling; other feature visibility rules are unchanged.
+
 ## Validation Rules
 
 - `id` unique and non-empty within each registry.

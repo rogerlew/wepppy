@@ -1,0 +1,11 @@
+# Standalone runner menu cleanup
+
+Status: active. Scope: remove Culvert Runner and Batch Runner from the run-header
+Mods menu only. No runner route, registry entry, saved state, permission,
+deployment or push changes. No new metadata mechanism is needed for two fixed
+standalone workflows.
+
+Authority: feature registry specification, Standalone runners and the Mods menu.
+User approved the menu removal and local checkpoint commit on 2026-09-21,
+explaining that these workflows have no run-level UI controls.
+See [decision](artifacts/20260921_contract_decision.md) and [tracker](tracker.md).
