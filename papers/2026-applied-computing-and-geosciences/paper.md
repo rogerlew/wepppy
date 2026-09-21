@@ -1,6 +1,8 @@
-# WEPPcloud: an on-demand microservices architecture for production-scale interactive watershed modeling
+# Operating an evolving watershed-modeling service: architecture and provenance lessons from WEPPcloud
 
 > Working draft for Applied Computing & Geosciences — Application article.
+> Scope revised 2026-09-21: [operations and provenance](01_devops_and_provenance.md).
+> Feature methods move to the [companion paper](../2026-weppcloud-scenarios-and-contrasts/00_planning.md).
 > Drafting in markdown; migrate to els-cas LaTeX (cas-sc.cls) once content is
 > nailed down. Constraints: 5,000 words body, 250-word abstract, 1–7 keywords,
 > numbered sections, numeric [n] references, SI units.
@@ -15,61 +17,53 @@
 \* Corresponding author: rogerlew@uidaho.edu
 
 ## Abstract
+WEPPcloud supports interactive watershed modeling through automated acquisition
+of environmental data, execution of legacy physics models, and analysis of
+hydrology and erosion outputs. Operating this service creates two related
+challenges: maintaining responsive workflows as demand and software evolve, and
+establishing which software, parameters, and data produced a scientific result.
+Interactive changes and selective reruns make provenance and reproducibility
+substantially more challenging.
+A project may span multiple deployments and retain inputs prepared under earlier
+revisions. This paper examines operational lessons since the platform's 2022
+description, focusing on asynchronous execution, portable file-backed state,
+columnar data interchange, and deployment management. Bare-metal Kubernetes and
+GitOps experience provides a setting for examining runtime boundaries, storage
+constraints, and controlled software promotion. We distinguish deployment history
+from execution provenance and examine what is required to identify the actual
+dependencies of retained results. For interactive jobs, the provenance goal is
+to identify the executing container and retrieve corresponding source through
+whole-stack version metadata. The evaluation will combine a representative
+watershed workflow with retained operational measurements [evidence pending].
+We then describe a proposed complementary backend for declarative experiments,
+executed as image-digest-pinned Kubernetes Jobs with enforced pipeline dependencies
+and cryptographic tracking. This backend would preserve WEPPcloud's on-demand user experience while
+providing a separate path for stricter replay guarantees. Its implementation and
+replay evaluation remain future work. The central lesson is that reproducible
+infrastructure and reproducible scientific executions require related but
+distinct records and validation.
 
-WEPPcloud is an online platform that couples watershed-scale erosion and
-hydrology models — foremost the Water Erosion Prediction Project (WEPP),
-alongside RUSLE, RHEM, WATAR, and debris-flow models —
-with automated acquisition of terrain, soil, land cover, and climate data to
-support land-management decision making, including post-wildfire emergency
-response. The implementation
-described in 2022 served early adopters well but was naive about production
-demand: larger watersheds, fire-season surges from Burned Area Emergency
-Response (BAER) teams, scenario-intensive treatment planning, and programmatic
-access. This paper traces the platform's evolution into tightly integrated,
-containerized, on-demand microservices, organized around the operational
-lessons that shaped each design decision.
-(1) Long-running legacy FORTRAN model executions are isolated from interactive
-requests through Redis-backed job queues. (2) Portable, file-backed run state —
-retained from the original design and hardened with distributed locking — lets
-every run be forked, archived, and re-executed. (3) Model outputs are
-published as self-describing columnar Parquet tables with embedded units
-metadata and queried through a declarative, safety-bounded analytics service
-that also serves AI agents. (4) Performance-critical components are
-purpose-built: Rust geoprocessing kernels for watershed delineation and
-abstraction, Go services for real-time status streaming. These foundations
-enable scenario fan-out — one user action clones and selectively reruns
-treatment scenarios — and interactive WebGL visualization of multi-scenario
-results. We demonstrate a post-fire treatment-planning workflow and report
-production evidence: [N] runs across [N] watersheds, fire-season demand
-surges, and queue and worker utilization. The lessons offer a
-transferable guide for operationalizing legacy environmental models as
-responsive, scalable web services.
-
-<!-- ACG limit: 250 words. -->
+<!-- Working abstract, not submission-ready: resolve the evidence placeholder
+and tense after evaluation. Do not present proposed replay as demonstrated. -->
 
 ## Keywords (1–7)
 
 watershed modeling; microservices; decision support; soil erosion; WEPP;
-cyberinfrastructure; interactive visualization
+cyberinfrastructure; provenance
 
 <!-- draft — prune/reorder; ACG says avoid multi-word keywords where possible -->
 
 ## Highlights (3–5 bullets, ≤85 chars each)
 
-- Operational lessons drove WEPPcloud's evolution to on-demand microservices
-- Job queues isolate long-running legacy FORTRAN models from interactive requests
-- Portable file-backed run state lets any run be forked, archived, and re-executed
-- Self-describing Parquet outputs feed a declarative query API for humans and AI
-- One user action clones and selectively reruns post-fire treatment scenarios
+- Operational lessons shape an evolving interactive watershed-modeling service
+- Asynchronous execution separates long simulations from interactive requests
+- Deployment history and scientific execution provenance need distinct records
+- Mixed-version projects motivate tracking the inputs each execution consumes
+- A proposed declarative backend complements on-demand modeling
 
-<!-- Alternates if any bullet is cut:
-- Rust geoprocessing kernels make basin-scale watershed delineation interactive
-- Production evidence: [N] runs, fire-season surges, queue/worker utilization
-Submit as separate file with "highlights" in the filename. -->
+<!-- Reassess highlights after evaluation; submit as a separate file. -->
 
----
-
-## 1. Introduction (~600 w)
+## 1. Introduction (~550 w)
 
 <!-- Prototype-to-production gap; demand growth since 2022; numbered
 contributions list. AI-prototyping hook lives here, not in abstract. -->
@@ -79,7 +73,7 @@ contributions list. AI-prototyping hook lives here, not in abstract. -->
 <!-- Requirements as discovered in operation, not assumed a priori. Two
 flavors: decisions the original design got right and hardened (file-backed
 run state) vs. decisions operation forced (queue isolation, columnar
-interchange, native kernels). Drafting convention for sections 3–6: open each
+interchange, native kernels). Drafting convention for architecture sections: open each
 with the operational pressure/incident that motivated the design, then the
 design, then observed behavior.
 TODO(Roger): inventory of actual operational incidents/pressures 2022–2026 —
@@ -92,7 +86,11 @@ dispatch, local storage (millions of small files; NFS/Lustre degrade),
 unrestricted egress for data APIs, horizontal worker scaling: "not
 preferences — consequences of a persistent, interactive modeling platform." -->
 
-## 3. On-demand microservices architecture (~800 w)
+<!-- Reassess the June storage/HPC generalizations above against the retained
+Talos/NFS experiments. Report measured workloads and constraints, not categorical
+claims that shared storage or HPC cannot support the application. -->
+
+## 3. Interactive execution architecture (~800 w)
 
 <!-- Source material: docs/projects/i-crews/st_joe/weppcloud-architecture-overview.md
 "Why HPC and WEPPcloud are a Poor Match" — the why-bespoke argument (batch
@@ -217,23 +215,69 @@ front of services (present in production, omitted in source diagram);
 (b) include rq-worker-batch pool? (c) keep f-esri/weppcloudr/cap.js service
 containers or collapse to "sandboxed service containers" for figure economy. -->
 
-## 4. State model and job orchestration (~550 w)
+<!-- Develop state/orchestration, interchange, analytics, and native kernels
+within this section. Figure 1 above is retained source material for the Compose
+architecture; verify each boundary and date it before submission. -->
 
-## 5. Data interchange and declarative analytics (~650 w)
+## 4. Operating and evolving the deployment (~800 w)
 
-## 6. Performance substrate (~400 w)
+<!-- Compose experience -> documented Talos/Flux deployment and operational
+constraints. Production RKE2/GitOps migration is intended, not an achieved result.
+Source map and evidence limits: 01_devops_and_provenance.md. -->
 
-## 7. On-demand scenario computation and analytics surfaces (~650 w)
+## 5. Execution identity and provenance (~650 w)
 
-## 8. Production evidence (~550 w)
+For the interactive service, the software-provenance goal is to associate every
+job with its actual executing container and immutable image identity. Container
+metadata should identify versions across the software stack, allowing the
+corresponding application, processing, and model source to be retrieved and
+reviewed. The [stack inventory](../../docs/weppcloud-stack.md) describes the
+component boundaries; a WEPPpy revision alone cannot identify all of them.
+Jobs delegated to other containers require those execution identities as well.
 
-<!-- post-fire workflow case study as running example; telemetry panels.
-Scale datapoint (verify current numbers at drafting): St. Joe basin-scale
-prep — 56 watersheds, 134,033 hillslopes, 151,121 channel segments; >100x
-area of the 2013–2018 Fernan effort (~3,800 ha); enabled by Rust delineation
-(weppcloud-wbt) within the last year. Strong "larger watersheds" evidence. -->
+This association supports software inspection without imposing a frozen pipeline
+on interactive users. It does not, by itself, establish that retained inputs
+were produced under consistent dependencies or that a complete project can be
+replicated. The proposed declarative backend adds runtime pinning and enforced
+pipeline dependencies to address those stronger requirements.
 
-## 9. Discussion: transferable lessons, limitations, future work (~300 w)
+## 6. Operational evaluation (~950 w)
+
+<!-- Representative watershed execution, measured operational pressures,
+storage/worker experiments, and deployment/recovery evidence. Audit retained
+artifacts and exact revisions before reporting numbers. The prior scenario and
+feature case study belongs to the companion paper. -->
+
+<!-- Retained scale lead from the June draft, not yet verified: St. Joe prep —
+56 watersheds, 134,033 hillslopes, 151,121 channel segments; >100x the area of
+the 2013–2018 Fernan effort (~3,800 ha). Check artifacts and dates before use. -->
+
+## 7. Discussion: complementary execution modes (~550 w)
+
+Interactive projects support exploration: users change parameters, inspect
+results, and continue work as the service evolves. A retained result can
+therefore depend on inputs prepared under several software revisions. Recording
+the project's creation revision or current deployment does not, by itself,
+identify that execution's complete dependency history. Interactivity makes
+capturing this history and ensuring consistent dependencies substantially harder.
+
+A proposed secondary backend would accept declarative experiments, bind their
+resolved inputs to a container image digest, and execute them as Kubernetes
+Jobs with enforced pipeline dependencies. Cryptographic tracking would identify the actual consumed
+artifacts and their relationships to generated outputs. Retention and semantic
+validation would be necessary alongside hashes. This mode would complement the
+existing on-demand service; it would not require all users to adopt a batch-only
+workflow. Notebook-based interaction retains the same tension unless an
+additional mechanism enforces the experiment's runtime and pipeline dependencies.
+
+The backend is a research direction. Claims of replay require measured tests
+that distinguish byte identity, numerical agreement, and independent scientific
+replication. The [scope decision](01_devops_and_provenance.md) defines the proposed
+evaluation and the boundary between demonstrated operations and future work.
+
+## 8. Conclusions (~200 w)
+
+<!-- Limit conclusions to demonstrated operations; proposed replay stays future work. -->
 
 ## Declaration of generative AI use
 
