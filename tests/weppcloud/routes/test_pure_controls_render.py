@@ -3662,6 +3662,28 @@ def test_run_header_renders_project_mutation_contract(jinja_env: Environment) ->
     assert re.search(r'id="checkbox_ttl_disabled"[^>]*checked', rendered)
 
 
+def test_run_header_omits_standalone_runner_toggles(jinja_env: Environment) -> None:
+    from wepppy.weppcloud.feature_registry.runtime import build_header_mod_options
+
+    user = SimpleNamespace(has_role=lambda role: role == "Root", roles=["Root"], is_authenticated=True)
+    mods = {"culvert_runner", "batch_runner", "omni"}
+    ron = SimpleNamespace(
+        mods=mods, runid="test-run", config_stem="test-config", nodb_version=3,
+        name="Project A", scenario="Baseline", readonly=False, public=True, srid=None,
+    )
+    rendered = jinja_env.get_template("header/_run_header_fixed.htm").render(
+        user=user, current_user=user, current_ron=ron, ron=ron,
+        request=SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"}),
+        current_ttl=SimpleNamespace(user_disabled=True),
+        header_mod_options=build_header_mod_options(
+            active_mods=mods, user=user, is_wbt=True, include_all=True,
+        ),
+    )
+    assert 'data-project-mod="culvert_runner"' not in rendered
+    assert 'data-project-mod="batch_runner"' not in rendered
+    assert 'data-project-mod="omni"' in rendered
+
+
 def test_run_header_renders_interface_maturity_badge_without_mod_dropdown_badges(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: role == "Admin", roles=["Admin"], is_authenticated=True)

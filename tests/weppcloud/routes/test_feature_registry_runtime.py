@@ -108,6 +108,23 @@ def test_build_header_mod_options_include_all_overrides_policy() -> None:
     assert "rusle" in option_ids
 
 
+@pytest.mark.parametrize("roles", [set(), {"PowerUser"}, {"Admin"}, {"Dev"}, {"Root"}])
+@pytest.mark.parametrize("is_wbt", [False, True])
+@pytest.mark.parametrize("include_all", [False, True])
+@pytest.mark.parametrize("active_mods", [set(), {"omni", "unknown"}, {"culvert_runner"}, {"batch_runner"}, {"culvert_runner", "batch_runner"}])
+def test_header_excludes_standalone_runners(roles, is_wbt, include_all, active_mods):
+    before = active_mods.copy()
+    options = build_header_mod_options(
+        active_mods=active_mods, user=_User(roles), is_wbt=is_wbt, include_all=include_all,
+    )
+    ids = [entry["id"] for entry in options]
+    assert not {"culvert_runner", "batch_runner"}.intersection(ids)
+    assert "omni" in ids
+    assert active_mods == before
+    assert {"culvert_runner", "batch_runner"} <= feature_registry_by_id().keys()
+    assert ids == [entry.id for entry in load_feature_registry() if entry.id in ids]
+
+
 def test_build_header_mod_options_allows_internal_features_for_dev_role() -> None:
     user = _User({"Dev"})
     active_mods = {"ag_fields", "omni"}

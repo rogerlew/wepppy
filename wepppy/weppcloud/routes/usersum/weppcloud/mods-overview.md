@@ -2,6 +2,11 @@
 > Quick reference for the optional mods toggled from the run header `Mods` menu.
 
 Not every mod is available on every run.
+
+Culvert Runner and Batch Runner are standalone workflows, not run-level
+controls, so they do not appear in the Mods menu. Their existing standalone
+entry points and access requirements are unchanged.
+
 - `openet_ts` is shown to Admin users.
 - `debris_flow` is shown to PowerUser users.
 - `roads` and `rusle` require WBT delineation backend runs.
