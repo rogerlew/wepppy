@@ -65,6 +65,10 @@ responses have the ordinary hydrologic sign---lower \Ksat{} raises peak flow
 and higher \Ksat{} lowers it---but their magnitude is disproportionate to a
 one-percent input change. Within the 0.5--2 band, the fraction of \Ksat{}
 responses having the opposite sign rises sharply with baseline peak magnitude.
+Excluding mixed infiltration-excess and surface-return events reduces that
+incongruent share at 30--100 mm/h from 24.1\% to 1.8\% unburned and from
+26.0\% to 1.9\% burned, concentrating the directional instability in the
+mixed-forcing population.
 
 Source forensics and an instrumented Hill 106 event identify one mechanism.
 Present WEPP assigns a daily soil-water surface return new subdaily timing by
@@ -959,6 +963,92 @@ work should test whether this gradient aligns with surface-return depth,
 positive-excess duration, forcing-mode changes, solver changes, or antecedent
 profile state.
 
+\subsection{Excluding mixed runoff sharply reduces directional incongruence}
+
+Figure~\ref{fig:filtered-scatter} repeats Figure~\ref{fig:scatter} after
+excluding pairs in which either the baseline or mutant uses forcing mode 1:
+surface return is added to intervals already having positive infiltration
+excess. In the census observer source, this branch requires realized surface
+return (\texttt{surpls}) greater than $10^{-6}$ m and positive pre-addition
+rainfall-excess duration (\texttt{durre}). The filter therefore isolates the
+mixed Green--Ampt runoff and surface-return pathway implicated by the Hill 106
+trace. It retains events without surface return and events with surface return
+but no positive-excess duration; it is not a filter for all positive \surdra.
+The peak floor, pairing rules, axes, markers, and opacity convention are
+unchanged. Of 199,086 plotted rows, 115,932 remain: 56,356 unburned and 59,576
+burned.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{artifacts/topanga-figure-3-excluding-mixed-runoff.pdf}
+  \caption{Mutant versus baseline peak flow after excluding mixed
+  infiltration-excess and surface-return forcing in either paired run.
+  Green and orange markers remain because surface-return-only events are
+  retained. Faint markers are directionally congruent; dark markers are
+  incongruent. The filtered population is much more tightly aligned with
+  the expected conductivity response, including at higher peak intensities.}
+  \label{fig:filtered-scatter}
+\end{figure}
+
+The principal result is the sharp fall in the incongruent share of
+\Ksat{} responses within the central 0.5--2 peak-ratio band
+(Table~\ref{tab:filtered-incongruence}). At baseline peaks of 30--100 mm/h,
+the share falls from 24.1\% to 1.8\% in the unburned stratum and from
+26.0\% to 1.9\% in the burned stratum. At 10--30 mm/h, it falls from
+7.4\% to 0.7\% unburned and from 18.5\% to 2.7\% burned. Thus, the
+high-intensity directional instability in the full census is concentrated
+in the mixed-forcing population. Among retained rows, the steep rise in
+wrong-direction conductivity responses is largely absent.
+
+\begin{table}[H]
+  \centering
+  \caption{Incongruent share of central-band \Ksat{} rows before and after
+  mixed-forcing exclusion. Bins include their lower bound and exclude their
+  upper bound; $n$ is the number of event rows in each denominator.}
+  \label{tab:filtered-incongruence}
+  \begin{tabular}{llrrrr}
+    \toprule
+    Stratum & Baseline peak & Original $n$ & Incongruent & Retained $n$ & Incongruent \\
+     & (mm/h) & & & & \\
+    \midrule
+    Unburned & 10--30 & 5,540 & 7.4\% & 3,740 & 0.7\% \\
+             & 30--100 & 10,399 & 24.1\% & 652 & 1.8\% \\
+             & 100--300 & 3,254 & 33.4\% & 42 & 2.4\% \\
+    Burned   & 10--30 & 12,596 & 18.5\% & 5,831 & 2.7\% \\
+             & 30--100 & 21,149 & 26.0\% & 4,199 & 1.9\% \\
+             & 100--300 & 1,466 & 23.1\% & 368 & 1.4\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+This pattern supports the report's timing-based interpretation. Conductivity
+changes affect both infiltration excess and profile return. In the mixed
+branch, a change in positive-excess duration also changes the rate imposed
+by dividing daily return depth by that duration. The filtered comparison
+locates most high-intensity directional incongruence in the population exposed
+to that coupling. It does not establish that duration compression causes
+every excluded reversal; antecedent state and solver selection also vary
+within this population and require frozen-event replay.
+
+The extreme-ratio tail also contracts, but remains distinct from directional
+incongruence. Exclusion removes 41.8\% of plotted rows and 69.5\% of rows
+outside the 0.2--5 band. The retained population contains 425 rows outside
+0.5--2 (0.367\%) and 184 outside 0.2--5 (0.159\%). All 184 remaining
+fivefold departures have no positive surface return in either run; 144 are
+burned and 169 are \Ksat{} mutations. The burned twofold-tail rate is nearly
+unchanged (0.577\% before versus 0.574\% after filtering). Mixed-forcing
+exclusion therefore explains the disappearance of much of the directional
+pattern without resolving the separate no-return extreme population.
+
+This is a descriptive exclusion analysis, not a corrected simulation. No
+retained peak changes value. Larger events are disproportionately removed,
+and only 42 unburned central-band \Ksat{} rows remain at 100--300 mm/h;
+none remain at 300--800 mm/h in either stratum. The within-bin comparisons
+reduce, but do not eliminate, differences in population composition. Event
+rows remain clustered within trials and years. A tighter diagonal demonstrates
+local response stability in the retained population, not agreement with
+observed peaks or proof that excluded events are physically invalid.
+
 \section{Interpretation}
 
 \subsection{What the Topanga census establishes}
@@ -1320,6 +1410,15 @@ peak inversions: scenario-specific events can enter the amplified peak regime
 at different points even under the same storm forcing. The association is
 demonstrated here; attribution to a particular duration or solver transition
 still requires frozen-event replay.
+
+The filtered comparison further locates the high-intensity directional
+instability in mixed infiltration-excess and surface-return events. Excluding
+that pathway in either paired run lowers central-band \Ksat{} incongruence
+at 30--100 mm/h from approximately one in four rows to fewer than one in
+50 in both strata. This supports the surface-return timing interpretation,
+while the 184 retained fivefold departures without surface return demonstrate
+that it does not explain every extreme response. Filtering selects a different
+population; it does not repair the excluded peaks.
 
 In production, a single hillslope or a small set of hillslopes may contribute
 abnormal events that distort aggregated extremes and return-period estimates.
