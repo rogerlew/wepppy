@@ -182,6 +182,9 @@ themselves establish probability calibration across fires.
 
 ### M1: Thomas Fire, San Ysidro Creek
 
+State: **California**. Fire start date: **December 4, 2017**, as recorded in
+[CAL FIRE's Thomas Fire incident record](https://www.fire.ca.gov/incidents/2017/12/4/thomas-fire).
+
 The `nervous-mesquite` project represents a 7.7669 km² basin near San Ysidro Creek,
 affected by the 2017 Thomas Fire. Its closest spatial match is USGS basin 19384
 (7.6260 km²); the basin polygons have 96.10% intersection-over-union.
@@ -214,6 +217,11 @@ Evidence: [original spatial and USGS comparison](../../../../docs/work-packages/
 and [current Kf rerun and end-to-end acceptance](../../../../docs/work-packages/20260916_thomas_fire_restart_rerun/artifacts/acceptance.md).
 
 ### M3: Grizzly Creek Fire, East Fork Deadhorse gauge
+
+State: **Colorado**. Fire start date: **August 10, 2020**, as documented in
+[Colorado Executive Order D 2020 187](https://spl.cde.state.co.us/artemis/goserials/go4312internet/go43122020187internet.pdf),
+which identifies the fire's origin in Garfield County and subsequent spread
+into Eagle County. This is the fire start date, not the 2021 storm dates below.
 
 The `thespian-cleanness` project represents Dead Horse Creek within the 2020
 Grizzly Creek Fire. The USGS East Fork Deadhorse gauge (GCEC2), inside the modeled
