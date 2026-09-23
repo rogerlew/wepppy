@@ -606,6 +606,77 @@ mitigation or proof of the NAS failure mechanism. Existing incident jobs are
 not automatically retried by this change. Deploy worker support before enabling
 new callback-bearing fork submissions; the live workflow must pass under
 production-equivalent identities, mounts and orchestration before rollout.
+
+## Production Incident: TOPAZ Raster Temporarily Invisible to Watershed Summary (2026-09-23)
+
+Assessment: **likely transient NFS visibility at a wepp2-to-wepp1 handoff**,
+with the exact client/cache/server mechanism unconfirmed. This is not evidence
+of persistent raster loss or a confirmed NAS outage. Investigation was read-only
+on 2026-09-23 at approximately 19:20–19:23 UTC.
+
+The affected run was `mdobre-marriageable-aspect`. Its host raster path is
+`/geodata/wc1/runs/md/mdobre-marriageable-aspect/dem/topaz/SUBWTA.ARC`;
+the web container consumes `/wc1/runs/md/mdobre-marriageable-aspect/dem/topaz/SUBWTA.ARC`.
+The failure was an HTTP watershed-summary render, not a failed RQ job:
+`query_watershed_summary` → `reports/subcatchments.htm` →
+`watershed.edge_hillslopes` → `identify_edge_hillslopes` → `rasterio.open`.
+The template's lazy edge calculation exposed the unavailable raster.
+
+### Confirmed Timeline and Artifact Evidence
+
+All times below are UTC on 2026-09-23.
+
+| Time | Evidence |
+| --- | --- |
+| 00:53:52.866868 | Redis/RQ records start of `build_subcatchments_rq`, job `8e86a429-4f46-444a-8ae3-5f139f925a3c`. Timestamped wepp2 `rq-worker` logs establish producer placement. |
+| 00:54:02.514780 | Raster modification and change times observed during inspection; size 999,404 bytes, inode 167881000. These are retrospective metadata, not a capture of visibility at failure. |
+| 00:54:04–00:54:09 | wepp2 logs show Peridot abstraction followed by `_peridot_post_abstract_watershed`. |
+| 00:54:10.769159 | Producer job finished with no `exc_info`; worker `e8b1878dc138401b8596c02b1d58ad88`. |
+| 00:54:10.976923 | wepp1 web log records `RasterioIOError: .../SUBWTA.ARC: No such file or directory`, about 0.208 seconds after producer completion. Run `exception_factory.log` records the same traceback at 00:54:10.978440, error ID `d92653b35f064f34b7a0ec57c3c5092a`. |
+| 00:54:11.782309 | Follow-on `abstract_watershed_rq` job `b0a49fc3-f94a-48a1-8d59-5052494d58d7` finished on wepp1 without `exc_info`; this alone does not prove raster readability. |
+| 19:21:17 onward | Full Rasterio band read succeeded inside wepp1 `weppcloud` as UID 1002/GID 130, matching Gunicorn identity. A separate call to the exact `identify_edge_hillslopes` helper also succeeded and returned an empty set. |
+
+The current raster parses as AAIGrid, 453 columns × 441 rows, one band,
+EPSG:32611, values 0–3104 with 984 distinct values. Its SHA-256 is
+`fce2d0a1dcdf9658c0bb84a3d74adec774419c8ea2b365393eb0027b62144f88`.
+Host and container `stat` succeeded. The run log contains no later
+subcatchment rebuild, and the observed mtime/ctime precede the failure by
+approximately 8.46 seconds. These facts favor temporary visibility over a
+raster that was only generated after the failed request.
+
+At inspection, `weppcloud` was running and healthy; `rq-worker`,
+`rq-worker-batch`, and `rq-engine` were running. `findmnt -T` confirmed
+`nas.rocket.net:/wepp` on `/geodata`, NFSv4.2, `hard`, `acregmax=30`,
+`acdirmin=5`, `timeo=600`, `retrans=2`, and 65,536-byte read/write sizes.
+The wepp1 kernel journal had no entries in the 00:45–01:05 UTC incident
+window; the broader same-day NFS/RPC search also returned no matches.
+This provides no positive evidence of a transport outage, but does not exclude
+a transient lookup/visibility problem.
+
+### Interpretation, Limits, and Follow-up
+
+The producer/consumer host split, immediate handoff, pre-error file timestamps,
+and successful later read through the actual consumer support an NFS visibility
+race as the leading explanation. A stale directory or negative lookup cache is
+a hypothesis, not a demonstrated root cause. No simultaneous cross-client
+lookup, syscall trace, packet capture, or NAS-side evidence was retained at
+failure; an application publication race cannot be conclusively excluded.
+Later readability alone must not be recorded as proof of an NFS defect.
+
+Evidence was collected using `wctl docker compose ps`, timestamped Compose logs
+on both hosts, `Job.fetch` against Redis/RQ, run-scoped logs, `findmnt`, `stat`,
+`journalctl -k`, and Python/Rasterio via `wctl docker compose exec -T weppcloud`.
+The wepp1 checkout reported revision `5f94a99b935a3f5027b43d8330246f2ea3b3e255`.
+No files were regenerated, jobs requeued, services restarted, or mounts changed.
+The raster consumer is currently readable; a browser summary render was not
+replayed, so this assessment does not claim full UI recovery or a deployed fix.
+
+The smallest next action is to retry the summary request. If it recurs,
+capture concurrent producer-host and web-container `stat`/open results, exact
+UTC timestamps and syscall errors before rebuilding anything. Investigate the
+cross-host publication/visibility boundary with that evidence; this incident
+alone does not justify remounting NFS or adding blanket Rasterio retries.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).
