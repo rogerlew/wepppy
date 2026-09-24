@@ -1,0 +1,26 @@
+{
+  "retrieved_utc": "2026-09-21T23:25:10.549641+00:00",
+  "host": "wepp1",
+  "source_directory": "/geodata/wc1/runs/tr/traveled-calligrapher/observed/",
+  "period": [
+    "2023-08-01",
+    "2025-12-31"
+  ],
+  "metrics_recomputed_from_saved_daily_csv": {
+    "n": 884,
+    "NSE": 0.47417941950353715,
+    "r": 0.719701676665276,
+    "PBIAS_percent_model_minus_observed": -30.695491668670034,
+    "RMSE_mm_day": 5.563646522362893,
+    "observed_total_mm": 4270.588382,
+    "modeled_total_mm": 2959.7102809999997
+  },
+  "modeled_area_m2": 61337209.46065074,
+  "gauge_area_m2": 62418713.45909761,
+  "annual_report_caveat": "Saved yearly report includes a partial first water year (Aug-Sep 2023) and excludes Oct-Dec 2025. Do not treat its NSE as three complete years of validation. Calendar totals recomputed separately; 2023 is partial.",
+  "scope": "Read-only assessment; no production run changes. Discharge fit does not validate sediment response or treatment effects.",
+  "hypotheses_not_diagnoses": [
+    "Check wet-season precipitation and snow/rain timing before calibration.",
+    "Investigate water-balance partitioning and event recession; daily fit alone cannot attribute missing flow."
+  ]
+}

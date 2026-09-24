@@ -1,0 +1,3 @@
+scenario,local_delivery_outlet_spearman,sediment_increase_years,water_increase_years,annual_sediment_delta_median_t,annual_sediment_delta_p05_t,annual_sediment_delta_p95_t
+thinning_30_75,0.8146619567834931,76,100,92.2,-195.98499999999999,734.1099999999999
+thinning_65_90,0.639132764574122,78,100,69.3,-140.855,487.3749999999998

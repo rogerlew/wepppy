@@ -1,0 +1,62 @@
+{
+  "retrieved_utc": "2026-09-21T23:36:35.447873+00:00",
+  "requested_epochs": {
+    "before": [
+      "1986-01-01",
+      "2023-07-31"
+    ],
+    "after": [
+      "2023-08-01",
+      "2025-12-31"
+    ]
+  },
+  "run": "traveled-calligrapher",
+  "host": "wepp1",
+  "production_access": "read only",
+  "station_source": "https://andrewsforest.oregonstate.edu/data/real-time-data/provisional-data-portal",
+  "archive_source": "https://andlter.forestry.oregonstate.edu/data/register/dataaccess.aspx?docid=MS00103_v8.csv",
+  "archive_metadata": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/fsdbdata/eml_archive/MS001_35.xml",
+  "archive_priority": "Use archived daily record through its last date for each selected probe, including its exclusions; provisional records only after that date.",
+  "probes": {
+    "PRIMET": [
+      "PPTPRI01",
+      "PRECIP_TOT_100_0_01"
+    ],
+    "CENMET": [
+      "PPTCEN01",
+      "PRECIP_TOT_455_0_01"
+    ],
+    "UPLMET": [
+      "PPTUPL01",
+      "PRECIP_TOT_455_0_01"
+    ],
+    "VARMET": [
+      "PPTVAR02",
+      "PRECIP_TOT_455_0_02"
+    ]
+  },
+  "qa": "Archive: A flag only and nonnegative. Provisional: all 288 five-minute intervals present, nonnegative, finite and blank flags. Do not sum cumulative storage values; use provider increment-corrected PRECIP_TOT.",
+  "additional_screen": "For provisional days only, exclude any unflagged interval above 50 mm per 5 minutes or accepted daily total above 500 mm. This excludes one otherwise complete accepted day: UPLMET 2019-09-06, 9936 mm. Other screened days already failed completeness/flag checks. These are analysis QC screens, not model parameter changes.",
+  "dates": "Station local timestamps retained. Interval-ending 00:00 assigned to prior day by subtracting 1 ns before daily grouping. No resampling into UTC. Daily boundaries versus GRIDMET may affect storm-day correspondence; multi-day totals also supplied.",
+  "forcing": "Central run GRIDMET and generated wepp_cli included. Primary comparison uses area-weighted precipitation from every hillslope climate/_<topaz_id>.cli, weighted by watershed/hillslopes.parquet area. Model spatialmode Multiple.",
+  "statistic": "Bias = 100 * (sum(forcing on accepted station dates) / sum(station on those dates) - 1). Point gauges compared with watershed forcing, not collocated GRIDMET pixels; do not interpret as a spatially unbiased basin precipitation estimate.",
+  "seasonal_sensitivity": "Compare Aug 2020-Dec 2022 versus Aug 2023-Dec 2025, matching month/day with +3-year date offset and accepting only dates valid in both epochs. Not a test of fire causation.",
+  "limitations": [
+    "Provisional flags do not establish gauge accuracy; VARMET has severe recent pre-epoch gaps and implausible undercatch/flat periods, so exclude it from primary conclusions.",
+    "Earlier epoch coverage differs among stations.",
+    "PRIMET precipitation has missing/flagged data during Jan 15-20 2024; no complete storm-total comparison for that gauge.",
+    "No WEPP settings or forcing were changed."
+  ],
+  "findings": [
+    "Primary precipitation input is lower than PRIMET after the split and lower than UPLMET in both epochs.",
+    "Feb 20-25 2025 precipitation deficit is large and consistent across gauges on available dates.",
+    "Dec 16-21 2025 PRIMET and model precipitation totals agree; streamflow mismatch cannot be attributed solely to precipitation amount."
+  ],
+  "acknowledgement": "H.J. Andrews Experimental Forest research program, NSF LTER, US Forest Service Pacific Northwest Research Station, and Oregon State University.",
+  "file_sha256": {
+    "station_daily.csv": "4953f48afa38cc173c1578061385b7f63d9fdad6f473476ddd0d49062e02538c",
+    "run_precipitation_daily.csv": "59d0619e455f4616a05555af3935b9a427019d11fae95cbf0a6d6f774296d19b",
+    "MS00103_v8.zip": "4bdd4a9677761eb805c3dff6a6b212670aa440d1597c855fa9f7eade7c8dcd37",
+    "station_five_minute_precipitation.parquet": "ae2b9b41ecab3f1fe0e0f91b9ec306e107b714c2c1e44a33c97b355d81c60ea8"
+  }
+}

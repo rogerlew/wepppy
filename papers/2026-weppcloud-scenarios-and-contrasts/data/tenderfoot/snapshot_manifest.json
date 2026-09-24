@@ -1,0 +1,3723 @@
+{
+  "downloaded_utc": "2026-09-23T17:41:35.430325+00:00",
+  "host": "wepp1",
+  "source_path": "/geodata/wc1/runs/an/animal-misgiving",
+  "run_url": "https://wepp.cloud/weppcloud/runs/animal-misgiving/disturbed9002_wbt/",
+  "files": [
+    {
+      "path": "_pups/omni/contrasts/1/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "f72d9ce0a08cca9133522c0b6f5585210f9a7cc7a8ae4770c95961ac8c4906d3"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/omni.nodb",
+      "bytes": 2934,
+      "sha256": "199dd9f5ca21706f5373a999d682e3c65137aab819b67e5d941f201fe10fa1c0"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/README.md",
+      "bytes": 12673,
+      "sha256": "24d258ce3aa98d18fc05393da40ef09fa4dcaa3a71e3551bd54761e7d3c794bf"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1012604,
+      "sha256": "2d2bf85df6e51287b78f92e30a72aef606764b6b5543927f7ecb58c0fda72a7a"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1823647,
+      "sha256": "35431562c63dea6be9364eee4b02f51ba7317135eed84df559966c1ee02b66c5"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5939,
+      "sha256": "24bf20ce0c920c8f5d9a94d7d60dd5ef6c69269bc9778e1ffb305e9f8341aa3c"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2392596,
+      "sha256": "44f908af076709fd84a8145f03026ff09586f00b93b0744f4acd6c872d009d7e"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6744,
+      "sha256": "2b45605ffdd2c02ded06d3d745b74ca8ebab97d83520954652ebcaf468b7bc34"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38945,
+      "sha256": "cb23b85ea94555683447e9864c8697cba81ced2f8707a9d6d08c3c8991dce3a4"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3221,
+      "sha256": "115903900b1ae0701640a564ce6ad55ef56f9332750e781a52cb5c15dd45daa5"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75498,
+      "sha256": "2b94fc109928c5f511001f72cdf3316be60ad6e8d029107ef5203890ddb02943"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "ad194df2bfa5b0db1684c7be1f2dda5df950f8701333f73bd8f318418cac51c1"
+    },
+    {
+      "path": "_pups/omni/contrasts/1/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "191db86ad2b0e812a9f7c93bfc30419282a604104adb5943b63e3919e47052d6"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "661e10346cbf1e1d533871ea5e9a1b2b96c87ee79c3576466890840926fdb6c4"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/omni.nodb",
+      "bytes": 7577,
+      "sha256": "86e0502c3c9adebd6644066093183d47abde77d54c77354304dbfd8f0e249ae7"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "cec6e747b50a3dd83453dd19efd208f9a8da23e2c8c89fecfc5f1493be9f1339"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 995336,
+      "sha256": "fc54bcea8aa444701f098b9b696aa7ed122914742c96a5922bd694bcf4ddd2b8"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1800257,
+      "sha256": "09288614b9c7cc9caabaa83e458a2b6b571bb5a0bd9f8a157ecbe7193952bd4d"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5911,
+      "sha256": "db00df487a5d593b88050e7be2e1a51e5e51843169e483a696f29135f3e870f2"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2345768,
+      "sha256": "dc6b1c673f2c26a29c90c478bd64aa17d53c150ed7be66e57eb657f3135d67c5"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6723,
+      "sha256": "7c49b3cb864a686194ba53b447196e7371a0177b364cf43b40597b45732cc3ed"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38865,
+      "sha256": "c00292cefd92926b47f883fcc5b1287194f8d2b6f5aff37b70462f545ed0df8e"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "624c2b6cbec0748bc8f7f1049807a7fd552f17931009c8d300a6dda0c4362ffc"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74230,
+      "sha256": "8d1329796f4c1d25e5bd86a123ee48b8e7f22f6ae7271c82f03cde416166aa1d"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "0fdc26d20f5ab674316e4c1888fa5dc9dc515beaedfb394826cfab0951a46784"
+    },
+    {
+      "path": "_pups/omni/contrasts/10/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "f6f7519275c65ec1e716c7f0e5682bc919ca145a19504afa7cbf890050f952d5"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "e57dd3d5568317aa4a1a6e814cdb878cb730eff353c1d43caf67299b6c54f99c"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/omni.nodb",
+      "bytes": 7577,
+      "sha256": "b43698f962a79f2c73927ea2a73c5f55d19123dbe9e403b0c3c18c2b95a66ee6"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/README.md",
+      "bytes": 12639,
+      "sha256": "83d41887f3f94d60b2f65726d044da23f857b45a379c9e361fd4344206dd00db"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1010633,
+      "sha256": "b8bbc170d5aef9a946ff053bc0c1086784e4bda3fe9a399bc670083f83964a01"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1826260,
+      "sha256": "6dbd1d4f3b4825903bb11e76416a0024538849dc03f003521d4f42d2af1a5248"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 6005,
+      "sha256": "00165dc7aeddf0869c509c0fa31fc28f72ce50e28722af3cf4c489bba153e6ac"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2417571,
+      "sha256": "77d48d3d8cff9ee0cc4e88a2c60d46480c5e92b7d7f5abeee9d0a2a810a04648"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6823,
+      "sha256": "9ffd9beddaefcb1bd4bf8a3f9b06574e31fcc150c7031da8f8761631f1ba689c"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 39158,
+      "sha256": "e324b28e7d5d06003d8bc31a4b008b1e4cdaf9398eac8282292b93a8074ce9fc"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "df7040fb6dffaa05196a73afe21537d04ba881fcdf659cb364007b3c85278879"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75542,
+      "sha256": "d034328c436d49dc507bceeeadb1ec55c4ea79ed827b19d827afda7a13e19127"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "838a96e4e3174e906f609494be8a7c411ec7a5acf990acdec784d3937bad2a72"
+    },
+    {
+      "path": "_pups/omni/contrasts/11/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "8c393f1b01c55a3664889fcb639bd4abc870e8475e4dd19d7d0f13d5f128e7a6"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "a05b410d9171b2c8db623f01fdb7a305a34e7d23fba180946e3c0f750b98db5c"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/omni.nodb",
+      "bytes": 7577,
+      "sha256": "481c9511251daae35751b48b4627d958c07f8dd78baf486b51754ffa200bff9b"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "5efbac40cdea5e40c42f73bd7aafb9a78fded1d7c18d8522477ed9a9938de6e1"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1023987,
+      "sha256": "be5cb1aa1f8d8933b723c4dd7e727d8147aed14d28b1ed8189913b78c819d301"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1815519,
+      "sha256": "8fbaa3af7f7be9421d9101106915e39da74320fdfb25a80b9b03216a9698a82f"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 6041,
+      "sha256": "00d3be440314204404891aaae971746423cc92bf714db4b996976cad04e7a4b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2392397,
+      "sha256": "1a21bdf05244885e8a16783c627cd470068bf367e2f65192957ba9c0d7b4ac15"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6786,
+      "sha256": "d8efde3475f3b96ccce49cf4e8f9a562e39897192c56f87a58639258abc3136f"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 39085,
+      "sha256": "cf54d2bcbf27cb7fa909442844be51ac3ddd7f72e965d97e397fca7237ed5941"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "ebb0a68b5c8a5c3403564e9f32c343ff62ae49e6818aa0e129c3b85643f7df89"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75145,
+      "sha256": "b1fdfe17f61084fa9db4721daa65530feb04f936c52cc709831d41463e4818e6"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "5e2eb65f3e0a9d7049f8d2a9fde2f50bad7fd7afee7ed0e9c058a7ba40862e37"
+    },
+    {
+      "path": "_pups/omni/contrasts/12/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "e991a38068360e0fbd41233bbe9f283c5f66d66f7353db5ef0ae468d62f781de"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "90f2b43adb29bfe7afc3b8ce73d05bf87dd78ff83c99758b033b117a133cb56f"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/omni.nodb",
+      "bytes": 12225,
+      "sha256": "03902f76570f2e57bff44e6a8d7a4f901778262c8ab1d8907f5749e4d6c8a8b8"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/README.md",
+      "bytes": 12641,
+      "sha256": "9f1095482a671aaeaea1af77706e8e1e02bcb3c54a89165bf3e2342d09cd7d30"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1015364,
+      "sha256": "e9480f6c40250f9186c82b8d78440e37131c6c8ea1ab1e44a0234fda9b5ba860"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1811456,
+      "sha256": "8abcea20c42125d5fec1878041224d89eee3228cc8f041c79a73e4f0bd561bcb"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5909,
+      "sha256": "55ee06c4ef8a7d7799502621c07dc3f2286be932c16106a261bfe0acd91d09f8"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2371650,
+      "sha256": "852a56953fd67dcbb7647ebf9993d38d1d3151b5df1cdc05e8034d5c15cec6da"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6740,
+      "sha256": "590d63b154c87b0253e125aa2f3922e3c57f03ba684c156b06fe1e72a5d50b0f"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38843,
+      "sha256": "b3a6e32facacee9e009e3ff4c968fe727d530e9b92c9d0d12913271455fe7217"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "ddf4ab7d2a3cf3990969d63e19f70751321ae5f193fcfe36cd60910e6186a4f8"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74556,
+      "sha256": "d96cb666d59ff027ef9787ec6c84225021fbc5ca316afd99e6d5074eed2a3924"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "94ffb436152b70d949c0aeee774275a4d9711a9520ed3e7c725bb8b958eae274"
+    },
+    {
+      "path": "_pups/omni/contrasts/13/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "7ef75117356dd8521c6bcfae6651b4e10056b4d9ca4bc42762b66ac33373d76f"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "e5293c497445160f753896b0866cc7179161db98bf5c48d259a6a43e5b3dfd61"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/omni.nodb",
+      "bytes": 12225,
+      "sha256": "4ce94f37197db0dd5c9687cea7f3b63bf36959bf323ab7335a3b19e50b24cf58"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "3563d973dcf17cf1c4e253d6bbb94251cc4dc83929c720a6fbecfb8a594fd733"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1010730,
+      "sha256": "8f004357ba1916bb7c60867b3732796f719fe254dc69a49cfc60044ab7cb876f"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1808895,
+      "sha256": "68f02457e1371c556112fa199f10f33a04d3ad74e231fbc9a60c18f774d3a9ad"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5876,
+      "sha256": "296fdc1edbfdd62ad5385dfec365c8647540a8ea13a47fa5f859cd1b4078cc04"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2363949,
+      "sha256": "f13b81dbcd61f09e82fce424d0fe0194626a72a77acd8ae5e39ab97ad29fd6d8"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6678,
+      "sha256": "b3b66b8dfb4dcc1841e50ed484159c699981ce45609510d43a5bcf84125f3d83"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38893,
+      "sha256": "6abbe0f8904f2bc0f6a7ddad21ad9e3e43d9db93c8f90d66867d4b35d1601526"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "e9d9f1cbae15ce5c71e1406e2570705002034451adb02b0dfc9bce01a8f660e2"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74473,
+      "sha256": "be9e0d192880b6d21c127a14f4f32d3ce4579dd25547a0736b3663d3b66b13b0"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "2ae3f61afa2c178d71f276c014ff87b4dfbe5b4b5e85f169339702d22005c149"
+    },
+    {
+      "path": "_pups/omni/contrasts/14/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "ecfc5f2061a063633ec359da9c02dc31aa2f9d717016208f86cba5f7dbc7f9c8"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "3738e15b20cfb3edc77fb3d67d40de8c250e3087be71d1e96e42cb5701882813"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/omni.nodb",
+      "bytes": 12225,
+      "sha256": "e02849c5c7bc8ddd3ff7ab760d1f90eb2f0e4e31806cc0abb37359bdc53071ea"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "7ae29d596d55e976892fd9ce3486c7e472072ac296279090fd0a6f839bd6f12d"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1014014,
+      "sha256": "3496fc6aad55bd3adb0fc3384364d567526e4de2222037c1f06bdbc35f02dd3d"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1811699,
+      "sha256": "ce6cb525efa3fa8894147754ffedf4c7e383beede38b1e13f9419297f44e3b6d"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5892,
+      "sha256": "e17186673f525fa7bd4b83c1cc90a869114c8955bce4615c54602e482101796e"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2370470,
+      "sha256": "9042dd37336b3ebd8c6d7157eb430ee6eb3e0843183ed35b17682afe6021be82"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6761,
+      "sha256": "01af73d345d5b4311ec7d5e4a62c72eb684fc66eab123d75c62279332cc0151d"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 39036,
+      "sha256": "645ccd7983854629ea861fe94c14ce39ced5438e16686e0ccbdd2fd379a85ec1"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "d9207f4e188eea62d9df725aa8d5a80ca5db702f1a46fb1eb063b94250848102"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74608,
+      "sha256": "88a618d5b45fce6a20e11d122175a57714b4e8e98e5c15ad94b86c10657477c8"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "9c434d7033d3f856c73ad0d17f9ceef3379073802f4a5fde413286133903860a"
+    },
+    {
+      "path": "_pups/omni/contrasts/15/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "67b5dedb73da66ab02f91d3766ad98eb467d16e7ca86072b1a81181ac8a820e7"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "d6c18a5fa99496aacad84a498cd4b59b2dc361fbd38aa2ec2d3a0faf455d3554"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/omni.nodb",
+      "bytes": 12225,
+      "sha256": "3543f6c105307e850604df09e71ca7d21162ca3a07988eba4df21ccd34e026dc"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "58630871a3ae76b7b8dc4d2fe4cfdd1d20e667a658d66690cb78cc0070d355eb"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1005120,
+      "sha256": "d13c70509de8d35d935dcadb4a11283e978e115bd9ce94a59b15e8f178586dad"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1810497,
+      "sha256": "5593e2fa6d0d6d90ba3e52e47bdd30d6385b3340a77ad431ba38d19875427cad"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5888,
+      "sha256": "a5e5d49be6c0c6f4372e0b7c07ba116ff464b68b5ab19c75834b3f50b0c2e708"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2364057,
+      "sha256": "53736fd157079495828018b4c29f317ca285a3dd9b66aeedcf124ee8fd926855"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6701,
+      "sha256": "e498415e15143bd9be79660e83902ef72a27bff162b7b798de4b7b3d109f9d8b"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38919,
+      "sha256": "509b6be2e6f981e2c7dabff3808128169ad315a8882f45a755b72fb6c23ddbaf"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "92c374277edcc4df86c9e6338a9d11e5bc28be415c85c5ea91f0edbf0826ba2d"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74505,
+      "sha256": "fa610f58b86d932adb2ee27e2b9bb84bcf8792f29c9a77d1c990a7abe162549a"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "55dbac23f29e008d59467ca1ee6df358ede272b1c2aef0717170a55d7ca9b86f"
+    },
+    {
+      "path": "_pups/omni/contrasts/16/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "8eb6ab1adcca4f46c8faad11b7251ae14985f88c101070e4c822744e469062a5"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "02d84eba3286c4abe1f2e8207fd3b21f2239fedd65f437c8d858bf31381f8cea"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/omni.nodb",
+      "bytes": 12225,
+      "sha256": "a6ab3324f52accc0ccf334e9f197de5eb9d79b84f398a5598b5efb71d056ea95"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/README.md",
+      "bytes": 12639,
+      "sha256": "1242c7563e85b9955f54ae64f657b968e2f7761f4d3c68aaed3c6b307a059a66"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1017644,
+      "sha256": "33320148905673f9ec2867587dda14595edb56ca96a265986598c102c5a43fe2"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1807315,
+      "sha256": "b3d17339110728bcaf6d5520f7e6d7d3c2368da8d913765f6e82fe2255cb72f6"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5908,
+      "sha256": "cdb8f8aa63d6d29d75235c1f3ad14fcdf1b8c40e354412f36805966ac00375b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2359830,
+      "sha256": "1b7e77e3b0c67d9d5392937512268454917b2fa548d2cad41074961d52192a54"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6732,
+      "sha256": "ad6fad0dd9a0d6be4b1657c6134ed250590d9cae0f732606f02a485d389db7ce"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38865,
+      "sha256": "9cfd00a5b17b1d2a2128a20eb495a19be3f6b2f4f0ed023a4853071f6fc3794b"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "b1b1766c20a81829df5bb2a8eb336b30f7aed588b288dc29301ecd2f5033588a"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74304,
+      "sha256": "f15130a5df50222b664138d081a75a106eb2a6b896b4cc9bc95060e94b9db0b0"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "5f005c38306b709d97247ce0a510ecba2f0370ef1e3c9b588f95b95cba188b3a"
+    },
+    {
+      "path": "_pups/omni/contrasts/17/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "e2c494514ef4fc9144652216171f97c5ca9806422d874e6c9ce2a3e5c3edddd7"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "60bcf5ec03b949ca8b367ee0984833adb611142e5e9ca72a09b32f86d27738ee"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/omni.nodb",
+      "bytes": 12225,
+      "sha256": "238a66c6da2b112d61253d7a52f06c9c6b73e5c7c1e7ad968164a49fff6d2ec6"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/README.md",
+      "bytes": 12639,
+      "sha256": "ba6575bfe1d5e110d0f2e4f1703576e37e78c3b2cbcda42ba386eab9bfb40d80"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1000457,
+      "sha256": "200fe50004fea92a798ef994a362566cc77f870817b208b77ad3a17f3823cedd"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1806154,
+      "sha256": "929977eb06b24d7776459dcc650ed35a8c63355c10bfee413dff1232bae473f9"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5891,
+      "sha256": "c17e4d462c8a9791b4c89d5e3e25bd82a8b43f536098c1769c70c618621fe24e"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2356832,
+      "sha256": "f4961d010e9894fcca9ab281819df0d5ad74daa8be67f774f294e666a62a5c42"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6732,
+      "sha256": "aa75ad99be0265cf67ea96dfd961e9edc3959691e661749e32aa294bb7f1c395"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38861,
+      "sha256": "ab074f5d368f3eb39ed02609cd2caa3d7b3e71c76b92be6b0516e436e07c40ae"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "febf85bb0641e135f0b8c01bab760c55857065592ef06ac41bb0d386efd2a38a"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74240,
+      "sha256": "1d8df0f06ba1ecebe453fb07fd2b08630d2101e65bd9e985657cc5ce58418a21"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "d0bf8a4f80d3079f0844cdadc0a3aba8caf6901c576707e71b37bd9e9f6c818c"
+    },
+    {
+      "path": "_pups/omni/contrasts/18/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "6e305e0f36f585809104bfaa90569a55fe1550d7469c09188a03170b51934200"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "e3c2b4daa34e9aef28ab0f30212cc42a4f815dc37005ac80b3dbf59515a76c08"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/omni.nodb",
+      "bytes": 16874,
+      "sha256": "d23d0f415d61974eb2772bd6f61e72e15e544eaca40fc41e95de934517eecb64"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "98d3c50644fd02cf6d091714a3f046163eee006773d38cc556dd298a49716bf7"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1004695,
+      "sha256": "a14e19b471d978b677853cde79c5de1ce0346e6197e80311466c7365c6563714"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1802104,
+      "sha256": "844b9bb5c6e65ad260702d26a26d3e15e32f0fc47cc375a9bc577567b442861c"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5867,
+      "sha256": "05d380954eebbaf58f78e9ba4f8437aa7433615dff7b080850538f219b7910f9"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2349869,
+      "sha256": "f50cc8aab5013e1267c04839690a01ed55cd8333314a0e94cf145f9b7bcaf6e3"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6703,
+      "sha256": "75961f19342c57d44b984a7f659059feeaf528050569a1ec30fffe85d59bae6a"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38845,
+      "sha256": "99a1569d4198a921d5889f840320dd68b823357408e232005c436a0d4d6416c2"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "5f3d5f4d9d3c1a0b6279a9c6dec7667c51527d28be46bbf7d5cfdcd749812d12"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74270,
+      "sha256": "da875b4645769a56f9bae8a4a9a20c8520e40871e5606c51daf9c65e60c68f38"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "8696f3a52af961d7b58dc74c38c6d6665d623e984cd928f0460dae96f0261e59"
+    },
+    {
+      "path": "_pups/omni/contrasts/19/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "cbc96e0fb83339d73133b62734024b73fd0d09722a2fbdf1a832bdb1c02195dd"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "b294bd0c2b25d85ebf846f419aef7147f39f6ea80f627f4db6633075f33c68c1"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/omni.nodb",
+      "bytes": 2934,
+      "sha256": "ae294267efa01d9f124e770e3dc7394c8b860abb9488479630e1505a5dc413d2"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/README.md",
+      "bytes": 12675,
+      "sha256": "55aa3935faa2389621f03904ccfb5a14cba020415a41d828c473df5b5b33249b"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1012493,
+      "sha256": "55a5009c052e2d6f223a4bd74005b4a8f0e2b28ade3376ab879db0690cb89a6b"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1821898,
+      "sha256": "083c80472af63d4a5789abf36e8cfc2ba4390cebcf1546258f37121be81484b2"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5900,
+      "sha256": "ea0d0dc4d4cb6a39f1b396a8fda9e67cd7e5a6e1403ebda1ddd2a7a782310a6c"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2381366,
+      "sha256": "e1c52d7ba3ef120cf70a222d4f0ae4c6d155ce55c69519a298c1f18a93d17cb9"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6706,
+      "sha256": "aed63395656bd7059c27baacd43f8b2c0fe532cb8e737487dbe02deae4faab89"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38938,
+      "sha256": "b63fc0257d928ce932913af2ee2962bfc655e9175a112fe250a5c851cb99c624"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "bd15f3aabce1845943f39ada660980b1a266364284af047253ae9f94771b7303"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74831,
+      "sha256": "c767ca5491ee5b6fb71d81e5a729aa23e828b71bfefb8eda81afe60f1aed12b6"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "1574edd18945f5a67c4d910226e401bbce117123c5665f7d37c540b1aa19e8e0"
+    },
+    {
+      "path": "_pups/omni/contrasts/2/wepp.nodb",
+      "bytes": 2400,
+      "sha256": "2a0695d3aee027379aa3fa74f3a524802bcc1ffd772c42ca99ce249cfe8fe1d3"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "947a35ce09fa12057d9b3d3683d38d24568a3c2aacdbf4456ef4e907f2320dd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/omni.nodb",
+      "bytes": 16874,
+      "sha256": "9a8c397401ed9818aa6b6aa22d0f839dcaa660bf91cbbf1378ab25f51063c85f"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "c8409dea24c161be8423929f95a65f1ddb80de21c4ba269d33170b4eaad4a114"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 996401,
+      "sha256": "d81db506a9d68030ea1619db838d919d821d79186a8ae297a81baa932d2d1024"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1801231,
+      "sha256": "35325be0b92a2237072621a7432489f254ed339601e8c8f13e610cd93a9469e7"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5895,
+      "sha256": "e56a5b9ef583333a19058a27049e08914703705d31299c2f9174752559dbf62f"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2351169,
+      "sha256": "1bc7b57045ce9ffa8c7414741f42f0c7c791b8b42cc39911adaee9733264530b"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6719,
+      "sha256": "c307aa36eab4970ce4e6f86dc3e38b2f2c49df7334a1e4a217f4077f954024c3"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38862,
+      "sha256": "1d47f15c09841fa3f214c8c72d3fc5e78fedc96b578259e36cb27e7ca830a81a"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "e6f479942fbd5cca929db2aa0fcf8831e4065344bb774a123f0f44a0f95e5f10"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74228,
+      "sha256": "d20e67bc063e3714863c0e396a62cde57f57ee93330f7e446e6134c6d1b14ff7"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "a950fdd9032f2a67947c313a2f22c8b3a4f8e135402a7261068f28e1fdc2ed64"
+    },
+    {
+      "path": "_pups/omni/contrasts/20/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "3998cac63c8792307f96f0bb4577982333e83d82670621fd50d6818ad2666441"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "b344368ebdbb76e0bb4df379eb0271a8f629bd4ce0939095092a7492e1d15934"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/omni.nodb",
+      "bytes": 16874,
+      "sha256": "20a0d5e584101618bf61fc7313f3fbf5d6e8eb9e45072e63cc8b89e90e71a90f"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/README.md",
+      "bytes": 12641,
+      "sha256": "c9a30874442a7730580d0a485ee3e1c6399f53261cec4ba90462943a8981dae6"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1025633,
+      "sha256": "1119f5206dc07a3b108c3db4ca8c13952761a3bc1014771079b743f1844f3fcc"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1811428,
+      "sha256": "cbe6eb11ab3495b5bac64b5180dc617b7c3b3f27ec88bcc4d6e6483265240524"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5844,
+      "sha256": "f1af7beee19fcbcfa734f984dd075d059e502e23da218e9425ec9cdf6c470cbd"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2387360,
+      "sha256": "f1e028821162501455df28339c08219e4873c048f2858e5a9a7e25f22ddd9663"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6745,
+      "sha256": "d9916e9ce68a1c07fe8cd651346d3818df1b5d232c2204c57214281a7f5970b7"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38890,
+      "sha256": "342860d4ee7697ebd549a58522efe4f43daebf68f1cf2b704658df1e6945f340"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "3224f1045c404353a80c516bad8c2a79ddb566ced5c6bebcf51ec767f704defa"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74651,
+      "sha256": "15f49c9a049aa6cebe4dab9e537788ef7169276a36be2976b4427b12d64a6312"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "2700311ecaa827bb99c3b69aecee6e232608ac3d17a6c6c3ceb61962f6595f72"
+    },
+    {
+      "path": "_pups/omni/contrasts/21/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "c2c25097e0e5046dc399c567a6d790ad707df77aed8e6b07316e26d7b1a13720"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "34c0056116b0ae39e0d528cfd53e5ccedd2daad25bb141d65053701cab8549b3"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/omni.nodb",
+      "bytes": 16874,
+      "sha256": "75312ca261d4226796e8f63e594d0dbb30468ba78de410a5c88cf4a0389e6040"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/README.md",
+      "bytes": 12639,
+      "sha256": "9e0d1c5222cc61012c3581fef7cdc769dd6e056d1370c93a7647eae9a2aa0dad"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 999586,
+      "sha256": "72b699df376c07be13eff9f0355ec541d1e61745572a99025e5c58d9e6427d20"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1808500,
+      "sha256": "b0bceafd8b8da6927154656a696dd258c1cf3d2f05dafba46101e03ba14d5964"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5869,
+      "sha256": "749dc4556497be9f13e30deff905c9f2f1eedf3c4326b50d299da7504f6dfbc2"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2372055,
+      "sha256": "05775c8b2e6f46d96dccff2e235b479bce7dfc5c9a3bcd2e0e2036020ffc9316"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6731,
+      "sha256": "466b450849a3b750ebe6158169b2c0664ef6164cf4f95ed026605e8e23d471fa"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38862,
+      "sha256": "03244a83216eb4933fe6a3c8f7a800499e00ba4ed088b2c22c5593756b5d4579"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "8b455f3b25f6f92483465fdadd9d87002688569d0337fdd1681e5a7b64fb5dc9"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74518,
+      "sha256": "895d96eabb38fbfa541d6ffc7842ef912f52894c882110f0fd67c727901b9cbc"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "343a09a9846774bc6d6c7347ecc9eeaed38207877876738a4ab99d9262d72f10"
+    },
+    {
+      "path": "_pups/omni/contrasts/22/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "677928a89c31713e3c9d194ca0c9f159411bc818cd808b3acdd21b0e5970e2ce"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "345bae712a3178632df643efec49df265572a0556551eadd612fb0968691926a"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/omni.nodb",
+      "bytes": 16874,
+      "sha256": "5c665c7739a14c3a81a58fd5b160826a700dcd6c3e433d68b73aa7504d7c58c7"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "48e6baaed6ff9940ac0a6262b2c884b1601b9236cc3ca941b156f798a51d3b21"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1019205,
+      "sha256": "88e0800ba60655093f5506999c2c3029950ded1059bb7b2a487d8f28c16d2a49"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1809820,
+      "sha256": "05c97efb5a6c3384819a43388c6b2dce99d53f7372bec5e7cd1f8705cd832246"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5848,
+      "sha256": "1ce34682cc199c9e45014c0b45631fe013722cecc426c2270f8b0e3e8585e490"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2382119,
+      "sha256": "f00ca748c1ca282989eadc3a514034d4af430134e3df3002d4463f2afa22cbf9"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6762,
+      "sha256": "2502512641edf92c1d2380a1de3ba92704d68af34a04ee426bbcbfdf9066d76e"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38900,
+      "sha256": "273b4ffaaa929be612d9ef09b2930cccb9ee2cc0ef498a07cfc6283af58fa625"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3219,
+      "sha256": "b96978bbd1eadb522f59501d06c3fd1d137da799fb4de53be57d8ef17ea54a05"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74836,
+      "sha256": "f69f21642b8b9bdead274b7d91e2c7c6310b7d4684903306df88eb21895273ed"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1762,
+      "sha256": "219984f51421add3c93f68b3949ddc1e915da051fc77ed1b923a3f5f73fecaf6"
+    },
+    {
+      "path": "_pups/omni/contrasts/23/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "1ef386ceb67f83df28ef709ef354ced4713195bcbf6f267a22621314200e09f0"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "705c2da73971d007f376e65efc38eaf994c73a8a63e46d71d79d09d671a92a8a"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/omni.nodb",
+      "bytes": 16874,
+      "sha256": "6958cbd13d6b0b4bba136d5b27ec18da01bd51393d1acbf11db7514cb2719b76"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "ce8ac4a2b1175023011fbef1a5b5729132549cef54fdaab0c1d92c749962d835"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1010453,
+      "sha256": "e2d5e511c18dd43f4856688bee8b28a2ae1bcffabce88d2058d3220197e22c1a"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1807869,
+      "sha256": "89e83e84bded9d619b8aa728c3c2af55bcac8f813aa20df65ff3c4d2066d7315"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5804,
+      "sha256": "3d58443af4f5b2ee23249fd2113ee47f4f93ef1927af170e0cdb3447e82bb775"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2374681,
+      "sha256": "d22d3d38ad432256d7a16e2bac6ee091d5a8541069891d8049858b94a8906775"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6693,
+      "sha256": "040ec15ead0bbabaf16192cfce02477f39177bef0a40b1f55910409858dce0aa"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38920,
+      "sha256": "d23eccf73eab8dd54ae83effdab30a267936c9dae7086e2d46bd6d5afbc03318"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "d4496af99a82e70187afecba5555bdd2aed135f36dabf02e851b972b085c8e50"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74590,
+      "sha256": "d28970268806aaed01754acb4e499556d7318a6826d3312f968bed5d145ab8e6"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "d47f0dfbab2ee11f51a8ed06830121718dbd11897c0ff2ae9e0e5c67e54be10a"
+    },
+    {
+      "path": "_pups/omni/contrasts/24/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "92a53bbdd0d8eadd8c6d6f1b03e90a75e356e33f1daa5b65231647dd26ba038c"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "9fd6976d073009a194e2609554c1c1c6ac280dcc88cdbe81cac0c8898531435d"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/omni.nodb",
+      "bytes": 21520,
+      "sha256": "b35757ae4d3b54b887ed18d887e0bff5ab895876b51b42e6f96f342f48dbcf13"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "d704372cfa961e862bc823015a9b742a1034722cd136f555adb0e77ef67d978a"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1020840,
+      "sha256": "9b71a533d50f7a885d6d87f7b9befc5429b99ef2bafbd16783f23ef88202e559"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1811419,
+      "sha256": "8193139ace38210fb139c88960f8487e6a454c762b2052566eddd80d535229b2"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5944,
+      "sha256": "b7aee7317d00e3521f62703a0d4e23fc7eaf64a02636fe0ce1ffd5bd283fcf5c"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2369359,
+      "sha256": "4c48d631860915160e8f402321aa0e242ddf15aa23b8797651103392f86e98a5"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6804,
+      "sha256": "a3992d1b40857e61030fa5028913e50ddd0fb414d3dfdd0b4b59c0e8416e7393"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38959,
+      "sha256": "8551f27162083ee60b8713e72fa1a25fa370765d390c771d9e5002471e49594d"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3222,
+      "sha256": "3a28732b4b39b9c125c489dbf01737da623d95cfe90c83469eca746831619fde"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74706,
+      "sha256": "e5b1756bb61363dc4a8ea364b5fccad5ea43e91356e3ff49b19a62e5c5870671"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "ae7653d875245feb80ceda4ca363fa54bf1d8f0dbe5122068761a52ddcc110ea"
+    },
+    {
+      "path": "_pups/omni/contrasts/25/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "fd90c1f6ec7c7a32870a6678955adc550a1b09743a6580e908746ca1e9762488"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "0e5a72ed959d64c688c7b04621ad856d2db7cb4c265517b12310ff0dca1834b7"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/omni.nodb",
+      "bytes": 21520,
+      "sha256": "abb4c063afe2ad7ef6184b647a237a3443d27ad0fd600f60dc9bec6137ff5b9a"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/README.md",
+      "bytes": 12641,
+      "sha256": "938408ef8555165c1ac5593839d70055a42c58442be578affea7d8990527949b"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1027266,
+      "sha256": "917256d6ac9826d09d305e228044e006f3ee0f74a9cc2d068b4f433319185d35"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1809065,
+      "sha256": "f0c930c32fcc794517c91c2333dea8901a7110f97c18e191410c49b56acd5455"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5923,
+      "sha256": "66dd8ed7068958eba31104197c5efda90dada46aebd1fdc2840cda6e6d8e14e2"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2357479,
+      "sha256": "cfbe913e552ae1d540a080d725933d764c2ec3630d3754eb5f66cb4a29770b1b"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6793,
+      "sha256": "3f8ccf8268d5488fcf4deefaf81ca1022644949ec276e5f14d33409dfe8f0031"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38932,
+      "sha256": "0a35effa2326942126bbabc6b3515bfd334b8184cdc78e6c486a0e4b50a192be"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3219,
+      "sha256": "1bc58d2d344933976cb3de627f3ac812fb05779edb9ff7301d3874dcc9d70b32"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74414,
+      "sha256": "cc86728e431f25691f7d6bac4a6ac202b4b4e6ca21b6f89066f2464be62aaaeb"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "4affb39f73a3609e4d500da2bbd431b8b7e028eb331cdc094d91f646c499dae5"
+    },
+    {
+      "path": "_pups/omni/contrasts/26/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "d933fd1f68eae205913f79d9edb2823070c5ff070ff85d6c92ac303955631f3c"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "594b0cd5c8c96cb332d2db295fda01603267ff2fd46c376a3c3c28259ddfb598"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/omni.nodb",
+      "bytes": 21520,
+      "sha256": "12dad06a43e84a7454bc5b80c8ccca6a6c30e656ea700a450ab8e04960b23472"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "d526f92ceff59581b509b78b09f2a3321e9e36f3bcc5268511280a8b3d078c4d"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1013493,
+      "sha256": "82ba87c70bd81183ec97f4a82d1d794423b14525dba21a68b990c3b31ec8f098"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1802889,
+      "sha256": "466ab121089bfac4af5fea42804a7ce53af058f9c1d0d2f0c1e91a0f9636020d"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5909,
+      "sha256": "42cdc0a10af2799417a581b81158c8eb60dc0a2b4952d3f1dcaf49fc813df8c8"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2352874,
+      "sha256": "970e565e77f41b8798fffb4eb9bedd79ed8c46f50f810c00a6eb082a6c2ecd26"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6723,
+      "sha256": "b8b6d025394c0586a16293f17fe77f6b07432a552ac8475996686a4bccc08774"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38852,
+      "sha256": "c2d03dfe3260820e0682ab25230f7a833a332a80292c147dbee317be4336942b"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "f8131170c88b975c724d595b3a8f444b36b11dfb1c12c34a62eff48d2832b3c9"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74340,
+      "sha256": "a00764c19b87df8cf17919f15f90fac561c08ac53a09ca50d684f1e4e673aa19"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "67d0fe45d24bf768f6ec6c58a908379ba6e36ad1bc88ff6863ee9a376841aa86"
+    },
+    {
+      "path": "_pups/omni/contrasts/27/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "fec0fbd98f177fd5dea12fc369676e31acea4bbef77a3a7348246b4aecdeb659"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "efc1a73477723d3958455f2aba66693e20e1795a5b37c3f79678cb59002da50d"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/omni.nodb",
+      "bytes": 21520,
+      "sha256": "9ee32923a230a11e85e004b780bcfc92153fd87059016cca5e7bee438243b404"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "834d717081f800e81db9fda3a421fb6097a5fb02d337da3f22b6db95b01cc93d"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1010520,
+      "sha256": "2a96815d3eb0516453e590c58be59e14fcc589121f2bc701936f167a24a83f3e"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1802421,
+      "sha256": "d1f4f69bfe43fd796a32662ca6f6746ec2cbc847259098bd8dc30f5591f40d0e"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5908,
+      "sha256": "176e36ac2b951b77c59118ec65d1df3c720233ef1f4f027c68227aca83ee33d2"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2349910,
+      "sha256": "7b01494609cdb71a06d8956ab40cb41c8e834fdfc8ce1ec3bf0fed83e0652123"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6710,
+      "sha256": "462900be881069752efd257bfe4e8758b9d84423589f96e0f06b1559dc00705a"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38887,
+      "sha256": "084613801f8437c2323a6f215141a85943958f1995279c23a182004e4ff3e399"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "791d61711d6a504c6cf2073309c269bc004dd087e157a9cf1cdf3f6581310ef0"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74296,
+      "sha256": "3ae3b61a8742f53d70e80ca9afcae2121a914bc30673576f4b7283191eb2e30c"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "94a5404d1d7459884b4d61dfb4a80cfe2e6252ddc366a283a51789bff8b94411"
+    },
+    {
+      "path": "_pups/omni/contrasts/28/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "d19d2f323fd41d3fac519a43b1521ec44be25bacccb48f56b3b616eeb94c3297"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "9027b71dcda135cd4e09f0b10267bb3032f7d3d0c778ed51d7db4aa7538e9c20"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/omni.nodb",
+      "bytes": 21520,
+      "sha256": "f4d6714ae6a468d2fca22caf77a804fcf27082f845b4895ba95d6ca1b0923eaa"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "85aadca5d8e386fb6cb13e4456de9c7a8a074accc1eed5d516e61ced4f5d4da9"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 993955,
+      "sha256": "72e339aab68ac65c2c3b67b8ee4ed73f0b64342fcbdf930d02c18624f851d434"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1803702,
+      "sha256": "62f46a55751dc0bee40e47504ab6ac80cfd9d779925b1f126a0fde75b097b06c"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5961,
+      "sha256": "09435a6c031b5bb4f0392fc3479cce6113082b7b5db44ab0ed85f878ba2fb976"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2350742,
+      "sha256": "0282356377d0282eb5c6e8a2c15e328044db30e98cb3cfa57f5ff64f05d02951"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6730,
+      "sha256": "cf8555ec606d470cbad82fbe07fe4d8efd4795bc6fbe7e5c9721274e8faca892"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38895,
+      "sha256": "ebfc9a4f684974f257e49112f46ab191b2e4d8d4ab127e05e93a153d82a01344"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "79195a6c29e64aaa91ab10d64486cdedbdf6ebf2fdd91f310a9424bd3ac9dfed"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74393,
+      "sha256": "19f42454b2ef367e842a957e016887ed6d459d9d35bedac9b39ddf60782d2dfe"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "8fe7660b2b26aee2348e18b885d2b4f42a4dc6611a4ee117fa28f9c8b3509494"
+    },
+    {
+      "path": "_pups/omni/contrasts/29/wepp.nodb",
+      "bytes": 2399,
+      "sha256": "18541ce7ec9d730f24ca7c37454d61bf5113e432793fd93c5a6b74f89626294a"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "a3868a339c274270eb6c2e456db96deefbc6010d183a7a151c98b82b95da4eb5"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/omni.nodb",
+      "bytes": 2934,
+      "sha256": "cb9a436eaa9144499277575d6fe49df43e6a4ccae0aeef8d3b08bc9e0ebca997"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/README.md",
+      "bytes": 12698,
+      "sha256": "418651a84de74e4572ec4c7907d3f15d6f930e3513f9e93331760e5cb7edcce5"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1011042,
+      "sha256": "8b2079ea5e6999eb9d7c85574f2b60c392b206da16978e4421edef5543091a90"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1827270,
+      "sha256": "4373d7a0a3cda15a4a9f22a652a23eaca439accabd386abd79d488c1f5e8e023"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5944,
+      "sha256": "6b33d238e94f83e019e7d2eb93ea12f4b9e29f8e609e2607d611f6a29ce1de26"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2403948,
+      "sha256": "e2da67b100fdb40297c3d04ab91ab9d93a47f7d426377cb38ef9107963642539"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6711,
+      "sha256": "20af6039abdc51df2520be69c08062135bf08d72675071363ba0b768b6e72d7f"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38926,
+      "sha256": "f0666ef4032d57ee47d9962a041e45772897b5123bdc198539cc7df31442cf62"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3221,
+      "sha256": "136bf9948ce0c0fa6ed2ced2f422fa9185c42ec9414eff0fd327d8a322b8383e"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75820,
+      "sha256": "2d532e737d2817957a5bc7dd47d04818bbb6eab2ab71c5610c458b5d8798a96f"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "47336e68bd16ac5ec12c8963bda22c525c37ca95206941c0a92263ae2932c767"
+    },
+    {
+      "path": "_pups/omni/contrasts/3/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "19696e70de605b301b13cf9b7830fa32a351b237bb4349152f322dbab64b2d64"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "d4c7137908ddea8be4053116bcb999a6aa195862bbee625d44d7d0d5d3557235"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/omni.nodb",
+      "bytes": 21520,
+      "sha256": "ee1c6a13812433c3c2ad2ddf71a7eab8f51b9fa77dd951df0ba88e6efcd6f25f"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "cf2485b7dc6eb8fe6b5d31f238acc9e5ab437809833327e5ad5bfdf7635fe628"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1006170,
+      "sha256": "b05e4942b2bcd58d4a28b6ee749baff333c2562f853ea785565900861b607061"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1802218,
+      "sha256": "45b272bbd5d94dcded901f51bc481ea1ca17b01ac64432334725c8cdd73f88d4"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5926,
+      "sha256": "a3a35cbb5d2b8c26d8324cd22c2ebe0137d09bc493fbbe65625936e20c1e4842"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2350386,
+      "sha256": "eabf525e2a6fa095136a60d7ddd2230057dab26dbe224e06b2e767b4ebf7fa4d"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6776,
+      "sha256": "ca2c78a5677917d283e235ad408767fb7cbc33a3930b33db016d669dc27da42c"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38876,
+      "sha256": "cf4a3cb1983058b2b8b30199f36bee2d9960eb838017c05edf3b4e7e803971c6"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3219,
+      "sha256": "3ab1449a6d523a1cfeccb71bdf2543ead3c3db82364be4d2fa79aa6ad02268e2"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74301,
+      "sha256": "5cae2023b1e8ee67004d5bac22bacb35704456bd34c5d424c5db79a66188f138"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "a0a4dc044d69bd88f267fe29bd33f581204c08ae78ce9926a0634a057d0317ac"
+    },
+    {
+      "path": "_pups/omni/contrasts/30/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "02750d562f61f8bb75a7bf0713b4ed3628d314bd850f47b836ad357ca968f295"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "2e7c4b4bac168bc020b091679336181a02b5066e2a61e7a513b7ba79cf019829"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/omni.nodb",
+      "bytes": 26167,
+      "sha256": "936d04cf15876af4f533c13f1bf3615552eec0009cdad220d47e871bd0cafb4a"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/README.md",
+      "bytes": 12644,
+      "sha256": "e13d0d5432d47aad921aca2842eb6be35fcdefae2fe348d1b216c525b9effe08"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1008214,
+      "sha256": "227b30fd562d093cbdb033a80f798c9db6fb8155cb11e562360b70ca2c6092a9"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1813229,
+      "sha256": "8c4ff59775207900131c7d908283575011a6d1367c7cb2124f2851694b2b55f3"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5835,
+      "sha256": "4b079deb0193f31a449152b21520d05c5b92fadb2136532ed804b7d7c913d9da"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2382133,
+      "sha256": "d098d985a2d37e8ce3d1c434ac343065ed49f9638641366e5ef33540ec2749ae"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6941,
+      "sha256": "20b613a3ec16d68ce0eec25f066b88f0d382759e1ee16214ef29d43bc3b193e1"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38931,
+      "sha256": "29634dad14a7c0ac476320e169c91c514d171d1787ccc9c112ed9fa02d249ca1"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "f9e265b6ac71ab5f76722d363e534f23d6d30a259f6d5a7625e95754c8c70966"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74780,
+      "sha256": "3884a9171d68291f17d62c68f5d80a5fad259aaa17f5379a1b1c6c2be1de8d6c"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1768,
+      "sha256": "ef8be9af0eb19cabaf8c4e0e8099f00daebde14fa97f29180881f1f4b2a9cbf7"
+    },
+    {
+      "path": "_pups/omni/contrasts/31/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "752016561902ada9a3b8e7cf193574e99cdce4f61f2967ea563e8ac44eef07d8"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "b1207324556e0c4c1af052323987ee1df0301f408b6ea57109eb1740f5953156"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/omni.nodb",
+      "bytes": 26167,
+      "sha256": "e5189ed8e17971000c8ec68aa51f26ec411289717fa173f7a163f6c65bfc906a"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/README.md",
+      "bytes": 12643,
+      "sha256": "7440cf1da66bd382f26b804dda2045c6eaba00e53dcab2201c878b86bb4916c1"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1005772,
+      "sha256": "6b2c07c467797f69be687d049fcdd194e1b5dbed3b5217349620659e82ff319f"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1807009,
+      "sha256": "14566e811e0e0ed1f8a7087826d0799635e6ad45ce57662e298d08f5f4a3b02b"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5834,
+      "sha256": "dd2ec7564d01a45baa99ce3f5b42d8eaf40fecc7ee2cf5e15a1b56abd0001141"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2356426,
+      "sha256": "deeac3e7290398fe841a4efebf41c328526a57843d8339d4515dab366592af91"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6800,
+      "sha256": "38b33e3eff0e684ff1ab5976e19a7efaed8c0d38eb1c05a8fd031f53fe184c9e"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38926,
+      "sha256": "cf9f9f036cedc0bbb935c011f09bd675cc1545e32b112c6ac5533aa4a819a430"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3221,
+      "sha256": "127ba5a3b59486c95efdcd858ad7c069f93b19e8d0914f3f96157914dda65eb9"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74496,
+      "sha256": "e68da615191c22fa319b7836e65c5a59d5bdc4ab99afaf330ab8a45e2332d884"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1768,
+      "sha256": "f222aab995a88b966dee43d35f4a6226249286c0ff5d4157d1cdb9d1638efc70"
+    },
+    {
+      "path": "_pups/omni/contrasts/32/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "1ef20f266b75940b4040d880bd31d612ae3022b4560fffa0ed71582e426472f3"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "e5d5340f7ed0804cdb8dcf96fcf98be628dc7b3e5bce52e2184934a4f3040bb7"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/omni.nodb",
+      "bytes": 26167,
+      "sha256": "31e35778f9794eb52ac8344bfe1fe98bd6eb4883fa44449cc995f62782769275"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "2e22fb6c7fb11dc4835c8ce64b9e782e7562765565026e67f9b1545b50b71b7c"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1019332,
+      "sha256": "9e8b58c8d53523c145b7a08157135360f0d7e37ea7d911f0368e92116667848e"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1817947,
+      "sha256": "a354e2f929bd38a59246367fe75727adfb4bff123dc83d3d5abd4cbe8b3990bc"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5845,
+      "sha256": "1ad60042bc0248d1469230982abb6096a461692ea3d4a5a4c37b0f272f92e33d"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2404177,
+      "sha256": "b3e1669a045b130c36469a140af133b615f41fb7e1411aa06065104ea1a938b8"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6889,
+      "sha256": "1124431eee019127029704ce83bab0aa759d23e580f065bf92f66f409c2fadb2"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38955,
+      "sha256": "29c2f2be449244068a4c274e6185d41aa8fa634bd3a26d09d6e160baa620cca5"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "d06ed19725c7f1ea48fcf1f74d12938f8bf0c287cb6809cd969abc1c9e63c12f"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75175,
+      "sha256": "a0a24e7967223623d74f919e15f49cdddf72936396ff42826e885a62f270c440"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "58745906206d59f92db69326d5ee91a1c840da25e7cd871430b9167a2c55fdf5"
+    },
+    {
+      "path": "_pups/omni/contrasts/33/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "3744ffbb95a359c30e3d4a0588d697b056a0452329c7e1ad6d5d53d3aa27576a"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "4070694489c32229340be4a1b7685988b15763ae222457c237c1f8a091b0a50a"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/omni.nodb",
+      "bytes": 26167,
+      "sha256": "23f8bf1bdd60f0f5f8f3965d30650b2a1ab6d5fe4b7141b6f73a09b890761546"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "166a1c442486ed38779cf8da4773f5e48974b65d471b8cc847e4d6f08b362cb6"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1010133,
+      "sha256": "ea518ea52e2a822545e33428fd429cf463d4fdcb55c8585cc6f92a6e0bc65f66"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1812321,
+      "sha256": "65b59ac038226abd79b2c0a82cb3e5549e3299d2bfceb3a8a594d97e7dba9526"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5834,
+      "sha256": "4bbcd7b83220134c42425a709c26d62a1ead168c5b2980c2b4694f1d61db617b"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2379705,
+      "sha256": "47822859c861142219c3b5823d0e36d5023d083adcc8d8839e865c8b104c39b1"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6721,
+      "sha256": "d8acac0a5243b2b1051b7a9ce889ad90e858546f3ee8389267a894043cdb0922"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38986,
+      "sha256": "7e91434c58cca3e02f8f58742c1a937b124ad7c2306a81f398224c51c897257e"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "4f3b426c28904bf546efa9d0c9cbc0a96870978fcf767f9afe19db37050924c7"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74584,
+      "sha256": "9310413c8c9d64a49e59d500ef2919a363c4fa6a019b1e76c5d25c1664e93db0"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1766,
+      "sha256": "9d832442bb568c62fd4adbec01832782741265dcafe903359606b36bf4aaf2a1"
+    },
+    {
+      "path": "_pups/omni/contrasts/34/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "7a96efaed21ea5819d9118286842858e731d07047144a6616a01c2b616065a8f"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "4671ccf51e41d380962d169336b18a7aae70a830bc7e7afca72124d9da2964d7"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/omni.nodb",
+      "bytes": 26167,
+      "sha256": "07fe63bd338ebd54d7b33cd446caa9629e4e4de245116b445ff0c9fa87e34b07"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "0a50e794397c966476aeee11fd90d932c8ed8ed6d3d224982aea6c5927a7f503"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1018045,
+      "sha256": "010d83209dc82eb9ebd3bc3c81d0d98935ddad23de8227d1820cdbea96f9dde8"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1814780,
+      "sha256": "22c36b7f9744ac34f088683a654bfc949058be83ff9008516583934994f0c384"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5933,
+      "sha256": "6ba0b120f8cb3fc6d9e654a33480e3ad9df90303622b1269896490a33f4cccff"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2398491,
+      "sha256": "ede35f6b3b442f655e5c8084ddce99b75125492a4b702aa2b3c56b977663ff1a"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6878,
+      "sha256": "482f965960c738730e8cf7d210dd0b247e918d40a8570ecdd35479d478a2512b"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38942,
+      "sha256": "c0816bde26cf816efa5645190569fac537309157e14b8bd65ab1267af80a5b48"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3222,
+      "sha256": "45065f3462bdbcf8edb9652a21c583e245f7e98db8594490df0963a89e1e7ab7"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75096,
+      "sha256": "d1d272e70ad01099b2242c6d0763bbd6452fe5ea7adef26b3913979c12a00c1c"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "6b194c586398b87267f2989af2d6b1cb02744dd28d0b514ff442531200cc8711"
+    },
+    {
+      "path": "_pups/omni/contrasts/35/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "7c3f50f944433e9d587b3b604d4db121fe1d94f56b17c5b0401fdc0fba0d6a4c"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/disturbed.nodb",
+      "bytes": 756,
+      "sha256": "e7745ad92f5ed0528a7097898e1a294ac111146877a8a768263a9c686872ee42"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/omni.nodb",
+      "bytes": 26167,
+      "sha256": "ab8bd5ee51fa176f14181bdc6ac32d266ee6454a4d0f9683330f584a5452b814"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/README.md",
+      "bytes": 12642,
+      "sha256": "f8ce91f546b54a1bbb1fefe29251ddf3d3be8d41296960ec4aca0fe2a99506ac"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1020827,
+      "sha256": "c51b9f09f5b304633ca24925bb7c66e281436b99e3be2eb8e3ac5ba42874245b"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1809769,
+      "sha256": "b879f31df06c8476d142b09f6f42cc94329556d314031f91aa696db5d346c3d2"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5881,
+      "sha256": "1ef78f2d69d4c5c2ca88e0890b21ec4cdba1628f78109021203ae06ee54849f5"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2373376,
+      "sha256": "00b4acb496fd8001413cc28658a635ceb612acebcbfcc8c87d448d164e90ee95"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6773,
+      "sha256": "5207ab42dfa9f568c81c50407875a0b1f69ad828a58d65cd49f910477f0676d6"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38923,
+      "sha256": "eff4450976108d1cc701de06084b356be7970d8630976d49a58ae686b1cc8039"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "202e3db9ee724bf3cf8394ba0fbf093ede84ac555b1a90e27628dde0d98de2e3"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74540,
+      "sha256": "be51551701fa3d9d39df079397d9f4ef3a6a1b64ae309ceaa49274064f3bc0e5"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "ad9951b5510957ebdd49e6547b3ed1f822586af69db2d3210489dd26789b96ac"
+    },
+    {
+      "path": "_pups/omni/contrasts/36/wepp.nodb",
+      "bytes": 2402,
+      "sha256": "17b9de8896e6457ba359a349d988aada2746267a877f4adb1cffca8184c8552b"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "9f5f230662ad4aaedf38afed143ba2bbd3bcfc6563978541660518ccd070ede4"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/omni.nodb",
+      "bytes": 2934,
+      "sha256": "ef6a9e2b7f7e36ad00f27158c334843afbd4557c2c9144d85d114a1a0127eb0d"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/README.md",
+      "bytes": 12697,
+      "sha256": "17a5d0885126d365d390781b6f77598f5c9d7b9c9379a03436f6d708f357eea1"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1004040,
+      "sha256": "07a51766f4c51d29c1211ef001fab01860d549e319832803c2b81e981017dbce"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1821659,
+      "sha256": "0f7201c479ed4f6e75f941660d94f60bfe4e32c0988279d082ba240a88b89706"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5933,
+      "sha256": "2c7fcf36a5c22d7eb0aa65bde22768fb780d8c6a70e09dbcec0d19e8a8ac5357"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2390883,
+      "sha256": "268d3f33478d319dfb9a10b192025b8c87ab65bfd4264fccc0d5aecc03db5328"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6722,
+      "sha256": "17fef39b94c46854719f165cf2f4b493caf32118291f95c5fef2cb3d03ca6b2c"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38864,
+      "sha256": "40df2889efdeceb1b0b0280fe62fd14d64e4e1369f80a139e04c7b226fd7940e"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "b6ecd4f3ad68a1b9b41589332b836635b8ac6f7b59d60e90937791b61e7bd4d2"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 75396,
+      "sha256": "e0ac2cadf93c4dcc5e2fc11525a2d77dae4aa84b32b51747e6def8c393c2dcd9"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "b833520dd4fe804979c4e3b4178c44f2e6bdcef3d45b2932822f6ef7977b2184"
+    },
+    {
+      "path": "_pups/omni/contrasts/4/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "108956b7381cbcee2d02aafde9452f855ca0f5610241ff8b4b40b33d5e92e359"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "845587e39d76c9c863e0601c954bf2d0ae2f6f62ee0c4aa84f6914df699ba6f0"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/omni.nodb",
+      "bytes": 2934,
+      "sha256": "852dad54ea615af4873385dc11e03c93e32c09b13cf4bb24084d3b36545fcb56"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/README.md",
+      "bytes": 12641,
+      "sha256": "39a602a02e64d9bfdec5eeab048ae8afa0aa9be39c48044c74033d8d6cfecb07"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1028321,
+      "sha256": "f6be5d45fbde8847b4ba4a3a954abd29a00236487c978cbf739f9b7a72d30bec"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1810795,
+      "sha256": "3a83be3c7445b2a0adee4429d99c5983f35a63559f5e0083c18192c639024ba3"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5918,
+      "sha256": "344696a30f30c6fa845092f555e92c125bf387eb772401295b3148f44ce4849f"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2370813,
+      "sha256": "b1ed296007b817330e08752e96fc054d2a5cda4c12a493f6f17ea06b061b464a"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6749,
+      "sha256": "2faf3c7d5905576f0cc0468a6fe7fe8152335bbb073ee9571a6eb3601ea5330b"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38865,
+      "sha256": "d8b213750024604d690a5158af18d78ff56cca0c0c0a4084454875e7f67ae186"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3222,
+      "sha256": "ab52d635b9f7e4c9f13d6afcd4d8f7c7412f8ba46974e744e5df4ead80a2d150"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74522,
+      "sha256": "bae7f25c689639f82be908d9154e9c9d547f71a7026ce5fd5317bcd0dfd56093"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1765,
+      "sha256": "1b707fc9301b10616f0df30e3e785c241642f32fef4fdf8d3003f1e440a39924"
+    },
+    {
+      "path": "_pups/omni/contrasts/5/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "4954ed7d60b65bfa883f2be11dc483dd2696302541718a13f763a4ebee54caa6"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "ba21515cd343e7874b97d55a755e74995bab5e8e911bd476cb17373d4c395461"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/omni.nodb",
+      "bytes": 2934,
+      "sha256": "4a4d1743e786fdb14ca9ef681acf5fe9e31644bc85765a05ba14fc77a7b7caa2"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/README.md",
+      "bytes": 12639,
+      "sha256": "8c0f32212db36792bca78dfaa2b7eea7596637518996f1c6120bf16e573f7e33"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 999261,
+      "sha256": "b19d96254614fac5b900896ba1cde420c92e4e7a8fe3cb21aa99187083bdf954"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1809774,
+      "sha256": "83e59d8e2600deb24c2827276ab9d9af126cae9a81a984a6d50d1b5133436e7a"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5915,
+      "sha256": "23a4aaf5bab4822dfc6e658ef39b023016d62e00f1b66789e4cb5c4ccc68df4a"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2364022,
+      "sha256": "1ec4143cd251230d9bb1a3358b7131a4cd60e37333479fcddb8556e7731728cb"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6715,
+      "sha256": "3ba4f6019c393dd97d9250831c4607df2394fddb240745214c8ce9c713097194"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38868,
+      "sha256": "c31bcfa63ba22dc536b395bc73b1fb541b69fbaef38b461916ca954b7e0166bb"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "4fa89427b1b1cef816df547110467be24321bf07e4172973958ed24bd047af69"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74438,
+      "sha256": "1e60093f3f9d3c0f2074b367db5367a7e221f155ebd903339417e1e927d0431d"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1768,
+      "sha256": "ff1f94282ee851452100dde7cf8ee690da70e69858a2252a5bce2bdfc9073bc6"
+    },
+    {
+      "path": "_pups/omni/contrasts/6/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "885fb2ab07eac531d4670d36655cdb85c0f897b5af2f8ab7543a633df8c7eb4c"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "2bf72862df6f036bab99f76763f4d24576e8de2eb5d56ceed84b46ae0a2e1a08"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/omni.nodb",
+      "bytes": 7576,
+      "sha256": "f014b86f9b5869fc23b1344f4bc83fcb644c072b7e4784062a3ed5b3ab5b4dff"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "77bebaec21629e4cb200ba5358fb8f2c9bd0516affd136d048e1a81a74a966a5"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 989066,
+      "sha256": "941097d0680a375e12944de7adb072a78e0f9bd6e3269bd5c561857d9ea44626"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1800261,
+      "sha256": "6294f283849da37fd9f48751220a6a426929f53eb6b0ae2449fa0bcfdcea8786"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5913,
+      "sha256": "c49e7ac154d2313efa419762dc291340c16e797d859bab8cd56ed13a52f42c2f"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2345578,
+      "sha256": "4f0b95e00b4ca03aa110d331e98b0246556649940fc3e92c83736689ad979b38"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6689,
+      "sha256": "13c6ddd1299ce59fa734aef7c9ceff9643187994b649fb3b561481ae16fafb29"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38867,
+      "sha256": "700e09b616c6d412932112b37af16e339acf4a11b9f54c006fa025c013ef3a07"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "30e0370930d3d845c48a0e390f90c9cbf669968d7b1a3c695707a67e8409976e"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74232,
+      "sha256": "c45898fd6101012cd0f1d258ccc6a5552f70a00d5132dd562ed9597be1967cab"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "ef2d08e85783ec7246b63f89fca19b7e7c3468ef2b95458c82e143b6d51702f1"
+    },
+    {
+      "path": "_pups/omni/contrasts/7/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "56719eb1e4851e5a248149335c21dd77f9eecc1be8e66bd96d9a846ab85ce1ec"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "29c26bfb756b353424e8a9a4e1d0fd1b27fd383218727cd9f1b5d2fb6064c30d"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/omni.nodb",
+      "bytes": 7576,
+      "sha256": "74ca7e9b8194e8d3e35bc172d612fae509f57bfaf5d9a46f21779c4b140fc85c"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/README.md",
+      "bytes": 12638,
+      "sha256": "77bebaec21629e4cb200ba5358fb8f2c9bd0516affd136d048e1a81a74a966a5"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 998240,
+      "sha256": "891af59aeeadd122c1aabee800e4901569cc070aa85638d0250dae9f3b6c18ca"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1800818,
+      "sha256": "0ad7b957902eef833aa34b411a2104f1ebb1477cdb4a443755cec924c378424d"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5914,
+      "sha256": "b349f6dfa5d8075cb91f5f5aeaebbc36262eafffe8a9022f3a7eb0aef531c0d3"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2345098,
+      "sha256": "6f1a9a5bdd86745460643b9d4030616b182d5f505e0cc4c656d6203cb9383f72"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6706,
+      "sha256": "4802012871368fd2e8f1acc98e9c109ec724aacf1da2de9a03beed6aeb646cef"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38860,
+      "sha256": "1c0acce6bc4e96a14014300912c8cf57354c2181b3fdc2a9439681579e333277"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "293f4255407fb5f1332f0f02097d69392c4888a8b64536a66d713d72a1a04490"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74235,
+      "sha256": "7c969edee53a47c68d701024663a4867947cc3b0e0465154c379ec9aa3afb233"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1768,
+      "sha256": "6a08756810f6378f3b47173e0b7c8ef20b2ef6dd2e130f19ba7bc7c9deb58b12"
+    },
+    {
+      "path": "_pups/omni/contrasts/8/wepp.nodb",
+      "bytes": 2401,
+      "sha256": "b0d5580213b034fd26f6d8ef06d597fe48f74b9291df44b8e3234ddafedea8ff"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/disturbed.nodb",
+      "bytes": 755,
+      "sha256": "451f149766865ca0aa4dc48374bc01aa43ebe2e845dcd5c92e42071f96759cfc"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/omni.nodb",
+      "bytes": 7576,
+      "sha256": "7b039f30ec90ce67168fa947de73395f2db0c8049334e30de6ce07ffefc9780f"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/README.md",
+      "bytes": 12640,
+      "sha256": "e5d8fa9daa3d112eabf432c61a3d4a257bd5fd9bbd34948dc71c872ba422d9d8"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 989307,
+      "sha256": "712b75828d2fc3981cfb156e680a9f65168bf169718ab10e91a61d5b06a5b4eb"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1800720,
+      "sha256": "34a84734191fc3ad406386febdab58aec5e501778ac315c39bbf9771cac02145"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5921,
+      "sha256": "8b87d504fa50b2f93f14843ea95cbf67a2948cf68a9cd6d0f8fced0337c99b41"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2344817,
+      "sha256": "b2d5635a00b3eb779362178280bd94c0219b265a5b6ff81280dacc6fb0084c04"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6732,
+      "sha256": "bff9d6844b157db833c0852a1517e4f49cf8cd2bca4538dfa3e0c1242749d8f9"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38868,
+      "sha256": "ab384654390063f573e9a6dd0418083c8d14f47874a50789bae9b211445788f6"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "166961af9d1b955be830ffb22f17ec1ada3b91afc860e06662a789011d671d59"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74216,
+      "sha256": "1ae1a8a052b6d5a1dc2a309af9442984e7e8741693d96aad880f2995058a31bb"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "75ea32a5e9bc537a02c096f5462c5a06bee11d6a32867b7aa56d4622f7c30793"
+    },
+    {
+      "path": "_pups/omni/contrasts/9/wepp.nodb",
+      "bytes": 2400,
+      "sha256": "39b71331f330db342dc55de7fe16bc12b45152be0118793d7d4a0b26f315b084"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/disturbed.nodb",
+      "bytes": 768,
+      "sha256": "f38b257bd630a0f380bf841cad8d7a6c6f2e67b9c867a4e5ab65c3ac00991824"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/landuse.nodb",
+      "bytes": 35351,
+      "sha256": "0b862206946763790d5a1aa85d831e254aa31151517b114e6c3263144e20f3e6"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/README.md",
+      "bytes": 42597,
+      "sha256": "67249002b2bffea843784f7a38270b427f431f1e59d37e201bea0cacb6b0e722"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1086090,
+      "sha256": "356a8d7115f1901ca49eb2531d98d2f8ed54d19953a426761982906315d9829e"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1975572,
+      "sha256": "a66d7a136473c034719cc31c0b8974350f44b00aefe0a38ee8864d3c84a9e5ac"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 6012,
+      "sha256": "0271873f901dfcd9ccb03a4dfedbc9e45450265ee5af62820386812fcf58ff25"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2813772,
+      "sha256": "1fb5c629b125ed8e1afe25f37160f474b2921ad30e5d84de1cc2cbf046d7ce23"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6972,
+      "sha256": "87f21aff6244cdbcac513a5206410d420259c40fee6c1e18af4df49b904e0b4d"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 39958,
+      "sha256": "7d26b122ac7683d68617c7ffbd50fbfc2de42eb47f87c7ad7b33bbb359bea342"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "3b6a6672824dc78cc42e41f12eaaf26298e959c78f5faaf725a6e2b049f0c893"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 82555,
+      "sha256": "38f34cf62c07150a95df3f7e60e6597fb725cab049613750e77d6d435b725fa0"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "bd04155b049f84e95930102b5f7b06da55db02f2b424385935a446aec3cb0a28"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_30_75/wepp.nodb",
+      "bytes": 2414,
+      "sha256": "18d09383e9047464a43b111e415abf69a306e9a4e8518f54b559d051df73fd11"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/disturbed.nodb",
+      "bytes": 768,
+      "sha256": "76f5e1db875045d87a2d33897efc3686f451e75b7ad3f8888406eed1f3558831"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/landuse.nodb",
+      "bytes": 35362,
+      "sha256": "0aa29be40db9acd2a8c3668c43da002b9a91f98444f7be5dbd8cc3c5f12f6413"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/README.md",
+      "bytes": 42602,
+      "sha256": "563674b12bb220708428e50642046190bcb003b56ca9135db887bdd19366d5c6"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 1048938,
+      "sha256": "1c7f83d393cf6f38737c5d8f52c5948cf3bfda81af7396c758ca369d45591692"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1935821,
+      "sha256": "f5d33f19e4087c29f31e44d92e1bf559b17b4b469061006a1e0af38828188611"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5900,
+      "sha256": "9ecf1f3c907c87b93829f404c7fba00f67c9255e2afc5f2c134fb61e75a0767e"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2665638,
+      "sha256": "4ec1c4c97861100015fb1efcb6185908bd2ef3252c46b27255d9b76999257d47"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6882,
+      "sha256": "a68534369f7241e255baee62447f7cddbed0e7216821e4ffbd15352f6f6b54d3"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 39656,
+      "sha256": "dd1019d51a927438b84c9ab95b694fec6baba639fc3bcb1c4d9d5a79adff7051"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "7de2889e1afcfc2e3e8a314795ca52849fc0b638057f2f6caf3815548f4bf07c"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 79543,
+      "sha256": "a76d030d979ebf3ca0ba7a848e9fdfccaca9ec6ac3a12c2b6a21327810d24556"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1767,
+      "sha256": "bf7724c8ca5b934c20eff17ec0689e9a74ebac77cbea4fdd84272caef1945c48"
+    },
+    {
+      "path": "_pups/omni/scenarios/thinning_65_90/wepp.nodb",
+      "bytes": 2414,
+      "sha256": "e76cb2470a9acd7aff48e25b47e3be70422fa70a54555dfd601fb93966de7eba"
+    },
+    {
+      "path": "climate.nodb",
+      "bytes": 86036,
+      "sha256": "b318f75b88353ca8500e601a603acf29c735044dc257fe82360cb16711f8ccd1"
+    },
+    {
+      "path": "config-manifest.json",
+      "bytes": 596,
+      "sha256": "4bc8dccbb80cfe44684e00385e0ea7d1dccec47bdc535f90c5ad3a20d18c9887"
+    },
+    {
+      "path": "disturbed.nodb",
+      "bytes": 685,
+      "sha256": "07e71d34784125bca7f9eb6a2563f1dd78d0eb411825d9acd892162fd15344ad"
+    },
+    {
+      "path": "landuse.nodb",
+      "bytes": 33235,
+      "sha256": "0a8aa3243a2b5e3528df4d6640b77b1b9c2ae8207a09df37df69f36001b897b5"
+    },
+    {
+      "path": "omni/README.contrasts.md",
+      "bytes": 4594,
+      "sha256": "faff8cdc4c4a699ca6dc070d91120320c2111e2408bac41a07d7a04e0be78282"
+    },
+    {
+      "path": "omni/README.scenarios.md",
+      "bytes": 10567,
+      "sha256": "b4d140941451d1904966d6791cb358f84f2cd310fe1534509b6066fbdb76d541"
+    },
+    {
+      "path": "omni/contrast_id_definitions.psv",
+      "bytes": 21095,
+      "sha256": "9b5b234c99ebe860a9387522377257ef5dc9a7a47ac448ddb8d6d7012b63b8f9"
+    },
+    {
+      "path": "omni/contrasts/contrast_00001.status.json",
+      "bytes": 178,
+      "sha256": "d8f5ec48fbe5ff1ee1b623b5eb46b5dcd0466ea9d6bfae7b5016dc5c114a9948"
+    },
+    {
+      "path": "omni/contrasts/contrast_00001.tsv",
+      "bytes": 119131,
+      "sha256": "3aa5a7105867f5044aa48884ddad731fd3c4050921aca58684fc3451e0c892ff"
+    },
+    {
+      "path": "omni/contrasts/contrast_00002.status.json",
+      "bytes": 178,
+      "sha256": "81df2541b5f689e51565cf3c770ba57ffc579274cd8719bbcfae251e85fa3c99"
+    },
+    {
+      "path": "omni/contrasts/contrast_00002.tsv",
+      "bytes": 119131,
+      "sha256": "c612ee0853f9c24fdb8a397d64d0886965c6dc9efec6425eb9063183ef99ccd1"
+    },
+    {
+      "path": "omni/contrasts/contrast_00003.status.json",
+      "bytes": 178,
+      "sha256": "18bc4761961dea6b9c4699efc90759d987f1346f7c4e152750ab0969f6423e39"
+    },
+    {
+      "path": "omni/contrasts/contrast_00003.tsv",
+      "bytes": 123199,
+      "sha256": "d62c73e14befaf733058cfcc683b883ea66f61248d563244132aab93325ce03b"
+    },
+    {
+      "path": "omni/contrasts/contrast_00004.status.json",
+      "bytes": 178,
+      "sha256": "f3af02e5dcba53d720d509d40715a795713fdf0ef516bcbcdcb5a3c4870d6d53"
+    },
+    {
+      "path": "omni/contrasts/contrast_00004.tsv",
+      "bytes": 123199,
+      "sha256": "3fb7bf19c150731668880bfa8163359a2ffcde77377456160ed7fb2021284da0"
+    },
+    {
+      "path": "omni/contrasts/contrast_00005.status.json",
+      "bytes": 178,
+      "sha256": "946e1640f06bc2403d6e16ca31907b0730e3d22745a89d201afa67d53a560d07"
+    },
+    {
+      "path": "omni/contrasts/contrast_00005.tsv",
+      "bytes": 115423,
+      "sha256": "f1f19059c9e7ab5399d23238ba4261d423531dea0f71a129f4f68f1175438b26"
+    },
+    {
+      "path": "omni/contrasts/contrast_00006.status.json",
+      "bytes": 178,
+      "sha256": "a85f4c73e68e48d3e7802a741b666d672e4e575de6ca6b107bcdabf562630538"
+    },
+    {
+      "path": "omni/contrasts/contrast_00006.tsv",
+      "bytes": 115423,
+      "sha256": "f5a3019fc58683975845e5caa96d856390e2db6db9758eee35ccc8be8b2471af"
+    },
+    {
+      "path": "omni/contrasts/contrast_00007.status.json",
+      "bytes": 177,
+      "sha256": "cb736e56b46860e943e1ad51476e7e51132e757bbe23f31c29bedc32ae27abea"
+    },
+    {
+      "path": "omni/contrasts/contrast_00007.tsv",
+      "bytes": 112723,
+      "sha256": "ab995f182252d165bf08e38dfacee752c834709fae14d6faaed5e235cbabd536"
+    },
+    {
+      "path": "omni/contrasts/contrast_00008.status.json",
+      "bytes": 177,
+      "sha256": "99fc89a18ff27bdb0d20d5e48e4493fb691539ce06e46c86907512d78991337f"
+    },
+    {
+      "path": "omni/contrasts/contrast_00008.tsv",
+      "bytes": 112723,
+      "sha256": "5e558460c780d31091028249dbfe5fecbcc505606542f78a0360692ae0f5844c"
+    },
+    {
+      "path": "omni/contrasts/contrast_00009.status.json",
+      "bytes": 178,
+      "sha256": "bf3d78e321fc370a89ee7b1afaf278e679a0cc3e36550bfa14e7f97a150044a7"
+    },
+    {
+      "path": "omni/contrasts/contrast_00009.tsv",
+      "bytes": 112615,
+      "sha256": "bb95d145a0b338af14a64730d9c6690d212347baec25c1acaf9d42e7c2d53385"
+    },
+    {
+      "path": "omni/contrasts/contrast_00010.status.json",
+      "bytes": 180,
+      "sha256": "73fc3ebf59878467972b7a95884bcb87f3ed83714a2600c8b8f39e83f27ee2ad"
+    },
+    {
+      "path": "omni/contrasts/contrast_00010.tsv",
+      "bytes": 112615,
+      "sha256": "e97452837b7e6e85afda2364fedfabc8fb2c1a983e861b555a485e8e64a7a8c3"
+    },
+    {
+      "path": "omni/contrasts/contrast_00011.status.json",
+      "bytes": 180,
+      "sha256": "e37bb9d3d4c02382ca5f2aaf5e85fc37361f8a3d2f3d415c7bc8f4a5ecae9fe0"
+    },
+    {
+      "path": "omni/contrasts/contrast_00011.tsv",
+      "bytes": 125107,
+      "sha256": "2e1130ad6901a70cb3f72f9f86ff6dbd7c022fd2ae507aae3c9efd63e9614e22"
+    },
+    {
+      "path": "omni/contrasts/contrast_00012.status.json",
+      "bytes": 180,
+      "sha256": "acefb7bbabe662d0c23e7dc0cb350f11ba99c9dddbecf367172b37dcf6c8717b"
+    },
+    {
+      "path": "omni/contrasts/contrast_00012.tsv",
+      "bytes": 125107,
+      "sha256": "93e3dcc644be3f84b4ba9f4babede49819d69aabc0fc4b99259b4467bed03e07"
+    },
+    {
+      "path": "omni/contrasts/contrast_00013.status.json",
+      "bytes": 179,
+      "sha256": "a684c055e5ac68a99fbaf283f3324d6dcbb5d58b7c076a9e16f35a7cc951f324"
+    },
+    {
+      "path": "omni/contrasts/contrast_00013.tsv",
+      "bytes": 116899,
+      "sha256": "95985beadbb8f47609d00f50e7470144a7b7c2918cff2222b4853bc7e0edc556"
+    },
+    {
+      "path": "omni/contrasts/contrast_00014.status.json",
+      "bytes": 179,
+      "sha256": "73c2c2acb980f5698cd0d3187a3e35b07c0cef50ed3d10476618c2d311126c38"
+    },
+    {
+      "path": "omni/contrasts/contrast_00014.tsv",
+      "bytes": 116899,
+      "sha256": "6244369bcc3946059138ccb9fbce6193acd0ec3a1ce9b9e4455c5ea06fb7d45e"
+    },
+    {
+      "path": "omni/contrasts/contrast_00015.status.json",
+      "bytes": 180,
+      "sha256": "f73eeafa0e6cd873608b91dbe8fd9fa2ed2f780de29a0a81cee0408dfdf2e944"
+    },
+    {
+      "path": "omni/contrasts/contrast_00015.tsv",
+      "bytes": 115675,
+      "sha256": "eaab5622f3d3742d3fa3f24a5ebde8a3fb7c8a90b131eb1bcafd113e08b28f96"
+    },
+    {
+      "path": "omni/contrasts/contrast_00016.status.json",
+      "bytes": 179,
+      "sha256": "dbf2ff486779a8ead17df29a7f2ec8945dc5773d3cad8c21a26bed5b4ea3e9bf"
+    },
+    {
+      "path": "omni/contrasts/contrast_00016.tsv",
+      "bytes": 115675,
+      "sha256": "c7e9996089883bafdfc73a5e296a5ec1060dd52d54c070423728badd717a1d2c"
+    },
+    {
+      "path": "omni/contrasts/contrast_00017.status.json",
+      "bytes": 180,
+      "sha256": "35f00da06d85731a2a6937687b30ad382180fcbbc29732038cb10111a979ede4"
+    },
+    {
+      "path": "omni/contrasts/contrast_00017.tsv",
+      "bytes": 114019,
+      "sha256": "36b22fbcb2a99d9fd62eadbc8569b876ce7b5330c5b119851cbdea5e671b80a6"
+    },
+    {
+      "path": "omni/contrasts/contrast_00018.status.json",
+      "bytes": 180,
+      "sha256": "477d54c60b312e124fa9bc03ad8e29ceb9223f760633c2c6903f2364c60294bd"
+    },
+    {
+      "path": "omni/contrasts/contrast_00018.tsv",
+      "bytes": 114019,
+      "sha256": "dc8e4edec5ae9cd9694920f70602646d94b58c2303cf538889f42bdb04ea8f48"
+    },
+    {
+      "path": "omni/contrasts/contrast_00019.status.json",
+      "bytes": 180,
+      "sha256": "ce01033864784f17e5571c5d2f67af916eea522c5b63a3ea0f82f2148d9dda83"
+    },
+    {
+      "path": "omni/contrasts/contrast_00019.tsv",
+      "bytes": 113119,
+      "sha256": "5f4a49979cdfee279f179683dc7782a605f8bb51c43be869c8ee198c1c101a05"
+    },
+    {
+      "path": "omni/contrasts/contrast_00020.status.json",
+      "bytes": 180,
+      "sha256": "880fc37050c4614bee6a6a4e151ea3f0e632ff442802acd1b798dec95aa8746f"
+    },
+    {
+      "path": "omni/contrasts/contrast_00020.tsv",
+      "bytes": 113119,
+      "sha256": "e7fab381cc925727462f79b814435bedf96b1e188087b80d504bf501d4345416"
+    },
+    {
+      "path": "omni/contrasts/contrast_00021.status.json",
+      "bytes": 179,
+      "sha256": "68d126bb3fa554ead3f94bbbf8c2d907a6c01b57397500e66c283611208d826e"
+    },
+    {
+      "path": "omni/contrasts/contrast_00021.tsv",
+      "bytes": 117187,
+      "sha256": "8b5bbbc62ffdc3f8f1c9ee0be6bac1c751ced347ae6be4078beab188990b5402"
+    },
+    {
+      "path": "omni/contrasts/contrast_00022.status.json",
+      "bytes": 180,
+      "sha256": "0ca8285c83011b7da9e7014dde4ba493bb762a6a54ad0877a598d65ecce7c8e0"
+    },
+    {
+      "path": "omni/contrasts/contrast_00022.tsv",
+      "bytes": 117187,
+      "sha256": "a5416ab85bb14d878091cbd1697d2fa5171befbdd3e62c0968e04489750d97a9"
+    },
+    {
+      "path": "omni/contrasts/contrast_00023.status.json",
+      "bytes": 180,
+      "sha256": "2431104180bb9728abfc3794395fdabc825928e1266ee1322f04d076dd129a7b"
+    },
+    {
+      "path": "omni/contrasts/contrast_00023.tsv",
+      "bytes": 117835,
+      "sha256": "22ff33d106c6daa455b5ef1550ab6628d6fb335ffe6818ce63a7a8e08ebcd63c"
+    },
+    {
+      "path": "omni/contrasts/contrast_00024.status.json",
+      "bytes": 180,
+      "sha256": "6589cb4bee10c7be5bfa43829c675818539209a6f567d4691c074cea08c497ba"
+    },
+    {
+      "path": "omni/contrasts/contrast_00024.tsv",
+      "bytes": 117835,
+      "sha256": "aa5261426f23fc75dad573d973ec926c9b265058e82a4a561bc4338913316733"
+    },
+    {
+      "path": "omni/contrasts/contrast_00025.status.json",
+      "bytes": 180,
+      "sha256": "90d84adce5b5318d108efac23b30b311c8aaf71e70aefd0219e461c8725f5aac"
+    },
+    {
+      "path": "omni/contrasts/contrast_00025.tsv",
+      "bytes": 116503,
+      "sha256": "6bca79652c39184f70d178ff2a25ad15657c158e3783a2d23bed0124659d5d5a"
+    },
+    {
+      "path": "omni/contrasts/contrast_00026.status.json",
+      "bytes": 180,
+      "sha256": "89221a42dd0dd2d586025ca72091431e89d17c0b80324f8a2d23439df3c2156c"
+    },
+    {
+      "path": "omni/contrasts/contrast_00026.tsv",
+      "bytes": 116503,
+      "sha256": "1444c42330a8b1f335f5fd8e254facfda5b6820cc1c372c5682bac8c47919dbe"
+    },
+    {
+      "path": "omni/contrasts/contrast_00027.status.json",
+      "bytes": 179,
+      "sha256": "d0fdd75ffcfb0154b22bd260a8127a40d1f2ad2a6d4f482ec705a8856eb0c958"
+    },
+    {
+      "path": "omni/contrasts/contrast_00027.tsv",
+      "bytes": 113407,
+      "sha256": "8bf4b9482a530177f3b27904b335e43c89d07343289c466d0369f42bcbf08486"
+    },
+    {
+      "path": "omni/contrasts/contrast_00028.status.json",
+      "bytes": 180,
+      "sha256": "0452cec1ce6d796bca1dcbbe050884886518e0414bb3c4b745c34e7798a33b86"
+    },
+    {
+      "path": "omni/contrasts/contrast_00028.tsv",
+      "bytes": 113407,
+      "sha256": "f9f45870b2c935127d03b1a98c8cd083f7f1c6ff16eb4ecb1f386fb04ddc9b0f"
+    },
+    {
+      "path": "omni/contrasts/contrast_00029.status.json",
+      "bytes": 180,
+      "sha256": "321d2536d9dd2bf0da5abfa803662c1a4e6716b318848ee5d779c1bd65323fd3"
+    },
+    {
+      "path": "omni/contrasts/contrast_00029.tsv",
+      "bytes": 113767,
+      "sha256": "2ea9a8303bd4d1610413d4d2a44d714ae3a220b8815719fba588d10ae78156ea"
+    },
+    {
+      "path": "omni/contrasts/contrast_00030.status.json",
+      "bytes": 179,
+      "sha256": "130171635e6d7244f8f0e638a268ed2cf5c63d100647be2d7b3c13867bee6469"
+    },
+    {
+      "path": "omni/contrasts/contrast_00030.tsv",
+      "bytes": 113767,
+      "sha256": "d49516d73000c91c61d99246e9cee762390fa46f8903fa7a66c699305a26d514"
+    },
+    {
+      "path": "omni/contrasts/contrast_00031.status.json",
+      "bytes": 180,
+      "sha256": "fa9a7734e0519cfb2c58d3d493c9820e100c35a4c39ff3ec7288ad691ae180fa"
+    },
+    {
+      "path": "omni/contrasts/contrast_00031.tsv",
+      "bytes": 117907,
+      "sha256": "507e55ca25e94e4ae12d7c37cff853abf701dfbfa1cbc1a726adcbd47ee6591a"
+    },
+    {
+      "path": "omni/contrasts/contrast_00032.status.json",
+      "bytes": 180,
+      "sha256": "00806617875fa8f4a8a048f3b13aaa02a48f586e79cb561dd991ec4c963d3b0e"
+    },
+    {
+      "path": "omni/contrasts/contrast_00032.tsv",
+      "bytes": 117907,
+      "sha256": "78dd5db8e22664bdc110f7200f55f29ac06ea20c059ae539beb6c7307150066a"
+    },
+    {
+      "path": "omni/contrasts/contrast_00033.status.json",
+      "bytes": 180,
+      "sha256": "c3f107f781e17ff873949c54a32372020d8d085771b16d9703272006bcc3e47b"
+    },
+    {
+      "path": "omni/contrasts/contrast_00033.tsv",
+      "bytes": 120067,
+      "sha256": "3fd655987634e81c1b8ee5213b30f7d770dfb3d60e2a1f553ab6d91bb3b036ca"
+    },
+    {
+      "path": "omni/contrasts/contrast_00034.status.json",
+      "bytes": 180,
+      "sha256": "21a83ce3382cdbe989d1fb1ee03a6b495c34a4e0ef257e9304f488ad1161787c"
+    },
+    {
+      "path": "omni/contrasts/contrast_00034.tsv",
+      "bytes": 120067,
+      "sha256": "7f5fe61b70bae9861f907545401a5f012cd24808a8cc1ed0bc5ca7faec21d8db"
+    },
+    {
+      "path": "omni/contrasts/contrast_00035.status.json",
+      "bytes": 180,
+      "sha256": "ff642d9126f526244641121654d7ffb1d641724ce9f285bc013562209bc21c72"
+    },
+    {
+      "path": "omni/contrasts/contrast_00035.tsv",
+      "bytes": 118555,
+      "sha256": "d00a1753e23e83a497683aee42dba01272c0fb679788ee4c32aa6a674b778852"
+    },
+    {
+      "path": "omni/contrasts/contrast_00036.status.json",
+      "bytes": 180,
+      "sha256": "7a330bcbd07cbb8fb42097d20cdc2609df010a39da1242e9b9f6ed7fb4026506"
+    },
+    {
+      "path": "omni/contrasts/contrast_00036.tsv",
+      "bytes": 118555,
+      "sha256": "82344b9649529088e6d5dd5f6a2a5df675ce5f1fade1852cc927493370afd275"
+    },
+    {
+      "path": "omni/contrasts/contrast_ids.utm.geojson",
+      "bytes": 333691,
+      "sha256": "4c19d50008b57a903d027cb93a3d98fd99cc12fb0d4603ee57f5a4498a2b9e52"
+    },
+    {
+      "path": "omni/contrasts/contrast_ids.wgs.geojson",
+      "bytes": 381651,
+      "sha256": "fe3c5646a4a0de958b47f1b359a0147c2917665367fdff65095b69ab7100787f"
+    },
+    {
+      "path": "omni/contrasts.out.parquet",
+      "bytes": 12565,
+      "sha256": "36ec94aacbf6af1830d06e19e7044a4df8802676cfb25b9d611a27c0fd8619b3"
+    },
+    {
+      "path": "omni/scenarios.channel_summaries.parquet",
+      "bytes": 202213,
+      "sha256": "457d5d3bede09d7c3da73afb754a690eed3ef33851a0fcaa7998ad4675865f16"
+    },
+    {
+      "path": "omni/scenarios.hillslope_summaries.parquet",
+      "bytes": 677649,
+      "sha256": "0e1e3d7d22489213425e8beb34317daad978aac72b31912c92ea53aede01ea5b"
+    },
+    {
+      "path": "omni/scenarios.out.parquet",
+      "bytes": 3830,
+      "sha256": "b5a09cc426dc2b0a76f2e2e30ce7e066dd4bd5e11af0c617c5cd4d53ea27b554"
+    },
+    {
+      "path": "omni.nodb",
+      "bytes": 30746,
+      "sha256": "20d0b094c37bbccec068ef4f0457f3d33b9c7eda45ef688b9b0841c0568c8c8b"
+    },
+    {
+      "path": "watershed.nodb",
+      "bytes": 84189,
+      "sha256": "5f0b2fe83b815731a2c90ff551c668569500a1dd53882f1ec61d2335875fca2a"
+    },
+    {
+      "path": "wepp/output/interchange/README.md",
+      "bytes": 42524,
+      "sha256": "bd9432d11fbde193c3bcfe7a3f9572730e7f78ff0b8d12b387d567ded53220b2"
+    },
+    {
+      "path": "wepp/output/interchange/ebe_pw0.parquet",
+      "bytes": 988210,
+      "sha256": "fa7a3dc27e67f8dd87deb18dacb3e536a38e04fc180c20dfc8fe6a71f061d86b"
+    },
+    {
+      "path": "wepp/output/interchange/interchange_version.json",
+      "bytes": 50,
+      "sha256": "aa42da47bbe721439c7f3dc66ec8fc123c0c3cac60ed029ef708273605c98369"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "bytes": 1800519,
+      "sha256": "373e222010e75315b9e8a44b09e9ad0da821bd93b0eab3c85ea9743cce355140"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "bytes": 5924,
+      "sha256": "0b520d76a9d7012e34f22fd4e39453362c64bc85a6018966ff0157dd41f0075b"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "bytes": 2345168,
+      "sha256": "108ef640541911f80253c6646c9a8aa4d82bae14b9a5c01c6a0e2219e40708b7"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 6716,
+      "sha256": "2ab80013d00e61ed0c1df7d089752b226a232cbcb7d7a7071a480addd397f683"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.chn.parquet",
+      "bytes": 38855,
+      "sha256": "33b6cd8e07849ee1b31d8176485b8e22bc780a452d11dd95ead43d736cdf4e9d"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.class_data.parquet",
+      "bytes": 3223,
+      "sha256": "c53cc4d93938aa6c45227220d767726068a33f2be5809e6af6fcd3b51784aaa5"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+      "bytes": 74203,
+      "sha256": "69b9aab35c2355ad289c8707e7a86e32e42a8a5dbb919f98e6f7912de4351bf5"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1764,
+      "sha256": "26ec2ace5eb9b905d46b3098181cd3766cd605318a2b2642169c8d887cba4a76"
+    },
+    {
+      "path": "wepp.nodb",
+      "bytes": 2331,
+      "sha256": "dac1493e7cdccd4682fb7d3cd7d5b09bddbc790eb1b49d3d4db8b4238f74c2c2"
+    }
+  ]
+}

@@ -1,0 +1,1185 @@
+I. Data Set Descriptors 
+   A. Title: Meteorological data from Central Met Station at the Andrews Forest. Variables include: 
+      stand-alone precip, swe, snow depth, PAR, and incoming shortwave radiation from 01-Oct-2015 
+      to 01-Oct-2016
+   B. Accession Number: N/A
+   C. Description 
+      1. Originator(s): 
+         Name:
+         Position:
+         Organization:
+         Address:
+         City:
+         State:
+         Postal Code:
+         Phone:
+         Email:
+         UserID:
+      2. Abstract: 
+      3. Study Type: 
+      4. Study Themes: 
+      5. LTER Core Areas: 
+      6. Georeferences: 
+      7. Submission Date: 
+   D. Keywords: 
+II. Research Origin Descriptors 
+   A. Overall Project Description 
+      1. Project Title: 
+      2. Principal Investigators: 
+         Name:
+         Position:
+         Organization:
+         Address:
+         City:
+         State:
+         Postal Code:
+         Phone:
+         Email:
+         UserID:
+      3. Funding Period:  to 
+      4. Objectives: 
+      5. Abstract: 
+      6. Funding Source: 
+   B. Sub-project Description 
+      1. Site Description 
+         a. Geographic Location: 
+            Coordinates: 
+         b. Physiographic Region: 
+         c. Landform Components: 
+         d. Hydrographic Characteristics: 
+         e. Topographic Attributes: 
+         f. Geology, Lithology and Soils: 
+         g. Vegetation Communities: 
+         h. History of Land Use and Disturbance: 
+         i. Climate: 
+      2. Experimental or Sampling Design 
+         a. Design Characteristics: 
+         b. Permanent Plots: 
+         c. Data Collection Duration and Frequency: 
+            Beginning of Observations: 
+            End of Observations: 
+      3. Research Methods 
+         a. Field and Laboratory Methods: 
+         b. Protocols: 
+         c. Instrumentation: 
+         d. Taxonomy and Systematics: 
+         e. Speclies List: 
+         f. Permit History: 
+      4. Project Personnel 
+         a. Personnel: 
+         b. Affiliations: 
+III. Data Set Status and Accessibility 
+   A. Status 
+      1. Latest Update: 12-May-2025
+      2. Latest Archive Date: 
+      3. Latest Metadata Update: 12-May-2025
+      4. Data Verification Status: 
+   B. Accessibility 
+      1. Storage Location and Medium: Stored at  
+         on media: 
+      2. Contact Person: 
+         Name:
+         Position:
+         Organization:
+         Address:
+         City:
+         State:
+         Postal Code:
+         Phone:
+         Email:
+         UserID:
+      3. Copyright Restrictions: 
+      4. Restrictions: 
+         a. Release Date: Affiliates: , Public: 
+         b. Citation: 
+         c. Disclaimer: 
+      5. Costs: 
+IV. Data Structural Descriptors 
+   A. Data Set File 
+      1. File Name: cenmet_234_a_5min_2016.csv
+      2. Size: 105408 records
+      3. File Format: ASCII text (comma-separated value format)
+      3a. Delimiters: single comma
+      4. Header Information: 5 lines of ASCII text
+      5. Alphanumeric Attributes: 
+      6. Quality Control Flag Codes: M = missing value, Q = questionable value, I = invalid value 
+         (out of range), T = hardware malfunction (eg. heater), L = low voltage, H = high voltage, 
+         E = value estimated by linear interpolation, V = small unexpected 1-step jump, C = sensor 
+         calibration, Z = value changed from negative number to zero., F = at or above field 
+         capacity
+      7. Authentication Procedures: 
+      8. Calculations: 
+         SNOWDEP_INST_0_0_01: SNOWDEP_INST_0_0_01(mm) = SNOWDEP_INST_0_0_01(m)*1000
+      9. Processing History: 
+         Software version: GCE Data Toolbox Version 3.9.10 (23-May-2022)
+         Data structure version: GCE Data Structure 1.1 (29-Mar-2001)
+         Original data files processed: 
+            metdat query: SELECT * FROM CENT_234_Table105 WHERE LOGGERID = 234 AND TmStamp BETWEEN 
+               '2015-10-01 00:05:00' AND '2016-10-01 00:00:00' ORDER BY TmStamp ASC (104747 records)
+            workspace (105325 records)
+            sunrise_sunset_cenmet_2004_5min.csv (105397 records)
+            sunrise_sunset_primet_2004_5min.csv (105397 records)
+            sunrise_sunset_uplmet_2004_5min.csv (105397 records)
+            sunrise_sunset_vanmet_2004_5min.csv (105397 records)
+            sunrise_sunset_cenmet_2004_5min.csv (105397 records)
+            sunrise_sunset_primet_2004_5min.csv (105397 records)
+            sunrise_sunset_uplmet_2004_5min.csv (105397 records)
+            sunrise_sunset_vanmet_2004_5min.csv (105397 records)
+         Data processing history:
+            12-May-2025: new GCE Data Structure 1.1 created ('newstruct')
+            12-May-2025: imported result set from SQL query on data source 'metdat' ('sql2struct')
+            12-May-2025: imported all documentation metadata from the template 'LNDB_CenMet_3', 
+               updating descriptors for columns Date, RecNum, LOGGERID, PROGID, 
+               BATTERY_INST_0_0_01, PRECIP_INST_625_0_02, ORI_SH_AVG, SNOWDEP_INST_0_0_01, 
+               SNOWDEP_QUAL, SWE_INST_0_0_01, PAR_MEAN_625_0_01, PAR_MAX_625_0_01, 
+               SWI_MEAN_625_0_01, SWI_MAX_625_0_01, PRECIP_INST_455_0_01, ORI_SA_AVG, 
+               PRECIP_TOT_625_0_04 and TSB_MEAN_625_0_01 ('meta_template')
+            12-May-2025: updated 2 metadata fields in the Data, Dataset section(s) ('addmeta')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: Q/C flagging criteria applied, 'flags' field updated ('dataflag')
+            12-May-2025: Name of column TmStamp changed to Date; Name of column BATTERY_V_Avg 
+               changed to BATTERY_INST_0_0_01; Name of column SH_PRECIP changed to 
+               PRECIP_INST_625_0_02; Name of column SH_TEMP_Avg changed to ORI_SH_AVG; Name of 
+               column SNOWDEPTH changed to SNOWDEP_INST_0_0_01; Name of column QUALITY changed to 
+               SNOWDEP_QUAL; Name of column SWE changed to SWE_INST_0_0_01; Name of column PAR_Avg 
+               changed to PAR_MEAN_625_0_01; Name of column PAR_Max changed to PAR_MAX_625_0_01; 
+               Name of column SOLAR_Wm2_Avg changed to SWI_MEAN_625_0_01; Name of column 
+               SOLAR_Wm2_Max changed to SWI_MAX_625_0_01; Name of column SA_PRECIP changed to 
+               PRECIP_INST_455_0_01; Name of column SA_TEMP_Avg changed to ORI_SA_AVG; Name of 
+               column TB_PRECIP_Tot changed to PRECIP_TOT_625_0_04; Name of column SOLAR_TEMP_Avg 
+               changed to TSB_MEAN_625_0_01; ('apply_template')
+            12-May-2025: Units of column Date changed from '' to 'serial number'; Units of column 
+               RecNum changed from '' to 'count'; Units of column LOGGERID changed from '' to 
+               'none'; Units of column PROGID changed from '' to 'none'; Units of column 
+               BATTERY_INST_0_0_01 changed from '' to 'volts'; Units of column PRECIP_INST_625_0_02 
+               changed from '' to 'mm'; Units of column ORI_SH_AVG changed from '' to 'deg c'; 
+               Units of column SNOWDEP_INST_0_0_01 changed from '' to 'm'; Units of column 
+               SNOWDEP_QUAL changed from '' to 'none'; Units of column SWE_INST_0_0_01 changed from 
+               '' to 'mm'; Units of column PAR_MEAN_625_0_01 changed from '' to 'µmol/(m2*s)'; 
+               Units of column PAR_MAX_625_0_01 changed from '' to 'µmol/(m2*s)'; Units of column 
+               SWI_MEAN_625_0_01 changed from '' to 'w m-2'; Units of column SWI_MAX_625_0_01 
+               changed from '' to 'w m-2'; Units of column PRECIP_INST_455_0_01 changed from '' to 
+               'mm'; Units of column ORI_SA_AVG changed from '' to 'deg c'; Units of column 
+               PRECIP_TOT_625_0_04 changed from '' to 'mm'; Units of column TSB_MEAN_625_0_01 
+               changed from '' to 'deg c'; ('apply_template')
+            12-May-2025: Data Type of column PROGID changed from 'd' to 'f'; Data Type of column 
+               SNOWDEP_QUAL changed from 'f' to 'd'; ('apply_template')
+            12-May-2025: Variable Type of column RecNum changed from 'data' to 'nominal'; Variable 
+               Type of column LOGGERID changed from 'data' to 'nominal'; Variable Type of column 
+               PROGID changed from 'data' to 'nominal'; ('apply_template')
+            12-May-2025: Numeric Type of column PROGID changed from 'discrete' to 'continuous'; 
+               Numeric Type of column BATTERY_INST_0_0_01 changed from 'continous' to 'continuous'; 
+               Numeric Type of column PRECIP_INST_625_0_02 changed from 'continous' to 
+               'continuous'; Numeric Type of column ORI_SH_AVG changed from 'continous' to 
+               'continuous'; Numeric Type of column SNOWDEP_INST_0_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column SNOWDEP_QUAL changed from 'continous' to 
+               'discrete'; Numeric Type of column SWE_INST_0_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column PAR_MEAN_625_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column PAR_MAX_625_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column SWI_MEAN_625_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column SWI_MAX_625_0_01 changed from 'continous' to 
+               'continuous'; Numeric Type of column PRECIP_INST_455_0_01 changed from 'continous' 
+               to 'continuous'; Numeric Type of column ORI_SA_AVG changed from 'continous' to 
+               'continuous'; Numeric Type of column PRECIP_TOT_625_0_04 changed from 'continous' to 
+               'continuous'; Numeric Type of column TSB_MEAN_625_0_01 changed from 'continous' to 
+               'continuous'; ('apply_template')
+            12-May-2025: Q/C Criteria of column Date changed from '' to 'x<0='I';isnan(x)='M''; Q/C 
+               Criteria of column RecNum changed from '' to 'x<0='I';isnan(x)='M''; Q/C Criteria of 
+               column LOGGERID changed from '' to 
+               'flag_notinarray(x,[225,233,234])='I';isnan(x)='M''; Q/C Criteria of column PROGID 
+               changed from '' to 'flag_valuechange(x,0.1,0.1,1)='P';isnan(x)='M''; Q/C Criteria of 
+               column BATTERY_INST_0_0_01 changed from '' to 
+               'x<0='I';x<11.5='L';x>16='H';isnan(x)='M''; Q/C Criteria of column 
+               PRECIP_INST_625_0_02 changed from '' to 
+               'x<=0='I';x>1200='I';col_ORI_SH_AVG<3.5='T';flag_valuechange(x,100,25,1)='R';isnan(x)
+               ='M';col_Date>=datenum('02/23/2019 15:05:00')&col_Date<=datenum('03/26/2019 
+               09:00:00')='Q';col_Date>=datenum('03/16/2019 
+               10:25:00')&col_Date<=datenum('03/16/2019 
+               12:00:00')='Q';col_Date>=datenum('10/01/2024 
+               00:05:00')&col_Date<=datenum('10/01/2024 00:10:00')='Q''; Q/C Criteria of column 
+               ORI_SH_AVG changed from '' to 'isnan(x)='M';x<3.5='T''; Q/C Criteria of column 
+               SNOWDEP_INST_0_0_01 changed from '' to 
+               'x>5.0='I';x<-5.0='I';x>4.5='Q';col_SNOWDEP_QUAL<=0='I';col_SNOWDEP_QUAL<162&col_SNOW
+               DEP_QUAL>0='Q';col_SNOWDEP_QUAL>=300&col_SNOWDEP_QUAL<=600='Q';isnan(x)='M';flag_date
+               range(col_Date,{'10/07/2022 11:55:00','10/30/2022 12:05:00'})='I''; Q/C Criteria of 
+               column SNOWDEP_QUAL changed from '' to 'isnan(x)='M''; Q/C Criteria of column 
+               SWE_INST_0_0_01 changed from '' to 
+               'x<-100='I';x>2500='I';x>2000='Q';isnan(x)='M';flag_daterange(col_Date,{'11/15/2019 
+               13:25:00','11/15/2019 17:20:00'})='I';flag_daterange(col_Date,{'12/10/2019 
+               13:25:00','12/10/2019 18:10:00'})='I';flag_daterange(col_Date,{'10/07/2022 
+               11:55:00','12/21/2022 11:45:00'})='I''; Q/C Criteria of column PAR_MEAN_625_0_01 
+               changed from '' to 
+               'x<-5='I';x<-2='Q';x>3000='I';x>2230='Q';isnan(x)='M';flag_daterange(col_Date,{'08/21
+               /2023 15:00:00','08/26/2023 23:55:00'})='Q''; Q/C Criteria of column 
+               PAR_MAX_625_0_01 changed from '' to 
+               'x<0='I';x>10000='I';x>2000='Q';isnan(x)='M';flag_daterange(col_Date,{'08/21/2023 
+               15:00:00','08/26/2023 23:55:00'})='Q''; Q/C Criteria of column SWI_MEAN_625_0_01 
+               changed from '' to 'isnan(x)='M';col_Date>=datenum('09/18/2018 
+               14:52:00')&col_Date<=datenum('09/18/2018 
+               14:57:00')='Q';flag_daterange(col_Date,{'08/21/2023 15:00:00','08/26/2023 
+               23:55:00'})='Q';flag_daterange(col_Date,{'05/18/2024 23:00:00','05/21/2024 
+               21:30:00'})='Q';flag_daterange(col_Date,{'11/13/2024 00:00:00','12/05/2024 
+               00:00:00'})='Q''; Q/C Criteria of column SWI_MAX_625_0_01 changed from '' to 
+               'isnan(x)='M';col_Date>=datenum('09/18/2018 14:52:00')&col_Date<=datenum('09/18/2018 
+               14:57:00')='Q';flag_daterange(col_Date,{'08/21/2023 15:00:00','08/26/2023 
+               23:55:00'})='Q''; Q/C Criteria of column PRECIP_INST_455_0_01 changed from '' to 
+               'x<=0='I';x>1200='I';col_ORI_SA_AVG<3.5='T';flag_valuechange(x,100,25,1)='R';isnan(x)
+               ='M';col_Date>=datenum('12/31/2015 09:00:00')&col_Date<=datenum('01/22/2016 
+               11:35:00')='I';col_Date>=datenum('12/18/2018 
+               02:30:00')&col_Date<=datenum('12/25/2018 
+               09:20:00')='M';col_Date>=datenum('02/12/2019 
+               17:45:00')&col_Date<=datenum('02/21/2019 
+               17:30:00')='I';col_Date>=datenum('04/06/2019 
+               10:00:00')&col_Date<=datenum('04/16/2019 
+               12:00:00')='I';col_Date>=datenum('09/07/2019 
+               19:00:00')&col_Date<=datenum('09/08/2019 
+               13:15:00')='Q';col_Date>=datenum('09/17/2019 
+               15:30:00')&col_Date<=datenum('09/17/2019 
+               15:45:00')='I';col_Date>=datenum('06/24/2020 
+               08:00:00')&col_Date<=datenum('06/30/2020 
+               17:00:00')='I';col_Date>=datenum('10/07/2021 
+               13:00:00')&col_Date<=datenum('10/12/2021 
+               17:00:00')='I';col_Date>=datenum('10/01/2024 
+               00:05:00')&col_Date<=datenum('10/01/2024 00:10:00')='Q''; Q/C Criteria of column 
+               ORI_SA_AVG changed from '' to 'isnan(x)='M';x<3.5='T''; Q/C Criteria of column 
+               PRECIP_TOT_625_0_04 changed from '' to 
+               'x<0='I';x>18.1='Q';col_ORI_SH_AVG<3.5='T';isnan(x)='M''; Q/C Criteria of column 
+               TSB_MEAN_625_0_01 changed from '' to 'isnan(x)='M';x<-50='I';x>60='I''; 
+               ('apply_template')
+            12-May-2025: Precision of column Date changed from 0 to 7; Precision of column PROGID 
+               changed from 0 to 1; Precision of column SNOWDEP_INST_0_0_01 changed from 4 to 5; 
+               Precision of column SNOWDEP_QUAL changed from 2 to 0; Precision of column 
+               SWE_INST_0_0_01 changed from 1 to 2; Precision of column PAR_MEAN_625_0_01 changed 
+               from 1 to 2; Precision of column SWI_MEAN_625_0_01 changed from 1 to 4; Precision of 
+               column SWI_MAX_625_0_01 changed from 1 to 4; Precision of column 
+               PRECIP_INST_455_0_01 changed from 2 to 3; Precision of column PRECIP_TOT_625_0_04 
+               changed from 0 to 4; Precision of column TSB_MEAN_625_0_01 changed from 0 to 2; 
+               ('apply_template')
+            12-May-2025: Descriptions of columns LOGGERID, PROGID, BATTERY_INST_0_0_01, 
+               PRECIP_INST_625_0_02, ORI_SH_AVG, SNOWDEP_INST_0_0_01, SWE_INST_0_0_01, 
+               PAR_MEAN_625_0_01, PAR_MAX_625_0_01, SWI_MEAN_625_0_01, SWI_MAX_625_0_01, 
+               PRECIP_INST_455_0_01, ORI_SA_AVG, PRECIP_TOT_625_0_04 and TSB_MEAN_625_0_01 edited; 
+               ('apply_template')
+            12-May-2025: deleted column SOLAR_MJ_Tot from the structure ('deletecols')
+            12-May-2025: converted units of 'SNOWDEP_INST_0_0_01' column and 3 QA/QC flag criteria 
+               parameters from m to mm ('unit_convert')
+            12-May-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: sorted rows by measurement date prior to applying drift corrections 
+               ('correct_drift')
+            12-May-2025: corrected values in column SNOWDEP_INST_0_0_01 for sensor drift over the 
+               date range 01-Oct-2015 12:00:00 to 19-Apr-2016 12:00:00 by applying a constant 
+               correction of 750 ('correct_drift')
+            12-May-2025: 57843 values in 'SNOWDEP_INST_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: sorted rows by measurement date prior to applying drift corrections 
+               ('correct_drift')
+            12-May-2025: corrected values in column SWE_INST_0_0_01 for sensor drift over the date 
+               range 22-Jan-2016 13:20:00 to 17-Mar-2016 16:10:00 by applying a constant correction 
+               of -2218 ('correct_drift')
+            12-May-2025: 15864 values in 'SWE_INST_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_INST_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: added column 'Site' at position 1 ('addcol')
+            12-May-2025: inserted 661 new records with date/time values and NaN/null data values 
+               (replicating common values in the non-data columns Site, RecNum, LOGGERID and 
+               PROGID) to fill in date/time interval gaps in the data series and assigned flag 'M' 
+               to inserted records ('pad_date_gaps')
+            12-May-2025: sorted by column Date(ascending) ('sortdata')
+            12-May-2025: converted values in all columns assigned QA/QC flag(s) I (invalid value 
+               (out of range)) to NaN/empty, locking and replacing existing flags with 'M': 335 
+               records in SNOWDEP_INST_0_0_01, 6354 records in PRECIP_INST_455_0_01 ('nullflags')
+            12-May-2025: replaced values matching 'SWI_MEAN_625_0_01 <= 5.0 & SWI_MEAN_625_0_01 > 
+               -5.0' in column(s) SWI_MEAN_625_0_01 with 0 ('num_replace')
+            12-May-2025: 2567 values in 'SWI_MEAN_625_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWI_MEAN_625_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: manually added 'Q' flags to 54 records in column(s) SWI_MEAN_625_0_01 
+               ('addflags')
+            12-May-2025: manually added 'M' flags to 661 records in column(s) SWI_MEAN_625_0_01 
+               excluding NaN/empty values ('addflags')
+            12-May-2025: added column 'SWI_RUNMN_625_0_01' at position 25 ('addcol')
+            12-May-2025: Year, Month, Day, Hour and Minute datetime columns added after column Date 
+               ('add_datepartcols')
+            12-May-2025: sorted by columns Month(ascending), Day(ascending), Hour(ascending), 
+               Minute(ascending) ('sortdata')
+            12-May-2025: performed a lookup join of columns Month, Day, Hour and Minute on columns 
+               Month, Day, Hour and Minute from a second structure, returning column(s) Site, Date, 
+               Year, RecNum, LOGGERID, PROGID, BATTERY_INST_0_0_01, BATTERY_V_CHECK, 
+               PRECIP_INST_625_0_02, ORI_SH_AVG, SNOWDEP_INST_0_0_01, SNOWDEPTH_CHECK, 
+               SNOWDEP_QUAL, SWE_INST_0_0_01, SWE_CHECK, PAR_MEAN_625_0_01, PAR_MAX_625_0_01, 
+               SWI_MEAN_625_0_01, SWI_MAX_625_0_01, PRECIP_INST_455_0_01, ORI_SA_AVG, 
+               PUMPVOLTS_Avg, PUMPVOLTS_CHECK, PRECIP_TOT_625_0_04, TSB_MEAN_625_0_01 and 
+               SWI_RUNMN_625_0_01 from the first structure and column(s) Year, CEN, CS2MET, DISCTR, 
+               PRI, UPL, VAN, CEN_100, CS2MET_100, DISCTR_100, PRI_100, UPL_100, VAN_100, CEN_SS, 
+               CS2MET_SS, DISCTR_SS, PRI_SS, UPL_SS, VAN_SS, CEN_SS_3, CS2MET_SS_3, DISCTR_SS_3, 
+               PRI_SS_3, VAN_SS_3, CEN_isDaytime, CEN_isNighttime, PRI_isDaytime, PRI_isNighttime, 
+               UPL_isDaytime, UPL_isNighttime, VAN_isDaytime and VAN_isNighttime from the second 
+               structure (105408 rows) ('joindata')
+            12-May-2025: sorted by column Date(ascending) ('sortdata')
+            12-May-2025: manually added 'Q' flags to 50 records in column(s) SWI_RUNMN_625_0_01 
+               ('addflags')
+            12-May-2025: locked Q/C flag criteria for column SWI_RUNMN_625_0_01 to prevent 
+               automatic evaluation ('flag_locks')
+            12-May-2025: deleted columns Month, Day, Hour and Minute from the structure 
+               ('deletecols')
+            12-May-2025: deleted column Year from the structure ('deletecols')
+            12-May-2025: added column 'Hour' at position 58 ('addcol')
+            12-May-2025: added column 'SWI_TOT_625_0_01' at position 59 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) SWI_MEAN_625_0_01 to column(s) 
+               SWI_TOT_625_0_01, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: replaced values matching 'PAR_MEAN_625_0_01 < 0' in column(s) 
+               PAR_MEAN_625_0_01 and PAR_MAX_625_0_01 with 0 ('num_replace')
+            12-May-2025: 612 values in 'PAR_MEAN_625_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) PAR_MEAN_625_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: documented flagged and missing values in columns Site, Date, RecNum, 
+               LOGGERID, PROGID, BATTERY_INST_0_0_01, BATTERY_V_CHECK, PRECIP_INST_625_0_02, 
+               ORI_SH_AVG, SNOWDEP_INST_0_0_01, SNOWDEPTH_CHECK, SNOWDEP_QUAL, SWE_INST_0_0_01, 
+               SWE_CHECK, PAR_MEAN_625_0_01, PAR_MAX_625_0_01, SWI_MEAN_625_0_01, SWI_MAX_625_0_01, 
+               PRECIP_INST_455_0_01, ORI_SA_AVG, PUMPVOLTS_Avg, PUMPVOLTS_CHECK, 
+               PRECIP_TOT_625_0_04, TSB_MEAN_625_0_01, SWI_RUNMN_625_0_01, Year, CEN, CS2MET, 
+               DISCTR, PRI, UPL, VAN, CEN_100, CS2MET_100, DISCTR_100, PRI_100, UPL_100, VAN_100, 
+               CEN_SS, CS2MET_SS, DISCTR_SS, PRI_SS, UPL_SS, VAN_SS, CEN_SS_3, CS2MET_SS_3, 
+               DISCTR_SS_3, PRI_SS_3, VAN_SS_3, CEN_isDaytime, CEN_isNighttime, PRI_isDaytime, 
+               PRI_isNighttime, UPL_isDaytime, UPL_isNighttime, VAN_isDaytime, VAN_isNighttime and 
+               SWI_TOT_625_0_01 as data set anomalies in the metadata ('add_anomalies')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            12-May-2025: added column 'PRECIP_TOT_455_0_01' at position 20 ('addcol')
+            12-May-2025: manually added an array of custom flags to 105408 records in column(s) 
+               PRECIP_TOT_455_0_01 ('addflags')
+            12-May-2025: locked Q/C flag criteria for column PRECIP_TOT_455_0_01 to prevent 
+               automatic evaluation ('flag_locks')
+            12-May-2025: converted values in column(s) PRECIP_TOT_455_0_01 assigned QA/QC flag(s) M 
+               (missing value) to NaN/empty, retaining and locking existing flags: 7015 records in 
+               PRECIP_TOT_455_0_01 ('nullflags')
+            12-May-2025: added column 'PRECIP_TOT_625_0_02' at position 9 ('addcol')
+            12-May-2025: manually added an array of custom flags to 105408 records in column(s) 
+               PRECIP_TOT_625_0_02 ('addflags')
+            12-May-2025: locked Q/C flag criteria for column PRECIP_TOT_625_0_02 to prevent 
+               automatic evaluation ('flag_locks')
+            12-May-2025: converted values in column(s) PRECIP_TOT_625_0_02 assigned QA/QC flag(s) M 
+               (missing value) to NaN/empty, retaining and locking existing flags: 661 records in 
+               PRECIP_TOT_625_0_02 ('nullflags')
+            12-May-2025: added column 'PRECIP_ACC_455_0_01' at position 22 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) PRECIP_TOT_455_0_01 to column(s) 
+               PRECIP_ACC_455_0_01, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: added column 'PRECIP_ACC_625_0_02' at position 10 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) PRECIP_TOT_625_0_02 to column(s) 
+               PRECIP_ACC_625_0_02, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: added column 'SNOWDEP_MED_0_0_01' at position 13 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) SNOWDEP_INST_0_0_01 to column(s) 
+               SNOWDEP_MED_0_0_01, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: added column 'SWE_MED_0_0_01' at position 17 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) SWE_INST_0_0_01 to column(s) 
+               SWE_MED_0_0_01, merging copied flags with any existing flags, and set QA/QC criteria 
+               for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: replaced values matching '(Date > datenum('05/07/2024 12:00:00') & Date < 
+               datenum('11/16/2024 00:00:00')) 
+          (Date > datenum('05/03/2023 21:45:00') & Date < datenum('10/24/2023 00:00:00')) 
+          (Date > datenum('05/10/2022 18:50:00') & Date < datenum('10/31/2022 17:00:00')) 
+          (Date > datenum('04/09/2021 12:00:00') & Date < datenum('10/07/2021 12:00:00')) 
+          (Date > datenum('04/11/2020 12:00:00') & Date < datenum('11/05/2020 12:00:00')) 
+          (Date > datenum('04/25/2019 12:00:00') & Date < datenum('11/11/2019 12:00:00')) 
+          (Date > datenum('05/02/2018 12:00:00') & Date < datenum('11/16/2018 12:00:00')) 
+          (Date > datenum('04/24/2017 12:00:00') & Date < datenum('10/13/2017 12:00:00')) 
+          (Date > datenum('04/19/2016 12:00:00') & Date < datenum('11/19/2016 12:00:00')) 
+          (Date > datenum('04/22/2015 12:00:00') & Date < datenum('09/31/2015 12:00:00'))' in 
+             column(s) SNOWDEP_INST_0_0_01 and SNOWDEP_MED_0_0_01 with 0 ('num_replace')
+            12-May-2025: 47519 values in 'SNOWDEP_INST_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: 47519 values in 'SNOWDEP_MED_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SNOWDEP_MED_0_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: replaced values matching '(Date > datenum('05/07/2024 12:00:00') & Date < 
+               datenum('11/16/2024 00:00:00')) 
+          (Date > datenum('05/03/2023 21:45:00') & Date < datenum('10/24/2023 00:00:00')) 
+          (Date > datenum('05/10/2022 18:50:00') & Date < datenum('10/31/2022 17:00:00')) 
+          (Date > datenum('04/09/2021 12:00:00') & Date < datenum('10/07/2021 12:00:00')) 
+          (Date > datenum('04/11/2020 12:00:00') & Date < datenum('11/05/2020 12:00:00')) 
+          (Date > datenum('04/25/2019 12:00:00') & Date < datenum('11/11/2019 12:00:00')) 
+          (Date > datenum('05/02/2018 12:00:00') & Date < datenum('11/16/2018 12:00:00')) 
+          (Date > datenum('04/24/2017 12:00:00') & Date < datenum('10/13/2017 12:00:00')) 
+          (Date > datenum('04/19/2016 12:00:00') & Date < datenum('11/19/2016 12:00:00')) 
+          (Date > datenum('04/22/2015 12:00:00') & Date < datenum('09/31/2015 12:00:00'))' in 
+             column(s) SWE_INST_0_0_01 and SWE_MED_0_0_01 with 0 ('num_replace')
+            12-May-2025: 47519 values in 'SWE_INST_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_INST_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: 47519 values in 'SWE_MED_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_MED_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: replaced values matching 'SNOWDEP_MED_0_0_01 < 0' in column(s) 
+               SNOWDEP_MED_0_0_01 with 0 ('num_replace')
+            12-May-2025: 18209 values in 'SNOWDEP_MED_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SNOWDEP_MED_0_0_01, 'flags' 
+               field updated ('dataflag')
+            12-May-2025: manually added 'Q' flags to 18209 records in column(s) SNOWDEP_MED_0_0_01 
+               ('addflags')
+            12-May-2025: replaced values matching 'SWE_MED_0_0_01 < 0' in column(s) SWE_MED_0_0_01 
+               with 0 ('num_replace')
+            12-May-2025: 10852 values in 'SWE_MED_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_MED_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: manually added 'Q' flags to 10852 records in column(s) SWE_MED_0_0_01 
+               ('addflags')
+            12-May-2025: deleted columns SNOWDEP_INST_0_0_01, SNOWDEP_QUAL, ORI_SA_AVG, ORI_SH_AVG, 
+               SWE_INST_0_0_01, SWE_CHECK, SNOWDEPTH_CHECK, BATTERY_V_CHECK, PUMPVOLTS_Avg and 
+               PUMPVOLTS_CHECK from the structure ('deletecols')
+            12-May-2025: deleted columns Year, CEN, CS2MET, DISCTR, PRI, UPL, VAN, CEN_100, 
+               CS2MET_100, DISCTR_100, PRI_100, UPL_100, VAN_100, CEN_SS, CS2MET_SS, DISCTR_SS, 
+               PRI_SS, UPL_SS, VAN_SS, CEN_SS_3, CS2MET_SS_3, DISCTR_SS_3, PRI_SS_3, VAN_SS_3, 
+               CEN_isDaytime, CEN_isNighttime, PRI_isDaytime, PRI_isNighttime, UPL_isDaytime, 
+               UPL_isNighttime, VAN_isDaytime and VAN_isNighttime from the structure ('deletecols')
+            12-May-2025: deleted column Date from the structure ('deletecols')
+            12-May-2025: added column 'Date' at position 2 ('addcol')
+            12-May-2025: flags for columns BATTERY_INST_0_0_01, PRECIP_INST_625_0_02, 
+               PRECIP_TOT_625_0_02, PRECIP_ACC_625_0_02, SNOWDEP_MED_0_0_01, SWE_MED_0_0_01, 
+               PAR_MEAN_625_0_01, PAR_MAX_625_0_01, SWI_MEAN_625_0_01, SWI_MAX_625_0_01, 
+               PRECIP_INST_455_0_01, PRECIP_TOT_455_0_01, PRECIP_ACC_455_0_01, PRECIP_TOT_625_0_04, 
+               TSB_MEAN_625_0_01, SWI_RUNMN_625_0_01, Hour and SWI_TOT_625_0_01 converted to data 
+               columns, flag codes updated in metadata ('flags2cols')
+            12-May-2025: updated 6 metadata fields in the Data section(s) ('addmeta')
+            12-May-2025: updated 15 metadata fields in the Status, Data sections to reflect 
+               attribute metadata ('updatecols')
+            12-May-2025: parsed and formatted metadata ('listmeta')
+   B. Variable Information 
+      1. Variable Name: 
+         column  1. Site
+         column  2. Date
+         column  3. RecNum
+         column  4. LOGGERID
+         column  5. PROGID
+         column  6. BATTERY_INST_0_0_01
+         column  7. Flag_BATTERY_INST_0_0_01
+         column  8. PRECIP_INST_625_0_02
+         column  9. Flag_PRECIP_INST_625_0_02
+         column 10. PRECIP_TOT_625_0_02
+         column 11. Flag_PRECIP_TOT_625_0_02
+         column 12. PRECIP_ACC_625_0_02
+         column 13. Flag_PRECIP_ACC_625_0_02
+         column 14. SNOWDEP_MED_0_0_01
+         column 15. Flag_SNOWDEP_MED_0_0_01
+         column 16. SWE_MED_0_0_01
+         column 17. Flag_SWE_MED_0_0_01
+         column 18. PAR_MEAN_625_0_01
+         column 19. Flag_PAR_MEAN_625_0_01
+         column 20. PAR_MAX_625_0_01
+         column 21. Flag_PAR_MAX_625_0_01
+         column 22. SWI_MEAN_625_0_01
+         column 23. Flag_SWI_MEAN_625_0_01
+         column 24. SWI_MAX_625_0_01
+         column 25. Flag_SWI_MAX_625_0_01
+         column 26. PRECIP_INST_455_0_01
+         column 27. Flag_PRECIP_INST_455_0_01
+         column 28. PRECIP_TOT_455_0_01
+         column 29. Flag_PRECIP_TOT_455_0_01
+         column 30. PRECIP_ACC_455_0_01
+         column 31. Flag_PRECIP_ACC_455_0_01
+         column 32. PRECIP_TOT_625_0_04
+         column 33. Flag_PRECIP_TOT_625_0_04
+         column 34. TSB_MEAN_625_0_01
+         column 35. Flag_TSB_MEAN_625_0_01
+         column 36. SWI_RUNMN_625_0_01
+         column 37. Flag_SWI_RUNMN_625_0_01
+         column 38. Hour
+         column 39. Flag_Hour
+         column 40. SWI_TOT_625_0_01
+         column 41. Flag_SWI_TOT_625_0_01
+      2. Variable Definition: 
+         column  1. Site code
+         column  2. Round off corrected corrected serial date
+         column  3. RecNum
+         column  4. Logger ID
+         column  5. Program ID of program
+         column  6. Battery supply voltage
+         column  7. QA/QC flags for Battery supply voltage (flagging criteria, where "x" is 
+            BATTERY_INST_0_0_01: x<0="I", x<11.5="L", x>16="H", isnan(x)="M", manual)
+         column  8. Shelter rain gauge
+         column  9. QA/QC flags for Shelter rain gauge (flagging criteria, where "x" is 
+            PRECIP_INST_625_0_02: x<=0="I", x>1200="I", ORI_SH_AVG<3.5="T", 
+            flag_valuechange(x,100,25,1)="R", isnan(x)="M", Date>=datenum("02/23/2019 
+            15:05:00")&Date<=datenum("03/26/2019 09:00:00")="Q", Date>=datenum("03/16/2019 
+            10:25:00")&Date<=datenum("03/16/2019 12:00:00")="Q", Date>=datenum("10/01/2024 
+            00:05:00")&Date<=datenum("10/01/2024 00:10:00")="Q")
+         column 10. Increment corrected total precipitation
+         column 11. QA/QC flags for Increment corrected total precipitation (flagging criteria, 
+            where "x" is PRECIP_TOT_625_0_02: manual)
+         column 12. Cumulative sum of total precipitation
+         column 13. QA/QC flags for Cumulative sum of total precipitation (flagging criteria, where 
+            "x" is PRECIP_ACC_625_0_02: manual)
+         column 14. 12 point running median of SNOWDEP_INST
+         column 15. QA/QC flags for 12 point running median of SNOWDEP_INST (flagging criteria, 
+            where "x" is SNOWDEP_MED_0_0_01: manual)
+         column 16. 12 point running median of SWE_INST
+         column 17. QA/QC flags for 12 point running median of SWE_INST (flagging criteria, where 
+            "x" is SWE_MED_0_0_01: manual)
+         column 18. PAR_AVG
+         column 19. QA/QC flags for PAR_AVG (flagging criteria, where "x" is PAR_MEAN_625_0_01: 
+            x<-5="I", x<-2="Q", x>3000="I", x>2230="Q", isnan(x)="M", 
+            flag_daterange(Date,{"08/21/2023 15:00:00","08/26/2023 23:55:00"})="Q", manual)
+         column 20. PAR_MAX
+         column 21. QA/QC flags for PAR_MAX (flagging criteria, where "x" is PAR_MAX_625_0_01: 
+            x<0="I", x>10000="I", x>2000="Q", isnan(x)="M", flag_daterange(Date,{"08/21/2023 
+            15:00:00","08/26/2023 23:55:00"})="Q")
+         column 22. Incoming shortwave radiation measured by a CS320 Digital Thermopile Pyranometer 
+            (installed 20200701)
+         column 23. QA/QC flags for Incoming shortwave radiation measured by a CS320 Digital 
+            Thermopile Pyranometer (installed 20200701) (flagging criteria, where "x" is 
+            SWI_MEAN_625_0_01: isnan(x)="M", Date>=datenum("09/18/2018 
+            14:52:00")&Date<=datenum("09/18/2018 14:57:00")="Q", flag_daterange(Date,{"08/21/2023 
+            15:00:00","08/26/2023 23:55:00"})="Q", flag_daterange(Date,{"05/18/2024 
+            23:00:00","05/21/2024 21:30:00"})="Q", flag_daterange(Date,{"11/13/2024 
+            00:00:00","12/05/2024 00:00:00"})="Q", manual)
+         column 24. Max incoming shortwave radiation measured by a CS320 Digital Thermopile 
+            Pyranometer (installed 20200701)
+         column 25. QA/QC flags for Max incoming shortwave radiation measured by a CS320 Digital 
+            Thermopile Pyranometer (installed 20200701) (flagging criteria, where "x" is 
+            SWI_MAX_625_0_01: isnan(x)="M", Date>=datenum("09/18/2018 
+            14:52:00")&Date<=datenum("09/18/2018 14:57:00")="Q", flag_daterange(Date,{"08/21/2023 
+            15:00:00","08/26/2023 23:55:00"})="Q", manual)
+         column 26. Stand alone rain gauge
+         column 27. QA/QC flags for Stand alone rain gauge (flagging criteria, where "x" is 
+            PRECIP_INST_455_0_01: x<=0="I", x>1200="I", ORI_SA_AVG<3.5="T", 
+            flag_valuechange(x,100,25,1)="R", isnan(x)="M", Date>=datenum("12/31/2015 
+            09:00:00")&Date<=datenum("01/22/2016 11:35:00")="I", Date>=datenum("12/18/2018 
+            02:30:00")&Date<=datenum("12/25/2018 09:20:00")="M", Date>=datenum("02/12/2019 
+            17:45:00")&Date<=datenum("02/21/2019 17:30:00")="I", Date>=datenum("04/06/2019 
+            10:00:00")&Date<=datenum("04/16/2019 12:00:00")="I", Date>=datenum("09/07/2019 
+            19:00:00")&Date<=datenum("09/08/2019 13:15:00")="Q", Date>=datenum("09/17/2019 
+            15:30:00")&Date<=datenum("09/17/2019 15:45:00")="I", Date>=datenum("06/24/2020 
+            08:00:00")&Date<=datenum("06/30/2020 17:00:00")="I", Date>=datenum("10/07/2021 
+            13:00:00")&Date<=datenum("10/12/2021 17:00:00")="I", Date>=datenum("10/01/2024 
+            00:05:00")&Date<=datenum("10/01/2024 00:10:00")="Q", manual)
+         column 28. Increment corrected total precipitation
+         column 29. QA/QC flags for Increment corrected total precipitation (flagging criteria, 
+            where "x" is PRECIP_TOT_455_0_01: manual)
+         column 30. Cumulative sum of total precipitation
+         column 31. QA/QC flags for Cumulative sum of total precipitation (flagging criteria, where 
+            "x" is PRECIP_ACC_455_0_01: manual)
+         column 32. TR-525USW installed 12/28/2023. See probe_code: PPTCEN04
+         column 33. QA/QC flags for TR-525USW installed 12/28/2023. See probe_code: PPTCEN04 
+            (flagging criteria, where "x" is PRECIP_TOT_625_0_04: x<0="I", x>18.1="Q", 
+            ORI_SH_AVG<3.5="T", isnan(x)="M")
+         column 34. Internal temperature sensor CS320
+         column 35. QA/QC flags for Internal temperature sensor CS320 (flagging criteria, where "x" 
+            is TSB_MEAN_625_0_01: isnan(x)="M", x<-50="I", x>60="I")
+         column 36. 7-point running mean
+         column 37. QA/QC flags for 7-point running mean (flagging criteria, where "x" is 
+            SWI_RUNMN_625_0_01: manual)
+         column 38. Hour of day
+         column 39. QA/QC flags for Hour of day (flagging criteria, where "x" is Hour: )
+         column 40. Calculated total radiative energy. MJ/m2 = val_in_watts * 
+            number_seconds_in_period / 1000000
+         column 41. QA/QC flags for Calculated total radiative energy. MJ/m2 = val_in_watts * 
+            number_seconds_in_period / 1000000 (flagging criteria, where "x" is SWI_TOT_625_0_01: 
+            manual)
+      3. Units of Measurement: 
+         column  1. 
+         column  2. yyyy-MM-dd HH:mm:ss
+         column  3. count
+         column  4. none
+         column  5. none
+         column  6. volts
+         column  7. none
+         column  8. mm
+         column  9. none
+         column 10. mm
+         column 11. none
+         column 12. mm
+         column 13. none
+         column 14. mm
+         column 15. none
+         column 16. mm
+         column 17. none
+         column 18. µmol/(m2*s)
+         column 19. none
+         column 20. µmol/(m2*s)
+         column 21. none
+         column 22. w m-2
+         column 23. none
+         column 24. w m-2
+         column 25. none
+         column 26. mm
+         column 27. none
+         column 28. mm
+         column 29. none
+         column 30. mm
+         column 31. none
+         column 32. mm
+         column 33. none
+         column 34. deg c
+         column 35. none
+         column 36. W m-2
+         column 37. none
+         column 38. 
+         column 39. none
+         column 40. MJ/m2
+         column 41. none
+      4. Data Type 
+         a. Storage Type: 
+            column  1. string
+            column  2. string
+            column  3. integer
+            column  4. integer
+            column  5. floating-point
+            column  6. floating-point
+            column  7. string
+            column  8. floating-point
+            column  9. string
+            column 10. floating-point
+            column 11. string
+            column 12. floating-point
+            column 13. string
+            column 14. floating-point
+            column 15. string
+            column 16. floating-point
+            column 17. string
+            column 18. floating-point
+            column 19. string
+            column 20. floating-point
+            column 21. string
+            column 22. floating-point
+            column 23. string
+            column 24. floating-point
+            column 25. string
+            column 26. floating-point
+            column 27. string
+            column 28. floating-point
+            column 29. string
+            column 30. floating-point
+            column 31. string
+            column 32. floating-point
+            column 33. string
+            column 34. floating-point
+            column 35. string
+            column 36. floating-point
+            column 37. string
+            column 38. floating-point
+            column 39. string
+            column 40. floating-point
+            column 41. string
+         b. Variable Codes: 
+            Flag_BATTERY_INST_0_0_01: M = missing value
+            Flag_PRECIP_INST_625_0_02: M = missing value, R = unspecified, T = hardware malfunction 
+               (eg. heater)
+            Flag_PRECIP_TOT_625_0_02: E = value estimated by linear interpolation, M = missing 
+               value, Q = questionable value, R = unspecified, W = unspecified
+            Flag_PRECIP_ACC_625_0_02: E = value estimated by linear interpolation, M = missing 
+               value, Q = questionable value, R = unspecified, W = unspecified
+            Flag_SNOWDEP_MED_0_0_01: M = missing value, Q = questionable value
+            Flag_SWE_MED_0_0_01: M = missing value, Q = questionable value
+            Flag_PAR_MEAN_625_0_01: M = missing value
+            Flag_PAR_MAX_625_0_01: M = missing value, Q = questionable value
+            Flag_SWI_MEAN_625_0_01: M = missing value, Q = questionable value
+            Flag_SWI_MAX_625_0_01: M = missing value
+            Flag_PRECIP_INST_455_0_01: M = missing value, R = unspecified, T = hardware malfunction 
+               (eg. heater)
+            Flag_PRECIP_TOT_455_0_01: J = unspecified, M = missing value, R = unspecified, W = 
+               unspecified
+            Flag_PRECIP_ACC_455_0_01: J = unspecified, M = missing value, R = unspecified, W = 
+               unspecified
+            Flag_PRECIP_TOT_625_0_04: M = missing value, T = hardware malfunction (eg. heater)
+            Flag_TSB_MEAN_625_0_01: M = missing value
+            Flag_SWI_RUNMN_625_0_01: Q = questionable value
+            Flag_SWI_TOT_625_0_01: M = missing value, Q = questionable value
+         c. Numeric Range: 
+            column  1. (none)
+            column  2. (none)
+            column  3. 0 to 77449
+            column  4. 234 to 234
+            column  5. 10400 to 55309
+            column  6. 12.55 to 14.89
+            column  7. (none)
+            column  8. 29.07 to 371.8
+            column  9. (none)
+            column 10. 0 to 16.76
+            column 11. (none)
+            column 12. 0 to 2237.79
+            column 13. (none)
+            column 14. 0 to 1040
+            column 15. (none)
+            column 16. 0 to 257.3
+            column 17. (none)
+            column 18. 0 to 1964
+            column 19. (none)
+            column 20. 0 to 2355
+            column 21. (none)
+            column 22. 0 to 1190
+            column 23. (none)
+            column 24. 0 to 1475
+            column 25. (none)
+            column 26. 14.6 to 356.8
+            column 27. (none)
+            column 28. 0 to 14.52
+            column 29. (none)
+            column 30. 0 to 2133.78
+            column 31. (none)
+            column 32. (none)
+            column 33. (none)
+            column 34. (none)
+            column 35. (none)
+            column 36. 0 to 1061.7143
+            column 37. (none)
+            column 38. 0 to 23
+            column 39. (none)
+            column 40. 0 to 0.357
+            column 41. (none)
+         d. Missing Value Code: NaN
+      5. Data Format 
+         a. Column Type: 
+            column  1. text
+            column  2. text
+            column  3. numerical
+            column  4. numerical
+            column  5. numerical
+            column  6. numerical
+            column  7. text
+            column  8. numerical
+            column  9. text
+            column 10. numerical
+            column 11. text
+            column 12. numerical
+            column 13. text
+            column 14. numerical
+            column 15. text
+            column 16. numerical
+            column 17. text
+            column 18. numerical
+            column 19. text
+            column 20. numerical
+            column 21. text
+            column 22. numerical
+            column 23. text
+            column 24. numerical
+            column 25. text
+            column 26. numerical
+            column 27. text
+            column 28. numerical
+            column 29. text
+            column 30. numerical
+            column 31. text
+            column 32. numerical
+            column 33. text
+            column 34. numerical
+            column 35. text
+            column 36. numerical
+            column 37. text
+            column 38. numerical
+            column 39. text
+            column 40. numerical
+            column 41. text
+         b. Number of Columns: 41
+         c. Decimal Places: 
+            column  1. 0
+            column  2. 0
+            column  3. 0
+            column  4. 0
+            column  5. 1
+            column  6. 3
+            column  7. 0
+            column  8. 2
+            column  9. 0
+            column 10. 2
+            column 11. 0
+            column 12. 2
+            column 13. 0
+            column 14. 2
+            column 15. 0
+            column 16. 2
+            column 17. 0
+            column 18. 2
+            column 19. 0
+            column 20. 1
+            column 21. 0
+            column 22. 4
+            column 23. 0
+            column 24. 4
+            column 25. 0
+            column 26. 3
+            column 27. 0
+            column 28. 2
+            column 29. 0
+            column 30. 2
+            column 31. 0
+            column 32. 4
+            column 33. 0
+            column 34. 2
+            column 35. 0
+            column 36. 2
+            column 37. 0
+            column 38. 0
+            column 39. 0
+            column 40. 3
+            column 41. 0
+      6. Logical Variable Type: 
+         column  1. nominal (none)
+         column  2. datetime (none)
+         column  3. nominal (discrete)
+         column  4. nominal (discrete)
+         column  5. nominal (continuous)
+         column  6. data (continuous)
+         column  7. coded value (none)
+         column  8. data (continuous)
+         column  9. coded value (none)
+         column 10. data (continuous)
+         column 11. coded value (none)
+         column 12. data (continuous)
+         column 13. coded value (none)
+         column 14. data (continuous)
+         column 15. coded value (none)
+         column 16. data (continuous)
+         column 17. coded value (none)
+         column 18. data (continuous)
+         column 19. coded value (none)
+         column 20. data (continuous)
+         column 21. coded value (none)
+         column 22. data (continuous)
+         column 23. coded value (none)
+         column 24. data (continuous)
+         column 25. coded value (none)
+         column 26. data (continuous)
+         column 27. coded value (none)
+         column 28. data (continuous)
+         column 29. coded value (none)
+         column 30. data (continuous)
+         column 31. coded value (none)
+         column 32. data (continuous)
+         column 33. coded value (none)
+         column 34. data (continuous)
+         column 35. coded value (none)
+         column 36. data (continuous)
+         column 37. coded value (none)
+         column 38. calculation (discrete)
+         column 39. coded value (none)
+         column 40. calculation (continuous)
+         column 41. coded value (none)
+      7. Flagging Criteria: 
+         column  1. manually-assigned flags
+         column  2. none
+         column  3. x<0="I";isnan(x)="M";manually-assigned flags
+         column  4. flag_notinarray(x,[225,233,234])="I";isnan(x)="M";manually-assigned flags
+         column  5. flag_valuechange(x,0.1,0.1,1)="P";isnan(x)="M"
+         column  6. x<0="I";x<11.5="L";x>16="H";isnan(x)="M";manually-assigned flags
+         column  7. none
+         column  8. 
+            x<=0="I";x>1200="I";col_ORI_SH_AVG<3.5="T";flag_valuechange(x,100,25,1)="R";isnan(x)="M"
+            ;col_Date>=datenum("02/23/2019 15:05:00")&col_Date<=datenum("03/26/2019 
+            09:00:00")="Q";col_Date>=datenum("03/16/2019 10:25:00")&col_Date<=datenum("03/16/2019 
+            12:00:00")="Q";col_Date>=datenum("10/01/2024 00:05:00")&col_Date<=datenum("10/01/2024 
+            00:10:00")="Q"
+         column  9. none
+         column 10. manually-assigned flags
+         column 11. none
+         column 12. manually-assigned flags
+         column 13. none
+         column 14. manually-assigned flags
+         column 15. none
+         column 16. manually-assigned flags
+         column 17. none
+         column 18. 
+            x<-5="I";x<-2="Q";x>3000="I";x>2230="Q";isnan(x)="M";flag_daterange(col_Date,{"08/21/202
+            3 15:00:00","08/26/2023 23:55:00"})="Q";manually-assigned flags
+         column 19. none
+         column 20. 
+            x<0="I";x>10000="I";x>2000="Q";isnan(x)="M";flag_daterange(col_Date,{"08/21/2023 
+            15:00:00","08/26/2023 23:55:00"})="Q"
+         column 21. none
+         column 22. isnan(x)="M";col_Date>=datenum("09/18/2018 
+            14:52:00")&col_Date<=datenum("09/18/2018 
+            14:57:00")="Q";flag_daterange(col_Date,{"08/21/2023 15:00:00","08/26/2023 
+            23:55:00"})="Q";flag_daterange(col_Date,{"05/18/2024 23:00:00","05/21/2024 
+            21:30:00"})="Q";flag_daterange(col_Date,{"11/13/2024 00:00:00","12/05/2024 
+            00:00:00"})="Q";manually-assigned flags
+         column 23. none
+         column 24. isnan(x)="M";col_Date>=datenum("09/18/2018 
+            14:52:00")&col_Date<=datenum("09/18/2018 
+            14:57:00")="Q";flag_daterange(col_Date,{"08/21/2023 15:00:00","08/26/2023 
+            23:55:00"})="Q";manually-assigned flags
+         column 25. none
+         column 26. 
+            x<=0="I";x>1200="I";col_ORI_SA_AVG<3.5="T";flag_valuechange(x,100,25,1)="R";isnan(x)="M"
+            ;col_Date>=datenum("12/31/2015 09:00:00")&col_Date<=datenum("01/22/2016 
+            11:35:00")="I";col_Date>=datenum("12/18/2018 02:30:00")&col_Date<=datenum("12/25/2018 
+            09:20:00")="M";col_Date>=datenum("02/12/2019 17:45:00")&col_Date<=datenum("02/21/2019 
+            17:30:00")="I";col_Date>=datenum("04/06/2019 10:00:00")&col_Date<=datenum("04/16/2019 
+            12:00:00")="I";col_Date>=datenum("09/07/2019 19:00:00")&col_Date<=datenum("09/08/2019 
+            13:15:00")="Q";col_Date>=datenum("09/17/2019 15:30:00")&col_Date<=datenum("09/17/2019 
+            15:45:00")="I";col_Date>=datenum("06/24/2020 08:00:00")&col_Date<=datenum("06/30/2020 
+            17:00:00")="I";col_Date>=datenum("10/07/2021 13:00:00")&col_Date<=datenum("10/12/2021 
+            17:00:00")="I";col_Date>=datenum("10/01/2024 00:05:00")&col_Date<=datenum("10/01/2024 
+            00:10:00")="Q";manually-assigned flags
+         column 27. none
+         column 28. manually-assigned flags
+         column 29. none
+         column 30. manually-assigned flags
+         column 31. none
+         column 32. x<0="I";x>18.1="Q";col_ORI_SH_AVG<3.5="T";isnan(x)="M"
+         column 33. none
+         column 34. isnan(x)="M";x<-50="I";x>60="I"
+         column 35. none
+         column 36. manually-assigned flags
+         column 37. none
+         column 38. none
+         column 39. none
+         column 40. manually-assigned flags
+         column 41. none
+   C. Data Anomalies: Converted values in all columns assigned QA/QC flag(s) I (invalid value (out 
+      of range)) to NaN/empty, locking and replacing existing flags with 'M': 335 records in 
+      SNOWDEP_INST_0_0_01, 6354 records in PRECIP_INST_455_0_01. Values of 661 records in Site were 
+      flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in Date were flagged as M (missing 
+      value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 
+      09/23/2016. Values of 661 records in RecNum were flagged as M (missing value) for dates: 
+      10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 
+      661 records in RecNum are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in LOGGERID were flagged as M 
+      (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in PROGID were flagged as M (missing 
+      value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 
+      09/23/2016. Values of 3 records in PROGID were flagged as P (undefined flag) for dates: 
+      01/22/2016, 03/17/2016, 05/16/2016. Values of 483 records in PROGID are missing for dates: 
+      01/22/2016, 03/17/2016, 05/15/2016-05/16/2016. Values of 661 records in BATTERY_INST_0_0_01 
+      were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in BATTERY_INST_0_0_01 are missing 
+      for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. 
+      Values of 661 records in BATTERY_V_CHECK were flagged as M (missing value) for dates: 
+      10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 
+      105408 records in BATTERY_V_CHECK are missing for dates: 10/01/2015-10/01/2016. Values of 661 
+      records in PRECIP_INST_625_0_02 were flagged as M (missing value) for dates: 10/10/2015, 
+      01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 10 records 
+      in PRECIP_INST_625_0_02 were flagged as R (undefined flag) for dates: 10/26/2015, 11/19/2015, 
+      12/08/2015, 12/17/2015, 12/31/2015, 01/22/2016, 02/17/2016, 03/17/2016, 04/14/2016, 
+      07/27/2016. Values of 22 records in PRECIP_INST_625_0_02 were flagged as T (hardware 
+      malfunction (eg. heater)) for dates: 11/25/2015, 09/23/2016. Values of 661 records in 
+      PRECIP_INST_625_0_02 are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in ORI_SH_AVG were flagged as M 
+      (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 22 records in ORI_SH_AVG were flagged as T 
+      (hardware malfunction (eg. heater)) for dates: 11/25/2015, 09/23/2016. Values of 661 records 
+      in ORI_SH_AVG are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 999 records in SNOWDEP_INST_0_0_01 were flagged 
+      as M (missing value) for dates: 10/10/2015, 11/15/2015, 11/16/2015, 11/17/2015, 12/19/2015, 
+      12/21/2015, 12/22/2015, 12/23/2015, 01/14/2016, 01/22/2016, 01/30/2016, 02/15/2016, 
+      02/16/2016, 02/18/2016, 02/20/2016, 02/23/2016, 02/24/2016, 03/12/2016, 03/13/2016, 
+      03/14/2016, 03/17/2016, 03/27/2016, 05/09/2016, 05/10/2016, 05/11/2016, 05/12/2016, 
+      05/13/2016, 05/15/2016-05/16/2016, 05/17/2016, 05/18/2016, 05/19/2016, 05/20/2016, 
+      05/21/2016, 05/22/2016, 05/24/2016, 05/25/2016, 05/26/2016, 05/27/2016, 05/28/2016, 
+      05/29/2016, 05/30/2016, 05/31/2016, 06/01/2016, 06/02/2016, 06/03/2016, 06/04/2016, 
+      06/05/2016, 06/06/2016, 06/07/2016, 06/08/2016, 06/09/2016, 06/10/2016, 06/12/2016, 
+      06/15/2016, 06/18/2016, 06/19/2016, 06/20/2016, 06/21/2016, 06/22/2016, 06/23/2016, 
+      06/25/2016, 06/26/2016, 06/27/2016, 06/28/2016, 06/29/2016, 06/30/2016, 07/01/2016, 
+      07/02/2016, 07/03/2016, 07/04/2016, 07/06/2016, 07/07/2016, 07/09/2016, 07/14/2016, 
+      07/30/2016, 08/01/2016, 08/04/2016, 08/05/2016, 08/06/2016, 08/07/2016, 08/08/2016, 
+      08/09/2016, 08/10/2016, 08/11/2016, 08/12/2016, 08/13/2016, 08/14/2016, 08/15/2016, 
+      08/16/2016, 08/17/2016, 08/18/2016, 08/19/2016, 08/20/2016, 08/21/2016, 08/22/2016, 
+      08/23/2016, 08/24/2016, 08/25/2016, 08/26/2016, 08/27/2016, 08/28/2016, 08/29/2016, 
+      08/30/2016, 08/31/2016, 09/01/2016, 09/02/2016, 09/03/2016, 09/05/2016, 09/07/2016, 
+      09/09/2016, 09/10/2016, 09/11/2016, 09/12/2016, 09/13/2016, 09/14/2016, 09/15/2016, 
+      09/16/2016, 09/17/2016, 09/19/2016, 09/20/2016, 09/23/2016, 09/24/2016, 09/26/2016. Values of 
+      6397 records in SNOWDEP_INST_0_0_01 were flagged as Q (questionable value) for dates: 
+      10/02/2015, 10/28/2015, 11/01/2015, 11/02/2015, 11/03/2015, 11/07/2015, 11/08/2015, 
+      11/15/2015, 11/16/2015, 11/17/2015, 11/19/2015, 11/24/2015, 11/25/2015, 12/01/2015, 
+      12/02/2015, 12/04/2015, 12/10/2015, 12/11/2015, 12/13/2015, 12/14/2015, 12/16/2015, 
+      12/18/2015, 12/19/2015, 12/20/2015, 12/21/2015, 12/22/2015, 12/23/2015, 12/24/2015, 
+      12/25/2015, 12/27/2015, 12/28/2015, 01/12/2016, 01/13/2016, 01/14/2016, 01/15/2016, 
+      01/16/2016, 01/17/2016, 01/18/2016, 01/19/2016, 01/20/2016, 01/21/2016, 01/28/2016, 
+      01/29/2016, 01/30/2016, 02/01/2016, 02/03/2016, 02/04/2016, 02/05/2016, 02/07/2016, 
+      02/12/2016, 02/13/2016, 02/14/2016, 02/15/2016, 02/16/2016, 02/17/2016, 02/18/2016, 
+      02/19/2016, 02/19/2016-02/20/2016, 02/22/2016, 02/23/2016, 02/24/2016, 02/25/2016, 
+      02/26/2016, 02/27/2016, 02/28/2016, 02/29/2016, 03/01/2016, 03/02/2016, 03/03/2016, 
+      03/08/2016, 03/12/2016, 03/13/2016, 03/14/2016, 03/15/2016, 03/16/2016, 03/18/2016, 
+      03/20/2016, 03/21/2016, 03/22/2016, 03/23/2016, 03/27/2016, 03/28/2016, 04/14/2016, 
+      04/24/2016, 05/01/2016, 05/03/2016, 05/04/2016, 05/06/2016, 05/07/2016, 05/08/2016, 
+      05/09/2016, 05/10/2016, 05/11/2016, 05/12/2016, 05/13/2016, 05/13/2016-05/14/2016, 
+      05/16/2016, 05/17/2016, 05/18/2016, 05/19/2016, 05/20/2016, 05/20/2016-05/21/2016, 
+      05/22/2016, 05/22/2016-05/23/2016, 05/24/2016, 05/25/2016, 05/26/2016, 05/27/2016, 
+      05/28/2016, 05/29/2016, 05/30/2016, 05/31/2016, 06/01/2016, 06/02/2016, 06/03/2016, 
+      06/04/2016, 06/05/2016, 06/06/2016, 06/07/2016, 06/08/2016, 06/09/2016, 06/10/2016, 
+      06/11/2016, 06/12/2016, 06/13/2016, 06/14/2016, 06/15/2016, 06/15/2016-06/16/2016, 
+      06/17/2016, 06/18/2016, 06/19/2016, 06/19/2016-06/20/2016, 06/21/2016, 06/22/2016, 
+      06/23/2016, 06/24/2016, 06/25/2016, 06/26/2016, 06/27/2016, 06/27/2016-06/28/2016, 
+      06/28/2016-06/29/2016, 06/30/2016, 07/01/2016, 07/01/2016-07/02/2016, 07/03/2016, 07/04/2016, 
+      07/05/2016, 07/06/2016, 07/07/2016, 07/08/2016, 07/09/2016, 07/10/2016, 07/11/2016, 
+      07/12/2016, 07/13/2016, 07/14/2016, 07/15/2016, 07/16/2016, 07/17/2016, 07/18/2016, 
+      07/19/2016, 07/20/2016, 07/22/2016, 07/23/2016, 07/25/2016, 07/26/2016, 07/27/2016, 
+      07/28/2016, 07/29/2016, 07/30/2016, 07/31/2016, 08/01/2016, 08/02/2016, 08/03/2016, 
+      08/04/2016, 08/05/2016, 08/06/2016, 08/07/2016, 08/08/2016, 08/08/2016-08/09/2016, 
+      08/10/2016, 08/11/2016, 08/12/2016, 08/13/2016, 08/14/2016, 08/14/2016-08/15/2016, 
+      08/16/2016, 08/17/2016, 08/18/2016, 08/19/2016, 08/20/2016, 08/21/2016, 08/22/2016, 
+      08/23/2016, 08/24/2016, 08/25/2016, 08/26/2016, 08/27/2016, 08/28/2016, 08/29/2016, 
+      08/30/2016, 08/31/2016, 09/01/2016, 09/02/2016, 09/03/2016, 09/04/2016, 09/05/2016, 
+      09/06/2016, 09/07/2016, 09/08/2016, 09/09/2016, 09/10/2016, 09/11/2016, 09/12/2016, 
+      09/13/2016, 09/14/2016, 09/15/2016, 09/16/2016, 09/17/2016, 09/18/2016, 09/19/2016, 
+      09/20/2016, 09/21/2016, 09/22/2016, 09/23/2016, 09/24/2016, 09/25/2016, 09/26/2016, 
+      09/27/2016, 09/28/2016, 09/29/2016, 09/30/2016. Values of 999 records in SNOWDEP_INST_0_0_01 
+      are missing for dates: 10/10/2015, 11/15/2015, 11/16/2015, 11/17/2015, 12/19/2015, 
+      12/21/2015, 12/22/2015, 12/23/2015, 01/14/2016, 01/22/2016, 01/30/2016, 02/15/2016, 
+      02/16/2016, 02/18/2016, 02/20/2016, 02/23/2016, 02/24/2016, 03/12/2016, 03/13/2016, 
+      03/14/2016, 03/17/2016, 03/27/2016, 05/09/2016, 05/10/2016, 05/11/2016, 05/12/2016, 
+      05/13/2016, 05/15/2016-05/16/2016, 05/17/2016, 05/18/2016, 05/19/2016, 05/20/2016, 
+      05/21/2016, 05/22/2016, 05/24/2016, 05/25/2016, 05/26/2016, 05/27/2016, 05/28/2016, 
+      05/29/2016, 05/30/2016, 05/31/2016, 06/01/2016, 06/02/2016, 06/03/2016, 06/04/2016, 
+      06/05/2016, 06/06/2016, 06/07/2016, 06/08/2016, 06/09/2016, 06/10/2016, 06/12/2016, 
+      06/15/2016, 06/18/2016, 06/19/2016, 06/20/2016, 06/21/2016, 06/22/2016, 06/23/2016, 
+      06/25/2016, 06/26/2016, 06/27/2016, 06/28/2016, 06/29/2016, 06/30/2016, 07/01/2016, 
+      07/02/2016, 07/03/2016, 07/04/2016, 07/06/2016, 07/07/2016, 07/09/2016, 07/14/2016, 
+      07/30/2016, 08/01/2016, 08/04/2016, 08/05/2016, 08/06/2016, 08/07/2016, 08/08/2016, 
+      08/09/2016, 08/10/2016, 08/11/2016, 08/12/2016, 08/13/2016, 08/14/2016, 08/15/2016, 
+      08/16/2016, 08/17/2016, 08/18/2016, 08/19/2016, 08/20/2016, 08/21/2016, 08/22/2016, 
+      08/23/2016, 08/24/2016, 08/25/2016, 08/26/2016, 08/27/2016, 08/28/2016, 08/29/2016, 
+      08/30/2016, 08/31/2016, 09/01/2016, 09/02/2016, 09/03/2016, 09/05/2016, 09/07/2016, 
+      09/09/2016, 09/10/2016, 09/11/2016, 09/12/2016, 09/13/2016, 09/14/2016, 09/15/2016, 
+      09/16/2016, 09/17/2016, 09/19/2016, 09/20/2016, 09/23/2016, 09/24/2016, 09/26/2016. Values of 
+      661 records in SNOWDEPTH_CHECK were flagged as M (missing value) for dates: 10/10/2015, 
+      01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 105408 
+      records in SNOWDEPTH_CHECK are missing for dates: 10/01/2015-10/01/2016. Values of 661 
+      records in SNOWDEP_QUAL were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 
+      03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in 
+      SNOWDEP_QUAL are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in SWE_INST_0_0_01 were flagged as M 
+      (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 1881 records in SWE_INST_0_0_01 were flagged as 
+      Q (questionable value) for dates: 05/13/2016-05/15/2016, 05/16/2016, 09/23/2016, 
+      09/23/2016-09/28/2016. Values of 661 records in SWE_INST_0_0_01 are missing for dates: 
+      10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 
+      661 records in SWE_CHECK were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 
+      03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 105408 records in 
+      SWE_CHECK are missing for dates: 10/01/2015-10/01/2016. Values of 661 records in 
+      PAR_MEAN_625_0_01 were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 
+      03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in 
+      PAR_MEAN_625_0_01 are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in PAR_MAX_625_0_01 were flagged as 
+      M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 66 records in PAR_MAX_625_0_01 were flagged as Q 
+      (questionable value) for dates: 06/10/2016, 06/11/2016, 06/13/2016, 06/14/2016, 06/23/2016, 
+      06/24/2016, 07/09/2016, 07/12/2016, 07/17/2016, 07/18/2016, 08/02/2016, 08/07/2016, 
+      08/08/2016, 09/02/2016, 09/03/2016, 09/18/2016, 09/19/2016. Values of 661 records in 
+      PAR_MAX_625_0_01 are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in SWI_MEAN_625_0_01 were flagged as 
+      M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 54 records in SWI_MEAN_625_0_01 were flagged as 
+      Q (questionable value) for dates: 03/28/2016, 04/22/2016, 04/25/2016, 04/30/2016, 05/07/2016, 
+      05/08/2016, 05/19/2016, 05/20/2016, 05/23/2016, 05/24/2016, 05/26/2016, 05/27/2016, 
+      06/11/2016, 06/13/2016, 06/15/2016, 06/16/2016, 06/17/2016, 07/06/2016, 07/11/2016, 
+      07/12/2016, 07/19/2016, 07/22/2016, 08/02/2016, 08/08/2016, 09/03/2016. Values of 661 records 
+      in SWI_MEAN_625_0_01 are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in SWI_MAX_625_0_01 were flagged as 
+      M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 661 records in SWI_MAX_625_0_01 are missing for 
+      dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. 
+      Values of 7015 records in PRECIP_INST_455_0_01 were flagged as M (missing value) for dates: 
+      10/10/2015, 12/31/2015-01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. 
+      Values of 11 records in PRECIP_INST_455_0_01 were flagged as R (undefined flag) for dates: 
+      10/26/2015, 11/19/2015, 12/08/2015, 12/17/2015, 01/22/2016, 02/17/2016, 03/17/2016, 
+      04/14/2016, 07/27/2016. Values of 902 records in PRECIP_INST_455_0_01 were flagged as T 
+      (hardware malfunction (eg. heater)) for dates: 03/18/2016, 03/18/2016-03/19/2016, 
+      03/19/2016-03/20/2016, 03/20/2016-03/21/2016, 03/21/2016-03/22/2016, 09/21/2016, 09/22/2016, 
+      09/23/2016. Values of 7015 records in PRECIP_INST_455_0_01 are missing for dates: 10/10/2015, 
+      12/31/2015-01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 
+      661 records in ORI_SA_AVG were flagged as M (missing value) for dates: 10/10/2015, 
+      01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 6210 records 
+      in ORI_SA_AVG were flagged as T (hardware malfunction (eg. heater)) for dates: 12/31/2015, 
+      12/31/2015-01/04/2016, 01/04/2016-01/05/2016, 01/05/2016-01/06/2016, 01/06/2016-01/07/2016, 
+      01/07/2016-01/08/2016, 01/08/2016-01/09/2016, 01/09/2016-01/10/2016, 01/10/2016-01/11/2016, 
+      01/11/2016-01/12/2016, 01/12/2016-01/13/2016, 01/13/2016-01/16/2016, 01/16/2016-01/17/2016, 
+      01/17/2016-01/18/2016, 01/18/2016-01/21/2016, 01/22/2016, 03/18/2016, 03/18/2016-03/19/2016, 
+      03/19/2016-03/20/2016, 03/20/2016-03/21/2016, 03/21/2016-03/22/2016, 09/21/2016, 09/22/2016, 
+      09/23/2016. Values of 661 records in ORI_SA_AVG are missing for dates: 10/10/2015, 
+      01/22/2016, 03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 661 records 
+      in PUMPVOLTS_Avg were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 
+      03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 105408 records in 
+      PUMPVOLTS_Avg are missing for dates: 10/01/2015-10/01/2016. Values of 661 records in 
+      PUMPVOLTS_CHECK were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 
+      03/17/2016, 05/13/2016, 05/15/2016-05/16/2016, 09/23/2016. Values of 105408 records in 
+      PUMPVOLTS_CHECK are missing for dates: 10/01/2015-10/01/2016. Values of 105386 records in 
+      PRECIP_TOT_625_0_04 were flagged as M (missing value) for dates: 10/01/2015-11/25/2015, 
+      11/25/2015-09/23/2016, 09/23/2016-10/01/2016. Values of 22 records in PRECIP_TOT_625_0_04 
+      were flagged as T (hardware malfunction (eg. heater)) for dates: 11/25/2015, 09/23/2016. 
+      Values of 105408 records in PRECIP_TOT_625_0_04 are missing for dates: 10/01/2015-10/01/2016. 
+      Values of 105408 records in TSB_MEAN_625_0_01 were flagged as M (missing value) for dates: 
+      10/01/2015-10/01/2016. Values of 105408 records in TSB_MEAN_625_0_01 are missing for dates: 
+      10/01/2015-10/01/2016. Values of 50 records in SWI_RUNMN_625_0_01 were flagged as Q 
+      (questionable value) for dates: 10/29/2015, 12/15/2015, 02/22/2016, 03/07/2016, 06/05/2016, 
+      06/11/2016, 07/12/2016, 09/03/2016, 09/04/2016, 09/19/2016, 09/20/2016. Values of 709 records 
+      in SWI_RUNMN_625_0_01 are missing for dates: 10/09/2015-10/10/2015, 01/22/2016, 03/17/2016, 
+      05/12/2016-05/13/2016, 05/14/2016-05/16/2016, 09/23/2016. Values of 11 records in Year are 
+      missing for date 12/31/2015. Values of 83 records in CEN are missing for dates: 12/31/2015, 
+      02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in CS2MET are missing for dates: 
+      12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in DISCTR are missing for 
+      dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in PRI are missing 
+      for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in UPL are 
+      missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in VAN 
+      are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in 
+      CEN_100 are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 
+      records in CS2MET_100 are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. 
+      Values of 83 records in DISCTR_100 are missing for dates: 12/31/2015, 02/28/2016, 
+      02/28/2016-02/29/2016. Values of 83 records in PRI_100 are missing for dates: 12/31/2015, 
+      02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in UPL_100 are missing for dates: 
+      12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in VAN_100 are missing 
+      for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in CEN_SS are 
+      missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in 
+      CS2MET_SS are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 
+      records in DISCTR_SS are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. 
+      Values of 83 records in PRI_SS are missing for dates: 12/31/2015, 02/28/2016, 
+      02/28/2016-02/29/2016. Values of 83 records in UPL_SS are missing for dates: 12/31/2015, 
+      02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in VAN_SS are missing for dates: 
+      12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in CEN_SS_3 are missing 
+      for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in CS2MET_SS_3 
+      are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 83 records in 
+      DISCTR_SS_3 are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. Values of 
+      83 records in PRI_SS_3 are missing for dates: 12/31/2015, 02/28/2016, 02/28/2016-02/29/2016. 
+      Values of 83 records in VAN_SS_3 are missing for dates: 12/31/2015, 02/28/2016, 
+      02/28/2016-02/29/2016. Values of 11 records in CEN_isDaytime are missing for date 12/31/2015. 
+      Values of 11 records in CEN_isNighttime are missing for date 12/31/2015. Values of 11 records 
+      in PRI_isDaytime are missing for date 12/31/2015. Values of 11 records in PRI_isNighttime are 
+      missing for date 12/31/2015. Values of 11 records in UPL_isDaytime are missing for date 
+      12/31/2015. Values of 11 records in UPL_isNighttime are missing for date 12/31/2015. Values 
+      of 11 records in VAN_isDaytime are missing for date 12/31/2015. Values of 11 records in 
+      VAN_isNighttime are missing for date 12/31/2015. Values of 661 records in SWI_TOT_625_0_01 
+      were flagged as M (missing value) for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Values of 54 records in SWI_TOT_625_0_01 were flagged as Q 
+      (questionable value) for dates: 03/28/2016, 04/22/2016, 04/25/2016, 04/30/2016, 05/07/2016, 
+      05/08/2016, 05/19/2016, 05/20/2016, 05/23/2016, 05/24/2016, 05/26/2016, 05/27/2016, 
+      06/11/2016, 06/13/2016, 06/15/2016, 06/16/2016, 06/17/2016, 07/06/2016, 07/11/2016, 
+      07/12/2016, 07/19/2016, 07/22/2016, 08/02/2016, 08/08/2016, 09/03/2016. Values of 661 records 
+      in SWI_TOT_625_0_01 are missing for dates: 10/10/2015, 01/22/2016, 03/17/2016, 05/13/2016, 
+      05/15/2016-05/16/2016, 09/23/2016. Converted values in column(s) PRECIP_TOT_455_0_01 assigned 
+      QA/QC flag(s) M (missing value) to NaN/empty, retaining and locking existing flags: 7015 
+      records in PRECIP_TOT_455_0_01. Converted values in column(s) PRECIP_TOT_625_0_02 assigned 
+      QA/QC flag(s) M (missing value) to NaN/empty, retaining and locking existing flags: 661 
+      records in PRECIP_TOT_625_0_02.
+V. Supplemental Descriptors 
+   A. Data Acquisition 
+      1. Data Forms: 
+      2. Form Location: 
+      3. Data Entry Validation: 
+   B. Quality Assurance/Quality Control Procedures: 
+   C. Supplemental Materials: 
+   D. Computer Programs: 
+   E. Archival Practices: 
+   F. Publications: 
+   G. History of Data Set Usage 
+      1. Data Request History: 
+      2. Data Set Update History: 
+      3. Review History: 
+      4. Questions and Comments from Users: 

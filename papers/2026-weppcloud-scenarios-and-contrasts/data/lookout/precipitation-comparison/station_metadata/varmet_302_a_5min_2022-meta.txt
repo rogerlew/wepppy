@@ -1,0 +1,1525 @@
+I. Data Set Descriptors 
+   A. Title: Meteorological data from Vanilla Rain Met at the Andrews Forest. Variables include: 
+      precipitation, swe, snow depth, air temperature, and battery supply from 01-Oct-2021 to 
+      01-Oct-2022
+   B. Accession Number: N/A
+   C. Description 
+      1. Originator(s): Christopher Daly
+      2. Abstract: A three-level hydro-climatological network for data monitoring was established 
+         in 1994. The networks at each level are nested to form a coordinated program of data 
+         acquisition and measurement. A future vision of linking the benchmark meteorological 
+         stations with regional weather stations to expand the future scope of studies was also 
+         considered in designing this network. The first-level in this top-down approach consists 
+         of Benchmark Meteorological Stations (BMS) and Benchmark Stream Stations. The BMS are 
+         designed to represent the environment across the Andrews. These stations are intended to 
+         provide complete, long-term, high temporal resolution, meso-scale hydroclimatological 
+         data. The location of the BMS network is based on factors such as elevation, aspect, 
+         vegetation gradients, and accessibility. Collected meteorological parameters are generally 
+         standardized across the BMS as well as methods and instrumentation. Secondary 
+         Meteorological Stations also follow standardized methods and serve similar purposes but 
+         are somewhat limited in meteorological parameters collected. The Primary Meteorological 
+         Station (PRIMET), Central Meteorological Station (CENMET), Upper Lookout Meteorological 
+         Station (UPLMET), and Vanilla Leaf Meteorological Station (VANMET) are the four Benchmark 
+         Stations, Climatic Station at Watershed 2 (CS2MET) and the Hi-15 Meteorological Station 
+         (H15MET) are Secondary Stations.
+      3. Study Type: Monitoring
+      4. Study Themes: 
+      5. LTER Core Areas: 
+      6. Georeferences: 
+      7. Submission Date: 
+   D. Keywords: Air temperature, Climate change, Climate data, Meteorological measurements, 
+      Monitoring, Photosynthetically active radiation, Precipitation, Relative humidity, Snow 
+      accumulation, Snow hydrology, Soil moisture, Soil temperature, Solar radiation, Wind speed, 
+      Disturbance
+II. Research Origin Descriptors 
+   A. Overall Project Description 
+      1. Project Title: Vanilla Rain Gage
+      2. Principal Investigators: 
+         Name:
+         Position:
+         Organization:
+         Address:
+         City:
+         State:
+         Postal Code:
+         Phone:
+         Email:
+         UserID:
+      3. Funding Period:  to 
+      4. Objectives: Hydrology, climatology, and biology interact over a wide range of spatial and 
+         temporal scales. Continuous interaction among climate, soils, landuse, and vegetation 
+         shape the hydrology and ecology of a landscape. Long-term measurements of such variables 
+         at various time and space scales provide an essential foundation for understanding 
+         ecosystem processes, and document changes in the local, regional, and global environments.
+      5. Abstract: 
+      6. Funding Source: NSF grants: DEB-7611978, BSR-9011663, DEB-9632921, DEB-0218088
+   B. Sub-project Description 
+      1. Site Description 
+         a. Geographic Location: HJ Andrews, Blue River, Oregon, USA
+            Coordinates: 
+         b. Physiographic Region: 
+         c. Landform Components: 
+         d. Hydrographic Characteristics: 
+         e. Topographic Attributes: 
+         f. Geology, Lithology and Soils: 
+         g. Vegetation Communities: CANOPY: None overhead, though insolation affected slightly from 
+            trees on adjacent hillsides. CONTINUOUS, OPEN CANOPY TYPE. SURFACE: Short grass/dirt, 
+            generally clear of vegetation.
+         h. History of Land Use and Disturbance: 
+         i. Climate: 
+      2. Experimental or Sampling Design 
+         a. Design Characteristics: Temperature and rainfall in the Andrews Experimental Forestare 
+            are typical of a maritime climate with wet, relatively mild winters and dry, cool 
+            summers. Humidity is generally high through winter months, and maximum daily relative 
+            humidity approaches 100 percent at night throughout the year. Minimum summer humidities 
+            generally hover around 30-50 percent. Temperature extremes range from near 0 degrees F 
+            in unusually cold winters to over 100 degrees for brief periods almost every summer. 
+            The range in mean annual temperature (1972-2002) is 7.1-10.5 degrees C at a low 
+            elevation site (PRIMET). Precipitation varies with elevation - long-term annual average 
+            at low elevation (450 m) is 2200 mm, and at high elevation (1200m) is 2600 mm.
+         b. Permanent Plots: 
+         c. Data Collection Duration and Frequency: 
+            Beginning of Observations: 
+            End of Observations: 
+      3. Research Methods 
+         a. Field and Laboratory Methods: 
+         b. Protocols: 
+         c. Instrumentation: 
+         d. Taxonomy and Systematics: None
+         e. Speclies List: 
+         f. Permit History: 
+      4. Project Personnel 
+         a. Personnel: 
+         b. Affiliations: 
+III. Data Set Status and Accessibility 
+   A. Status 
+      1. Latest Update: 03-Nov-2025
+      2. Latest Archive Date: 
+      3. Latest Metadata Update: 03-Nov-2025
+      4. Data Verification Status: 
+   B. Accessibility 
+      1. Storage Location and Medium: Stored at  
+         on media: 
+      2. Contact Person: Adam M. Kennedy
+      3. Copyright Restrictions: 
+      4. Restrictions: 
+         a. Release Date: Affiliates: , Public: 
+         b. Citation: 
+         c. Disclaimer: 
+      5. Costs: 
+IV. Data Structural Descriptors 
+   A. Data Set File 
+      1. File Name: varmet_302_a_5min_2022.csv
+      2. Size: 105120 records
+      3. File Format: ASCII text (comma-separated value format)
+      3a. Delimiters: single comma
+      4. Header Information: 5 lines of ASCII text
+      5. Alphanumeric Attributes: 
+      6. Quality Control Flag Codes: M = missing value, I = Invalid value (out of range), Q = 
+         Questionable value, V = Flags values n greater than or m less than the mean of the 
+         preceding N readings, C = Flags values greater than or less than N Stdev the mean of the 
+         preceding M readings, A = Flags values with total accumulation over N days greater than 
+         some value, S = Flags unrealistic sequences of identical or near identical values in time 
+         series of non-missing values, T = For methods or hardware related flags. ie. broken 
+         shield, D = Value is outside detection limit, L = Low value, H = High value, P = Program 
+         ID change, R = Reduced volume stored in sample tank, E = Value estimated by linear 
+         interpolation
+      7. Authentication Procedures: 
+      8. Calculations: 
+         SNOWDEP_INST_0_0_05: SNOWDEP_INST_0_0_05(mm) = SNOWDEP_INST_0_0_05(m) * 1000
+      9. Processing History: 
+         Software version: GCE Data Toolbox Version 3.9.10 (23-May-2022)
+         Data structure version: GCE Data Structure 1.1 (29-Mar-2001)
+         Original data files processed: 
+            metdat query: SELECT * FROM VARA_302_Table105 WHERE LOGGERID = 302 AND TmStamp BETWEEN 
+               '2021-10-01 00:05:00' AND '2022-10-01 00:00:00' ORDER BY TmStamp ASC (102729 records)
+            FINAL_AIRTEMP_QC4SIGMA_leap_ak.csv (8784 records)
+         Data processing history:
+            03-Nov-2025: new GCE Data Structure 1.1 created ('newstruct')
+            03-Nov-2025: imported result set from SQL query on data source 'metdat' ('sql2struct')
+            03-Nov-2025: imported all documentation metadata from the template 'LNDB_VarMet_3', 
+               updating descriptors for columns Date, RecNum, LOGGERID, PROGID, BATTERY_MEAN, 
+               SWE_INST_0_0_05, SNOWDEP_INST_0_0_05, SNOWDEP_QUAL, PRECIP_INST_455_0_02, 
+               ORI_SH_AVG, AIRTEMP_MEAN_450_0_10, AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10 
+               ('meta_template')
+            03-Nov-2025: updated 16 metadata fields in the Data, Dataset, Project, Site, Status, 
+               Study, Supplement section(s) ('addmeta')
+            03-Nov-2025: updated title ('newtitle')
+            03-Nov-2025: Q/C flagging criteria applied, 'flags' field updated ('dataflag')
+            03-Nov-2025: Name of column TmStamp changed to Date; Name of column BATTERY_V_Avg 
+               changed to BATTERY_MEAN; Name of column SWE changed to SWE_INST_0_0_05; Name of 
+               column SNOWDEPTH changed to SNOWDEP_INST_0_0_05; Name of column QUALITY changed to 
+               SNOWDEP_QUAL; Name of column PRECIP changed to PRECIP_INST_455_0_02; Name of column 
+               OR_TEMP_Avg changed to ORI_SH_AVG; Name of column AIR_450_Avg changed to 
+               AIRTEMP_MEAN_450_0_10; Name of column AIR_450_Max changed to AIRTEMP_MAX_450_0_10; 
+               Name of column AIR_450_Min changed to AIRTEMP_MIN_450_0_10; ('apply_template')
+            03-Nov-2025: Units of column Date changed from '' to 'serial number'; Units of column 
+               RecNum changed from '' to 'count'; Units of column LOGGERID changed from '' to 
+               'none'; Units of column PROGID changed from '' to 'none'; Units of column 
+               BATTERY_MEAN changed from '' to 'volts'; Units of column SWE_INST_0_0_05 changed 
+               from '' to 'mm'; Units of column SNOWDEP_INST_0_0_05 changed from '' to 'm'; Units 
+               of column SNOWDEP_QUAL changed from '' to 'none'; Units of column 
+               PRECIP_INST_455_0_02 changed from '' to 'mm'; Units of column ORI_SH_AVG changed 
+               from '' to 'deg c'; Units of column AIRTEMP_MEAN_450_0_10 changed from '' to 'deg 
+               c'; Units of column AIRTEMP_MAX_450_0_10 changed from '' to 'deg c'; Units of column 
+               AIRTEMP_MIN_450_0_10 changed from '' to 'deg c'; ('apply_template')
+            03-Nov-2025: Data Type of column PROGID changed from 'd' to 'f'; Data Type of column 
+               SNOWDEP_QUAL changed from 'f' to 'd'; ('apply_template')
+            03-Nov-2025: Variable Type of column RecNum changed from 'data' to 'nominal'; Variable 
+               Type of column LOGGERID changed from 'data' to 'nominal'; Variable Type of column 
+               PROGID changed from 'data' to 'nominal'; ('apply_template')
+            03-Nov-2025: Numeric Type of column PROGID changed from 'discrete' to 'continuous'; 
+               Numeric Type of column BATTERY_MEAN changed from 'continous' to 'continuous'; 
+               Numeric Type of column SWE_INST_0_0_05 changed from 'continous' to 'continuous'; 
+               Numeric Type of column SNOWDEP_INST_0_0_05 changed from 'continous' to 'continuous'; 
+               Numeric Type of column SNOWDEP_QUAL changed from 'continous' to 'discrete'; Numeric 
+               Type of column PRECIP_INST_455_0_02 changed from 'continous' to 'continuous'; 
+               Numeric Type of column ORI_SH_AVG changed from 'continous' to 'continuous'; Numeric 
+               Type of column AIRTEMP_MEAN_450_0_10 changed from 'continous' to 'continuous'; 
+               Numeric Type of column AIRTEMP_MAX_450_0_10 changed from 'continous' to 
+               'continuous'; Numeric Type of column AIRTEMP_MIN_450_0_10 changed from 'continous' 
+               to 'continuous'; ('apply_template')
+            03-Nov-2025: Q/C Criteria of column Date changed from '' to 'x<0='I';isnan(x)='M''; Q/C 
+               Criteria of column RecNum changed from '' to 'x<0='I';isnan(x)='M''; Q/C Criteria of 
+               column LOGGERID changed from '' to 'flag_notinarray(x,[301,302])='I';isnan(x)='M''; 
+               Q/C Criteria of column PROGID changed from '' to 
+               'flag_valuechange(x,0.1,0.1,1)='P';isnan(x)='M''; Q/C Criteria of column 
+               BATTERY_MEAN changed from '' to 'x<0='I';x<11.5='L';x>16='H';isnan(x)='M''; Q/C 
+               Criteria of column SWE_INST_0_0_05 changed from '' to 
+               'isnan(x)='M';col_Date>=datenum('10/30/2015 12:00:00')&col_Date<=datenum('11/5/2015 
+               14:00:00')='Q';col_Date>=datenum('11/11/2016 
+               12:00:00')&col_Date<=datenum('11/14/2017 
+               12:00:00')='I';col_Date>=datenum('09/30/2023 
+               00:00:00')&col_Date<=datenum('06/04/2024 
+               12:00:00')='I';col_Date>=datenum('11/20/2024 
+               00:00:00')&col_Date<=datenum('03/26/2025 12:00:00')='I''; Q/C Criteria of column 
+               SNOWDEP_INST_0_0_05 changed from '' to 
+               'isnan(x)='M';x>4.5='Q';x>5.0='I';x<-5.0='I';col_SNOWDEP_QUAL<=0='I';col_SNOWDEP_QUAL
+               <162&col_SNOWDEP_QUAL>0='Q';col_SNOWDEP_QUAL>=300&col_SNOWDEP_QUAL<=600='Q';flag_date
+               range(col_Date,{'10/30/2015 12:00:00','11/05/2015 
+               14:55:00'})='Q';flag_daterange(col_Date,{'06/03/2022 15:20:00','06/09/2022 
+               13:30:00'})='I';flag_daterange(col_Date,{'10/20/2022 10:55:00','10/22/2022 
+               05:05:00'})='Q''; Q/C Criteria of column SNOWDEP_QUAL changed from '' to 
+               'isnan(x)='M''; Q/C Criteria of column PRECIP_INST_455_0_02 changed from '' to 
+               'x<=0='I';x>1200='I';col_ORI_SH_AVG<3.5='T';flag_valuechange(x,100,25,1)='R';isnan(x)
+               ='M';col_Date>=datenum('10/30/2015 12:00:00')&col_Date<=datenum('11/05/2015 
+               14:00:00')='Q';col_Date>=datenum('12/17/2015 
+               12:00:00')&col_Date<=datenum('01/27/2016 
+               12:00:00')='I';col_Date>=datenum('02/25/2018 
+               22:45:00')&col_Date<=datenum('02/28/2018 
+               20:00:00')='T';col_Date>=datenum('02/27/2019 
+               16:55:00')&col_Date<=datenum('10/06/2021 
+               12:10:00')='Q';col_Date>=datenum('09/11/2019 
+               13:35:00')&col_Date<=datenum('09/11/2019 
+               13:45:00')='I';col_Date>=datenum('10/06/2021 
+               12:15:00')&col_Date<=datenum('12/14/2021 
+               00:05:00')='Q';col_Date>=datenum('12/29/2021 
+               00:00:00')&col_Date<=datenum('07/04/2022 
+               00:00:00')='I';col_Date>=datenum('12/14/2021 
+               00:10:00')&col_Date<=datenum('09/31/2022 
+               00:00:00')='Q';col_Date>=datenum('12/15/2022 
+               11:20:00')&col_Date<=datenum('12/15/2022 
+               12:25:00')='I';col_Date>=datenum('10/01/2022 
+               00:00:00')&col_Date<=datenum('09/19/2024 14:15:00')='Q''; Q/C Criteria of column 
+               ORI_SH_AVG changed from '' to 'x<3.5='T';isnan(x)='M';col_Date>=datenum('10/30/2015 
+               12:00:00')&col_Date<=datenum('11/5/2015 14:00:00')='Q''; Q/C Criteria of column 
+               AIRTEMP_MEAN_450_0_10 changed from '' to 
+               'x<=-35='I';x>50='I';x<-18='Q';x>45='Q';flag_valuechange(x,6.5,6.5,1) 
+               ='V';flag_valuechange(x,8,8,1) 
+               ='I';isnan(x)='M';x<col_FOURLO='Q';x>col_FOURHI='Q';col_Date>=datenum('10/30/2015 
+               12:00:00')&col_Date<=datenum('11/5/2015 14:00:00')='Q';col_Date>=datenum('05/06/2017 
+               08:00:00')&col_Date<=datenum('08/18/2017 
+               20:00:00')='Q';(col_AIRTEMP_MAX_450_0_10-col_AIRTEMP_MEAN_450_0_10)>1='Q';(col_AIRTEM
+               P_MEAN_450_0_10-col_AIRTEMP_MIN_450_0_10)>1='Q';x>col_AIRTEMP_MAX_450_0_10='I';x<col_
+               AIRTEMP_MIN_450_0_10=‘I’'; Q/C Criteria of column AIRTEMP_MAX_450_0_10 changed from 
+               '' to 'x<=-35='I';x>50='I';x<-18='Q';x>45='Q';flag_valuechange(x,6.5,6.5,1) 
+               ='V';flag_valuechange(x,8,8,1) 
+               ='I';isnan(x)='M';x<col_FOURLO='Q';x>col_FOURHI='Q';col_Date>=datenum('10/30/2015 
+               12:00:00')&col_Date<=datenum('11/5/2015 14:00:00')='Q';col_Date>=datenum('05/06/2017 
+               08:00:00')&col_Date<=datenum('08/18/2017 20:00:00')='Q''; Q/C Criteria of column 
+               AIRTEMP_MIN_450_0_10 changed from '' to 
+               'x<=-35='I';x>50='I';x<-18='Q';x>45='Q';flag_valuechange(x,6.5,6.5,1) 
+               ='V';flag_valuechange(x,8,8,1) 
+               ='I';isnan(x)='M';x<col_FOURLO='Q';x>col_FOURHI='Q';col_Date>=datenum('10/30/2015 
+               12:00:00')&col_Date<=datenum('11/5/2015 14:00:00')='Q';col_Date>=datenum('05/06/2017 
+               08:00:00')&col_Date<=datenum('08/18/2017 20:00:00')='Q''; ('apply_template')
+            03-Nov-2025: Precision of column Date changed from 0 to 7; Precision of column PROGID 
+               changed from 0 to 1; Precision of column SWE_INST_0_0_05 changed from 2 to 4; 
+               Precision of column SNOWDEP_QUAL changed from 2 to 0; Precision of column ORI_SH_AVG 
+               changed from 3 to 2; Precision of column AIRTEMP_MIN_450_0_10 changed from 2 to 3; 
+               ('apply_template')
+            03-Nov-2025: Descriptions of columns Date, RecNum, LOGGERID, PROGID, BATTERY_MEAN, 
+               SWE_INST_0_0_05, SNOWDEP_INST_0_0_05, SNOWDEP_QUAL, PRECIP_INST_455_0_02, 
+               ORI_SH_AVG, AIRTEMP_MEAN_450_0_10, AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10 
+               edited; ('apply_template')
+            03-Nov-2025: added column 'Site' at position 1 ('addcol')
+            03-Nov-2025: inserted 2391 new records with date/time values and NaN/null data values 
+               (replicating common values in the non-data columns Site, RecNum, LOGGERID and 
+               PROGID) to fill in date/time interval gaps in the data series and assigned flag 'M' 
+               to inserted records ('pad_date_gaps')
+            03-Nov-2025: sorted by column Date(ascending) ('sortdata')
+            03-Nov-2025: Year, Month, Day, Hour and Minute datetime columns added after column Date 
+               ('add_datepartcols')
+            03-Nov-2025: sorted by columns Month(ascending), Day(ascending), Hour(ascending) 
+               ('sortdata')
+            03-Nov-2025: performed a lookup join of columns Month, Day and Hour on columns Month, 
+               Day and Hour from a second structure, returning column(s) Site, Date, Year, Minute, 
+               RecNum, LOGGERID, PROGID, BATTERY_MEAN, BATTERY_V_CHECK, SWE_INST_0_0_05, SWE_CHECK, 
+               SNOWDEP_INST_0_0_05, SNOWDEPTH_CHECK, SNOWDEP_QUAL, PRECIP_INST_455_0_02, 
+               ORI_SH_AVG, PUMPVOLTS_Avg, PUMPVOLTS_CHECK, AIRTEMP_MEAN_450_0_10, 
+               AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10 from the first structure and column(s) 
+               MEAN, STD, MIN, MAX, MEDIAN, FOURLO and FOURHI from the second structure (105120 
+               rows) ('joindata')
+            03-Nov-2025: sorted by column Date(ascending) ('sortdata')
+            03-Nov-2025: imported all documentation metadata from the template 'LNDB_VarMet_3', 
+               updating descriptors for columns Date, RecNum, LOGGERID, PROGID, BATTERY_MEAN, 
+               SWE_INST_0_0_05, SNOWDEP_INST_0_0_05, SNOWDEP_QUAL, PRECIP_INST_455_0_02, 
+               ORI_SH_AVG, AIRTEMP_MEAN_450_0_10, AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10 
+               ('meta_template')
+            03-Nov-2025: updated 16 metadata fields in the Data, Dataset, Project, Site, Status, 
+               Study, Supplement section(s) ('addmeta')
+            03-Nov-2025: updated title ('newtitle')
+            03-Nov-2025: Q/C flagging criteria applied, 'flags' field updated ('dataflag')
+            03-Nov-2025: Q/C Criteria of column Date changed from 'x<0='I';isnan(x)='M';manual' to 
+               'x<0='I';isnan(x)='M''; Q/C Criteria of column RecNum changed from 
+               'x<0='I';isnan(x)='M';manual' to 'x<0='I';isnan(x)='M''; Q/C Criteria of column 
+               LOGGERID changed from 'flag_notinarray(x,[301,302])='I';isnan(x)='M';manual' to 
+               'flag_notinarray(x,[301,302])='I';isnan(x)='M''; Q/C Criteria of column BATTERY_MEAN 
+               changed from 'x<0='I';x<11.5='L';x>16='H';isnan(x)='M';manual' to 
+               'x<0='I';x<11.5='L';x>16='H';isnan(x)='M''; Q/C Criteria of column SNOWDEP_QUAL 
+               changed from 'isnan(x)='M';manual' to 'isnan(x)='M''; ('apply_template')
+            03-Nov-2025: deleted columns Month, Day, Hour, Year, Minute, RecNum, MEAN, STD, MIN, 
+               MAX, FOURLO, FOURHI and MEDIAN from the structure ('deletecols')
+            03-Nov-2025: converted values in all columns assigned QA/QC flag(s) I (Invalid value 
+               (out of range)) to NaN/empty, locking and replacing existing flags with 'M': 2731 
+               records in SNOWDEP_INST_0_0_05, 55445 records in PRECIP_INST_455_0_02, 1 records in 
+               AIRTEMP_MIN_450_0_10 ('nullflags')
+            03-Nov-2025: sorted by column Date(ascending) ('sortdata')
+            03-Nov-2025: replaced 9 missing values in column SWE_INST_0_0_05 with estimated values 
+               based on 1D interpolation of SWE_INST_0_0_05 as a function of Date using the MATLAB 
+               9.913 function 'interp1' with the 'linear' (linear interpolation) method option, 
+               excluding data gaps with more than 5 consecutive missing values, and flagging the 
+               estimated values as 'E' ('interp_missing')
+            03-Nov-2025: 9 values in 'SWE_INST_0_0_05' were updated with new values 
+               ('update_data'): changed record 77191 from NaN to -10.1733, changed record 77192 
+               from NaN to -10.1367, changed record 78055 from NaN to -10.8050, changed record 
+               78775 from NaN to -21.3800, changed record 79063 from NaN to -21.5133, changed 
+               record 79064 from NaN to -20.4367, changed record 80935 from NaN to -10.9150, 
+               changed record 92874 from NaN to -35.5100, changed record 92875 from NaN to -35.5000
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SWE_INST_0_0_05, 'flags' field 
+               updated ('dataflag')
+            03-Nov-2025: replaced 1025 missing values in column SNOWDEP_INST_0_0_05 with estimated 
+               values based on 1D interpolation of SNOWDEP_INST_0_0_05 as a function of Date using 
+               the MATLAB 9.913 function 'interp1' with the 'linear' (linear interpolation) method 
+               option, excluding data gaps with more than 5 consecutive missing values, and 
+               flagging the estimated values as 'E' ('interp_missing')
+            03-Nov-2025: 1025 values in 'SNOWDEP_INST_0_0_05' were updated with new values 
+               ('update_data'): changed record 131 from NaN to 0.0490, changed record 138 from NaN 
+               to 0.1275, changed record 164 from NaN to 0.1475, changed record 224 from NaN to 
+               -0.2550, changed record 236 from NaN to -0.0575, changed record 340 from NaN to 
+               0.1405, changed record 386 from NaN to -0.0785, changed record 391 from NaN to 
+               -0.0220, changed record 430 from NaN to -0.1285, changed record 439 from NaN to 
+               -0.1055, changed record 443 from NaN to -0.1115, changed record 525 from NaN to 
+               -0.0465, changed record 675 from NaN to 0.1420, changed record 747 from NaN to 
+               0.1585, changed record 804 from NaN to 0.0845, changed record 926 from NaN to 
+               -0.3145, changed record 943 from NaN to -0.0635, changed record 954 from NaN to 
+               -0.1090, changed record 1042 from NaN to -0.3260, changed record 1065 from NaN to 
+               0.0600, changed record 1306 from NaN to -0.2505, changed record 10445 from NaN to 
+               -0.2415, changed record 10550 from NaN to -0.1990, changed record 10881 from NaN to 
+               -0.1425, changed record 10899 from NaN to -0.1215, changed record 15321 from NaN to 
+               -0.1950, changed record 15504 from NaN to -0.0805, changed record 15506 from NaN to 
+               -0.0810, changed record 15552 from NaN to -0.0835, changed record 15562 from NaN to 
+               -0.0795, changed record 15677 from NaN to -0.1360, changed record 15682 from NaN to 
+               -0.1395, changed record 15699 from NaN to -0.1175, changed record 15705 from NaN to 
+               -0.1190, changed record 15712 from NaN to -0.1255, changed record 19966 from NaN to 
+               -0.2680, changed record 20059 from NaN to -0.0905, changed record 20115 from NaN to 
+               -0.0715, changed record 20394 from NaN to -0.0090, changed record 20396 from NaN to 
+               0.0040, changed record 20398 from NaN to -0.0125, changed record 20400 from NaN to 
+               -0.0320, changed record 20490 from NaN to -0.0095, changed record 20498 from NaN to 
+               0.0205, changed record 20501 from NaN to 0.0295, changed record 20553 from NaN to 
+               0.0870, changed record 20597 from NaN to 0.1565, changed record 20618 from NaN to 
+               0.1920, changed record 20763 from NaN to 0.4410, changed record 20834 from NaN to 
+               0.5430, changed record 21777 from NaN to 0.6870, changed record 22144 from NaN to 
+               0.7677, changed record 22145 from NaN to 0.7673, changed record 22167 from NaN to 
+               0.7145, changed record 22172 from NaN to 0.7420, changed record 22194 from NaN to 
+               0.7175, changed record 23333 from NaN to 0.3390, changed record 23883 from NaN to 
+               0.4410, changed record 24656 from NaN to 1.1350, changed record 24680 from NaN to 
+               1.1630, changed record 24713 from NaN to 1.2440, changed record 24910 from NaN to 
+               1.5190, changed record 27421 from NaN to 2.0630, changed record 28376 from NaN to 
+               1.6795, changed record 35316 from NaN to 1.2030, changed record 41091 from NaN to 
+               1.2013, changed record 41092 from NaN to 1.2187, changed record 41097 from NaN to 
+               1.2235, changed record 44609 from NaN to 1.2205, changed record 44615 from NaN to 
+               1.2145, changed record 44618 from NaN to 1.2240, changed record 44631 from NaN to 
+               1.1917, changed record 44632 from NaN to 1.2133, changed record 44634 from NaN to 
+               1.2360, changed record 48868 from NaN to 1.2665, changed record 53521 from NaN to 
+               0.9775, changed record 54996 from NaN to 0.8295, changed record 55413 from NaN to 
+               1.4610, changed record 55416 from NaN to 1.4470, changed record 56381 from NaN to 
+               1.9775, changed record 56905 from NaN to 1.8420, changed record 61526 from NaN to 
+               1.5250, changed record 62939 from NaN to 1.2255, changed record 66404 from NaN to 
+               1.0110, changed record 70439 from NaN to 0.2345, changed record 70446 from NaN to 
+               0.2310, changed record 70448 from NaN to 0.2200, changed record 72458 from NaN to 
+               0.1095, changed record 72476 from NaN to 0.0600, changed record 72496 from NaN to 
+               -0.1575, changed record 72551 from NaN to 0.1450, changed record 72573 from NaN to 
+               0.3205, changed record 72692 from NaN to 0.2043, changed record 72693 from NaN to 
+               0.0727, changed record 72747 from NaN to 0.1505, changed record 72800 from NaN to 
+               0.2150, changed record 72806 from NaN to 0.3313, changed record 72807 from NaN to 
+               0.3287, changed record 72851 from NaN to 0.0705, changed record 74157 from NaN to 
+               0.3480, changed record 74238 from NaN to 0.0040, changed record 74242 from NaN to 
+               0.3200, changed record 74276 from NaN to 0.0815, changed record 74417 from NaN to 
+               0.1500, changed record 75042 from NaN to 0.1350, changed record 75582 from NaN to 
+               0.3360, changed record 75613 from NaN to -0.1685, changed record 75619 from NaN to 
+               -0.0670, changed record 75635 from NaN to 0.2965, changed record 75640 from NaN to 
+               -0.2110, changed record 75769 from NaN to -0.0930, changed record 75808 from NaN to 
+               0.1080, changed record 75812 from NaN to 0.3090, changed record 75858 from NaN to 
+               -0.0455, changed record 75873 from NaN to 0.2110, changed record 75875 from NaN to 
+               0.2100, changed record 75884 from NaN to 0.0705, changed record 75886 from NaN to 
+               0.0717, changed record 75887 from NaN to 0.0743, changed record 75892 from NaN to 
+               -0.0055, changed record 75897 from NaN to 0.3170, changed record 75909 from NaN to 
+               -0.0213, changed record 75910 from NaN to 0.0323, changed record 75913 from NaN to 
+               0.1950, changed record 75923 from NaN to -0.0725, changed record 75942 from NaN to 
+               0.0785, changed record 75961 from NaN to -0.2450, changed record 75985 from NaN to 
+               0.0920, changed record 76025 from NaN to 0.2050, changed record 76030 from NaN to 
+               0.2030, changed record 76033 from NaN to 0.0165, changed record 76041 from NaN to 
+               0.2010, changed record 76047 from NaN to -0.2605, changed record 76136 from NaN to 
+               -0.1040, changed record 76144 from NaN to 0.2000, changed record 76154 from NaN to 
+               0.1850, changed record 76165 from NaN to -0.0705, changed record 76170 from NaN to 
+               -0.0705, changed record 76179 from NaN to -0.0830, changed record 76198 from NaN to 
+               -0.0730, changed record 76201 from NaN to 0.0360, changed record 76206 from NaN to 
+               -0.2120, changed record 76209 from NaN to -0.0710, changed record 76211 from NaN to 
+               -0.0770, changed record 76218 from NaN to 0.3190, changed record 76222 from NaN to 
+               0.3285, changed record 76235 from NaN to -0.0585, changed record 76239 from NaN to 
+               -0.0680, changed record 76436 from NaN to -0.0925, changed record 76438 from NaN to 
+               0.1783, changed record 76439 from NaN to 0.2697, changed record 76447 from NaN to 
+               0.1525, changed record 76454 from NaN to 0.3155, changed record 76456 from NaN to 
+               0.3355, changed record 76466 from NaN to 0.3467, changed record 76467 from NaN to 
+               0.3513, changed record 76473 from NaN to 0.0470, changed record 76475 from NaN to 
+               -0.2475, changed record 76477 from NaN to -0.2680, changed record 76479 from NaN to 
+               -0.2490, changed record 76485 from NaN to 0.1200, changed record 76498 from NaN to 
+               0.2853, changed record 76499 from NaN to 0.2807, changed record 76505 from NaN to 
+               0.1850, changed record 76508 from NaN to -0.2310, changed record 76511 from NaN to 
+               -0.2103, changed record 76512 from NaN to -0.2057, changed record 76516 from NaN to 
+               0.0800, changed record 76521 from NaN to -0.0225, changed record 76552 from NaN to 
+               -0.0435, changed record 76629 from NaN to -0.0595, changed record 76654 from NaN to 
+               0.0830, changed record 76719 from NaN to -0.1260, changed record 76725 from NaN to 
+               -0.2135, changed record 76750 from NaN to 0.0450, changed record 76773 from NaN to 
+               0.1810, changed record 76774 from NaN to 0.2520, changed record 76786 from NaN to 
+               0.3430, changed record 76787 from NaN to 0.3420, changed record 76788 from NaN to 
+               0.3410, changed record 76910 from NaN to 0.3110, changed record 76922 from NaN to 
+               0.3480, changed record 76936 from NaN to 0.0285, changed record 76960 from NaN to 
+               0.0533, changed record 76961 from NaN to 0.0157, changed record 76985 from NaN to 
+               0.0285, changed record 77003 from NaN to -0.0540, changed record 77009 from NaN to 
+               0.0550, changed record 77013 from NaN to -0.0865, changed record 77015 from NaN to 
+               -0.3935, changed record 77019 from NaN to 0.1090, changed record 77022 from NaN to 
+               0.0640, changed record 77031 from NaN to -0.0930, changed record 77034 from NaN to 
+               -0.1150, changed record 77037 from NaN to -0.0980, changed record 77052 from NaN to 
+               -0.2455, changed record 77073 from NaN to 0.0735, changed record 77075 from NaN to 
+               0.0715, changed record 77083 from NaN to -0.1355, changed record 77091 from NaN to 
+               -0.1375, changed record 77098 from NaN to -0.1240, changed record 77129 from NaN to 
+               0.0690, changed record 77137 from NaN to 0.2870, changed record 77142 from NaN to 
+               0.0705, changed record 77173 from NaN to 0.2900, changed record 77191 from NaN to 
+               0.3273, changed record 77192 from NaN to 0.3107, changed record 77238 from NaN to 
+               0.0910, changed record 77241 from NaN to 0.3245, changed record 77259 from NaN to 
+               -0.2100, changed record 77268 from NaN to -0.1715, changed record 77276 from NaN to 
+               0.0500, changed record 77277 from NaN to 0.0520, changed record 77283 from NaN to 
+               -0.0975, changed record 77302 from NaN to -0.2240, changed record 77316 from NaN to 
+               0.1100, changed record 77319 from NaN to -0.2765, changed record 77326 from NaN to 
+               -0.1245, changed record 77330 from NaN to 0.1670, changed record 77388 from NaN to 
+               -0.3090, changed record 77422 from NaN to -0.3125, changed record 77424 from NaN to 
+               -0.3110, changed record 77427 from NaN to 0.2150, changed record 77438 from NaN to 
+               -0.0925, changed record 77443 from NaN to 0.0630, changed record 77448 from NaN to 
+               -0.2827, changed record 77449 from NaN to -0.1113, changed record 77491 from NaN to 
+               0.0635, changed record 77493 from NaN to 0.0780, changed record 77498 from NaN to 
+               0.2225, changed record 77538 from NaN to -0.0375, changed record 77544 from NaN to 
+               -0.4290, changed record 77549 from NaN to -0.1280, changed record 77550 from NaN to 
+               -0.0250, changed record 77655 from NaN to 0.0795, changed record 77743 from NaN to 
+               -0.4690, changed record 77755 from NaN to -0.0075, changed record 77830 from NaN to 
+               0.4320, changed record 77864 from NaN to 0.4105, changed record 77871 from NaN to 
+               0.0915, changed record 77873 from NaN to 0.0905, changed record 77877 from NaN to 
+               0.3895, changed record 77881 from NaN to 0.1030, changed record 77886 from NaN to 
+               -0.1575, changed record 77892 from NaN to -0.0065, changed record 77894 from NaN to 
+               -0.1075, changed record 77897 from NaN to -0.0325, changed record 77901 from NaN to 
+               -0.3865, changed record 77903 from NaN to -0.1665, changed record 77905 from NaN to 
+               0.0960, changed record 77907 from NaN to 0.0510, changed record 77908 from NaN to 
+               -0.1970, changed record 77912 from NaN to 0.0175, changed record 77913 from NaN to 
+               0.0480, changed record 77914 from NaN to 0.0785, changed record 77916 from NaN to 
+               -0.0550, changed record 77918 from NaN to -0.1593, changed record 77919 from NaN to 
+               -0.0997, changed record 77922 from NaN to -0.2420, changed record 77938 from NaN to 
+               0.0835, changed record 77940 from NaN to -0.0970, changed record 77948 from NaN to 
+               0.0465, changed record 77955 from NaN to -0.0810, changed record 77957 from NaN to 
+               -0.1340, changed record 78008 from NaN to -0.1760, changed record 78055 from NaN to 
+               0.0975, changed record 78134 from NaN to -0.1185, changed record 78168 from NaN to 
+               0.3825, changed record 78775 from NaN to -0.2090, changed record 79063 from NaN to 
+               -0.2320, changed record 79064 from NaN to -0.2380, changed record 80935 from NaN to 
+               -0.2240, changed record 81417 from NaN to -0.2200, changed record 81676 from NaN to 
+               -0.2160, changed record 81807 from NaN to -0.3835, changed record 81844 from NaN to 
+               -0.2285, changed record 81851 from NaN to -0.3400, changed record 81853 from NaN to 
+               -0.4367, changed record 81854 from NaN to -0.3303, changed record 81859 from NaN to 
+               -0.5550, changed record 81871 from NaN to -0.2303, changed record 81872 from NaN to 
+               -0.2277, changed record 81885 from NaN to -0.3725, changed record 81890 from NaN to 
+               -0.2130, changed record 81913 from NaN to -0.2045, changed record 81928 from NaN to 
+               -0.2120, changed record 81945 from NaN to -0.2110, changed record 81974 from NaN to 
+               -0.1585, changed record 81979 from NaN to -0.2110, changed record 82018 from NaN to 
+               -0.1950, changed record 82024 from NaN to -0.1855, changed record 82026 from NaN to 
+               -0.2235, changed record 82050 from NaN to -0.2195, changed record 82077 from NaN to 
+               -0.2215, changed record 82080 from NaN to -0.2220, changed record 82090 from NaN to 
+               -0.2175, changed record 82115 from NaN to -0.3850, changed record 82188 from NaN to 
+               -0.3125, changed record 82194 from NaN to -0.2110, changed record 82210 from NaN to 
+               -0.1830, changed record 82215 from NaN to -0.1250, changed record 82220 from NaN to 
+               -0.2180, changed record 82235 from NaN to -0.1770, changed record 82267 from NaN to 
+               -0.2235, changed record 82269 from NaN to -0.2265, changed record 82275 from NaN to 
+               -0.1855, changed record 82345 from NaN to -0.2820, changed record 82352 from NaN to 
+               -0.1895, changed record 82363 from NaN to -0.4435, changed record 82503 from NaN to 
+               -0.1525, changed record 82508 from NaN to -0.1375, changed record 82513 from NaN to 
+               -0.1310, changed record 82518 from NaN to -0.1775, changed record 84550 from NaN to 
+               -0.1210, changed record 84553 from NaN to -0.0085, changed record 84556 from NaN to 
+               -0.3047, changed record 84557 from NaN to -0.2213, changed record 84559 from NaN to 
+               -0.1750, changed record 84562 from NaN to -0.4367, changed record 84563 from NaN to 
+               -0.4305, changed record 84564 from NaN to -0.4243, changed record 84567 from NaN to 
+               -0.1065, changed record 84569 from NaN to -0.2145, changed record 84571 from NaN to 
+               -0.2340, changed record 84580 from NaN to -0.2980, changed record 84582 from NaN to 
+               -0.2465, changed record 84588 from NaN to -0.0775, changed record 84633 from NaN to 
+               -0.2985, changed record 84748 from NaN to -0.0960, changed record 84753 from NaN to 
+               -0.0845, changed record 84772 from NaN to -0.2275, changed record 84785 from NaN to 
+               -0.3815, changed record 84787 from NaN to -0.4040, changed record 84790 from NaN to 
+               -0.0580, changed record 84799 from NaN to -0.3893, changed record 84800 from NaN to 
+               -0.4107, changed record 84810 from NaN to -0.1815, changed record 84813 from NaN to 
+               -0.4070, changed record 84820 from NaN to 0.0120, changed record 84823 from NaN to 
+               -0.0325, changed record 84825 from NaN to -0.0040, changed record 84830 from NaN to 
+               -0.0455, changed record 84832 from NaN to -0.1017, changed record 84833 from NaN to 
+               -0.1533, changed record 84837 from NaN to -0.2545, changed record 84842 from NaN to 
+               -0.1985, changed record 84845 from NaN to -0.3210, changed record 84846 from NaN to 
+               -0.2210, changed record 84853 from NaN to -0.1290, changed record 84855 from NaN to 
+               -0.0805, changed record 84862 from NaN to -0.3520, changed record 84865 from NaN to 
+               -0.4020, changed record 84866 from NaN to -0.4370, changed record 84873 from NaN to 
+               -0.1740, changed record 84874 from NaN to -0.1760, changed record 84876 from NaN to 
+               -0.2865, changed record 84878 from NaN to -0.2360, changed record 84883 from NaN to 
+               -0.2640, changed record 84892 from NaN to -0.0960, changed record 84923 from NaN to 
+               -0.0455, changed record 84928 from NaN to -0.0530, changed record 84955 from NaN to 
+               -0.0255, changed record 84969 from NaN to -0.1550, changed record 85065 from NaN to 
+               -0.0115, changed record 85073 from NaN to -0.1900, changed record 85085 from NaN to 
+               -0.2205, changed record 85089 from NaN to -0.3880, changed record 85090 from NaN to 
+               -0.4030, changed record 85091 from NaN to -0.4180, changed record 85095 from NaN to 
+               -0.3070, changed record 85098 from NaN to -0.3546, changed record 85099 from NaN to 
+               -0.2852, changed record 85100 from NaN to -0.2158, changed record 85101 from NaN to 
+               -0.1464, changed record 85104 from NaN to -0.2683, changed record 85105 from NaN to 
+               -0.3887, changed record 85107 from NaN to -0.4530, changed record 85109 from NaN to 
+               -0.4057, changed record 85110 from NaN to -0.4143, changed record 85116 from NaN to 
+               -0.3980, changed record 85118 from NaN to -0.3942, changed record 85119 from NaN to 
+               -0.4015, changed record 85120 from NaN to -0.4088, changed record 85122 from NaN to 
+               -0.4040, changed record 85124 from NaN to -0.2580, changed record 85126 from NaN to 
+               -0.1805, changed record 85127 from NaN to -0.2370, changed record 85128 from NaN to 
+               -0.2935, changed record 85133 from NaN to -0.0710, changed record 85135 from NaN to 
+               -0.2730, changed record 85142 from NaN to -0.2010, changed record 85144 from NaN to 
+               0.0120, changed record 85146 from NaN to 0.0130, changed record 85147 from NaN to 
+               0.0090, changed record 85153 from NaN to -0.3713, changed record 85154 from NaN to 
+               -0.2947, changed record 85156 from NaN to -0.1725, changed record 85158 from NaN to 
+               -0.0660, changed record 85162 from NaN to -0.3235, changed record 85167 from NaN to 
+               -0.0005, changed record 85169 from NaN to -0.2010, changed record 85172 from NaN to 
+               -0.1860, changed record 85179 from NaN to -0.0585, changed record 85181 from NaN to 
+               -0.0440, changed record 85344 from NaN to -0.4190, changed record 85349 from NaN to 
+               -0.0765, changed record 85357 from NaN to -0.4075, changed record 85359 from NaN to 
+               -0.4270, changed record 85381 from NaN to -0.2255, changed record 85384 from NaN to 
+               0.0055, changed record 85387 from NaN to 0.0515, changed record 85415 from NaN to 
+               0.0290, changed record 85424 from NaN to -0.1830, changed record 85431 from NaN to 
+               -0.0115, changed record 85433 from NaN to -0.2050, changed record 85437 from NaN to 
+               -0.1795, changed record 85440 from NaN to -0.2210, changed record 85445 from NaN to 
+               -0.3875, changed record 85452 from NaN to -0.1750, changed record 85458 from NaN to 
+               -0.2610, changed record 85463 from NaN to -0.1157, changed record 85464 from NaN to 
+               -0.2843, changed record 85490 from NaN to -0.3745, changed record 85496 from NaN to 
+               -0.3610, changed record 85511 from NaN to -0.3480, changed record 85540 from NaN to 
+               -0.1315, changed record 85542 from NaN to 0.0620, changed record 85567 from NaN to 
+               -0.0580, changed record 85575 from NaN to -0.3375, changed record 85585 from NaN to 
+               -0.1395, changed record 85599 from NaN to -0.3345, changed record 85623 from NaN to 
+               -0.1495, changed record 85626 from NaN to -0.3825, changed record 85629 from NaN to 
+               -0.2155, changed record 85634 from NaN to 0.0340, changed record 85637 from NaN to 
+               -0.1635, changed record 85652 from NaN to -0.3977, changed record 85653 from NaN to 
+               -0.3863, changed record 85659 from NaN to -0.2345, changed record 85661 from NaN to 
+               -0.2440, changed record 85662 from NaN to -0.0980, changed record 85664 from NaN to 
+               -0.1995, changed record 85666 from NaN to -0.2963, changed record 85667 from NaN to 
+               -0.1457, changed record 85672 from NaN to -0.0080, changed record 85677 from NaN to 
+               -0.2190, changed record 85681 from NaN to -0.1600, changed record 85683 from NaN to 
+               0.0115, changed record 85684 from NaN to 0.0000, changed record 85685 from NaN to 
+               -0.0115, changed record 85689 from NaN to -0.1130, changed record 85690 from NaN to 
+               -0.2750, changed record 85692 from NaN to -0.1865, changed record 85694 from NaN to 
+               0.0477, changed record 85695 from NaN to 0.0313, changed record 85698 from NaN to 
+               -0.0353, changed record 85699 from NaN to -0.0967, changed record 85705 from NaN to 
+               -0.1555, changed record 85709 from NaN to -0.1820, changed record 85710 from NaN to 
+               -0.1470, changed record 85713 from NaN to -0.2505, changed record 85715 from NaN to 
+               -0.2375, changed record 85717 from NaN to -0.2777, changed record 85718 from NaN to 
+               -0.1643, changed record 85721 from NaN to -0.1685, changed record 85725 from NaN to 
+               -0.2560, changed record 85730 from NaN to -0.3695, changed record 85733 from NaN to 
+               -0.1760, changed record 85734 from NaN to -0.1190, changed record 85735 from NaN to 
+               -0.0620, changed record 85740 from NaN to -0.2230, changed record 85744 from NaN to 
+               -0.2805, changed record 85746 from NaN to -0.1650, changed record 85756 from NaN to 
+               -0.1400, changed record 85757 from NaN to -0.1390, changed record 85767 from NaN to 
+               -0.2325, changed record 85774 from NaN to -0.4385, changed record 85779 from NaN to 
+               -0.4000, changed record 85788 from NaN to -0.3235, changed record 85822 from NaN to 
+               -0.0020, changed record 85830 from NaN to -0.2800, changed record 85843 from NaN to 
+               -0.2455, changed record 85850 from NaN to -0.4315, changed record 85860 from NaN to 
+               -0.2800, changed record 85867 from NaN to -0.2190, changed record 85878 from NaN to 
+               -0.2625, changed record 85896 from NaN to -0.3965, changed record 85908 from NaN to 
+               -0.2080, changed record 85910 from NaN to -0.0043, changed record 85911 from NaN to 
+               0.0043, changed record 85918 from NaN to -0.1300, changed record 85919 from NaN to 
+               -0.1330, changed record 85920 from NaN to -0.1360, changed record 85931 from NaN to 
+               -0.2690, changed record 85941 from NaN to -0.0570, changed record 85942 from NaN to 
+               -0.1430, changed record 85947 from NaN to 0.0435, changed record 85951 from NaN to 
+               -0.0140, changed record 85956 from NaN to -0.1455, changed record 85980 from NaN to 
+               -0.4020, changed record 85982 from NaN to -0.2673, changed record 85983 from NaN to 
+               -0.1417, changed record 85985 from NaN to -0.1980, changed record 85988 from NaN to 
+               -0.0664, changed record 85989 from NaN to -0.1438, changed record 85990 from NaN to 
+               -0.2212, changed record 85991 from NaN to -0.2986, changed record 85999 from NaN to 
+               0.0140, changed record 86000 from NaN to 0.0030, changed record 86007 from NaN to 
+               -0.4075, changed record 86009 from NaN to -0.2100, changed record 86015 from NaN to 
+               -0.0780, changed record 86025 from NaN to -0.0785, changed record 86033 from NaN to 
+               -0.1645, changed record 86040 from NaN to -0.2390, changed record 86071 from NaN to 
+               -0.3590, changed record 86080 from NaN to -0.3070, changed record 86098 from NaN to 
+               -0.2540, changed record 86102 from NaN to -0.1275, changed record 86115 from NaN to 
+               -0.2625, changed record 86145 from NaN to -0.2085, changed record 86167 from NaN to 
+               -0.3855, changed record 86177 from NaN to -0.0035, changed record 86187 from NaN to 
+               -0.2605, changed record 86196 from NaN to -0.0465, changed record 86200 from NaN to 
+               -0.2130, changed record 86221 from NaN to -0.1215, changed record 86228 from NaN to 
+               -0.2985, changed record 86232 from NaN to -0.2065, changed record 86236 from NaN to 
+               -0.3230, changed record 86237 from NaN to -0.2700, changed record 86239 from NaN to 
+               -0.2917, changed record 86240 from NaN to -0.3663, changed record 86249 from NaN to 
+               -0.0250, changed record 86250 from NaN to -0.0760, changed record 86251 from NaN to 
+               -0.1270, changed record 86252 from NaN to -0.1780, changed record 86255 from NaN to 
+               -0.3250, changed record 86256 from NaN to -0.2760, changed record 86258 from NaN to 
+               -0.2227, changed record 86259 from NaN to -0.2183, changed record 86261 from NaN to 
+               -0.3295, changed record 86270 from NaN to -0.2715, changed record 86272 from NaN to 
+               -0.4100, changed record 86278 from NaN to -0.0225, changed record 86282 from NaN to 
+               -0.0123, changed record 86283 from NaN to -0.0607, changed record 86285 from NaN to 
+               -0.2305, changed record 86287 from NaN to -0.2340, changed record 86291 from NaN to 
+               -0.2643, changed record 86292 from NaN to -0.3197, changed record 86296 from NaN to 
+               -0.2960, changed record 86302 from NaN to -0.2245, changed record 86304 from NaN to 
+               -0.2225, changed record 86313 from NaN to -0.2260, changed record 86316 from NaN to 
+               -0.2630, changed record 86317 from NaN to -0.3330, changed record 86329 from NaN to 
+               -0.3855, changed record 86333 from NaN to -0.3520, changed record 86337 from NaN to 
+               -0.2740, changed record 86345 from NaN to -0.3040, changed record 86392 from NaN to 
+               -0.4010, changed record 86398 from NaN to -0.1640, changed record 86405 from NaN to 
+               -0.4045, changed record 86412 from NaN to 0.0105, changed record 86424 from NaN to 
+               0.0327, changed record 86425 from NaN to 0.0303, changed record 86435 from NaN to 
+               -0.1805, changed record 86443 from NaN to -0.0525, changed record 86447 from NaN to 
+               -0.1790, changed record 86449 from NaN to -0.2985, changed record 86465 from NaN to 
+               -0.1770, changed record 86473 from NaN to -0.0035, changed record 86485 from NaN to 
+               -0.4180, changed record 86491 from NaN to 0.0280, changed record 86515 from NaN to 
+               -0.0020, changed record 86521 from NaN to -0.0725, changed record 86524 from NaN to 
+               -0.3490, changed record 86525 from NaN to -0.2850, changed record 86530 from NaN to 
+               -0.3270, changed record 86536 from NaN to -0.0130, changed record 86540 from NaN to 
+               -0.3050, changed record 86544 from NaN to -0.3145, changed record 86546 from NaN to 
+               -0.2570, changed record 86553 from NaN to -0.3810, changed record 86554 from NaN to 
+               -0.3470, changed record 86555 from NaN to -0.3130, changed record 86556 from NaN to 
+               -0.2790, changed record 86557 from NaN to -0.2450, changed record 86559 from NaN to 
+               -0.2163, changed record 86560 from NaN to -0.2217, changed record 86567 from NaN to 
+               -0.2255, changed record 86568 from NaN to -0.2240, changed record 86569 from NaN to 
+               -0.2225, changed record 86571 from NaN to -0.2210, changed record 86576 from NaN to 
+               -0.2215, changed record 86579 from NaN to -0.2223, changed record 86580 from NaN to 
+               -0.2177, changed record 86582 from NaN to -0.1625, changed record 86591 from NaN to 
+               -0.1925, changed record 86594 from NaN to -0.1757, changed record 86595 from NaN to 
+               -0.2773, changed record 86598 from NaN to -0.2057, changed record 86599 from NaN to 
+               -0.2163, changed record 86601 from NaN to -0.2285, changed record 86602 from NaN to 
+               -0.2300, changed record 86603 from NaN to -0.2315, changed record 86606 from NaN to 
+               -0.1630, changed record 86609 from NaN to -0.1195, changed record 86618 from NaN to 
+               -0.2293, changed record 86619 from NaN to -0.2285, changed record 86620 from NaN to 
+               -0.2277, changed record 86623 from NaN to -0.1585, changed record 86658 from NaN to 
+               -0.1625, changed record 86669 from NaN to -0.1620, changed record 86712 from NaN to 
+               0.0070, changed record 86714 from NaN to -0.0690, changed record 86715 from NaN to 
+               -0.1450, changed record 86726 from NaN to 0.0215, changed record 86729 from NaN to 
+               -0.1720, changed record 86731 from NaN to -0.0435, changed record 86744 from NaN to 
+               -0.3670, changed record 86747 from NaN to 0.0205, changed record 86751 from NaN to 
+               -0.4080, changed record 86760 from NaN to -0.0785, changed record 86766 from NaN to 
+               -0.4260, changed record 86769 from NaN to -0.2325, changed record 86778 from NaN to 
+               -0.1260, changed record 86779 from NaN to -0.1110, changed record 86795 from NaN to 
+               -0.2460, changed record 86796 from NaN to -0.1080, changed record 86799 from NaN to 
+               -0.1257, changed record 86800 from NaN to -0.1263, changed record 86804 from NaN to 
+               -0.3740, changed record 86805 from NaN to -0.3660, changed record 86808 from NaN to 
+               -0.1680, changed record 86810 from NaN to -0.1890, changed record 86813 from NaN to 
+               -0.1692, changed record 86814 from NaN to -0.1273, changed record 86815 from NaN to 
+               -0.0855, changed record 86816 from NaN to -0.0437, changed record 86817 from NaN to 
+               -0.0018, changed record 86822 from NaN to -0.1840, changed record 86831 from NaN to 
+               -0.2213, changed record 86832 from NaN to -0.0797, changed record 86834 from NaN to 
+               -0.0815, changed record 86836 from NaN to -0.1070, changed record 86842 from NaN to 
+               -0.1507, changed record 86843 from NaN to -0.0943, changed record 86845 from NaN to 
+               -0.0585, changed record 86847 from NaN to -0.2430, changed record 86849 from NaN to 
+               -0.4060, changed record 86850 from NaN to -0.4050, changed record 86853 from NaN to 
+               -0.0035, changed record 86855 from NaN to -0.1340, changed record 86857 from NaN to 
+               -0.2250, changed record 86859 from NaN to -0.1762, changed record 86860 from NaN to 
+               -0.1265, changed record 86861 from NaN to -0.0767, changed record 86864 from NaN to 
+               -0.2185, changed record 86868 from NaN to -0.3830, changed record 86870 from NaN to 
+               -0.3780, changed record 86877 from NaN to -0.2310, changed record 86878 from NaN to 
+               -0.2320, changed record 86887 from NaN to -0.2327, changed record 86888 from NaN to 
+               -0.1093, changed record 86890 from NaN to -0.0462, changed record 86891 from NaN to 
+               -0.1065, changed record 86892 from NaN to -0.1667, changed record 86903 from NaN to 
+               -0.1735, changed record 86911 from NaN to -0.1755, changed record 86920 from NaN to 
+               -0.2985, changed record 86926 from NaN to 0.0225, changed record 86945 from NaN to 
+               -0.0825, changed record 86965 from NaN to -0.2910, changed record 86972 from NaN to 
+               -0.1710, changed record 87000 from NaN to -0.2940, changed record 87036 from NaN to 
+               -0.2813, changed record 87037 from NaN to -0.1337, changed record 87040 from NaN to 
+               0.0400, changed record 87054 from NaN to 0.0125, changed record 87065 from NaN to 
+               -0.2145, changed record 87069 from NaN to -0.1940, changed record 87075 from NaN to 
+               -0.1755, changed record 87083 from NaN to -0.3790, changed record 87086 from NaN to 
+               -0.2640, changed record 87088 from NaN to -0.0565, changed record 87090 from NaN to 
+               -0.0990, changed record 87092 from NaN to -0.1205, changed record 87094 from NaN to 
+               -0.0710, changed record 87108 from NaN to -0.3100, changed record 87110 from NaN to 
+               -0.2183, changed record 87111 from NaN to -0.2167, changed record 87113 from NaN to 
+               -0.3065, changed record 87116 from NaN to -0.3203, changed record 87117 from NaN to 
+               -0.2627, changed record 87118 from NaN to -0.2050, changed record 87119 from NaN to 
+               -0.1473, changed record 87120 from NaN to -0.0897, changed record 87122 from NaN to 
+               -0.1275, changed record 87127 from NaN to -0.1825, changed record 87129 from NaN to 
+               -0.0770, changed record 87131 from NaN to -0.1120, changed record 87134 from NaN to 
+               -0.3100, changed record 87135 from NaN to -0.2280, changed record 87137 from NaN to 
+               -0.1000, changed record 87143 from NaN to -0.2830, changed record 87145 from NaN to 
+               -0.3370, changed record 87146 from NaN to -0.2400, changed record 87150 from NaN to 
+               -0.2260, changed record 87151 from NaN to -0.2280, changed record 87152 from NaN to 
+               -0.2300, changed record 87157 from NaN to -0.2170, changed record 87159 from NaN to 
+               -0.1637, changed record 87160 from NaN to -0.1143, changed record 87186 from NaN to 
+               -0.3125, changed record 87194 from NaN to -0.1525, changed record 87207 from NaN to 
+               -0.1820, changed record 87263 from NaN to -0.1560, changed record 87281 from NaN to 
+               -0.1455, changed record 87324 from NaN to -0.4115, changed record 87330 from NaN to 
+               -0.3945, changed record 87345 from NaN to -0.3860, changed record 87380 from NaN to 
+               -0.1985, changed record 87382 from NaN to -0.2975, changed record 87389 from NaN to 
+               -0.2410, changed record 87390 from NaN to -0.1170, changed record 87396 from NaN to 
+               -0.3625, changed record 87399 from NaN to -0.1070, changed record 87401 from NaN to 
+               -0.0857, changed record 87402 from NaN to -0.0333, changed record 87404 from NaN to 
+               0.0157, changed record 87405 from NaN to 0.0123, changed record 87412 from NaN to 
+               -0.1995, changed record 87416 from NaN to -0.1335, changed record 87419 from NaN to 
+               -0.1340, changed record 87425 from NaN to -0.2820, changed record 87430 from NaN to 
+               -0.0793, changed record 87431 from NaN to -0.0227, changed record 87433 from NaN to 
+               -0.1050, changed record 87434 from NaN to -0.2440, changed record 87437 from NaN to 
+               -0.1765, changed record 87442 from NaN to -0.2085, changed record 87446 from NaN to 
+               0.0075, changed record 87448 from NaN to -0.0030, changed record 87482 from NaN to 
+               0.0370, changed record 87501 from NaN to -0.2955, changed record 87590 from NaN to 
+               -0.3405, changed record 87651 from NaN to 0.0540, changed record 87658 from NaN to 
+               -0.0930, changed record 87666 from NaN to 0.0325, changed record 87674 from NaN to 
+               -0.0075, changed record 87678 from NaN to -0.2960, changed record 87682 from NaN to 
+               -0.0605, changed record 87685 from NaN to -0.3817, changed record 87686 from NaN to 
+               -0.3733, changed record 87688 from NaN to -0.2940, changed record 87689 from NaN to 
+               -0.2230, changed record 87690 from NaN to -0.1520, changed record 87692 from NaN to 
+               -0.1535, changed record 87696 from NaN to -0.0123, changed record 87697 from NaN to 
+               -0.0115, changed record 87698 from NaN to -0.0107, changed record 87701 from NaN to 
+               -0.0470, changed record 87702 from NaN to -0.0880, changed record 87703 from NaN to 
+               -0.1290, changed record 87704 from NaN to -0.1700, changed record 87706 from NaN to 
+               -0.1774, changed record 87707 from NaN to -0.1438, changed record 87708 from NaN to 
+               -0.1102, changed record 87709 from NaN to -0.0766, changed record 87711 from NaN to 
+               -0.1114, changed record 87712 from NaN to -0.1798, changed record 87713 from NaN to 
+               -0.2482, changed record 87714 from NaN to -0.3166, changed record 87716 from NaN to 
+               -0.2625, changed record 87718 from NaN to -0.0590, changed record 87721 from NaN to 
+               -0.0210, changed record 87726 from NaN to -0.3840, changed record 87728 from NaN to 
+               -0.3303, changed record 87729 from NaN to -0.2777, changed record 87731 from NaN to 
+               -0.1090, changed record 87737 from NaN to -0.0867, changed record 87738 from NaN to 
+               -0.0613, changed record 87752 from NaN to -0.1185, changed record 87770 from NaN to 
+               -0.1205, changed record 87773 from NaN to -0.1517, changed record 87774 from NaN to 
+               -0.1793, changed record 87793 from NaN to -0.0470, changed record 87795 from NaN to 
+               -0.2415, changed record 87815 from NaN to -0.4180, changed record 87817 from NaN to 
+               -0.3215, changed record 87831 from NaN to -0.2315, changed record 87834 from NaN to 
+               -0.4110, changed record 87881 from NaN to -0.1797, changed record 87882 from NaN to 
+               -0.3313, changed record 87888 from NaN to -0.3710, changed record 87889 from NaN to 
+               -0.2890, changed record 87908 from NaN to -0.1235, changed record 87923 from NaN to 
+               -0.2685, changed record 87937 from NaN to 0.0210, changed record 87942 from NaN to 
+               -0.1520, changed record 87946 from NaN to -0.2603, changed record 87947 from NaN to 
+               -0.3637, changed record 87949 from NaN to -0.3445, changed record 87957 from NaN to 
+               -0.1580, changed record 87960 from NaN to -0.2310, changed record 87964 from NaN to 
+               -0.4055, changed record 87967 from NaN to -0.1925, changed record 87978 from NaN to 
+               -0.1900, changed record 87982 from NaN to -0.1715, changed record 87989 from NaN to 
+               -0.1075, changed record 87991 from NaN to -0.0125, changed record 88010 from NaN to 
+               -0.0030, changed record 88014 from NaN to -0.1110, changed record 88015 from NaN to 
+               -0.1200, changed record 88017 from NaN to -0.0905, changed record 88027 from NaN to 
+               -0.0985, changed record 88034 from NaN to -0.1660, changed record 88036 from NaN to 
+               -0.0840, changed record 88039 from NaN to -0.0550, changed record 88043 from NaN to 
+               -0.2990, changed record 88054 from NaN to -0.0863, changed record 88055 from NaN to 
+               -0.0377, changed record 88059 from NaN to -0.2760, changed record 88064 from NaN to 
+               -0.1290, changed record 88068 from NaN to -0.1397, changed record 88069 from NaN to 
+               -0.2823, changed record 88072 from NaN to -0.1265, changed record 88075 from NaN to 
+               -0.0610, changed record 88086 from NaN to -0.3200, changed record 88087 from NaN to 
+               -0.2010, changed record 88088 from NaN to -0.0820, changed record 88095 from NaN to 
+               -0.4265, changed record 88103 from NaN to -0.1900, changed record 88105 from NaN to 
+               -0.1460, changed record 88106 from NaN to -0.3050, changed record 88110 from NaN to 
+               -0.0585, changed record 88119 from NaN to -0.2273, changed record 88120 from NaN to 
+               -0.3087, changed record 88129 from NaN to -0.1850, changed record 88151 from NaN to 
+               -0.2750, changed record 88159 from NaN to -0.3980, changed record 88187 from NaN to 
+               -0.3870, changed record 88188 from NaN to -0.3940, changed record 88200 from NaN to 
+               -0.2015, changed record 88205 from NaN to -0.4015, changed record 88216 from NaN to 
+               -0.4340, changed record 88218 from NaN to -0.2675, changed record 88229 from NaN to 
+               0.0115, changed record 88231 from NaN to -0.0017, changed record 88232 from NaN to 
+               -0.0003, changed record 88234 from NaN to 0.0145, changed record 88242 from NaN to 
+               -0.0065, changed record 88245 from NaN to -0.0520, changed record 88247 from NaN to 
+               -0.0750, changed record 88251 from NaN to -0.1660, changed record 88255 from NaN to 
+               0.0215, changed record 88258 from NaN to -0.1247, changed record 88259 from NaN to 
+               -0.2573, changed record 88261 from NaN to -0.2535, changed record 88264 from NaN to 
+               -0.0103, changed record 88265 from NaN to -0.0197, changed record 88268 from NaN to 
+               -0.0265, changed record 88272 from NaN to -0.0090, changed record 88273 from NaN to 
+               0.0060, changed record 88277 from NaN to -0.0360, changed record 88279 from NaN to 
+               -0.0520, changed record 88283 from NaN to -0.2320, changed record 88287 from NaN to 
+               -0.3137, changed record 88288 from NaN to -0.2063, changed record 88291 from NaN to 
+               -0.1845, changed record 88294 from NaN to -0.1443, changed record 88295 from NaN to 
+               -0.2647, changed record 88298 from NaN to 0.0215, changed record 88299 from NaN to 
+               0.0260, changed record 88300 from NaN to 0.0305, changed record 88302 from NaN to 
+               0.0310, changed record 88304 from NaN to 0.0075, changed record 88307 from NaN to 
+               -0.0190, changed record 88309 from NaN to -0.0650, changed record 88318 from NaN to 
+               -0.0555, changed record 88320 from NaN to 0.0145, changed record 88322 from NaN to 
+               -0.0580, changed record 88323 from NaN to -0.1390, changed record 88329 from NaN to 
+               -0.2150, changed record 88336 from NaN to -0.3270, changed record 88342 from NaN to 
+               -0.3445, changed record 88355 from NaN to -0.3530, changed record 88362 from NaN to 
+               0.0150, changed record 88381 from NaN to 0.0310, changed record 88448 from NaN to 
+               0.0645, changed record 88523 from NaN to -0.1555, changed record 88537 from NaN to 
+               -0.1850, changed record 88558 from NaN to -0.1890, changed record 88561 from NaN to 
+               -0.1840, changed record 88564 from NaN to -0.3690, changed record 88577 from NaN to 
+               -0.3730, changed record 88580 from NaN to -0.1985, changed record 88584 from NaN to 
+               -0.1765, changed record 88592 from NaN to -0.0105, changed record 88594 from NaN to 
+               -0.2075, changed record 88603 from NaN to -0.0880, changed record 88606 from NaN to 
+               -0.3860, changed record 88623 from NaN to -0.0300, changed record 88626 from NaN to 
+               -0.0505, changed record 88632 from NaN to -0.2280, changed record 88635 from NaN to 
+               -0.4190, changed record 88658 from NaN to -0.2560, changed record 88663 from NaN to 
+               -0.1355, changed record 88674 from NaN to 0.0465, changed record 88743 from NaN to 
+               -0.1870, changed record 88753 from NaN to -0.0485, changed record 88794 from NaN to 
+               -0.1940, changed record 88810 from NaN to -0.1670, changed record 88812 from NaN to 
+               -0.1230, changed record 88814 from NaN to -0.1983, changed record 88815 from NaN to 
+               -0.0807, changed record 88829 from NaN to -0.0490, changed record 88837 from NaN to 
+               0.0205, changed record 88841 from NaN to -0.3515, changed record 88876 from NaN to 
+               -0.1650, changed record 88885 from NaN to -0.2680, changed record 88886 from NaN to 
+               -0.1530, changed record 88887 from NaN to -0.0380, changed record 88890 from NaN to 
+               -0.0765, changed record 88900 from NaN to 0.0055, changed record 88913 from NaN to 
+               -0.0125, changed record 88918 from NaN to -0.0435, changed record 88928 from NaN to 
+               -0.5365, changed record 88931 from NaN to -0.0905, changed record 88953 from NaN to 
+               -0.2030, changed record 88979 from NaN to -0.1540, changed record 88984 from NaN to 
+               0.0245, changed record 89066 from NaN to -0.1685, changed record 89090 from NaN to 
+               0.0900, changed record 89097 from NaN to -0.3360, changed record 89135 from NaN to 
+               -0.0950, changed record 89147 from NaN to -0.3230, changed record 89153 from NaN to 
+               -0.0125, changed record 89168 from NaN to -0.3430, changed record 89175 from NaN to 
+               -0.1110, changed record 89201 from NaN to 0.0030, changed record 89202 from NaN to 
+               0.0270, changed record 89354 from NaN to -0.0900, changed record 89404 from NaN to 
+               -0.1125, changed record 89414 from NaN to -0.2095, changed record 89419 from NaN to 
+               -0.3300, changed record 89422 from NaN to 0.1220, changed record 89433 from NaN to 
+               0.0410, changed record 89450 from NaN to -0.3420, changed record 89467 from NaN to 
+               -0.3115, changed record 89481 from NaN to -0.0480, changed record 89486 from NaN to 
+               -0.1385, changed record 89501 from NaN to -0.1540, changed record 89545 from NaN to 
+               0.0770, changed record 89549 from NaN to -0.1035, changed record 89555 from NaN to 
+               -0.2745, changed record 89576 from NaN to -0.2623, changed record 89577 from NaN to 
+               -0.2517, changed record 89584 from NaN to -0.1280, changed record 89705 from NaN to 
+               -0.1305, changed record 89717 from NaN to -0.0663, changed record 89718 from NaN to 
+               -0.1475, changed record 89719 from NaN to -0.2288, changed record 89724 from NaN to 
+               -0.1410, changed record 89734 from NaN to -0.0925, changed record 89737 from NaN to 
+               -0.2750, changed record 89744 from NaN to -0.3510, changed record 89745 from NaN to 
+               -0.3290, changed record 89746 from NaN to -0.3070, changed record 90026 from NaN to 
+               -0.1405, changed record 90035 from NaN to -0.1540, changed record 90038 from NaN to 
+               -0.3505, changed record 90054 from NaN to -0.1130, changed record 90088 from NaN to 
+               0.0860, changed record 90257 from NaN to 0.0540, changed record 90288 from NaN to 
+               -0.0995, changed record 90515 from NaN to -0.0795, changed record 90518 from NaN to 
+               -0.2885, changed record 90589 from NaN to 0.1215, changed record 90602 from NaN to 
+               0.1070, changed record 90604 from NaN to -0.0660, changed record 90615 from NaN to 
+               -0.1270, changed record 90653 from NaN to -0.2630, changed record 90705 from NaN to 
+               0.0550, changed record 90862 from NaN to 0.1185, changed record 91122 from NaN to 
+               -0.0325, changed record 91189 from NaN to 0.1365, changed record 91450 from NaN to 
+               -0.0810, changed record 91456 from NaN to -0.0760, changed record 91483 from NaN to 
+               0.1150, changed record 91699 from NaN to -0.0570, changed record 91747 from NaN to 
+               0.1640, changed record 91897 from NaN to 0.0035, changed record 91986 from NaN to 
+               0.1235, changed record 92002 from NaN to -0.0830, changed record 92006 from NaN to 
+               0.0077, changed record 92007 from NaN to -0.1177, changed record 92014 from NaN to 
+               -0.1270, changed record 92025 from NaN to -0.2315, changed record 92027 from NaN to 
+               -0.2270, changed record 92036 from NaN to -0.0905, changed record 92043 from NaN to 
+               0.0040, changed record 92052 from NaN to -0.2180, changed record 92060 from NaN to 
+               -0.2605, changed record 92073 from NaN to 0.1665, changed record 92077 from NaN to 
+               0.1480, changed record 92511 from NaN to -0.2325, changed record 92874 from NaN to 
+               0.2090, changed record 92875 from NaN to 0.2060, changed record 93137 from NaN to 
+               0.1980, changed record 94086 from NaN to -0.0075, changed record 94326 from NaN to 
+               0.1960, changed record 94621 from NaN to -0.0275, changed record 94789 from NaN to 
+               -0.2260, changed record 94904 from NaN to -0.0075, changed record 96659 from NaN to 
+               0.1695, changed record 96907 from NaN to 0.1565, changed record 97382 from NaN to 
+               0.1970, changed record 98042 from NaN to -0.0200, changed record 100419 from NaN to 
+               0.1970, changed record 102714 from NaN to -0.0085, changed record 102874 from NaN to 
+               0.0540, changed record 102875 from NaN to -0.0500
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: replaced 9 missing values in column AIRTEMP_MEAN_450_0_10 with estimated 
+               values based on 1D interpolation of AIRTEMP_MEAN_450_0_10 as a function of Date 
+               using the MATLAB 9.913 function 'interp1' with the 'linear' (linear interpolation) 
+               method option, excluding data gaps with more than 5 consecutive missing values, and 
+               flagging the estimated values as 'E' ('interp_missing')
+            03-Nov-2025: 9 values in 'AIRTEMP_MEAN_450_0_10' were updated with new values 
+               ('update_data'): changed record 77191 from NaN to 16.490, changed record 77192 from 
+               NaN to 16.470, changed record 78055 from NaN to 9.310, changed record 78775 from NaN 
+               to 22.075, changed record 79063 from NaN to 18.993, changed record 79064 from NaN to 
+               18.887, changed record 80935 from NaN to 11.880, changed record 92874 from NaN to 
+               18.147, changed record 92875 from NaN to 20.213
+            03-Nov-2025: Q/C flagging criteria applied for column(s) AIRTEMP_MEAN_450_0_10, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: copied QA/QC flags from column(s) AIRTEMP_MEAN_450_0_10 to column(s) 
+               AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10, merging copied flags with any 
+               existing flags, and set QA/QC criteria for destination column(s) to 'manual' 
+               ('copyflags')
+            03-Nov-2025: converted units of 'SNOWDEP_INST_0_0_05' column and 3 QA/QC flag criteria 
+               parameters from m to mm ('unit_convert')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: sorted rows by measurement date prior to applying drift corrections 
+               ('correct_drift')
+            03-Nov-2025: corrected values in column SNOWDEP_INST_0_0_05 for sensor drift over the 
+               date range 01-Oct-2021 12:00:00 to 01-Oct-2023 by applying a constant correction of 
+               238 ('correct_drift')
+            03-Nov-2025: 100880 values in 'SNOWDEP_INST_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: sorted rows by measurement date prior to applying drift corrections 
+               ('correct_drift')
+            03-Nov-2025: corrected values in column SWE_INST_0_0_05 for sensor drift over the date 
+               range 01-Oct-2021 12:00:00 to 01-Oct-2022 12:00:00 by applying a constant correction 
+               of 0 ('correct_drift')
+            03-Nov-2025: sorted rows by measurement date prior to applying drift corrections 
+               ('correct_drift')
+            03-Nov-2025: corrected values in column SWE_INST_0_0_05 for sensor drift over the date 
+               range 01-Oct-2020 12:00:00 to 01-Oct-2021 12:00:00 by applying a constant correction 
+               of -520 ('correct_drift')
+            03-Nov-2025: documented flagged and missing values in columns Site, PROGID, 
+               BATTERY_MEAN, BATTERY_V_CHECK, SWE_INST_0_0_05, SWE_CHECK, SNOWDEP_INST_0_0_05, 
+               SNOWDEPTH_CHECK, SNOWDEP_QUAL, PRECIP_INST_455_0_02, ORI_SH_AVG, PUMPVOLTS_Avg, 
+               PUMPVOLTS_CHECK, AIRTEMP_MEAN_450_0_10, AIRTEMP_MAX_450_0_10 and 
+               AIRTEMP_MIN_450_0_10 as data set anomalies in the metadata ('add_anomalies')
+            03-Nov-2025: updated title ('newtitle')
+            03-Nov-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            03-Nov-2025: updated title ('newtitle')
+            03-Nov-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            03-Nov-2025: added column 'PRECIP_TOT_455_0_02' at position 13 ('addcol')
+            03-Nov-2025: manually added an array of custom flags to 105120 records in column(s) 
+               PRECIP_TOT_455_0_02 ('addflags')
+            03-Nov-2025: locked Q/C flag criteria for column PRECIP_TOT_455_0_02 to prevent 
+               automatic evaluation ('flag_locks')
+            03-Nov-2025: converted values in column(s) PRECIP_TOT_455_0_02 assigned QA/QC flag(s) M 
+               (missing value) to NaN/empty, retaining and locking existing flags: 57819 records in 
+               PRECIP_TOT_455_0_02 ('nullflags')
+            03-Nov-2025: added column 'PRECIP_ACC_455_0_02' at position 14 ('addcol')
+            03-Nov-2025: copied QA/QC flags from column(s) PRECIP_TOT_455_0_02 to column(s) 
+               PRECIP_ACC_455_0_02, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            03-Nov-2025: added column 'SNOWDEP_MED_0_0_05' at position 10 ('addcol')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_MED_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: copied QA/QC flags from column(s) SNOWDEP_INST_0_0_05 to column(s) 
+               SNOWDEP_MED_0_0_05, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            03-Nov-2025: added column 'SWE_MED_0_0_05' at position 8 ('addcol')
+            03-Nov-2025: copied QA/QC flags from column(s) SWE_INST_0_0_05 to column(s) 
+               SWE_MED_0_0_05, merging copied flags with any existing flags, and set QA/QC criteria 
+               for destination column(s) to 'manual' ('copyflags')
+            03-Nov-2025: replaced values matching '(Date > datenum('05/15/2024 12:00:00')&Date < 
+               datenum('10/28/2024 00:00:00')) 
+          (Date > datenum('05/31/2023 12:00:00')&Date < datenum('10/24/2023 00:00:00')) 
+          (Date > datenum('06/09/2022 12:00:00')&Date < datenum('10/21/2022 14:00:00')) 
+          (Date > datenum('05/14/2021 12:00:00')&Date < datenum('10/31/2021 12:00:00')) 
+          (Date > datenum('05/20/2020 12:00:00')&Date < datenum('11/05/2020 12:00:00')) 
+          (Date > datenum('05/15/2019 12:00:00')&Date < datenum('11/19/2019 12:00:00')) 
+          (Date > datenum('06/01/2018 12:00:00')&Date < datenum('10/25/2018 12:00:00')) 
+          (Date > datenum('06/14/2017 12:00:00')&Date < datenum('10/02/2017 12:00:00')) 
+          (Date > datenum('05/04/2016 12:00:00')&Date < datenum('11/13/2016 12:00:00')) 
+          (Date > datenum('07/06/2015 12:00:00')&Date < datenum('10/31/2015 12:00:00'))' in 
+             column(s) SNOWDEP_INST_0_0_05 and SNOWDEP_MED_0_0_05 with 0 ('num_replace')
+            03-Nov-2025: 41470 values in 'SNOWDEP_INST_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_INST_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: 41471 values in 'SNOWDEP_MED_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_MED_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: replaced values matching '(Date > datenum('05/15/2024 12:00:00')&Date < 
+               datenum('10/28/2024 00:00:00')) 
+          (Date > datenum('05/31/2023 12:00:00')&Date < datenum('10/24/2023 00:00:00')) 
+          (Date > datenum('06/09/2022 12:00:00')&Date < datenum('10/21/2022 14:00:00')) 
+          (Date > datenum('05/14/2021 12:00:00')&Date < datenum('10/31/2021 12:00:00')) 
+          (Date > datenum('05/20/2020 12:00:00')&Date < datenum('11/05/2020 12:00:00')) 
+          (Date > datenum('05/15/2019 12:00:00')&Date < datenum('11/19/2019 12:00:00')) 
+          (Date > datenum('06/01/2018 12:00:00')&Date < datenum('10/25/2018 12:00:00')) 
+          (Date > datenum('06/14/2017 12:00:00')&Date < datenum('10/02/2017 12:00:00')) 
+          (Date > datenum('05/04/2016 12:00:00')&Date < datenum('11/13/2016 12:00:00')) 
+          (Date > datenum('07/06/2015 12:00:00')&Date < datenum('10/31/2015 12:00:00'))' in 
+             column(s) SWE_INST_0_0_05 and SWE_MED_0_0_05 with 0 ('num_replace')
+            03-Nov-2025: 41468 values in 'SWE_INST_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SWE_INST_0_0_05, 'flags' field 
+               updated ('dataflag')
+            03-Nov-2025: 41468 values in 'SWE_MED_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SWE_MED_0_0_05, 'flags' field 
+               updated ('dataflag')
+            03-Nov-2025: replaced values matching 'SNOWDEP_MED_0_0_05 < 0' in column(s) 
+               SNOWDEP_MED_0_0_05 with 0 ('num_replace')
+            03-Nov-2025: 6809 values in 'SNOWDEP_MED_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SNOWDEP_MED_0_0_05, 'flags' 
+               field updated ('dataflag')
+            03-Nov-2025: manually added 'Q' flags to 6809 records in column(s) SNOWDEP_MED_0_0_05 
+               ('addflags')
+            03-Nov-2025: replaced values matching 'SWE_MED_0_0_05 < 0' in column(s) SWE_MED_0_0_05 
+               with 0 ('num_replace')
+            03-Nov-2025: 8194 values in 'SWE_MED_0_0_05' were updated with new values 
+               ('update_data')
+            03-Nov-2025: Q/C flagging criteria applied for column(s) SWE_MED_0_0_05, 'flags' field 
+               updated ('dataflag')
+            03-Nov-2025: manually added 'Q' flags to 8194 records in column(s) SWE_MED_0_0_05 
+               ('addflags')
+            03-Nov-2025: cleared assignments of QA/QC flag(s) Q (Questionable value) for column(s) 
+               AIRTEMP_MEAN_450_0_10 and locked flags to prevent automatic recalculation: 166 
+               records in AIRTEMP_MEAN_450_0_10 ('clearflags')
+            03-Nov-2025: deleted columns SNOWDEP_QUAL, PUMPVOLTS_Avg, ORI_SH_AVG, BATTERY_MEAN, 
+               SWE_CHECK, SNOWDEPTH_CHECK, PUMPVOLTS_CHECK and BATTERY_V_CHECK from the structure 
+               ('deletecols')
+            03-Nov-2025: deleted column Date from the structure ('deletecols')
+            03-Nov-2025: added column 'Date' at position 2 ('addcol')
+            03-Nov-2025: flags for columns SWE_INST_0_0_05, SWE_MED_0_0_05, SNOWDEP_INST_0_0_05, 
+               SNOWDEP_MED_0_0_05, PRECIP_INST_455_0_02, PRECIP_TOT_455_0_02, PRECIP_ACC_455_0_02, 
+               AIRTEMP_MEAN_450_0_10, AIRTEMP_MAX_450_0_10 and AIRTEMP_MIN_450_0_10 converted to 
+               data columns, flag codes updated in metadata ('flags2cols')
+            03-Nov-2025: updated 6 metadata fields in the Data section(s) ('addmeta')
+            03-Nov-2025: updated 15 metadata fields in the Status, Data sections to reflect 
+               attribute metadata ('updatecols')
+            03-Nov-2025: parsed and formatted metadata ('listmeta')
+   B. Variable Information 
+      1. Variable Name: 
+         column  1. Site
+         column  2. Date
+         column  3. LOGGERID
+         column  4. PROGID
+         column  5. SWE_INST_0_0_05
+         column  6. Flag_SWE_INST_0_0_05
+         column  7. SWE_MED_0_0_05
+         column  8. Flag_SWE_MED_0_0_05
+         column  9. SNOWDEP_INST_0_0_05
+         column 10. Flag_SNOWDEP_INST_0_0_05
+         column 11. SNOWDEP_MED_0_0_05
+         column 12. Flag_SNOWDEP_MED_0_0_05
+         column 13. PRECIP_INST_455_0_02
+         column 14. Flag_PRECIP_INST_455_0_02
+         column 15. PRECIP_TOT_455_0_02
+         column 16. Flag_PRECIP_TOT_455_0_02
+         column 17. PRECIP_ACC_455_0_02
+         column 18. Flag_PRECIP_ACC_455_0_02
+         column 19. AIRTEMP_MEAN_450_0_10
+         column 20. Flag_AIRTEMP_MEAN_450_0_10
+         column 21. AIRTEMP_MAX_450_0_10
+         column 22. Flag_AIRTEMP_MAX_450_0_10
+         column 23. AIRTEMP_MIN_450_0_10
+         column 24. Flag_AIRTEMP_MIN_450_0_10
+      2. Variable Definition: 
+         column  1. Site code
+         column  2. Round off corrected corrected serial date
+         column  3. Logger ID
+         column  4. Program ID of program
+         column  5. Snow water equivalent
+         column  6. QA/QC flags for Snow water equivalent (flagging criteria, where "x" is 
+            SWE_INST_0_0_05: isnan(x)="M", Date>=datenum("10/30/2015 
+            12:00:00")&Date<=datenum("11/5/2015 14:00:00")="Q", Date>=datenum("11/11/2016 
+            12:00:00")&Date<=datenum("11/14/2017 12:00:00")="I", Date>=datenum("09/30/2023 
+            00:00:00")&Date<=datenum("06/04/2024 12:00:00")="I", Date>=datenum("11/20/2024 
+            00:00:00")&Date<=datenum("03/26/2025 12:00:00")="I", manual)
+         column  7. 12 point running median of SWE_INST
+         column  8. QA/QC flags for 12 point running median of SWE_INST (flagging criteria, where 
+            "x" is SWE_MED_0_0_05: manual)
+         column  9. Snow depth
+         column 10. QA/QC flags for Snow depth (flagging criteria, where "x" is 
+            SNOWDEP_INST_0_0_05: isnan(x)="M", x>4500="Q", x>5000="I", x<-5000="I", 
+            SNOWDEP_QUAL<=0="I", SNOWDEP_QUAL<162&SNOWDEP_QUAL>0="Q", 
+            SNOWDEP_QUAL>=300&SNOWDEP_QUAL<=600="Q", flag_daterange(Date,{"10/30/2015 
+            12:00:00","11/05/2015 14:55:00"})="Q", flag_daterange(Date,{"06/03/2022 
+            15:20:00","06/09/2022 13:30:00"})="I", flag_daterange(Date,{"10/20/2022 
+            10:55:00","10/22/2022 05:05:00"})="Q", manual)
+         column 11. 12 point running median of SNOWDEP_INST
+         column 12. QA/QC flags for 12 point running median of SNOWDEP_INST (flagging criteria, 
+            where "x" is SNOWDEP_MED_0_0_05: Date>=datenum("12/16/2021 
+            12:00:00")&Date<=datenum("12/23/2021 12:00:00")="Q", manual)
+         column 13. Stand alone rain gauge
+         column 14. QA/QC flags for Stand alone rain gauge (flagging criteria, where "x" is 
+            PRECIP_INST_455_0_02: x<=0="I", x>1200="I", ORI_SH_AVG<3.5="T", 
+            flag_valuechange(x,100,25,1)="R", isnan(x)="M", Date>=datenum("10/30/2015 
+            12:00:00")&Date<=datenum("11/05/2015 14:00:00")="Q", Date>=datenum("12/17/2015 
+            12:00:00")&Date<=datenum("01/27/2016 12:00:00")="I", Date>=datenum("02/25/2018 
+            22:45:00")&Date<=datenum("02/28/2018 20:00:00")="T", Date>=datenum("02/27/2019 
+            16:55:00")&Date<=datenum("10/06/2021 12:10:00")="Q", Date>=datenum("09/11/2019 
+            13:35:00")&Date<=datenum("09/11/2019 13:45:00")="I", Date>=datenum("10/06/2021 
+            12:15:00")&Date<=datenum("12/14/2021 00:05:00")="Q", Date>=datenum("12/29/2021 
+            00:00:00")&Date<=datenum("07/04/2022 00:00:00")="I", Date>=datenum("12/14/2021 
+            00:10:00")&Date<=datenum("09/31/2022 00:00:00")="Q", Date>=datenum("12/15/2022 
+            11:20:00")&Date<=datenum("12/15/2022 12:25:00")="I", Date>=datenum("10/01/2022 
+            00:00:00")&Date<=datenum("09/19/2024 14:15:00")="Q", manual)
+         column 15. Increment corrected total precipitation
+         column 16. QA/QC flags for Increment corrected total precipitation (flagging criteria, 
+            where "x" is PRECIP_TOT_455_0_02: manual)
+         column 17. Cumulative sum of total precipitation
+         column 18. QA/QC flags for Cumulative sum of total precipitation (flagging criteria, where 
+            "x" is PRECIP_ACC_455_0_02: manual)
+         column 19. Average air temperature at 450 cm
+         column 20. QA/QC flags for Average air temperature at 450 cm (flagging criteria, where "x" 
+            is AIRTEMP_MEAN_450_0_10: x<=-35="I", x>50="I", x<-18="Q", x>45="Q", 
+            flag_valuechange(x,6.5,6.5,1) ="V", flag_valuechange(x,8,8,1) ="I", isnan(x)="M", 
+            x<FOURLO="Q", x>FOURHI="Q", Date>=datenum("10/30/2015 
+            12:00:00")&Date<=datenum("11/5/2015 14:00:00")="Q", Date>=datenum("05/06/2017 
+            08:00:00")&Date<=datenum("08/18/2017 20:00:00")="Q", 
+            (AIRTEMP_MAX_450_0_10-AIRTEMP_MEAN_450_0_10)>1="Q", 
+            (AIRTEMP_MEAN_450_0_10-AIRTEMP_MIN_450_0_10)>1="Q", x>AIRTEMP_MAX_450_0_10="I", 
+            x<AIRTEMP_MIN_450_0_10=‘I’, manual)
+         column 21. Maximum air temperature at 450 cm
+         column 22. QA/QC flags for Maximum air temperature at 450 cm (flagging criteria, where "x" 
+            is AIRTEMP_MAX_450_0_10: x<=-35="I", x>50="I", x<-18="Q", x>45="Q", 
+            flag_valuechange(x,6.5,6.5,1) ="V", flag_valuechange(x,8,8,1) ="I", isnan(x)="M", 
+            x<FOURLO="Q", x>FOURHI="Q", Date>=datenum("10/30/2015 
+            12:00:00")&Date<=datenum("11/5/2015 14:00:00")="Q", Date>=datenum("05/06/2017 
+            08:00:00")&Date<=datenum("08/18/2017 20:00:00")="Q", manual)
+         column 23. Minimum air temperature at 450 cm
+         column 24. QA/QC flags for Minimum air temperature at 450 cm (flagging criteria, where "x" 
+            is AIRTEMP_MIN_450_0_10: x<=-35="I", x>50="I", x<-18="Q", x>45="Q", 
+            flag_valuechange(x,6.5,6.5,1) ="V", flag_valuechange(x,8,8,1) ="I", isnan(x)="M", 
+            x<FOURLO="Q", x>FOURHI="Q", Date>=datenum("10/30/2015 
+            12:00:00")&Date<=datenum("11/5/2015 14:00:00")="Q", Date>=datenum("05/06/2017 
+            08:00:00")&Date<=datenum("08/18/2017 20:00:00")="Q", manual)
+      3. Units of Measurement: 
+         column  1. 
+         column  2. yyyy-MM-dd HH:mm:ss
+         column  3. none
+         column  4. none
+         column  5. mm
+         column  6. none
+         column  7. mm
+         column  8. none
+         column  9. mm
+         column 10. none
+         column 11. mm
+         column 12. none
+         column 13. mm
+         column 14. none
+         column 15. mm
+         column 16. none
+         column 17. mm
+         column 18. none
+         column 19. deg c
+         column 20. none
+         column 21. deg c
+         column 22. none
+         column 23. deg c
+         column 24. none
+      4. Data Type 
+         a. Storage Type: 
+            column  1. string
+            column  2. string
+            column  3. integer
+            column  4. floating-point
+            column  5. floating-point
+            column  6. string
+            column  7. floating-point
+            column  8. string
+            column  9. floating-point
+            column 10. string
+            column 11. floating-point
+            column 12. string
+            column 13. floating-point
+            column 14. string
+            column 15. floating-point
+            column 16. string
+            column 17. floating-point
+            column 18. string
+            column 19. floating-point
+            column 20. string
+            column 21. floating-point
+            column 22. string
+            column 23. floating-point
+            column 24. string
+         b. Variable Codes: 
+            Flag_SWE_INST_0_0_05: E = Value estimated by linear interpolation, M = missing value
+            Flag_SWE_MED_0_0_05: E = Value estimated by linear interpolation, M = missing value, Q 
+               = Questionable value
+            Flag_SNOWDEP_INST_0_0_05: E = Value estimated by linear interpolation, M = missing 
+               value, Q = Questionable value
+            Flag_SNOWDEP_MED_0_0_05: E = Value estimated by linear interpolation, M = missing 
+               value, Q = Questionable value
+            Flag_PRECIP_INST_455_0_02: M = missing value, Q = Questionable value, R = Reduced 
+               volume stored in sample tank, T = For methods or hardware related flags. ie. broken 
+               shield
+            Flag_PRECIP_TOT_455_0_02: J = unspecified, M = missing value, R = Reduced volume stored 
+               in sample tank, W = unspecified
+            Flag_PRECIP_ACC_455_0_02: J = unspecified, M = missing value, R = Reduced volume stored 
+               in sample tank, W = unspecified
+            Flag_AIRTEMP_MEAN_450_0_10: E = Value estimated by linear interpolation, M = missing 
+               value, Q = Questionable value
+            Flag_AIRTEMP_MAX_450_0_10: E = Value estimated by linear interpolation, M = missing 
+               value, Q = Questionable value
+            Flag_AIRTEMP_MIN_450_0_10: E = Value estimated by linear interpolation, M = missing 
+               value, Q = Questionable value
+         c. Numeric Range: 
+            column  1. (none)
+            column  2. (none)
+            column  3. 302 to 302
+            column  4. 0 to 41878
+            column  5. -17.89 to 750.2
+            column  6. (none)
+            column  7. 0 to 749.95
+            column  8. (none)
+            column  9. -60 to 2753.0001
+            column 10. (none)
+            column 11. 0 to 2413
+            column 12. (none)
+            column 13. 0.894 to 176.1
+            column 14. (none)
+            column 15. 0 to 23.67
+            column 16. (none)
+            column 17. 0 to 495.048
+            column 18. (none)
+            column 19. -15.27 to 36.61
+            column 20. (none)
+            column 21. -15.26 to 36.81
+            column 22. (none)
+            column 23. -15.28 to 36.42
+            column 24. (none)
+         d. Missing Value Code: NaN
+      5. Data Format 
+         a. Column Type: 
+            column  1. text
+            column  2. text
+            column  3. numerical
+            column  4. numerical
+            column  5. numerical
+            column  6. text
+            column  7. numerical
+            column  8. text
+            column  9. numerical
+            column 10. text
+            column 11. numerical
+            column 12. text
+            column 13. numerical
+            column 14. text
+            column 15. numerical
+            column 16. text
+            column 17. numerical
+            column 18. text
+            column 19. numerical
+            column 20. text
+            column 21. numerical
+            column 22. text
+            column 23. numerical
+            column 24. text
+         b. Number of Columns: 24
+         c. Decimal Places: 
+            column  1. 0
+            column  2. 0
+            column  3. 0
+            column  4. 1
+            column  5. 4
+            column  6. 0
+            column  7. 2
+            column  8. 0
+            column  9. 4
+            column 10. 0
+            column 11. 2
+            column 12. 0
+            column 13. 2
+            column 14. 0
+            column 15. 2
+            column 16. 0
+            column 17. 2
+            column 18. 0
+            column 19. 3
+            column 20. 0
+            column 21. 3
+            column 22. 0
+            column 23. 3
+            column 24. 0
+      6. Logical Variable Type: 
+         column  1. nominal (none)
+         column  2. datetime (none)
+         column  3. nominal (discrete)
+         column  4. nominal (continuous)
+         column  5. data (continuous)
+         column  6. coded value (none)
+         column  7. data (continuous)
+         column  8. coded value (none)
+         column  9. data (continuous)
+         column 10. coded value (none)
+         column 11. data (continuous)
+         column 12. coded value (none)
+         column 13. data (continuous)
+         column 14. coded value (none)
+         column 15. data (continuous)
+         column 16. coded value (none)
+         column 17. data (continuous)
+         column 18. coded value (none)
+         column 19. data (continuous)
+         column 20. coded value (none)
+         column 21. data (continuous)
+         column 22. coded value (none)
+         column 23. data (continuous)
+         column 24. coded value (none)
+      7. Flagging Criteria: 
+         column  1. manually-assigned flags
+         column  2. none
+         column  3. flag_notinarray(x,[301,302])="I";isnan(x)="M"
+         column  4. flag_valuechange(x,0.1,0.1,1)="P";isnan(x)="M"
+         column  5. isnan(x)="M";col_Date>=datenum("10/30/2015 
+            12:00:00")&col_Date<=datenum("11/5/2015 14:00:00")="Q";col_Date>=datenum("11/11/2016 
+            12:00:00")&col_Date<=datenum("11/14/2017 12:00:00")="I";col_Date>=datenum("09/30/2023 
+            00:00:00")&col_Date<=datenum("06/04/2024 12:00:00")="I";col_Date>=datenum("11/20/2024 
+            00:00:00")&col_Date<=datenum("03/26/2025 12:00:00")="I";manually-assigned flags
+         column  6. none
+         column  7. manually-assigned flags
+         column  8. none
+         column  9. 
+            isnan(x)="M";x>4500="Q";x>5000="I";x<-5000="I";col_SNOWDEP_QUAL<=0="I";col_SNOWDEP_QUAL<
+            162&col_SNOWDEP_QUAL>0="Q";col_SNOWDEP_QUAL>=300&col_SNOWDEP_QUAL<=600="Q";flag_daterang
+            e(col_Date,{"10/30/2015 12:00:00","11/05/2015 
+            14:55:00"})="Q";flag_daterange(col_Date,{"06/03/2022 15:20:00","06/09/2022 
+            13:30:00"})="I";flag_daterange(col_Date,{"10/20/2022 10:55:00","10/22/2022 
+            05:05:00"})="Q";manually-assigned flags
+         column 10. none
+         column 11. col_Date>=datenum("12/16/2021 12:00:00")&col_Date<=datenum("12/23/2021 
+            12:00:00")="Q";manually-assigned flags
+         column 12. none
+         column 13. 
+            x<=0="I";x>1200="I";col_ORI_SH_AVG<3.5="T";flag_valuechange(x,100,25,1)="R";isnan(x)="M"
+            ;col_Date>=datenum("10/30/2015 12:00:00")&col_Date<=datenum("11/05/2015 
+            14:00:00")="Q";col_Date>=datenum("12/17/2015 12:00:00")&col_Date<=datenum("01/27/2016 
+            12:00:00")="I";col_Date>=datenum("02/25/2018 22:45:00")&col_Date<=datenum("02/28/2018 
+            20:00:00")="T";col_Date>=datenum("02/27/2019 16:55:00")&col_Date<=datenum("10/06/2021 
+            12:10:00")="Q";col_Date>=datenum("09/11/2019 13:35:00")&col_Date<=datenum("09/11/2019 
+            13:45:00")="I";col_Date>=datenum("10/06/2021 12:15:00")&col_Date<=datenum("12/14/2021 
+            00:05:00")="Q";col_Date>=datenum("12/29/2021 00:00:00")&col_Date<=datenum("07/04/2022 
+            00:00:00")="I";col_Date>=datenum("12/14/2021 00:10:00")&col_Date<=datenum("09/31/2022 
+            00:00:00")="Q";col_Date>=datenum("12/15/2022 11:20:00")&col_Date<=datenum("12/15/2022 
+            12:25:00")="I";col_Date>=datenum("10/01/2022 00:00:00")&col_Date<=datenum("09/19/2024 
+            14:15:00")="Q";manually-assigned flags
+         column 14. none
+         column 15. manually-assigned flags
+         column 16. none
+         column 17. manually-assigned flags
+         column 18. none
+         column 19. x<=-35="I";x>50="I";x<-18="Q";x>45="Q";flag_valuechange(x,6.5,6.5,1) 
+            ="V";flag_valuechange(x,8,8,1) 
+            ="I";isnan(x)="M";x<col_FOURLO="Q";x>col_FOURHI="Q";col_Date>=datenum("10/30/2015 
+            12:00:00")&col_Date<=datenum("11/5/2015 14:00:00")="Q";col_Date>=datenum("05/06/2017 
+            08:00:00")&col_Date<=datenum("08/18/2017 
+            20:00:00")="Q";(col_AIRTEMP_MAX_450_0_10-col_AIRTEMP_MEAN_450_0_10)>1="Q";(col_AIRTEMP_M
+            EAN_450_0_10-col_AIRTEMP_MIN_450_0_10)>1="Q";x>col_AIRTEMP_MAX_450_0_10="I";x<col_AIRTEM
+            P_MIN_450_0_10=‘I’;manually-assigned flags
+         column 20. none
+         column 21. x<=-35="I";x>50="I";x<-18="Q";x>45="Q";flag_valuechange(x,6.5,6.5,1) 
+            ="V";flag_valuechange(x,8,8,1) 
+            ="I";isnan(x)="M";x<col_FOURLO="Q";x>col_FOURHI="Q";col_Date>=datenum("10/30/2015 
+            12:00:00")&col_Date<=datenum("11/5/2015 14:00:00")="Q";col_Date>=datenum("05/06/2017 
+            08:00:00")&col_Date<=datenum("08/18/2017 20:00:00")="Q";manually-assigned flags
+         column 22. none
+         column 23. x<=-35="I";x>50="I";x<-18="Q";x>45="Q";flag_valuechange(x,6.5,6.5,1) 
+            ="V";flag_valuechange(x,8,8,1) 
+            ="I";isnan(x)="M";x<col_FOURLO="Q";x>col_FOURHI="Q";col_Date>=datenum("10/30/2015 
+            12:00:00")&col_Date<=datenum("11/5/2015 14:00:00")="Q";col_Date>=datenum("05/06/2017 
+            08:00:00")&col_Date<=datenum("08/18/2017 20:00:00")="Q";manually-assigned flags
+         column 24. none
+   C. Data Anomalies: Converted values in all columns assigned QA/QC flag(s) I (Invalid value (out 
+      of range)) to NaN/empty, locking and replacing existing flags with 'M': 2731 records in 
+      SNOWDEP_INST_0_0_05, 55445 records in PRECIP_INST_455_0_02, 1 records in 
+      AIRTEMP_MIN_450_0_10. Values of 2391 records in Site were flagged as M (missing value) for 
+      dates: 06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 346 records in PROGID 
+      were flagged as M (missing value) for dates: 08/18/2022-08/19/2022, 09/27/2022. Values of 3 
+      records in PROGID were flagged as P (Program ID change) for dates: 08/19/2022, 09/27/2022. 
+      Values of 346 records in PROGID are missing for dates: 08/18/2022-08/19/2022, 09/27/2022. 
+      Values of 2391 records in BATTERY_MEAN were flagged as M (missing value) for dates: 
+      06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 2391 records in 
+      BATTERY_MEAN are missing for dates: 06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 
+      07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 
+      2391 records in BATTERY_V_CHECK were flagged as M (missing value) for dates: 06/26/2022, 
+      06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 105119 records in BATTERY_V_CHECK are missing 
+      for dates: 10/01/2021-09/27/2022, 09/27/2022-10/01/2022. Values of 9 records in 
+      SWE_INST_0_0_05 were flagged as E (Value estimated by linear interpolation) for dates: 
+      06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/09/2022, 08/19/2022. Values of 7450 
+      records in SWE_INST_0_0_05 were flagged as M (missing value) for dates: 
+      10/01/2021-10/18/2021, 07/03/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. 
+      Values of 7450 records in SWE_INST_0_0_05 are missing for dates: 10/01/2021-10/18/2021, 
+      07/03/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 2391 records 
+      in SWE_CHECK were flagged as M (missing value) for dates: 06/26/2022, 06/29/2022, 07/01/2022, 
+      07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. 
+      Values of 105116 records in SWE_CHECK are missing for dates: 10/01/2021-08/19/2022, 
+      08/19/2022-09/27/2022, 09/27/2022-10/01/2022. Values of 1025 records in SNOWDEP_INST_0_0_05 
+      were flagged as E (Value estimated by linear interpolation) for dates: 10/01/2021, 
+      10/02/2021, 10/03/2021, 10/04/2021, 10/05/2021, 11/06/2021, 11/07/2021, 11/23/2021, 
+      11/24/2021, 12/09/2021, 12/10/2021, 12/11/2021, 12/12/2021, 12/15/2021, 12/16/2021, 
+      12/17/2021, 12/21/2021, 12/22/2021, 12/25/2021, 12/26/2021, 01/04/2022, 01/07/2022, 
+      01/31/2022, 02/20/2022, 03/04/2022, 03/19/2022, 04/04/2022, 04/09/2022, 04/11/2022, 
+      04/14/2022, 04/16/2022, 05/02/2022, 05/07/2022, 05/19/2022, 06/02/2022, 06/09/2022, 
+      06/10/2022, 06/15/2022, 06/16/2022, 06/18/2022, 06/20/2022, 06/21/2022, 06/22/2022, 
+      06/23/2022, 06/24/2022, 06/25/2022, 06/26/2022, 06/27/2022, 06/28/2022, 06/29/2022, 
+      07/01/2022, 07/02/2022, 07/09/2022, 07/10/2022, 07/11/2022, 07/12/2022, 07/13/2022, 
+      07/14/2022, 07/21/2022, 07/22/2022, 07/23/2022, 07/24/2022, 07/25/2022, 07/26/2022, 
+      07/27/2022, 07/28/2022, 07/29/2022, 07/30/2022, 07/31/2022, 08/01/2022, 08/02/2022, 
+      08/03/2022, 08/04/2022, 08/05/2022, 08/06/2022, 08/07/2022, 08/08/2022, 08/09/2022, 
+      08/10/2022, 08/11/2022, 08/12/2022, 08/13/2022, 08/14/2022, 08/15/2022, 08/16/2022, 
+      08/18/2022, 08/19/2022, 08/20/2022, 08/23/2022, 08/24/2022, 08/25/2022, 08/26/2022, 
+      09/01/2022, 09/02/2022, 09/04/2022, 09/06/2022, 09/14/2022, 09/22/2022, 09/23/2022. Values of 
+      4097 records in SNOWDEP_INST_0_0_05 were flagged as M (missing value) for dates: 
+      06/03/2022-06/09/2022, 07/03/2022, 07/14/2022-07/21/2022, 08/02/2022, 08/18/2022-08/19/2022, 
+      09/27/2022. Values of 3850 records in SNOWDEP_INST_0_0_05 were flagged as Q (Questionable 
+      value) for dates: 10/01/2021, 10/02/2021, 10/03/2021, 10/04/2021, 10/05/2021, 10/09/2021, 
+      10/10/2021, 10/11/2021, 10/12/2021, 10/13/2021, 10/14/2021, 10/24/2021, 11/06/2021, 
+      11/07/2021, 11/08/2021, 11/09/2021, 11/10/2021, 11/11/2021, 11/12/2021, 11/16/2021, 
+      11/20/2021, 11/21/2021, 11/23/2021, 11/24/2021, 11/25/2021, 11/26/2021, 11/27/2021, 
+      12/01/2021, 12/02/2021, 12/08/2021, 12/09/2021, 12/10/2021, 12/11/2021, 12/12/2021, 
+      12/13/2021, 12/14/2021, 12/15/2021, 12/16/2021, 12/17/2021, 12/18/2021, 12/19/2021, 
+      12/20/2021, 12/21/2021, 12/22/2021, 12/23/2021, 12/24/2021, 12/25/2021, 12/26/2021, 
+      12/27/2021, 12/28/2021, 12/28/2021-12/29/2021, 12/30/2021, 12/31/2021, 01/03/2022, 
+      01/04/2022, 01/05/2022, 01/07/2022, 01/08/2022, 01/10/2022, 01/13/2022, 01/17/2022, 
+      01/18/2022, 01/19/2022, 01/20/2022, 01/30/2022, 01/31/2022, 02/01/2022, 02/02/2022, 
+      02/03/2022, 02/04/2022, 02/14/2022, 02/15/2022, 02/16/2022, 02/19/2022, 02/20/2022, 
+      02/21/2022, 02/22/2022, 02/23/2022, 02/26/2022, 02/28/2022, 03/01/2022, 03/02/2022, 
+      03/03/2022, 03/04/2022, 03/05/2022, 03/10/2022, 03/11/2022, 03/14/2022, 03/15/2022, 
+      03/16/2022, 03/18/2022, 03/19/2022, 03/21/2022, 03/31/2022, 04/01/2022, 04/02/2022, 
+      04/03/2022, 04/04/2022, 04/08/2022, 04/09/2022, 04/10/2022, 04/11/2022, 04/12/2022, 
+      04/13/2022, 04/14/2022, 04/16/2022, 04/18/2022, 04/19/2022, 04/21/2022, 04/22/2022, 
+      04/23/2022, 04/24/2022, 04/25/2022, 04/26/2022, 04/27/2022, 04/28/2022, 04/29/2022, 
+      04/30/2022, 05/01/2022, 05/02/2022, 05/03/2022, 05/04/2022, 05/07/2022, 05/08/2022, 
+      05/10/2022, 05/12/2022, 05/13/2022, 05/19/2022, 05/27/2022, 05/29/2022, 05/31/2022, 
+      06/02/2022, 06/03/2022, 06/09/2022, 06/10/2022, 06/11/2022, 06/12/2022, 06/13/2022, 
+      06/14/2022, 06/15/2022, 06/16/2022, 06/16/2022-06/17/2022, 06/18/2022, 06/19/2022, 
+      06/20/2022, 06/21/2022, 06/21/2022-06/22/2022, 06/23/2022, 06/24/2022, 06/25/2022, 
+      06/26/2022, 06/27/2022, 06/28/2022, 06/29/2022, 07/07/2022, 07/09/2022, 07/11/2022, 
+      07/12/2022, 07/13/2022, 07/14/2022, 07/21/2022, 07/22/2022, 07/22/2022-07/23/2022, 
+      07/24/2022, 07/25/2022, 07/26/2022, 07/27/2022, 07/28/2022, 07/28/2022-07/29/2022, 
+      07/30/2022, 07/31/2022, 08/01/2022, 08/02/2022, 08/03/2022, 08/04/2022, 08/05/2022, 
+      08/06/2022, 08/07/2022, 08/08/2022, 08/09/2022, 08/10/2022, 08/11/2022, 08/12/2022, 
+      08/13/2022, 08/14/2022, 08/15/2022, 08/16/2022, 08/17/2022, 08/18/2022, 08/19/2022, 
+      08/20/2022, 08/21/2022, 08/22/2022, 08/23/2022, 08/24/2022, 08/25/2022, 08/26/2022, 
+      08/27/2022, 08/28/2022, 08/29/2022, 08/30/2022, 08/31/2022, 09/01/2022, 09/02/2022, 
+      09/03/2022, 09/04/2022, 09/05/2022, 09/06/2022, 09/07/2022, 09/08/2022, 09/09/2022, 
+      09/10/2022, 09/11/2022, 09/12/2022, 09/13/2022, 09/14/2022, 09/15/2022, 09/16/2022, 
+      09/17/2022, 09/18/2022, 09/19/2022, 09/20/2022, 09/21/2022, 09/22/2022, 09/23/2022, 
+      09/24/2022, 09/25/2022, 09/26/2022, 09/27/2022, 09/28/2022, 09/29/2022, 09/30/2022. Values of 
+      4097 records in SNOWDEP_INST_0_0_05 are missing for dates: 06/03/2022-06/09/2022, 07/03/2022, 
+      07/14/2022-07/21/2022, 08/02/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 2391 records 
+      in SNOWDEPTH_CHECK were flagged as M (missing value) for dates: 06/26/2022, 06/29/2022, 
+      07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 
+      09/27/2022. Values of 105116 records in SNOWDEPTH_CHECK are missing for dates: 
+      10/01/2021-08/19/2022, 08/19/2022-09/27/2022, 09/27/2022-10/01/2022. Values of 2391 records 
+      in SNOWDEP_QUAL were flagged as M (missing value) for dates: 06/26/2022, 06/29/2022, 
+      07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 
+      09/27/2022. Values of 2391 records in SNOWDEP_QUAL are missing for dates: 06/26/2022, 
+      06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 57818 records in PRECIP_INST_455_0_02 were 
+      flagged as M (missing value) for dates: 10/01/2021-10/06/2021, 12/29/2021-07/04/2022, 
+      07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 45964 records 
+      in PRECIP_INST_455_0_02 were flagged as Q (Questionable value) for dates: 10/06/2021, 
+      10/07/2021, 10/08/2021, 10/09/2021-10/10/2021, 10/11/2021, 10/12/2021, 10/13/2021, 
+      10/14/2021-11/04/2021, 11/04/2021-12/07/2021, 12/07/2021-12/28/2021, 07/04/2022-07/09/2022, 
+      07/09/2022-07/14/2022, 07/21/2022-08/18/2022, 08/19/2022, 08/19/2022-09/27/2022, 
+      09/27/2022-10/01/2022. Values of 3 records in PRECIP_INST_455_0_02 were flagged as R (Reduced 
+      volume stored in sample tank) for dates: 10/06/2021, 11/04/2021, 12/07/2021. Values of 1335 
+      records in PRECIP_INST_455_0_02 were flagged as T (For methods or hardware related flags. ie. 
+      broken shield) for dates: 10/06/2021-10/07/2021, 10/07/2021-10/08/2021, 
+      10/08/2021-10/09/2021, 10/10/2021-10/11/2021, 10/11/2021-10/12/2021, 10/12/2021-10/13/2021, 
+      10/13/2021-10/14/2021. Values of 57818 records in PRECIP_INST_455_0_02 are missing for dates: 
+      10/01/2021-10/06/2021, 12/29/2021-07/04/2022, 07/09/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 3979 records in ORI_SH_AVG were flagged as M 
+      (missing value) for dates: 10/01/2021-10/06/2021, 06/26/2022, 06/29/2022, 07/01/2022, 
+      07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. 
+      Values of 20962 records in ORI_SH_AVG were flagged as T (For methods or hardware related 
+      flags. ie. broken shield) for dates: 10/06/2021-10/07/2021, 10/07/2021-10/08/2021, 
+      10/08/2021-10/09/2021, 10/10/2021-10/11/2021, 10/11/2021-10/12/2021, 10/12/2021-10/13/2021, 
+      10/13/2021-10/14/2021, 01/27/2022, 01/29/2022, 01/29/2022-01/30/2022, 01/30/2022-02/03/2022, 
+      02/03/2022-02/04/2022, 02/04/2022-02/05/2022, 02/07/2022, 02/07/2022-02/08/2022, 
+      02/11/2022-02/12/2022, 02/14/2022-02/15/2022, 02/15/2022-02/16/2022, 02/16/2022-02/17/2022, 
+      02/17/2022-02/18/2022, 02/19/2022, 02/19/2022-02/20/2022, 02/20/2022-02/22/2022, 
+      02/22/2022-02/23/2022, 02/23/2022-02/25/2022, 02/25/2022-02/26/2022, 02/26/2022-02/27/2022, 
+      02/27/2022-02/28/2022, 03/01/2022, 03/02/2022, 03/02/2022-03/03/2022, 03/03/2022-03/05/2022, 
+      03/05/2022-03/06/2022, 03/06/2022-03/07/2022, 03/07/2022-03/08/2022, 03/08/2022-03/09/2022, 
+      03/09/2022-03/10/2022, 03/10/2022-03/11/2022, 03/11/2022-03/12/2022, 03/12/2022-03/14/2022, 
+      03/14/2022-03/15/2022, 03/15/2022-03/16/2022, 03/16/2022-03/17/2022, 03/17/2022-03/18/2022, 
+      03/18/2022-03/19/2022, 03/19/2022-03/20/2022, 03/20/2022-03/21/2022, 03/21/2022-03/22/2022, 
+      03/23/2022-03/24/2022, 03/26/2022, 03/28/2022-03/29/2022, 03/30/2022, 03/30/2022-03/31/2022, 
+      03/31/2022-04/01/2022, 04/01/2022-04/02/2022, 04/02/2022-04/03/2022, 04/03/2022-04/05/2022, 
+      04/05/2022-04/06/2022, 04/08/2022, 04/08/2022-04/09/2022, 04/09/2022-04/14/2022, 
+      04/14/2022-04/15/2022, 04/15/2022-04/17/2022, 04/17/2022-04/18/2022, 04/18/2022-04/19/2022, 
+      04/19/2022-04/20/2022, 04/20/2022-04/21/2022, 04/21/2022-04/22/2022, 04/22/2022-04/23/2022, 
+      04/23/2022-04/24/2022, 04/24/2022-04/25/2022, 04/25/2022-04/26/2022, 04/26/2022-04/27/2022, 
+      04/27/2022-04/28/2022, 04/28/2022-04/29/2022, 04/29/2022-04/30/2022, 04/30/2022-05/01/2022, 
+      05/02/2022-05/03/2022, 05/03/2022-05/04/2022, 05/05/2022, 05/06/2022-05/07/2022, 
+      05/07/2022-05/08/2022, 05/08/2022-05/09/2022, 05/09/2022-05/10/2022, 05/10/2022-05/11/2022, 
+      05/11/2022-05/13/2022, 05/16/2022, 05/16/2022-05/17/2022, 05/18/2022, 05/18/2022-05/19/2022, 
+      05/19/2022-05/20/2022, 05/20/2022-05/21/2022, 05/22/2022, 05/28/2022, 05/28/2022-05/29/2022, 
+      05/29/2022-05/30/2022, 05/30/2022-05/31/2022, 06/07/2022, 06/12/2022-06/13/2022, 
+      06/13/2022-06/14/2022, 06/14/2022-06/15/2022, 06/18/2022. Values of 3979 records in 
+      ORI_SH_AVG are missing for dates: 10/01/2021-10/06/2021, 06/26/2022, 06/29/2022, 07/01/2022, 
+      07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. 
+      Values of 2391 records in PUMPVOLTS_Avg were flagged as M (missing value) for dates: 
+      06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 2391 records in 
+      PUMPVOLTS_Avg are missing for dates: 06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 
+      07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 
+      2391 records in PUMPVOLTS_CHECK were flagged as M (missing value) for dates: 06/26/2022, 
+      06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 105119 records in PUMPVOLTS_CHECK are missing 
+      for dates: 10/01/2021-08/19/2022, 08/19/2022-10/01/2022. Values of 9 records in 
+      AIRTEMP_MEAN_450_0_10 were flagged as E (Value estimated by linear interpolation) for dates: 
+      06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/09/2022, 08/19/2022. Values of 2382 
+      records in AIRTEMP_MEAN_450_0_10 were flagged as M (missing value) for dates: 07/03/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 349 records in 
+      AIRTEMP_MEAN_450_0_10 were flagged as Q (Questionable value) for dates: 11/03/2021, 
+      11/08/2021, 12/14/2021, 12/20/2021, 12/31/2021, 01/01/2022, 01/02/2022, 01/09/2022, 
+      01/12/2022, 01/24/2022, 01/27/2022, 01/28/2022, 02/03/2022, 02/07/2022, 02/08/2022, 
+      02/10/2022, 02/22/2022-02/23/2022, 02/25/2022, 03/05/2022, 03/10/2022, 03/11/2022, 
+      03/12/2022, 03/15/2022, 03/16/2022, 03/25/2022, 03/29/2022, 03/31/2022, 04/01/2022, 
+      04/02/2022, 04/03/2022, 04/05/2022, 04/07/2022, 04/14/2022, 04/15/2022, 04/21/2022, 
+      04/22/2022, 04/23/2022, 04/24/2022, 04/27/2022, 04/29/2022, 05/01/2022, 05/03/2022, 
+      05/09/2022, 05/10/2022, 05/11/2022, 05/13/2022, 05/16/2022, 05/17/2022, 05/20/2022, 
+      05/21/2022, 05/22/2022, 05/23/2022, 05/25/2022, 05/31/2022, 06/23/2022, 06/26/2022, 
+      06/27/2022, 07/01/2022, 07/03/2022, 07/04/2022, 07/09/2022, 07/12/2022, 07/22/2022, 
+      08/08/2022, 08/09/2022, 08/10/2022, 08/17/2022, 08/19/2022, 09/13/2022. Values of 2382 
+      records in AIRTEMP_MEAN_450_0_10 are missing for dates: 07/03/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 9 records in AIRTEMP_MAX_450_0_10 were flagged 
+      as E (Value estimated by linear interpolation) for dates: 06/26/2022, 06/29/2022, 07/01/2022, 
+      07/02/2022, 07/09/2022, 08/19/2022. Values of 2382 records in AIRTEMP_MAX_450_0_10 were 
+      flagged as M (missing value) for dates: 07/03/2022, 07/14/2022-07/21/2022, 
+      08/18/2022-08/19/2022, 09/27/2022. Values of 349 records in AIRTEMP_MAX_450_0_10 were flagged 
+      as Q (Questionable value) for dates: 11/03/2021, 11/08/2021, 12/14/2021, 12/20/2021, 
+      12/31/2021, 01/01/2022, 01/02/2022, 01/09/2022, 01/12/2022, 01/24/2022, 01/27/2022, 
+      01/28/2022, 02/03/2022, 02/07/2022, 02/08/2022, 02/10/2022, 02/22/2022-02/23/2022, 
+      02/25/2022, 03/05/2022, 03/10/2022, 03/11/2022, 03/12/2022, 03/15/2022, 03/16/2022, 
+      03/25/2022, 03/29/2022, 03/31/2022, 04/01/2022, 04/02/2022, 04/03/2022, 04/05/2022, 
+      04/07/2022, 04/14/2022, 04/15/2022, 04/21/2022, 04/22/2022, 04/23/2022, 04/24/2022, 
+      04/27/2022, 04/29/2022, 05/01/2022, 05/03/2022, 05/09/2022, 05/10/2022, 05/11/2022, 
+      05/13/2022, 05/16/2022, 05/17/2022, 05/20/2022, 05/21/2022, 05/22/2022, 05/23/2022, 
+      05/25/2022, 05/31/2022, 06/23/2022, 06/26/2022, 06/27/2022, 07/01/2022, 07/03/2022, 
+      07/04/2022, 07/09/2022, 07/12/2022, 07/22/2022, 08/08/2022, 08/09/2022, 08/10/2022, 
+      08/17/2022, 08/19/2022, 09/13/2022. Values of 2391 records in AIRTEMP_MAX_450_0_10 are 
+      missing for dates: 06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/03/2022, 07/09/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 9 records in 
+      AIRTEMP_MIN_450_0_10 were flagged as E (Value estimated by linear interpolation) for dates: 
+      06/26/2022, 06/29/2022, 07/01/2022, 07/02/2022, 07/09/2022, 08/19/2022. Values of 2382 
+      records in AIRTEMP_MIN_450_0_10 were flagged as M (missing value) for dates: 07/03/2022, 
+      07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. Values of 349 records in 
+      AIRTEMP_MIN_450_0_10 were flagged as Q (Questionable value) for dates: 11/03/2021, 
+      11/08/2021, 12/14/2021, 12/20/2021, 12/31/2021, 01/01/2022, 01/02/2022, 01/09/2022, 
+      01/12/2022, 01/24/2022, 01/27/2022, 01/28/2022, 02/03/2022, 02/07/2022, 02/08/2022, 
+      02/10/2022, 02/22/2022-02/23/2022, 02/25/2022, 03/05/2022, 03/10/2022, 03/11/2022, 
+      03/12/2022, 03/15/2022, 03/16/2022, 03/25/2022, 03/29/2022, 03/31/2022, 04/01/2022, 
+      04/02/2022, 04/03/2022, 04/05/2022, 04/07/2022, 04/14/2022, 04/15/2022, 04/21/2022, 
+      04/22/2022, 04/23/2022, 04/24/2022, 04/27/2022, 04/29/2022, 05/01/2022, 05/03/2022, 
+      05/09/2022, 05/10/2022, 05/11/2022, 05/13/2022, 05/16/2022, 05/17/2022, 05/20/2022, 
+      05/21/2022, 05/22/2022, 05/23/2022, 05/25/2022, 05/31/2022, 06/23/2022, 06/26/2022, 
+      06/27/2022, 07/01/2022, 07/03/2022, 07/04/2022, 07/09/2022, 07/12/2022, 07/22/2022, 
+      08/08/2022, 08/09/2022, 08/10/2022, 08/17/2022, 08/19/2022, 09/13/2022. Values of 2392 
+      records in AIRTEMP_MIN_450_0_10 are missing for dates: 06/26/2022, 06/29/2022, 07/01/2022, 
+      07/02/2022, 07/03/2022, 07/09/2022, 07/14/2022-07/21/2022, 08/18/2022-08/19/2022, 09/27/2022. 
+      Converted values in column(s) PRECIP_TOT_455_0_02 assigned QA/QC flag(s) M (missing value) to 
+      NaN/empty, retaining and locking existing flags: 57819 records in PRECIP_TOT_455_0_02. 
+      Cleared assignments of QA/QC flag(s) Q (Questionable value) for column(s) 
+      AIRTEMP_MEAN_450_0_10 and locked flags to prevent automatic recalculation: 166 records in 
+      AIRTEMP_MEAN_450_0_10.
+V. Supplemental Descriptors 
+   A. Data Acquisition 
+      1. Data Forms: 
+      2. Form Location: 
+      3. Data Entry Validation: 
+   B. Quality Assurance/Quality Control Procedures: 
+   C. Supplemental Materials: 
+   D. Computer Programs: 
+   E. Archival Practices: 
+   F. Publications: 
+   G. History of Data Set Usage 
+      1. Data Request History: 
+      2. Data Set Update History: 
+      3. Review History: 
+      4. Questions and Comments from Users: Vara power supply replaced the week of Oct 10, 2015. 
+         New batteries and jumpers added by JM and SW.

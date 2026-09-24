@@ -1,0 +1,28 @@
+{
+  "retrieved_utc": "2026-09-21T23:51:42.356449+00:00",
+  "source": "wepp1:/geodata/wc1/runs/tr/traveled-calligrapher/omni/scenarios.out.parquet",
+  "sha256": "2083e8d2f3d4362996a852a6414cfb12000cad288ce07cd7480dd55f1ef5d622",
+  "scenario_definitions": [
+    {
+      "type": "undisturbed"
+    },
+    {
+      "type": "mulch",
+      "ground_cover_increase": "30%",
+      "base_scenario": "sbs_map"
+    },
+    {
+      "type": "mulch",
+      "ground_cover_increase": "60%",
+      "base_scenario": "sbs_map"
+    }
+  ],
+  "interpretation": "Scenario model summaries, not measured treatment effects. Contrast results not yet retained.",
+  "hillslope_soil_loss_normalization": {
+    "denominator_ha": 6124.9762,
+    "source": "wepp1:/geodata/wc1/runs/tr/traveled-calligrapher/watershed.nodb, _sub_area = 61249762 m2",
+    "formula": "Avg. Ann. total hillslope soil loss (tonne/yr) / total modeled hillslope area (ha)",
+    "units": "tonne/ha/year",
+    "scope": "All modeled hillslopes, excluding channel area; common denominator across scenarios, not treated area."
+  }
+}

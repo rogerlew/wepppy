@@ -1,0 +1,2 @@
+station,date,intervals,valid_intervals,station_mm,source,flag,physical_screen
+UPLMET,2019-09-06,288,288,9936.0,provisional_5min,,True

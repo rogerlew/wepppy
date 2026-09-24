@@ -1,0 +1,30 @@
+{
+  "received_date": "2026-09-21",
+  "run": "traveled-calligrapher",
+  "screenshots": [
+    {
+      "file": "gl-dashboard-difference-map.png",
+      "source": "/tmp/gl-dashboard-difference-map.png",
+      "sha256": "f6f1bd12b85702f7cecf8b1470eb6967f4650c2df9e47c4efe6b867a53aa50a3",
+      "width": 3828,
+      "height": 2090,
+      "alterations": "None; original screenshot copied byte-for-byte."
+    },
+    {
+      "file": "lookout-map.png",
+      "source": "/tmp/lookout-map.png",
+      "sha256": "4adb07776f3e0ff2ebe06fd83fd21011dd3331a05a97efc776e0e31248e3ef6c",
+      "width": 2980,
+      "height": 2026,
+      "alterations": "None; original screenshot copied byte-for-byte."
+    },
+    {
+      "file": "omni-control.png",
+      "source": "/tmp/omni-control.png",
+      "sha256": "c43efb4407c8238897ae493f8ed507fb491583cf2179ae84c4e735c490ebc669",
+      "width": 3076,
+      "height": 2110,
+      "alterations": "None; original screenshot copied byte-for-byte."
+    }
+  ]
+}

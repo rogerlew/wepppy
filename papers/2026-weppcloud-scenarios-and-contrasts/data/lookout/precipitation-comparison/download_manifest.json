@@ -1,0 +1,646 @@
+[
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2013.csv",
+    "file": "primet_230_a_5min_2013.csv",
+    "sha256": "4de63850e3806eb8103a323e6ab88cb2af684ba6905646eb0005b8274a5b0774",
+    "bytes": 9013470
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2013-meta.txt",
+    "file": "primet_230_a_5min_2013-meta.txt",
+    "sha256": "ccb4138be61d457cafce02902f457dec0a5450d595a899739a642d4c598554b9",
+    "bytes": 54455
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2014.csv",
+    "file": "primet_230_a_5min_2014.csv",
+    "sha256": "6521a99258b7bcee9f9b0fd9f95e13ba325c7ae55d0d1fed4b3362051d12dfcf",
+    "bytes": 22715694
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2014-meta.txt",
+    "file": "primet_230_a_5min_2014-meta.txt",
+    "sha256": "7bb943ea518c0ec7ad55b6d616b264f5f44a79b7cb1e19ca9fdd78f742d6a576",
+    "bytes": 59860
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2015.csv",
+    "file": "primet_230_a_5min_2015.csv",
+    "sha256": "70315d640dbe38b8e289affef2ee89f340922f94860ff0f66c87d3c71f07dff0",
+    "bytes": 23755688
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2015-meta.txt",
+    "file": "primet_230_a_5min_2015-meta.txt",
+    "sha256": "9dbb57085011531721bc85110d300f54d7399071210cc732a1c72e19a34c3d5b",
+    "bytes": 66571
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2016.csv",
+    "file": "primet_230_a_5min_2016.csv",
+    "sha256": "1918e465703d5462ec4badcf2b8a2ccadfe7fbb6147729a7394076ab0fce1fbb",
+    "bytes": 23857606
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2016-meta.txt",
+    "file": "primet_230_a_5min_2016-meta.txt",
+    "sha256": "0bf71a2403800a3b4a090bef957d3cb136f62ea615048ae0f78124f9f5d802ae",
+    "bytes": 69266
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2017.csv",
+    "file": "primet_230_a_5min_2017.csv",
+    "sha256": "d3b6024f3c82a205e858282811d08564c3342632c13bf1bbfc19effb81a1b632",
+    "bytes": 23826955
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2017-meta.txt",
+    "file": "primet_230_a_5min_2017-meta.txt",
+    "sha256": "e5641cc7732d01c206e8d51221dcdba47bc5188b550a475c7022b71d2be442df",
+    "bytes": 55206
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2018.csv",
+    "file": "primet_230_a_5min_2018.csv",
+    "sha256": "e9c17781e8d2124da62316542b07ea5e8e955003c75690f3affcb0099697964d",
+    "bytes": 23789913
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2018-meta.txt",
+    "file": "primet_230_a_5min_2018-meta.txt",
+    "sha256": "855f0d6f2c27e0c493a7e2c1d99150538b925435afe3ec0722c8e70de9deda92",
+    "bytes": 60988
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2019.csv",
+    "file": "primet_230_a_5min_2019.csv",
+    "sha256": "a6be7006efbf173cfb320da730b8cd1347601f6d98db8d2fedc042fd16520caf",
+    "bytes": 23912883
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2019-meta.txt",
+    "file": "primet_230_a_5min_2019-meta.txt",
+    "sha256": "33014efad0d1cfc1c014510712d393868fd2789ae466cac25e39268f94113266",
+    "bytes": 55387
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2020.csv",
+    "file": "primet_230_a_5min_2020.csv",
+    "sha256": "0725b7f49591a0d34a6947d379b1548480a9cbabbaa10304160e5248da867b74",
+    "bytes": 24089079
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2020-meta.txt",
+    "file": "primet_230_a_5min_2020-meta.txt",
+    "sha256": "d468d296d6f45a25419bad534d9a626b73061bfac8439e5e371964ac80557490",
+    "bytes": 56159
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2021.csv",
+    "file": "primet_230_a_5min_2021.csv",
+    "sha256": "8062fe998433c2675ad182675d8ece031be9f860142f9a0dec65f9efc9f3fbcc",
+    "bytes": 23933056
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2021-meta.txt",
+    "file": "primet_230_a_5min_2021-meta.txt",
+    "sha256": "7b3e98b01cca4e8ff299352f69a935deab764edfa4c6ef15fe97d7fc74c90439",
+    "bytes": 61440
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2022.csv",
+    "file": "primet_230_a_5min_2022.csv",
+    "sha256": "cf2c50b68e1cb7946b5e2bcf91ac1dbd1988f9e41d54b335170deba08022bf99",
+    "bytes": 23967851
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2022-meta.txt",
+    "file": "primet_230_a_5min_2022-meta.txt",
+    "sha256": "a7bad8ae2960bf03aea8cca85a62c4d1760b6cc8e59baf3a1ffee5510efb89ae",
+    "bytes": 55750
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2023.csv",
+    "file": "primet_230_a_5min_2023.csv",
+    "sha256": "f6b8518d05919c5111efc900ba33a90729d16687f6776ea11fe7cf445113b88a",
+    "bytes": 23837117
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2023-meta.txt",
+    "file": "primet_230_a_5min_2023-meta.txt",
+    "sha256": "4a22a7da19f858757f6854ec64896b37c13b80a4cec090492096abfddd4675e2",
+    "bytes": 66924
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2024.csv",
+    "file": "primet_230_a_5min_2024.csv",
+    "sha256": "d0367f5c3b23b8b2e9f7ad02ca7d3657503bd95d9b60b2f172f0968cbefb9f2e",
+    "bytes": 24224709
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2024-meta.txt",
+    "file": "primet_230_a_5min_2024-meta.txt",
+    "sha256": "3749a6addc94cd6e8337c8f04a546e9c91284921926746681fbe44b6e0359f3a",
+    "bytes": 55672
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2025.csv",
+    "file": "primet_230_a_5min_2025.csv",
+    "sha256": "f9a2065a63d8e2bba848b8ca5fc294aedc7170fe688dd304cf68e2f7dac499be",
+    "bytes": 24145292
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2025-meta.txt",
+    "file": "primet_230_a_5min_2025-meta.txt",
+    "sha256": "49f06389519f1e831d2a5a6ba120da3ee0e88ab0f751310563d089d669358898",
+    "bytes": 66423
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2026.csv",
+    "file": "primet_230_a_5min_2026.csv",
+    "sha256": "e20b4f3f97ac4253a4d7bb8435f30e637508605eba1610d9842e172de5ec5623",
+    "bytes": 23215126
+  },
+  {
+    "station": "PRIMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/PRIMET/data/primet_230_a_5min_2026-meta.txt",
+    "file": "primet_230_a_5min_2026-meta.txt",
+    "sha256": "41a7c4b78637539c234aebbd715fa708e9ac01620de0a676b9e567a946a75f2b",
+    "bytes": 50820
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2019.csv",
+    "file": "uplmet_235_a_5min_2019.csv",
+    "sha256": "e80b7e442c0f04bd065de798812d3b98c891635778f27bc584d370cf70170dda",
+    "bytes": 61265839
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2019-meta.txt",
+    "file": "uplmet_235_a_5min_2019-meta.txt",
+    "sha256": "d765630293b622cdb3abb55faae5dc7600eef747dc3f3030ef71403219802e94",
+    "bytes": 216103
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2020.csv",
+    "file": "uplmet_235_a_5min_2020.csv",
+    "sha256": "12400a2a26af44bfde3d85d4372d9cd8608ecad123f1c237655ee7ce62391ba4",
+    "bytes": 61639208
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2020-meta.txt",
+    "file": "uplmet_235_a_5min_2020-meta.txt",
+    "sha256": "c7a8b32f686b2af6621282e9678f7b6a653213c68d36a19f96721dfab056596c",
+    "bytes": 213388
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2021.csv",
+    "file": "uplmet_235_a_5min_2021.csv",
+    "sha256": "bad7cb257754849790adf47174370672d7d22319499790a22b814f6986f0a5de",
+    "bytes": 61368407
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2021-meta.txt",
+    "file": "uplmet_235_a_5min_2021-meta.txt",
+    "sha256": "f20485f445cec61e80d74e8c7fd3ca4cb24bdac90e40cbdd3ba70f2d25652551",
+    "bytes": 244420
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2022.csv",
+    "file": "uplmet_235_a_5min_2022.csv",
+    "sha256": "baf6ddb2e54ba31d8dfe740792b6f9febf3879422d73e8343cc2d42c83a951a0",
+    "bytes": 60787036
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2022-meta.txt",
+    "file": "uplmet_235_a_5min_2022-meta.txt",
+    "sha256": "cc440b4e6a6ed3efb3b0fe542a77f948c9985f1820858871a7855e4abfc4c069",
+    "bytes": 408211
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2023.csv",
+    "file": "uplmet_235_a_5min_2023.csv",
+    "sha256": "f4e59d86c29dbea22161bc730d80132ecd5f68c17f465b61131a997f80bfd90a",
+    "bytes": 60495295
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2023-meta.txt",
+    "file": "uplmet_235_a_5min_2023-meta.txt",
+    "sha256": "5ba09221e6ee6d85108a0062aaf82dfceb62d77ae1f4f7b3d2da8fa3540070cb",
+    "bytes": 1408935
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2024.csv",
+    "file": "uplmet_235_a_5min_2024.csv",
+    "sha256": "8e7b3e500d2452b8ceef3707a556334f05922cb92ecbceb15dfbd09bfd893f49",
+    "bytes": 61619678
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2024-meta.txt",
+    "file": "uplmet_235_a_5min_2024-meta.txt",
+    "sha256": "5fae222b0e5820ada5c0a0dcef2fdc4dae1167e7f5eb508d8eb06d4c2baa3a22",
+    "bytes": 243617
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2025.csv",
+    "file": "uplmet_235_a_5min_2025.csv",
+    "sha256": "2bbba1b222c5f80f05e91b8db8a0ee92765af500766382a8ea93a45d594d9708",
+    "bytes": 61378137
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2025-meta.txt",
+    "file": "uplmet_235_a_5min_2025-meta.txt",
+    "sha256": "3da8c989b46da2e2d9f575ce7249008e9a513c9fab9390d73ed9caac1858cd04",
+    "bytes": 225858
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2026.csv",
+    "file": "uplmet_235_a_5min_2026.csv",
+    "sha256": "f960cef1840d7349455851907640f4f7fffbe37705ab7a0c91a23eddc7ae69fc",
+    "bytes": 58446620
+  },
+  {
+    "station": "UPLMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/UPLMET/data/uplmet_235_a_5min_2026-meta.txt",
+    "file": "uplmet_235_a_5min_2026-meta.txt",
+    "sha256": "3cbb3ea7e92f79cc649b614f853720d13d3d3ed3a0cd4df4cd5dd7e58b485b3b",
+    "bytes": 237949
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2015.csv",
+    "file": "cenmet_234_a_5min_2015.csv",
+    "sha256": "3601bf3f1a9400cc6f94c9f0a3a7bcf9e0b7eda3539315e15b96b069680fbe6a",
+    "bytes": 9875486
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2015-meta.txt",
+    "file": "cenmet_234_a_5min_2015-meta.txt",
+    "sha256": "fd3a47f0426a8297a937fb6a49546db85a8c260183dbd1106e56fb689369cdea",
+    "bytes": 64432
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2016.csv",
+    "file": "cenmet_234_a_5min_2016.csv",
+    "sha256": "c740c375c38e8b929b2230d36e1584b90c92277c1e6bd18de78a1297ca0acd80",
+    "bytes": 22546687
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2016-meta.txt",
+    "file": "cenmet_234_a_5min_2016-meta.txt",
+    "sha256": "72a31388b0c1c025f4a34af5738968a9866c313e21361207c74544b7ab7da504",
+    "bytes": 76181
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2017.csv",
+    "file": "cenmet_234_a_5min_2017.csv",
+    "sha256": "2fa7d0037d54dfd00be0b8cf99f9230aa0ee09a314476a93caa49e48b8214515",
+    "bytes": 22529960
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2017-meta.txt",
+    "file": "cenmet_234_a_5min_2017-meta.txt",
+    "sha256": "27a62c3a48dc9244ce99c703c846fa3baa52d192507561a0429089f438fd6b7d",
+    "bytes": 77777
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2018.csv",
+    "file": "cenmet_234_a_5min_2018.csv",
+    "sha256": "72e7b4cb7361a5950a305ff2e213d8920e6a07ac65cb51e7ad199e4159942bfe",
+    "bytes": 22518043
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2018-meta.txt",
+    "file": "cenmet_234_a_5min_2018-meta.txt",
+    "sha256": "287ebe5fd111ef303755c990940806344db03e6b6b1217164ef967b2303fd1da",
+    "bytes": 73449
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2019.csv",
+    "file": "cenmet_234_a_5min_2019.csv",
+    "sha256": "6de636304fdafa4ffbfac82d246f0a643f0989b2511885a543c9e93c516f046e",
+    "bytes": 23505017
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2019-meta.txt",
+    "file": "cenmet_234_a_5min_2019-meta.txt",
+    "sha256": "2feb9b886150c38357492294c38aa1025318772574c927187f0dd80e35c0503e",
+    "bytes": 73512
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2020.csv",
+    "file": "cenmet_234_a_5min_2020.csv",
+    "sha256": "71ed75df248a93d7fe444a1bbbe702657847cb1eecadef996cda782d883037ca",
+    "bytes": 23458601
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2020-meta.txt",
+    "file": "cenmet_234_a_5min_2020-meta.txt",
+    "sha256": "d3106975233cc17c74ba70c7655ecf66191956feb00d97fcfae9d066f33dbf8f",
+    "bytes": 79319
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2021.csv",
+    "file": "cenmet_234_a_5min_2021.csv",
+    "sha256": "644bf28581262c77d4e81cf5dd0ec87ddb39e35b1ec8832e5d0575451a704e51",
+    "bytes": 23531100
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2021-meta.txt",
+    "file": "cenmet_234_a_5min_2021-meta.txt",
+    "sha256": "07cd1770c3780dd03f0ac0dd79800f5505277070dd8f2eba3bcf5bbe11a9b199",
+    "bytes": 68223
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2022.csv",
+    "file": "cenmet_234_a_5min_2022.csv",
+    "sha256": "0168a2d554883ed922ad2e03a71ad0109fcced3ea16505a44e72f4287a8bb6c1",
+    "bytes": 23478385
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2022-meta.txt",
+    "file": "cenmet_234_a_5min_2022-meta.txt",
+    "sha256": "5103b3a51ce818f58b1f0671ea0c33f7655c17ec43a68635c2dd11d4e9cb5209",
+    "bytes": 82066
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2023.csv",
+    "file": "cenmet_234_a_5min_2023.csv",
+    "sha256": "66e2079d7c936555f671a20b6e48b19b13a947da6e2c246076be1546c828826d",
+    "bytes": 23433838
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2023-meta.txt",
+    "file": "cenmet_234_a_5min_2023-meta.txt",
+    "sha256": "91eb2f7d85b4a88fe622020cebf4042cfa1e30a0500cd20b2a968b2957e21238",
+    "bytes": 82284
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2024.csv",
+    "file": "cenmet_234_a_5min_2024.csv",
+    "sha256": "b3cc231efa659706be924855fe92d7a1049f7b880bd21413c5e781843ff47e01",
+    "bytes": 23698955
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2024-meta.txt",
+    "file": "cenmet_234_a_5min_2024-meta.txt",
+    "sha256": "a9d8afa28570cfdef62fddd305239b369da252548557cf28116e83804035f234",
+    "bytes": 89301
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2025.csv",
+    "file": "cenmet_234_a_5min_2025.csv",
+    "sha256": "41b45a54105e76c2408e668b83cc2a7eb86eb9c9add27758d0b16aca1bd7e3fa",
+    "bytes": 24027066
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2025-meta.txt",
+    "file": "cenmet_234_a_5min_2025-meta.txt",
+    "sha256": "5f2ee153a3efaee625395738092725c05e842fac271487d69662841aeb74e985",
+    "bytes": 79813
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2026.csv",
+    "file": "cenmet_234_a_5min_2026.csv",
+    "sha256": "837e0510daf06bbb702ef046975da16d6b7602a66ebff173b01d49ea1eb9d3a1",
+    "bytes": 23096302
+  },
+  {
+    "station": "CENMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/CENMET/data/cenmet_234_a_5min_2026-meta.txt",
+    "file": "cenmet_234_a_5min_2026-meta.txt",
+    "sha256": "0dbc44c9598e751b5d006184857c99d3b9ff1e2d3161381c5d3c3762e0bcce00",
+    "bytes": 68140
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2015.csv",
+    "file": "varmet_302_a_5min_2015.csv",
+    "sha256": "d6075ca13103d47c92a7a1505001cf0c3c534633d1f9aa7aabff2b9c9720a3d4",
+    "bytes": 3297846
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2015-meta.txt",
+    "file": "varmet_302_a_5min_2015-meta.txt",
+    "sha256": "5ae16a252b6d6d82922549308b12a73d7146b7e1e1810e263d91b3e25025a7d8",
+    "bytes": 125078
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2016.csv",
+    "file": "varmet_302_a_5min_2016.csv",
+    "sha256": "359235e5a23bd878b7ed9f4b5aacb2ddc79da485d046fade81a4a57e0572e0ae",
+    "bytes": 14702093
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2016-meta.txt",
+    "file": "varmet_302_a_5min_2016-meta.txt",
+    "sha256": "3ee370d2b65092c8121f7f1e5cce429d02d38c5bd74717ba369eb8bf8f5ce2f0",
+    "bytes": 237476
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2017.csv",
+    "file": "varmet_302_a_5min_2017.csv",
+    "sha256": "3319a284db51a74f68dba5c00b9fe0509e3f62e7131ab9c6a643370b7ac64e79",
+    "bytes": 14532194
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2017-meta.txt",
+    "file": "varmet_302_a_5min_2017-meta.txt",
+    "sha256": "d426963f7c4275ebe7d02755e8623be081ebb433c38e38a2ba4d640086c66a00",
+    "bytes": 153058
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2018.csv",
+    "file": "varmet_302_a_5min_2018.csv",
+    "sha256": "95c051dd75e39ca6c88798f3b302f3993a30e57936a28bdfbfd6cb6cbf5fea99",
+    "bytes": 14610512
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2018-meta.txt",
+    "file": "varmet_302_a_5min_2018-meta.txt",
+    "sha256": "ac87fdf7f5b274bd9c2cf8128813fd8aac3a4b61734d24a185ee624201cab6c0",
+    "bytes": 94374
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2019.csv",
+    "file": "varmet_302_a_5min_2019.csv",
+    "sha256": "584d015f796907a84499fa87775d0c884f03e550c5158ba3c3517f4ec64d4a8e",
+    "bytes": 14642518
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2019-meta.txt",
+    "file": "varmet_302_a_5min_2019-meta.txt",
+    "sha256": "660019d365a2e07a1f3ebdfc3c0c683a8904886f1ccd702ebbb967fb4d4b6399",
+    "bytes": 145790
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2020.csv",
+    "file": "varmet_302_a_5min_2020.csv",
+    "sha256": "881d15b2b88afe4a99b88af38c094d625dcc4a2ad0bf5085735142b3d1bbbc10",
+    "bytes": 14573865
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2020-meta.txt",
+    "file": "varmet_302_a_5min_2020-meta.txt",
+    "sha256": "9dc875db861e6becbdabff0dbbc16d647b163439bf66197f90a67feb4e4a433b",
+    "bytes": 223468
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2021.csv",
+    "file": "varmet_302_a_5min_2021.csv",
+    "sha256": "acf9116086df0f10acf4d29a4240ffb8da5791bee2dc1cdcb8a76a9bbc9d7bf4",
+    "bytes": 14831185
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2021-meta.txt",
+    "file": "varmet_302_a_5min_2021-meta.txt",
+    "sha256": "bcda9e17b4060b9d29a8acd92a90e644d71c8e74b347dff482d4ed9650043c61",
+    "bytes": 164348
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2022.csv",
+    "file": "varmet_302_a_5min_2022.csv",
+    "sha256": "a13c8ff40fd44cc0f08a043e1fac750efa062a18b1dde704b6680bf199611783",
+    "bytes": 14447761
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2022-meta.txt",
+    "file": "varmet_302_a_5min_2022-meta.txt",
+    "sha256": "2c2b1ecf5f9023eddad90113d854b917319e9b7e12aa57ad0248ac272ae0ff7c",
+    "bytes": 122487
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2023.csv",
+    "file": "varmet_302_a_5min_2023.csv",
+    "sha256": "f3f796b606cdac1dea2cce6909523a7edb6e9acd906cf91ef93c1d888d61a50d",
+    "bytes": 14812649
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2023-meta.txt",
+    "file": "varmet_302_a_5min_2023-meta.txt",
+    "sha256": "901b842fa41db3f24690616248db49ae8de5761418554267186fdd9dac82d5db",
+    "bytes": 235045
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2024.csv",
+    "file": "varmet_302_a_5min_2024.csv",
+    "sha256": "72fdb73c339f257e172343b84c1d567ebbc133c8b5cb4a47c7a49084381ead0a",
+    "bytes": 14424155
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2024-meta.txt",
+    "file": "varmet_302_a_5min_2024-meta.txt",
+    "sha256": "aa92b3e34e57a4d114ba1b5b5eff898260d0ec247ed758ff9d9406038671c6dd",
+    "bytes": 149626
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2025.csv",
+    "file": "varmet_302_a_5min_2025.csv",
+    "sha256": "54778da507bb2370709e5f632b2d00a0bb5f499e1021181c2755506614ff09f8",
+    "bytes": 14664258
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2025-meta.txt",
+    "file": "varmet_302_a_5min_2025-meta.txt",
+    "sha256": "0b8336d1deecb85341bbcf1e672b729f90863f2a1648e50dc21eb3c19c3f9f1d",
+    "bytes": 110147
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2026.csv",
+    "file": "varmet_302_a_5min_2026.csv",
+    "sha256": "0b0f338b875ae700e33638fbe14cfdee1396a75048cc15159ee9d46f03f58a3d",
+    "bytes": 14387700
+  },
+  {
+    "station": "VARMET",
+    "url": "https://andrewsforest.oregonstate.edu/sites/default/files/lter/data/weather/portal/VARMET/data/varmet_302_a_5min_2026-meta.txt",
+    "file": "varmet_302_a_5min_2026-meta.txt",
+    "sha256": "099c0fd1babef910c7716d482fd95819dfd3bca7f16f8924790c25a671e0618a",
+    "bytes": 73254
+  }
+]

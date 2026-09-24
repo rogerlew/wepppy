@@ -1,0 +1,5 @@
+# Local reading copies. Public availability does not establish redistribution rights.
+# Keep all downloaded PDFs out of Git, including those with uncertain licensing.
+*.pdf
+# Locally extracted full text has the same redistribution concerns.
+*.txt

@@ -1,0 +1,16 @@
+{
+  "snapshot_files_verified": 743,
+  "dependency_hashes_verified": 72,
+  "undisturbed_event_day_index_duplicates": 1,
+  "thinning_30_75_event_day_index_duplicates": 1,
+  "thinning_65_90_event_day_index_duplicates": 1,
+  "groups": 18,
+  "contrasts": 36,
+  "partition_hillslopes": 2149,
+  "export_control_mismatches": 172,
+  "years": 100,
+  "python": "3.12.3",
+  "pandas": "2.2.2",
+  "numpy": "1.26.0",
+  "matplotlib": "3.9.0"
+}

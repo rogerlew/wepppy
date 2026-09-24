@@ -1,0 +1,930 @@
+I. Data Set Descriptors 
+   A. Title: Meteorological data from Primary Met Station at the Andrews Forest. Variables include: 
+      battery supply, barometric pressure, swe, soil temperature, incoming shortwave radiation, 
+      precipitation, soil moisture from 02-May-2013 to 01-Oct-2013
+   B. Accession Number: N/A
+   C. Description 
+      1. Originator(s): Christopher Daly
+      2. Abstract: A three-level hydro-climatological network for data monitoring was established 
+         in 1994. The networks at each level are nested to form a coordinated program of data 
+         acquisition and measurement. A future vision of linking the benchmark meteorological 
+         stations with regional weather stations to expand the future scope of studies was also 
+         considered in designing this network. The first-level in this top-down approach consists 
+         of Benchmark Meteorological Stations (BMS) and Benchmark Stream Stations. The BMS are 
+         designed to represent the environment across the Andrews. These stations are intended to 
+         provide complete, long-term, high temporal resolution, meso-scale hydroclimatological 
+         data. The location of the BMS network is based on factors such as elevation, aspect, 
+         vegetation gradients, and accessibility. Collected meteorological parameters are generally 
+         standardized across the BMS as well as methods and instrumentation. Secondary 
+         Meteorological Stations also follow standardized methods and serve similar purposes but 
+         are somewhat limited in meteorological parameters collected. The Primary Meteorological 
+         Station (PRIMET), Central Meteorological Station (CENMET), Upper Lookout Meteorological 
+         Station (UPLMET), and Vanilla Leaf Meteorological Station (VANMET) are the four Benchmark 
+         Stations, Climatic Station at Watershed 2 (CS2MET) and the Hi-15 Meteorological Station 
+         (H15MET) are Secondary Stations.
+      3. Study Type: Monitoring
+      4. Study Themes: 
+      5. LTER Core Areas: 
+      6. Georeferences: 
+      7. Submission Date: 
+   D. Keywords: Air temperature, Climate change, Climate data, Meteorological measurements, 
+      Monitoring, Photosynthetically active radiation, Precipitation, Relative humidity, Snow 
+      accumulation, Snow hydrology, Soil moisture, Soil temperature, Solar radiation, Wind speed, 
+      Disturbance
+II. Research Origin Descriptors 
+   A. Overall Project Description 
+      1. Project Title: Primary Met Station
+      2. Principal Investigators: 
+         Name:
+         Position:
+         Organization:
+         Address:
+         City:
+         State:
+         Postal Code:
+         Phone:
+         Email:
+         UserID:
+      3. Funding Period:  to 
+      4. Objectives: Hydrology, climatology, and biology interact over a wide range of spatial and 
+         temporal scales. Continuous interaction among climate, soils, landuse, and vegetation 
+         shape the hydrology and ecology of a landscape. Long-term measurements of such variables 
+         at various time and space scales provide an essential foundation for understanding 
+         ecosystem processes, and document changes in the local, regional, and global environments.
+      5. Abstract: 
+      6. Funding Source: NSF grants: DEB-7611978, BSR-9011663, DEB-9632921, DEB-0218088
+   B. Sub-project Description 
+      1. Site Description 
+         a. Geographic Location: HJ Andrews, Blue River, Oregon, USA
+            Coordinates: 
+         b. Physiographic Region: 
+         c. Landform Components: 
+         d. Hydrographic Characteristics: 
+         e. Topographic Attributes: 
+         f. Geology, Lithology and Soils: 
+         g. Vegetation Communities: CANOPY: None overhead, though insolation affected slightly from 
+            trees on adjacent hillsides. CONTINUOUS, OPEN CANOPY TYPE. SURFACE: Short grass/dirt, 
+            generally clear of vegetation.
+         h. History of Land Use and Disturbance: 
+         i. Climate: 
+      2. Experimental or Sampling Design 
+         a. Design Characteristics: Temperature and rainfall in the Andrews Experimental Forest are 
+            typical of a maritime climate with wet, relatively mild winters and dry, cool summers. 
+            Humidity is generally high through winter months, and maximum daily relative humidity 
+            approaches 100 percent at night throughout the year. Minimum summer humidities 
+            generally hover around 30-50 percent. Temperature extremes range from near 0 degrees F 
+            in unusually cold winters to over 100 degrees for brief periods almost every summer. 
+            The range in mean annual temperature (1972-2002) is 7.1-10.5 degrees C at a low 
+            elevation site (PRIMET). Precipitation varies with elevation - long-term annual average 
+            at low elevation (450 m) is 2200 mm, and at high elevation (1200m) is 2600 mm.
+         b. Permanent Plots: 
+         c. Data Collection Duration and Frequency: 
+            Beginning of Observations: 
+            End of Observations: 
+      3. Research Methods 
+         a. Field and Laboratory Methods: 
+         b. Protocols: 
+         c. Instrumentation: 
+         d. Taxonomy and Systematics: None
+         e. Speclies List: 
+         f. Permit History: 
+      4. Project Personnel 
+         a. Personnel: 
+         b. Affiliations: 
+III. Data Set Status and Accessibility 
+   A. Status 
+      1. Latest Update: 12-May-2025
+      2. Latest Archive Date: 
+      3. Latest Metadata Update: 12-May-2025
+      4. Data Verification Status: 
+   B. Accessibility 
+      1. Storage Location and Medium: Stored at  
+         on media: 
+      2. Contact Person: Adam M. Kennedy
+      3. Copyright Restrictions: 
+      4. Restrictions: 
+         a. Release Date: Affiliates: , Public: 
+         b. Citation: 
+         c. Disclaimer: 
+      5. Costs: 
+IV. Data Structural Descriptors 
+   A. Data Set File 
+      1. File Name: primet_230_a_5min_2013.csv
+      2. Size: 43634 records
+      3. File Format: ASCII text (comma-separated value format)
+      3a. Delimiters: single comma
+      4. Header Information: 5 lines of ASCII text
+      5. Alphanumeric Attributes: 
+      6. Quality Control Flag Codes: M = Missing value, I = Invalid value (out of range), Q = 
+         Questionable value, V = Single step value change larger than expected, P = Program ID 
+         change, C = Flags values greater than or less than N Stdev the mean of the preceding M 
+         readings, A = Flags values with total accumulation over N days greater than some value, T 
+         = For methods or hardware related flags. ie. broken shield, S = Flags unrealistic 
+         sequences of identical or near identical values in time series of non-missing values, D = 
+         Value is outside detection limit, L = Low battery voltage, H = High battery voltage, R = 
+         Reduced volume stored in sample tank, C = Sensor calibration, E = Value estimated by 
+         linear interpolation, F = at or above field capacity
+      7. Authentication Procedures: 
+      8. Calculations: 
+      9. Processing History: 
+         Software version: GCE Data Toolbox Version 3.9.10 (23-May-2022)
+         Data structure version: GCE Data Structure 1.1 (29-Mar-2001)
+         Original data files processed: 
+            metdat query: SELECT * FROM PRIM_230_Table105 WHERE LOGGERID = 230 AND TmStamp BETWEEN 
+               '2012-10-01 00:05:00' AND '2013-10-01 00:00:00' ORDER BY TmStamp ASC (43623 records)
+            workspace (105325 records)
+            sunrise_sunset_cenmet_2004_5min.csv (105397 records)
+            sunrise_sunset_primet_2004_5min.csv (105397 records)
+            sunrise_sunset_uplmet_2004_5min.csv (105397 records)
+            sunrise_sunset_vanmet_2004_5min.csv (105397 records)
+            sunrise_sunset_cenmet_2004_5min.csv (105397 records)
+            sunrise_sunset_primet_2004_5min.csv (105397 records)
+            sunrise_sunset_uplmet_2004_5min.csv (105397 records)
+            sunrise_sunset_vanmet_2004_5min.csv (105397 records)
+         Data processing history:
+            12-May-2025: new GCE Data Structure 1.1 created ('newstruct')
+            12-May-2025: imported result set from SQL query on data source 'metdat' ('sql2struct')
+            12-May-2025: imported all documentation metadata from the template 'LNDB_PriMet_3', 
+               updating descriptors for columns Date, RecNum, LOGGERID, PROGID, BATTERY_AVG, 
+               SOILTEMP_MEAN_0_10_01, SOILTEMP_MEAN_0_20_02, SOILTEMP_MEAN_0_50_03, 
+               SOILTEMP_MEAN_0_100_04, SWC_MEAN_0_10_01, SWC_MEAN_0_20_02, SWC_MEAN_0_50_03, 
+               SWC_MEAN_0_100_04, PRECIP_TOT_100_0_01, SWE_INST_0_0_01, SWI_MEAN_100_0_01, 
+               SWI_MAX_100_0_01, TSB_MEAN_100_0_01 and ATMPRESS_INST_430_0_01 ('meta_template')
+            12-May-2025: updated 15 metadata fields in the Data, Dataset, Project, Site, Status, 
+               Study section(s) ('addmeta')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: Q/C flagging criteria applied, 'flags' field updated ('dataflag')
+            12-May-2025: Name of column TmStamp changed to Date; Name of column BATTERY_V_Avg 
+               changed to BATTERY_AVG; Name of column SOILT_10_Avg changed to 
+               SOILTEMP_MEAN_0_10_01; Name of column SOILT_20_Avg changed to SOILTEMP_MEAN_0_20_02; 
+               Name of column SOILT_50_Avg changed to SOILTEMP_MEAN_0_50_03; Name of column 
+               SOILT_100_Avg changed to SOILTEMP_MEAN_0_100_04; Name of column WCRWC_10_Avg changed 
+               to SWC_MEAN_0_10_01; Name of column WCRWC_20_Avg changed to SWC_MEAN_0_20_02; Name 
+               of column WCRWC_50_Avg changed to SWC_MEAN_0_50_03; Name of column WCRWC_100_Avg 
+               changed to SWC_MEAN_0_100_04; Name of column TB_PRECIP_Tot changed to 
+               PRECIP_TOT_100_0_01; Name of column SNOW_PILL changed to SWE_INST_0_0_01; Name of 
+               column SOLAR_Wm2_Avg changed to SWI_MEAN_100_0_01; Name of column SOLAR_Wm2_Max 
+               changed to SWI_MAX_100_0_01; Name of column SOLAR_TEMP_Avg changed to 
+               TSB_MEAN_100_0_01; Name of column BP_mb changed to ATMPRESS_INST_430_0_01; 
+               ('apply_template')
+            12-May-2025: Units of column Date changed from '' to 'serial number'; Units of column 
+               RecNum changed from '' to 'count'; Units of column LOGGERID changed from '' to 
+               'none'; Units of column PROGID changed from '' to 'none'; Units of column 
+               BATTERY_AVG changed from '' to 'volts'; Units of column SOILTEMP_MEAN_0_10_01 
+               changed from '' to 'deg c'; Units of column SOILTEMP_MEAN_0_20_02 changed from '' to 
+               'deg c'; Units of column SOILTEMP_MEAN_0_50_03 changed from '' to 'deg c'; Units of 
+               column SOILTEMP_MEAN_0_100_04 changed from '' to 'deg c'; Units of column 
+               SWC_MEAN_0_10_01 changed from '' to 'fraction'; Units of column SWC_MEAN_0_20_02 
+               changed from '' to 'fraction'; Units of column SWC_MEAN_0_50_03 changed from '' to 
+               'fraction'; Units of column SWC_MEAN_0_100_04 changed from '' to 'fraction'; Units 
+               of column PRECIP_TOT_100_0_01 changed from '' to 'mm'; Units of column 
+               SWE_INST_0_0_01 changed from '' to 'mm'; Units of column SWI_MEAN_100_0_01 changed 
+               from '' to 'w m-2'; Units of column SWI_MAX_100_0_01 changed from '' to 'w m-2'; 
+               Units of column TSB_MEAN_100_0_01 changed from '' to 'deg c'; Units of column 
+               ATMPRESS_INST_430_0_01 changed from '' to 'mb'; ('apply_template')
+            12-May-2025: Data Type of column PROGID changed from 'd' to 'f'; ('apply_template')
+            12-May-2025: Variable Type of column RecNum changed from 'data' to 'nominal'; Variable 
+               Type of column LOGGERID changed from 'data' to 'nominal'; Variable Type of column 
+               PROGID changed from 'data' to 'nominal'; ('apply_template')
+            12-May-2025: Numeric Type of column PROGID changed from 'discrete' to 'continuous'; 
+               Numeric Type of column BATTERY_AVG changed from 'continous' to 'continuous'; Numeric 
+               Type of column SOILTEMP_MEAN_0_10_01 changed from 'continous' to 'continuous'; 
+               Numeric Type of column SOILTEMP_MEAN_0_20_02 changed from 'continous' to 
+               'continuous'; Numeric Type of column SOILTEMP_MEAN_0_50_03 changed from 'continous' 
+               to 'continuous'; Numeric Type of column SOILTEMP_MEAN_0_100_04 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWC_MEAN_0_10_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWC_MEAN_0_20_02 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWC_MEAN_0_50_03 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWC_MEAN_0_100_04 changed from 
+               'continous' to 'continuous'; Numeric Type of column PRECIP_TOT_100_0_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWE_INST_0_0_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWI_MEAN_100_0_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column SWI_MAX_100_0_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column TSB_MEAN_100_0_01 changed from 
+               'continous' to 'continuous'; Numeric Type of column ATMPRESS_INST_430_0_01 changed 
+               from 'continous' to 'continuous'; ('apply_template')
+            12-May-2025: Q/C Criteria of column Date changed from '' to 'x<0='I';isnan(x)='M''; Q/C 
+               Criteria of column RecNum changed from '' to 'x<0='I';isnan(x)='M''; Q/C Criteria of 
+               column LOGGERID changed from '' to 
+               'flag_notinarray(x,[226,229,230,239])='Q';isnan(x)='M''; Q/C Criteria of column 
+               PROGID changed from '' to 'flag_valuechange(x,0.1,0.1,1)='P';isnan(x)='M''; Q/C 
+               Criteria of column BATTERY_AVG changed from '' to 
+               'x<0='I';x<11.5='L';x>16='H';isnan(x)='M';x>48='Q''; Q/C Criteria of column 
+               SOILTEMP_MEAN_0_10_01 changed from '' to 
+               'x<-2='I';x>35='I';x<-1='Q';x>30='Q';isnan(x)='M''; Q/C Criteria of column 
+               SOILTEMP_MEAN_0_20_02 changed from '' to 
+               'x<-2='I';x>35='I';x<-1='Q';x>30='Q';isnan(x)='M''; Q/C Criteria of column 
+               SOILTEMP_MEAN_0_50_03 changed from '' to 
+               'x<-2='I';x>35='I';x<-1='Q';x>30='Q';isnan(x)='M''; Q/C Criteria of column 
+               SOILTEMP_MEAN_0_100_04 changed from '' to 
+               'x<-2='I';x>35='I';x<-1='Q';x>30='Q';isnan(x)='M''; Q/C Criteria of column 
+               SWC_MEAN_0_10_01 changed from '' to 'isnan(x)='M';x<0='I';x>1='I';(x > 0.5 & x < 
+               0.83) = 'F';(x >= 0.83 & x <= 1.0) = 'Q''; Q/C Criteria of column SWC_MEAN_0_20_02 
+               changed from '' to 'isnan(x)='M';x<0='I';x>1='I';(x > 0.5 & x < 0.83) = 'F';(x >= 
+               0.83 & x <= 1.0) = 'Q''; Q/C Criteria of column SWC_MEAN_0_50_03 changed from '' to 
+               'isnan(x)='M';x<0='I';x>1='I';(x > 0.5 & x < 0.83) = 'F';(x >= 0.83 & x <= 1.0) = 
+               'Q''; Q/C Criteria of column SWC_MEAN_0_100_04 changed from '' to 
+               'isnan(x)='M';x<0='I';x>1='I';(x > 0.5 & x < 0.83) = 'F';(x >= 0.83 & x <= 1.0) = 
+               'Q''; Q/C Criteria of column PRECIP_TOT_100_0_01 changed from '' to 
+               'x<0='I';x>4.2='Q';isnan(x)='M';col_Date>=datenum('09/07/2019 
+               00:05:00')&col_Date<=datenum('09/09/2019 
+               12:00:00')='M';col_Date>=datenum('02/27/2019 
+               10:50:00')&col_Date<=datenum('03/04/2019 
+               10:50:00')='Q';col_Date>=datenum('04/29/2019 
+               18:50:00')&col_Date<=datenum('04/29/2019 
+               19:00:00')='Q';col_Date>=datenum('12/12/2021 
+               00:00:00')&col_Date<=datenum('12/13/2021 
+               13:00:00')='Q';col_Date>=datenum('12/24/2021 
+               12:00:00')&col_Date<=datenum('12/27/2021 
+               15:30:00')='Q';flag_daterange(col_Date,{'12/24/2021 12:00:00','12/27/2021 
+               15:30:00'})='Q';flag_daterange(col_Date,{'01/13/2024 00:07:00','01/19/2024 
+               06:00:00'})='T''; Q/C Criteria of column SWE_INST_0_0_01 changed from '' to 
+               'isnan(x)='M';flag_daterange(col_Date,{'12/13/2022 08:50:00','12/18/2022 
+               10:55:00'})='Q''; Q/C Criteria of column SWI_MEAN_100_0_01 changed from '' to 
+               'isnan(x)='M';flag_daterange(col_Date,{'2/18/2018 08:00:00','2/22/2018 
+               10:20:00'})='T';flag_daterange(col_Date,{'4/17/2021 04:30:00','7/13/2021 
+               12:00:00'})='I';flag_daterange(col_Date,{'3/10/2022 11:30:00','3/10/2022 
+               12:00:00'})='T';flag_daterange(col_Date,{'01/25/2023 
+               00:00:00'})='I';col_PRI_SWI_RUNMN_100_0_01>col_PRI_100='Q'; Q/C Criteria of column 
+               SWI_MAX_100_0_01 changed from '' to 'col_Date>=datenum('04/17/2021 
+               04:30:00')&col_Date<=datenum('07/13/2021 12:00:00')='I''; Q/C Criteria of column 
+               TSB_MEAN_100_0_01 changed from '' to 'isnan(x)='M';x<-50='I';x>60='I''; Q/C Criteria 
+               of column ATMPRESS_INST_430_0_01 changed from '' to 
+               'x<=950='Q';x<=900='I';isnan(x)='M';x>=1050='Q';x>=1100='I''; ('apply_template')
+            12-May-2025: Precision of column Date changed from 0 to 7; Precision of column PROGID 
+               changed from 0 to 1; Precision of column BATTERY_AVG changed from 3 to 2; Precision 
+               of column SOILTEMP_MEAN_0_10_01 changed from 0 to 3; Precision of column 
+               SOILTEMP_MEAN_0_20_02 changed from 0 to 3; Precision of column SOILTEMP_MEAN_0_50_03 
+               changed from 0 to 3; Precision of column SOILTEMP_MEAN_0_100_04 changed from 0 to 3; 
+               Precision of column SWC_MEAN_0_10_01 changed from 0 to 3; Precision of column 
+               SWC_MEAN_0_20_02 changed from 0 to 3; Precision of column SWC_MEAN_0_50_03 changed 
+               from 0 to 3; Precision of column SWC_MEAN_0_100_04 changed from 0 to 3; Precision of 
+               column PRECIP_TOT_100_0_01 changed from 4 to 3; Precision of column 
+               SWI_MEAN_100_0_01 changed from 0 to 2; Precision of column SWI_MAX_100_0_01 changed 
+               from 0 to 2; Precision of column TSB_MEAN_100_0_01 changed from 0 to 2; Precision of 
+               column ATMPRESS_INST_430_0_01 changed from 0 to 2; ('apply_template')
+            12-May-2025: Descriptions of columns PROGID, BATTERY_AVG, SOILTEMP_MEAN_0_10_01, 
+               SOILTEMP_MEAN_0_20_02, SOILTEMP_MEAN_0_50_03, SOILTEMP_MEAN_0_100_04, 
+               SWC_MEAN_0_10_01, SWC_MEAN_0_20_02, SWC_MEAN_0_50_03, SWC_MEAN_0_100_04, 
+               PRECIP_TOT_100_0_01, SWE_INST_0_0_01, SWI_MEAN_100_0_01, SWI_MAX_100_0_01, 
+               TSB_MEAN_100_0_01 and ATMPRESS_INST_430_0_01 edited; ('apply_template')
+            12-May-2025: deleted column SOLAR_MJ_Tot from the structure ('deletecols')
+            12-May-2025: added column 'Site' at position 1 ('addcol')
+            12-May-2025: inserted 11 new records with date/time values and NaN/null data values 
+               (replicating common values in the non-data columns Site, RecNum, LOGGERID and 
+               PROGID) to fill in date/time interval gaps in the data series and assigned flag 'M' 
+               to inserted records ('pad_date_gaps')
+            12-May-2025: sorted by column Date(ascending) ('sortdata')
+            12-May-2025: manually added 'M' flags to 43634 records in column(s) SWI_MEAN_100_0_01 
+               excluding NaN/empty values ('addflags')
+            12-May-2025: locked Q/C flag criteria for column SWI_MEAN_100_0_01 to prevent automatic 
+               evaluation ('flag_locks')
+            12-May-2025: added column 'SWI_RUNMN_100_0_01' at position 23 ('addcol')
+            12-May-2025: Year, Month, Day, Hour and Minute datetime columns added after column Date 
+               ('add_datepartcols')
+            12-May-2025: sorted by columns Month(ascending), Day(ascending), Hour(ascending), 
+               Minute(ascending) ('sortdata')
+            12-May-2025: performed a lookup join of columns Month, Day, Hour and Minute on columns 
+               Month, Day, Hour and Minute from a second structure, returning column(s) Site, Date, 
+               Year, RecNum, LOGGERID, PROGID, BATTERY_AVG, BATTERY_V_CHECK, SOILTEMP_MEAN_0_10_01, 
+               SOILTEMP_MEAN_0_20_02, SOILTEMP_MEAN_0_50_03, SOILTEMP_MEAN_0_100_04, 
+               SWC_MEAN_0_10_01, SWC_MEAN_0_20_02, SWC_MEAN_0_50_03, SWC_MEAN_0_100_04, 
+               PRECIP_TOT_100_0_01, SWE_INST_0_0_01, SWE_CHECK, SWI_MEAN_100_0_01, 
+               SWI_MAX_100_0_01, TSB_MEAN_100_0_01, ATMPRESS_INST_430_0_01 and SWI_RUNMN_100_0_01 
+               from the first structure and column(s) Year, CEN, CS2MET, DISCTR, PRI, UPL, VAN, 
+               CEN_100, CS2MET_100, DISCTR_100, PRI_100, UPL_100, VAN_100, CEN_SS, CS2MET_SS, 
+               DISCTR_SS, PRI_SS, UPL_SS, VAN_SS, CEN_SS_3, CS2MET_SS_3, DISCTR_SS_3, PRI_SS_3, 
+               VAN_SS_3, CEN_isDaytime, CEN_isNighttime, PRI_isDaytime, PRI_isNighttime, 
+               UPL_isDaytime, UPL_isNighttime, VAN_isDaytime and VAN_isNighttime from the second 
+               structure (43634 rows) ('joindata')
+            12-May-2025: sorted by column Date(ascending) ('sortdata')
+            12-May-2025: deleted columns Month, Day, Hour and Minute from the structure 
+               ('deletecols')
+            12-May-2025: deleted column Year from the structure ('deletecols')
+            12-May-2025: added column 'Hour' at position 56 ('addcol')
+            12-May-2025: added column 'SWI_TOT_100_0_01' at position 57 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) SWI_MEAN_100_0_01 to column(s) 
+               SWI_TOT_100_0_01, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: documented flagged and missing values in columns Site, Date, RecNum, 
+               LOGGERID, PROGID, BATTERY_AVG, BATTERY_V_CHECK, SOILTEMP_MEAN_0_10_01, 
+               SOILTEMP_MEAN_0_20_02, SOILTEMP_MEAN_0_50_03, SOILTEMP_MEAN_0_100_04, 
+               SWC_MEAN_0_10_01, SWC_MEAN_0_20_02, SWC_MEAN_0_50_03, SWC_MEAN_0_100_04, 
+               PRECIP_TOT_100_0_01, SWE_INST_0_0_01, SWE_CHECK, SWI_MEAN_100_0_01, 
+               SWI_MAX_100_0_01, TSB_MEAN_100_0_01, ATMPRESS_INST_430_0_01, SWI_RUNMN_100_0_01 and 
+               SWI_TOT_100_0_01 as data set anomalies in the metadata ('add_anomalies')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            12-May-2025: updated title ('newtitle')
+            12-May-2025: updated 1 metadata fields in the Dataset section(s) ('addmeta')
+            12-May-2025: added column 'PRECIP_ACC_100_0_01' at position 17 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) PRECIP_TOT_100_0_01 to column(s) 
+               PRECIP_ACC_100_0_01, merging copied flags with any existing flags, and set QA/QC 
+               criteria for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: added column 'SWE_MED_0_0_01' at position 19 ('addcol')
+            12-May-2025: copied QA/QC flags from column(s) SWE_INST_0_0_01 to column(s) 
+               SWE_MED_0_0_01, merging copied flags with any existing flags, and set QA/QC criteria 
+               for destination column(s) to 'manual' ('copyflags')
+            12-May-2025: replaced values matching '(Date > datenum('04/04/2023 14:15:00')&Date < 
+               datenum('10/01/2023 00:00:00')) 
+          (Date > datenum('04/20/2022 12:00:00')&Date < datenum('11/01/2022 12:00:00')) 
+          (Date > datenum('03/01/2022 16:40:00')&Date < datenum('04/10/2022 16:00:00')) 
+          (Date > datenum('03/22/2021 12:00:00')&Date < datenum('12/09/2021 12:00:00')) 
+          (Date > datenum('01/29/2020 12:00:00')&Date < datenum('01/24/2021 12:00:00')) 
+          (Date > datenum('04/05/2019 12:00:00')&Date < datenum('01/11/2020 12:00:00')) 
+          (Date > datenum('03/26/2018 12:00:00')&Date < datenum('01/25/2019 12:00:00')) 
+          (Date > datenum('03/16/2017 12:00:00')&Date < datenum('11/21/2017 12:00:00')) 
+          (Date > datenum('01/18/2016 12:00:00')&Date < datenum('11/14/2016 12:00:00')) 
+          (Date > datenum('07/01/2015 12:00:00')&Date < datenum('12/13/2015 12:00:00')) 
+          (Date > datenum('02/17/2014 12:00:00')&Date < datenum('10/01/2014 12:00:00')) 
+          (Date > datenum('03/03/2013 12:00:00')&Date < datenum('12/01/2013 12:00:00')) 
+          (Date > datenum('05/14/2012 12:00:00')&Date < datenum('12/14/2012 12:00:00'))' in 
+             column(s) SWE_INST_0_0_01 and SWE_MED_0_0_01 with 0 ('num_replace')
+            12-May-2025: 43634 values in 'SWE_INST_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_INST_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: 43634 values in 'SWE_MED_0_0_01' were updated with new values 
+               ('update_data')
+            12-May-2025: Q/C flagging criteria applied for column(s) SWE_MED_0_0_01, 'flags' field 
+               updated ('dataflag')
+            12-May-2025: deleted columns BATTERY_AVG and SWE_INST_0_0_01 from the structure 
+               ('deletecols')
+            12-May-2025: deleted columns Year, CEN, CS2MET, DISCTR, PRI, UPL, VAN, CEN_100, 
+               CS2MET_100, DISCTR_100, PRI_100, UPL_100, VAN_100, CEN_SS, CS2MET_SS, DISCTR_SS, 
+               PRI_SS, UPL_SS, VAN_SS, CEN_SS_3, CS2MET_SS_3, DISCTR_SS_3, PRI_SS_3, VAN_SS_3, 
+               CEN_isDaytime, CEN_isNighttime, PRI_isDaytime, PRI_isNighttime, UPL_isDaytime, 
+               UPL_isNighttime, VAN_isDaytime and VAN_isNighttime from the structure ('deletecols')
+            12-May-2025: deleted column Date from the structure ('deletecols')
+            12-May-2025: added column 'Date' at position 2 ('addcol')
+            12-May-2025: flags for columns BATTERY_V_CHECK, SOILTEMP_MEAN_0_10_01, 
+               SOILTEMP_MEAN_0_20_02, SOILTEMP_MEAN_0_50_03, SOILTEMP_MEAN_0_100_04, 
+               SWC_MEAN_0_10_01, SWC_MEAN_0_20_02, SWC_MEAN_0_50_03, SWC_MEAN_0_100_04, 
+               PRECIP_TOT_100_0_01, PRECIP_ACC_100_0_01, SWE_MED_0_0_01, SWE_CHECK, 
+               SWI_MEAN_100_0_01, SWI_MAX_100_0_01, TSB_MEAN_100_0_01, ATMPRESS_INST_430_0_01, 
+               SWI_RUNMN_100_0_01, Hour and SWI_TOT_100_0_01 converted to data columns, flag codes 
+               updated in metadata ('flags2cols')
+            12-May-2025: updated 6 metadata fields in the Data section(s) ('addmeta')
+            12-May-2025: updated 15 metadata fields in the Status, Data sections to reflect 
+               attribute metadata ('updatecols')
+            12-May-2025: parsed and formatted metadata ('listmeta')
+   B. Variable Information 
+      1. Variable Name: 
+         column  1. Site
+         column  2. Date
+         column  3. RecNum
+         column  4. LOGGERID
+         column  5. PROGID
+         column  6. BATTERY_V_CHECK
+         column  7. Flag_BATTERY_V_CHECK
+         column  8. SOILTEMP_MEAN_0_10_01
+         column  9. Flag_SOILTEMP_MEAN_0_10_01
+         column 10. SOILTEMP_MEAN_0_20_02
+         column 11. Flag_SOILTEMP_MEAN_0_20_02
+         column 12. SOILTEMP_MEAN_0_50_03
+         column 13. Flag_SOILTEMP_MEAN_0_50_03
+         column 14. SOILTEMP_MEAN_0_100_04
+         column 15. Flag_SOILTEMP_MEAN_0_100_04
+         column 16. SWC_MEAN_0_10_01
+         column 17. Flag_SWC_MEAN_0_10_01
+         column 18. SWC_MEAN_0_20_02
+         column 19. Flag_SWC_MEAN_0_20_02
+         column 20. SWC_MEAN_0_50_03
+         column 21. Flag_SWC_MEAN_0_50_03
+         column 22. SWC_MEAN_0_100_04
+         column 23. Flag_SWC_MEAN_0_100_04
+         column 24. PRECIP_TOT_100_0_01
+         column 25. Flag_PRECIP_TOT_100_0_01
+         column 26. PRECIP_ACC_100_0_01
+         column 27. Flag_PRECIP_ACC_100_0_01
+         column 28. SWE_MED_0_0_01
+         column 29. Flag_SWE_MED_0_0_01
+         column 30. SWE_CHECK
+         column 31. Flag_SWE_CHECK
+         column 32. SWI_MEAN_100_0_01
+         column 33. Flag_SWI_MEAN_100_0_01
+         column 34. SWI_MAX_100_0_01
+         column 35. Flag_SWI_MAX_100_0_01
+         column 36. TSB_MEAN_100_0_01
+         column 37. Flag_TSB_MEAN_100_0_01
+         column 38. ATMPRESS_INST_430_0_01
+         column 39. Flag_ATMPRESS_INST_430_0_01
+         column 40. SWI_RUNMN_100_0_01
+         column 41. Flag_SWI_RUNMN_100_0_01
+         column 42. Hour
+         column 43. Flag_Hour
+         column 44. SWI_TOT_100_0_01
+         column 45. Flag_SWI_TOT_100_0_01
+      2. Variable Definition: 
+         column  1. Site code
+         column  2. Round off corrected corrected serial date
+         column  3. RecNum
+         column  4. LOGGERID
+         column  5. Program ID of program
+         column  6. BATTERY_V_CHECK
+         column  7. QA/QC flags for BATTERY_V_CHECK (flagging criteria, where "x" is 
+            BATTERY_V_CHECK: manual)
+         column  8. Average soil temperature
+         column  9. QA/QC flags for Average soil temperature (flagging criteria, where "x" is 
+            SOILTEMP_MEAN_0_10_01: x<-2="I", x>35="I", x<-1="Q", x>30="Q", isnan(x)="M")
+         column 10. Average soil temperature
+         column 11. QA/QC flags for Average soil temperature (flagging criteria, where "x" is 
+            SOILTEMP_MEAN_0_20_02: x<-2="I", x>35="I", x<-1="Q", x>30="Q", isnan(x)="M")
+         column 12. Average soil temperature
+         column 13. QA/QC flags for Average soil temperature (flagging criteria, where "x" is 
+            SOILTEMP_MEAN_0_50_03: x<-2="I", x>35="I", x<-1="Q", x>30="Q", isnan(x)="M")
+         column 14. Average soil temperature
+         column 15. QA/QC flags for Average soil temperature (flagging criteria, where "x" is 
+            SOILTEMP_MEAN_0_100_04: x<-2="I", x>35="I", x<-1="Q", x>30="Q", isnan(x)="M")
+         column 16. Average soil water content
+         column 17. QA/QC flags for Average soil water content (flagging criteria, where "x" is 
+            SWC_MEAN_0_10_01: isnan(x)="M", x<0="I", x>1="I", (x > 0.5 & x < 0.83) = "F", (x >= 
+            0.83 & x <= 1.0) = "Q")
+         column 18. Average soil water content
+         column 19. QA/QC flags for Average soil water content (flagging criteria, where "x" is 
+            SWC_MEAN_0_20_02: isnan(x)="M", x<0="I", x>1="I", (x > 0.5 & x < 0.83) = "F", (x >= 
+            0.83 & x <= 1.0) = "Q")
+         column 20. Average soil water content
+         column 21. QA/QC flags for Average soil water content (flagging criteria, where "x" is 
+            SWC_MEAN_0_50_03: isnan(x)="M", x<0="I", x>1="I", (x > 0.5 & x < 0.83) = "F", (x >= 
+            0.83 & x <= 1.0) = "Q")
+         column 22. Average soil water content
+         column 23. QA/QC flags for Average soil water content (flagging criteria, where "x" is 
+            SWC_MEAN_0_100_04: isnan(x)="M", x<0="I", x>1="I", (x > 0.5 & x < 0.83) = "F", (x >= 
+            0.83 & x <= 1.0) = "Q")
+         column 24. Precipitation collected from a TE525M 9.7in rain gauge. (TR525 6in retired 
+            2023-06-07)
+         column 25. QA/QC flags for Precipitation collected from a TE525M 9.7in rain gauge. (TR525 
+            6in retired 2023-06-07) (flagging criteria, where "x" is PRECIP_TOT_100_0_01: x<0="I", 
+            x>4.2="Q", isnan(x)="M", Date>=datenum("09/07/2019 00:05:00")&Date<=datenum("09/09/2019 
+            12:00:00")="M", Date>=datenum("02/27/2019 10:50:00")&Date<=datenum("03/04/2019 
+            10:50:00")="Q", Date>=datenum("04/29/2019 18:50:00")&Date<=datenum("04/29/2019 
+            19:00:00")="Q", Date>=datenum("12/12/2021 00:00:00")&Date<=datenum("12/13/2021 
+            13:00:00")="Q", Date>=datenum("12/24/2021 12:00:00")&Date<=datenum("12/27/2021 
+            15:30:00")="Q", flag_daterange(Date,{"12/24/2021 12:00:00","12/27/2021 15:30:00"})="Q", 
+            flag_daterange(Date,{"01/13/2024 00:07:00","01/19/2024 06:00:00"})="T")
+         column 26. Cumulative sum of total precipitation
+         column 27. QA/QC flags for Cumulative sum of total precipitation (flagging criteria, where 
+            "x" is PRECIP_ACC_100_0_01: manual)
+         column 28. 12 point running median of SWE_INST
+         column 29. QA/QC flags for 12 point running median of SWE_INST (flagging criteria, where 
+            "x" is SWE_MED_0_0_01: manual)
+         column 30. SWE_CHECK
+         column 31. QA/QC flags for SWE_CHECK (flagging criteria, where "x" is SWE_CHECK: manual)
+         column 32. Incoming solar radiation recorded by Kipp and Zonen CMB6 (CMB6 retired 
+            2023-06-07; replaced with CS320)
+         column 33. QA/QC flags for Incoming solar radiation recorded by Kipp and Zonen CMB6 (CMB6 
+            retired 2023-06-07; replaced with CS320) (flagging criteria, where "x" is 
+            SWI_MEAN_100_0_01: isnan(x)="M", flag_daterange(Date,{"2/18/2018 08:00:00","2/22/2018 
+            10:20:00"})="T", flag_daterange(Date,{"4/17/2021 04:30:00","7/13/2021 12:00:00"})="I", 
+            flag_daterange(Date,{"3/10/2022 11:30:00","3/10/2022 12:00:00"})="T", 
+            flag_daterange(Date,{"01/25/2023 00:00:00"})="I", PRI_SWI_RUNMN_100_0_01>PRI_100="Q, 
+            manual)
+         column 34. Incoming maximum solar radiation ((CMB6 retired 2023-06-07; replaced with CS320)
+         column 35. QA/QC flags for Incoming maximum solar radiation ((CMB6 retired 2023-06-07; 
+            replaced with CS320) (flagging criteria, where "x" is SWI_MAX_100_0_01: 
+            Date>=datenum("04/17/2021 04:30:00")&Date<=datenum("07/13/2021 12:00:00")="I", manual)
+         column 36. Internal temperature sensor CS320
+         column 37. QA/QC flags for Internal temperature sensor CS320 (flagging criteria, where "x" 
+            is TSB_MEAN_100_0_01: isnan(x)="M", x<-50="I", x>60="I")
+         column 38. Insantenous barometric pressure adjusted to sea level.
+         column 39. QA/QC flags for Insantenous barometric pressure adjusted to sea level. 
+            (flagging criteria, where "x" is ATMPRESS_INST_430_0_01: x<=950="Q", x<=900="I", 
+            isnan(x)="M", x>=1050="Q", x>=1100="I")
+         column 40. 7-point running mean
+         column 41. QA/QC flags for 7-point running mean (flagging criteria, where "x" is 
+            SWI_RUNMN_100_0_01: )
+         column 42. Hour of day
+         column 43. QA/QC flags for Hour of day (flagging criteria, where "x" is Hour: )
+         column 44. Calculated total radiative energy. MJ/m2 = val_in_watts * 
+            number_seconds_in_period / 1000000
+         column 45. QA/QC flags for Calculated total radiative energy. MJ/m2 = val_in_watts * 
+            number_seconds_in_period / 1000000 (flagging criteria, where "x" is SWI_TOT_100_0_01: 
+            manual)
+      3. Units of Measurement: 
+         column  1. 
+         column  2. yyyy-MM-dd HH:mm:ss
+         column  3. count
+         column  4. none
+         column  5. none
+         column  6. 
+         column  7. none
+         column  8. deg c
+         column  9. none
+         column 10. deg c
+         column 11. none
+         column 12. deg c
+         column 13. none
+         column 14. deg c
+         column 15. none
+         column 16. fraction
+         column 17. none
+         column 18. fraction
+         column 19. none
+         column 20. fraction
+         column 21. none
+         column 22. fraction
+         column 23. none
+         column 24. mm
+         column 25. none
+         column 26. mm
+         column 27. none
+         column 28. mm
+         column 29. none
+         column 30. 
+         column 31. none
+         column 32. w m-2
+         column 33. none
+         column 34. w m-2
+         column 35. none
+         column 36. deg c
+         column 37. none
+         column 38. mb
+         column 39. none
+         column 40. W m-2
+         column 41. none
+         column 42. 
+         column 43. none
+         column 44. MJ/m2
+         column 45. none
+      4. Data Type 
+         a. Storage Type: 
+            column  1. string
+            column  2. string
+            column  3. integer
+            column  4. integer
+            column  5. floating-point
+            column  6. floating-point
+            column  7. string
+            column  8. floating-point
+            column  9. string
+            column 10. floating-point
+            column 11. string
+            column 12. floating-point
+            column 13. string
+            column 14. floating-point
+            column 15. string
+            column 16. floating-point
+            column 17. string
+            column 18. floating-point
+            column 19. string
+            column 20. floating-point
+            column 21. string
+            column 22. floating-point
+            column 23. string
+            column 24. floating-point
+            column 25. string
+            column 26. floating-point
+            column 27. string
+            column 28. floating-point
+            column 29. string
+            column 30. floating-point
+            column 31. string
+            column 32. floating-point
+            column 33. string
+            column 34. floating-point
+            column 35. string
+            column 36. floating-point
+            column 37. string
+            column 38. floating-point
+            column 39. string
+            column 40. floating-point
+            column 41. string
+            column 42. floating-point
+            column 43. string
+            column 44. floating-point
+            column 45. string
+         b. Variable Codes: 
+            Flag_BATTERY_V_CHECK: M = Missing value
+            Flag_SOILTEMP_MEAN_0_10_01: M = Missing value
+            Flag_SOILTEMP_MEAN_0_20_02: M = Missing value
+            Flag_SOILTEMP_MEAN_0_50_03: M = Missing value
+            Flag_SOILTEMP_MEAN_0_100_04: M = Missing value
+            Flag_SWC_MEAN_0_10_01: M = Missing value
+            Flag_SWC_MEAN_0_20_02: M = Missing value
+            Flag_SWC_MEAN_0_50_03: M = Missing value
+            Flag_SWC_MEAN_0_100_04: M = Missing value
+            Flag_PRECIP_TOT_100_0_01: M = Missing value, Q = Questionable value
+            Flag_PRECIP_ACC_100_0_01: M = Missing value, Q = Questionable value
+            Flag_SWE_MED_0_0_01: M = Missing value
+            Flag_SWE_CHECK: M = Missing value
+            Flag_SWI_MEAN_100_0_01: M = Missing value
+            Flag_SWI_MAX_100_0_01: M = Missing value
+            Flag_TSB_MEAN_100_0_01: M = Missing value
+            Flag_ATMPRESS_INST_430_0_01: M = Missing value
+            Flag_SWI_TOT_100_0_01: M = Missing value
+         c. Numeric Range: 
+            column  1. (none)
+            column  2. (none)
+            column  3. 0 to 19444
+            column  4. 230 to 230
+            column  5. 7999 to 7999
+            column  6. (none)
+            column  7. (none)
+            column  8. (none)
+            column  9. (none)
+            column 10. (none)
+            column 11. (none)
+            column 12. (none)
+            column 13. (none)
+            column 14. (none)
+            column 15. (none)
+            column 16. (none)
+            column 17. (none)
+            column 18. (none)
+            column 19. (none)
+            column 20. (none)
+            column 21. (none)
+            column 22. (none)
+            column 23. (none)
+            column 24. 0 to 4.318
+            column 25. (none)
+            column 26. 0 to 524.256
+            column 27. (none)
+            column 28. 0 to 0
+            column 29. (none)
+            column 30. (none)
+            column 31. (none)
+            column 32. (none)
+            column 33. (none)
+            column 34. (none)
+            column 35. (none)
+            column 36. (none)
+            column 37. (none)
+            column 38. (none)
+            column 39. (none)
+            column 40. (none)
+            column 41. (none)
+            column 42. 0 to 23
+            column 43. (none)
+            column 44. (none)
+            column 45. (none)
+         d. Missing Value Code: NaN
+      5. Data Format 
+         a. Column Type: 
+            column  1. text
+            column  2. text
+            column  3. numerical
+            column  4. numerical
+            column  5. numerical
+            column  6. numerical
+            column  7. text
+            column  8. numerical
+            column  9. text
+            column 10. numerical
+            column 11. text
+            column 12. numerical
+            column 13. text
+            column 14. numerical
+            column 15. text
+            column 16. numerical
+            column 17. text
+            column 18. numerical
+            column 19. text
+            column 20. numerical
+            column 21. text
+            column 22. numerical
+            column 23. text
+            column 24. numerical
+            column 25. text
+            column 26. numerical
+            column 27. text
+            column 28. numerical
+            column 29. text
+            column 30. numerical
+            column 31. text
+            column 32. numerical
+            column 33. text
+            column 34. numerical
+            column 35. text
+            column 36. numerical
+            column 37. text
+            column 38. numerical
+            column 39. text
+            column 40. numerical
+            column 41. text
+            column 42. numerical
+            column 43. text
+            column 44. numerical
+            column 45. text
+         b. Number of Columns: 45
+         c. Decimal Places: 
+            column  1. 0
+            column  2. 0
+            column  3. 0
+            column  4. 0
+            column  5. 1
+            column  6. 0
+            column  7. 0
+            column  8. 3
+            column  9. 0
+            column 10. 3
+            column 11. 0
+            column 12. 3
+            column 13. 0
+            column 14. 3
+            column 15. 0
+            column 16. 3
+            column 17. 0
+            column 18. 3
+            column 19. 0
+            column 20. 3
+            column 21. 0
+            column 22. 3
+            column 23. 0
+            column 24. 3
+            column 25. 0
+            column 26. 2
+            column 27. 0
+            column 28. 2
+            column 29. 0
+            column 30. 0
+            column 31. 0
+            column 32. 2
+            column 33. 0
+            column 34. 2
+            column 35. 0
+            column 36. 2
+            column 37. 0
+            column 38. 2
+            column 39. 0
+            column 40. 2
+            column 41. 0
+            column 42. 0
+            column 43. 0
+            column 44. 3
+            column 45. 0
+      6. Logical Variable Type: 
+         column  1. nominal (none)
+         column  2. datetime (none)
+         column  3. nominal (discrete)
+         column  4. nominal (discrete)
+         column  5. nominal (continuous)
+         column  6. data (continous)
+         column  7. coded value (none)
+         column  8. data (continuous)
+         column  9. coded value (none)
+         column 10. data (continuous)
+         column 11. coded value (none)
+         column 12. data (continuous)
+         column 13. coded value (none)
+         column 14. data (continuous)
+         column 15. coded value (none)
+         column 16. data (continuous)
+         column 17. coded value (none)
+         column 18. data (continuous)
+         column 19. coded value (none)
+         column 20. data (continuous)
+         column 21. coded value (none)
+         column 22. data (continuous)
+         column 23. coded value (none)
+         column 24. data (continuous)
+         column 25. coded value (none)
+         column 26. data (continuous)
+         column 27. coded value (none)
+         column 28. data (continuous)
+         column 29. coded value (none)
+         column 30. data (continous)
+         column 31. coded value (none)
+         column 32. data (continuous)
+         column 33. coded value (none)
+         column 34. data (continuous)
+         column 35. coded value (none)
+         column 36. data (continuous)
+         column 37. coded value (none)
+         column 38. data (continuous)
+         column 39. coded value (none)
+         column 40. data (continuous)
+         column 41. coded value (none)
+         column 42. calculation (discrete)
+         column 43. coded value (none)
+         column 44. calculation (continuous)
+         column 45. coded value (none)
+      7. Flagging Criteria: 
+         column  1. manually-assigned flags
+         column  2. none
+         column  3. x<0="I";isnan(x)="M";manually-assigned flags
+         column  4. flag_notinarray(x,[226,229,230,239])="Q";isnan(x)="M";manually-assigned flags
+         column  5. flag_valuechange(x,0.1,0.1,1)="P";isnan(x)="M";manually-assigned flags
+         column  6. manually-assigned flags
+         column  7. none
+         column  8. x<-2="I";x>35="I";x<-1="Q";x>30="Q";isnan(x)="M"
+         column  9. none
+         column 10. x<-2="I";x>35="I";x<-1="Q";x>30="Q";isnan(x)="M"
+         column 11. none
+         column 12. x<-2="I";x>35="I";x<-1="Q";x>30="Q";isnan(x)="M"
+         column 13. none
+         column 14. x<-2="I";x>35="I";x<-1="Q";x>30="Q";isnan(x)="M"
+         column 15. none
+         column 16. isnan(x)="M";x<0="I";x>1="I";(x > 0.5 & x < 0.83) = "F";(x >= 0.83 & x <= 1.0) 
+            = "Q"
+         column 17. none
+         column 18. isnan(x)="M";x<0="I";x>1="I";(x > 0.5 & x < 0.83) = "F";(x >= 0.83 & x <= 1.0) 
+            = "Q"
+         column 19. none
+         column 20. isnan(x)="M";x<0="I";x>1="I";(x > 0.5 & x < 0.83) = "F";(x >= 0.83 & x <= 1.0) 
+            = "Q"
+         column 21. none
+         column 22. isnan(x)="M";x<0="I";x>1="I";(x > 0.5 & x < 0.83) = "F";(x >= 0.83 & x <= 1.0) 
+            = "Q"
+         column 23. none
+         column 24. x<0="I";x>4.2="Q";isnan(x)="M";col_Date>=datenum("09/07/2019 
+            00:05:00")&col_Date<=datenum("09/09/2019 12:00:00")="M";col_Date>=datenum("02/27/2019 
+            10:50:00")&col_Date<=datenum("03/04/2019 10:50:00")="Q";col_Date>=datenum("04/29/2019 
+            18:50:00")&col_Date<=datenum("04/29/2019 19:00:00")="Q";col_Date>=datenum("12/12/2021 
+            00:00:00")&col_Date<=datenum("12/13/2021 13:00:00")="Q";col_Date>=datenum("12/24/2021 
+            12:00:00")&col_Date<=datenum("12/27/2021 
+            15:30:00")="Q";flag_daterange(col_Date,{"12/24/2021 12:00:00","12/27/2021 
+            15:30:00"})="Q";flag_daterange(col_Date,{"01/13/2024 00:07:00","01/19/2024 
+            06:00:00"})="T"
+         column 25. none
+         column 26. manually-assigned flags
+         column 27. none
+         column 28. manually-assigned flags
+         column 29. none
+         column 30. manually-assigned flags
+         column 31. none
+         column 32. isnan(x)="M";flag_daterange(col_Date,{"2/18/2018 08:00:00","2/22/2018 
+            10:20:00"})="T";flag_daterange(col_Date,{"4/17/2021 04:30:00","7/13/2021 
+            12:00:00"})="I";flag_daterange(col_Date,{"3/10/2022 11:30:00","3/10/2022 
+            12:00:00"})="T";flag_daterange(col_Date,{"01/25/2023 
+            00:00:00"})="I";col_PRI_SWI_RUNMN_100_0_01>col_PRI_100="Q;manually-assigned flags
+         column 33. none
+         column 34. col_Date>=datenum("04/17/2021 04:30:00")&col_Date<=datenum("07/13/2021 
+            12:00:00")="I";manually-assigned flags
+         column 35. none
+         column 36. isnan(x)="M";x<-50="I";x>60="I"
+         column 37. none
+         column 38. x<=950="Q";x<=900="I";isnan(x)="M";x>=1050="Q";x>=1100="I"
+         column 39. none
+         column 40. none
+         column 41. none
+         column 42. none
+         column 43. none
+         column 44. manually-assigned flags
+         column 45. none
+   C. Data Anomalies: Values of 11 records in Site were flagged as M (Missing value) for dates: 
+      06/12/2013, 07/25/2013. Values of 11 records in Date were flagged as M (Missing value) for 
+      dates: 06/12/2013, 07/25/2013. Values of 11 records in RecNum were flagged as M (Missing 
+      value) for dates: 06/12/2013, 07/25/2013. Values of 11 records in RecNum are missing for 
+      dates: 06/12/2013, 07/25/2013. Values of 11 records in LOGGERID were flagged as M (Missing 
+      value) for dates: 06/12/2013, 07/25/2013. Values of 11 records in PROGID were flagged as M 
+      (Missing value) for dates: 06/12/2013, 07/25/2013. Values of 11 records in BATTERY_AVG were 
+      flagged as M (Missing value) for dates: 06/12/2013, 07/25/2013. Values of 11 records in 
+      BATTERY_AVG are missing for dates: 06/12/2013, 07/25/2013. Values of 11 records in 
+      BATTERY_V_CHECK were flagged as M (Missing value) for dates: 06/12/2013, 07/25/2013. Values 
+      of 43634 records in BATTERY_V_CHECK are missing for dates: 05/02/2013-10/01/2013. Values of 
+      43634 records in SOILTEMP_MEAN_0_10_01 were flagged as M (Missing value) for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in SOILTEMP_MEAN_0_10_01 are missing for 
+      dates: 05/02/2013-10/01/2013. Values of 43634 records in SOILTEMP_MEAN_0_20_02 were flagged 
+      as M (Missing value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in 
+      SOILTEMP_MEAN_0_20_02 are missing for dates: 05/02/2013-10/01/2013. Values of 43634 records 
+      in SOILTEMP_MEAN_0_50_03 were flagged as M (Missing value) for dates: 05/02/2013-10/01/2013. 
+      Values of 43634 records in SOILTEMP_MEAN_0_50_03 are missing for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in SOILTEMP_MEAN_0_100_04 were flagged as M 
+      (Missing value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in 
+      SOILTEMP_MEAN_0_100_04 are missing for dates: 05/02/2013-10/01/2013. Values of 43634 records 
+      in SWC_MEAN_0_10_01 were flagged as M (Missing value) for dates: 05/02/2013-10/01/2013. 
+      Values of 43634 records in SWC_MEAN_0_10_01 are missing for dates: 05/02/2013-10/01/2013. 
+      Values of 43634 records in SWC_MEAN_0_20_02 were flagged as M (Missing value) for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in SWC_MEAN_0_20_02 are missing for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in SWC_MEAN_0_50_03 were flagged as M (Missing 
+      value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in SWC_MEAN_0_50_03 are 
+      missing for dates: 05/02/2013-10/01/2013. Values of 43634 records in SWC_MEAN_0_100_04 were 
+      flagged as M (Missing value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in 
+      SWC_MEAN_0_100_04 are missing for dates: 05/02/2013-10/01/2013. Values of 11 records in 
+      PRECIP_TOT_100_0_01 were flagged as M (Missing value) for dates: 06/12/2013, 07/25/2013. The 
+      value of one record in PRECIP_TOT_100_0_01 was flagged as Q (Questionable value) for date 
+      08/09/2013. Values of 11 records in PRECIP_TOT_100_0_01 are missing for dates: 06/12/2013, 
+      07/25/2013. Values of 11 records in SWE_INST_0_0_01 were flagged as M (Missing value) for 
+      dates: 06/12/2013, 07/25/2013. Values of 11 records in SWE_INST_0_0_01 are missing for dates: 
+      06/12/2013, 07/25/2013. Values of 11 records in SWE_CHECK were flagged as M (Missing value) 
+      for dates: 06/12/2013, 07/25/2013. Values of 43634 records in SWE_CHECK are missing for 
+      dates: 05/02/2013-10/01/2013. Values of 43634 records in SWI_MEAN_100_0_01 were flagged as M 
+      (Missing value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in 
+      SWI_MEAN_100_0_01 are missing for dates: 05/02/2013-10/01/2013. Values of 11 records in 
+      SWI_MAX_100_0_01 were flagged as M (Missing value) for dates: 06/12/2013, 07/25/2013. Values 
+      of 43634 records in SWI_MAX_100_0_01 are missing for dates: 05/02/2013-10/01/2013. Values of 
+      43634 records in TSB_MEAN_100_0_01 were flagged as M (Missing value) for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in TSB_MEAN_100_0_01 are missing for dates: 
+      05/02/2013-10/01/2013. Values of 43634 records in ATMPRESS_INST_430_0_01 were flagged as M 
+      (Missing value) for dates: 05/02/2013-10/01/2013. Values of 43634 records in 
+      ATMPRESS_INST_430_0_01 are missing for dates: 05/02/2013-10/01/2013. Values of 43634 records 
+      in SWI_RUNMN_100_0_01 are missing for dates: 05/02/2013-10/01/2013. Values of 43634 records 
+      in SWI_TOT_100_0_01 were flagged as M (Missing value) for dates: 05/02/2013-10/01/2013. 
+      Values of 43634 records in SWI_TOT_100_0_01 are missing for dates: 05/02/2013-10/01/2013.
+V. Supplemental Descriptors 
+   A. Data Acquisition 
+      1. Data Forms: 
+      2. Form Location: 
+      3. Data Entry Validation: 
+   B. Quality Assurance/Quality Control Procedures: 
+   C. Supplemental Materials: 
+   D. Computer Programs: 
+   E. Archival Practices: 
+   F. Publications: 
+   G. History of Data Set Usage 
+      1. Data Request History: 
+      2. Data Set Update History: 
+      3. Review History: 
+      4. Questions and Comments from Users: 

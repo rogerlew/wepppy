@@ -1,0 +1,49 @@
+{
+  "station": "USGS-14161500",
+  "station_name": "LOOKOUT CREEK NEAR BLUE RIVER, OR",
+  "source_url": "https://waterservices.usgs.gov/nwis/dv/?format=json&sites=14161500&startDT=1950-01-01&endDT=2025-12-31&parameterCd=00060&statCd=00003&siteStatus=all",
+  "retrieved_utc": "2026-09-21T22:04:12.154675+00:00",
+  "source_sha256_uncompressed": "d9da27093453dbb566471edb01761f63fe46c6f6d1184c180eb26461f783173c",
+  "parameter_code": "00060",
+  "statistic_code": "00003",
+  "statistic": "Daily mean discharge",
+  "drainage_area_square_miles": 24.1,
+  "drainage_area_m2": 62418713.45909761,
+  "drainage_area_source": "https://waterdata.usgs.gov/monitoring-location/USGS-14161500/",
+  "conversion": "Streamflow (mm) = daily mean discharge (ft3/s) * 0.3048^3 * 86400 * 1000 / (24.1 * 1609.344^2)",
+  "mm_per_cfs_day": 0.03919618668769932,
+  "qualifiers": {
+    "A": "Approved",
+    "e": "Estimated; retained, including all 235 approved estimated daily values"
+  },
+  "missing_data_policy": "Absent dates omitted; no interpolation or zero filling.",
+  "date_policy": "Preserve USGS daily calendar date; no UTC conversion.",
+  "target_run": "https://wepp.cloud/weppcloud/runs/traveled-calligrapher/config/",
+  "run_verification": "Simulation dates supplied by user. Outlet location and delineated area have not been checked; public run page requires browser verification.",
+  "usage": "Paste observed_daily CSV text into Observed Timeseries; select WEPP. Fitting uses overlapping dates. Depth uses gauge area, not unverified modeled area; confirm outlet and drainage-area agreement before interpreting fit.",
+  "scope": "Discharge only, not sediment observations. Record spans prefire and postfire conditions; select periods consistent with modeled land cover. Annual fitting requires checking observation completeness.",
+  "source_observations": 24866,
+  "source_qualifier_counts": {
+    "A": 24631,
+    "A;e": 235
+  },
+  "source_missing_date_ranges_inclusive": [
+    [
+      "1955-09-30",
+      "1963-08-31"
+    ]
+  ],
+  "fitting_period": {
+    "start": "1986-01-01",
+    "end": "2025-12-31",
+    "observations": 14610,
+    "missing_dates": 0,
+    "qualifier_counts": {
+      "A": 14375,
+      "A;e": 235
+    }
+  },
+  "climate": "Observed GRIDMET, 1986-2025, per user; target run hosted on wepp1.",
+  "fitting_csv": "usgs_14161500_observed_daily_1986-2025.csv",
+  "fitting_csv_sha256": "b94a2662ad855b8d9d574e4e6bae36cdafe14daa05428862386e70fee9bd513c"
+}
