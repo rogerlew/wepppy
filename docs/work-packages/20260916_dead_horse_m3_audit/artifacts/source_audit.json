@@ -1,0 +1,2127 @@
+{
+  "official_source_url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/grizzlycreek_sbs.zip",
+  "official_zip_sha256": "52987444b58e183098e5925121417bb42624d7ee3cf6611b54f3676c9a74ef76",
+  "official_tif_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "upload_tif_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "upload_byte_identical": true,
+  "native_grid": {
+    "crs": "EPSG:26913",
+    "resolution": [
+      20.0,
+      -20.0
+    ],
+    "nodata": null,
+    "shape": [
+      714,
+      836
+    ]
+  },
+  "official_values": {
+    "1": 40313,
+    "2": 108127,
+    "3": 140383,
+    "4": 38614,
+    "127": 269467
+  },
+  "sbs_direct_nearest": {
+    "official_known_basin_cells": 146161,
+    "local_known_basin_cells": 146161,
+    "mask_disagreement": 0,
+    "native_127_basin_cells": 97075,
+    "outside_native_extent_cells": 25093,
+    "class_disagreement_on_both_known": 0
+  },
+  "outlet_lon_lat": [
+    -107.18387524445478,
+    39.59279527152553
+  ],
+  "soil_mapunits": [
+    {
+      "mukey": 496827,
+      "cells": 22690,
+      "common_cells": 11263,
+      "mean_cm": null,
+      "valid_percentage": 0.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492841,
+          "compname": "Rock outcrop",
+          "comppct_r": 100.0
+        }
+      ]
+    },
+    {
+      "mukey": 496828,
+      "cells": 19878,
+      "common_cells": 19878,
+      "mean_cm": 97.0,
+      "valid_percentage": 45.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492842,
+          "compname": "Cryorthents",
+          "comppct_r": 45.0
+        },
+        {
+          "cokey": 26492843,
+          "compname": "Rock outcrop",
+          "comppct_r": 55.0
+        }
+      ]
+    },
+    {
+      "mukey": 496847,
+      "cells": 4,
+      "common_cells": 4,
+      "mean_cm": 96.21428571428571,
+      "valid_percentage": 70.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492902,
+          "compname": "Delson",
+          "comppct_r": 5.0
+        },
+        {
+          "cokey": 26492903,
+          "compname": "Empedrado",
+          "comppct_r": 5.0
+        },
+        {
+          "cokey": 26492904,
+          "compname": "Shawa",
+          "comppct_r": 5.0
+        },
+        {
+          "cokey": 26492905,
+          "compname": "Torriorthents",
+          "comppct_r": 55.0
+        },
+        {
+          "cokey": 26492906,
+          "compname": "Rock outcrop",
+          "comppct_r": 30.0
+        }
+      ]
+    },
+    {
+      "mukey": 496855,
+      "cells": 4763,
+      "common_cells": 4763,
+      "mean_cm": 152.0,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492211,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492212,
+          "compname": "Angostura",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492213,
+          "compname": "Cochetopa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492214,
+          "compname": "Gothic",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492215,
+          "compname": "Mulgon",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492216,
+          "compname": "Peeler",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492217,
+          "compname": "Quander",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492218,
+          "compname": "Clayburn",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492219,
+          "compname": "Mayoworth",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492220,
+          "compname": "Adel",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496857,
+      "cells": 58028,
+      "common_cells": 37338,
+      "mean_cm": 151.2828282828283,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492230,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492231,
+          "compname": "Angostura",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492232,
+          "compname": "Clayburn",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492233,
+          "compname": "Emerald",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492234,
+          "compname": "Gothic",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492235,
+          "compname": "Mayoworth",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492236,
+          "compname": "Mulgon",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492237,
+          "compname": "Namela",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492238,
+          "compname": "Rhone",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492239,
+          "compname": "Poose",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492240,
+          "compname": "Cochetopa",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492241,
+          "compname": "Adel",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492242,
+          "compname": "Hapgood",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496858,
+      "cells": 20825,
+      "common_cells": 17891,
+      "mean_cm": 151.2828282828283,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492243,
+          "compname": "Angostura",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492244,
+          "compname": "Clayburn",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492245,
+          "compname": "Emerald",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492246,
+          "compname": "Gothic",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492247,
+          "compname": "Mayoworth",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492248,
+          "compname": "Mulgon",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492249,
+          "compname": "Namela",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492250,
+          "compname": "Rhone",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492251,
+          "compname": "Poose",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492252,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492253,
+          "compname": "Cochetopa",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492254,
+          "compname": "Adel",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492255,
+          "compname": "Hapgood",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496860,
+      "cells": 6754,
+      "common_cells": 6754,
+      "mean_cm": 152.0,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492269,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492270,
+          "compname": "Angostura",
+          "comppct_r": 4.0
+        },
+        {
+          "cokey": 26492271,
+          "compname": "Peeler",
+          "comppct_r": 5.0
+        },
+        {
+          "cokey": 26492272,
+          "compname": "Anvik",
+          "comppct_r": 5.0
+        },
+        {
+          "cokey": 26492273,
+          "compname": "Cochetopa",
+          "comppct_r": 50.0
+        },
+        {
+          "cokey": 26492274,
+          "compname": "Antrobus",
+          "comppct_r": 35.0
+        }
+      ]
+    },
+    {
+      "mukey": 496876,
+      "cells": 3124,
+      "common_cells": 0,
+      "mean_cm": 78.41414141414141,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492387,
+          "compname": "Adel",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492388,
+          "compname": "Heterwa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492389,
+          "compname": "Targhee",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492390,
+          "compname": "Clinetop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492391,
+          "compname": "Nimerick",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492392,
+          "compname": "Pineisle",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492393,
+          "compname": "Parachute",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492394,
+          "compname": "Dateman",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492395,
+          "compname": "Sapphire",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492396,
+          "compname": "Secondset",
+          "comppct_r": 25.0
+        },
+        {
+          "cokey": 26492397,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        }
+      ]
+    },
+    {
+      "mukey": 496884,
+      "cells": 50853,
+      "common_cells": 2448,
+      "mean_cm": 114.6875,
+      "valid_percentage": 80.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26493035,
+          "compname": "Rock outcrop",
+          "comppct_r": 20.0
+        },
+        {
+          "cokey": 26493036,
+          "compname": "Adel",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493037,
+          "compname": "Lamphier",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493038,
+          "compname": "Northwater",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493039,
+          "compname": "Gateview",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493040,
+          "compname": "Rhone",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493041,
+          "compname": "Farlow",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26493042,
+          "compname": "Dateman",
+          "comppct_r": 30.0
+        }
+      ]
+    },
+    {
+      "mukey": 496896,
+      "cells": 199,
+      "common_cells": 0,
+      "mean_cm": 150.56565656565655,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492510,
+          "compname": "Angostura",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492511,
+          "compname": "Cochetopa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492512,
+          "compname": "Emerald",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492513,
+          "compname": "Mulgon",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492514,
+          "compname": "Peeler",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492515,
+          "compname": "Mayoworth",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492516,
+          "compname": "Namela",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492517,
+          "compname": "Gothic",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492518,
+          "compname": "Poose",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492519,
+          "compname": "Quander",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492520,
+          "compname": "Hapgood",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492521,
+          "compname": "Adel",
+          "comppct_r": 25.0
+        },
+        {
+          "cokey": 26492522,
+          "compname": "Clayburn",
+          "comppct_r": 25.0
+        },
+        {
+          "cokey": 26492523,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        }
+      ]
+    },
+    {
+      "mukey": 496898,
+      "cells": 6033,
+      "common_cells": 6033,
+      "mean_cm": 152.0,
+      "valid_percentage": 100.0,
+      "reason_codes": "weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492538,
+          "compname": "Adel",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492539,
+          "compname": "Poose",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492540,
+          "compname": "Gothic",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492541,
+          "compname": "Mayoworth",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492542,
+          "compname": "Angostura",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492543,
+          "compname": "Scout",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492544,
+          "compname": "Hapgood",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492545,
+          "compname": "Clayburn",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492546,
+          "compname": "Cochetopa",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496904,
+      "cells": 367,
+      "common_cells": 137,
+      "mean_cm": 81.53,
+      "valid_percentage": 100.0,
+      "reason_codes": "bedrock_excluded;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26493117,
+          "compname": "Antrobus",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493118,
+          "compname": "Burnette",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493119,
+          "compname": "Cochetopa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493120,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493121,
+          "compname": "Farlow",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493122,
+          "compname": "Miracle",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493123,
+          "compname": "Northwater",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493124,
+          "compname": "Owen Creek",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493125,
+          "compname": "Rhone",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493126,
+          "compname": "Tampico",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493127,
+          "compname": "Thornburgh",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493128,
+          "compname": "Irrawaddy",
+          "comppct_r": 85.0
+        }
+      ]
+    },
+    {
+      "mukey": 496905,
+      "cells": 3396,
+      "common_cells": 3396,
+      "mean_cm": 150.36363636363637,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26493129,
+          "compname": "Antrobus",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493130,
+          "compname": "Burnette",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493131,
+          "compname": "Cochetopa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493132,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493133,
+          "compname": "Farlow",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493134,
+          "compname": "Miracle",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493135,
+          "compname": "Northwater",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493136,
+          "compname": "Owen Creek",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493137,
+          "compname": "Rhone",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493138,
+          "compname": "Tampico",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493139,
+          "compname": "Thornburgh",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493140,
+          "compname": "Jerry",
+          "comppct_r": 88.0
+        },
+        {
+          "cokey": 26493141,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        }
+      ]
+    },
+    {
+      "mukey": 496928,
+      "cells": 10551,
+      "common_cells": 0,
+      "mean_cm": 63.06666666666667,
+      "valid_percentage": 75.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492739,
+          "compname": "Targhee",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492740,
+          "compname": "Sapphire",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492741,
+          "compname": "Heterwa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492742,
+          "compname": "Pineisle",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492743,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492744,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492745,
+          "compname": "Farlow",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492746,
+          "compname": "Rock outcrop",
+          "comppct_r": 25.0
+        },
+        {
+          "cokey": 26492747,
+          "compname": "Adel",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492748,
+          "compname": "Parachute",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492749,
+          "compname": "Nimerick",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492750,
+          "compname": "Clinetop",
+          "comppct_r": 30.0
+        }
+      ]
+    },
+    {
+      "mukey": 496929,
+      "cells": 21113,
+      "common_cells": 21113,
+      "mean_cm": 152.0,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil;weathered_material_included",
+      "components": [
+        {
+          "cokey": 26492751,
+          "compname": "Adel",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492752,
+          "compname": "Clayburn",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26492753,
+          "compname": "Cochetopa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492754,
+          "compname": "Lamphier",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492755,
+          "compname": "Northwater",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492756,
+          "compname": "Rhone",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492757,
+          "compname": "Thornburgh",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492758,
+          "compname": "Owen Creek",
+          "comppct_r": 40.0
+        },
+        {
+          "cokey": 26492759,
+          "compname": "Jerry",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492760,
+          "compname": "Burnette",
+          "comppct_r": 20.0
+        },
+        {
+          "cokey": 26492761,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        }
+      ]
+    },
+    {
+      "mukey": 496936,
+      "cells": 13066,
+      "common_cells": 12048,
+      "mean_cm": 152.0,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26492825,
+          "compname": "Angostura",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26492826,
+          "compname": "Peeler",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26492827,
+          "compname": "Antrobus",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26492828,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26492829,
+          "compname": "Anvik",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26492830,
+          "compname": "Cochetopa",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26492831,
+          "compname": "Passar",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496938,
+      "cells": 3086,
+      "common_cells": 3086,
+      "mean_cm": 152.0,
+      "valid_percentage": 99.0,
+      "reason_codes": "bedrock_excluded;incomplete_components;nonsoil",
+      "components": [
+        {
+          "cokey": 26493229,
+          "compname": "Leighcan",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493230,
+          "compname": "Cochetopa",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493231,
+          "compname": "Mulgon",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493232,
+          "compname": "Quander",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493233,
+          "compname": "Angostura",
+          "comppct_r": 3.0
+        },
+        {
+          "cokey": 26493234,
+          "compname": "Peeler",
+          "comppct_r": 50.0
+        },
+        {
+          "cokey": 26493235,
+          "compname": "Anvik",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26493236,
+          "compname": "Rock outcrop",
+          "comppct_r": 1.0
+        }
+      ]
+    },
+    {
+      "mukey": 496942,
+      "cells": 23518,
+      "common_cells": 0,
+      "mean_cm": 94.42,
+      "valid_percentage": 100.0,
+      "reason_codes": "bedrock_excluded",
+      "components": [
+        {
+          "cokey": 26493274,
+          "compname": "Adel",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493275,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493276,
+          "compname": "Dateman",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493277,
+          "compname": "Farlow",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493278,
+          "compname": "Heterwa",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493279,
+          "compname": "Sapphire",
+          "comppct_r": 2.0
+        },
+        {
+          "cokey": 26493280,
+          "compname": "Parachute",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493281,
+          "compname": "Targhee",
+          "comppct_r": 1.0
+        },
+        {
+          "cokey": 26493282,
+          "compname": "Pineisle",
+          "comppct_r": 35.0
+        },
+        {
+          "cokey": 26493283,
+          "compname": "Nimerick",
+          "comppct_r": 30.0
+        },
+        {
+          "cokey": 26493284,
+          "compname": "Clinetop",
+          "comppct_r": 25.0
+        }
+      ]
+    },
+    {
+      "mukey": 496947,
+      "cells": 81,
+      "common_cells": 9,
+      "mean_cm": null,
+      "valid_percentage": 0.0,
+      "reason_codes": "incomplete_components;missing_horizons",
+      "components": [
+        {
+          "cokey": 26492003,
+          "compname": "Water",
+          "comppct_r": 100.0
+        }
+      ]
+    }
+  ],
+  "component_union_checks": [
+    {
+      "cokey": 26492842,
+      "cm": 97.0,
+      "independent_union_cm": 97.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492902,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492903,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492904,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492905,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492212,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492213,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492214,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492215,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492216,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492217,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492218,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492219,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492220,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492231,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492232,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492233,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492234,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492235,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492236,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492237,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492238,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492239,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492240,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492241,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492242,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492243,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492244,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492245,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492246,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492247,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492248,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492249,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492250,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492251,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492253,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492254,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492255,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492270,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492271,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492272,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492273,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492274,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492387,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492388,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492389,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492390,
+      "cm": 46.0,
+      "independent_union_cm": 46.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492391,
+      "cm": 69.0,
+      "independent_union_cm": 69.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492392,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492393,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492394,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492395,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492396,
+      "cm": 84.0,
+      "independent_union_cm": 84.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493036,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493037,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493038,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493039,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493040,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493041,
+      "cm": 119.0,
+      "independent_union_cm": 119.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493042,
+      "cm": 91.0,
+      "independent_union_cm": 91.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492510,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492511,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492512,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492513,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492514,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492515,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492516,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492517,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492518,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492519,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492520,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492521,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492522,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492538,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492539,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492540,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492541,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492542,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492543,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492544,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492545,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492546,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493117,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493118,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493119,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493120,
+      "cm": 91.0,
+      "independent_union_cm": 91.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493121,
+      "cm": 119.0,
+      "independent_union_cm": 119.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493122,
+      "cm": 84.0,
+      "independent_union_cm": 84.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493123,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493124,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493125,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493126,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493127,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493128,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493129,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493130,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493131,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493132,
+      "cm": 91.0,
+      "independent_union_cm": 91.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493133,
+      "cm": 119.0,
+      "independent_union_cm": 119.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493134,
+      "cm": 84.0,
+      "independent_union_cm": 84.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493135,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493136,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493137,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26493138,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493139,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493140,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492739,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492740,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492741,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492742,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492743,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492744,
+      "cm": 91.0,
+      "independent_union_cm": 91.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492745,
+      "cm": 119.0,
+      "independent_union_cm": 119.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492747,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492748,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492749,
+      "cm": 69.0,
+      "independent_union_cm": 69.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492750,
+      "cm": 46.0,
+      "independent_union_cm": 46.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26492751,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492752,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492753,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492754,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492755,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492756,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492757,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492758,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "weathered_material_included"
+    },
+    {
+      "cokey": 26492759,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492760,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492825,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492826,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492827,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492829,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492830,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26492831,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493229,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493230,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493231,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493232,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493233,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493234,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493235,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493274,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493275,
+      "cm": 91.0,
+      "independent_union_cm": 91.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493276,
+      "cm": 81.0,
+      "independent_union_cm": 81.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493277,
+      "cm": 119.0,
+      "independent_union_cm": 119.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493278,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493279,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493280,
+      "cm": 71.0,
+      "independent_union_cm": 71.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493281,
+      "cm": 66.0,
+      "independent_union_cm": 66.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493282,
+      "cm": 152.0,
+      "independent_union_cm": 152.0,
+      "difference": 0.0,
+      "reasons": "nan"
+    },
+    {
+      "cokey": 26493283,
+      "cm": 69.0,
+      "independent_union_cm": 69.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    },
+    {
+      "cokey": 26493284,
+      "cm": 46.0,
+      "independent_union_cm": 46.0,
+      "difference": 0.0,
+      "reasons": "bedrock_excluded"
+    }
+  ],
+  "max_primary_raster_error_cm": 6.627554853366746e-06,
+  "max_fallback_raster_error_cm": 7.476806644035605e-06,
+  "largest_component_error_cm": 0.0
+}

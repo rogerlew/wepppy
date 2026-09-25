@@ -1,0 +1,223 @@
+WEPPcloud
+thespian-cleanness
+config
+NoDb v1000
+EPSG:32613
+Last Modified: 2026-09-17 01:03:21 UTC
+PROJECT NAME
+SCENARIO
+README
+FORK
+ARCHIVE
+THEMES
+Default (Light) · AA checked
+High Contrast (Light) · AA checked
+OneDark · Sensory preference
+Dark Modern · Sensory preference
+Ayu Dark · Sensory preference
+Ayu Mirage · AA checked
+Ayu Light · Sensory preference
+Ayu Dark · Bordered · Sensory preference
+Ayu Mirage · Bordered · AA checked
+Ayu Light · Bordered · Sensory preference
+Cursor Dark (Anysphere) · Sensory preference
+Cursor Dark (Midnight) · AA checked
+Cursor Dark (High Contrast) · Sensory preference
+More
+Tip: Press ':' to activate the command bar. :help for commands.
+Post-fire debris-flow likelihood
+
+Assessment summary
+
+Accepted model M3 · Completed 2026-09-17T00:57:50.186605+00:00 · Watershed area: 2683.29 ha
+
+Inputs have changed; these are previous results.
+
+Usable input coverage: 146161 of 268329 cells (54.5%); 122168 excluded. Coverage is not confidence.
+
+Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.
+
+Likelihood is conditional on the rainfall shown and the modeled post-fire conditions. It is not the annual chance of a debris flow and does not predict where debris will travel. This is not an official warning or evacuation threshold.
+
+Rainfall scenarios — 15 minutes
+Rainfall window
+15 minutes
+30 minutes
+60 minutes
+
+Changes rainfall scenarios and storm events; the 50% table always shows all three windows.
+
+Saved rainfall-frequency source: Project climate PDS.
+
+Rainfall recurrence intervals are partial-duration-series average recurrence intervals (PDS ARI), not debris-flow return periods or annual debris-flow probabilities.
+
+0%
+25%
+50%
+75%
+100%
+0.00
+16.85
+33.71
+50.56
+67.42
+Peak rainfall intensity (mm/hour)
+Modeled likelihood · 15-minute window
+P50
+
+Select a saved marker or its table button to highlight that scenario. The line evaluates the accepted model between rainfall intensities; P50 marks a rainfall intensity associated with 50% modeled likelihood when available.
+
+Response curve values
+Saved rainfall scenarios
+Rainfall recurrence interval	Peak rainfall intensity	Rainfall in the selected window	Modeled likelihood
+years	mm/hour	mm	%
+1	23.89	5.97	31.7%
+2	29.67	7.42	48.6%
+5	44.24	11.06	85.1%
+10	49.50	12.38	91.6%
+Download displayed rows (CSV)
+Rainfall associated with 50% modeled likelihood
+
+All three rainfall windows. These equation-derived values depend on the accepted model and post-fire inputs, not the rainfall-frequency source. They are not safe/unsafe boundaries or recommended warning triggers.
+
+All three rainfall windows
+Rainfall window	Peak rainfall intensity	Rainfall in the window
+minutes	mm/hour	mm
+15	30.12	7.53
+30	22.24	11.12
+60	18.99	18.99
+Download displayed rows (CSV)
+Storm events — 15 minutes
+
+Accepted climate mode: GridMetPRISM. Years represented: 46 (original labels 1980–2025; not necessarily a continuous record). Dates retain the accepted climate provenance. Event subdaily peaks are modeled/disaggregated rainfall, including events with calendar dates.
+
+Every storm uses the same fixed post-fire conditions. A long climate record does not simulate landscape recovery. Total event rainfall is separate from rainfall in the selected window.
+
+Minimum likelihood (%)  Year (original label)  Order by 
+Original event order
+Rainfall in the window
+Modeled likelihood
+  Descending Apply filters Reset filters
+
+Blank filters include all storms. A minimum likelihood excludes storms with unavailable likelihoods.
+
+Showing 1–100 of 8381 matching storm events. 8381 storm events before filters.
+
+Saved storm events; select a date label for all three rainfall windows
+Date label (year / month / day)	Peak rainfall intensity	Rainfall in the selected window	Total event rainfall	Modeled likelihood
+	mm/hour	mm	mm	%
+1980 / 1 / 1	0.87	0.22	5.30	2.7%
+1980 / 1 / 3	1.65	0.41	2.80	2.9%
+1980 / 1 / 6	4.26	1.07	8.10	4%
+1980 / 1 / 7	0.38	0.10	0.50	2.5%
+1980 / 1 / 8	2.14	0.53	7.90	3.1%
+1980 / 1 / 9	0.98	0.25	6.10	2.7%
+1980 / 1 / 10	10.56	2.64	26.40	8.2%
+1980 / 1 / 11	3.71	0.93	13.00	3.7%
+1980 / 1 / 12	0.44	0.11	1.50	2.5%
+1980 / 1 / 13	9.53	2.38	12.70	7.3%
+1980 / 1 / 14	4.04	1.01	6.60	3.9%
+1980 / 1 / 15	1.50	0.38	3.60	2.9%
+1980 / 1 / 16	0.69	0.17	1.80	2.6%
+1980 / 1 / 25	1.47	0.37	2.50	2.9%
+1980 / 1 / 26	0.09	0.02	0.30	2.4%
+1980 / 1 / 27	3.65	0.91	8.40	3.7%
+1980 / 1 / 28	6.17	1.54	29.00	5%
+1980 / 1 / 29	6.73	1.68	17.50	5.3%
+1980 / 1 / 30	0.52	0.13	1.30	2.5%
+1980 / 2 / 4	0.04	0.01	0.50	2.4%
+1980 / 2 / 7	0.78	0.20	1.80	2.6%
+1980 / 2 / 14	9.05	2.26	19.00	6.9%
+1980 / 2 / 15	1.06	0.26	9.40	2.7%
+1980 / 2 / 16	0.37	0.09	1.50	2.5%
+1980 / 2 / 17	4.43	1.11	12.40	4.1%
+1980 / 2 / 18	12.99	3.25	21.10	10.8%
+1980 / 2 / 19	10.77	2.69	32.30	8.4%
+1980 / 2 / 20	1.98	0.49	8.90	3%
+1980 / 2 / 21	3.20	0.80	16.00	3.5%
+1980 / 2 / 22	2.25	0.56	6.30	3.1%
+1980 / 2 / 23	2.45	0.61	13.00	3.2%
+1980 / 2 / 24	0.49	0.12	1.80	2.5%
+1980 / 2 / 28	7.06	1.77	6.10	5.5%
+1980 / 2 / 29	0.28	0.07	1.30	2.5%
+1980 / 3 / 2	0.19	0.05	1.00	2.4%
+1980 / 3 / 3	3.00	0.75	10.20	3.4%
+1980 / 3 / 4	6.88	1.72	11.70	5.4%
+1980 / 3 / 6	7.55	1.89	30.20	5.8%
+1980 / 3 / 7	3.42	0.86	13.00	3.6%
+1980 / 3 / 8	1.70	0.43	5.10	2.9%
+1980 / 3 / 11	2.44	0.61	13.20	3.2%
+1980 / 3 / 12	0.36	0.09	1.80	2.5%
+1980 / 3 / 15	2.11	0.53	7.60	3.1%
+1980 / 3 / 16	0.42	0.10	1.30	2.5%
+1980 / 3 / 22	0.42	0.10	0.50	2.5%
+1980 / 3 / 23	1.14	0.28	5.80	2.7%
+1980 / 3 / 25	2.38	0.60	12.40	3.2%
+1980 / 3 / 28	0.09	0.02	0.50	2.4%
+1980 / 3 / 29	1.13	0.28	3.60	2.7%
+1980 / 3 / 30	0.46	0.11	7.40	2.5%
+1980 / 3 / 31	1.24	0.31	3.60	2.8%
+1980 / 4 / 1	0.07	0.02	0.50	2.4%
+1980 / 4 / 2	2.34	0.59	8.90	3.2%
+1980 / 4 / 6	2.54	0.64	9.40	3.2%
+1980 / 4 / 7	0.61	0.15	2.00	2.6%
+1980 / 4 / 9	0.13	0.03	1.00	2.4%
+1980 / 4 / 11	0.21	0.05	0.80	2.4%
+1980 / 4 / 21	0.33	0.08	0.50	2.5%
+1980 / 4 / 28	3.42	0.86	3.80	3.6%
+1980 / 4 / 29	3.89	0.97	11.40	3.8%
+1980 / 4 / 30	3.39	0.85	13.20	3.6%
+1980 / 5 / 1	0.50	0.13	1.00	2.5%
+1980 / 5 / 2	0.14	0.03	0.30	2.4%
+1980 / 5 / 3	0.27	0.07	0.80	2.5%
+1980 / 5 / 5	1.39	0.35	3.30	2.8%
+1980 / 5 / 6	5.86	1.46	4.60	4.8%
+1980 / 5 / 7	1.57	0.39	4.60	2.9%
+1980 / 5 / 8	3.22	0.80	6.30	3.5%
+1980 / 5 / 9	1.24	0.31	2.80	2.8%
+1980 / 5 / 10	7.07	1.77	8.10	5.5%
+1980 / 5 / 11	11.28	2.82	14.50	8.9%
+1980 / 5 / 12	1.50	0.38	6.30	2.9%
+1980 / 5 / 13	0.55	0.14	1.50	2.6%
+1980 / 5 / 14	1.42	0.35	5.10	2.8%
+1980 / 5 / 15	3.82	0.95	8.60	3.8%
+1980 / 5 / 16	7.47	1.87	12.40	5.8%
+1980 / 5 / 17	5.49	1.37	11.70	4.6%
+1980 / 5 / 18	0.76	0.19	2.30	2.6%
+1980 / 5 / 19	0.49	0.12	0.50	2.5%
+1980 / 6 / 30	4.09	1.02	3.80	3.9%
+1980 / 7 / 1	7.60	1.90	7.60	5.9%
+1980 / 7 / 2	7.69	1.92	5.60	5.9%
+1980 / 7 / 6	4.30	1.08	2.50	4%
+1980 / 7 / 7	0.83	0.21	0.50	2.6%
+1980 / 7 / 10	0.59	0.15	0.50	2.6%
+1980 / 7 / 11	8.79	2.20	3.60	6.7%
+1980 / 7 / 12	9.16	2.29	5.60	7%
+1980 / 7 / 13	0.95	0.24	1.00	2.7%
+1980 / 7 / 22	0.42	0.11	0.80	2.5%
+1980 / 7 / 23	3.68	0.92	2.00	3.7%
+1980 / 7 / 24	4.60	1.15	4.80	4.1%
+1980 / 7 / 28	1.86	0.47	1.50	3%
+1980 / 7 / 29	4.81	1.20	2.80	4.2%
+1980 / 8 / 1	0.88	0.22	0.50	2.7%
+1980 / 8 / 13	3.50	0.88	2.80	3.6%
+1980 / 8 / 14	6.95	1.74	5.80	5.4%
+1980 / 8 / 15	12.65	3.16	8.90	10.4%
+1980 / 8 / 16	0.78	0.20	0.50	2.6%
+1980 / 8 / 17	0.58	0.14	0.50	2.6%
+1980 / 8 / 22	1.63	0.41	1.00	2.9%
+
+Previous page Next page
+Download displayed rows (CSV)
+Methods and downloads
+Assessment provenance and interpretation
+
+Displayed-row CSV: current page and displayed rainfall units; numeric values retain full precision. Probability columns are explicitly labeled fractions (0–1), not percentages. Context columns identify the assessment, filters, page and units.
+
+All saved design scenarios (canonical units)
+All saved events (canonical units)
+All saved thresholds (canonical units)
+Saved assessment manifest
+Saved validity mask
+
+Saved manifest and validity mask, when present, remain available with the normal browsable and archived module files.

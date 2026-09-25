@@ -1,0 +1,34 @@
+Supplemental Figures
+
+Figure S1. Map showing initiation locations of debris flows with respect to rain gauges and verified debris-flow deposits.
+
+Figure S2. (a) Distribution of all pixels in the DEM of Difference (DoD) area shown in (b), showing most of the change is
+near 0. This suggests little systematic offset in the DoD. (b) A relatively low sloping area used to analyze the DoD to explore
+any systematic offset.
+
+Figure S3. (a-d) Pre- and post-event lidar elevation difference at four unique locations on I-70 evenly distributed across
+Glenwood Canyon. Profiles are running parallel to the road. Secondary y-axis shows the relative elevation difference
+between the pre- and post-event lidar. (e-h) Change in elevation at perpendicular profiles along the mid-section of the same
+four road segments. Y-axes are the same as (a-d).
+
+Figure S4. Debris-flow levee with coarse grains shown adjacent to a debris-flow channel. The largest grain sizes in the levee
+were approximately 30 cm.
+
+Figure S5. Hillslope rilling in a small watershed adjacent to Tie Gulch (39.620972, -107.140139). Photo acquired 18 August
+2021 (Photo Credit: F. Rengers).
+
+Figure S6. Comparison of all the erosional volumes in locations where we have known depositional volumes. Error bars
+represent the uncertainty. Note that many channels contributed to an in-channel deposit in Grizzly Creek, but for the
+purposes of comparing erosion and deposition, all of the erosional channels contributing upstream of the deposit were
+summed to compare with the deposit volume.
+
+Figure S7. (a-k) The peak 15-minute rainfall intensity (I15) for debris-flow triggering storms measured at each of the eleven
+available rain gauges across the Grizzly Creek burn area. Dates for observed debris flows are shown as the bins on the xaxis. Peak I15 values below the modelled rainfall threshold (dashed black line) are shown in orange. Peak I15 values greater
+than the threshold are shown in blue. Storm dates without available rainfall data are labelled as No Data Available.
+
+Figure S8. Photo from the upper portion of the canyon showing channelized debris-flow erosion down to bedrock indicating
+sediment depletion.
+
+Video S1. Timelapse video of the debris-flow activity near the outlet of French Creek.
+
+

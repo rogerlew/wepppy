@@ -1,0 +1,295 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20260917_dead_horse_daymet_audit/artifacts/compare_daymet.py
+{
+  "attempts": {
+    "synthetic_PRISM": "0a34c96cd0dc4e6bb7bb7780d8f8915b",
+    "GridMET": "f493a714df9d4fbfbfd4370c46ad54f8",
+    "Daymet": "8190121c8a4b45e1952861e74d909693"
+  },
+  "catalog_id": "observed_daymet",
+  "mode_value": {
+    "py/reduce": [
+      {
+        "py/type": "wepppy.nodb.core.climate.ClimateMode"
+      },
+      {
+        "py/tuple": [
+          9
+        ]
+      }
+    ]
+  },
+  "period": [
+    "1980-01-01 00:00:00",
+    "2024-12-31 00:00:00"
+  ],
+  "days": 16437,
+  "wet_days": 4670,
+  "quality_guard_warning": "CLIGEN failed to converge, continuing because silent-pass is enabled. Try selecting different station or setting Adjust MX .5 P Values",
+  "silent_pass": true,
+  "adjust_mx_pt5": false,
+  "source_parquet_units": "precipitation hundredths of inches; temperatures Fahrenheit; original column labels incorrectly retained",
+  "prn_matches_saved_source": true,
+  "recovered_daily_vs_cli_max_abs_mm": 0.05000000000000071,
+  "publisher_query": "https://daymet.ornl.gov/single-pixel/api/data?lat=39.6392704740886&lon=-107.21618322112406&year=2021",
+  "publisher_2021_quantized_matches_retained_source": true,
+  "publisher_raw_sha256": "cd8c39fcc60eb32bf81f6304e88cdd3abb337f41c7ab1bf6d8ab211dc4d34fe4",
+  "publisher_2021_vs_cli_max_abs_mm": 0.16000000000000014,
+  "comparison": {
+    "synthetic_PRISM": {
+      "predictors_identical": true,
+      "coverage_identical": true,
+      "inverse_identical": true
+    },
+    "GridMET": {
+      "predictors_identical": true,
+      "coverage_identical": true,
+      "inverse_identical": true
+    },
+    "Daymet": {
+      "predictors_identical": true,
+      "coverage_identical": true,
+      "inverse_identical": true
+    }
+  },
+  "window_daily": [
+    {
+      "date": "2021-08-05",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-06",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-07",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-08",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-09",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-10",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-11",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    },
+    {
+      "date": "2021-08-12",
+      "publisher_daymet_mm": 0.0,
+      "saved_daymet_column_value": 0.0,
+      "recovered_daymet_mm": 0.0,
+      "prcp": 0.0,
+      "peak_intensity_15": 0.0,
+      "peak_intensity_30": 0.0,
+      "peak_intensity_60": 0.0
+    }
+  ],
+  "window_events": [],
+  "design_15": [
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 99,
+      "positive_samples": 10840,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 18.8105039081,
+      "rainfall_mm": 4.702625977,
+      "probability": 0.1989633033,
+      "status": "available",
+      "reason": null,
+      "climate": "synthetic_PRISM"
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 49,
+      "positive_samples": 10840,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 24.5199367871,
+      "rainfall_mm": 6.1299841968,
+      "probability": 0.3341538315,
+      "status": "available",
+      "reason": null,
+      "climate": "synthetic_PRISM"
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 19,
+      "positive_samples": 10840,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 30.1971080504,
+      "rainfall_mm": 7.5492770126,
+      "probability": 0.5024744118,
+      "status": "available",
+      "reason": null,
+      "climate": "synthetic_PRISM"
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 9,
+      "positive_samples": 10840,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 35.6215125504,
+      "rainfall_mm": 8.9053781376,
+      "probability": 0.6633178611,
+      "status": "available",
+      "reason": null,
+      "climate": "synthetic_PRISM"
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 45,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 23.8921401853,
+      "rainfall_mm": 5.9730350463,
+      "probability": 0.3171730963,
+      "status": "available",
+      "reason": null,
+      "climate": "GridMET"
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 22,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 29.6666666667,
+      "rainfall_mm": 7.4166666667,
+      "probability": 0.4861420824,
+      "status": "available",
+      "reason": null,
+      "climate": "GridMET"
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 8,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 44.2363752141,
+      "rainfall_mm": 11.0590938035,
+      "probability": 0.8506052458,
+      "status": "available",
+      "reason": null,
+      "climate": "GridMET"
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 3,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 49.5000002715,
+      "rainfall_mm": 12.3750000679,
+      "probability": 0.9158897314,
+      "status": "available",
+      "reason": null,
+      "climate": "GridMET"
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 44,
+      "positive_samples": 4670,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 24.8,
+      "rainfall_mm": 6.2,
+      "probability": 0.3418733603,
+      "status": "available",
+      "reason": null,
+      "climate": "Daymet"
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 22,
+      "positive_samples": 4670,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 31.6244920492,
+      "rainfall_mm": 7.9061230123,
+      "probability": 0.5463002733,
+      "status": "available",
+      "reason": null,
+      "climate": "Daymet"
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 8,
+      "positive_samples": 4670,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 39.6666666667,
+      "rainfall_mm": 9.9166666667,
+      "probability": 0.7643046361,
+      "status": "available",
+      "reason": null,
+      "climate": "Daymet"
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 3,
+      "positive_samples": 4670,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 54.576460097,
+      "rainfall_mm": 13.6441150242,
+      "probability": 0.9531634393,
+      "status": "available",
+      "reason": null,
+      "climate": "Daymet"
+    }
+  ]
+}

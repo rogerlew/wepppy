@@ -1,0 +1,329 @@
+{
+  "artifacts_sha256": {
+    "valid_mask.tif": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  "coverage": {
+    "excluded_cells": 122168,
+    "fallback_valid_cells": 11272,
+    "mask": "valid_mask.tif",
+    "policy": "common_valid_v1",
+    "primary_valid_cells": 134889,
+    "total_cells": 268329,
+    "valid_cells": 146161,
+    "valid_fraction": 0.5447081754115284
+  },
+  "frequency": {
+    "frequency_method": "Climate weibull_series pds",
+    "invalid_wet_year_labels": false,
+    "positive_samples": {
+      "15": 10840,
+      "30": 10840,
+      "60": 10840
+    },
+    "rank_indices": {
+      "1.0": 99,
+      "10.0": 9,
+      "100.0": 0,
+      "2.0": 49,
+      "25.0": 3,
+      "5.0": 19,
+      "50.0": 1
+    },
+    "record_rows": 36524,
+    "recurrence_context": [
+      1,
+      2,
+      5,
+      10,
+      25,
+      50,
+      100
+    ],
+    "represented_years": 100,
+    "wet_events": 10840,
+    "wet_years": 100,
+    "year_max": 100.0,
+    "year_min": 1.0
+  },
+  "frequency_metadata": {},
+  "identity": {
+    "assessment_id": "0a34c96cd0dc4e6bb7bb7780d8f8915b",
+    "climate_mode": "PRISM",
+    "date_semantics": "simulation_labels",
+    "project_id": "thespian-cleanness"
+  },
+  "model": "M3",
+  "predictor_snapshot": {
+    "area_km2": 26.8329,
+    "artifacts_sha256": {
+      "prepared/domain.tif": "b43d43af736c1f03c773217d2a41116d57ff68150fbb91f1e52e85df121cba02",
+      "prepared/sbs.tif": "45f0aae5124dcb0f332c69034d53ddb74aad5b7b1e34e3083107c0bedc6190ee",
+      "soil/manifest.json": "77b2151c336cd131bba6f9ad3f15cb1c8aa3e4414ff7f24a4dca69225f6eebbd",
+      "soil/source.tif": "b71ad9c68471b06f7a44e5f608c0128459ff1e39a5541a33cc4cbc34b52486f7",
+      "soil/thickness_cm.tif": "4b5ce3d22db2474ffa3625f50328106219c7b7819eb6ef25b9c436747c21709d",
+      "terrain/manifest.json": "dd7b5d6b6bdd54ed8ad9dab4e7f777411d998ed7198a2a7818c053d1fe226cbb",
+      "terrain/wbt/watershed.tif": "d029b849d86408fd1427de2e808e53fd983db5107d21d01457c92f21cba85e1b",
+      "valid_mask.tif": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0",
+      "wbt/area.tif": "96c3b9c9f3ef2e810a8f0a0507383b136de602f2197a76409d8ffcd5aadb27f4",
+      "wbt/coverage.tif": "a2496ca743f772943b7cda1efea3fa0f98e2cd6ea4d2691053266e5b75487253",
+      "wbt/relief.tif": "e3e84f9f14d176218bc169d8231c86c5cdb16658d36c6ed82318c38f1e8aa4dc",
+      "wbt/summary.json": "c83082ea4bc4392d7a53fbd23632e5c45b885537e5c473cbd7dd1f4af8175ede"
+    },
+    "availability": "complete",
+    "coverage": {
+      "excluded_cells": 122168,
+      "fallback_valid_cells": 11272,
+      "mask": "valid_mask.tif",
+      "policy": "common_valid_v1",
+      "primary_valid_cells": 134889,
+      "total_cells": 268329,
+      "valid_cells": 146161,
+      "valid_fraction": 0.5447081754115284
+    },
+    "grid": {
+      "crs": "EPSG:32613",
+      "shape": [
+        2630,
+        2509
+      ],
+      "transform": [
+        10.0,
+        0.0,
+        298608.87148751813,
+        0.0,
+        -10.0,
+        4403136.391018704
+      ]
+    },
+    "model": "M3",
+    "outlet": {
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32613"
+        },
+        "type": "name"
+      },
+      "features": [
+        {
+          "geometry": {
+            "coordinates": [
+              312473.87148751813,
+              4384841.391018704
+            ],
+            "type": "Point"
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 1386,
+            "distance_to_boundary": null,
+            "easting": 312473.87148751813,
+            "epsg": 32613,
+            "northing": 4384841.391018704,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 1388,
+            "requested_easting": 312493.87148751813,
+            "requested_lat": 39.593018834920215,
+            "requested_lon": -107.18373219590406,
+            "requested_northing": 4384861.391018704,
+            "requested_row": 1827,
+            "row": 1829,
+            "start_col": 1388,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 1827,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 2,
+            "steps_from_start": 2,
+            "watershed_cell_count": 0
+          },
+          "type": "Feature"
+        }
+      ],
+      "type": "FeatureCollection"
+    },
+    "predictors": {
+      "F": {
+        "reason": null,
+        "status": "available",
+        "support": {
+          "coverage_fraction": 0.5447081754115284,
+          "total_cells": 268329,
+          "valid_cells": 146161
+        },
+        "units": "fraction",
+        "value": 0.42879427480654897
+      },
+      "S": {
+        "reason": null,
+        "status": "available",
+        "support": {
+          "coverage_fraction": 0.5447081754115284,
+          "total_cells": 268329,
+          "valid_cells": 146161
+        },
+        "units": "thickness_cm_div_254",
+        "value": 0.5595864610102531
+      },
+      "T": {
+        "reason": null,
+        "status": "available",
+        "support": {
+          "coverage_fraction": 1.0,
+          "total_cells": 268329,
+          "valid_cells": 268329
+        },
+        "units": "dimensionless",
+        "value": 0.2757535126256827,
+        "wbt_summary": {
+          "area_m2": 26832900.0,
+          "full_upstream_cells": 268329,
+          "grid": {
+            "crs": "EPSG:32613",
+            "shape": [
+              2630,
+              2509
+            ],
+            "transform": [
+              10.0,
+              0.0,
+              298608.87148751813,
+              0.0,
+              -10.0,
+              4403136.391018704
+            ]
+          },
+          "outlet": [
+            1829,
+            1386
+          ],
+          "reason": null,
+          "relief_m": 1428.41650390625,
+          "schema_version": 1,
+          "status": "complete",
+          "terrain_valid": true,
+          "tool": "D8UpstreamRelief",
+          "tool_sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+          "tool_version": "WhiteboxTools v2.4.0 (c) Dr. John Lindsay 2017-2025\n\nWhiteboxTools is an advanced geospatial data analysis platform developed at\nthe University of Guelph's Geomorphometry and Hydrogeomatics Research \nGroup (GHRG). See www.whiteboxgeo.com for more details."
+        }
+      }
+    },
+    "prepared_sha256": {
+      "soil/manifest.json": "77b2151c336cd131bba6f9ad3f15cb1c8aa3e4414ff7f24a4dca69225f6eebbd",
+      "terrain/manifest.json": "dd7b5d6b6bdd54ed8ad9dab4e7f777411d998ed7198a2a7818c053d1fe226cbb"
+    },
+    "readiness": {
+      "upstream_freshness": "not_checked_local",
+      "wepp_soils": "not_checked_local"
+    },
+    "schema_version": 2,
+    "soil_policy": "recorded_depth_v1",
+    "source_kind": "real",
+    "sources_sha256": {
+      "/wc1/runs/th/thespian-cleanness/dem/dem.tif": "5d8be71e2a869650f2de470d4105f0ee17cf08c305694490a66c76065874ddce",
+      "/wc1/runs/th/thespian-cleanness/dem/wbt/bound.tif": "b691d4e561604512d936d8f540d80e37af22e56a4433883174a905b991564aad",
+      "/wc1/runs/th/thespian-cleanness/dem/wbt/flovec.tif": "cebe6d9b92f4f8f5da522ea62598173730c37e2661ea2b649d0c9415d5d85099",
+      "/wc1/runs/th/thespian-cleanness/dem/wbt/outlet.geojson": "243f041871dfd89f6f3b158ce4dff4cd560d113d1943a95f8a3937cbf0eedb59",
+      "/wc1/runs/th/thespian-cleanness/disturbed/sbs_4class.tif": "61632dbfc07ea76cf1e238a212484f3887d22181a2294b40ba31b78d26aebbb7",
+      "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/inputs/soil_sources.json": "8e00191b34d69f7f1995604e35a38edfde355115d3a1e8905d126adb3f333b11",
+      "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json": "ace300fba0363496ab28e70f564e54dcdec913071e1a33a4e39f5a155c66bad7",
+      "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif": "b5d26917d00cf457edf48f0a26174966416d8e7155d96c4627259886e5c795a4",
+      "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json": "5e08667a041285a3e0aea2ef2a932c3bb895d6051f371bb9cfea8f6c8917002d",
+      "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif": "751f7609a64bc0b4cea8e570a28d572849ab50753f636cb9bf88ec492bdebc56",
+      "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif.meta": "4cdb830039dbae3f8cb13cce67fd6080a5058b012288d96426ae8fac0482e37d",
+      "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite.meta.md": "9e49c47011f9fc483f4303e348bc5a195ae6bbddb27278a21ebe80bd903cc143",
+      "/workdir/weppcloud-wbt/WBT/whitebox_tools": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42"
+    },
+    "status": "complete",
+    "support_policy": "common_valid_v1",
+    "tool": {
+      "command": [
+        "/workdir/weppcloud-wbt/WBT/whitebox_tools",
+        "-r=D8UpstreamRelief",
+        "--dem=/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/prepared/dem.tif",
+        "--d8_pntr=/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/prepared/pointer.tif",
+        "--output=/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/wbt/relief.tif",
+        "--area=/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/wbt/area.tif",
+        "--coverage=/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/wbt/coverage.tif",
+        "--elevation_units=m"
+      ],
+      "path": "/workdir/weppcloud-wbt/WBT/whitebox_tools",
+      "sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+      "version": "WhiteboxTools v2.4.0 (c) Dr. John Lindsay 2017-2025\n\nWhiteboxTools is an advanced geospatial data analysis platform developed at\nthe University of Guelph's Geomorphometry and Hydrogeomatics Research \nGroup (GHRG). See www.whiteboxgeo.com for more details."
+    },
+    "warnings": [
+      "area_outside_study_range"
+    ]
+  },
+  "rainfall_provenance": {
+    "climate_mode": "PRISM",
+    "date_semantics": "simulation_labels",
+    "design_origin": "Project climate statistical design rainfall",
+    "event_origin": "Project climate events",
+    "subdaily_origin": "modeled_disaggregated"
+  },
+  "request": {
+    "durations": [
+      15,
+      30,
+      60
+    ],
+    "frequency_source": "cli",
+    "return_intervals": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "target_probabilities": [
+      0.5
+    ]
+  },
+  "schema_version": 1,
+  "sources_sha256": {
+    "/wc1/runs/th/thespian-cleanness/climate/wepp_cli.parquet": "a52260f4d7ea269d97a718033bf9ac712eb545f7daf4659e473656f82020081d",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/manifest.json": "8f1da53b894e9c43c47ace56b24112d2b28d3ff9e0c4c4aed6a342e73d61d09f",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/prepared/domain.tif": "b43d43af736c1f03c773217d2a41116d57ff68150fbb91f1e52e85df121cba02",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/prepared/sbs.tif": "45f0aae5124dcb0f332c69034d53ddb74aad5b7b1e34e3083107c0bedc6190ee",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/soil/manifest.json": "77b2151c336cd131bba6f9ad3f15cb1c8aa3e4414ff7f24a4dca69225f6eebbd",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/soil/source.tif": "b71ad9c68471b06f7a44e5f608c0128459ff1e39a5541a33cc4cbc34b52486f7",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/soil/thickness_cm.tif": "4b5ce3d22db2474ffa3625f50328106219c7b7819eb6ef25b9c436747c21709d",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/manifest.json": "dd7b5d6b6bdd54ed8ad9dab4e7f777411d998ed7198a2a7818c053d1fe226cbb",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/terrain/wbt/watershed.tif": "d029b849d86408fd1427de2e808e53fd983db5107d21d01457c92f21cba85e1b",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/valid_mask.tif": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/wbt/area.tif": "96c3b9c9f3ef2e810a8f0a0507383b136de602f2197a76409d8ffcd5aadb27f4",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/wbt/coverage.tif": "a2496ca743f772943b7cda1efea3fa0f98e2cd6ea4d2691053266e5b75487253",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/wbt/relief.tif": "e3e84f9f14d176218bc169d8231c86c5cdb16658d36c6ed82318c38f1e8aa4dc",
+    "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/0a34c96cd0dc4e6bb7bb7780d8f8915b/predictors/wbt/summary.json": "c83082ea4bc4392d7a53fbd23632e5c45b885537e5c473cbd7dd1f4af8175ede"
+  },
+  "status": "complete",
+  "tables": {
+    "design": {
+      "rows": 12,
+      "sha256": "15f2ba1308f45b2ec4d7b33aaa1830255f80a2cd12b68f20e9382f4e5511324f"
+    },
+    "events": {
+      "rows": 32520,
+      "sha256": "e76d2b7a59c3c7cd53874d5284b78f9f3118c8100814de9a003dc6730a090826"
+    },
+    "inverse": {
+      "rows": 3,
+      "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+    }
+  },
+  "units": {
+    "intensity_mm_per_hour": "mm/hour",
+    "probability": "fraction",
+    "rainfall_mm": "mm"
+  }
+}

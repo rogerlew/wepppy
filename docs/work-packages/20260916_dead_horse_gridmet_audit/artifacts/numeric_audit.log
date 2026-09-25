@@ -1,0 +1,53 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20260916_dead_horse_gridmet_audit/artifacts/audit_saved.py
+{
+  "values": {
+    "T": 0.2757535126256827,
+    "F": 0.42879427480654897,
+    "S": 0.5595864610102531
+  },
+  "coverage": {
+    "basin_cells": 268329,
+    "valid_cells": 146161,
+    "excluded_cells": 122168,
+    "missing_sbs_cells": 122168,
+    "missing_soil_cells": 0,
+    "sbs_counts": {
+      "0": 25142,
+      "1": 58346,
+      "2": 47799,
+      "3": 14874,
+      "255": 122168
+    },
+    "soil_sources_full": {
+      "0": 0,
+      "1": 245558,
+      "2": 22771
+    },
+    "mean_thickness_common_cm": 142.1349610966043,
+    "mean_thickness_full_cm": 129.50289226153112
+  },
+  "checks": {
+    "events": {
+      "rows": 25143,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 3.552713678800501e-15,
+      "hash_match": true,
+      "published_equals_attempt": true
+    },
+    "design": {
+      "rows": 12,
+      "max_probability_error": 5.551115123125783e-17,
+      "max_unit_error_mm": 1.7763568394002505e-15,
+      "hash_match": true,
+      "published_equals_attempt": true
+    },
+    "inverse": {
+      "rows": 3,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 0.0,
+      "hash_match": true,
+      "published_equals_attempt": true
+    }
+  },
+  "preservation": true
+}

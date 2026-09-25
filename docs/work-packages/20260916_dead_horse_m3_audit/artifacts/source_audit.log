@@ -1,0 +1,42 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20260916_dead_horse_m3_audit/artifacts/audit_sources.py
+{
+  "official_source_url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/grizzlycreek_sbs.zip",
+  "official_zip_sha256": "52987444b58e183098e5925121417bb42624d7ee3cf6611b54f3676c9a74ef76",
+  "official_tif_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "upload_tif_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "upload_byte_identical": true,
+  "native_grid": {
+    "crs": "EPSG:26913",
+    "resolution": [
+      20.0,
+      -20.0
+    ],
+    "nodata": null,
+    "shape": [
+      714,
+      836
+    ]
+  },
+  "official_values": {
+    "1": 40313,
+    "2": 108127,
+    "3": 140383,
+    "4": 38614,
+    "127": 269467
+  },
+  "sbs_direct_nearest": {
+    "official_known_basin_cells": 146161,
+    "local_known_basin_cells": 146161,
+    "mask_disagreement": 0,
+    "native_127_basin_cells": 97075,
+    "outside_native_extent_cells": 25093,
+    "class_disagreement_on_both_known": 0
+  },
+  "outlet_lon_lat": [
+    -107.18387524445478,
+    39.59279527152553
+  ],
+  "max_primary_raster_error_cm": 6.627554853366746e-06,
+  "max_fallback_raster_error_cm": 7.476806644035605e-06,
+  "largest_component_error_cm": 0.0
+}

@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "duration": 15,
+      "points": 106,
+      "max_curve_probability_error": 5.551115123125783e-17,
+      "live_equals_local": true
+    },
+    {
+      "duration": 30,
+      "points": 106,
+      "max_curve_probability_error": 5.551115123125783e-17,
+      "live_equals_local": true
+    },
+    {
+      "duration": 60,
+      "points": 106,
+      "max_curve_probability_error": 1.1102230246251565e-16,
+      "live_equals_local": true
+    }
+  ],
+  "attachments_verified": 5,
+  "protected_files": 181,
+  "changed": [],
+  "source_checks": "PASS",
+  "status": "PASS"
+}

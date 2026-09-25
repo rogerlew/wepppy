@@ -1,0 +1,140 @@
+Identification Information
+    Citation
+        Originator: USDA Forest Service, Geospatial Technology and Applications Center, BAER Imagery Support Program
+        Publication Date: 2020-11-13
+        Title: Soil Burn Severity Dataset for the GRIZZLY CREEK Fire occurring on the White River National Forest National Forest
+        Publication Information
+            Publication Place: Salt Lake City, Utah, USA
+            Publisher: USDA Forest Service
+        Geospatial Data Presentation Form: raster digital data
+        Online Linkage: https://fsapps.nwcg.gov/afm/baer/download.php
+    Description
+        Abstract: This soil burn severity dataset was derived from Sentinel 2 data and field validated by a Forest Service Burned Area Emergency Response (BAER) team. It is based upon an initial Burned
+        Area Reflectance Classification (BARC) dataset created by analyzing satellite imagery. A pre-fire and post-fire Sentinel 2 scene were processed to develop a differenced 
+        Normalized Burn Ratio (dNBR) image. The dNBR image attempts to portray the variation of burn severity within a fire and captures the combined effects of the fire to vegetation and soil
+        components of the ecosytem. The preliminary BARC dataset was assessed by a Forest Service BAER team and modified, if necessary, based on field conditions. 
+        Purpose: These data were created by the USDA Forest Service Geospatial Technology and Applications Center (GTAC) to support Burned Area Emergency Response (BAER) teams.    
+    Supplemental Information
+        Fire Name: GRIZZLY CREEK
+        Agency: USDA Forest Service
+        Type of assessment: Emergency
+        Fire size (as mapped): 32566 acres
+        Pre-Fire Imagery Date : 2020-08-07
+        Post-Fire Imagery Date : 2020-08-27
+        Output Dataset Projection: NAD_1983_UTM_Zone_13N
+        Datum: D_North_American_1983
+        Spheroid Name: GRS_1980
+        Mapping Comments: None    
+    Product List
+        GRIZZLY CREEK_sbs.tif = Soil burn severity (SBS) dataset in raster format
+        GRIZZLY CREEK_SBS thumb.jpg = JPEG version of the SBS
+        
+    
+    Time Period of Content
+        Multiple Dates/Times
+            Single Date/Time
+                Calendar Date: 2020-08-07 (pre-fire image)
+            Single Date/Time
+                Calendar Date: 2020-08-27 (post-fire image)
+        Currentness Reference: Severity data correspond to the date of the post-fire image.
+    Status
+        Progress: Evaluation of methods in process
+        Maintenance and Update Frequency: As needed
+    Spatial Domain
+        Bounding Coordinates
+            West Bounding Coordinate: 303227.074454
+            East Bounding Coordinate: 319947.074454
+            North Bounding Coordinate: 4393310.56744
+            South Bounding Coordinate: 4379030.56744
+    Keywords
+        Theme
+            Theme Keyword Thesaurus: none
+            Theme Keyword: Wildland Fire
+            Theme Keyword: Wildfire
+            Theme Keyword: Burned Area Emergency Response
+            Theme Keyword: BAER
+            Theme Keyword: dNBR
+            Theme Keyword: Fire Severity
+            Theme Keyword: Burn Severity
+            Theme Keyword: USDA Forest Service
+        Place
+            Place Keyword Thesaurus: none
+            Place Keyword: CO
+            Place Keyword: GRIZZLY CREEK Fire
+    Access Constraints: These data are publicly available. 
+    Use Constraints:  There are no restrictions on use, except for reasonable and proper acknowledgement of information sources and limitations as preliminary/draft data.
+    Data Set Credit: USDA Forest Service
+    Native Data Set Environment: GeoTiff
+Data Quality Information
+    Positional Accuracy
+        Horizontal Positional Accuracy
+            Horizontal Positional Accuracy Report: Landsat data are terrain corrected using ground control points and processed to an RMSE of less than 1/2 pixel.
+    Lineage
+        Process Step
+            Process Description: These data products are derived from Sentinel 2 data. Pre-fire and post-fire scenes are analyzed to create a differenced Normalized Burn Ratio (dNBR) image.
+                The dNBR image portrays the variation of burn severity within the fire. The pre- and post-fire images are terrain corrected and further processed to convert top of atmosphere reflectance. 
+                The Normalized Burn Ratio (NBR) is computed for the pre- and post-fire images using the following formula:
+                (NIR Band - SWIR Band) / (NIR Band + SWIR Band) = NBR
+
+                The Differenced NBR is computed to determine severity by subtracting the post-fire NBR from the pre-fire NBR:
+                (PreNBR - PostNBR) = dNBR
+            Original BARC thresholds:
+                Unburned/Low threshold = 74
+                Low/Moderate threshold = 119
+                Moderate/High threshold = 199
+
+            Revised SBS thresholds:
+                Unburned/Low threshold = 68
+                Low/Moderate threshold = 130
+                Moderate/High threshold = 215
+                
+                General descriptions of the severity classes are below:
+                Unburned / Very low: The area after the fire was indistinguishable from pre-fire conditions. This does not always indicate the area did not burn
+                    (i.e. canopy may be occluding the burn signal).
+                Low:      Areas of surface fire with little detected change in cover and little detected mortality of the dominant vegetation. Little to no change in the soil color, structure and condition occured.
+                Moderate: This severity class is between low and high and means there is a mixture of detected effects on the dominant vegetation.
+                High:     Areas where the canopy has high to complete consumption. Changes to soil structure, color and condition are significant and hydrophobicity may have occured.
+Spatial Data Organization Information
+    Direct Spatial Reference Method: Raster
+    Raster Object Information
+        Vertical Count: 1
+Spatial Reference Information
+    Horizontal Coordinate System Definition
+        Planar
+            Map Projection
+                Map Projection Name: NAD_1983_UTM_Zone_13N
+                    Map Projection Parameters
+                        Standard Parallel: 0.0
+                        Standard Parallel: 0.0
+                        Longitude of Central Meridian: -105.0
+                        Latitude of Projection Origin: 1.0]];-5120900 -9998100 450445547.391054;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecisio
+                        False Easting: 500000.0
+                        False Northing: 0.0
+            Planar Coordinate Information
+                Planar Coordinate Encoding Method: row and column
+                Coordinate Representation
+                    Abscissa Resolution: 20.0
+                    Ordinate Resolution: 20.0
+                Planar Distance Units: Meter
+        Geodetic Model
+            Horizontal Datum Name: D_North_American_1983
+            Ellipsoid Name: GRS_1980
+            Semi-major Axis: 6378137.0
+            Denominator of Flattening Ratio: 298.257222101
+Distribution Information
+    Resource Description: Downloadable Data
+Metadata Reference Information
+    Metadata Date: 2020-11-13
+    Metadata Contact
+        Contact Information
+            Contact Organization Primary
+                Contact Organization: USDA Forest Service, Geospatial Technology and Applications Center (GTAC)
+                Contact Person: Craig Baker
+                Contact Address
+                    Address Type: mailing address
+                    Address: 125 S. Sate St., Suite 7105
+                    City: Salt Lake City
+                    State or Province: UT
+                    Postal Code: 84138
+                Contact Voice Telephone: 801 975 3763 
+                Contact Electronic Mail Address: baerimagery@fs.fed.us

@@ -1,0 +1,65 @@
+[
+  {
+    "utc": "2026-09-17T01:06:19.994Z",
+    "stage": "report",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T01:06:24.006Z",
+    "stage": "currentness",
+    "duration": 15,
+    "current": false
+  },
+  {
+    "utc": "2026-09-17T01:06:25.430Z",
+    "stage": "attachment",
+    "name": "design.parquet",
+    "bytes": 3480,
+    "sha256": "701ba4723f72e0d0f750c462cf60f4bd9ae69defff7513b34ef16efc65ebdcb3"
+  },
+  {
+    "utc": "2026-09-17T01:06:26.747Z",
+    "stage": "attachment",
+    "name": "events.parquet",
+    "bytes": 822285,
+    "sha256": "88f7ad8650e8faad2c47b5cff63aea98a0c5b5c9a0ff18b5a20aeacbf7354d23"
+  },
+  {
+    "utc": "2026-09-17T01:06:28.008Z",
+    "stage": "attachment",
+    "name": "inverse.parquet",
+    "bytes": 2213,
+    "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+  },
+  {
+    "utc": "2026-09-17T01:06:29.263Z",
+    "stage": "attachment",
+    "name": "manifest.json",
+    "bytes": 14358,
+    "sha256": "3e828092f6ed8ca308af1dbe72633dd075feafe40fcf5e940fcd274ca81c1251"
+  },
+  {
+    "utc": "2026-09-17T01:06:30.532Z",
+    "stage": "attachment",
+    "name": "valid_mask.tif",
+    "bytes": 42972,
+    "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  {
+    "utc": "2026-09-17T01:06:31.857Z",
+    "stage": "currentness",
+    "duration": 30,
+    "current": false
+  },
+  {
+    "utc": "2026-09-17T01:06:33.128Z",
+    "stage": "currentness",
+    "duration": 60,
+    "current": false
+  },
+  {
+    "utc": "2026-09-17T01:06:34.767Z",
+    "stage": "reload",
+    "status": "PASS"
+  }
+]

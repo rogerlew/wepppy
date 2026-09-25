@@ -1,0 +1,23 @@
+{
+  "title": "Evaluating post-wildfire debris-flow rainfall thresholds and volume models at the 2020 Grizzly Creek Fire in Glenwood Canyon, Colorado, USA",
+  "authors": "Rengers et al.",
+  "year": 2024,
+  "doi": "10.5194/nhess-24-2093-2024",
+  "url": "https://nhess.copernicus.org/articles/24/2093/2024/",
+  "license": "CC BY 4.0",
+  "retrieved_utc": "2026-09-17",
+  "figure5_url": "https://nhess.copernicus.org/articles/24/2093/2024/nhess-24-2093-2024-f05-high-res.png",
+  "figure5_status": 200,
+  "figure5_sha256": "fae07d6646539d6a0346d1f8907247fe97e418f0d94f9f05b300f850b9444604",
+  "comparison_sections": [
+    "3.1",
+    "3.3",
+    "3.4.3",
+    "4.1",
+    "5.1"
+  ],
+  "observed_Dead_Horse_timing": "Likely August 5\u201312, 2021; cannot assign a single storm",
+  "M1_firewide_I15_P50_2021_mm_h": 25.9,
+  "M1_firewide_I15_P75_2022_mm_h": 33.7,
+  "data_access": "DOI and ScienceBase catalog/file endpoints returned 403; official data landing page available; no measured storm CSV acquired"
+}

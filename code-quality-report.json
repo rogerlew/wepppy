@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-09-04T11:59:06Z",
+  "generated_at_utc": "2026-09-09T20:15:24Z",
   "mode": "observe-only",
-  "base_ref": "8434ecb88",
+  "base_ref": "origin/master",
   "thresholds": {
     "python_file_sloc": {
       "yellow": 650,
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 983.0,
+      "count": 997.0,
       "p50": 130.0,
-      "p75": 335.0,
-      "p90": 697.8,
-      "p95": 1006.1,
-      "p99": 2137.86,
+      "p75": 333.0,
+      "p90": 687.4,
+      "p95": 996.0,
+      "p99": 2106.08,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 800.0,
-      "p50": 62.0,
-      "p75": 113.0,
-      "p90": 184.1,
-      "p95": 243.25,
-      "p99": 389.06,
+      "count": 814.0,
+      "p50": 61.5,
+      "p75": 111.0,
+      "p90": 181.1,
+      "p95": 238.4,
+      "p99": 389.0,
       "max": 2233.0
     },
     "python_prod_max_cc": {
@@ -94,7 +94,7 @@
       },
       {
         "path": "tests/weppcloud/routes/test_pure_controls_render.py",
-        "value": 4213.0
+        "value": 4368.0
       },
       {
         "path": "tests/nodb/mods/test_features_export_service.py",
@@ -114,7 +114,7 @@
       },
       {
         "path": "wepppy/rq/project_rq.py",
-        "value": 2803.0
+        "value": 2809.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -130,11 +130,11 @@
       },
       {
         "path": "wepppy/nodb/base.py",
-        "value": 2361.0
+        "value": 2379.0
       },
       {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 2338.0
+        "value": 2351.0
       },
       {
         "path": "wepppy/climates/cligen/cligen.py",
@@ -207,20 +207,20 @@
         "value": 389.0
       },
       {
+        "path": "wepppy/microservices/rq_engine/project_routes.py",
+        "value": 389.0
+      },
+      {
+        "path": "tests/scripts/test_deploy_production_execution.py",
+        "value": 382.0
+      },
+      {
         "path": "wepppy/nodb/mods/ash_transport/neris_ash_model.py",
         "value": 381.0
       },
       {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
         "value": 378.0
-      },
-      {
-        "path": "wepppy/microservices/rq_engine/project_routes.py",
-        "value": 367.0
-      },
-      {
-        "path": "tests/scripts/test_deploy_production_execution.py",
-        "value": 365.0
       },
       {
         "path": "wepppy/nodb/core/landuse.py",

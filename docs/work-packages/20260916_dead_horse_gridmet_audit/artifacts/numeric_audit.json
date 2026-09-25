@@ -1,0 +1,536 @@
+{
+  "attempt_id": "f493a714df9d4fbfbfd4370c46ad54f8",
+  "hash_checks": [
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/valid_mask.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/climate/wepp_cli.parquet",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/manifest.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/prepared/domain.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/prepared/sbs.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/manifest.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/source.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/thickness_cm.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/manifest.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/watershed.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/valid_mask.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/area.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/coverage.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/relief.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/summary.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/prepared/domain.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/prepared/sbs.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/manifest.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/source.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/thickness_cm.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/manifest.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/watershed.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/valid_mask.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/area.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/coverage.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/relief.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/wbt/summary.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/dem.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/wbt/bound.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/wbt/flovec.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/wbt/outlet.geojson",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/disturbed/sbs_4class.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/inputs/soil_sources.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif.meta",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite.meta.md",
+      "matches": true
+    },
+    {
+      "path": "/workdir/weppcloud-wbt/WBT/whitebox_tools",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/components.csv",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/components_source.csv",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/horizons_source.csv",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/mapunits.csv",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/source.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/cache_retrieval.meta.md",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/fallback_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/fallback_native.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/original_mukey.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/primary_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/soil_raster.meta",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/sources/soil_sources.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/soil/thickness_cm.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/inputs/soil_sources.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo.tif.meta",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/soils/ssurgo_tabular_cache.sqlite.meta.md",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/area.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/coverage.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/relief.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/summary.json",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/postfire_debris_flow/attempts/f493a714df9d4fbfbfd4370c46ad54f8/predictors/terrain/wbt/watershed.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/dem.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/wbt/bound.tif",
+      "matches": true
+    },
+    {
+      "path": "/wc1/runs/th/thespian-cleanness/dem/wbt/flovec.tif",
+      "matches": true
+    },
+    {
+      "path": "/workdir/weppcloud-wbt/WBT/whitebox_tools",
+      "matches": true
+    }
+  ],
+  "predictors": {
+    "T": 0.2757535126256827,
+    "F": 0.42879427480654897,
+    "S": 0.5595864610102531
+  },
+  "area_km2": 26.8329,
+  "relief_m": 1428.41650390625,
+  "coverage": {
+    "basin_cells": 268329,
+    "valid_cells": 146161,
+    "excluded_cells": 122168,
+    "missing_sbs_cells": 122168,
+    "missing_soil_cells": 0,
+    "sbs_counts": {
+      "0": 25142,
+      "1": 58346,
+      "2": 47799,
+      "3": 14874,
+      "255": 122168
+    },
+    "soil_sources_full": {
+      "0": 0,
+      "1": 245558,
+      "2": 22771
+    },
+    "mean_thickness_common_cm": 142.1349610966043,
+    "mean_thickness_full_cm": 129.50289226153112
+  },
+  "tables": {
+    "events": {
+      "rows": 25143,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 3.552713678800501e-15,
+      "hash_match": true,
+      "published_equals_attempt": true
+    },
+    "design": {
+      "rows": 12,
+      "max_probability_error": 5.551115123125783e-17,
+      "max_unit_error_mm": 1.7763568394002505e-15,
+      "hash_match": true,
+      "published_equals_attempt": true
+    },
+    "inverse": {
+      "rows": 3,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 0.0,
+      "hash_match": true,
+      "published_equals_attempt": true
+    }
+  },
+  "max_event_rainfall_error": 0.0,
+  "max_design_rainfall_error": 0.0,
+  "inverse": [
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 30.11676101418647,
+      "rainfall_mm": 7.529190253546617,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 22.2398083080446,
+      "rainfall_mm": 11.1199041540223,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 18.989028280111235,
+      "rainfall_mm": 18.989028280111235,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    }
+  ],
+  "design": [
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 45,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 23.89214018525623,
+      "rainfall_mm": 5.973035046314058,
+      "probability": 0.3171730963253146,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 45,
+      "positive_samples": 8381,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 19.541211576032712,
+      "rainfall_mm": 9.770605788016356,
+      "probability": 0.38701388015634236,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 45,
+      "positive_samples": 8381,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 15.22061875999778,
+      "rainfall_mm": 15.22061875999778,
+      "probability": 0.3347801107805065,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 22,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 29.666666666666668,
+      "rainfall_mm": 7.416666666666667,
+      "probability": 0.4861420824267951,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 22,
+      "positive_samples": 8381,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 24.352445750432757,
+      "rainfall_mm": 12.176222875216379,
+      "probability": 0.5890465829365289,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 22,
+      "positive_samples": 8381,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 18.026313517934536,
+      "rainfall_mm": 18.026313517934536,
+      "probability": 0.456257927954446,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 8,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 44.23637521408093,
+      "rainfall_mm": 11.059093803520232,
+      "probability": 0.8506052458076775,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 8,
+      "positive_samples": 8381,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 34.34777008834981,
+      "rainfall_mm": 17.173885044174906,
+      "probability": 0.887292625269958,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 8,
+      "positive_samples": 8381,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 22.9,
+      "rainfall_mm": 22.9,
+      "probability": 0.6709798348654357,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 3,
+      "positive_samples": 8381,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 49.500000271502074,
+      "rainfall_mm": 12.375000067875519,
+      "probability": 0.9158897313677765,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 3,
+      "positive_samples": 8381,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 40.85274746172054,
+      "rainfall_mm": 20.42637373086027,
+      "probability": 0.9597640497861382,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 3,
+      "positive_samples": 8381,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 24.86444569480007,
+      "rainfall_mm": 24.86444569480007,
+      "probability": 0.7447038997542745,
+      "status": "available",
+      "reason": null
+    }
+  ],
+  "views": {
+    "15": {
+      "current": false,
+      "status": "available"
+    },
+    "30": {
+      "current": false,
+      "status": "available"
+    },
+    "60": {
+      "current": false,
+      "status": "available"
+    }
+  },
+  "reference_intensity_scenarios": {
+    "24": 0.3200576734495108,
+    "25.9": 0.3729806037181208,
+    "30": 0.4964041958699106,
+    "33.7": 0.6085947735217347,
+    "40": 0.7716213078198062
+  },
+  "hypothetical_excluded_sbs_unburned": {
+    "description": "Sensitivity only; missing SBS is NOT established unburned",
+    "F": 0.2335677470567848,
+    "S": 0.5098539065414611,
+    "I15_P50": 36.646516160955635
+  }
+}

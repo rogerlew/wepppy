@@ -1,0 +1,33 @@
+{
+  "attempt": "f493a714df9d4fbfbfd4370c46ad54f8",
+  "rows": 16802,
+  "column_equality": {
+    "da": true,
+    "mo": true,
+    "year": true,
+    "prcp": true,
+    "dur": true,
+    "tp": true,
+    "ip": true,
+    "tmax": true,
+    "tmin": true,
+    "rad": true,
+    "w-vl": true,
+    "w-dir": true,
+    "tdew": true,
+    "10-min Peak Rainfall Intensity (mm/hour)": true,
+    "15-min Peak Rainfall Intensity (mm/hour)": true,
+    "30-min Peak Rainfall Intensity (mm/hour)": true,
+    "60-min Peak Rainfall Intensity (mm/hour)": true,
+    "peak_intensity_10": true,
+    "peak_intensity_15": true,
+    "peak_intensity_30": true,
+    "peak_intensity_60": true
+  },
+  "cli_sha256_at_check": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+  "parquet_sha256_matches_accepted": true,
+  "same_inode_as_pw0_cli": true,
+  "link_count": 2,
+  "mtime_ns": 1789606508469623319,
+  "ctime_ns": 1789606773014495607
+}

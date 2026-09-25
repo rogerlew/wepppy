@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20260916_dead_horse_m3_audit/artifacts/audit_saved.py
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_dead_horse_m3_audit/artifacts/audit_saved.py", line 84, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_dead_horse_m3_audit/artifacts/audit_saved.py", line 80, in main
+    save('numeric_audit.json',{'attempt_id':ID,'hash_checks':hashes,'predictors':values,'area_km2':area/1e6,'relief_m':relief,'coverage':coverage,'tables':checks,'max_event_rainfall_error':max(event_errors),'max_design_rainfall_error':max(design_errors),'inverse':tables['inverse'].to_dict('records'),'design':tables['design'].to_dict('records'),'views':views,'reference_intensity_scenarios':{str(i):probability(15,i/4) for i in [24,25.9,30,33.7,40]},'hypothetical_excluded_sbs_unburned':{'description':'Sensitivity only; missing SBS is NOT established unburned','F':F*int(use.sum())/int(basin.sum()),'S':float(thick[basin].astype('float64').mean()/254),'I15_P50':-COEF[15][0]/(COEF[15][1]*T+COEF[15][2]*F*int(use.sum())/int(basin.sum())+COEF[15][3]*float(thick[basin].astype('float64').mean()/254))*4}})
+  File "/workdir/wepppy/docs/work-packages/20260916_dead_horse_m3_audit/artifacts/audit_saved.py", line 20, in save
+    def save(n,d): (OUT/n).write_text(json.dumps(d,indent=2,allow_nan=False)+'\n')
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/usr/local/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/local/lib/python3.12/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "/usr/local/lib/python3.12/json/encoder.py", line 398, in _iterencode_dict
+    yield _floatstr(value)
+          ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/encoder.py", line 240, in floatstr
+    raise ValueError(
+ValueError: Out of range float values are not JSON compliant: nan

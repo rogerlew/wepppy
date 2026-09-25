@@ -1,0 +1,20 @@
+{
+  "snapshot_differences": [
+    {
+      "path": "/files/active_cli",
+      "accepted": [
+        "climate/wepp.cli",
+        1177082,
+        1789606508469623319,
+        1789606517582688867
+      ],
+      "current": [
+        "climate/wepp.cli",
+        1177082,
+        1789606508469623319,
+        1789606773014495607
+      ]
+    }
+  ],
+  "artifacts_current": true
+}

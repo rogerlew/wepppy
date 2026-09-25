@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-17
+**Last Updated**: 2026-09-25
 **Active Packages**: 38
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -238,6 +238,21 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Single User-Defined Landuse and Soils
+
+**Proposed**: 2026-09-25
+**Status**: Builder scope approved; planning findings independently closed; checkpoint and implementation pending
+**Security impact**: `high` (file uploads, parsers, and run filesystem writes)
+**Link**: [Work package](docs/work-packages/20260925_single_user_defined_landuse_soils/package.md)
+
+Add independent `.man`/`.MAN` and `.sol`/`.SOL` upload modes with standard Pure
+controls and SBS-style filename feedback. Apply each uploaded input to all
+hillslopes and OFEs, retaining existing modifiers. The approved
+Config Builder option enables upload modes and excludes Disturbed/SBS, dependent
+features, and buffer OFEs. Finalize source formats/lifecycle, complete design
+security review and canonical checkpoint, then implement; no per-input class selectors.
+
 
 
 ### Seamless WEPPcloud Session Cookie Namespace Migration

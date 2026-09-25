@@ -1,8 +1,8 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-09-04T11:59:06Z`
-- Base ref: `8434ecb88`
+- Generated (UTC): `2026-09-09T20:15:24Z`
+- Base ref: `origin/master`
 
 ## Threshold Bands
 
@@ -27,8 +27,8 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 983 | 130.0 | 335.0 | 697.8 | 1006.1 | 2137.86 | 5697.0 |
-| `python_prod_max_function_len` | 800 | 62.0 | 113.0 | 184.1 | 243.25 | 389.06 | 2233.0 |
+| `python_prod_file_sloc` | 997 | 130.0 | 333.0 | 687.4 | 996.0 | 2106.08 | 5697.0 |
+| `python_prod_max_function_len` | 814 | 61.5 | 111.0 | 181.1 | 238.4 | 389.0 | 2233.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 | `js_source_file_sloc` | 207 | 255.0 | 577.0 | 1224.8 | 1598.6 | 2433.58 | 2835.0 |
 | `js_source_max_cc` | 207 | 6.0 | 20.0 | 33.0 | 43.4 | 85.7 | 155.0 |
@@ -45,12 +45,12 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | --- | ---: |
 | `wepppy/nodb/mods/roads/roads.py` | 5697 |
 | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 5274 |
-| `tests/weppcloud/routes/test_pure_controls_render.py` | 4213 |
+| `tests/weppcloud/routes/test_pure_controls_render.py` | 4368 |
 | `tests/nodb/mods/test_features_export_service.py` | 3251 |
 | `tests/nodb/mods/test_roads_controller.py` | 3240 |
 | `wepppy/nodb/mods/features_export/service.py` | 3026 |
 | `tests/nodb/mods/test_omni.py` | 2929 |
-| `wepppy/rq/project_rq.py` | 2803 |
+| `wepppy/rq/project_rq.py` | 2809 |
 | `wepppy/wepp/management/managements.py` | 2548 |
 | `wepppy/nodb/core/wepp.py` | 2440 |
 

@@ -1,0 +1,10 @@
+{"stage":"report","status":200}
+{"stage":"currentness","duration":15,"current":true}
+{"stage":"attachment","name":"design.parquet","bytes":3472,"sha256":"d21a5f64c88bc790e1b2bd8fbc43fc6a0dd8b4332cb688096d6a96f479644286"}
+{"stage":"attachment","name":"events.parquet","bytes":476092,"sha256":"518a12373188137db3afd3b19ff26b3bf5839221139b76bef90c857750eb0f24"}
+{"stage":"attachment","name":"inverse.parquet","bytes":2213,"sha256":"e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"}
+{"stage":"attachment","name":"manifest.json","bytes":14351,"sha256":"3f3e0cbcf327ea01984844b48de69e29bc49a8655cc700e6aac53df61297fe31"}
+{"stage":"attachment","name":"valid_mask.tif","bytes":42972,"sha256":"cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"}
+{"stage":"currentness","duration":30,"current":true}
+{"stage":"currentness","duration":60,"current":true}
+{"stage":"reload","status":"PASS"}

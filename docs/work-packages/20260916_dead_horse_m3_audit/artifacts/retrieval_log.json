@@ -1,0 +1,12 @@
+{
+  "usgs_landing_status": 200,
+  "report_status": 404,
+  "doi_resolver_initial": "403 Forbidden; using official USGS landing page",
+  "retrieved_utc": "2026-09-17",
+  "authenticated_report": "200; see browser/thespian-cleanness/evidence.json",
+  "sciencebase_catalog_json_status": 403,
+  "sciencebase_file_get_status": 403,
+  "public_bucket_listing_status": 403,
+  "sbs_status": 200,
+  "initial_source_audit_diagnostic": "Finite-value check incorrectly counted class 127 as recognized; changed audit to explicit 1\u20134 category membership, yielding zero mask/class disagreement."
+}

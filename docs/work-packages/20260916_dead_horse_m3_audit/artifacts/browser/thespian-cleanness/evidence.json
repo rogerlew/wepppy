@@ -1,0 +1,47 @@
+[
+  {
+    "utc": "2026-09-17T00:47:08.173Z",
+    "stage": "report",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-17T00:47:14.098Z",
+    "stage": "attachment",
+    "name": "design.parquet",
+    "bytes": 3482,
+    "sha256": "15f2ba1308f45b2ec4d7b33aaa1830255f80a2cd12b68f20e9382f4e5511324f"
+  },
+  {
+    "utc": "2026-09-17T00:47:15.797Z",
+    "stage": "attachment",
+    "name": "events.parquet",
+    "bytes": 1272034,
+    "sha256": "e76d2b7a59c3c7cd53874d5284b78f9f3118c8100814de9a003dc6730a090826"
+  },
+  {
+    "utc": "2026-09-17T00:47:17.433Z",
+    "stage": "attachment",
+    "name": "inverse.parquet",
+    "bytes": 2213,
+    "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+  },
+  {
+    "utc": "2026-09-17T00:47:19.050Z",
+    "stage": "attachment",
+    "name": "manifest.json",
+    "bytes": 14421,
+    "sha256": "02023b64973a0153df3b0bbbddcbfaacb3b18ca3acb928d7635d5aedf0a5045f"
+  },
+  {
+    "utc": "2026-09-17T00:47:20.649Z",
+    "stage": "attachment",
+    "name": "valid_mask.tif",
+    "bytes": 42972,
+    "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  {
+    "utc": "2026-09-17T00:47:25.783Z",
+    "stage": "reload",
+    "status": "PASS"
+  }
+]

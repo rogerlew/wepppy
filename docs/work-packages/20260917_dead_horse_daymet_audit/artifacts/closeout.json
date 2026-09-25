@@ -1,0 +1,46 @@
+{
+  "protected_files": 858,
+  "changed": [],
+  "new_tracked_files": [],
+  "manifest_unchanged": true,
+  "attachments": [
+    {
+      "name": "design.parquet",
+      "matches": true
+    },
+    {
+      "name": "events.parquet",
+      "matches": true
+    },
+    {
+      "name": "inverse.parquet",
+      "matches": true
+    },
+    {
+      "name": "manifest.json",
+      "matches": true
+    },
+    {
+      "name": "valid_mask.tif",
+      "matches": true
+    }
+  ],
+  "browser_current_all_durations": true,
+  "browser_errors": false,
+  "cli_cache_dates_precipitation_match": true,
+  "cli_rows": 16437,
+  "cli_sha256": "884cb1660dc22d413d77547860fdbd0af2f50459eb8b3558ed3cf442dc3f1f9f",
+  "source_code_hashes": {
+    "wepppy/climates/cligen/cligen.py": "4166a855ac165ba24be85c58139bda50abfee0c015a5cfebb93cf62ec35997b6",
+    "wepppy/nodb/core/climate_build_helpers.py": "6b3da12ac3bf7ef554c3d9a6010d9efa4a2ef5a4186011e8a585a46f4b47d411",
+    "wepppy/nodb/core/climate.py": "015d72aa577a7163673a0106b17e6b574b43ad88da40205915f2c7e9483555ef",
+    "wepppy/climates/daymet/daymet_singlelocation_client.py": "1de3c9a0698b53159f9c24d75100ee610cf78fcf9ae33b3967a6eebe24da0028"
+  },
+  "cligen_error_count": 1,
+  "cligen_error_excerpts": [
+    {
+      "line": 271,
+      "text": "*** ERROR *** Could not produce desired level of quality in\n                    << Precip. Amt.    >> random deviates."
+    }
+  ]
+}
