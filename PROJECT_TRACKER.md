@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Active: [Disturbed thinning soil lookup and mulch audit](docs/work-packages/20260925_disturbed_thinning_soil_lookup/package.md)
+— resolve any `thinning` prefix to existing soil parameters; verify mulch preserves
+burned soil classes. Code delivery and artifact validation; production repair separate.
+
 Completed (local): [Omni thinning 30% and 50%](docs/work-packages/20260920_omni_thinning_30_50/package.md)
 — eight additive management variants; legacy files and 40% default preserved.
 Generated-input evidence passed; 9,169 Python and 911 frontend tests passed.
