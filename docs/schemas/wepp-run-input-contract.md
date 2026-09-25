@@ -25,3 +25,21 @@ state and read prepared soil files. Retained artifacts use existing `wepp.nodb`,
 `soils/hill_*.mofe.sol`, `wepp/runs/p*.sol`, logs and output paths, normal project
 browse/download and canonical archive/restore. Failure is not completion; no
 new status mechanism or error translation is introduced.
+
+## Single User-Defined Builder exception (2026-09-25)
+
+SUDI-01, [Single User-Defined inputs](single-user-defined-inputs-contract.md), defines the bounded creation-time exception to ordinary
+Builder Disturbed support and adds independent mode5 landuse/soil uploads.
+Checked projects exclude Disturbed/SBS and their dependent features across UI,
+activation and direct execution, and disable buffer geometry and management
+overrides. Unchecked/legacy behavior remains unchanged. The checkbox does not
+select an input mode. Preserve the option through capability refresh and preserve
+accepted sources across rebuilds/mode switches. Compatible cover/soil modifiers
+retain their existing precedence on generated copies; all non-buffer OFEs receive
+the selected single source on a mode5 build. Subsequent explicit class edits
+and global mappings retain existing modification contracts and may replace
+assignments; rebuilding mode5 restores uniform source assignments. These edits
+do not initialize Disturbed or apply its lookup transforms. Existing authorization, response, persistence and
+controller invariants remain in force. This explicit exception governs where
+earlier unconditional Disturbed statements conflict; no other defaults change.
+Implementation conformance is pending the SUDI-01 checkpoint and validation.

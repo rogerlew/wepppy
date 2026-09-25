@@ -4,7 +4,7 @@
 
 - **Package**: `docs/work-packages/20260925_single_user_defined_landuse_soils/`
 - **Date**: 2026-09-25 UTC
-- **Prepared by**: Codex; independent security reviewer not yet assigned
+- **Prepared by**: Codex; independent reviewer `/root/review_single_input_security`
 - **Stage**: Pre-checkpoint design artifact, based on `docs/prompt_templates/security_review_template.md`
 - **Baseline**: `b96f77e589ec033853970ac90fdab945490c6553`; implementation not started
 - **Related evidence**: [dependency trace](20260925_dependency_review.md), [package review](20260925_work_package_review.md)
@@ -115,8 +115,8 @@ These are explicit design obligations, not independent findings or completed tes
 ## Findings and verdict
 
 Independent review findings have not yet been produced. No finding counts or pass
-verdict are claimed. **Gate: pending; hold the canonical checkpoint until design
-review and dispositions are complete.** This artifact corrects the review sequence;
+verdict are claimed. **Design gate approved after the independent review recorded below; runtime
+security approval remains pending.** This artifact corrects the review sequence;
 its existence alone is not design approval. Runtime release readiness is also pending.
 
 ## Validation evidence and continuation
@@ -140,3 +140,28 @@ and implementation behavior require evidence. Independent security reviewer sign
 and exact canonical checkpoint approval are pending. Operator product decisions on
 Builder policy and buffer exclusion are recorded in the package; they do not claim
 approval of an unfinished security assessment.
+
+## Independent pre-checkpoint review and disposition
+
+Reviewer: `/root/review_single_input_security`, read-only security reviewer.
+Reviewed SUDI-01 canonical contract, ADR-0075, checkpoint and source; confirmed
+all corrections by readback on2026-09-25. Design-only verdict: approved for
+checkpoint, no unresolved medium/high findings. Native roles are identified by
+sidecars; not yet validated by this package.
+
+| Finding | Severity | Correction and confirmation |
+| --- | --- | --- |
+| SEC-D01: generic payload parsing buffers multipart before limits | Medium | Streaming envelope and per-part callback limits, header/field/count bounds, all-exit spool cleanup and omitted inactive chooser fields; independently closed |
+| SEC-D02: proposed counts exceed native arrays | High | Pin initial checked support to260803 with source f24c957e event counts, at most32 hillslope OFEs, source and prepared-input checks; independently closed |
+| SEC-D03: native reader ignores modern2016.3 fields | Medium | Admit management98.4 and soil7778 only, reject2016.3; independently closed |
+
+DS-01 through DS-04 design obligations are resolved by the canonical contract and
+checkpoint matrix. Trusted project policy, dependency exclusions, containment,
+immutable publication, canonical locks/recovery and valid-state requirements
+are adequate for implementation. This supersedes earlier pending-design status
+in this artifact; those draft sections retain the original assessment history.
+
+Runtime verdict: pending unmocked upload/filesystem/NoDb tests, active/conflicting
+job and disk-failure evidence, direct native execution, generated inputs, normal
+browse/download/archive restoration and production-equivalent environment proof.
+No runtime tests or deployment are claimed by this design approval.

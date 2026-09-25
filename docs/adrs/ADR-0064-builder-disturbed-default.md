@@ -59,3 +59,18 @@ restoration and regeneration of any subsequently built artifacts.
 [Work package](../work-packages/20260910_builder_sbs/package.md) and the
 [canonical contract](../schemas/project-owned-config-contract.md#builder-soil-burn-severity-support-2026-09-10)
 track focused tests, controller initialization and browser upload evidence.
+
+## Single User-Defined Builder exception (2026-09-25)
+
+SUDI-01, [ADR-0075](ADR-0075-single-user-defined-inputs.md), defines the bounded creation-time exception to ordinary
+Builder Disturbed support and adds independent mode5 landuse/soil uploads.
+Checked projects exclude Disturbed/SBS and their dependent features across UI,
+activation and direct execution, and disable buffer geometry and management
+overrides. Unchecked/legacy behavior remains unchanged. The checkbox does not
+select an input mode. Preserve the option through capability refresh and preserve
+accepted sources across rebuilds/mode switches. Compatible cover/soil modifiers
+retain their existing precedence on generated copies; all non-buffer OFEs receive
+the selected single source. Existing authorization, response, persistence and
+controller invariants remain in force. This explicit exception governs where
+earlier unconditional Disturbed statements conflict; no other defaults change.
+Implementation conformance is pending the SUDI-01 checkpoint and validation.

@@ -3,9 +3,9 @@
 ## Quick status
 
 **Started / last updated**: 2026-09-25 UTC
-**Phase**: Builder scope approved; WPR-01 through WPR-03 independently closed
+**Phase**: SUDI-01 design reviews approved; committing contract ancestor
 **Implementation**: Not started
-**Security impact**: `high`; design artifact created, independent security review pending before checkpoint
+**Security impact**: `high`; independent design review approved; runtime validation pending
 **Next milestone**: Resolve remaining design choices and complete canonical checkpoint
 **Active plan**: [ExecPlan](prompts/active/single_user_defined_landuse_soils_execplan.md)
 
@@ -101,3 +101,25 @@ errors/warnings; all 25 relative file links resolve and diff whitespace checks p
 Spelling preview retained the country name Chile. These are documentation checks;
 independent design security approval, exact canonical checkpoint, and runtime
 validation remain pending. No production implementation or deployment occurred.
+
+## Execution authorization and checkpoint
+
+2026-09-25: operator instructed committing the complete worktree then executing
+the package. Snapshot commit: `cb09ab422`. Canonical SUDI-01 contract and ADR-0075
+are drafted; independent design reviews and checkpoint ancestor remain pending.
+No runtime files have been edited.
+
+## Execution design resolution (2026-09-25)
+
+The canonical [SUDI-01 contract](../../schemas/single-user-defined-inputs-contract.md) supersedes earlier pending recommendations.
+Initial support is management98.4 and soil7778, exactly one source OFE, for current
+Builder default `wepp_260803`; the native reader ignores modern2016.3 fields, so
+2016.3 is rejected. Source/raw/generated lifecycle, bounded multipart admission,
+exact interfaces and errors are specified there. Uniform assignment is the Build
+outcome; subsequent deliberate class edits remain functional and rebuilding
+mode5 restores uniform source assignment. Native-reader bounds apply before
+execution; no buffer geometry or silent topology truncation is permitted.
+
+Both independent reviewers approved the final design by2026-09-25 21:58 UTC.
+All medium/high design findings closed; see
+[review dispositions](artifacts/20260925_contract_reviews.md).

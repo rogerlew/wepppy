@@ -129,3 +129,14 @@ provenance only. Propose a current
 `docs/ui-docs/contracts/single-user-defined-landuse-soils-contract.md` for the
 accepted source lifecycle, Builder policy, independent mode choices, and buffer exclusion, cross-linked from affected
 current contracts. Do not treat this discovery note as that canonical contract.
+
+## Execution design resolution (2026-09-25)
+
+The canonical [SUDI-01 contract](../../../schemas/single-user-defined-inputs-contract.md) supersedes earlier pending recommendations.
+Initial support is management98.4 and soil7778, exactly one source OFE, for current
+Builder default `wepp_260803`; the native reader ignores modern2016.3 fields, so
+2016.3 is rejected. Source/raw/generated lifecycle, bounded multipart admission,
+exact interfaces and errors are specified there. Uniform assignment is the Build
+outcome; subsequent deliberate class edits remain functional and rebuilding
+mode5 restores uniform source assignment. Native-reader bounds apply before
+execution; no buffer geometry or silent topology truncation is permitted.

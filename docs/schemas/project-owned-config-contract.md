@@ -2375,3 +2375,18 @@ For fair-division, the absent/default persisted Landuse mapping is explicitly
 repaired to `disturbed`; a populated custom mapping must not be overwritten.
 Older config updates preserve populated mapping values and may propose a newly
 registered missing mapping through the existing explicit preview/apply contract. Authentication and RQ topology remain unchanged.
+
+## Single User-Defined Builder exception (2026-09-25)
+
+SUDI-01, [Single User-Defined inputs](single-user-defined-inputs-contract.md), defines the bounded creation-time exception to ordinary
+Builder Disturbed support and adds independent mode5 landuse/soil uploads.
+Checked projects exclude Disturbed/SBS and their dependent features across UI,
+activation and direct execution, and disable buffer geometry and management
+overrides. Unchecked/legacy behavior remains unchanged. The checkbox does not
+select an input mode. Preserve the option through capability refresh and preserve
+accepted sources across rebuilds/mode switches. Compatible cover/soil modifiers
+retain their existing precedence on generated copies; all non-buffer OFEs receive
+the selected single source. Existing authorization, response, persistence and
+controller invariants remain in force. This explicit exception governs where
+earlier unconditional Disturbed statements conflict; no other defaults change.
+Implementation conformance is pending the SUDI-01 checkpoint and validation.

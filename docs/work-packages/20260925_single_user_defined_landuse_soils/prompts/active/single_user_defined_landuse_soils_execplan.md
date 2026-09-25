@@ -4,8 +4,9 @@
 Maintain this living plan under `docs/prompt_templates/codex_exec_plans.md`, including
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective.
 This is the active plan for `20260925_single_user_defined_landuse_soils` only.
-Current work resolves planning findings; production implementation and deployment
-have not started and are not authorized by this documentation revision.
+The operator authorized execution and commits on 2026-09-25. Execute this plan
+through validation; deployment remains outside scope. Runtime edits await the
+standalone reviewed contract ancestor.
 
 ## Purpose / Big Picture
 
@@ -27,13 +28,17 @@ Existing projects are not converted, and no Disturbed Class selectors are needed
 ## Progress
 
 
+- [x] (2026-09-25 UTC) Operator authorized execution; committed all existing worktree contents as `cb09ab422`.
+- [x] (2026-09-25 UTC) Draft canonical SUDI-01 contract, parameterization ADR and contract/source matrix; independent review pending.
+
 - [x] (2026-09-25 UTC) Inspect mode enums, parsers, builders, controls, configuration authority, and final preparation.
 - [x] (2026-09-25 UTC) Complete delegated dependency review and independent work-package review.
 - [x] (2026-09-25 UTC) Operator directs Builder-scope reconciliation and disables buffer OFEs whenever the feature is enabled.
 - [x] (2026-09-25 UTC) Rewrite plan around Builder policy; create pre-checkpoint design security artifact.
 - [x] (2026-09-25 UTC) Reviewer confirms WPR-01, WPR-02, and WPR-03 planning findings closed.
-- [ ] Finalize format/content, source OFE count, upload lifecycle/bounds, and exact interfaces.
-- [ ] Complete canonical amendments, ADR, independent design security and contract reviews, and contract ancestor checkpoint.
+- [x] (2026-09-25 UTC) Finalize format/content, source OFE count, lifecycle/bounds and exact interfaces in SUDI-01.
+- [x] (2026-09-25 21:58 UTC) Complete canonical amendments, ADR and two independent design contract/security reviews; all findings closed.
+- [ ] Commit standalone contract ancestor before runtime edits.
 - [ ] Implement Builder serialization/resolution, feature/buffer policy, and refresh preservation.
 - [ ] Implement validated source lifecycle, additive modes, and non-disturbed single/multiple-OFE preparation.
 - [ ] Implement themed run controls and user-visible error/filename round trips.
@@ -138,8 +143,8 @@ compose files for the real watershed topology. `core/wepp.py` and
 
 Use `notes/discovery.md` and `notes/builder_upload_option_assessment.md` to resolve
 remaining format/content, one-OFE source, byte/count bounds, encoding, publication,
-concurrency, retention, and interface decisions. Recommended initial versions
-are management 98.4/2016.3 and soil 7778; parser acceptance alone is insufficient.
+concurrency, retention, and interface decisions. Final initial versions are management98.4 and soil7778 on `wepp_260803`;
+modern2016.3 is excluded because its fields are ignored by that native reader.
 Define enum values, strict Builder boolean serialization, capability IDs, form
 fields, metadata, summary keys, canonical errors, and supported binary/config
 combinations before coding. Preserve existing schema keys and write the brief
@@ -326,3 +331,16 @@ plan with the operator-selected Builder policy; disabled buffer OFEs at project
 scope; moved design security review before the checkpoint and made Builder,
 feature, buffer, and refresh implementation explicit. Independent re-review confirmed all three planning
 findings closed; security approval and the canonical checkpoint remain pending.
+
+Execution note (2026-09-25): authorization received; all-worktree snapshot committed. Exact interfaces, compatibility and source lifecycle now live in `docs/schemas/single-user-defined-inputs-contract.md`; independent checkpoint reviews precede runtime edits.
+
+## Execution design resolution (2026-09-25)
+
+The canonical [SUDI-01 contract](../../../../schemas/single-user-defined-inputs-contract.md) supersedes earlier pending recommendations.
+Initial support is management98.4 and soil7778, exactly one source OFE, for current
+Builder default `wepp_260803`; the native reader ignores modern2016.3 fields, so
+2016.3 is rejected. Source/raw/generated lifecycle, bounded multipart admission,
+exact interfaces and errors are specified there. Uniform assignment is the Build
+outcome; subsequent deliberate class edits remain functional and rebuilding
+mode5 restores uniform source assignment. Native-reader bounds apply before
+execution; no buffer geometry or silent topology truncation is permitted.
