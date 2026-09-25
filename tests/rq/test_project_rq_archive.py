@@ -107,6 +107,40 @@ def test_mofe_ground_cover_records_survive_archive_restore(archive_rq_environmen
         assert (root / relative).read_bytes() == content
 
 
+@pytest.mark.parametrize('state', ['working', 'failed', 'completed'])
+def test_treatment_soils_survive_archive_restore(archive_rq_environment, state):
+    from wepppy.nodb.mods.disturbed.disturbed import read_disturbed_land_soil_lookup
+    from wepppy.wepp.soils.utils import WeppSoilUtil
+
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'demo'
+    repo = Path(__file__).resolve().parents[2]
+    source = repo / 'tests/omni/fixtures/honeyed_marathoner_sediment_inversion/run_root/wepp/runs/p118.sol'
+    lookup = read_disturbed_land_soil_lookup(str(
+        repo / 'wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv'))
+    expected = {}
+    for index, base in enumerate(('thinning', 'forest high sev fire'), 1):
+        soil = WeppSoilUtil(str(source)).to_over9000(lookup[('loam', base)], version=9002)
+        for relative in (f'soils/treatment-{index}.sol', f'wepp/runs/p{index}.sol'):
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            soil.write(str(path))
+            expected[relative] = path.read_bytes()
+    # These are labeled artifact snapshots, not a scenario lifecycle simulation.
+    expected['soils.log'] = f'{state}: treatment soils\n'.encode()
+    (root / 'soils.log').write_bytes(expected['soils.log'])
+    project.archive_rq('demo', comment=state)
+    archive = next((root / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as z:
+        for relative, content in expected.items():
+            assert z.read(relative) == content
+    for relative in expected:
+        (root / relative).write_text('later partial overwrite')
+    project.restore_archive_rq('demo', archive.name)
+    for relative, content in expected.items():
+        assert (root / relative).read_bytes() == content
+
+
 def test_archive_rq_fails_fast_when_nodb_files_are_locked(
     archive_rq_environment,
     monkeypatch: pytest.MonkeyPatch,

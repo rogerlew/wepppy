@@ -263,6 +263,8 @@ disturbed.modify_soils()
 
 ## Developer Notes
 
+- Single-OFE and MOFE soil generation map every case-sensitive class starting with `thinning` to the effective `thinning` soil row for its texture. The class-specific artifact key remains unchanged. This rule lives at the two soil lookup sites; the shared suffix resolver stays unchanged for RUSLE and other consumers. See the [treatment soil lookup contract](../../../../docs/schemas/disturbed-treatment-soil-lookup-contract.md).
+- Mulch 15/30/60 preserves the burned vegetation/severity soil row by stripping its supported suffix. A bare treatment selector such as `mulch_30` is not a generic soil class.
 - `remap_landuse()` and `remap_mofe_landuse()` resolve SBS classes 131/132/133 to low/mod/high severity management keys by `DisturbedClass` through `get_disturbed_key_lookup()` and the effective landuse map, including custom mappings. See the [MOFE mapping contract](../../../../docs/schemas/disturbed-mofe-mapping-contract.md).
 - `remap_landuse()` treats nodata-only/off-map hillslopes as unburned (`130`) by contract; this is an intentional safety rule and not configurable to global-mode fallback.
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
@@ -273,6 +275,21 @@ disturbed.modify_soils()
 - For MOFE `sol_ver=9002` lookup misses, the controller creates class-specific fallback `9002` soils (`mukey-texid-disturbed_class`) with explicit neutral metadata replacements (`luse`, `stext`, `ksatfac=0.0`, `ksatrec=0.0`) so MOFE stacks remain same-version; single-OFE lookup misses still return base `mukey`.
 - `build_extended_land_soil_lookup()` exports the extended scheme (management + soil parameters) and normalizes scalar plant keys to `plant.data.rdmax` / `plant.data.xmxlai`; it is not part of the default run workflow.
 - All mutations must occur inside `with disturbed.locked():` blocks to respect Redis-backed locking.
+
+### Existing thinning runs
+
+After deploying the thinning soil lookup correction, rebuild affected scenarios
+through the normal scenario/soil build workflow, prepare WEPP inputs, and rerun.
+Deployment or calling the modifier again with existing generated soil keys does
+not repair saved results. Do not edit `wepp/runs/*.sol` by hand.
+
+Inspect both `soils/hill_*.mofe.sol` and prepared `wepp/runs/p*.sol` against the
+effective project lookup. For the default loam thinning row, upper-200-mm Ksat
+is 40 mm/h and `kr` is 0.00004; 9002 metadata is `ksatfac=1.3`, `ksatrec=0.3`.
+Zero metadata plus inherited forest Ksat/erodibility is a lookup-miss warning.
+Those metadata fields alone do not control infiltration in format 9002.
+Any recurrence after a verified rebuild requires a new incident investigation;
+preserve the old inputs/results until corrected outputs have been verified.
 
 ## Validation Results (80-Simulation Matrix)
 

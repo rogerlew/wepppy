@@ -2260,6 +2260,10 @@ class Disturbed(NoDbBase):
                     assert man is not None, dom
 
                     lookup_class = lookup_disturbed_class(man.disturbed_class)
+                    # Cover variants share thinning soils; keep the shared resolver
+                    # unchanged because RUSLE also uses it for custom class keys.
+                    if man.disturbed_class is not None and man.disturbed_class.startswith('thinning'):
+                        lookup_class = 'thinning'
                     key = (texid, lookup_class)
                     replacements = _land_soil_replacements_d.get(key, None)
 
@@ -2627,6 +2631,9 @@ class Disturbed(NoDbBase):
             # Treatment-modified classes (e.g., 'forest moderate sev fire-mulch_15') won't have
             # entries in _land_soil_replacements_d, but we still need fire-adjusted erodibility
             lookup_class = lookup_disturbed_class(man.disturbed_class)
+            # Match the MOFE soil lookup without changing non-soil consumers.
+            if man.disturbed_class is not None and man.disturbed_class.startswith('thinning'):
+                lookup_class = 'thinning'
             key = (texid, lookup_class)
             if key not in _land_soil_replacements_d:
                 # this is different from mofe.

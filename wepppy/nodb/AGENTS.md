@@ -15,6 +15,9 @@ Canonical behavioral contract:
   Applying configured cover defaults also regenerates once, including retries.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
   omitted kslast preserves saved state; explicit clearing remains supported.
+* Treatment soil class selection follows `docs/schemas/disturbed-treatment-soil-lookup-contract.md`:
+  thinning prefixes use the effective thinning row in both soil writers; mulch
+  retains burned base classes. Keep the shared suffix helper unchanged for RUSLE.
 * Daymet acquisition artifact ownership follows the “Daymet acquisition source
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
 * Applicable current canonical domain and shared/cross-cutting contracts are
