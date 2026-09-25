@@ -57,10 +57,18 @@ EXPECTED_DISTURBED_CLASSES = {
     "thinning_50_85",
     "thinning_50_90",
     "thinning_50_93",
+    "thinning_60_75",
+    "thinning_60_85",
+    "thinning_60_90",
+    "thinning_60_93",
     "thinning_65_75",
     "thinning_65_85",
     "thinning_65_90",
     "thinning_65_93",
+    "thinning_70_75",
+    "thinning_70_85",
+    "thinning_70_90",
+    "thinning_70_93",
     "young forest",
 }
 
@@ -69,7 +77,7 @@ class TestGetDisturbedClasses(unittest.TestCase):
     def test_disturbed_classes_snapshot(self):
         classes = get_disturbed_classes()
         self.assertEqual(classes, EXPECTED_DISTURBED_CLASSES)
-        self.assertEqual(len(classes), 47)
+        self.assertEqual(len(classes), 55)
 
 
 class TestLoadMap(unittest.TestCase):

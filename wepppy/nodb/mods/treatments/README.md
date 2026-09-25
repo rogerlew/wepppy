@@ -92,7 +92,7 @@ For fire-derived mulch classes, lookup-derived management and soil parameters co
 
 Thinning removes trees to reduce fuel loads and improve forest health. Treatments are named `thinning_{canopy}_{ground_cover}`:
 
-- **First number**: Target canopy cover after thinning (30%, 40%, 50%, or 65%; regional availability varies)
+- **First number**: Target canopy cover after thinning (30%, 40%, 50%, 60%, 65%, or 70%; regional availability varies)
 - **Second number**: Ground cover retention based on harvest method
 
 | Treatment | Canopy | Ground Cover | Harvest Method | Best For |
@@ -110,11 +110,12 @@ Higher ground cover retention means less soil disturbance from equipment. Choose
 
 > **Important**: Thinning treatments only apply to hillslopes classified as forest. Other vegetation types are skipped.
 
-30% and 50% canopy treatments support all four ground-cover choices in the
+30%, 50%, 60% and 70% canopy treatments support all four ground-cover choices in the
 Disturbed, C3S, AU, EU-CORINE and revegetation catalogs. Existing 40% and 65%
 assets and mapping IDs are retained. Each new file copies its matching 40%
 ground-cover source and changes canopy only; LAI and soil rules are unchanged.
-Existing regional availability of 65% is unchanged.
+Existing regional availability of 65% is unchanged; these variants remain
+supported for compatibility with older projects.
 
 Operators must deploy the catalogs and management assets together with the UI
 bundle. Existing projects and outputs need no migration; select and run a new

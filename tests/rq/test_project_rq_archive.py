@@ -79,7 +79,7 @@ def archive_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
 
 @pytest.mark.parametrize('state', ['working', 'failed', 'completed'])
-@pytest.mark.parametrize('management_key', ['424', '443', '450'])
+@pytest.mark.parametrize('management_key', ['424', '425', '443', '450', '451', '458'])
 def test_mofe_ground_cover_records_survive_archive_restore(archive_rq_environment, state, management_key):
     from wepppy.wepp.management import get_management_summary
     project, tmp_path, _, _ = archive_rq_environment

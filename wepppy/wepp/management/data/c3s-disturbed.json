@@ -71,5 +71,13 @@
 "447": {"Key": 447, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_93", "Description": "Thinning 50/93 Cover (Cable)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_93.man"},
 "448": {"Key": 448, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_90", "Description": "Thinning 50/90 Cover (Forwarder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_90.man"},
 "449": {"Key": 449, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_50_85", "Description": "Thinning 50/85 Cover (Skidder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_85.man"},
-"450": {"Key": 450, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_50_75", "Description": "Thinning 50/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_75.man"}
+"450": {"Key": 450, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_50_75", "Description": "Thinning 50/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_50_75.man"},
+"451": {"Key": 451, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_60_93", "Description": "Thinning 60/93 Cover (Cable)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_60_93.man"},
+"452": {"Key": 452, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_60_90", "Description": "Thinning 60/90 Cover (Forwarder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_60_90.man"},
+"453": {"Key": 453, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_60_85", "Description": "Thinning 60/85 Cover (Skidder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_60_85.man"},
+"454": {"Key": 454, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_60_75", "Description": "Thinning 60/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_60_75.man"},
+"455": {"Key": 455, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_70_93", "Description": "Thinning 70/93 Cover (Cable)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_70_93.man"},
+"456": {"Key": 456, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_70_90", "Description": "Thinning 70/90 Cover (Forwarder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_70_90.man"},
+"457": {"Key": 457, "Color": [0, 255, 197, 255], "DisturbedClass": "thinning_70_85", "Description": "Thinning 70/85 Cover (Skidder)", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_70_85.man"},
+"458": {"Key": 458, "Color": [0, 245, 197, 255], "DisturbedClass": "thinning_70_75", "Description": "Thinning 70/75 Cover", "IsTreatment": true, "ManagementFile": "UnDisturbed/Thinning_70_75.man"}
 }

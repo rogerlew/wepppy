@@ -206,12 +206,12 @@ describe("Omni controller", () => {
     test("new thinning rows preserve defaults with expanded canopy choices", () => {
         const item = addScenarioAndSelect("thinning");
         const canopy = item.querySelector("[data-omni-field='canopy_cover']");
-        expect(Array.from(canopy.options, option => option.value)).toEqual(["30%", "40%", "50%", "65%"]);
+        expect(Array.from(canopy.options, option => option.value)).toEqual(["30%", "40%", "50%", "60%", "65%", "70%"]);
         expect(canopy.value).toBe("40%");
         expect(item.querySelector("[data-omni-field='ground_cover']").value).toBe("93%");
     });
 
-    test.each(["30%", "40%", "50%", "65%"])("thinning %s survives hydration and serialization", async canopy => {
+    test.each(["30%", "40%", "50%", "60%", "65%", "70%"])("thinning %s survives hydration and serialization", async canopy => {
         getJsonMock.mockResolvedValueOnce([
             { type: "thinning", canopy_cover: canopy, ground_cover: "85%" }
         ]);

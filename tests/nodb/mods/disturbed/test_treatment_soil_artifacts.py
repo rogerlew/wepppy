@@ -30,7 +30,7 @@ Any comments:
 1 10000 0.0001
 """
 
-THINNING = [f"thinning_{c}_{g}" for c in (30, 40, 50, 65) for g in (75, 85, 90, 93)]
+THINNING = [f"thinning_{c}_{g}" for c in (30, 40, 50, 60, 65, 70) for g in (75, 85, 90, 93)]
 THINNING += ["thinning", "thinning-custom", "thinningcustom-mulch_30"]
 MULCH = [(f"{v} {s} sev fire-mulch_{level}", f"{v} {s} sev fire")
          for v in ("forest", "shrub", "grass")

@@ -18,7 +18,7 @@ def _parameters(data):
 
 @pytest.mark.parametrize('catalog', ['disturbed', 'c3s-disturbed', 'au-disturbed',
                                      'eu-corine-disturbed', 'revegetation'])
-@pytest.mark.parametrize('canopy', [30, 50])
+@pytest.mark.parametrize('canopy', [30, 50, 60, 70])
 @pytest.mark.parametrize('ground', [75, 85, 90, 93])
 def test_thinning_catalog_roundtrip(tmp_path, catalog, canopy, ground):
     mapping = load_map(str(DATA / f'{catalog}.json'))
@@ -39,7 +39,7 @@ def test_thinning_catalog_roundtrip(tmp_path, catalog, canopy, ground):
     assert _parameters(restored.inis[0].data) == expected_ini
 
 
-@pytest.mark.parametrize('canopy', [30, 50])
+@pytest.mark.parametrize('canopy', [30, 50, 60, 70])
 @pytest.mark.parametrize('ground', [75, 85, 90, 93])
 def test_thinning_single_ofe_prepared_input(tmp_path, monkeypatch, canopy, ground):
     from wepppy.nodb.core.wepp_prep_service import WeppPrepService

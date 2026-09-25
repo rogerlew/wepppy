@@ -206,7 +206,7 @@ def test_defaults_at_normal_build_and_modify_boundaries(scenario, monkeypatch, o
     ('thinning', '90', '424', 40, 75), ('prescribed_fire', '90', '410', 40, 75),
     ('mulch', '418', '418030', 40, 75),
 ] + [('thinning', '90', str(443 + ci * 4 + gi), canopy, ground)
-     for ci, canopy in enumerate((30, 50))
+     for ci, canopy in enumerate((30, 50, 60, 70))
      for gi, ground in enumerate((93, 90, 85, 75))])
 def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
     scenario, monkeypatch, kind, source, target, canopy, ground,
