@@ -1,6 +1,7 @@
 # ADR-0074: Add 60% and 70% Omni thinning canopy; retain 65%
 
-Status: accepted 2026-09-25; implementation conformance pending.
+Status: accepted and locally validated 2026-09-25; implementation `2d0891398`.
+Deployment and live acceptance remain separate.
 
 ## Context and decision
 
@@ -32,6 +33,6 @@ Check generated source/single/MOFE/prepared managements, soil prefixes, catalogs
 legacy byte/record preservation, UI defaults/hydration and archive restoration.
 Risks are ID collision, omitted catalog and unintended source/default changes.
 Before any new selections are saved, selector availability may be rolled back.
-Afterward, any rollback must preserve saved 60%/70% hydration and serialization,
+Afterwards, any rollback must preserve saved 60%/70% hydration and serialization,
 as well as referenced assets/IDs; simply removing selector options is unsafe.
 No deployment or fresh model-output claim is part of local delivery.

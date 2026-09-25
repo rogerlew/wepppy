@@ -7,8 +7,10 @@
 
 ## Purpose
 
-Active: [Omni thinning 60% and 70%](docs/work-packages/20260925_omni_thinning_60_70/package.md)
-— add eight variants; retain 65% and the 40% default. Contract checkpoint in progress.
+Completed (code/local): [Omni thinning 60% and 70%](docs/work-packages/20260925_omni_thinning_60_70/package.md)
+— implemented `2d0891398`; eight variants, retained 65% and 40% default.
+308 focused Python, 913 frontend and 230 soil artifact tests pass. Broad run
+stopped after 5,326 passes on a preexisting timeout assertion; deployment remains separate.
 
 Completed (code/local): [Disturbed thinning soil lookup and mulch audit](docs/work-packages/20260925_disturbed_thinning_soil_lookup/package.md)
 — implemented in `9a5eb0813`; 198 soil artifact tests and 123 focused tests pass.

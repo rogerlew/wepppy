@@ -1,6 +1,7 @@
 # Omni thinning 60% and 70%
 
-Status: active, started 2026-09-25 UTC. Owner: requesting operator; implementer: Codex.
+Status: completed code delivery/local validation 2026-09-25 UTC.
+Owner: requesting operator; implementer: Codex.
 
 ## Scope and complexity budget
 
@@ -47,4 +48,25 @@ operator-owned release gates, not claims of this code-delivery package.
 
 ## Execution
 
-[ExecPlan](prompts/active/omni_thinning_execplan.md); [tracker](tracker.md).
+[ExecPlan](prompts/completed/omni_thinning_execplan.md); [tracker](tracker.md).
+
+## Outcome
+
+Delivered eight 60/70 assets, eight additive records in each of five catalogs,
+CSV mirror and six-choice selector in `2d0891398`, after reviewed contract
+ancestor `9ed739875`. Retained all 16 prior assets, 322 catalog records, every
+existing CSV byte, 65% support and 40% default. Durable compatibility decision is
+in the canonical thinning contract, Compatibility, states and errors / Choice
+and parameter contract, and ADR-0074 (including safe rollback after saved use).
+
+Validation: 308 focused Python tests plus 12 subtests, 913 frontend tests, 230 real
+soil artifact cases, lint, bundle build and documentation checks pass. Independent
+correctness and QA reviews report no package findings. The required broad run
+stopped with 5,326 passed, 54 skipped and one confirmed preexisting timeout-test
+failure (60 expected, 120 implemented per unchanged ADR-0072); later tests were
+not run. Full-suite success is not claimed. See
+[validation summary](artifacts/validation-summary.md) for evidence and limits.
+
+No deployment, live browser acceptance or fresh model reports. Operator owns
+those release gates. Repository maintainers own the unrelated timeout expectation
+follow-up. Closed historical packages were not modified.

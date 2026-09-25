@@ -1,7 +1,8 @@
 # Omni thinning canopy choices
 
-Status: amendment accepted 2026-09-25; 60%/70% implementation conformance pending.
-Existing choices remain locally validated. Live acceptance/deployment are separate.
+Status: amendment accepted and 60%/70% generated-input conformance locally
+validated 2026-09-25 (implementation `2d0891398`). Live browser acceptance and
+deployment remain separate. Full-suite status is recorded in the work package.
 
 ## Choice and parameter contract
 

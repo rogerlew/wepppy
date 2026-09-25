@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py
+Ignored bundle rebuilt and options verified; SHA256 3e5a4135da60ec46f431ecfb06fb3b42cb19bc4a10baee2ed7d74b452960f391

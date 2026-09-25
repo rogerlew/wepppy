@@ -1,0 +1,35 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/wepp/management/test_thinning_variants.py -q -k '60 and 90 and disturbed' --maxfail=1
+F
+=================================== FAILURES ===================================
+_______________ test_thinning_catalog_roundtrip[90-60-disturbed] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_thinning_catalog_roundtri0')
+catalog = 'disturbed', canopy = 60, ground = 90
+
+    @pytest.mark.parametrize('catalog', ['disturbed', 'c3s-disturbed', 'au-disturbed',
+                                         'eu-corine-disturbed', 'revegetation'])
+    @pytest.mark.parametrize('canopy', [30, 50, 60, 70])
+    @pytest.mark.parametrize('ground', [75, 85, 90, 93])
+    def test_thinning_catalog_roundtrip(tmp_path, catalog, canopy, ground):
+        mapping = load_map(str(DATA / f'{catalog}.json'))
+        matches = [key for key, row in mapping.items()
+                   if row.get('DisturbedClass') == f'thinning_{canopy}_{ground}']
+>       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/wepp/management/test_thinning_variants.py:27: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/wepp/management/test_thinning_variants.py::test_thinning_catalog_roundtrip[90-60-disturbed]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/wepp/management/test_thinning_variants.py::test_thinning_catalog_roundtrip[90-60-disturbed]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 92 deselected, 2 warnings in 8.87s

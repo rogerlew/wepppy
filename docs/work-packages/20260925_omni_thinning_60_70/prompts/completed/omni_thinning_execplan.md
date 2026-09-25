@@ -1,6 +1,9 @@
 # Add Omni thinning 60% and 70%
 
-This living ExecPlan follows docs/prompt_templates/codex_exec_plans.md.
+This ExecPlan follows docs/prompt_templates/codex_exec_plans.md.
+
+Completed 2026-09-25 UTC: code and local generated-input validation delivered.
+Broad suite has one confirmed preexisting failure; no deployment claimed.
 
 ## Purpose / Big Picture
 
@@ -10,16 +13,18 @@ Provide six remaining-canopy choices 30/40/50/60/65/70 while retaining saved
 ## Progress
 
 - [x] 2026-09-25 UTC: recipe inspected; scope, contract and ADR drafted.
-- [ ] Independent contract reviews and ancestor checkpoint.
-- [ ] Tests first, static assets/catalogs/selector and documentation.
-- [ ] Focused generated-input, frontend, archive and broad validation.
-- [ ] Independent correctness/QA; close package and move plan to completed.
+- [x] Independent contract reviews; ancestor `9ed739875`.
+- [x] Tests first, static assets/catalogs/selector and documentation.
+- [x] Focused generated-input/archive 308 tests and frontend 913 tests pass.
+- [x] Required broad run: 5,326 passed, 54 skipped; one preexisting timeout assertion failed.
+  Later tests were not executed.
+- [x] Independent correctness/QA pass; package and plan closed.
 
 ## Surprises & Discoveries
 
 The shared thinning soil-prefix fix already covers the new choices. Extend its
-artifact matrix rather than changing soil parameterization. Prior broad suite
-had an unrelated 60-versus120 timeout expectation; retain truthful gate status.
+artifact matrix rather than changing soil parameterization. The broad suite reproduced the unrelated 60-versus120 timeout expectation;
+runner/test/ADR blobs match the starting revision. Retain truthful gate status.
 
 ## Decision Log
 
@@ -29,8 +34,11 @@ canopy override APIs that also scale LAI; only static cancov changes.
 
 ## Outcomes & Retrospective
 
-Pending execution. Highest permitted claim is locally validated code delivery;
-production and fresh model results are separate.
+Implementation `2d0891398` delivers all eight variants and preserves 65%/default 40%.
+308 focused tests, 12 subtests, 913 frontend tests and 230 real soil tests pass.
+Broad suite stopped on unchanged timeout debt; no full-suite pass is claimed.
+Locally validated code delivery is complete; production/live acceptance and fresh
+model results remain separate.
 
 ## Context and Orientation
 
@@ -71,7 +79,7 @@ thinning soil artifact coverage to new prefixes; numerical row stays unchanged.
 ## Idempotence and Recovery
 
 Tests use temporary directories. No real project mutations. Before any 60/70
-selections are saved, selector availability can be rolled back. Afterward retain
+selections are saved, selector availability can be rolled back. Afterwards retain
 saved 60/70 hydration/serialization and referenced files/IDs during rollback.
 Simply removing selector options would lose saved-value hydration.
 Do not remove 65%. Preserve unrelated working-tree changes and current branch.
@@ -87,3 +95,6 @@ No new interfaces or dependencies. Reuse management parser/writer, existing
 MOFE synthesis, WEPP preparation, archive/restore and frontend helpers.
 
 Revision note: initial plan records requested additive options and compatibility.
+
+Revision note: final outcome records implemented options, retained compatibility,
+passing direct artifact gates and the unrelated failed broad-suite gate.
