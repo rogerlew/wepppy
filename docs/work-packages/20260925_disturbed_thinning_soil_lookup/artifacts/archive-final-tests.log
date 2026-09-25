@@ -1,0 +1,19 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/rq/test_project_rq_archive.py -q -k treatment_soils_survive
+...                                                                      [100%]
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_project_rq_archive.py::test_treatment_soils_survive_archive_restore[working]
+tests/rq/test_project_rq_archive.py::test_treatment_soils_survive_archive_restore[failed]
+tests/rq/test_project_rq_archive.py::test_treatment_soils_survive_archive_restore[completed]
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:300: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 34 deselected, 5 warnings in 35.97s

@@ -1,6 +1,6 @@
 # ADR-0073: Resolve thinning soil classes by prefix
 
-Status: accepted 2026-09-25; implementation pending.
+Status: accepted 2026-09-25; implemented in `9a5eb0813`, locally validated.
 
 ## Context and decision
 
@@ -19,6 +19,7 @@ The normative rule is the
 ## Decision provenance
 
 - Venue: operator/Codex task conversation, 2026-09-25 UTC.
+- Checkpoint recorded: 2026-09-25 15:41:58 UTC (`b63e738d0`), before implementation.
 - Participants: requesting operator and Codex.
 - Decision owner: requesting operator.
 - Implementer: Codex.

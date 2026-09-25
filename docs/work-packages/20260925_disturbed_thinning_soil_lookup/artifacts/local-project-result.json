@@ -1,0 +1,169 @@
+{
+  "timestamp": "2026-09-25T16:08:21.774972+00:00",
+  "source": "/wc1/runs/ch/choice-feminist",
+  "target": "/wc1/runs/th/thinning-soil-validation-20260925",
+  "revision": "9a5eb08137d572ef437764515144b8fba2134c64",
+  "implementation_sha256": "d4f5b1e0e2f6dbdca332fe334b55d330103eb4542734ee85e41af89e3291b4db",
+  "uid": 1000,
+  "gid": 993,
+  "source_nodb_sha256": {
+    "ashpost.nodb": "dcccd113b1acc166b952e3b812dd8c95be9f0b5c6fe34b021af892f389fb47ae",
+    "landuse.nodb": "5bdf144f75feb57dafa2ab532468c955234cb79f876ce0a0d65efeca6fcc1038",
+    "wepp.nodb": "9b31c18f2584c303c278e123bc0fb66bbf1f5146dbe35a2afcfeb84e639e75a5",
+    "soils.nodb": "c9e09e9c7ea78e8aff7bd40e2639e682716231f5fa2d72cef7405ed2cf0906e9",
+    "debris_flow.nodb": "50c0ead89e0e4107eb4a9528561359749af0d80adc6f3b55999686d6ceff8581",
+    "unitizer.nodb": "03fbeab41f290bf505790ca7ea7fb21d1734df549fa2da67852856341a4deb97",
+    "climate.nodb": "fa94937e911016f5a0c612f9b07238f0b6b53a51aee131776aa3dd3871c60ea1",
+    "watershed.nodb": "e77ae5737595f12b00245247994bb50bbf03d24d136e98950ce42dd55aaffa9b",
+    "observed.nodb": "82a1a040880d2d9d1a53e65b19286c4274255b388f2291724e8d8a29871f24bf",
+    "ron.nodb": "9e6d5ce03bb55f8fe54360059f8bafbb66f8d2baa6e80016a82b8836580abd4b",
+    "ash.nodb": "f7c537a33c273db2c10c01a9b9985016d37403ae5a2890303de138a7aa13f70d",
+    "disturbed.nodb": "c851f5b99bfc3f9d6d4ee035917687b9b300c734ae11b7db52474cc94fdc7f67"
+  },
+  "artifacts": [
+    {
+      "path": "soils/hill_71.mofe.sol",
+      "sha256": "6799385ce68b8854cdacea14ffa16f9eb7b89ec6a752c40d2fb99e306be3b513",
+      "ofes": [
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        }
+      ]
+    },
+    {
+      "path": "wepp/runs/p10.sol",
+      "sha256": "8d4f06d02fdce4124034bf8faac8589b00d6ab7d6b46925135320ad5d121f3de",
+      "ofes": [
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        {
+          "ki": 400000.0,
+          "kr": 4e-05,
+          "shcrit": 1.0,
+          "ksatadj": 0.0,
+          "ksatfac": 1.3,
+          "ksatrec": 0.3,
+          "upper_ksat": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        }
+      ]
+    }
+  ],
+  "wepp_id": 10,
+  "status": "actual local project inputs validated; no model execution or production repair"
+}

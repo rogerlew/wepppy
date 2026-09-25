@@ -1,0 +1,145 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k 'thinning_30_90 and 9002' --maxfail=2
+FF
+=================================== FAILURES ===================================
+_ test_treatment_soil_parameters_reach_prepared_inputs[thinning_30_90-thinning-9002-single] _
+
+self = <[AttributeError("'WeppSoilUtil' object has no attribute 'obj'") raised in repr()] WeppSoilUtil object at 0x7786c81ac110>
+fn = '/tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol'
+compute_erodibilities = False, compute_conductivity = False
+
+    def __init__(
+        self,
+        fn: str,
+        compute_erodibilities: bool = False,
+        compute_conductivity: bool = False,
+    ) -> None:
+        """
+        Parameters
+        ----------
+        fn:
+            Path to a ``.sol`` or ``.bson`` soil file.
+        compute_erodibilities:
+            When True, recompute interrill/rill/shear values for the first horizon.
+        compute_conductivity:
+            When True, recompute hydraulic conductivity using the WEPP guidance formulas.
+        """
+        self.compute_erodibilities = compute_erodibilities
+        self.compute_conductivity = compute_conductivity
+
+        if fn.endswith('.sol'):
+            try:
+>               self._parse_sol(fn)
+
+wepppy/wepp/soils/utils/wepp_soil_util.py:228:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <[AttributeError("'WeppSoilUtil' object has no attribute 'obj'") raised in repr()] WeppSoilUtil object at 0x7786c81ac110>
+fn = '/tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol'
+
+    def _parse_sol(self, fn: str) -> None:
+        """Populate ``self.obj`` from a raw WEPP ``.sol`` file."""
+>       with open(fn) as fp:
+             ^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol'
+
+wepppy/wepp/soils/utils/wepp_soil_util.py:240: FileNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+soil_case = (<wepppy.nodb.mods.disturbed.disturbed.Disturbed object at 0x7786c817fe30>, PosixPath('/tmp/pytest-of-unknown/pytest-2...', 'ki': '400000', ...}, ('clay loam', 'forest'): {'avke': '35', 'bd': '', 'keffflag': '0', 'ki': '400000', ...}, ...})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7786c817fdd0>
+treatment = 'thinning_30_90', base_class = 'thinning', version = 9002
+mofe = False
+
+    @pytest.mark.parametrize("mofe", [False, True], ids=["single", "mofe"])
+    @pytest.mark.parametrize("version", [9002, 9005])
+    @pytest.mark.parametrize("treatment,base_class", CASES)
+    def test_treatment_soil_parameters_reach_prepared_inputs(
+        soil_case, monkeypatch, treatment, base_class, version, mofe,
+    ):
+        _, root, _, lookup = soil_case
+        expected = lookup[("loam", base_class)]
+        intermediate, prepared = _generate(soil_case, monkeypatch, treatment, version, mofe)
+        component = root / "soils" / f"base-loam-{treatment}.sol"
+        for path in {component, intermediate, prepared}:
+>           soil = WeppSoilUtil(str(path))
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py:101:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <[AttributeError("'WeppSoilUtil' object has no attribute 'obj'") raised in repr()] WeppSoilUtil object at 0x7786c81ac110>
+fn = '/tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol'
+compute_erodibilities = False, compute_conductivity = False
+
+    def __init__(
+        self,
+        fn: str,
+        compute_erodibilities: bool = False,
+        compute_conductivity: bool = False,
+    ) -> None:
+        """
+        Parameters
+        ----------
+        fn:
+            Path to a ``.sol`` or ``.bson`` soil file.
+        compute_erodibilities:
+            When True, recompute interrill/rill/shear values for the first horizon.
+        compute_conductivity:
+            When True, recompute hydraulic conductivity using the WEPP guidance formulas.
+        """
+        self.compute_erodibilities = compute_erodibilities
+        self.compute_conductivity = compute_conductivity
+
+        if fn.endswith('.sol'):
+            try:
+                self._parse_sol(fn)
+            except Exception as exc:
+>               raise Exception(f"Error opening {fn}: {exc}") from exc
+E               Exception: Error opening /tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-28/test_treatment_soil_parameters0/treatment-soils/soils/base-loam-thinning_30_90.sol'
+
+wepppy/wepp/soils/utils/wepp_soil_util.py:230: Exception
+_ test_treatment_soil_parameters_reach_prepared_inputs[thinning_30_90-thinning-9002-mofe] _
+
+soil_case = (<wepppy.nodb.mods.disturbed.disturbed.Disturbed object at 0x778699c54440>, PosixPath('/tmp/pytest-of-unknown/pytest-2...', 'ki': '400000', ...}, ('clay loam', 'forest'): {'avke': '35', 'bd': '', 'keffflag': '0', 'ki': '400000', ...}, ...})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x778699d3c3b0>
+treatment = 'thinning_30_90', base_class = 'thinning', version = 9002
+mofe = True
+
+    @pytest.mark.parametrize("mofe", [False, True], ids=["single", "mofe"])
+    @pytest.mark.parametrize("version", [9002, 9005])
+    @pytest.mark.parametrize("treatment,base_class", CASES)
+    def test_treatment_soil_parameters_reach_prepared_inputs(
+        soil_case, monkeypatch, treatment, base_class, version, mofe,
+    ):
+        _, root, _, lookup = soil_case
+        expected = lookup[("loam", base_class)]
+        intermediate, prepared = _generate(soil_case, monkeypatch, treatment, version, mofe)
+        component = root / "soils" / f"base-loam-{treatment}.sol"
+        for path in {component, intermediate, prepared}:
+            soil = WeppSoilUtil(str(path))
+            assert soil.obj["datver"] == version
+            assert len(soil.obj["ofes"]) == (5 if mofe and path != component else 1)
+            for ofe in soil.obj["ofes"]:
+>               assert ofe["luse"] == base_class
+E               AssertionError: assert 'thinning_30_90' == 'thinning'
+E
+E                 - thinning
+E                 + thinning_30_90
+
+tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py:105: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py::test_treatment_soil_parameters_reach_prepared_inputs[thinning_30_90-thinning-9002-single]
+FAILED tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py::test_treatment_soil_parameters_reach_prepared_inputs[thinning_30_90-thinning-9002-mofe]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 2 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 failed, 196 deselected, 2 warnings in 8.88s

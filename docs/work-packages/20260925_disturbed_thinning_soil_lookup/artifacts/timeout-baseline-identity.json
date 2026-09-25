@@ -1,0 +1,22 @@
+{
+  "starting_revision": "2b0c3e30d5856f74069530b422e2541cc7820f06",
+  "candidate": "9a5eb08137d572ef437764515144b8fba2134c64",
+  "unchanged_files": [
+    {
+      "path": "wepppy/nodb/core/wepp_run_service.py",
+      "base_blob": "012ec221766f79c8f8c1d1def73f836d24f78015",
+      "candidate_blob": "012ec221766f79c8f8c1d1def73f836d24f78015"
+    },
+    {
+      "path": "tests/nodb/test_wepp_run_service.py",
+      "base_blob": "9d9f8e9de3880d9ba1b483db52e79efb6fb3363e",
+      "candidate_blob": "9d9f8e9de3880d9ba1b483db52e79efb6fb3363e"
+    },
+    {
+      "path": "docs/adrs/ADR-0072-continuous-hillslope-timeout.md",
+      "base_blob": "086756386b2450fc2fdd49082358805fcec459e3",
+      "candidate_blob": "086756386b2450fc2fdd49082358805fcec459e3"
+    }
+  ],
+  "failure": "single-OFE test expects60 but ADR-0072 and runner specify120; changed thinning paths are not called by this stubbed runner test"
+}

@@ -1,6 +1,6 @@
 # Disturbed thinning soil lookup and mulch audit
 
-Status: Open 2026-09-25. Timezone: UTC.
+Status: Completed code delivery and local validation 2026-09-25. Timezone: UTC.
 
 ## Overview and scope
 
@@ -63,8 +63,24 @@ soil correctness from management coverage.
 
 ## Deliverables and follow-up
 
-Active [ExecPlan](prompts/active/thinning_soil_lookup_execplan.md) and
-[tracker](tracker.md). Highest supported claim: diagnosed.
-Deployment, isolated actual-project release acceptance and production rebuild/
-rerun ownership remain explicit at handoff; the incident is not resolved by a
-source edit alone.
+Completed [ExecPlan](prompts/completed/thinning_soil_lookup_execplan.md) and
+[tracker](tracker.md). Highest supported claim: locally validated, including
+actual local-project input acceptance. Implementation `9a5eb0813` follows the
+reviewed contract ancestor `b63e738d0`.
+
+198 real-artifact tests and 123 focused tests pass. A supported fork of the local
+choice-feminist copy rebuilt 455 hillslopes, applied thinning_30_90 to hill 71,
+and produced matching corrected soils in intermediate and prepared p10.sol.
+All five OFEs pass; twelve source NoDb hashes are unchanged. Evidence and exact
+candidate/identity are in [validation summary](artifacts/validation-summary.md)
+and [project result](artifacts/local-project-result.json). Independent correctness
+and QA reviews pass with no open findings. Three final archive/restore tests pass.
+The broad suite stopped after 5,286 passes and 54 skips on one independently
+confirmed preexisting timeout assertion (60 expected versus 120 implemented).
+Later tests were not executed; full-suite success is not claimed. Repository
+maintainers own that unrelated test-expectation follow-up.
+
+Production-equivalent host/mount acceptance, deployment, rebuild/rerun and fresh
+report validation remain operator-owned release/recovery gates. The local source
+is an older copy, not the current wepp1 scenario. The production incident remains
+unresolved until deployment and affected-resource recovery are verified.

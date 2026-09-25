@@ -1,6 +1,7 @@
 # Disturbed treatment soil lookup
 
-Status: accepted by operator 2026-09-25; implementation conformance pending.
+Status: accepted by operator 2026-09-25; implemented and locally validated.
+Production deployment and existing-run recovery remain separate.
 
 ## Class resolution
 

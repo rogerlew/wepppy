@@ -2,6 +2,9 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 
+Completed 2026-09-25: code delivery and local artifact acceptance pass.
+The broad suite has a confirmed preexisting failure; production remains unchanged.
+
 ## Purpose / Big Picture
 
 Thinning scenarios must consume their existing Disturbed soil lookup parameters.
@@ -12,10 +15,14 @@ thinning row. Fix any `thinning` prefix, and prove mulch retains fire severity.
 ## Progress
 
 - [x] 2026-09-25 UTC: diagnose, scope and draft canonical contract/ADR/package.
-- [ ] Review and commit contract checkpoint before implementation.
-- [ ] Demonstrate failing soil regressions; implement minimal soil lookup selection fix.
-- [ ] Validate generated and prepared soils, mulch matrix and broad suite.
-- [ ] Complete independent correctness/QA review and document release limitations.
+- [x] 2026-09-25 UTC: independent contract reviews approved; ancestor `b63e738d0` committed.
+- [x] 2026-09-25 UTC: both thinning soil paths fail regressions; minimal two-site fix implemented.
+- [x] 2026-09-25 16:01 UTC: 198 generated/prepared soil matrix cases and 123 focused tests pass.
+- [x] 2026-09-25 16:08 UTC: supported actual local-project fork/rebuild verifies all five p10 OFEs.
+- [x] 2026-09-25 UTC: required broad suite executed; 5,286 passed, 54 skipped,
+  one preexisting timeout assertion failed. Later tests were not executed.
+- [x] 2026-09-25 UTC: final archive soil/log byte checks 3 passed; package closed.
+- [x] 2026-09-25 UTC: independent correctness/QA pass; production release limitations recorded.
 
 ## Surprises & Discoveries
 
@@ -24,6 +31,11 @@ use it. A separate management-parameter path has its own thinning normalization,
 which did not protect soil generation. MOFE 9002 fallback inserts zero recovery
 metadata; missed conductivity and erodibility replacements have physical impact.
 Fortran 9002 ignores recovery metadata; do not confuse that with no impact.
+Review exposed shared-helper RUSLE custom key consumers. Preserve that helper;
+the prefix rule is contained at the two soil generation sites.
+The broad suite exposed an unrelated stale 60-second test expectation against
+the existing 120-second runner/ADR-0072. Baseline blob identity and isolated
+reproduction establish that it predates this package.
 
 ## Decision Log
 
@@ -33,8 +45,14 @@ avoids duplicating lookup rows. No production deployment or repair is inferred.
 
 ## Outcomes & Retrospective
 
-Pending execution. Completion must distinguish local validation from release,
-deployment and repair. Management tests alone did not establish soil correctness.
+Implementation and local input validation are complete. Broad suite execution
+stopped at a confirmed preexisting timeout assertion after 5,286 passes;
+full-suite success is not claimed. Final archive checks and both reviews pass.
+The real local-project fork reproduces the relevant five-OFE topology and now
+emits Ksat 40, kr 0.00004 and recovery metadata 1.3/0.3. Management-only tests
+had missed this boundary. Shared-helper changes were rejected during contract
+review to preserve RUSLE custom keys. Production deployment and repair remain
+separate, with no new model execution/report claims.
 
 ## Context and Orientation
 

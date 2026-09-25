@@ -1,0 +1,72 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_wepp_run_service.py -q -k uses_mofe_timeout
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+__ test_run_hillslopes_uses_mofe_timeout_for_continuous_hillslopes[False-60] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-32/test_run_hillslopes_uses_mofe_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79aa9cb3a570>
+multi_ofe = False, expected_timeout_s = 60
+
+    @pytest.mark.parametrize(
+        ("multi_ofe", "expected_timeout_s"),
+        [
+            (False, 60),
+            (True, 300),
+        ],
+    )
+    def test_run_hillslopes_uses_mofe_timeout_for_continuous_hillslopes(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        multi_ofe: bool,
+        expected_timeout_s: int,
+    ) -> None:
+        topaz_ids = ["627"]
+        landuse = _build_landuse(topaz_ids, disturbed_class="agriculture crops")
+        climate = SimpleNamespace(climate_mode=ClimateMode.Observed, ss_batch_storms=[])
+        wepp = SimpleNamespace(
+            class_name="Wepp",
+            logger=logging.getLogger("tests.nodb.wepp_run_service.hillslope_timeout"),
+            watershed_instance=_DummyWatershed(topaz_ids),
+            climate_instance=climate,
+            landuse_instance=landuse,
+            multi_ofe=multi_ofe,
+            runs_dir=str(tmp_path / "runs"),
+            wepp_bin="wepp_260426_hill",
+            wd=str(tmp_path),
+        )
+
+        captured_timeouts: list[int] = []
+
+        def _fake_run_hillslope(**kwargs):
+            captured_timeouts.append(kwargs["timeout"])
+            return True, kwargs["wepp_id"], 0.01
+
+        monkeypatch.setattr("wepppy.nodb.core.wepp_run_service.run_hillslope", _fake_run_hillslope)
+        monkeypatch.setattr(
+            wepp_module.RedisPrep,
+            "getInstance",
+            lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+        )
+
+        WeppRunService().run_hillslopes(wepp)
+
+>       assert captured_timeouts == [expected_timeout_s]
+E       assert [120] == [60]
+E
+E         At index 0 diff: 120 != 60
+E         Use -v to get more diff
+
+tests/nodb/test_wepp_run_service.py:125: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_wepp_run_service.py::test_run_hillslopes_uses_mofe_timeout_for_continuous_hillslopes[False-60]
+1 failed, 1 passed, 5 deselected, 2 warnings in 9.51s

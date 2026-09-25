@@ -7,9 +7,11 @@
 
 ## Purpose
 
-Active: [Disturbed thinning soil lookup and mulch audit](docs/work-packages/20260925_disturbed_thinning_soil_lookup/package.md)
-— resolve any `thinning` prefix to existing soil parameters; verify mulch preserves
-burned soil classes. Code delivery and artifact validation; production repair separate.
+Completed (code/local): [Disturbed thinning soil lookup and mulch audit](docs/work-packages/20260925_disturbed_thinning_soil_lookup/package.md)
+— implemented in `9a5eb0813`; 198 soil artifact tests and 123 focused tests pass.
+Supported local choice-feminist fork/rebuild verifies five corrected p10 OFEs.
+Three final archive tests pass. Broad suite stopped after 5,286 passes on a
+confirmed preexisting timeout assertion; production deployment and repair remain separate.
 
 Completed (local): [Omni thinning 30% and 50%](docs/work-packages/20260920_omni_thinning_30_50/package.md)
 — eight additive management variants; legacy files and 40% default preserved.
@@ -323,7 +325,7 @@ coordination, and run-data integrity; dedicated review required)
 **Description**: Harden whole-run archive creation against concurrent
 filesystem mutation and unsafe/broken symlinks. The triggering `wepp1` archive
 overlapped Omni contrast deletion, while an earlier attempt proves its fatal
-broken scenario link was a separate pre-existing defect.
+broken scenario link was a separate preexisting defect.
 
 **Scope**:
 
@@ -578,7 +580,7 @@ downstream interchange consumes the post-build controller.
 
 **Status**: Implementation, focused regressions, independent reviews, and a
 successful Forest batch receipt pass; the full suite has one unrelated
-pre-existing shape-converter compose contract failure. The supplemental
+preexisting shape-converter compose contract failure. The supplemental
 stress job was stopped after functional verification. Available Forest
 culvert fixtures fail later on missing artifacts or raster-shape mismatch, so
 acceptance is conditional. No production deployment is authorized.
@@ -2904,7 +2906,7 @@ ADR-0005 captured parameterization governance.
 
 **Lifecycle**: Backlog -> In Progress -> Done (2026-04-28)
 
-**Summary**: Closed the Geneva storm-shape package end to end across `/workdir/wepppy` and `/workdir/wepppyo3`. Added closed-enum `Storm Shape` support (`uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii`) through UI, controller payloads, Python schemas/services/reports, and Rust kernel hyetograph dispatch. Source gating requirements were satisfied first with checked-in raw WinTR-20 table payload, normalized CSV, and metadata under `geneva_core/resources/`, including Type II embedded-duration validation within `<= 0.003` absolute tolerance. Package closure also addressed reviewer/QA findings: kernel callable availability, panel/run-batch distribution consistency, non-divisible timestep rejection, stale-summary suppression, positive-depth contract alignment, and explicit legacy-uniform warning surfacing. Required validation commands passed except an unrelated pre-existing JS lint issue in `controllers_js/__tests__/landuse_map_inline.test.js`; reviewer, QA, and validation artifacts are recorded under the package `artifacts/` directory.
+**Summary**: Closed the Geneva storm-shape package end to end across `/workdir/wepppy` and `/workdir/wepppyo3`. Added closed-enum `Storm Shape` support (`uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii`) through UI, controller payloads, Python schemas/services/reports, and Rust kernel hyetograph dispatch. Source gating requirements were satisfied first with checked-in raw WinTR-20 table payload, normalized CSV, and metadata under `geneva_core/resources/`, including Type II embedded-duration validation within `<= 0.003` absolute tolerance. Package closure also addressed reviewer/QA findings: kernel callable availability, panel/run-batch distribution consistency, non-divisible timestep rejection, stale-summary suppression, positive-depth contract alignment, and explicit legacy-uniform warning surfacing. Required validation commands passed except an unrelated preexisting JS lint issue in `controllers_js/__tests__/landuse_map_inline.test.js`; reviewer, QA, and validation artifacts are recorded under the package `artifacts/` directory.
 
 ### wepppyo3 Native Substrate Repositioning (2026-04-28)
 **Status**: ✅ **COMPLETE**
@@ -2997,7 +2999,7 @@ ADR-0005 captured parameterization governance.
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260425_nodb_lock_dump_efficiency_refactor/](docs/work-packages/20260425_nodb_lock_dump_efficiency_refactor/)  
 **Lifecycle**: Backlog -> In Progress -> Done (2026-04-25)  
-**Summary**: Closed end-to-end with all scoped rq-engine lock/dump hotspots converted to grouped single-lock mutation flows: `wepp_run_payload.py`, `watershed_routes.py`, `landuse_routes.py`, `upload_batch_runner_routes.py`, `wepp_routes.py`, and `bootstrap_routes.py`, with required NoDb helper additions in `Soils`, `Watershed`, `Landuse`, `Disturbed`, `BatchRunner`, and `Wepp.persist_job_hint(...)`. Per-milestone `reviewer`/`qa_reviewer`/`security_reviewer` loops were executed and all Medium findings were remediated before progression; remaining findings are Low-only residual notes. Targeted validation passed across scoped suites (`198 passed`), and `wctl check-rq-graph` was executed with documented pre-existing drift while no queue-wiring files were changed in this package. ExecPlan was archived under `prompts/completed/`.
+**Summary**: Closed end-to-end with all scoped rq-engine lock/dump hotspots converted to grouped single-lock mutation flows: `wepp_run_payload.py`, `watershed_routes.py`, `landuse_routes.py`, `upload_batch_runner_routes.py`, `wepp_routes.py`, and `bootstrap_routes.py`, with required NoDb helper additions in `Soils`, `Watershed`, `Landuse`, `Disturbed`, `BatchRunner`, and `Wepp.persist_job_hint(...)`. Per-milestone `reviewer`/`qa_reviewer`/`security_reviewer` loops were executed and all Medium findings were remediated before progression; remaining findings are Low-only residual notes. Targeted validation passed across scoped suites (`198 passed`), and `wctl check-rq-graph` was executed with documented preexisting drift while no queue-wiring files were changed in this package. ExecPlan was archived under `prompts/completed/`.
 
 ### Landuse/Disturbed MOFE Pipeline Optimization (`apprehensive-caw`) (2026-04-25)
 **Status**: ✅ **COMPLETE**  
