@@ -7,6 +7,9 @@
 
 ## Purpose
 
+Active: [Omni thinning 60% and 70%](docs/work-packages/20260925_omni_thinning_60_70/package.md)
+— add eight variants; retain 65% and the 40% default. Contract checkpoint in progress.
+
 Completed (code/local): [Disturbed thinning soil lookup and mulch audit](docs/work-packages/20260925_disturbed_thinning_soil_lookup/package.md)
 — implemented in `9a5eb0813`; 198 soil artifact tests and 123 focused tests pass.
 Supported local choice-feminist fork/rebuild verifies five corrected p10 OFEs.

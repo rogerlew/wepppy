@@ -1,21 +1,25 @@
 # Omni thinning canopy choices
 
-Status: accepted 2026-09-20; implementation and generated-input conformance
-locally validated. Live browser acceptance and deployment remain separate.
+Status: amendment accepted 2026-09-25; 60%/70% implementation conformance pending.
+Existing choices remain locally validated. Live acceptance/deployment are separate.
 
 ## Choice and parameter contract
 
-Omni thinning offers target canopy cover 30%, 40%, 50%, 65% in ascending order.
+Omni thinning offers target canopy cover 30%, 40%, 50%, 60%, 65%, 70% in ascending order.
 New rows default to 40%; ground choices remain 93% (Cable), 90% (Forward),
 85% (Skidder), 75%, with 93% default. Saved choices hydrate unchanged. Canopy
 means remaining target cover, not percentage removed.
 
-30% and 50% each resolve all four ground covers in disturbed, c3s-disturbed,
+30%, 50%, 60% and 70% each resolve all four ground covers in disturbed, c3s-disturbed,
 au-disturbed, eu-corine-disturbed and revegetation catalogs. Each file copies the
-corresponding legacy 40% ground-cover file and changes only cancov to 0.30 or
-0.50. Ground fractions, LAI, other plant/management parameters, treatment
+corresponding legacy 40% ground-cover file and changes only cancov to its target fraction
+(0.30, 0.50, 0.60 or 0.70). Ground fractions, LAI, other plant/management parameters, treatment
 eligibility, soil lookup and RAP/explicit override precedence remain unchanged.
 Existing numeric IDs, classes, files and regional availability remain unchanged.
+65% remains a visible choice with its existing regional availability: removing
+its supported variants would break existing projects and saved direct-path
+references. No deprecation, migration or expansion of regional 65% availability
+is introduced.
 
 ## Compatibility, states and errors
 
@@ -41,9 +45,10 @@ confirm all legacy files and map records remain unchanged. UI evidence covers
 new/default and hydrated selections. Local generated-input validation does not
 claim fresh model results or deployment; those remain separate operator actions.
 
-Eight additive assets are preferred to a template refactor for this bounded
+Eight additive assets per two new canopy choices are preferred to a template refactor for this bounded
 request. Retaining legacy files protects saved direct-path references. See
-[ADR-0071](../../adrs/ADR-0071-omni-thinning-30-50.md) for provenance.
+[ADR-0071](../../adrs/ADR-0071-omni-thinning-30-50.md) for the original provenance and [ADR-0074](../../adrs/ADR-0074-omni-thinning-60-70.md)
+for the 60%/70% addition and retained 65% decision.
 
 ## Archive and inspection evidence
 
