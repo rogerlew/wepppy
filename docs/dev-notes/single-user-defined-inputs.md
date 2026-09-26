@@ -71,7 +71,7 @@ project and does not constitute production rollout approval.
 
 ## Developer contract
 
-The authoritative behavior is [SUDI-01](../schemas/single-user-defined-inputs-contract.md).
+The authoritative behavior is [SUDI-01/SUDI-02](../schemas/single-user-defined-inputs-contract.md).
 Use the existing landuse/soil build endpoints and RQ jobs. Multipart admission is
 bounded before generic form parsing; source publication is descriptor-relative,
 uses immutable generation files and NoDb locking, and occurs under idle run

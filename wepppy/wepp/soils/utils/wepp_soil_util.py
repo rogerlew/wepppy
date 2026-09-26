@@ -1250,7 +1250,7 @@ class WeppSoilUtil(object):
 
     @property
     def avke(self) -> Any:
-        """Return the average kinetic energy metric recorded for the soil."""
+        """Return the supplied effective surface hydraulic conductivity in mm/h."""
         return self.obj['ofes'][0].get('avke')
 
     @property

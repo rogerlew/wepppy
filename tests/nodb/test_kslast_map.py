@@ -110,8 +110,8 @@ def test_bad_map_and_missing_keys_fail(mapped_wepp):
 
 
 @pytest.mark.parametrize('multi_ofe', [False, True])
-@pytest.mark.parametrize('single_input_policy', [False, True])
-def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, monkeypatch, multi_ofe, single_input_policy):
+@pytest.mark.parametrize('single_input_policy,soil_mode', [(False, 1), (True, 1), (True, 5)])
+def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, monkeypatch, multi_ofe, single_input_policy, soil_mode):
     from concurrent.futures import Future
     import wepppy.nodb.core.wepp as wm
     import wepppy.nodb.core.wepp_prep_service as service
@@ -139,7 +139,7 @@ def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, 
     w.watershed_instance.subs_summary={'11':{},'21':{}}
     w.watershed_instance.clip_hillslopes_configured=False
     w.watershed_instance.clip_hillslope_length=300
-    w.soils_instance=SimpleNamespace(clip_soils=False,clip_soils_depth=1,clip_soils_minimum=False,
+    w.soils_instance=SimpleNamespace(mode=soil_mode,clip_soils=False,clip_soils_depth=1,clip_soils_minimum=False,
             clip_soils_minimum_depth=1,initial_sat=.5,
             sub_iter=lambda:iter([('11',SimpleNamespace(fname='11.sol')),('21',SimpleNamespace(fname='21.sol'))]))
     for key in ['11','21']: (Path(w.wd)/'soils'/f'{key}.sol').write_text('worker source fixture')
@@ -152,6 +152,7 @@ def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, 
         pars=arg[13 if multi_ofe else 4]
         assert pars['aggregation']=='project_cell_area_mean'
         assert 'lng' not in pars
+        assert arg[15 if multi_ofe else 10] is (single_input_policy and soil_mode == 5)
         if multi_ofe:
             assert arg[14] is single_input_policy
     captured.clear()

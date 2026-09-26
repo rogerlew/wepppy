@@ -1,8 +1,8 @@
 # Single User-Defined landuse and soil inputs
 
-Status: intended behavior approved through the operator's 2026-09-25 execution
-instruction; independent design reviews approved2026-09-25; implementation conformance pending.
-Amendment: SUDI-01. This contract composes Builder, landuse, soil, watershed,
+Status: operator-approved, independently reviewed and verified locally.
+SUDI-01 was approved 2026-09-25; SUDI-02 soil-format reviews passed 2026-09-26.
+Deployment remains separate. Amendments: SUDI-01 and SUDI-02. This contract composes Builder, landuse, soil, watershed,
 feature activation and WEPP preparation only; it does not advance their unrelated
 work packages. See [ADR-0075](../adrs/ADR-0075-single-user-defined-inputs.md).
 
@@ -90,8 +90,8 @@ invalid UTF-8 input; accept UTF-8 BOM and CRLF. Maximum 100,000 physical lines,
 Validation must use the exact bytes later published.
 
 Supported formats are management 98.4 and soils 2006, 2006.2, 7778, and 9002.
-Soil-format amendment SUDI-02 is operator-approved; implementation conformance
-is pending until its native artifact acceptance passes. Reject management
+Soil-format amendment SUDI-02 is operator-approved and verified through native
+artifact acceptance; deployment remains separate. Reject management
 2016.3: the pinned native reader ignores modern rcc/usinrco/usrilco fields even
 though the Python parser supports them. Future expansion requires native semantic
 preservation evidence, not merely parsing or successful WEPP execution. Each source

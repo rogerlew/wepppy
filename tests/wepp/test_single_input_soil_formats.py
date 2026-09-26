@@ -170,3 +170,19 @@ def test_valid_texture_sum_survives_native_rounding(version):
     fields[start:start + 2] = ['30.1', '69.9']
     records[layer] = ' '.join(fields)
     validate_soil_text('\n'.join(records))
+
+
+@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('layers', [10, 11])
+def test_complete_profiles_at_native_layer_limit(version, layers):
+    records = _records(version)
+    header = 4 if version == '9002' else 3
+    records[header] = records[header].replace(' 2 ', f' {layers} ', 1)
+    fields = records[header + 1].split()
+    horizons = [' '.join([str(100 * (index + 1))] + fields[1:]) for index in range(layers)]
+    text = '\n'.join(records[:header + 1] + horizons + [records[-1]])
+    if layers == 10:
+        validate_soil_text(text)
+    else:
+        with pytest.raises(SingleInputError):
+            validate_soil_text(text)

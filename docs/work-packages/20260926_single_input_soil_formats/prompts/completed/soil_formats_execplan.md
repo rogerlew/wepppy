@@ -15,7 +15,8 @@ version and science values apart from existing explicit soil modifiers.
 - [x] Ratify contract checkpoint with two independent reviews; commit before runtime edits.
 - [x] Implement admission, explicit preserving WSU path, preparation wiring, metadata and UI.
 - [x] Verify generated single/multiple-OFE inputs and native executions; live authenticated RQ and both preparation entry points pass.
-- [ ] Close correctness/security findings; update guides and commit.
+- [x] Close independent correctness/QA and security findings; update guides and commit runtime `f6ee5b527`.
+- [x] Record full regression coverage and package closeout after both reviews passed.
 
 ## Surprises & Discoveries
 
@@ -32,7 +33,11 @@ values and additionally native float32 ordering: rounding all fields first
 would hide invalid original texture sums or reject valid decimal texture sums.
 Both directions now have regressions. Live long-lived development RQ workers
 retained old modules; only these disposable failed jobs were retried in a fresh
-worker. No service restart or deployment was performed.
+worker. No service restart or deployment was performed. The broad regression stopped
+at an incomplete conductivity-map soils test double after 4,492 passes; adding
+its real `mode` field and asserting both preparation flags yielded 32 passing
+module tests. Continue the remaining 398 files using ignores for the 269 already
+completed files, preserving directory-based optional-test selection semantics.
 
 ## Decision Log
 
@@ -117,4 +122,15 @@ legacy positional tuples retain behavior. No dependency additions.
 
 ## Outcomes & Retrospective
 
-Pending implementation and native acceptance.
+Implemented and verified locally through strict admission, immutable publication,
+all-OFE replication, both preparation entry points, native WEPP execution and
+authenticated downloads. Live archive/restore preserves the 9002 source. Both
+independent final reviews pass. All 667 collected test files are covered across the initial run and successful
+continuation: initial 4,492 passes, fixture correction 32 passes, then 5,366 passes
+and 49 skips (phase counts overlap). Final format suite: 115 passes; frontend:
+919 passes. No unresolved review findings or implementation work remain.
+Package closed 2026-09-26; no production deployment occurred.
+
+The separate preservation path kept catalog behavior stable. Native precision
+checks must supplement original-domain validation so safety checks neither
+permit silent repairs nor reject valid decimal texture sums.

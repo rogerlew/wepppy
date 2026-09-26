@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted product direction, 2026-09-25; independent contract reviews approved; conformance pending.
+Accepted product direction, 2026-09-25; independent reviews and local native
+acceptance passed for SUDI-01 and the SUDI-02 format amendment. Not deployed.
 
 ## Decision and rationale
 
@@ -42,8 +43,9 @@ Sources survive rebuilds; explicit compatible modifiers preserve prior precedenc
 ## Evidence, risks and rollback
 
 [Execution package](../work-packages/20260925_single_user_defined_landuse_soils/package.md)
-records dependency tracing, independent reviews and future generated-input evidence.
-Conformance remains pending. Risk includes parser permissiveness, feature bypasses,
+records dependency tracing, independent reviews and generated-input evidence.
+The [soil-format amendment](../work-packages/20260926_single_input_soil_formats/package.md)
+records SUDI-02 preservation and live/native acceptance. Risk includes parser permissiveness, feature bypasses,
 and non-disturbed multi-OFE assembly; direct boundary/generated-input tests are
 required. Revert new creation exposure if acceptance fails; preserve archives and
 use compatible code to process already opted-in projects rather than converting

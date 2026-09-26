@@ -5,7 +5,8 @@ Runtime code is not deployed. No production services were restarted.
 
 ## Generated and native behavior
 
-The focused parser/WSU/source/artifact suite passed **248 tests**. The additional
+The focused parser/WSU/source/artifact suite passed **248 tests**. The final format-focused suite passed **115 tests**, including complete
+10-layer acceptance and 11-layer rejection for each new format. The additional
 existing preparation/template suite passed **229 tests** (overlaps artifact tests).
 All four soil versions executed with vendored `wepp_260803` at 1, 2, 12 and 32 OFEs.
 Separate modifier/native cases exercise the single-OFE worker and 3-OFE preparation
@@ -49,5 +50,25 @@ they were harness errors, not production defects.
 - Targeted docs lint, git diff whitespace and root AGENTS size gates: passed.
 - Live archive/restore passed for the accepted 9002 source, preserving metadata
   and source hashes; see `20260926_archive_acceptance.json`.
-- Broad pytest: in progress.
-- Final independent correctness/QA and security reviews: pending.
+- Initial `wctl run-pytest tests --maxfail=1 -q`: **4,492 passed, 51 skipped**,
+  then an incomplete conductivity-map test double failed because it lacked the
+  real controller's `mode`. The fixture now covers unchecked ordinary, checked
+  ordinary and checked uploaded soils and asserts both preparation flags.
+  Its full module passed **32 tests**, and the correctness reviewer approved it.
+- Broad continuation: 398 remaining files, retaining the `tests` directory entry
+  point and ignoring the 269 completed files from actual contiguous collection
+  order. **5,366 passed, 49 skipped, 12 subtests passed** in 526.42 seconds,
+  exit 0. `20260926_regression_coverage.json` retains that split: all 667
+  collected files are covered. Phase counts overlap in the rerun failing module
+  and include collection-time skips; do not sum them as unique test counts.
+  Final format-focused tests separately cover the precision fixes completed
+  while the first broad process was already running.
+- Final independent correctness/QA and dedicated security reviews: passed;
+  no unresolved findings. Owner accepts all closures; no risk acceptance used.
+
+The continuation's initial per-file ignore list was interrupted during slow
+pathlib discovery after 187.78 seconds with no tests run. Compressing completed
+subtrees reduced 269 ignores to 45 with an exact coverage check; the successful
+continuation retained ordinary directory-based optional-test selection. The
+known test-generated `man42_5.man.json` change (three parser flags) was restored
+after inspecting the diff. No unrelated production code was changed.

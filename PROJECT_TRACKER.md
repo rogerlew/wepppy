@@ -7,9 +7,11 @@
 
 ## Purpose
 
-Active: [Single-input soil formats](docs/work-packages/20260926_single_input_soil_formats/package.md)
-— extend uploads to 2006, 2006.2 and 9002, preserving native records through
-single/multiple-OFE preparation. Contract ancestor `313951562`; native and review gates in progress.
+Completed (code/local): [Single-input soil formats](docs/work-packages/20260926_single_input_soil_formats/package.md)
+— uploads support 2006, 2006.2 and 9002 alongside 7778, preserving native records
+through single/multiple-OFE preparation. Runtime `f6ee5b527`; native through 32 OFEs,
+live RQ/archive/download and independent reviews pass. All 667 collected regression files
+covered after a fixture correction; 919 frontend tests pass. Not deployed.
 
 Completed (code/local): [Omni thinning 60% and 70%](docs/work-packages/20260925_omni_thinning_60_70/package.md)
 — implemented `2d0891398`; eight variants, retained 65% and 40% default.
