@@ -54,3 +54,15 @@ showed that the native reader ignores modern2016.3 fields which Python preserves
 Therefore initial support deliberately rejects2016.3 rather than silently losing
 scientific intent. Native event and OFE limits, rather than Python parse success,
 bound admitted and generated input.
+
+## SUDI-02 soil-format amendment
+
+The operator subsequently requested 2006, 2006.2, and 9002 soil support and
+approved implementation ("make it so"). These supplement 7778. Preserve explicit
+conductivity and hydraulic values through generated single/multiple-OFE files;
+use native version-specific calculations without converting older inputs or
+recomputing 9002 values with Rosetta. The native reader requires nine-field
+headers for both 2006 versions. Uploaded 9002 adjustment settings remain supplied
+model inputs; disabling WEPPcloud Disturbed does not erase native file settings.
+No shared catalog parameterization, numerical defaults, or formulas change.
+The SUDI-02 canonical contract defines the validation bounds and acceptance.

@@ -89,7 +89,9 @@ invalid UTF-8 input; accept UTF-8 BOM and CRLF. Maximum 100,000 physical lines,
 16,384 bytes per line, and 64 characters per numeric token bound parsing work.
 Validation must use the exact bytes later published.
 
-Initial supported formats are management 98.4 and soil 7778. Reject management
+Supported formats are management 98.4 and soils 2006, 2006.2, 7778, and 9002.
+Soil-format amendment SUDI-02 is operator-approved; implementation conformance
+is pending until its native artifact acceptance passes. Reject management
 2016.3: the pinned native reader ignores modern rcc/usinrco/usrilco fields even
 though the Python parser supports them. Future expansion requires native semantic
 preservation evidence, not merely parsing or successful WEPP execution. Each source
@@ -119,16 +121,52 @@ cross-section indexes are permitted; mandatory references cannot be zero and
 scenario names must be unique within a section. Explicit zero-count optional sections remain
 valid where the owned format permits them.
 
-Soil 7778 requires one OFE, `ksflag` 0 or 1, 1–10 layers, exactly eight soil-header
-fields and eleven fields per layer. Require increasing positive cumulative depths,
-positive density, nonnegative conductivity/anisotropy/erodibility/shear values,
-fractions in [0,1], percentages in [0,100], sand+clay <=100, and wilting point <=
-field capacity. Require the three-field restrictive-layer record with flag 0 or 1 and
-nonnegative thickness/conductivity; missing or four-field records are unsupported.
-Reject ignored extra fields/trailing content and inputs that would invoke silent
-numeric repair. Preserve source version, `ksflag` and explicit restrictive-layer
-values through synthesis. Do not estimate missing soil parameters or convert old
-versions. Format bounds are admission/resource limits, not scientific defaults.
+All soil versions require one OFE, `ksflag` 0 or 1, 1–10 layers,
+increasing positive cumulative depths, nonnegative erodibility/shear values,
+surface fractions in [0,1], nonnegative CEC, percentages in [0,100], and sand+clay <=100.
+Versions 2006 and 2006.2 require exactly nine soil-header fields including explicit
+nonnegative `avke`, six fields per layer (depth, sand, clay, organic matter, CEC,
+rock), and a three-field restrictive record (flag, anisotropy, conductivity).
+The pinned native reader consumes `avke` for both versions; eight-field 2006.2
+headers are rejected rather than guessing the missing value.
+
+Versions 7778 and 9002 require eight soil-header fields and eleven base layer
+fields, including positive density, nonnegative conductivity/anisotropy,
+0 <= wilting point <= field capacity <= 1, and nonnegative CEC.
+Version 9002 additionally requires its five-field adjustment header (flag 0/1,
+quoted landuse and texture labels, positive conductivity factor and recovery),
+and seven appended layer values: residual/saturated water fractions satisfying
+0 <= residual < saturated <= 1, positive alpha, exponent n > 1, positive
+conductivity, and 0 < wilting point < field capacity <= 1. Its supplied native
+adjustment flag/parameters remain active as authored; WEPPcloud adds no Disturbed
+parameterization and does not infer a class from those labels.
+Versions 7778 and 9002 have a three-field restrictive record (flag, bedrock
+thickness, conductivity). Restrictive flags are 0/1, remaining values nonnegative.
+
+Text fields must have unambiguous native list-directed token syntax: quoted
+labels without embedded quotes/backslashes, or single unquoted labels without
+native separators/control punctuation. Reject Python-only quoting/escape syntax.
+Derived soil copies remove standalone comments and blank lines (retaining the
+required free-text comment record); immutable accepted source bytes retain them.
+This prevents comments between records from disrupting native reads that do not
+skip comments. Prepared files put modifier provenance comments before the
+required free-text comment record, where the native reader skips comments.
+Reject missing/extra fields, four-field restrictive records, trailing content,
+non-finite or nonrepresentable values and inputs invoking silent numeric repair.
+Preserve source version, `avke`, `ksflag`, explicit restrictive values and all
+9002 hydraulic values through synthesis and preparation, except fields changed by
+explicit compatible modifiers. Do not estimate missing values, convert versions,
+or recalculate uploaded 9002 values with Rosetta. Native calculations inherent
+to the chosen file format remain native behavior. Use an explicit upload-only
+preservation path; ordinary catalog/Disturbed serialization stays unchanged.
+For preserved uploads, explicit kslast overrides apply even when the 9002 label
+contains "developed"; labels do not select WEPPcloud modifier policy. Depth
+clipping at an existing horizon ends there without adding a duplicate depth.
+Existing reporting/management bulk-density derivation from older soil formats
+remains unchanged; it must not convert or populate the generated soil file.
+Metadata `version` records the actual admitted version as a canonical string;
+existing 7778 metadata remains valid. Format bounds are admission/resource limits,
+not scientific defaults.
 
 ## Source state, publication and recovery
 
