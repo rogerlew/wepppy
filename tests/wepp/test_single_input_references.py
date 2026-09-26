@@ -65,7 +65,10 @@ def _assert_active_references(management, expected_by_ofe):
                         assert reference.section_type is None
                         assert str(reference) == "0"
                     else:
-                        assert reference.section_type == expected_type
+                        # Import-isolation tests reload managements before jsonpickle
+                        # hydrates this summary; compare semantic enum identifiers.
+                        assert reference.section_type.name == expected_type.name
+                        assert reference.section_type.value == expected_type.value
                         selected = section[int(str(reference)) - 1]
                         assert getattr(selected.data, attribute) == pytest.approx(expected)
 

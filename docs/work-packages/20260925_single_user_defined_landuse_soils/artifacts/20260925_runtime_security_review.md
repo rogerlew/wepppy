@@ -2,21 +2,25 @@
 
 ## Findings and current verdict
 
-**All recorded security findings are resolved. Final release sign-off remains
-pending correctness/QA and the remaining repository/browser gates.** No risk
-acceptance is recorded. This artifact records independent security finding
-closure; it does not authorize deployment or replace the other release gates.
+**Bounded security gate: approved for implementation checkpoint
+`c1d02d73fdcfa249ee2c424ec0a3ae11c6614a2b` plus the post-checkpoint corrections
+reviewed below. All recorded security findings are
+resolved.** Final correctness/QA review confirms its findings closed. The final
+repository regression gate remains separate and in progress; this approval does
+not claim an overall repository pass or authorize production deployment. No
+unresolved security finding is accepted as residual risk.
 
 | ID | Severity | Exploit or failure path and evidence | Required action | Status |
 | --- | --- | --- | --- | --- |
 | SEC-R01 | Medium | Checked projects with stale/restored excluded controllers could call Flask `set_treatments_mode`, `task_set_disturbed_sol_ver`, or `delete_scenarios` and mutate state without checking the creation policy. | Reject before excluded-controller lookup; cover direct mutation routes and any excluded read/report endpoints that restore controllers. Retain direct-route regression evidence. | Remediated: guards precede all affected controller lookups, including Omni queries/reports; three direct mutation regression cases independently passed |
 | SEC-R02 | Low | A held soils NoDb lock reached the generic 500 handler; active-job codes differed between the build endpoints. | Return the canonical conflict response before publication/enqueue; test contention preserves the old pointer and source. Align active-job codes with SUDI-01. | Resolved: source correction and retained actual NoDb/Redis boundary evidence show 409/conflict and 409/job_active for both domains, preserving metadata and source bytes |
 | SEC-R03 | Medium | Process interruption could retain `.source-UUID` or `.validate-UUID.man` bytes indefinitely. | Idle admission plus module maintenance must precede bounded descriptor-relative cleanup of exact owned regular-file names; preserve symlinks, directories, unrelated entries and retained generations. | Remediated: `_remove_interrupted_staging` scans at most 256 entries; focused cleanup test passed |
-| SEC-R04 | High | Earlier management admission accepted native-ignored extra fields and zero mandatory references; generic Python numeric syntax also admitted underscores and values outside native REAL representation. | Enforce strict record widths and references, the certified native count limits, numeric grammar and REAL bounds before publication; reparse serialized management. | Remediated by source readback and focused parser tests, including lexical nonzero underflow rejection; full count-boundary acceptance is tracked by QA-R01 |
+| SEC-R04 | High | Earlier management admission accepted native-ignored extra fields and zero mandatory references; generic Python numeric syntax also admitted underscores and values outside native REAL representation. | Enforce strict record widths and references, the certified native count limits, numeric grammar and REAL bounds before publication; reparse serialized management. | Resolved by source readback and focused parser tests, including lexical nonzero underflow; QA-R01/R03 close actual-reader count boundaries and native contour/drain reference propagation |
 | SEC-R05 | Medium | Failed metadata publication could leave a candidate or cached pointer inconsistent with the durable controller; malformed saved metadata prevented a valid replacement. | Inspect durable state on failure, retain a durably committed candidate, remove an uncommitted new candidate, restore the cached pointer, and allow valid replacement of malformed metadata. | Resolved: focused filesystem tests plus retained real NoDb/Redis failure-boundary evidence for both domains before/after durable dump; durable selected hashes and previous generations independently read back |
 | SEC-R06 | Medium | Earlier read-only admission could write validation staging; nonregular generated files could block or be truncated; unexpected storage errors could expose paths. | Reject read-only projects before storage; use no-follow/nonblocking regular-file checks; translate storage errors to bounded canonical responses. | Remediated by readback and focused filesystem tests |
 | SEC-R07 | Medium | Mode-setting routes bypassed active-job admission; checked raster builds could reacquire their own maintenance lock; invalid buffer input could be rejected after accepting a replacement source. | Share admission with mode mutations, avoid nested module acquisition, and validate checked-project buffer requests before source acceptance. | Resolved by readback, focused route tests and real NoDb/Redis admission evidence; queued-receipt tests are not presented as worker timing-race stress tests |
 | SEC-R08 | Medium | `require_idle` read only `rq:*` receipts, omitting `archive:job_id`. Archive/restore jobs could overlap source validation/publication; archive could capture mismatched source/pointer state and restore could remove the source directory. Fork admission leased only the destination, allowing a checked source fork to start after an upload's idle check; concurrent forks could overwrite the source's single fork receipt. | Include archive receipts in idle checks; under the shared lifecycle lease, reject checked-project archive/restore while source work is active. For checked-source forks, hold a source lifecycle lease and idle check through source receipt/enqueue commit, before target side effects. Retain both-ordering tests. | Resolved: source readback confirms guards and sorted source/destination leases before mutations, with source checkpoints through receipt/enqueue; live boundary evidence covers active builds blocking archive/fork and active archive/restore receipts blocking uploads |
+| SEC-R09 | Low | Eight Omni workers and three SBS/Treatments/Debris Flow project workers evaluated the policy guard before initializing error-telemetry locals. An excluded-project rejection could be masked by `UnboundLocalError`, obscuring the original policy diagnosis. | Initialize `func_name` and `status_channel` before the guard while keeping it before STARTED, recovery, excluded-controller hydration and mutation. Preserve established structured exception telemetry. | Resolved by bounded readback and eleven independently passing checked-policy worker cases; the original policy error propagates without a STARTED event or excluded feature execution |
 
 Unresolved recorded findings: high 0, medium 0, low 0. Resolved rows record
 implementation corrections and cited evidence; they do not imply completion of
@@ -29,7 +33,8 @@ all release validation.
 - Date: 2026-09-25.
 - Follow-up readbacks and evidence updates: 2026-09-26 UTC, including SEC-R08 closure,
   actual publication-failure recovery and authenticated source downloads.
-- Snapshot: uncommitted implementation on `0efd7ea46a73f8990375f2300b30c49368c15789`.
+- Final runtime snapshot: `c1d02d73fdcfa249ee2c424ec0a3ae11c6614a2b`; earlier interim
+  reviews used uncommitted implementation on contract checkpoint `0efd7ea46`.
 - Related: [design security review](20260925_security_review.md),
   [contract reviews](20260925_contract_reviews.md), and
   [canonical SUDI-01 contract](../../../schemas/single-user-defined-inputs-contract.md).
@@ -90,7 +95,8 @@ replacement retention and injected publication failures.
 cache and detached loading. Its filesystem coverage is direct; it does **not**
 alone establish real Redis/NoDb concurrency or failure recovery; the separate live
 evidence below covers those boundaries. The parser suite is
-focused rather than exhaustive max/max-plus-one native array certification.
+scoped to the certified subset. The final QA review below adds actual-reader
+maximum/maximum-plus-one fixtures; native tests remain representative executions.
 
 After the cleanup change, the independently rerun
 `test_idle_replacement_removes_only_owned_regular_staging` passed (one test,
@@ -163,24 +169,87 @@ accepting a value below native REAL range, including `1e-999` and `-1e-999` that
 Python float would otherwise turn into zero. The independently rerun numeric
 regressions cover decoder and soil validation: `wctl run-pytest
 tests/wepp/test_single_input.py -k native_numeric_values_rejected --maxfail=1`
-completed with **5 passed**, two existing warnings. The latest contour/drain reference
-correction remains opt-in for checked/strict parsing; its asymmetric fixture and
-count-boundary review are owned by the separate correctness/QA reviewer.
+completed with **5 passed**, two existing warnings.
+
+Final security readback verifies the native-reference correction remains opt-in:
+strict uploads/new source summaries enable it, checked-project catalog summaries
+propagate it, and segment materialization, synthesis, prepared-file reading and
+validation preserve it. Ordinary legacy reads retain the previous default. The
+flag is independent of strict upload admission, so corrected reference semantics
+do not impose the upload-only grammar on compatible catalog modifiers.
+
+The final [QA review](20260926_qa_review.md) and
+[correctness review](20260926_correctness_review.md) independently record
+**52 passing tests**: 39 numeric/count-boundary cases and 13 asymmetric reference
+cases, including three native `wepp_260803` executions. Security review inspected
+those fixture assertions: unequal contour/drain counts, distinct selected values,
+persisted summary reload, both synthesis paths, segment materialization, prepared
+files and the preserved legacy interpretation. Actual serialized section/event/
+year/rotation/layer maximum and maximum-plus-one fixtures, canonical synthesis,
+and 32/33-OFE checks close the outstanding QA-R01 proof gap. The separate
+32-OFE native regression is recorded in the validation summary. No new security
+blocker was found in the committed reference remediation.
 
 [Browser evidence](20260926_browser_controls.json) is bounded to rendered control
 partials and shared CSS in three Chromium themes, including native chooser
-selection, focus and preserved accepted-file feedback. It does not establish full
-controller-bundle submission, browser authentication, Tab navigation, read-only
+selection, actual Tab reachability and preserved accepted-file feedback. It does not establish full
+controller-bundle submission, browser authentication, read-only
 interaction or complete accessibility certification. Controlled native slopes and
 climate similarly do not establish end-to-end DEM/model project acceptance.
 
-## Evidence required before final security gate
+## Security verdict and remaining repository gate
 
-1. Close [QA-R01](20260926_qa_review.md)'s required actual-reader maximum and
-   maximum-plus-one fixtures; retain contour/drain asymmetric-reference review.
-2. Attach final correctness/QA review and required repository gates, preserving
-   the explicit browser and synthetic-input coverage limits. Re-read
-   changed security paths after all remediation; update this artifact's verdict.
+### Post-checkpoint error-path review
+
+The late `wepppy/rq/omni_rq.py` correction moves only the eight policy guards below
+initialization of their error-telemetry locals. The guards still precede STARTED,
+root recovery, controller hydration, enqueue and mutations. Independent command
+`wctl run-pytest tests/rq/test_omni_rq.py -k
+excluded_workers_preserve_policy_error_before_hydration --maxfail=1` completed
+with **8 passed**, ten existing deprecation warnings. Each case preserves
+`SingleInputPolicyError`, emits one plain EXCEPTION event and never hydrates Omni;
+the scenario worker additionally retains its established EXCEPTION_JSON event with
+the correct error type. The initial test's one-total-message assertion was corrected
+to preserve that existing telemetry contract. The owner's combined late regression
+log records 46 passing tests; this reviewer did not rerun that entire set.
+
+The same bounded correction was subsequently applied to `init_sbs_map_rq`,
+`build_treatments_rq` and `run_debris_flow_rq` in `project_rq.py`. Each guard remains
+before STARTED, cache clearing, module locks, excluded-controller lookup and work.
+SBS initialization reuses the existing single Ron lookup for its guard and action.
+Independent command `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py -k
+excluded_project_workers_preserve_policy_error --maxfail=1` completed with
+**3 passed**, five existing deprecation warnings. Each case propagates
+`SingleInputPolicyError` and emits exactly one EXCEPTION event. The owner's broader
+route/worker log records 120 passing tests; this is distinguished from the three
+independently rerun cases. RUSLE, PATH and postfire guard readback confirms their
+policy exceptions do not enter the affected uninitialized-local handlers.
+
+Readback also confirms the late `Soils.build` change defers watershed lookup only
+when the project policy is unchecked. Checked runs still perform full policy and
+buffer validation; unflagged mode 5 still fails `require_enabled`. The five new
+capability catalog records now name the actual implementation `first_reader_revision`
+`c1d02d73f`; their payloads/hashes and existing catalog records are unchanged.
+These narrow post-checkpoint changes introduce no unresolved security finding.
+
+The independent security review approves the bounded implementation at the
+recorded commit plus the reviewed corrections above, with high 0, medium 0 and low 0 unresolved findings. The reviewed
+controls preserve the contracted valid states within the explicit evidence scope.
+Any subsequent material security-path change requires review against this snapshot.
+
+The [validation summary](20260926_validation_summary.md) separately tracks the
+repository regression sweep, which remains in progress at this sign-off. Its
+management stubtest reports **143 existing incomplete/stale surface entries**;
+none identify the changed `Management.load`, `ManagementSummary.get_management`
+or `get_management_summary` signatures. The committed stubs include the new
+optional parameters. Package-wide management script typing debt is also retained;
+these checks are not represented as passing. This existing typing debt is not a
+new security finding and is not silently waived by security approval.
+
+No production rollout was performed or approved. Native execution uses controlled
+topology/climate; browser coverage is partial; the unrelated-target fork succeeds
+while the preexisting source-prefix target defect remains documented. These are
+explicit practical limits of the evidence, not claims of exhaustive certification.
 
 No unresolved medium/high finding may be silently accepted at closeout. Operator
 authorization to implement does not substitute for the required release evidence.

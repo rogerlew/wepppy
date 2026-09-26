@@ -27,6 +27,7 @@ def test_build_managements_uses_watershed_hillslope_area_for_coverage(
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest", "12": "range"}
@@ -105,6 +106,7 @@ def test_build_managements_reuses_runtime_generated_management_keys(
             self.pct_coverage = 0.0
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = None
@@ -156,6 +158,7 @@ def test_build_managements_multi_ofe_uses_rust_pair_counts(
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest", "12": "range"}
@@ -253,6 +256,7 @@ def test_build_managements_multi_ofe_propagates_pair_count_failures(
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest"}
@@ -310,6 +314,7 @@ def test_build_managements_multi_ofe_skips_pair_counts_without_domlc_assignments
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest", "12": "range"}
@@ -373,6 +378,7 @@ def test_build_managements_multi_ofe_reuses_pair_counts_for_same_cycle_inputs(
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest", "12": "range"}
@@ -458,6 +464,7 @@ def test_build_managements_multi_ofe_pair_count_cache_miss_on_signature_drift(
     wd.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(wd)
     landuse._mapping = "test-mapping"
     landuse.domlc_d = {"11": "forest"}
@@ -528,6 +535,7 @@ def test_build_managements_multi_ofe_pair_count_cache_miss_on_signature_drift(
 
 def test_invalidate_mofe_pair_count_cache_clears_cached_state() -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.logger = _LoggerStub()
     landuse._mofe_pair_count_cache = {"11": {"1": 2}}
     landuse._mofe_pair_count_cache_signature = ("sig",)

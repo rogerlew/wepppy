@@ -591,6 +591,8 @@ def test_m3_task_retains_failure_and_preserves_previous_result(tmp_path, monkeyp
     def fail_native(*args,**kwargs):
         raise RainfallError('tool_failed','Native terrain failed')
     monkeypatch.setattr(m3_integration,'build_m3_predictors',fail_native)
+    # This isolated worker fixture uses the controller's real legacy config.
+    monkeypatch.setattr(worker.Ron, 'getInstance', lambda wd: controller)
     monkeypatch.setattr(worker, 'get_wd', lambda runid: str(tmp_path))
     monkeypatch.setattr(worker, 'get_current_job', lambda: None)
     with pytest.raises(RuntimeError, match='tool_failed'):

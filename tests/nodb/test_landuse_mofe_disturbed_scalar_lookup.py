@@ -93,6 +93,7 @@ def test_build_multiple_ofe_accepts_extended_rdmax_xmxlai_keys(
 
     management = _ManagementStub()
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = []
     landuse.managements = {
@@ -167,6 +168,7 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
 
     management = _ManagementStub()
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = ["rap"]
     landuse.managements = {
@@ -258,6 +260,7 @@ def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
     (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = []
     landuse._mapping = "mock-map"
@@ -365,6 +368,7 @@ def test_build_multiple_ofe_sbs_nodata_segment_stays_unburned(
     (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = []
     landuse._mapping = "mock-map"
@@ -454,6 +458,7 @@ def test_build_multiple_ofe_sbs_unknown_class_pixel_falls_back_to_unburned(
     (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = []
     landuse._mapping = "mock-map"

@@ -22,6 +22,9 @@ def _stub_rq_context(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
+    monkeypatch.setattr(project_rq, "Ron", SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda section, option, default=None: default),
+    ))
     run_wd = tmp_path / "run"
     run_wd.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(project_rq, "get_wd", lambda _runid: str(run_wd))
@@ -2511,3 +2514,24 @@ def test_run_with_directory_roots_lock_retries_nodir_locked_once(
         ("landuse", "unit-roots-lock-retry/landuse"),
         ("soils", "unit-roots-lock-retry/soils"),
     ]
+
+
+@pytest.mark.parametrize('worker_name,args', [
+    ('init_sbs_map_rq', ('run', 'sbs.tif')),
+    ('build_treatments_rq', ('run',)),
+    ('run_debris_flow_rq', ('run',)),
+])
+def test_excluded_project_workers_preserve_policy_error(monkeypatch, tmp_path, worker_name, args):
+    from wepppy.nodb.single_input_policy import SingleInputPolicyError
+
+    _stub_rq_context(monkeypatch, tmp_path)
+    published = []
+    monkeypatch.setattr(project_rq.StatusMessenger, 'publish',
+                        lambda channel, message: published.append(message))
+    monkeypatch.setattr(project_rq, 'Ron', SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda *args: 'true'),
+    ))
+    with pytest.raises(SingleInputPolicyError, match='unavailable'):
+        getattr(project_rq, worker_name)(*args)
+    assert len(published) == 1
+    assert ' EXCEPTION ' in published[0]

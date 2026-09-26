@@ -239,21 +239,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Single User-Defined Landuse and Soils
-
-**Proposed**: 2026-09-25
-**Status**: Implemented after contract checkpoint; final regression validation and review closeout
-**Security impact**: `high` (file uploads, parsers, and run filesystem writes)
-**Link**: [Work package](docs/work-packages/20260925_single_user_defined_landuse_soils/package.md)
-
-Add independent `.man`/`.MAN` and `.sol`/`.SOL` upload modes with standard Pure
-controls and SBS-style filename feedback. Apply each uploaded input to all
-hillslopes and OFEs, retaining existing modifiers. The approved
-Config Builder option enables upload modes and excludes Disturbed/SBS, dependent
-features, and buffer OFEs. Native execution, source recovery, archive/fork and
-themed controls have retained acceptance evidence; final repository gates continue.
-
-
 
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
@@ -1440,6 +1425,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Single User-Defined Landuse and Soils
+
+**Proposed**: 2026-09-25
+**Status**: Closed 2026-09-26; implemented and validated, not deployed
+**Security impact**: `high` (file uploads, parsers, and run filesystem writes)
+**Link**: [Work package](docs/work-packages/20260925_single_user_defined_landuse_soils/package.md)
+
+Add independent `.man`/`.MAN` and `.sol`/`.SOL` upload modes with standard Pure
+controls and SBS-style filename feedback. Apply each uploaded input to all
+hillslopes and OFEs, retaining existing modifiers. The approved
+Config Builder option enables upload modes and excludes Disturbed/SBS, dependent
+features, and buffer OFEs. Native execution, source recovery, archive/fork and
+themed controls have retained acceptance evidence. All feature review findings are
+closed; the validation summary records preexisting optional/tooling limitations.
+
 
 ### MOFE Scenario Artifact Integrity and Abdisa Run Repair (2026-09-18)
 

@@ -244,6 +244,7 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
         modify_mofe_soils=lambda: soil_calls.append('rebuilt'))
     monkeypatch.setattr(Disturbed, 'getInstance', lambda wd: disturbed)
     treatments = Treatments.__new__(Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(root)
     treatments.logger = logging.getLogger(__name__)
     treatments.locked = lambda: nullcontext()

@@ -85,6 +85,15 @@ _AMENDMENT5_STRUCTURE_HASHES = {
 }
 
 
+_SINGLE_INPUT_STRUCTURE_HASHES = {
+    "continental-us": "8c9fd249f34531e3254ecb0f57e2724f335ef3e5d23cd581ac256cc0168f091f",
+    "europe": "a5700b21dc60003ced20e4251c46c2ee0bdfdda9134c7f67e8344590d14626d5",
+    "canada": "72e194b11c4c0969a41e0c5494bfa6dc6b2266f137d4a98e6401bd9aa39652a8",
+    "australia": "b47e27c6aa1e3740cb9cfd3cffc181b9cbedf702e58ce7e11c786f0db5b77bf9",
+    "global-earth": "106e6f36a3f975f1ad895afde641ec6738fb84899bbedebc5455ead1d2e009b1",
+}
+
+
 def _amendment5_reader_fixture(profile_id: str):
     binary_ids = ("wepp_260803",)
     baseline = build_locale_capability_graph(
@@ -324,9 +333,9 @@ def test_shipped_config_data_and_dependency_boundaries_are_closed() -> None:
     }
     assert set(CLIMATE_SPATIAL_METHOD_RUNTIME) == {"single", "multiple", "interpolated"}
     assert set(LANDUSE_METHOD_MODES) == {
-        "gridded", "single", "rred_unburned", "rred_burned", "upload"
+        "gridded", "single", "rred_unburned", "rred_burned", "upload", "single-user-defined"
     }
-    assert set(SOIL_BUILDER_MODES) == {"gridded", "single_mukey", "single_database"}
+    assert set(SOIL_BUILDER_MODES) == {"gridded", "single_mukey", "single_database", "single-user-defined"}
 
 
 def test_locale_composition_normalizes_continental_us_and_overlay_order() -> None:
@@ -716,11 +725,12 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         for record in by_hash.values()
     ]
 
-    assert len(records) == 11
+    assert len(records) == 16
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
         "d68d94816",
+        "c1d02d73f",
     }
     assert all(
         hashlib.sha256(
@@ -747,7 +757,10 @@ def test_amendment5_reader_floor_accepts_prior_and_new_structures(
     records = capability_graph_module._PRODUCTION_STRUCTURE_CATALOG[(3, profile_id)]
     evolved = _amendment5_reader_fixture(profile_id)
 
-    assert set(records) == {prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id]}
+    assert set(records) == {
+        prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id],
+        _SINGLE_INPUT_STRUCTURE_HASHES[profile_id],
+    }
     assert capability_graph_module.capability_structure_sha256(evolved) == (
         _AMENDMENT5_STRUCTURE_HASHES[profile_id]
     )

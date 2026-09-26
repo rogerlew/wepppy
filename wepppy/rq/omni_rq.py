@@ -343,9 +343,9 @@ def run_omni_scenario_rq(
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         start_ts = time.time()
 
@@ -443,9 +443,9 @@ def run_omni_contrast_rq(
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         start_ts = time.time()
 
@@ -485,9 +485,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         recovered_roots = _recover_mixed_nodir_roots(wd)
@@ -774,9 +774,9 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         recovered_roots = _recover_mixed_nodir_roots(wd)
@@ -932,9 +932,9 @@ def _finalize_omni_contrasts_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         try:
@@ -959,9 +959,9 @@ def delete_omni_contrasts_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
@@ -989,9 +989,9 @@ def _compile_hillslope_summaries_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         omni = Omni.getInstance(wd)
@@ -1013,9 +1013,9 @@ def _finalize_omni_scenarios_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         try:

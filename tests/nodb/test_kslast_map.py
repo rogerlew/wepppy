@@ -110,7 +110,8 @@ def test_bad_map_and_missing_keys_fail(mapped_wepp):
 
 
 @pytest.mark.parametrize('multi_ofe', [False, True])
-def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, monkeypatch, multi_ofe):
+@pytest.mark.parametrize('single_input_policy', [False, True])
+def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, monkeypatch, multi_ofe, single_input_policy):
     from concurrent.futures import Future
     import wepppy.nodb.core.wepp as wm
     import wepppy.nodb.core.wepp_prep_service as service
@@ -125,6 +126,13 @@ def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, 
     monkeypatch.setattr(wm,'createProcessPoolExecutor',lambda **kwargs:Pool())
     monkeypatch.setattr(service,'createProcessPoolExecutor',lambda **kwargs:Pool())
     w=mapped_wepp
+    w.config_get_str=lambda section, option, default=None: {
+        ('nodb','single_user_defined_uploads'): str(single_input_policy).lower(),
+        ('wepp','bin'): 'wepp_260803',
+    }.get((section,option),default)
+    w.mods=()
+    w.wepp_bin='wepp_260803'
+    w.watershed_instance.mofe_buffer=False
     w.class_name='Wepp'
     w.runs_dir=str(Path(w.wd)/'wepp/runs')
     w.climate_instance=SimpleNamespace(input_years=2)
@@ -144,6 +152,8 @@ def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, 
         pars=arg[13 if multi_ofe else 4]
         assert pars['aggregation']=='project_cell_area_mean'
         assert 'lng' not in pars
+        if multi_ofe:
+            assert arg[14] is single_input_policy
     captured.clear()
     w.kslast=None
     with pytest.raises(ValueError,match='Missing parameter coverage'):

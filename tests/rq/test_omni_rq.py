@@ -17,6 +17,13 @@ import wepppy.rq.omni_rq as omni_rq
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    monkeypatch.setattr(omni_rq, "Ron", SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda section, option, default=None: default),
+    ))
+
+
 def _child_job_stub(job_id: str) -> SimpleNamespace:
     """Enqueued-job stub whose status keeps `_release_deferred_job_if_ready` a no-op."""
     return SimpleNamespace(
@@ -1119,3 +1126,39 @@ def test_finalize_omni_scenarios_rq_timestamps_and_triggers(
     assert prep.timestamps == [omni_rq.TaskEnum.run_omni_scenarios]
     assert any("TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED" in message for _, message in published)
     assert any("TRIGGER omni END_BROADCAST" in message for _, message in published)
+
+
+@pytest.mark.parametrize('worker_name,args', [
+    ('run_omni_scenario_rq', ('demo', {})),
+    ('run_omni_contrast_rq', ('demo', 1)),
+    ('run_omni_scenarios_rq', ('demo',)),
+    ('run_omni_contrasts_rq', ('demo',)),
+    ('_finalize_omni_contrasts_rq', ('demo',)),
+    ('delete_omni_contrasts_rq', ('demo',)),
+    ('_compile_hillslope_summaries_rq', ('demo',)),
+    ('_finalize_omni_scenarios_rq', ('demo',)),
+])
+def test_excluded_workers_preserve_policy_error_before_hydration(
+    omni_rq_environment, monkeypatch, worker_name, args,
+):
+    from wepppy.nodb.single_input_policy import SingleInputPolicyError
+
+    _, omni_cls, published, _ = omni_rq_environment
+    monkeypatch.setattr(omni_rq, 'Ron', SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda *args: 'true'),
+    ))
+
+    def unexpected_hydration(*args, **kwargs):
+        raise AssertionError('Excluded worker hydrated Omni')
+
+    monkeypatch.setattr(omni_cls, 'getInstance', unexpected_hydration)
+    with pytest.raises(SingleInputPolicyError, match='omni is unavailable'):
+        getattr(omni_rq, worker_name)(*args)
+    assert sum(' EXCEPTION ' in message for _, message in published) == 1
+    assert all(' EXCEPTION' in message for _, message in published)
+    if worker_name == 'run_omni_scenario_rq':
+        import json
+        details = [message.split(' EXCEPTION_JSON ', 1)[1]
+                   for _, message in published if ' EXCEPTION_JSON ' in message]
+        assert len(details) == 1
+        assert json.loads(details[0])['type'] == 'SingleInputPolicyError'

@@ -23,6 +23,13 @@ RUN_ID = "test-run"
 CONFIG = "cfg"
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda section, option, default=None: default),
+    ))
+
+
 @pytest.fixture()
 def disturbed_client(
     monkeypatch: pytest.MonkeyPatch,

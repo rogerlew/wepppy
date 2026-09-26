@@ -131,6 +131,7 @@ def test_build_treatments_updates_domlc_and_dumps_parquet(monkeypatch, tmp_path)
     monkeypatch.setattr(disturbed_module, "Disturbed", FakeDisturbed)
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments")
     treatments._treatments_domlc_d = {"101": "140"}
@@ -196,6 +197,7 @@ def test_build_treatments_propagates_thinning_to_eligible_mofe_segments(
     monkeypatch.setattr(disturbed_module, "Disturbed", FakeDisturbed)
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments.mofe")
     treatments._treatments_domlc_d = {"101": "140"}
@@ -264,6 +266,7 @@ def test_apply_mulch_updates_requested_mofe_assignment_only(tmp_path):
     landuse._locked = True
     landuse.lc_dir = str(landuse_dir)
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments.mofe.mulch")
     assignments = {"1": "41", "2": "51"}
@@ -349,6 +352,7 @@ def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
     )
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments.validate")
     treatments._treatments_domlc_d = {}
@@ -430,6 +434,7 @@ def test_validate_map_tie_break_prefers_larger_value_after_local_and_global_ties
     )
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments.validate.tie_break")
     treatments._treatments_domlc_d = {}
@@ -479,6 +484,7 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
     disturbed = DummyDisturbed()
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(tmp_path)
     treatments.logger = logging.getLogger("test.treatments.modify_soil")
 
@@ -566,6 +572,7 @@ def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, 
     monkeypatch.setattr(treatments_module, "WeppSoilUtil", FakeWeppSoilUtil)
 
     treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.config_get_str = lambda section, option, default=None: default
     treatments.wd = str(child_wd)
     treatments.logger = logging.getLogger("test.treatments.modify_soil.parent_fallback")
 

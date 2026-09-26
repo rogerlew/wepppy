@@ -13,6 +13,7 @@ pytestmark = pytest.mark.unit
 
 def _landuse_for_modify() -> Landuse:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.domlc_d = {'101': '90', '102': '90'}
     landuse.domlc_mofe_d = {
         '101': {'1': '90', '2': '90'},

@@ -13,6 +13,7 @@ pytestmark = pytest.mark.unit
 
 def test_resolve_effective_mapping_reference_prefers_custom_map(tmp_path: Path) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/custom-map.json"
@@ -27,6 +28,7 @@ def test_resolve_effective_mapping_reference_prefers_custom_map(tmp_path: Path) 
 
 def test_resolve_effective_mapping_reference_rejects_missing_custom_map(tmp_path: Path) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/missing-map.json"
@@ -40,6 +42,7 @@ def test_resolve_effective_mapping_reference_rejects_missing_custom_map(tmp_path
 
 def test_resolve_effective_mapping_reference_clears_missing_system_override(tmp_path: Path) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
@@ -54,6 +57,7 @@ def test_resolve_effective_mapping_reference_clears_system_override_legacy_relpa
     tmp_path: Path,
 ) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = r"./landuse\landuse_user_defined_mapping.json"
@@ -68,6 +72,7 @@ def test_clear_stale_system_custom_mapping_reference_does_not_acquire_lock_when_
     tmp_path: Path,
 ) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
 
@@ -93,6 +98,7 @@ def test_clear_stale_system_custom_mapping_reference_does_not_acquire_lock_when_
 
 def test_get_mapping_dict_wraps_invalid_custom_map(tmp_path: Path) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/custom-map.json"
@@ -113,6 +119,7 @@ def test_single_selection_setter_uses_effective_mapping(
     tmp_path: Path,
 ) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/custom-map.json"
@@ -138,6 +145,7 @@ def test_mofe_buffer_selection_setter_uses_effective_mapping(
     tmp_path: Path,
 ) -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/custom-map.json"
@@ -174,6 +182,7 @@ def test_build_managements_rebuilds_cached_management_entries(monkeypatch: pytes
         cellsize = 1.0
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = "/tmp/run"
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = None
@@ -242,6 +251,7 @@ def test_build_managements_relabels_stale_custom_mapping_description(
     }
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"

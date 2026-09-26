@@ -65,7 +65,7 @@ Warning:
 """
 
 # standard library
-from wepppy.nodb.single_input_policy import require_wepp_input_policy, require_feature_allowed
+from wepppy.nodb.single_input_policy import require_wepp_input_policy, single_input_uploads_enabled, require_feature_allowed
 from wepppy.nodb.single_input_artifacts import validate_prepared_single_inputs
 import errno
 import logging

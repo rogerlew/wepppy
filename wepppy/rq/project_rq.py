@@ -1294,12 +1294,12 @@ def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "disturbed")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:watershed'
+        ron = Ron.getInstance(wd)
+        require_feature_allowed(ron, "disturbed")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
             
-        ron = Ron.getInstance(wd)
         sbs_scope = "baer.nodb" if "baer" in (ron.mods or ()) else "disturbed.nodb"
         clear_nodb_file_cache(runid, pup_relpath=sbs_scope)
         ron.init_sbs_map(sbs_map, ron.disturbed)
@@ -2268,9 +2268,9 @@ def build_treatments_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "treatments")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:treatments'
+        require_feature_allowed(Ron.getInstance(wd), "treatments")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _build_treatments() -> None:
             clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
@@ -2510,9 +2510,9 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        require_feature_allowed(Ron.getInstance(wd), "debris_flow")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:debris_flow'
+        require_feature_allowed(Ron.getInstance(wd), "debris_flow")
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         options = payload or {}

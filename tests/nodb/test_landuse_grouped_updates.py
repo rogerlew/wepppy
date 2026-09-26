@@ -34,6 +34,7 @@ class _LockRecorder:
 
 def test_landuse_apply_set_landuse_mode_updates_noop_skips_lock_and_mutation() -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
     landuse._single_man = {"dom": "101"}
@@ -53,6 +54,7 @@ def test_landuse_apply_set_landuse_mode_updates_uses_one_lock_and_applies_values
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = None
@@ -88,6 +90,7 @@ def test_landuse_apply_set_landuse_mode_updates_uses_one_lock_and_applies_values
 
 def test_landuse_apply_set_landuse_mode_updates_mode_only_preserves_single_selection_state() -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
     landuse._single_man = {"dom": "101"}
@@ -112,6 +115,7 @@ def test_landuse_apply_set_landuse_mode_updates_rejects_single_mode_for_mofe(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
     landuse._single_man = {"dom": "101"}
@@ -138,6 +142,7 @@ def test_landuse_apply_set_landuse_mode_updates_selection_only_preserves_mode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._mapping = "disturbed"
     landuse._custom_mapping_relpath = None
@@ -173,6 +178,7 @@ def test_landuse_apply_set_landuse_mode_updates_selection_only_preserves_mode(
 
 def test_landuse_apply_set_landuse_mode_updates_preserves_mode_validation_contract() -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
     landuse._single_man = {"dom": "101"}
@@ -190,6 +196,7 @@ def test_landuse_apply_set_landuse_mode_updates_preserves_mode_validation_contra
 
 def test_landuse_apply_set_landuse_mode_updates_rolls_back_state_on_selection_failure() -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
     landuse._single_man = {"dom": "101"}
@@ -220,6 +227,7 @@ def test_landuse_apply_set_landuse_mode_updates_rolls_back_state_on_selection_fa
 def test_landuse_apply_set_landuse_mode_updates_rolls_back_with_missing_single_man(
 ) -> None:
     landuse = object.__new__(Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._single_selection = "101"
 

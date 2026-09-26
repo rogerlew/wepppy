@@ -3,7 +3,8 @@
 
 Maintain this living plan under `docs/prompt_templates/codex_exec_plans.md`, including
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective.
-This is the active plan for `20260925_single_user_defined_landuse_soils` only.
+Completed 2026-09-26 for `20260925_single_user_defined_landuse_soils`.
+Implementation and validation are complete; production rollout is separate.
 The operator authorized execution and commits on 2026-09-25. Execute this plan
 through validation; deployment remains outside scope. Runtime implementation follows reviewed contract ancestor `0efd7ea46`.
 
@@ -28,7 +29,7 @@ Existing projects are not converted, and no Disturbed Class selectors are needed
 
 
 - [x] (2026-09-25 UTC) Operator authorized execution; committed all existing worktree contents as `cb09ab422`.
-- [x] (2026-09-25 UTC) Draft canonical SUDI-01 contract, parameterization ADR and contract/source matrix; independent review pending.
+- [x] (2026-09-25 UTC) Draft canonical SUDI-01 contract, parameterization ADR and contract/source matrix; subsequent independent review is recorded below.
 
 - [x] (2026-09-25 UTC) Inspect mode enums, parsers, builders, controls, configuration authority, and final preparation.
 - [x] (2026-09-25 UTC) Complete delegated dependency review and independent work-package review.
@@ -41,7 +42,9 @@ Existing projects are not converted, and no Disturbed Class selectors are needed
 - [x] Implement Builder serialization/resolution, feature/buffer policy, and refresh preservation.
 - [x] Implement validated source lifecycle, additive modes, and non-disturbed single/multiple-OFE preparation.
 - [x] Implement themed run controls and user-visible error/filename round trips.
-- [ ] Complete artifact/environment acceptance, implementation reviews, and documentation closeout.
+- [x] Complete bounded artifact/environment acceptance and independent security/correctness/QA reviews.
+- [x] Commit implementation checkpoint `c1d02d73f` with retained evidence.
+- [x] Finish repository regression validation and documentation closeout; retained limitations are explicit.
 
 ## Surprises & Discoveries
 
@@ -64,7 +67,7 @@ mixed-SBS acceptance matrix are superseded, not additional implementation duties
 The parser historically swaps contour and drainage scenario references. Checked
 projects now explicitly use native reference semantics through summaries and
 preparation; legacy defaults are preserved. Asymmetric generated-file regression
-coverage is being added. QA also caught decimal underflow (`1e-999`), now rejected.
+coverage passes. QA also caught decimal underflow (`1e-999`), now rejected.
 
 ## Decision Log
 
@@ -93,7 +96,7 @@ resolution and evidence before implementation.
 ## Outcomes & Retrospective
 
 
-Runtime implementation is present and validation continues. Authenticated multipart
+Runtime implementation and validation are complete. Authenticated multipart
 requests accepted both sources in the disposable Builder project
 `single-input-acceptance-20260925`. The existing worker daemon had old mode enums;
 a fresh process in the same worker container executed only those failed jobs.
@@ -104,8 +107,10 @@ climate were controlled fixtures, not an end-to-end delineation/climate workflow
 Independent runtime review closed reload transport, initial visibility/load-all,
 and excluded direct-route gaps. Retained browser evidence covers three themes;
 real archive/restore, fork, publication fault and authenticated download checks
-passed. Native execution also passed at 32 OFEs. Final broad validation, review
-closure and commits remain open. No production deployment has occurred.
+passed. Native execution also passed at 32 OFEs. Final correction runs pass (353 tests across fourteen corrected modules), and
+all independent review findings are closed. Validation evidence and preexisting
+limitations are retained in `artifacts/20260926_validation_summary.md`. No
+production deployment has occurred.
 
 ## Context and Orientation
 
@@ -326,11 +331,11 @@ this is not a migration or fleet repair.
 ## Artifacts and Notes
 
 
-The brief records current requirements; discovery lists remaining choices; the
-Builder design and dependency artifact locate implementation boundaries. The
-work-package review retains initial findings and correction disposition. The
-security artifact exists at design stage with independent approval pending.
-No runtime or deployment evidence is claimed.
+The brief and canonical SUDI-01 contract record resolved requirements. Discovery,
+Builder design and dependency tracing retain decision provenance. Independent
+planning, correctness, QA and security findings are closed. The validation summary
+and adjacent acceptance artifacts retain runtime evidence and explicit limits.
+No production deployment is claimed.
 
 ## Interfaces and Dependencies
 
@@ -344,7 +349,8 @@ Revision note (2026-09-25 UTC): Replaced the superseded per-domain disturbance
 plan with the operator-selected Builder policy; disabled buffer OFEs at project
 scope; moved design security review before the checkpoint and made Builder,
 feature, buffer, and refresh implementation explicit. Independent re-review confirmed all three planning
-findings closed; security approval and the canonical checkpoint remain pending.
+findings closed; design security approval and the canonical checkpoint were
+subsequently completed before runtime implementation.
 
 Execution note (2026-09-25): authorization received; all-worktree snapshot committed. Exact interfaces, compatibility and source lifecycle now live in `docs/schemas/single-user-defined-inputs-contract.md`; independent checkpoint reviews precede runtime edits.
 
@@ -368,7 +374,8 @@ metadata repair, contained roots, and independent MOFE combinations. Real prepar
 files at2/12OFEs pass native `wepp_260803` execution. Config-refresh preview/apply
 preserves opted-in capabilities and policy. Runtime security findings, real-request,
 browser theme/Tab, clone/archive, fault and download acceptance are complete.
-Final repository regression validation and closeout remain in progress.
+Final repository regression validation and closeout are complete, with the
+existing management stub debt and optional WBT mismatch retained explicitly.
 
 Discoveries: ordinary Tenerife soil templates include symbolic values and trailing
 display colors; use existing normalization before stacking. A missing final newline
@@ -377,4 +384,4 @@ sources with multiple initial scenarios require the active reference for display
 cover and all referenced conditions for overrides. Strict98.4 must reject modern
 fields even under a spoofed version header, and finite Python floats are not enough
 to ensure native REAL representability. These are now covered by targeted changes;
-post-fix review is still required.
+post-fix independent review is complete.

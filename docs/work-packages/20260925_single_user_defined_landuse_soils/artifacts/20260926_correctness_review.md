@@ -11,6 +11,8 @@ modes, generated artifacts, reports and lifecycle acceptance. Review date:
 | --- | --- | --- | --- | --- |
 | COR-R01 | Medium | `wepppy/weppcloud/templates/reports/landuse.htm:58-67` rendered only static `landuseoptions` in the mapping select. The new `single-user-defined` summary key had no option, so the browser selected an unrelated first catalog entry. `controllers_js/landuse.js:556-565` recorded that value as the current mapping, both misrepresenting the source and preventing an intentional change to that first option from being staged. | Render a selected current-source option for the uploaded summary while retaining catalog alternatives. Verify the selected value and staging a remap to the first catalog choice. | Closed: selected escaped source option confirmed; independent render test and controller staging regression passed |
 | COR-R02 | Medium | `wepppy/weppcloud/routes/nodb_api/wepp_bp.py:624-680` obtained a retained Disturbed controller and rendered disturbance-adjusted management without checking the upload policy. `routes/nodb_api/landuse_bp.py:653` advertised the preview based only on module IDs. The canonical exclusion covers reports and retained controllers as well as the main page. | Reject the excluded effective-management preview before Disturbed lookup and suppress its report links under the immutable policy. Preserve ordinary management viewing and legacy previews. | Closed by readback: endpoint, landuse report and all three hill/preparation report call sites enforce policy; independent endpoint rejection test passed |
+| COR-R03 | High | The broader sweep found `Wepp._prep_multi_ofe` calling `single_input_uploads_enabled` without importing it. Building a task list for any nonempty MOFE run raised `NameError`, including legacy runs. Direct worker/native tests did not traverse this orchestrator. | Import the helper and exercise actual task construction under both checked and legacy policies, preserving existing worker argument positions. | Closed: import verified; four orchestration regressions independently pass |
+| COR-R04 | Medium | `Soils.build` eagerly evaluated `watershed_instance` in the new policy check, adding a Watershed dependency before legacy SpatialAPI dispatch. The existing root-materialization regression exposed that compatibility change. | Load Watershed for this policy check only when uploads are enabled; retain mode-5 capability rejection and all opted-in exclusions. | Closed: conditional access and policy checks verified; root-materialization and actual-artifact suites independently pass |
 
 No remaining correctness or UX blocker was found in the bounded reviewed paths.
 This verdict closes the reported code findings; it does not substitute for the
@@ -70,6 +72,48 @@ The owner reports the independent security findings closed; that status is
 governed by the [security artifact](20260925_runtime_security_review.md). Complete
 the remaining required gates, retain regression evidence and re-review any
 subsequent material source changes before overall release approval.
+
+## Final orchestration correction
+
+The reviewer verified the corrected policy-helper import in
+`wepppy/nodb/core/wepp.py:68` and the actual task construction in
+`Wepp._prep_multi_ofe`. The existing Kslast provenance remains at argument 13;
+the native-reference policy is appended at argument 14. The worker still accepts
+older tuples without that appended argument, retaining legacy behavior.
+
+The expanded
+`tests/nodb/test_kslast_map.py::test_both_orchestrators_use_grid_mean_before_worker_submission`
+uses both checked and legacy policies for the single- and multiple-OFE
+orchestrators. It verifies policy propagation, existing Kslast aggregation and
+failure before worker submission when parameter coverage is missing. The reviewer
+independently reran all four cases: **4 passed**, with two existing deprecation
+warnings. The owner's retained logs also show **30 passing Kslast tests** and
+**49 passing orchestration/artifact/reference tests**; the latter preceded the
+additional checked-policy parameter cases. These focused results close COR-R03
+without claiming that the ongoing repository sweep has completed.
+
+## Final soil compatibility and catalog correction
+
+`wepppy/nodb/core/soils.py:1163` now resolves the immutable upload policy before
+accessing Watershed. Unchecked projects pass no Watershed to the policy helper;
+legacy SpatialAPI still creates its root and dispatches without hydrating that
+controller. Checked projects retain the Watershed buffer check, and mode 5 still
+requires the upload capability. The existing SpatialAPI regression supplies an
+explicit legacy configuration and no Watershed fixture, so it exercises the
+compatibility boundary rather than bypassing the policy helper.
+
+The reviewer independently ran `tests/nodb/test_root_dir_materialization.py` and
+`tests/nodb/test_single_input_artifacts.py`: **15 passed**, with two existing
+deprecation warnings. The separate combined late-regression run had Omni RQ
+failures and must not be counted as a complete pass; the owner is addressing
+those separately during the ongoing repository sweep.
+
+The capability catalog correction changes exactly five `first_reader_revision`
+values from the contract placeholder to implementation commit `c1d02d73f`.
+Independent structural comparison confirms all other values, including existing
+entries and capability payload hashes, remain unchanged. The referenced commit
+contains the initial upload implementation. This is a provenance correction,
+not a capability payload change.
 
 ## Preexisting fork limitation found during acceptance
 

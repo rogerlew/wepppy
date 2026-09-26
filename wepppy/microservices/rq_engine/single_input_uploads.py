@@ -109,4 +109,3 @@ async def input_payload(request, kind, *, boolean_fields=()):
         # lifetime for validation errors, disconnects and task cancellation too.
         for handle in parser._files_to_close_on_error:
             handle.close()
-

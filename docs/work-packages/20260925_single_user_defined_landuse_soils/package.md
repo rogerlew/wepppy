@@ -1,6 +1,6 @@
 # Single User-Defined landuse and soils
 
-**Status**: Implemented — final regression validation and review closeout in progress
+**Status**: Closed 2026-09-26 — implemented and validated; not deployed
 **Started**: 2026-09-25 20:17 UTC
 **Owner**: Requesting operator; implementation unassigned
 **Security impact**: `high` — uploads, parsers, filesystem writes, and feature-policy enforcement
@@ -143,10 +143,11 @@ Persisted intent or a successful job is not output correctness.
 
 ## Deliverables and readiness
 
-The [ExecPlan](prompts/active/single_user_defined_landuse_soils_execplan.md),
+The [ExecPlan](prompts/completed/single_user_defined_landuse_soils_execplan.md),
 [tracker](tracker.md), discovery/design notes, and review artifacts provide the
-implementation handoff. WPR-01 through WPR-03 corrections are independently confirmed and closed. Format/lifecycle decisions, canonical amendments, design security
-approval, contract reviews, and the ancestor checkpoint remain pending.
+implementation handoff. Planning, correctness, QA and security findings are closed.
+The canonical contract, ADR and ancestor checkpoint precede implementation; the
+validation summary records completed evidence and preexisting limitations.
 
 ## References
 
@@ -169,3 +170,13 @@ exact interfaces and errors are specified there. Uniform assignment is the Build
 outcome; subsequent deliberate class edits remain functional and rebuilding
 mode5 restores uniform source assignment. Native-reader bounds apply before
 execution; no buffer geometry or silent topology truncation is permitted.
+
+## Completion
+
+Implementation checkpoint: `c1d02d73f`; the closeout commit contains final
+regression corrections and evidence. Independent correctness, QA and security
+reviews have no unresolved feature findings. See the
+[validation summary](artifacts/20260926_validation_summary.md) for native execution,
+real upload/RQ/source lifecycle evidence, test results and retained limitations.
+Existing management stub debt, optional WBT diagnostics mismatch and generic
+fork source-prefix destination rewriting remain outside this package.

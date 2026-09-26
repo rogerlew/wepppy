@@ -35,6 +35,7 @@ def test_clip_hillslopes_configured_preserves_stored_choice_for_multi_ofe(
 ) -> None:
     monkeypatch.setattr(Watershed, "multi_ofe", property(lambda _self: True))
     watershed = object.__new__(Watershed)
+    watershed.config_get_str = lambda section, option, default=None: default
     watershed._clip_hillslopes = True
 
     assert watershed.clip_hillslopes_configured is True
@@ -43,6 +44,7 @@ def test_clip_hillslopes_configured_preserves_stored_choice_for_multi_ofe(
 
 def test_apply_build_subcatchment_updates_noop_skips_lock_and_mutation() -> None:
     watershed = object.__new__(Watershed)
+    watershed.config_get_str = lambda section, option, default=None: default
     watershed._clip_hillslopes = True
     watershed._walk_flowpaths = True
     watershed._clip_hillslope_length = 450.0
@@ -70,6 +72,7 @@ def test_apply_build_subcatchment_updates_noop_skips_lock_and_mutation() -> None
 
 def test_apply_build_subcatchment_updates_uses_one_lock_and_applies_falsey_values() -> None:
     watershed = object.__new__(Watershed)
+    watershed.config_get_str = lambda section, option, default=None: default
     watershed._clip_hillslopes = True
     watershed._walk_flowpaths = True
     watershed._clip_hillslope_length = 450.0
@@ -108,6 +111,7 @@ def test_apply_build_subcatchment_updates_uses_one_lock_and_applies_falsey_value
 
 def test_apply_build_subcatchment_updates_clamps_mofe_max_ofes_floor_to_one() -> None:
     watershed = object.__new__(Watershed)
+    watershed.config_get_str = lambda section, option, default=None: default
     watershed._mofe_max_ofes = 7
 
     lock = _LockRecorder()

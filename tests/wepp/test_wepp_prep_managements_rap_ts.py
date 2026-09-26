@@ -90,6 +90,7 @@ def test_prep_managements_rap_ts_only_updates_undisturbed_classes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     wepp = Wepp.__new__(Wepp)
+    wepp.config_get_str = lambda section, option, default=None: default
     wepp.wd = str(tmp_path)
     Path(wepp.runs_dir).mkdir(parents=True, exist_ok=True)
     Path(wepp.fp_runs_dir).mkdir(parents=True, exist_ok=True)

@@ -37,6 +37,7 @@ def owner(tmp_path, monkeypatch):
     monkeypatch.setattr(module.Landuse, 'ron_instance', property(lambda self: SimpleNamespace(cellsize=30.)))
     monkeypatch.setattr(module.Landuse, 'wepp_instance', property(lambda self: SimpleNamespace(_multi_ofe=True)))
     landuse = module.Landuse.__new__(module.Landuse)
+    landuse.config_get_str = lambda section, option, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mapping = None
     keys = list(load_map())[:2]

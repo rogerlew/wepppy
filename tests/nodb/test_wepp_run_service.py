@@ -82,7 +82,7 @@ def test_run_hillslopes_keeps_configured_bin_for_agriculture_crops(
 @pytest.mark.parametrize(
     ("multi_ofe", "expected_timeout_s"),
     [
-        (False, 60),
+        (False, 120),
         (True, 300),
     ],
 )

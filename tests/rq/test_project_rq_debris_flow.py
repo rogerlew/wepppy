@@ -14,6 +14,9 @@ pytestmark = pytest.mark.unit
 @pytest.fixture()
 def debris_flow_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     import wepppy.rq.project_rq as project
+    monkeypatch.setattr(project, "Ron", SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda section, option, default=None: default),
+    ))
 
     published = []
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))

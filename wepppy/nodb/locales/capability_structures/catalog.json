@@ -3233,7 +3233,7 @@
       "structure_sha256": "b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92"
     },
     {
-      "first_reader_revision": "SUDI-01-0efd7ea46",
+      "first_reader_revision": "c1d02d73f",
       "payload": {
         "allowed_model_pairs": [
           [
@@ -4343,7 +4343,7 @@
       "structure_sha256": "8c9fd249f34531e3254ecb0f57e2724f335ef3e5d23cd581ac256cc0168f091f"
     },
     {
-      "first_reader_revision": "SUDI-01-0efd7ea46",
+      "first_reader_revision": "c1d02d73f",
       "payload": {
         "allowed_model_pairs": [
           [
@@ -4525,7 +4525,7 @@
       "structure_sha256": "a5700b21dc60003ced20e4251c46c2ee0bdfdda9134c7f67e8344590d14626d5"
     },
     {
-      "first_reader_revision": "SUDI-01-0efd7ea46",
+      "first_reader_revision": "c1d02d73f",
       "payload": {
         "allowed_model_pairs": [
           [
@@ -4899,7 +4899,7 @@
       "structure_sha256": "72e194b11c4c0969a41e0c5494bfa6dc6b2266f137d4a98e6401bd9aa39652a8"
     },
     {
-      "first_reader_revision": "SUDI-01-0efd7ea46",
+      "first_reader_revision": "c1d02d73f",
       "payload": {
         "allowed_model_pairs": [
           [
@@ -5046,7 +5046,7 @@
       "structure_sha256": "b47e27c6aa1e3740cb9cfd3cffc181b9cbedf702e58ce7e11c786f0db5b77bf9"
     },
     {
-      "first_reader_revision": "SUDI-01-0efd7ea46",
+      "first_reader_revision": "c1d02d73f",
       "payload": {
         "allowed_model_pairs": [
           [

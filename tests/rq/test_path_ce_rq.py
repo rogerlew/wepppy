@@ -81,6 +81,9 @@ class PathCeStub:
 
 @pytest.fixture()
 def path_ce_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.setattr(path_ce_rq, "Ron", SimpleNamespace(
+        getInstance=lambda wd: SimpleNamespace(config_get_str=lambda section, option, default=None: default),
+    ))
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         path_ce_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message))

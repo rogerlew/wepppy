@@ -24,6 +24,7 @@ def test_soils_build_creates_root_before_spatial_api_dispatch(
     wd.mkdir(parents=True, exist_ok=True)
 
     soils = Soils.__new__(Soils)
+    soils.config_get_str = lambda section, option, default=None: default
     soils.wd = str(wd)
     soils.logger = logging.getLogger("tests.nodb.soils.root_materialization")
     soils._mode = SoilsMode.SpatialAPI
@@ -80,6 +81,7 @@ def test_soils_clean_preserves_managed_projection_symlink_mount(tmp_path: Path) 
     sidecar.write_text("stale", encoding="utf-8")
 
     soils = Soils.__new__(Soils)
+    soils.config_get_str = lambda section, option, default=None: default
     soils.wd = str(wd)
     soils._soils_is_vrt = True
     soils.islocked = lambda: True
@@ -107,6 +109,7 @@ def test_soils_clean_unlinks_unmanaged_symlink_without_deleting_target(tmp_path:
     soils_root.symlink_to(mount_target, target_is_directory=True)
 
     soils = Soils.__new__(Soils)
+    soils.config_get_str = lambda section, option, default=None: default
     soils.wd = str(wd)
     soils._soils_is_vrt = True
     soils.islocked = lambda: True

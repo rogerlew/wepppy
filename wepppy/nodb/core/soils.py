@@ -1160,8 +1160,11 @@ class Soils(NoDbBase):
         max_workers: Optional[int] = None,
         retrieve_gridded_ssurgo: bool = True,
     ) -> None:
-        require_single_input_policy(self, watershed=self.watershed_instance,
-                                    require_enabled=self.mode == SoilsMode.SingleUserDefined)
+        upload_policy = single_input_uploads_enabled(self)
+        require_single_input_policy(
+            self, watershed=self.watershed_instance if upload_policy else None,
+            require_enabled=self.mode == SoilsMode.SingleUserDefined,
+        )
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')

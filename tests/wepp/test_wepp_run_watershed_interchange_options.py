@@ -19,6 +19,7 @@ def _noop_timed(*args, **kwargs):
 
 def test_run_watershed_respects_contrast_output_options(tmp_path, monkeypatch):
     wepp = Wepp.__new__(Wepp)
+    wepp.config_get_str = lambda section, option, default=None: default
     wepp.wd = str(tmp_path / "omni" / "contrasts" / "1")
 
     runs_dir = Path(wepp.runs_dir)

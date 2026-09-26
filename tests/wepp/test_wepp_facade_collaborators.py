@@ -14,6 +14,7 @@ pytestmark = pytest.mark.unit
 
 def _new_detached_wepp(tmp_path: Path, logger_name: str) -> Wepp:
     wepp = Wepp.__new__(Wepp)
+    wepp.config_get_str = lambda section, option, default=None: default
     wepp.wd = str(tmp_path)
     wepp.logger = logging.getLogger(logger_name)
     wepp._logger = wepp.logger
