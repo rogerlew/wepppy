@@ -3597,6 +3597,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 operation_id=build_landuse_id,
                 path="/api/runs/{runid}/{config}/build-landuse",
                 execution_mode="async",
+                content_types=["application/json", "application/x-www-form-urlencoded", "multipart/form-data"],
                 returns_job=True,
                 job_key="build_landuse_rq",
                 required_fields=["job_id"],
@@ -3611,6 +3612,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "request": {
                     "type": "object",
                     "properties": {
+                        "input_upload_single_landuse": {
+                            "type": "string", "format": "binary", "constraint_mode": "static",
+                            "description": "Single User-Defined mode 5 only, with project opt-in. Version 98.4; one OFE; .man/.MAN; maximum 5 MiB. Omit to reuse the accepted source.",
+                        },
                         "landuse_db": {
                             **_landuse_dataset_field(runtime),
                         },
@@ -4161,6 +4166,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 operation_id=build_soils_id,
                 path="/api/runs/{runid}/{config}/build-soils",
                 execution_mode="async",
+                content_types=["application/json", "application/x-www-form-urlencoded", "multipart/form-data"],
                 returns_job=True,
                 job_key="build_soils_rq",
                 required_fields=["job_id"],
@@ -4175,6 +4181,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "request": {
                     "type": "object",
                     "properties": {
+                        "input_upload_single_soil": {
+                            "type": "string", "format": "binary", "constraint_mode": "static",
+                            "description": "Single User-Defined mode 5 only, with project opt-in. Version 7778; one OFE; .sol/.SOL; maximum 5 MiB. Omit to reuse the accepted source.",
+                        },
                         "soil_mode": {
                             **copy.deepcopy(build_soil_mode_field),
                         },

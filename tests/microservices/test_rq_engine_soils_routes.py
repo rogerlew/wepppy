@@ -88,6 +88,7 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         initial_sat = None
@@ -133,6 +134,7 @@ def test_build_soils_rejects_invalid_capability_authority_before_mutation(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         initial_sat = "unchanged"
         clear_ssurgo_cache_on_rebuild = "unchanged"
 
@@ -166,6 +168,7 @@ def test_build_soils_rejects_hostile_native_mode_before_mutation(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         mode = soils_routes.SoilsMode.Gridded
@@ -200,6 +203,7 @@ def test_build_soils_allows_exact_current_mode_outside_live_axis(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         mode = soils_routes.SoilsMode.Single
@@ -232,6 +236,7 @@ def test_build_soils_persists_authorized_different_mode(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         mode = soils_routes.SoilsMode.SingleDb
@@ -263,6 +268,7 @@ def test_build_soils_rejects_disagreeing_mode_aliases_before_mutation(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         mode = soils_routes.SoilsMode.SingleDb
@@ -299,6 +305,7 @@ def test_build_soils_persists_cache_clear_option_for_batch(
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "batch"
         mods: set[str] = set()
         initial_sat = None
@@ -360,6 +367,7 @@ def test_build_soils_rejects_mismatched_config_before_mutation(
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         initial_sat = "unchanged"
@@ -393,6 +401,7 @@ def test_build_soils_accepts_normalized_matching_config(monkeypatch: pytest.Monk
     )
 
     class DummySoils:
+        mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
         initial_sat = None

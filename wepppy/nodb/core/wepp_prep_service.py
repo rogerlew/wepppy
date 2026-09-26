@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 import inspect
 import os
 import shutil
@@ -55,7 +56,7 @@ class WeppPrepService:
         translator = watershed.translator_factory()
 
         reveg = False
-        disturbed = wepp_module.Disturbed.getInstance(wepp.wd, allow_nonexistent=True)
+        disturbed = None if single_input_uploads_enabled(wepp) else wepp_module.Disturbed.getInstance(wepp.wd, allow_nonexistent=True)
         if disturbed is not None:
             if disturbed.sol_ver == 9005.0:
                 reveg = True
@@ -125,7 +126,7 @@ class WeppPrepService:
 
         climate = wepp.climate_instance
         soils = wepp.soils_instance
-        disturbed = wepp_module.Disturbed.tryGetInstance(wd)
+        disturbed = None if single_input_uploads_enabled(wepp) else wepp_module.Disturbed.tryGetInstance(wd)
         if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
             openwepp_native_managements = bool(
@@ -175,7 +176,9 @@ class WeppPrepService:
                 management = None
                 if hasattr(man_summary, "get_management"):
                     try:
-                        management = man_summary.get_management()
+                        management = man_summary.get_management(
+                            **({"native_scenario_references": True} if single_input_uploads_enabled(wepp) else {})
+                        )
                     except FileNotFoundError:
                         management = None
 
@@ -193,6 +196,7 @@ class WeppPrepService:
                         man_dir=str(Path(man_src).parent),
                         desc=man_summary.desc,
                         color=man_summary.color,
+                        native_scenario_references=single_input_uploads_enabled(wepp),
                     )
 
                     cancov_override = getattr(man_summary, "cancov_override", None)

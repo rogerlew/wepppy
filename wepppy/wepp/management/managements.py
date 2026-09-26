@@ -300,6 +300,64 @@ class SectionType(Enum):
     Year = 7
 
 
+def _input_count(lines, root, maximum, *, minimum=0):
+    value = int(lines.pop(0))
+    if getattr(root, '_strict_upload', False) and not minimum <= value <= maximum:
+        raise ValueError(f"Management count must be between {minimum} and {maximum}.")
+    return value
+
+
+class _StrictTokens(list):
+    def __init__(self, values):
+        super().__init__(values)
+        self.accessed = set()
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            self.accessed.add(index % len(self))
+        return super().__getitem__(index)
+
+    def __iter__(self):
+        self.accessed.update(range(len(self)))
+        return super().__iter__()
+
+    def complete(self):
+        return not self or len(self.accessed) == len(self)
+
+
+class _StrictLine(str):
+    def __new__(cls, text, owner):
+        value = super().__new__(cls, text)
+        value.owner = owner
+        return value
+
+    def __deepcopy__(self, memo):
+        return str(self)
+
+    def strip(self, *args):
+        return _StrictLine(super().strip(*args), self.owner)
+
+    def split(self, *args):
+        tokens = _StrictTokens(super().split(*args))
+        self.owner.tokens.append(tokens)
+        return tokens
+
+
+class _StrictInputLines(list):
+    def __init__(self, values):
+        super().__init__(values)
+        self.tokens = []
+
+    def check_tokens(self):
+        if any(not tokens.complete() for tokens in self.tokens):
+            raise ValueError("Management record contains unsupported extra fields.")
+        self.tokens.clear()
+
+    def pop(self, index=-1):
+        self.check_tokens()
+        return _StrictLine(super().pop(index), self)
+
+
 def _scenario_reference_factory(i, section_type, root, this):
     """
     builds and returns a ScenarioReference instance
@@ -307,6 +365,8 @@ def _scenario_reference_factory(i, section_type, root, this):
     this is the caller, and is for debugging purposes
     """
 
+    if getattr(root, '_strict_upload', False) and i < 0:
+        raise ValueError("Negative management scenario reference.")
     # no loops in section, should print 0
     if i == 0:
         return ScenarioReference()
@@ -454,6 +514,8 @@ class PlantLoopCropland(ScenarioBase):
 
         line = lines.pop(0).split()
         assert len(line) in [3, 4], line
+        if getattr(root, "_strict_upload", False) and len(line) != 3:
+            raise ValueError("Management98.4 does not support rcc")
         has_rcc = len(line) == 4
         self.tmpmin = float(line.pop(0))
         self.xmxlai = float(line.pop(0))
@@ -630,6 +692,8 @@ class OpLoopCropland(ScenarioBase):
 
         line = lines.pop(0).split()
         assert len(line) in [7, 9], line
+        if getattr(root, "_strict_upload", False) and len(line) != 7:
+            raise ValueError("Management98.4 does not support resurfacing fields")
         has_resurf = len(line) == 9
         self.rho = float(line.pop(0))
         self.rint = float(line.pop(0))
@@ -840,6 +904,8 @@ class IniLoopCropland(ScenarioBase):
 
         line = lines.pop(0).split()
         assert len(line) in (2, 4), line
+        if getattr(root, "_strict_upload", False) and len(line) != 2:
+            raise ValueError("Management98.4 does not support understory resurfacing")
         has_understory = len(line) == 4
         self.sumrtm = float(line.pop(0))
         self.sumsrm = float(line.pop(0))
@@ -1007,6 +1073,8 @@ class ContourLoopCropland(ScenarioBase):
         self.root = root
         line = lines.pop(0).split()
         assert len(line) in [4, 5], line
+        if getattr(root, "_strict_upload", False) and len(line) != 4:
+            raise ValueError("Management98.4 does not support permanent contour fields")
         has_permanent = len(line) == 5
         self.cntslp = float(line.pop(0))
         self.rdghgt = float(line.pop(0))
@@ -1240,6 +1308,8 @@ class YearLoopCroplandPerennialCut(ScenarioBase):
 
         self.root = root
         _line = lines.pop(0).strip().split()
+        if getattr(root, "_strict_upload", False) and len(_line) != 1:
+            raise ValueError("Management98.4 requires a single cut day")
         self.cutday = _parse_julian(_line[0])
         if len(_line) == 2:
             self._wtf = _line[1]  # TODO: get wepp source with 2017.1 suppport figure out wtf this is for
@@ -1304,14 +1374,14 @@ class YearLoopCroplandPerennial(ScenarioBase):
 
         self.ncut = self.cut = self.ncycle = self.graze = ''
         if mgtopt == 1:
-            self.ncut = ncut = int(lines.pop(0))
+            self.ncut = ncut = _input_count(lines, root, 25, minimum=1)
             assert ncut > 0
 
             self.cut = Loops()
             for i in range(ncut):
                 self.cut.append(YearLoopCroplandPerennialCut(lines, root))
         elif mgtopt == 2:
-            self.ncycle = ncycle = int(lines.pop(0))
+            self.ncycle = ncycle = _input_count(lines, root, 10, minimum=1)
             assert ncycle > 0
 
             self.graze = Loops()
@@ -1361,10 +1431,10 @@ class YearLoopCropland(ScenarioBase):
         self.tilseq = _scenario_reference_factory(i, SectionType.Surf, root, self)
 
         i = int(lines.pop(0))
-        self.conset = _scenario_reference_factory(i, SectionType.Drain, root, self)
+        self.conset = _scenario_reference_factory(i, SectionType.Contour if getattr(root, "_native_scenario_references", False) else SectionType.Drain, root, self)
 
         i = int(lines.pop(0))
-        self.drset = _scenario_reference_factory(i, SectionType.Contour, root, self)
+        self.drset = _scenario_reference_factory(i, SectionType.Drain if getattr(root, "_native_scenario_references", False) else SectionType.Contour, root, self)
 
         self.imngmt = imngmt = int(lines.pop(0))
         assert imngmt in [1, 2, 3], lines
@@ -1567,7 +1637,7 @@ class YearLoopRangeland(ScenarioBase):
         self.tilseq = _scenario_reference_factory(i, SectionType.Surf, root, self)
 
         i = int(lines.pop(0))
-        self.drset = _scenario_reference_factory(i, SectionType.Contour, root, self)
+        self.drset = _scenario_reference_factory(i, SectionType.Drain if getattr(root, "_native_scenario_references", False) else SectionType.Contour, root, self)
 
         self.grazig = grazig = int(lines.pop(0))
         assert self.grazig in [0, 1]
@@ -1697,7 +1767,7 @@ class PlantLoops(Loops):
     def __init__(self, lines, root):
         super(PlantLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 20, minimum=1)
         for j in range(n):
             super(PlantLoops, self).append(PlantLoop(lines, root))
 
@@ -1706,7 +1776,7 @@ class OpLoops(Loops):
     def __init__(self, lines, root):
         super(OpLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 32, minimum=0)
         for j in range(n):
             super(OpLoops, self).append(OpLoop(lines, root))
 
@@ -1715,7 +1785,7 @@ class IniLoops(Loops):
     def __init__(self, lines, root):
         super(IniLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 32, minimum=1)
         for j in range(n):
             super(IniLoops, self).append(IniLoop(lines, root))
 
@@ -1724,7 +1794,7 @@ class SurfLoops(Loops):
     def __init__(self, lines, root):
         super(SurfLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 30, minimum=0)
         for j in range(n):
             super(SurfLoops, self).append(SurfLoop(lines, root))
 
@@ -1733,7 +1803,7 @@ class ContourLoops(Loops):
     def __init__(self, lines, root):
         super(ContourLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 32, minimum=0)
         for j in range(n):
             super(ContourLoops, self).append(ContourLoop(lines, root))
 
@@ -1742,7 +1812,7 @@ class DrainLoops(Loops):
     def __init__(self, lines, root):
         super(DrainLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 32, minimum=0)
         for j in range(n):
             super(DrainLoops, self).append(DrainLoop(lines, root))
 
@@ -1751,7 +1821,7 @@ class YearLoops(Loops):
     def __init__(self, lines, root):
         super(YearLoops, self).__init__()
         self.root = root
-        n = int(lines.pop(0))
+        n = _input_count(lines, root, 32, minimum=1)
         for j in range(n):
             super(YearLoops, self).append(YearLoop(lines, root))
 
@@ -1763,6 +1833,8 @@ class Loop(ScenarioBase):
         self.name = lines.pop(0)
         self.description = _parse_desc(lines, root)
         self.landuse = int(lines.pop(0))
+        if getattr(root, "_strict_upload", False) and self.landuse != 1:
+            raise ValueError("Uploaded management requires cropland-format landuse 1 records.")
         self.ntill = None
         self.data = None
 
@@ -1898,7 +1970,7 @@ class SurfLoop(Loop):
         super(SurfLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        self.ntill = ntill = int(lines.pop(0))
+        self.ntill = ntill = _input_count(lines, root, 20, minimum=1)
 
         data_landuse = _effective_landuse_for_data(root, landuse)
 
@@ -1979,7 +2051,7 @@ class ManagementLoopManLoop(object):
     def __init__(self, lines, parent, root, year=None, ofe=None):
         self.root = root
         self.parent = parent
-        self.nycrop = int(lines.pop(0))
+        self.nycrop = _input_count(lines, root, 6, minimum=1)
         self._year = year
         self._ofe = ofe
 
@@ -2058,7 +2130,7 @@ class ManagementLoop(object):
         self.root = root
         self.name = lines.pop(0)
         self.description = _parse_desc(lines, root)
-        self.nofes = nofes = int(lines.pop(0))
+        self.nofes = nofes = _input_count(lines, root, getattr(root, "_input_max_ofes", 1), minimum=1)
         self.ofeindx = Loops()
 
         for i in range(nofes):
@@ -2066,8 +2138,8 @@ class ManagementLoop(object):
             scen = _scenario_reference_factory(j, SectionType.Ini, root, self)
             self.ofeindx.append(scen)
 
-        nrots = int(lines.pop(0))
-        nyears = int(lines.pop(0))
+        nrots = _input_count(lines, root, 1000, minimum=1)
+        nyears = _input_count(lines, root, 1000, minimum=1)
         self.loops = Loops()
         for i in range(nrots):
             self.loops.append(ManagementLoopMan(lines, self, root, nyears))
@@ -2149,6 +2221,7 @@ class ManagementSummary(object):
     """
     def __init__(self, **kwargs):
         self.key: int = kwargs["Key"]
+        self._native_scenario_references = bool(kwargs.get("NativeScenarioReferences", False) or self.key == "single-user-defined")
         self._map: Optional[str] = kwargs.get("_map", None)
         self.man_fn: str = kwargs["ManagementFile"]
         self.sol_fn: Optional[str] = kwargs.get("SoilFile", None)
@@ -2174,14 +2247,15 @@ class ManagementSummary(object):
 
         self.pct_coverage: Optional[float] = None
 
-        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
+        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color, native_scenario_references=self._native_scenario_references)
         assert len(m.inis) >= 1, m.inis
-        assert m.inis[0].landuse == 1
-        assert isinstance(m.inis[0].data, IniLoopCropland)
+        initial_index = int(str(m.man.ofeindx[0])) - 1 if self.key == "single-user-defined" else 0
+        assert m.inis[initial_index].landuse == 1
+        assert isinstance(m.inis[initial_index].data, IniLoopCropland)
 
-        self.cancov: float = m.inis[0].data.cancov
-        self.inrcov: float = m.inis[0].data.inrcov
-        self.rilcov: float = m.inis[0].data.rilcov
+        self.cancov: float = m.inis[initial_index].data.cancov
+        self.inrcov: float = m.inis[initial_index].data.inrcov
+        self.rilcov: float = m.inis[initial_index].data.rilcov
 
         self.cancov_override: Optional[float] = None
         self.inrcov_override: Optional[float] = None
@@ -2199,13 +2273,13 @@ class ManagementSummary(object):
             return None
         return _join(self.man_dir, self.sol_fn)
 
-    def get_management(self) -> 'Management':
+    def get_management(self, *, native_scenario_references: bool = False) -> 'Management':
         """
         Load the concrete :class:`Management` instance represented by this
         summary, applying any canopy coverage overrides before returning the
         hydrated object.
         """
-        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
+        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color, native_scenario_references=native_scenario_references or getattr(self, "_native_scenario_references", False))
         assert len(m.inis) >= 1
 
         for i in range(len(m.inis)):
@@ -2215,13 +2289,13 @@ class ManagementSummary(object):
                 continue
 
             if self.cancov_override is not None:
-                m.inis[0].data.cancov = self.cancov_override
+                m.inis[i if self.key == "single-user-defined" else 0].data.cancov = self.cancov_override
                 
             if self.inrcov_override is not None:
-                m.inis[0].data.inrcov = self.inrcov_override
+                m.inis[i if self.key == "single-user-defined" else 0].data.inrcov = self.inrcov_override
 
             if self.rilcov_override is not None:
-                m.inis[0].data.rilcov = self.rilcov_override
+                m.inis[i if self.key == "single-user-defined" else 0].data.rilcov = self.rilcov_override
                 
         for i in range(len(m.plants)):
             if self.cancov_override is not None:
@@ -2255,6 +2329,9 @@ class Management(object):
     """Runtime representation of a WEPP management (``.man``) file."""
 
     def __init__(self, **kwargs: Any) -> None:
+        self._strict_upload = bool(kwargs.get("StrictUpload", False))
+        self._native_scenario_references = bool(kwargs.get("NativeScenarioReferences", False) or self._strict_upload or kwargs.get("Key") == "single-user-defined")
+        self._input_max_ofes = int(kwargs.get("InputMaxOfes", 1))
         self.key: Optional[int] = kwargs["Key"]
         self.man_fn: str = kwargs["ManagementFile"]
         self.man_dir: str = kwargs.get("ManagementDir", _management_dir)
@@ -2309,6 +2386,7 @@ class Management(object):
         man_dir: str,
         desc: Optional[str],
         color: Optional[Iterable[int]] = None,
+        *, native_scenario_references: bool = False,
     ) -> 'Management':
         """
         Instantiate a :class:`Management` from the provided metadata.
@@ -2321,7 +2399,8 @@ class Management(object):
             "Key": key,
             "ManagementFile": man_fn,
             "ManagementDir": man_dir,
-            "Description": desc
+            "Description": desc,
+            "NativeScenarioReferences": native_scenario_references,
         }
 
         if color is not None:
@@ -2351,13 +2430,17 @@ class Management(object):
 
         del desc_indxs
 
+        if self._strict_upload:
+            lines = _StrictInputLines(lines)
         self.datver = lines.pop(0)
+        if self._strict_upload and self.datver != "98.4":
+            raise ValueError("Only management version 98.4 is supported.")
         try:
             self.datver_value = float(self.datver)
         except ValueError:
             self.datver_value = 0.0
-        self.nofe = int(lines.pop(0))
-        self.sim_years = int(lines.pop(0))
+        self.nofe = _input_count(lines, self, self._input_max_ofes, minimum=1)
+        self.sim_years = _input_count(lines, self, 1000, minimum=1)
 
         # Read Plant Growth Section
         self.plants = PlantLoops(lines, self)
@@ -2382,6 +2465,14 @@ class Management(object):
 
         # Read Management Section
         self.man = ManagementLoop(lines, self)
+        if self._strict_upload:
+            lines.check_tokens()
+            if lines:
+                raise ValueError("Unexpected trailing management records.")
+            if self.man.nofes != self.nofe:
+                raise ValueError("Management OFE counts disagree.")
+            if sum(rotation.nyears for rotation in self.man.loops) != self.sim_years:
+                raise ValueError("Management schedule length disagrees with simulation years.")
 
     @property
     def ncrop(self):
@@ -3189,7 +3280,7 @@ class InvalidManagementKey(Exception):
         return f"{self.key} is an invalid key"
 
 
-def get_management_summary(dom: int, _map: Optional[str] = None) -> ManagementSummary:
+def get_management_summary(dom: int, _map: Optional[str] = None, *, native_scenario_references: bool = False) -> ManagementSummary:
     """Return the summary for ``dom`` using the specified management map.
 
     Raises
@@ -3202,7 +3293,7 @@ def get_management_summary(dom: int, _map: Optional[str] = None) -> ManagementSu
     if k not in d:
         raise InvalidManagementKey(k)
 
-    return ManagementSummary(**d[k], _map=_map)
+    return ManagementSummary(**d[k], _map=_map, NativeScenarioReferences=native_scenario_references)
 
 
 def get_management(dom: int, _map: Optional[str] = None) -> Management:

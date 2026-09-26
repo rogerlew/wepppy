@@ -194,12 +194,13 @@ def build_header_mod_options(
     user: object,
     is_wbt: bool,
     include_all: bool = False,
+    excluded_features: frozenset[str] = frozenset(),
 ) -> list[dict[str, Any]]:
     options: list[dict[str, Any]] = []
     registry = feature_registry_by_id()
     for entry in load_feature_registry():
         # Standalone workflows have no run-level controls to toggle.
-        if entry.id in {"culvert_runner", "batch_runner"}:
+        if entry.id in excluded_features or entry.id in {"culvert_runner", "batch_runner"}:
             continue
         authorized = include_all or user_meets_min_role(user, entry.min_role)
         backend_available = include_all or backend_matches_requirement(

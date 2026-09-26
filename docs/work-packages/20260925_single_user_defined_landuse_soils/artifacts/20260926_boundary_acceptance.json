@@ -1,0 +1,62 @@
+[
+  {
+    "kind": "landuse",
+    "case": "real_nodb_lock",
+    "status": 409
+  },
+  {
+    "kind": "landuse",
+    "case": "readonly",
+    "status": 403
+  },
+  {
+    "kind": "landuse",
+    "case": "active_receipt",
+    "status": 409
+  },
+  {
+    "kind": "landuse",
+    "case": "active_build_blocks_archive",
+    "status": 409
+  },
+  {
+    "kind": "landuse",
+    "case": "active_build_blocks_fork",
+    "status": 409
+  },
+  {
+    "kind": "landuse",
+    "case": "active_archive_blocks_upload",
+    "status": 409
+  },
+  {
+    "kind": "soils",
+    "case": "real_nodb_lock",
+    "status": 409
+  },
+  {
+    "kind": "soils",
+    "case": "readonly",
+    "status": 403
+  },
+  {
+    "kind": "soils",
+    "case": "active_receipt",
+    "status": 409
+  },
+  {
+    "kind": "soils",
+    "case": "active_build_blocks_archive",
+    "status": 409
+  },
+  {
+    "kind": "soils",
+    "case": "active_build_blocks_fork",
+    "status": 409
+  },
+  {
+    "kind": "soils",
+    "case": "active_archive_blocks_upload",
+    "status": 409
+  }
+]

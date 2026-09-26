@@ -9,6 +9,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.project_rq import build_rusle_rq
@@ -54,6 +56,8 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
 
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return error_response("rusle is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
         payload = await parse_request_payload(
             request,
             boolean_fields=("force_polaris_refresh",),

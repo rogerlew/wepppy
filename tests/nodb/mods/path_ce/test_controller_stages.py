@@ -13,6 +13,7 @@ import logging
 import shutil
 from contextlib import nullcontext
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -30,6 +31,13 @@ from wepppy.nodb.mods.path_ce.presets import default_treatments
 FIXTURES = Path(__file__).resolve().parents[3] / "data" / "path_ce"
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    # PATH owns a dictionary _config; run policy belongs to the parent Ron.
+    monkeypatch.setattr(PathCostEffective, 'ron_instance', property(lambda self: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default)))
 
 
 def _assemble_run_dir(tmp_path: Path) -> Path:

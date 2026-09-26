@@ -1,0 +1,42 @@
+{
+  "landuse": {
+    "status": 200,
+    "body": {
+      "job_id": "cf73da99-1bdb-4c30-ba54-841934f6f356",
+      "result": {
+        "single_user_defined_filename": "Acceptance.MAN"
+      }
+    },
+    "source_sha256": "d9f07a41f3be6f7d9cd43346adeef07feac00399d36b761d57fe8aefe8755e3b",
+    "fresh_worker": {
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ]
+    },
+    "observed_rq_status": "finished",
+    "origin": "default",
+    "status_evidence": "20260926_job_status_readback.log"
+  },
+  "soils": {
+    "status": 200,
+    "body": {
+      "job_id": "5a7663e5-abe0-4c2b-8014-77a14aa446cc",
+      "result": {
+        "single_user_defined_filename": "Acceptance.SOL"
+      }
+    },
+    "source_sha256": "2a58b8e236c48c20afa9f436483f88c599c110effd4f2f870a4e2ac2a6b25a6a",
+    "fresh_worker": {
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ]
+    },
+    "observed_rq_status": "finished",
+    "origin": "default",
+    "status_evidence": "20260926_job_status_readback.log"
+  }
+}

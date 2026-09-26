@@ -18,6 +18,7 @@ def _noop_lock():
 
 def _new_detached_omni(tmp_path: Path, logger_name: str) -> omni_module.Omni:
     omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.config_get_str = lambda section, option, default=None: default
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger(logger_name)
     omni._logger = omni.logger

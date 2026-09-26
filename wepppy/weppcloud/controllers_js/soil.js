@@ -185,7 +185,8 @@ var Soil = (function () {
             dom.qs("#soil_mode1_controls"),
             dom.qs("#soil_mode2_controls"),
             dom.qs("#soil_mode3_controls"),
-            dom.qs("#soil_mode4_controls")
+            dom.qs("#soil_mode4_controls"),
+            dom.qs("#soil_mode5_controls")
         ];
 
         var baseTriggerEvent = soil.triggerEvent.bind(soil);
@@ -250,7 +251,13 @@ var Soil = (function () {
 
             soil.connect_status_stream(soil);
 
-            var params = forms.serializeForm(formElement, { format: "url" });
+            var params = soil.mode === 5 ? new FormData(formElement) : forms.serializeForm(formElement, { format: "url" });
+            if (soil.mode === 5) {
+                var sourceFile = params.get("input_upload_single_soil");
+                if (!sourceFile || !sourceFile.name) {
+                    params.delete("input_upload_single_soil");
+                }
+            }
 
             http.requestWithSessionToken(
                 url_for_run("build-soils", { prefix: "/rq-engine/api" }),
@@ -258,6 +265,16 @@ var Soil = (function () {
             )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
+                    if (response && response.result && response.result.single_user_defined_filename) {
+                        var filenameNode = dom.qs("#soil_source_filename");
+                        var feedbackNode = dom.qs("#soil_source_feedback");
+                        if (filenameNode) {
+                            filenameNode.textContent = response.result.single_user_defined_filename;
+                        }
+                        if (feedbackNode) {
+                            feedbackNode.hidden = false;
+                        }
+                    }
                     if (response && response.job_id) {
                         soil.append_status_message(soil, "build_soils_rq job submitted: " + response.job_id);
                         soil.poll_completion_event = "SOILS_BUILD_TASK_COMPLETED";
@@ -285,6 +302,7 @@ var Soil = (function () {
 
         soil.restore = function (mode) {
             var modeValue = parseInteger(mode, 0);
+            soil.mode = modeValue;
             var radio = document.getElementById("soil_mode" + modeValue);
             if (radio) {
                 radio.checked = true;

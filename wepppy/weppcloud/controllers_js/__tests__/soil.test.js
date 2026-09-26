@@ -126,6 +126,37 @@ describe("Soil controller", () => {
         expect(pollCompletionValues).toEqual(["SOILS_BUILD_TASK_COMPLETED"]);
     });
 
+    test("restored upload mode preserves a newly selected soil", async () => {
+        const NativeFormData = global.FormData;
+        const constructor = jest.spyOn(global, "FormData").mockImplementation((form) => {
+            const data = new NativeFormData(form);
+            data.set("input_upload_single_soil", new File(["source"], "custom.SOL"));
+            return data;
+        });
+        try {
+            soil.restore(5);
+            soil.build();
+            await Promise.resolve();
+            expect(postFormMock.mock.calls[0][1].body.get("input_upload_single_soil").name).toBe("custom.SOL");
+        } finally {
+            constructor.mockRestore();
+        }
+    });
+
+    test("single user-defined mode sends multipart and omits an empty chooser", async () => {
+        soil.mode = 5;
+        const input = document.createElement("input");
+        input.type = "file";
+        input.name = "input_upload_single_soil";
+        document.getElementById("soil_form").appendChild(input);
+        soil.build();
+        await Promise.resolve();
+        const body = postFormMock.mock.calls[0][1].body;
+        expect(body).toBeInstanceOf(FormData);
+        expect(body.has("input_upload_single_soil")).toBe(false);
+        expect(body.get("soil_single_selection")).toBe("101");
+    });
+
     test("poll failure pushes stacktrace and emits job error", async () => {
         global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
         soil.rq_job_id = "job-123";

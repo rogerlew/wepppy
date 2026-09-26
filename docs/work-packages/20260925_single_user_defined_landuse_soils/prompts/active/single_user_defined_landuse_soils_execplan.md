@@ -5,8 +5,7 @@ Maintain this living plan under `docs/prompt_templates/codex_exec_plans.md`, inc
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective.
 This is the active plan for `20260925_single_user_defined_landuse_soils` only.
 The operator authorized execution and commits on 2026-09-25. Execute this plan
-through validation; deployment remains outside scope. Runtime edits await the
-standalone reviewed contract ancestor.
+through validation; deployment remains outside scope. Runtime implementation follows reviewed contract ancestor `0efd7ea46`.
 
 ## Purpose / Big Picture
 
@@ -38,10 +37,10 @@ Existing projects are not converted, and no Disturbed Class selectors are needed
 - [x] (2026-09-25 UTC) Reviewer confirms WPR-01, WPR-02, and WPR-03 planning findings closed.
 - [x] (2026-09-25 UTC) Finalize format/content, source OFE count, lifecycle/bounds and exact interfaces in SUDI-01.
 - [x] (2026-09-25 21:58 UTC) Complete canonical amendments, ADR and two independent design contract/security reviews; all findings closed.
-- [ ] Commit standalone contract ancestor before runtime edits.
-- [ ] Implement Builder serialization/resolution, feature/buffer policy, and refresh preservation.
-- [ ] Implement validated source lifecycle, additive modes, and non-disturbed single/multiple-OFE preparation.
-- [ ] Implement themed run controls and user-visible error/filename round trips.
+- [x] (2026-09-25 UTC) Commit standalone contract ancestor `0efd7ea46` before runtime edits.
+- [x] Implement Builder serialization/resolution, feature/buffer policy, and refresh preservation.
+- [x] Implement validated source lifecycle, additive modes, and non-disturbed single/multiple-OFE preparation.
+- [x] Implement themed run controls and user-visible error/filename round trips.
 - [ ] Complete artifact/environment acceptance, implementation reviews, and documentation closeout.
 
 ## Surprises & Discoveries
@@ -61,6 +60,11 @@ Buffer source override occurs independently of Disturbed in
 `wepppy/nodb/core/landuse.py`. The operator resolved this by disabling buffer OFEs
 for the entire opted-in configuration. The old per-domain bypass plan and its
 mixed-SBS acceptance matrix are superseded, not additional implementation duties.
+
+The parser historically swaps contour and drainage scenario references. Checked
+projects now explicitly use native reference semantics through summaries and
+preparation; legacy defaults are preserved. Asymmetric generated-file regression
+coverage is being added. QA also caught decimal underflow (`1e-999`), now rejected.
 
 ## Decision Log
 
@@ -89,10 +93,19 @@ resolution and evidence before implementation.
 ## Outcomes & Retrospective
 
 
-Source discovery and static dependency review are complete. The package now has
-one Builder policy and explicit buffer exclusion. The reviewer independently confirmed all three planning corrections. No production code or live projects changed. Pending
-format/lifecycle decisions and the canonical checkpoint still prevent claiming
-implementation readiness or a working feature.
+Runtime implementation is present and validation continues. Authenticated multipart
+requests accepted both sources in the disposable Builder project
+`single-input-acceptance-20260925`. The existing worker daemon had old mode enums;
+a fresh process in the same worker container executed only those failed jobs.
+Both jobs finished. Generated inputs for 2/12 OFEs subsequently executed with
+`wepp_260803` under uid1000/gid993 and produced nonempty loss outputs. Topology and
+climate were controlled fixtures, not an end-to-end delineation/climate workflow.
+
+Independent runtime review closed reload transport, initial visibility/load-all,
+and excluded direct-route gaps. Retained browser evidence covers three themes;
+real archive/restore, fork, publication fault and authenticated download checks
+passed. Native execution also passed at 32 OFEs. Final broad validation, review
+closure and commits remain open. No production deployment has occurred.
 
 ## Context and Orientation
 
@@ -280,7 +293,8 @@ substantive implementation passes focused gates, run:
 Run applicable stub checks. If queue wiring changes, update the dependency catalog,
 run `wctl check-rq-graph`, and inspect a live job tree. Rebuild generated browser
 assets according to controller instructions. Run scoped documentation lint and
-spelling previews. Capture actual outcomes; no implementation gates have run yet.
+spelling previews. Capture actual outcomes and distinguish scoped passes from
+remaining repository-wide gate limitations.
 
 ## Validation and Acceptance
 
@@ -344,3 +358,23 @@ exact interfaces and errors are specified there. Uniform assignment is the Build
 outcome; subsequent deliberate class edits remain functional and rebuilding
 mode5 restores uniform source assignment. Native-reader bounds apply before
 execution; no buffer geometry or silent topology truncation is permitted.
+
+### Runtime validation update (2026-09-25)
+
+Builder/policy, routes, sources, controls and core preparation are now implemented
+in the working tree. Tests verify bounded multipart cleanup, two-generation
+retention, durable-pointer recovery on pre/post-publication failure, malformed
+metadata repair, contained roots, and independent MOFE combinations. Real prepared
+files at2/12OFEs pass native `wepp_260803` execution. Config-refresh preview/apply
+preserves opted-in capabilities and policy. Runtime security findings, real-request,
+browser theme/Tab, clone/archive, fault and download acceptance are complete.
+Final repository regression validation and closeout remain in progress.
+
+Discoveries: ordinary Tenerife soil templates include symbolic values and trailing
+display colors; use existing normalization before stacking. A missing final newline
+could merge OFE records. OFE string sorting misplaced segment10 before2. Uploaded
+sources with multiple initial scenarios require the active reference for displayed
+cover and all referenced conditions for overrides. Strict98.4 must reject modern
+fields even under a spoofed version header, and finite Python floats are not enough
+to ensure native REAL representability. These are now covered by targeted changes;
+post-fix review is still required.

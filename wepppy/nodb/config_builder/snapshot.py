@@ -32,7 +32,7 @@ _REQUIRED = frozenset({
     "climate",
     "climate_station_database",
 })
-_OPTIONAL = frozenset({"mods", "capability_profile", "cellsize_override"})
+_OPTIONAL = frozenset({"mods", "capability_profile", "cellsize_override", "single_user_defined_uploads"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +68,9 @@ def parse_builder_selections(payload: object) -> BuilderSelections:
     mods = payload.get("mods", [])
     if not isinstance(mods, list) or not all(isinstance(item, str) for item in mods):
         raise BuilderConstraintError("mods", "invalid_type", "mods must be an array of stable IDs")
+    uploads = payload.get("single_user_defined_uploads", False)
+    if type(uploads) is not bool:
+        raise BuilderConstraintError("single_user_defined_uploads", "invalid_type", "single_user_defined_uploads must be a boolean")
     override = payload.get("cellsize_override")
     if override is not None and (isinstance(override, bool) or not isinstance(override, int)):
         raise BuilderConstraintError("cellsize_override", "invalid_type", "cellsize_override must be an integer")
@@ -80,6 +83,7 @@ def parse_builder_selections(payload: object) -> BuilderSelections:
         landuse=payload["landuse"], climate=payload["climate"],
         climate_station_database=payload["climate_station_database"], mods=tuple(mods),
         capability_profile=profile, cellsize_override=override,
+        single_user_defined_uploads=uploads,
     )
 
 
@@ -103,6 +107,7 @@ def resolve_builder_candidate(
         "soil": selections.soil, "landuse": selections.landuse, "climate": selections.climate,
         "climate_station_database": selections.climate_station_database,
         "mods": list(selections.mods),
+        "single_user_defined_uploads": selections.single_user_defined_uploads,
         "capabilities": dict(resolved.config.get("capabilities", {})),
         "config_filename": "config.cfg",
     }

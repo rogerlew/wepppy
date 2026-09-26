@@ -20,6 +20,9 @@ CONFIG = "cfg"
 
 @pytest.fixture()
 def wepp_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+    from types import SimpleNamespace
+    monkeypatch.setattr(wepp_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(wepp_module.wepp_bp)
@@ -1432,3 +1435,16 @@ def test_report_ron_sub_summary_disables_disturbed_preview_without_mod(
     assert response.get_data(as_text=True) == "rendered"
     assert captured["template_name"] == "reports/hill.htm"
     assert captured["kwargs"]["disturbed_preview_available"] is False
+
+
+def test_checked_project_rejects_disturbed_preview_before_hydration(wepp_client, monkeypatch):
+    from types import SimpleNamespace
+    client = wepp_client[0]
+    monkeypatch.setattr(wepp_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: "True"))
+    def forbidden(*args, **kwargs):
+        pytest.fail("Excluded Disturbed controller was hydrated")
+    monkeypatch.setattr(wepp_module.nodb_mods.Disturbed, "tryGetInstance", forbidden)
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/clay/")
+    assert response.status_code == 400
+    assert response.get_json()['error']['code'] == 'unsupported_capability'

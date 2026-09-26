@@ -18,6 +18,7 @@ from starlette.datastructures import UploadFile
 from starlette.formparsers import MultiPartException, MultiPartParser
 from starlette.requests import ClientDisconnect
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Ron
@@ -72,6 +73,8 @@ def context(request, runid, config, write=False, export=False):
     authorize_run_access(claims,runid)
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
+    if single_input_uploads_enabled(ron):
+        raise p.WorkflowError("unsupported_capability", "Postfire debris flow is unavailable for single-input upload projects.", 400)
     if config.removesuffix('.cfg') != ron.config_stem.removesuffix('.cfg'):
         raise p.WorkflowError('config_mismatch','The project configuration changed. Reload the page.',409)
     if write and ron.readonly:

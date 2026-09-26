@@ -18,6 +18,13 @@ from wepppy.weppcloud.utils import runid as runid_utils
 
 pytestmark = pytest.mark.microservice
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
+
+
 
 @pytest.mark.parametrize("value", [True, False])
 def test_strict_fork_omni_boolean_accepts_json_booleans(value: bool) -> None:

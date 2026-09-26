@@ -1,0 +1,9 @@
+{
+  "job_id": "82a09a46-73f1-4ad3-8339-1b2f603db849",
+  "rq_status": "finished",
+  "target": "single-input-copy-20260925",
+  "origin": "fork-archive",
+  "uid": 1000,
+  "gid": 993,
+  "sources_and_policy_preserved": true
+}

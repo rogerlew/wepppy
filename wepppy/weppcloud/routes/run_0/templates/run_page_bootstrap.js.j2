@@ -128,7 +128,8 @@
         "flags": {
             "initialHasSbs": ron.has_sbs,
             "hasDem": ron.has_dem,
-            "playwrightLoadAll": playwright_load_all
+            "playwrightLoadAll": playwright_load_all,
+            "singleUserDefinedUploads": ron.single_user_defined_uploads | default(false)
         },
         "map": {
             "center": ron.center0,
@@ -226,6 +227,17 @@
         });
     }
 
+    function applySingleInputPolicy(flags, context) {
+        if (context.flags && context.flags.singleUserDefinedUploads) {
+            ["baer", "disturbed", "treatments", "omni", "omni_contrasts", "path_ce",
+             "debris_flow", "rusle", "postfire_debris_flow", "revegetation", "rred"].forEach(function (name) {
+                flags[name] = false;
+            });
+            context.flags.initialHasSbs = false;
+        }
+    }
+    applySingleInputPolicy(modsFlags, runContext);
+
     window.site_prefix = sitePrefix;
     window.runid = runId;
     window.runId = runId;
@@ -264,6 +276,7 @@
             modFlags.rusle = true;
             modFlags.ag_fields = true;
         }
+        applySingleInputPolicy(modFlags, context);
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
         );

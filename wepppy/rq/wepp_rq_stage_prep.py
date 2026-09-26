@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 import inspect
 
 from rq import get_current_job
@@ -161,7 +162,7 @@ def _prep_remaining_rq(runid: str) -> None:
 
         def _prep_remaining() -> None:
             reveg = False
-            disturbed = Disturbed.getInstance(wepp.wd, allow_nonexistent=True)
+            disturbed = None if single_input_uploads_enabled(wepp) else Disturbed.getInstance(wepp.wd, allow_nonexistent=True)
             if disturbed is not None and disturbed.sol_ver == 9005.0:
                 reveg = True
 

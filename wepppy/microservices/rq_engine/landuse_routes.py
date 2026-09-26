@@ -60,6 +60,10 @@ from .auth import (
     require_token_class,
 )
 from .openapi import agent_route_responses, rq_operation_id
+from .single_input_uploads import input_payload
+from wepppy.rq.single_input_admission import accept_input, input_submission
+from wepppy.wepp.single_input import SingleInputError
+from wepppy.nodb.single_input_policy import SingleInputPolicyError, require_single_input_policy, single_input_uploads_enabled
 from .payloads import parse_request_payload
 from .responses import error_response, validation_error_response
 from .upload_helpers import UploadError, save_upload_file
@@ -119,6 +123,11 @@ def _capability_mode_error(
     authority: CapabilityGraph | None,
     runtime_dataset: str | None = None,
 ) -> JSONResponse | None:
+    if mode == LanduseMode.SingleUserDefined:
+        try:
+            require_single_input_policy(landuse, require_enabled=True)
+        except SingleInputPolicyError as exc:
+            return error_response(str(exc), status_code=400, code="unsupported_capability")
     if authority is None:
         return None
     current_runtime = str(getattr(landuse, "nlcd_db", "") or "").strip()
@@ -553,215 +562,233 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         if authority_error is not None:
             return authority_error
 
-        payload = await parse_request_payload(
-            request,
+        async with input_payload(
+            request, "landuse",
             boolean_fields=(
                 "checkbox_burn_shrubs",
                 "checkbox_burn_grass",
                 "burn_shrubs",
                 "burn_grass",
             ),
-        )
+        ) as (payload, upload_form):
 
-        def _first(value: Any) -> Any:
-            if isinstance(value, (list, tuple)):
-                return value[0] if value else None
-            return value
+            def _first(value: Any) -> Any:
+                if isinstance(value, (list, tuple)):
+                    return value[0] if value else None
+                return value
 
-        requested_db_raw = _first(payload.get("landuse_db"))
-        requested_runtime_db = None
-        if requested_db_raw is not None:
-            requested_runtime_db = _requested_landuse_runtime(
-                landuse, requested_db_raw, authority
-            )
-            if requested_runtime_db is None:
-                return error_response(
-                    "Landuse dataset is not supported by this project.",
-                    status_code=400,
-                    code="unsupported_capability",
+            requested_db_raw = _first(payload.get("landuse_db"))
+            requested_runtime_db = None
+            if requested_db_raw is not None:
+                requested_runtime_db = _requested_landuse_runtime(
+                    landuse, requested_db_raw, authority
                 )
+                if requested_runtime_db is None:
+                    return error_response(
+                        "Landuse dataset is not supported by this project.",
+                        status_code=400,
+                        code="unsupported_capability",
+                    )
 
-        landuse_mode_raw = _first(payload.get("landuse_mode"))
-        mode_alias_raw = _first(payload.get("mode"))
-        if landuse_mode_raw is None and mode_alias_raw is None:
-            requested_mode = landuse.mode
-        else:
-            try:
-                landuse_mode = (
-                    LanduseMode(int(landuse_mode_raw))
-                    if landuse_mode_raw is not None
-                    else None
+            landuse_mode_raw = _first(payload.get("landuse_mode"))
+            mode_alias_raw = _first(payload.get("mode"))
+            if landuse_mode_raw is None and mode_alias_raw is None:
+                requested_mode = landuse.mode
+            else:
+                try:
+                    landuse_mode = (
+                        LanduseMode(int(landuse_mode_raw))
+                        if landuse_mode_raw is not None
+                        else None
+                    )
+                    mode_alias = (
+                        LanduseMode(int(mode_alias_raw))
+                        if mode_alias_raw is not None
+                        else None
+                    )
+                except (TypeError, ValueError):
+                    return error_response("Invalid landuse mode", status_code=400)
+                if (
+                    landuse_mode is not None
+                    and mode_alias is not None
+                    and landuse_mode != mode_alias
+                ):
+                    return error_response(
+                        "landuse_mode and mode must identify the same landuse method",
+                        status_code=400,
+                    )
+                requested_mode = (
+                    landuse_mode if landuse_mode is not None else mode_alias
                 )
-                mode_alias = (
-                    LanduseMode(int(mode_alias_raw))
-                    if mode_alias_raw is not None
-                    else None
+                assert requested_mode is not None
+            if requested_runtime_db is not None or requested_mode != landuse.mode:
+                capability_error = _capability_mode_error(
+                    landuse,
+                    requested_mode,
+                    authority,
+                    runtime_dataset=requested_runtime_db,
                 )
-            except (TypeError, ValueError):
-                return error_response("Invalid landuse mode", status_code=400)
-            if (
-                landuse_mode is not None
-                and mode_alias is not None
-                and landuse_mode != mode_alias
-            ):
-                return error_response(
-                    "landuse_mode and mode must identify the same landuse method",
-                    status_code=400,
-                )
-            requested_mode = (
-                landuse_mode if landuse_mode is not None else mode_alias
-            )
-            assert requested_mode is not None
-        if requested_runtime_db is not None or requested_mode != landuse.mode:
-            capability_error = _capability_mode_error(
-                landuse,
-                requested_mode,
-                authority,
-                runtime_dataset=requested_runtime_db,
-            )
-            if capability_error is not None:
-                return capability_error
+                if capability_error is not None:
+                    return capability_error
 
-        mode_error = _validate_mofe_landuse_mode_for_build(landuse, requested_mode)
-        if mode_error is not None:
-            return mode_error
-
-        try:
-            mapping = _normalize_landuse_mapping_selection(
-                _first(payload.get("landuse_management_mapping_selection"))
-            )
-        except ValueError as exc:
-            return error_response(
-                str(exc), status_code=400, code="invalid_mapping_selection"
-            )
-
-        try:
-            landuse.parse_inputs(payload)
-        except ValueError as exc:
-            return error_response(str(exc), status_code=400)
-
-        if "disturbed" in landuse.mods:
-            disturbed = Disturbed.getInstance(wd)
-            burn_shrubs_value = payload.get("checkbox_burn_shrubs")
-            if burn_shrubs_value is None:
-                burn_shrubs_value = payload.get("burn_shrubs")
-
-            burn_grass_value = payload.get("checkbox_burn_grass")
-            if burn_grass_value is None:
-                burn_grass_value = payload.get("burn_grass")
-            disturbed.apply_build_landuse_updates(
-                burn_shrubs=bool(burn_shrubs_value),
-                burn_grass=bool(burn_grass_value),
-            )
-
-        if requested_mode == LanduseMode.UserDefined:
-            from wepppy.all_your_base.geo import raster_stacker
-
-            watershed = Watershed.getInstance(wd)
-            if mapping is None:
-                return error_response(
-                    "landuse_management_mapping_selection must be provided",
-                    status_code=400,
-                )
-            landuse.mapping = mapping
-
-            form = await request.form()
-            upload = _extract_upload(form, "input_upload_landuse")
-            filename: str | None = None
-            user_defined_fn: str | None = None
-
-            def _mutate_landuse_user_defined() -> None:
-                nonlocal filename
-                nonlocal user_defined_fn
-
-                if upload is not None:
-                    if not upload.filename:
-                        raise ValueError("no filename specified")
-
-                    filename = secure_filename(upload.filename)
-                    if not filename:
-                        raise ValueError("Could not obtain filename")
-
-                    try:
-                        saved_path = save_upload_file(
-                            upload,
-                            allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
-                            dest_dir=Path(landuse.lc_dir),
-                            filename_transform=lambda _value: f"_{filename}",
-                            overwrite=True,
-                            max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
-                        )
-                    except UploadError as exc:
-                        raise ValueError(str(exc)) from exc
-                    user_defined_fn = str(saved_path)
-                else:
-                    filename = landuse.user_defined_landcover_fn
-                    if filename:
-                        user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-                    if not filename or not user_defined_fn or not _exists(user_defined_fn):
-                        raise FileNotFoundError(
-                            "input_upload_landuse is required when no existing user-defined landuse file is available."
-                        )
-
-                raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
-
-                if not _exists(landuse.lc_fn):
-                    raise RuntimeError("Failed creating landuse file")
-                if filename:
-                    landuse.user_defined_landcover_fn = filename
+            mode_error = _validate_mofe_landuse_mode_for_build(landuse, requested_mode)
+            if mode_error is not None:
+                return mode_error
 
             try:
-                mutate_root(
-                    wd,
-                    "landuse",
-                    _mutate_landuse_user_defined,
-                    purpose="rq-build-landuse-user-defined",
+                mapping = _normalize_landuse_mapping_selection(
+                    _first(payload.get("landuse_management_mapping_selection"))
                 )
             except ValueError as exc:
                 return error_response(
-                    str(exc),
-                    status_code=_upload_status_from_message(str(exc)),
+                    str(exc), status_code=400, code="invalid_mapping_selection"
                 )
-            except FileNotFoundError as exc:
-                return error_response(str(exc), status_code=400)
-            except RuntimeError as exc:
-                return error_response(str(exc), status_code=400)
 
-        mapping_error = _validate_effective_mapping(landuse)
-        if mapping_error is not None:
-            return mapping_error
+            if single_input_uploads_enabled(landuse) and "mofe_buffer_selection" in payload:
+                return error_response("Buffer OFEs are disabled for this project.", status_code=400, code="unsupported_capability")
+            mapping_error = _validate_effective_mapping(landuse)
+            if mapping_error is not None:
+                return mapping_error
+            with input_submission(landuse, "landuse", runid):
+                await accept_input(landuse, "landuse", upload_form, requested_mode)
+                try:
+                    landuse.parse_inputs(payload)
+                except ValueError as exc:
+                    return error_response(str(exc), status_code=400)
 
-        selection_changed = (
-            requested_runtime_db is not None
-            and requested_runtime_db
-            != str(getattr(landuse, "nlcd_db", "") or "")
-        ) or requested_mode != landuse.mode
-        if selection_changed:
-            landuse.apply_build_landuse_selection_updates(
-                nlcd_db=requested_runtime_db,
-                mode=requested_mode,
-            )
+                if "disturbed" in landuse.mods:
+                    disturbed = Disturbed.getInstance(wd)
+                    burn_shrubs_value = payload.get("checkbox_burn_shrubs")
+                    if burn_shrubs_value is None:
+                        burn_shrubs_value = payload.get("burn_shrubs")
 
-        if landuse.run_group == "batch":
-            return JSONResponse({"message": "Set landuse inputs for batch processing"})
+                    burn_grass_value = payload.get("checkbox_burn_grass")
+                    if burn_grass_value is None:
+                        burn_grass_value = payload.get("burn_grass")
+                    disturbed.apply_build_landuse_updates(
+                        burn_shrubs=bool(burn_shrubs_value),
+                        burn_grass=bool(burn_grass_value),
+                    )
 
-        prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.build_landuse)
-        prep.remove_timestamp(TaskEnum.run_geneva)
+                if requested_mode == LanduseMode.UserDefined:
+                    from wepppy.all_your_base.geo import raster_stacker
 
-        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
-            job = enqueue_tracked_rq_job(
-                q,
-                build_landuse_rq,
-                prep=prep,
-                job_key="build_landuse_rq",
-                runid=runid,
-                args=(runid,),
-                timeout=RQ_TIMEOUT,
-            )
-        return JSONResponse({"job_id": job.id})
+                    watershed = Watershed.getInstance(wd)
+                    if mapping is None:
+                        return error_response(
+                            "landuse_management_mapping_selection must be provided",
+                            status_code=400,
+                        )
+                    landuse.mapping = mapping
+
+                    form = await request.form()
+                    upload = _extract_upload(form, "input_upload_landuse")
+                    filename: str | None = None
+                    user_defined_fn: str | None = None
+
+                    def _mutate_landuse_user_defined() -> None:
+                        nonlocal filename
+                        nonlocal user_defined_fn
+
+                        if upload is not None:
+                            if not upload.filename:
+                                raise ValueError("no filename specified")
+
+                            filename = secure_filename(upload.filename)
+                            if not filename:
+                                raise ValueError("Could not obtain filename")
+
+                            try:
+                                saved_path = save_upload_file(
+                                    upload,
+                                    allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
+                                    dest_dir=Path(landuse.lc_dir),
+                                    filename_transform=lambda _value: f"_{filename}",
+                                    overwrite=True,
+                                    max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
+                                )
+                            except UploadError as exc:
+                                raise ValueError(str(exc)) from exc
+                            user_defined_fn = str(saved_path)
+                        else:
+                            filename = landuse.user_defined_landcover_fn
+                            if filename:
+                                user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
+                            if not filename or not user_defined_fn or not _exists(user_defined_fn):
+                                raise FileNotFoundError(
+                                    "input_upload_landuse is required when no existing user-defined landuse file is available."
+                                )
+
+                        raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+
+                        if not _exists(landuse.lc_fn):
+                            raise RuntimeError("Failed creating landuse file")
+                        if filename:
+                            landuse.user_defined_landcover_fn = filename
+
+                    try:
+                        if single_input_uploads_enabled(landuse):
+                            # input_submission already holds this module lock.
+                            _mutate_landuse_user_defined()
+                        else:
+                            mutate_root(
+                                wd,
+                                "landuse",
+                                _mutate_landuse_user_defined,
+                                purpose="rq-build-landuse-user-defined",
+                            )
+                    except ValueError as exc:
+                        return error_response(
+                            str(exc),
+                            status_code=_upload_status_from_message(str(exc)),
+                        )
+                    except FileNotFoundError as exc:
+                        return error_response(str(exc), status_code=400)
+                    except RuntimeError as exc:
+                        return error_response(str(exc), status_code=400)
+
+                mapping_error = _validate_effective_mapping(landuse)
+                if mapping_error is not None:
+                    return mapping_error
+
+                selection_changed = (
+                    requested_runtime_db is not None
+                    and requested_runtime_db
+                    != str(getattr(landuse, "nlcd_db", "") or "")
+                ) or requested_mode != landuse.mode
+                if selection_changed:
+                    landuse.apply_build_landuse_selection_updates(
+                        nlcd_db=requested_runtime_db,
+                        mode=requested_mode,
+                    )
+
+                if landuse.run_group == "batch":
+                    return JSONResponse({"message": "Set landuse inputs for batch processing"})
+
+                prep = RedisPrep.getInstance(wd)
+                prep.remove_timestamp(TaskEnum.build_landuse)
+                prep.remove_timestamp(TaskEnum.run_geneva)
+
+                conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+                with redis.Redis(**conn_kwargs) as redis_conn:
+                    q = Queue(connection=redis_conn)
+                    job = enqueue_tracked_rq_job(
+                        q,
+                        build_landuse_rq,
+                        prep=prep,
+                        job_key="build_landuse_rq",
+                        runid=runid,
+                        args=(runid,),
+                        timeout=RQ_TIMEOUT,
+                    )
+                response = {"job_id": job.id}
+                if int(landuse.mode) == 5:
+                    response["result"] = {"single_user_defined_filename": landuse.single_user_defined_filename}
+                return JSONResponse(response)
+    except SingleInputError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
+    except SingleInputPolicyError as exc:
+        return error_response(str(exc), status_code=400, code="unsupported_capability")
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except WatershedNotAbstractedError as exc:
@@ -824,21 +851,28 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        authority, authority_error = _run_authority(landuse)
-        if authority_error is not None:
-            return authority_error
-        capability_error = _capability_mode_error(landuse, mode, authority)
-        if capability_error is not None:
-            return capability_error
-        if mode == LanduseMode.Single and bool(getattr(landuse, "multi_ofe", False)):
-            return error_response(MOFE_SINGLE_LANDUSE_MESSAGE, status_code=400, code="invalid_landuse_mode")
-        if mode == LanduseMode.Single and single_selection is None:
-            return error_response("mode and landuse_single_selection must be provided", status_code=400)
-        landuse.apply_set_landuse_mode_updates(
-            mode=mode,
-            single_selection=str(single_selection) if single_selection is not None else None,
-        )
-        return JSONResponse({"message": "Landuse mode updated"})
+        with input_submission(landuse, "landuse", runid):
+            authority, authority_error = _run_authority(landuse)
+            if authority_error is not None:
+                return authority_error
+            capability_error = _capability_mode_error(landuse, mode, authority)
+            if capability_error is not None:
+                return capability_error
+            if mode == LanduseMode.Single and bool(getattr(landuse, "multi_ofe", False)):
+                return error_response(MOFE_SINGLE_LANDUSE_MESSAGE, status_code=400, code="invalid_landuse_mode")
+            if mode == LanduseMode.Single and single_selection is None:
+                return error_response("mode and landuse_single_selection must be provided", status_code=400)
+            landuse.apply_set_landuse_mode_updates(
+                mode=mode,
+                single_selection=str(single_selection) if single_selection is not None else None,
+            )
+            return JSONResponse({"message": "Landuse mode updated"})
+    except SingleInputError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
+    except SingleInputPolicyError as exc:
+        return error_response(str(exc), status_code=400, code="unsupported_capability")
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception as exc:  # broad-except: boundary contract

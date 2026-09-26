@@ -18,6 +18,9 @@ CONFIG = "cfg"
 def soils_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     """Provide a Flask client with the soils blueprint and stubbed dependencies."""
 
+    from types import SimpleNamespace
+    monkeypatch.setattr(soils_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(soils_module.soils_bp)
@@ -166,3 +169,17 @@ def test_task_set_disturbed_sol_ver_updates_controller(soils_client):
 
     controller = DummyDisturbed.getInstance(run_dir)
     assert controller.sol_ver == pytest.approx(9002.0)
+
+
+def test_single_input_project_rejects_excluded_mutation_before_hydration(soils_client, monkeypatch):
+    from types import SimpleNamespace
+    value = soils_client
+    client = value[0] if isinstance(value, tuple) else value
+    monkeypatch.setattr(soils_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: "True"))
+    def forbidden_hydration(*args, **kwargs):
+        pytest.fail("Excluded controller must not be restored")
+    monkeypatch.setattr(soils_module.Disturbed, "getInstance", forbidden_hydration)
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/set_disturbed_sol_ver/", json={'sol_ver': 7778})
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "unsupported_capability"

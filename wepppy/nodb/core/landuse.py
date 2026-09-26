@@ -52,6 +52,8 @@ Warning:
 # standard library
 import csv
 import errno
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled, require_single_input_policy, SingleInputPolicyError
+from wepppy.nodb.single_input_sources import source_metadata, write_generated_source
 from wepppy.all_your_base.raster_freshness import observe_raster_dependencies
 import hashlib
 import json
@@ -161,6 +163,7 @@ def _materialize_mofe_management_segment(segment_plan: Mapping[str, Any]) -> Any
         man_dir=segment_plan['man_dir'],
         desc=segment_plan['desc'],
         color=segment_plan['color'],
+        native_scenario_references=bool(segment_plan.get('single_input_policy')),
     )
 
     replacements = segment_plan.get('replacements')
@@ -216,7 +219,7 @@ def _write_mofe_management_file_task(
         with open(mofe_lc_fn, 'w') as pf:
             pf.write(str(stack[0]))
     else:
-        mofe_synth = ManagementMultipleOfeSynth(stack=stack)
+        mofe_synth = ManagementMultipleOfeSynth(stack=stack, deduplicate_scenarios=any(plan.get("single_input_policy") for plan in segment_plans))
         mofe_synth.write(mofe_lc_fn)
 
     elapsed = time.perf_counter() - start
@@ -389,6 +392,7 @@ class LanduseMode(IntEnum):
     RRED_Unburned = 2
     RRED_Burned = 3
     UserDefined = 4
+    SingleUserDefined = 5
     SpatialAPI = 9
 
 
@@ -785,6 +789,8 @@ class Landuse(NoDbBase):
         return self._mode
 
     def _set_mode_value(self, value: Any) -> None:
+        if isinstance(value, (LanduseMode, int)) and int(value) == 5:
+            require_single_input_policy(self, require_enabled=True)
         if isinstance(value, LanduseMode):
             self._mode = value
         elif isinstance(value, int):
@@ -808,7 +814,7 @@ class Landuse(NoDbBase):
         k = landuse_single_selection
         self._single_selection = k
         mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
-        self._single_man = get_management_summary(k, mapping_reference)
+        self._single_man = get_management_summary(k, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
 
     @single_selection.setter
     @nodb_setter
@@ -989,7 +995,7 @@ class Landuse(NoDbBase):
         lc_dir = self.lc_dir
         _clear_directory_preserving_symlink_mount(
             lc_dir,
-            preserve_names={"user-defined", "landuse_user_defined_mapping.json"},
+            preserve_names={"user-defined", "landuse_user_defined_mapping.json", "single-user-defined"},
         )
         os.makedirs(lc_dir, exist_ok=True)
         self._landuse_is_vrt = False
@@ -1178,6 +1184,24 @@ class Landuse(NoDbBase):
         domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
         self.domlc_d = domlc_d
 
+    @property
+    def single_user_defined_filename(self) -> Optional[str]:
+        metadata = source_metadata(self)
+        return metadata.get("filename") if isinstance(metadata, dict) else None
+
+    def _build_single_user_defined(self) -> None:
+        from wepppy.wepp.management.managements import ManagementSummary
+        require_single_input_policy(self, watershed=self.watershed_instance, require_enabled=True)
+        path = write_generated_source(self, "landuse")
+        summary = ManagementSummary(Key="single-user-defined", ManagementFile=os.path.basename(path),
+                                    ManagementDir=self.lc_dir, Description="Single User-Defined",
+                                    Color=(80, 130, 100, 255))
+        previous = (self.managements or {}).get("single-user-defined")
+        for cover in ("cancov", "inrcov", "rilcov"):
+            setattr(summary, cover + "_override", getattr(previous, cover + "_override", None))
+        self.managements = {"single-user-defined": summary}
+        self.domlc_d = {str(topaz_id): "single-user-defined" for topaz_id in self.watershed_instance._subs_summary}
+
     def _build_single_selection(self) -> None:
         assert self.single_selection is not None
 
@@ -1211,7 +1235,7 @@ class Landuse(NoDbBase):
         managements = {}
         mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
         for dom in doms:
-            man = managements[dom] = get_management_summary(dom, mapping_reference)
+            man = managements[dom] = get_management_summary(dom, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
 
             # copy the management file to landuse directory
             shutil.copyfile(_join(man.man_dir, man.man_fn), _join(self.lc_dir, _split(man.man_fn)[-1]))
@@ -1237,6 +1261,7 @@ class Landuse(NoDbBase):
             from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
+        require_single_input_policy(self, watershed=watershed, require_enabled=self._mode == LanduseMode.SingleUserDefined)
         self.validate_landuse_mode_for_mofe()
 
         from wepppy.nodb.project_config_capabilities import (
@@ -1257,7 +1282,9 @@ class Landuse(NoDbBase):
         with self.locked():
             if self._mode != LanduseMode.UserDefined and retrieve_nlcd:
                 self.clean()
-            if self._mode == LanduseMode.UserDefined:
+            if self._mode == LanduseMode.SingleUserDefined:
+                self._build_single_user_defined()
+            elif self._mode == LanduseMode.UserDefined:
                 self._build_NLCD(retrieve_nlcd=False)
             elif self._mode == LanduseMode.Gridded:
                 if 'au' in effective_locales:
@@ -1288,7 +1315,14 @@ class Landuse(NoDbBase):
             rap = None
 
         if self.multi_ofe:
-            self._build_multiple_ofe()
+            if self._mode == LanduseMode.SingleUserDefined:
+                assignments = {
+                    str(topaz_id): {str(index): "single-user-defined" for index in range(1, int(count) + 1)}
+                    for topaz_id, count in watershed.mofe_nsegments.items()
+                }
+                self._build_multiple_ofe(domlc_mofe_override=assignments)
+            else:
+                self._build_multiple_ofe()
 
         self = Landuse.getInstance(wd)
         with self.locked():
@@ -1432,7 +1466,8 @@ class Landuse(NoDbBase):
         wd = self.wd
 
         watershed = self.watershed_instance
-        disturbed = Disturbed.tryGetInstance(wd)
+        require_single_input_policy(self, watershed=watershed)
+        disturbed = None if single_input_uploads_enabled(self) else Disturbed.tryGetInstance(wd)
         if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
         else:
@@ -1553,9 +1588,11 @@ class Landuse(NoDbBase):
             self.logger.debug('building management for hillslope: %s', topaz_id)
 
             nsegments = int(watershed.mofe_nsegments[str(topaz_id)])
+            if single_input_uploads_enabled(self) and not 1 <= nsegments <= 32:
+                raise ValueError("Single-input projects support 1–32 OFEs per hillslope.")
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
-            mofe_ids = sorted([_id for _id in domlc_d[str(topaz_id)]])
+            mofe_ids = sorted(domlc_d[str(topaz_id)], key=int)
             if set(mofe_ids) != {str(index) for index in range(1, nsegments + 1)}:
                 raise ValueError(f'MOFE landuse assignments have incomplete OFE segments for Topaz ID: {topaz_id}')
 
@@ -1573,7 +1610,7 @@ class Landuse(NoDbBase):
                 mofe_id = str(i + 1)
 
                 if dom not in managements:
-                    managements[dom] = get_management_summary(dom, mapping_reference)
+                    managements[dom] = get_management_summary(dom, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
 
                 summary = managements[dom]
                 disturbed_class = summary.disturbed_class
@@ -1616,6 +1653,7 @@ class Landuse(NoDbBase):
                 ):
                     segment_plan = {
                         'key': summary.key,
+                        'single_input_policy': single_input_uploads_enabled(self),
                         'man_fn': summary.man_fn,
                         'man_dir': summary.man_dir,
                         'desc': summary.desc,
@@ -1628,7 +1666,9 @@ class Landuse(NoDbBase):
                         'xmxlai': xmxlai,
                     }
                 else:
-                    management = summary.get_management()
+                    management = summary.get_management(
+                        **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {})
+                    )
                     if replacements is not None:
                         apply_disturbed_management_overrides(management, replacements)
                     if cancov_override is not None:
@@ -2045,7 +2085,7 @@ class Landuse(NoDbBase):
 
             def _resolve_management_summary(dom_key: str) -> Any:
                 try:
-                    man = get_management_summary(dom_key, _map)
+                    man = get_management_summary(dom_key, _map, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
                 except InvalidManagementKey:
                     # Runtime-generated treatment keys (for example mulch_15/30/60 variants)
                     # are persisted in landuse.managements but intentionally absent from
@@ -2179,7 +2219,7 @@ class Landuse(NoDbBase):
         landuse = str(int(landuse))
         mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
         try:
-            get_management_summary(landuse, mapping_reference)
+            get_management_summary(landuse, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
         except InvalidManagementKey as exc:
             raise ValueError(f'Unknown landuse class: {landuse}') from exc
         assert self.domlc_d is not None

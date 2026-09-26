@@ -101,3 +101,39 @@ def test_builder_always_materializes_disturbed_and_compatible_mapping(locale):
         mapping = load_map(config["landuse"]["mapping"])
         assert required <= {entry["DisturbedClass"] for entry in mapping.values()}, source
         assert candidate.resolved.effective_writers[("landuse", "mapping")] == source
+
+
+@pytest.mark.parametrize("representation", ["single-ofe", "multiple-ofe"])
+def test_single_inputs_are_independent_creation_capabilities(representation):
+    candidate = resolve_builder_candidate(parse_builder_selections(_payload(
+        single_user_defined_uploads=True, watershed_representation=representation,
+    )))
+    config = parse_config_text(candidate.artifact.config_bytes.decode())
+    manifest = json.loads(candidate.artifact.manifest_bytes)
+    assert config["nodb"]["mods"] == []
+    assert config["nodb"]["single_user_defined_uploads"] is True
+    assert config["watershed"]["mofe_buffer"] is False
+    assert manifest["selections"]["single_user_defined_uploads"] is True
+    assert config["capabilities"]["wepp_binaries"] == ["wepp_260803"]
+    for section in ("capabilities.landuse_methods", "capabilities.soil_builders",
+                    "capabilities.landuse_methods_by_representation"):
+        assert all("single-user-defined" in methods for methods in config[section].values())
+    ordinary = resolve_builder_candidate(parse_builder_selections(_payload()))
+    normal_config = parse_config_text(ordinary.artifact.config_bytes.decode())
+    assert normal_config["nodb"]["mods"] == ["disturbed"]
+    assert "single-user-defined" not in normal_config["capabilities"]["soil_builders"]
+    assert config["landuse"].get("mode") == normal_config["landuse"].get("mode")
+    assert config["soils"].get("mode") == normal_config["soils"].get("mode")
+
+
+@pytest.mark.parametrize("value", [None, 0, 1, "true", "false", [], {}])
+def test_single_input_builder_boolean_is_not_coerced(value):
+    with pytest.raises(BuilderConstraintError, match="must be a boolean"):
+        parse_builder_selections(_payload(single_user_defined_uploads=value))
+
+
+def test_single_input_native_binary_is_explicit():
+    with pytest.raises(BuilderConstraintError, match="require wepp_260803"):
+        resolve_builder_candidate(parse_builder_selections(_payload(
+            single_user_defined_uploads=True, wepp_binary="latest",
+        )))

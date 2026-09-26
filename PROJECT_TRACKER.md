@@ -242,7 +242,7 @@ Feedback mechanisms:
 ### Single User-Defined Landuse and Soils
 
 **Proposed**: 2026-09-25
-**Status**: Builder scope approved; planning findings independently closed; checkpoint and implementation pending
+**Status**: Implemented after contract checkpoint; final regression validation and review closeout
 **Security impact**: `high` (file uploads, parsers, and run filesystem writes)
 **Link**: [Work package](docs/work-packages/20260925_single_user_defined_landuse_soils/package.md)
 
@@ -250,8 +250,8 @@ Add independent `.man`/`.MAN` and `.sol`/`.SOL` upload modes with standard Pure
 controls and SBS-style filename feedback. Apply each uploaded input to all
 hillslopes and OFEs, retaining existing modifiers. The approved
 Config Builder option enables upload modes and excludes Disturbed/SBS, dependent
-features, and buffer OFEs. Finalize source formats/lifecycle, complete design
-security review and canonical checkpoint, then implement; no per-input class selectors.
+features, and buffer OFEs. Native execution, source recovery, archive/fork and
+themed controls have retained acceptance evidence; final repository gates continue.
 
 
 

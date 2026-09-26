@@ -879,6 +879,7 @@ def test_run_omni_scenario_delegates_mode_specific_branch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.config_get_str = lambda section, option, default=None: default
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     scenario_dir = run_dir / "_pups" / "omni" / "scenarios" / "uniform_low"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import Dict, Iterable, List, Optional
+from wepppy.wepp.management.managements import SectionType
 
 if False:  # pragma: no cover - typing only
     from wepppy.wepp.management.managements import Management
@@ -225,9 +226,9 @@ class ManagementMultipleOfeSynth(object):
                 continue
             cls._update_reference(yearly.data.itype, name_maps['plants'])
             cls._update_reference(yearly.data.tilseq, name_maps['surfs'])
-            # Preserve the parser's historical conset/drset swap.
-            cls._update_reference(yearly.data.conset, name_maps['drains'])
-            cls._update_reference(yearly.data.drset, name_maps['contours'])
+            for reference in (yearly.data.conset, yearly.data.drset):
+                section = 'contours' if reference.section_type == SectionType.Contour else 'drains'
+                cls._update_reference(reference, name_maps[section])
         source.years.setroot(target)
         name_maps['years'] = cls._merge_section_deduplicated(
             target.years, source.years, prefix=prefix
@@ -339,9 +340,9 @@ class ManagementMultipleOfeSynth(object):
                     data = year_loop.data
                     update_ref(data.itype, 'plants')
                     update_ref(data.tilseq, 'surfs')
-                    # Note: The provided parser swaps conset and drset. This code respects that implementation.
-                    update_ref(data.conset, 'drains')
-                    update_ref(data.drset, 'contours')
+                    for reference in (data.conset, data.drset):
+                        section = 'contours' if reference.section_type == SectionType.Contour else 'drains'
+                        update_ref(reference, section)
 
             # Step 3: Append the now-unique scenarios from 'other' to the base 'mf'.
             mf.plants.extend(other.plants)

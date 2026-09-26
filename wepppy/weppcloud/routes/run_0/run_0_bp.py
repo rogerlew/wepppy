@@ -9,6 +9,7 @@ from datetime import datetime
 from numbers import Real
 import re
 import uuid
+from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES, single_input_uploads_enabled
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
@@ -2121,6 +2122,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     else:
         topaz = None
 
+    single_input_uploads = single_input_uploads_enabled(ron)
     mods_list = ron.mods or []
     openet_role_enabled = _feature_role_enabled(
         "openet_ts",
@@ -2132,13 +2134,13 @@ def _build_runs0_context(runid, config, playwright_load_all):
     rangeland_cover = RangelandCover.tryGetInstance(wd)
     rhem = Rhem.tryGetInstance(wd)
     openet_ts = OpenET_TS.tryGetInstance(wd) if show_openet_ts else None
-    disturbed = Disturbed.tryGetInstance(wd)
+    disturbed = None if single_input_uploads else Disturbed.tryGetInstance(wd)
     baer = Baer.tryGetInstance(wd) if 'baer' in ron.mods else None
     ash = Ash.tryGetInstance(wd)
     skid_trails = wepppy.nodb.mods.SkidTrails.tryGetInstance(wd)
-    reveg = Revegetation.tryGetInstance(wd)
-    omni = Omni.tryGetInstance(wd)
-    treatments = Treatments.tryGetInstance(wd)
+    reveg = None if single_input_uploads else Revegetation.tryGetInstance(wd)
+    omni = None if single_input_uploads else Omni.tryGetInstance(wd)
+    treatments = None if single_input_uploads else Treatments.tryGetInstance(wd)
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
     roads = Roads.tryGetInstance(wd) if 'roads' in mods_list else None
@@ -2297,6 +2299,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         'postfire_debris_flow' in mods_list and 'disturbed' in mods_list
         and rusle_backend_supported and postfire_authority.locale_profile == 'continental-us'
     ) or playwright_load_all
+    if single_input_uploads:
+        show_treatments = show_omni = show_omni_contrasts = False
+        show_debris_flow = show_path_ce = show_rusle = show_postfire_debris_flow = False
     rusle_rap_year_options = rusle.available_rap_years() if rusle is not None else []
 
     bootstrap_admin_disabled = bool(getattr(run_record, "bootstrap_disabled", False)) if run_record else False
@@ -2327,11 +2332,15 @@ def _build_runs0_context(runid, config, playwright_load_all):
             'postfire_debris_flow': show_postfire_debris_flow,
         }
     )
+    if single_input_uploads:
+        for feature in EXCLUDED_FEATURES:
+            mod_visibility[feature] = False
     header_mod_options = build_header_mod_options(
         active_mods=set(mods_list),
         user=current_user,
         is_wbt=rusle_backend_supported,
         include_all=bool(playwright_load_all),
+        excluded_features=EXCLUDED_FEATURES if single_input_uploads else frozenset(),
     )
     maturity_definition_href = (
         url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md')

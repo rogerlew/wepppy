@@ -89,7 +89,7 @@ invalid UTF-8 input; accept UTF-8 BOM and CRLF. Maximum 100,000 physical lines,
 16,384 bytes per line, and 64 characters per numeric token bound parsing work.
 Validation must use the exact bytes later published.
 
-Initial supported formats are management98.4 and soil7778. Reject management
+Initial supported formats are management 98.4 and soil 7778. Reject management
 2016.3: the pinned native reader ignores modern rcc/usinrco/usrilco fields even
 though the Python parser supports them. Future expansion requires native semantic
 preservation evidence, not merely parsing or successful WEPP execution. Each source
@@ -102,14 +102,19 @@ conditions and yearly scenarios use supported cropland-format landuse 1 records.
 Do not infer eligibility from description words or apply disturbed classes.
 Management rotations/scenarios/section counts must be positively bounded before
 count-driven allocation and validated against actual available records; source
-simulation/rotation years are limited to 1–1000. Admission caps are20 plant
-scenarios (owned rotation-stack limit),32 yearly scenarios (owned MOFE limit),
-30 surface/tillage sequences, and32 each for initial-condition, operation, contour
-and drainage scenarios. Event caps are20 tillage operations per sequence,10 grazing
-cycles,25 cuttings and6 crops per year. Validate source and synthesized output
+simulation/rotation years are limited to 1–1000. Admission caps are 20 plant
+scenarios (owned rotation-stack limit), 32 yearly scenarios (owned MOFE limit),
+30 surface/tillage sequences, and 32 each for initial-condition, operation, contour
+and drainage scenarios. Event caps are 20 tillage operations per sequence, 10 grazing
+cycles, 25 cuttings and 6 crops per year. Validate source and synthesized output
 separately against selected-binary limits; deduplicate repeated scenarios before
 checking combined counts. Boundary fixtures must prove accepted maxima and
-rejected maxima+1 rather than assuming a universal32-scenario limit. No negative references or unresolved
+rejected maxima+1 rather than assuming a universal 32-scenario limit.
+
+Checked projects use native contour and drainage section references at admission,
+summary reload, synthesis, and final preparation. Legacy parser defaults remain
+unchanged. This avoids accepting a valid source that later resolves against the
+wrong scenario table. No negative references or unresolved
 cross-section indexes are permitted; mandatory references cannot be zero and
 scenario names must be unique within a section. Explicit zero-count optional sections remain
 valid where the owned format permits them.
@@ -128,7 +133,8 @@ versions. Format bounds are admission/resource limits, not scientific defaults.
 ## Source state, publication and recovery
 
 Optional controller `_single_user_defined_source` metadata contains `filename`,
-`sha256`, `size_bytes`, `version` and `relative_path`. Absent metadata is the
+`sha256`, `size_bytes`, `version` and `relative_path`, plus optional
+`previous_relative_path` for generation retention. Absent metadata is the
 legacy/never-used state. Publish immutable hash-named files under visible
 `landuse/single-user-defined/<sha256>.man` or
 `soils/single-user-defined/<sha256>.sol`; use summary key `single-user-defined`.
@@ -148,7 +154,12 @@ never a silent database fallback.
 Publication and metadata use canonical NoDb locking/fresh hydration/cache rules.
 Serialize source acceptance and build access using the module lock and existing
 run submission coordination: a build consumes one source generation, and active
-conflicts return 409. Immutable previous generations survive failed metadata
+conflicts return 409. Idle checks include normal build/descendant receipts, the
+archive/restore receipt, and the source fork receipt. Checked archive/restore
+admission checks source work under the shared lifecycle lease; checked forks
+lease source and destination in run-id order through receipt/enqueue publication.
+This prevents a copied or restored project from racing accepted-source publication.
+Immutable previous generations survive failed metadata
 publication; remove an unreferenced candidate on failure. After successful
 acceptance retain current and immediately previous accepted generation, prune only
 unreferenced older generations when no build can consume them. Do not retain
@@ -221,3 +232,5 @@ Security review proves containment and noninterference; separate correctness rev
 proves user outcomes. Deployment remains separate. Reverting code does not migrate
 opted-in projects; retain their source/config archives and restore compatible code
 before processing them. Do not silently reinterpret mode5 as an older mode.
+
+User, operator, and developer usage guidance: [Single User-Defined inputs](../dev-notes/single-user-defined-inputs.md).

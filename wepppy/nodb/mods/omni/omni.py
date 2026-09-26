@@ -19,6 +19,7 @@ Outputs:
 """
 
 from __future__ import annotations
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import os
@@ -964,6 +965,7 @@ class Omni(OmniStateContrastMixin, NoDbBase):
         select_topaz_ids: Optional[List[int]] = None,
         contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> None:
+        require_feature_allowed(self, "omni")
         _OMNI_BUILD_ROUTER.build_contrasts(
             self,
             control_scenario_def=control_scenario_def,
@@ -1093,9 +1095,11 @@ class Omni(OmniStateContrastMixin, NoDbBase):
         return _OMNI_BUILD_ROUTER.contrast_status_report(self)
 
     def run_omni_contrasts(self) -> None:
+        require_feature_allowed(self, "omni")
         _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_contrasts(self)
 
     def run_omni_contrast(self, contrast_id: int, *, rq_job_id: Optional[str] = None) -> str:
+        require_feature_allowed(self, "omni")
         return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_contrast(
             self,
             contrast_id,
@@ -1298,9 +1302,11 @@ class Omni(OmniStateContrastMixin, NoDbBase):
 
 
     def run_omni_scenarios(self) -> None:
+        require_feature_allowed(self, "omni")
         _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
 
     def run_omni_scenario(self, scenario_def: ScenarioDef, *, _sbs_execution=None) -> Tuple[str, str]:
+        require_feature_allowed(self, "omni")
         if _sbs_execution is not None:
             return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenario(
                 self, scenario_def, _sbs_execution=_sbs_execution)

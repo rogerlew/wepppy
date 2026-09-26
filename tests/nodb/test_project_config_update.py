@@ -1576,3 +1576,39 @@ def test_builder_sbs_update_rejects_unrelated_module_changes(tmp_path, mods):
     path.write_bytes(serialize_config(config))
     with pytest.raises(ConfigUpdateUnavailableError, match="nodb.mods"):
         preview_project_config_update(tmp_path)
+
+
+def test_single_input_policy_and_sources_survive_config_refresh(tmp_path, monkeypatch):
+    candidate = resolve_builder_candidate(BuilderSelections(
+        locale="continental-us", dem="usgs-ned13-2022", delineation_backend="wbt",
+        watershed_representation="multiple-ofe", soil="ssurgo-gnatsgso-2025",
+        wepp_binary="wepp_260803", landuse="nlcd-2019", climate="vanilla_cligen",
+        single_user_defined_uploads=True,
+    ))
+    materialize_preset_snapshot(tmp_path, candidate.artifact)
+    path = tmp_path / "config.cfg"
+    config = parse_config_text(path.read_text())
+    del config["unitizer"]["is_english"]
+    path.write_bytes(serialize_config(config))
+    manifest_path = tmp_path / "config-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["config"]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest))
+    source = tmp_path / 'landuse/single-user-defined/source.man'
+    source.parent.mkdir(parents=True); source.write_bytes(b'immutable source sentinel')
+    graph = replace(resolve_builder_capability_graph("continental-us"), provider_revision="f" * 64)
+    monkeypatch.setattr(project_update, "resolve_builder_capability_graph", lambda *_a, **_k: graph)
+    preview = preview_project_config_update(tmp_path)
+    assert preview.available
+    assert preview.capability_refresh is not None
+    apply_project_config_update(tmp_path, preview.preview_id, trigger_section="unitizer",
+                                trigger_option="is_english", application_revision="single-input-test",
+                                capability_acknowledgment_accepted=True,
+                                capability_acknowledgment_revision=CAPABILITY_REFRESH_ACKNOWLEDGMENT_REVISION)
+    updated = parse_config_text(path.read_text())
+    assert updated['nodb']['single_user_defined_uploads'] is True
+    assert 'disturbed' not in updated['nodb']['mods']
+    assert updated['watershed']['mofe_buffer'] is False
+    assert 'single-user-defined' in updated['capabilities']['landuse_methods']
+    assert 'single-user-defined' in updated['capabilities']['soil_builders']
+    assert source.read_bytes() == b'immutable source sentinel'

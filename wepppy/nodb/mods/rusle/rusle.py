@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
@@ -911,6 +912,7 @@ class Rusle(NoDbBase):
         return readme_path
 
     def build(self, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        require_feature_allowed(self, "rusle")
         options = self.parse_inputs(payload)
         with self.locked():
             self._r_mode = options["r_mode"]

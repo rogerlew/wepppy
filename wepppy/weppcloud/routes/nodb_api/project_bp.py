@@ -6,6 +6,7 @@ import os
 import traceback
 import redis
 from rq import Queue
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -93,6 +94,7 @@ def _validate_feature_enable_preconditions(
     active_mods: set[str],
     wd: str,
 ) -> None:
+    require_feature_allowed(Ron.getInstance(wd), spec.id)
     is_wbt_backend = _delineation_backend_is_wbt(wd)
     if not backend_matches_requirement(spec.requires_backend, is_wbt=is_wbt_backend):
         if spec.requires_backend == "wbt":
@@ -181,6 +183,19 @@ def _enable_mod_for_run(ron: Ron, wd: str, cfg_fn: str, mod_name: str) -> bool:
     if spec is None:
         raise ValueError(f"Unknown module '{mod_name}'.")
 
+    # Validate the complete closure before module state or backups can change.
+    pending = [mod_name]
+    checked = set()
+    while pending:
+        candidate = pending.pop()
+        if candidate in checked:
+            continue
+        checked.add(candidate)
+        require_feature_allowed(ron, candidate)
+        candidate_spec = _feature_spec(candidate)
+        if candidate_spec is not None:
+            pending.extend(candidate_spec.enable_dependencies)
+            pending.extend(candidate_spec.requires_features)
     changed = _append_mod(ron, mod_name)
 
     for dependency in spec.enable_dependencies:

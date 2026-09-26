@@ -58,7 +58,7 @@ class SoilMultipleOfeSynth(object):
         for fn in self.stack:
             lines = read_soil_lines(fn)
             for L in lines:
-                if not L.startswith('#'):
+                if L.strip() and not L.lstrip().startswith('#'):
                     versions.add(L)
                     break
 
@@ -71,9 +71,9 @@ class SoilMultipleOfeSynth(object):
             lines = read_soil_lines(fn)
             i = 0
             for L in lines:
-                if not L.startswith('#'):
+                if L.strip() and not L.lstrip().startswith('#'):
                     if i > 2:
-                        s.append(L)
+                        s.append(L if L.endswith("\n") else L + "\n")
                     i += 1
         s.append('\n\n')
 

@@ -9,6 +9,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -93,6 +95,8 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
 
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return error_response("debris_flow is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
         _preflight_debris_flow_roots(wd)
 
         payload = await parse_request_payload(request)

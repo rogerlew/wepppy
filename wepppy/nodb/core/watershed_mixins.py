@@ -33,6 +33,7 @@ from osgeo.gdalconst import *
 
 from deprecated import deprecated
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled, require_single_input_policy, SingleInputPolicyError
 from wepppy.topo.watershed_abstraction import WeppTopTranslator
 from wepppy.topo.peridot.peridot_runner import (
     run_peridot_abstract_watershed,
@@ -690,6 +691,8 @@ class WatershedOperationsMixin:
     @mofe_buffer.setter
     @nodb_setter
     def mofe_buffer(self, value: bool) -> None:
+        if value and single_input_uploads_enabled(self):
+            raise SingleInputPolicyError("Buffer OFEs are disabled for single-input upload projects.")
         self._mofe_buffer = bool(value)
 
     @property
@@ -714,6 +717,7 @@ class WatershedOperationsMixin:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(f'{self.class_name}.{func_name}()')
         subwta, _, _ = read_raster(self.subwta, dtype=np.int32)
+        require_single_input_policy(self, watershed=self)
         sub_ids, sub_counts = np.unique(subwta, return_counts=True)
         hillslope_cell_counts = {
             str(int(_id)): int(count)

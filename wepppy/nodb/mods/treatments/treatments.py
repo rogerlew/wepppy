@@ -1,3 +1,4 @@
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from typing import Any, Dict, List, Optional, Tuple
 import os
 import ast
@@ -249,6 +250,7 @@ class Treatments(NoDbBase):
         treatments_domlc_d should be set at this point.
         """
 
+        require_feature_allowed(self, "treatments")
         from wepppy.nodb.mods.disturbed import Disturbed
 
         # treatment keys need to be topaz ids

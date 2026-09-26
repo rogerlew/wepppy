@@ -2,6 +2,8 @@
 
 from .._common import *  # noqa: F401,F403
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
 
 
@@ -30,6 +32,8 @@ def set_treatments_mode(runid: str, config: str):
         return error_factory('mode must be an integer')
 
     wd = get_wd(runid)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "treatments is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     treatments = Treatments.getInstance(wd)
 
     try:

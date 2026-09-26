@@ -37,6 +37,7 @@ from rq.exceptions import InvalidJobOperation, NoSuchJobError
 from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry, StartedJobRegistry
 from redis.exceptions import WatchError
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -1293,6 +1294,7 @@ def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "disturbed")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:watershed'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -2266,6 +2268,7 @@ def build_treatments_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "treatments")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:treatments'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -2507,6 +2510,7 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "debris_flow")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:debris_flow'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -3188,6 +3192,7 @@ def build_rusle_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None
     """Build RUSLE factors and final mode-specific A output."""
     job = get_current_job()
     wd = get_wd(runid)
+    require_feature_allowed(Ron.getInstance(wd), "rusle")
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f"{runid}:rusle"
     StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")

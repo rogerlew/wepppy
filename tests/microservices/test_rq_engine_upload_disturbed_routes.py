@@ -12,6 +12,13 @@ from wepppy.nodb.redis_prep import TaskEnum
 pytestmark = pytest.mark.microservice
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(upload_disturbed_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
+        mods=[], config_get_str=lambda section, key, default=None: default))
+
+
 def test_upload_sbs_returns_disturbed_fn(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     baer_dir = run_dir / "baer"

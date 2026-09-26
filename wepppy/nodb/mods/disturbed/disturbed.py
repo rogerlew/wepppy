@@ -33,6 +33,7 @@ See also:
     - wepppy/weppcloud/controllers_js/README.md - Controller system documentation
 """
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
 import os
 import ast
 import csv
@@ -1388,6 +1389,7 @@ class Disturbed(NoDbBase):
         mode: Optional[int] = None,
         uniform_severity: Optional[int] = None
     ) -> None:
+        require_feature_allowed(self, "disturbed")
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(fn={fn}, breaks={breaks}, nodata_vals={nodata_vals}, color_map={color_map}, mode={mode}, uniform_severity={uniform_severity})')
 
@@ -2160,6 +2162,7 @@ class Disturbed(NoDbBase):
 
     def modify_mofe_soils(self) -> None:
         """Generate MOFE soils with rollback for a failed operation."""
+        require_feature_allowed(self, "disturbed")
         _run_disturbed_soil_transaction(
             self.soils_instance,
             self._modify_mofe_soils_impl,
@@ -2712,6 +2715,7 @@ class Disturbed(NoDbBase):
 
     def modify_soils(self) -> None:
         """Generate single-OFE soils with rollback for a failed operation."""
+        require_feature_allowed(self, "disturbed")
         _run_disturbed_soil_transaction(
             self.soils_instance,
             self._modify_soils_impl,

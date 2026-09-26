@@ -53,6 +53,7 @@ def _write_uint8_tif(path: Path, values: np.ndarray) -> None:
 
 def _disturbed_stub(run_dir: Path) -> Disturbed:
     disturbed = Disturbed.__new__(Disturbed)
+    disturbed.config_get_str = lambda _section, _key, default=None: default
     disturbed.wd = str(run_dir)
     disturbed.logger = _NoopLogger()
     disturbed._sbs_mode = 0

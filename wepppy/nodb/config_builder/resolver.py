@@ -8,6 +8,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
+from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES, SUPPORTED_BINARY, single_input_capability_graph
 from wepppy.nodb.config_builder.registry import DEFAULT_PROFILES_ROOT, load_registry
 from wepppy.nodb.config_builder.schema import (
     BuilderDescription,
@@ -438,6 +439,13 @@ def resolve_builder_config(
         for section, options in config.items()
         for option in options
     }
+    if type(selections.single_user_defined_uploads) is not bool:
+        raise BuilderConstraintError("single_user_defined_uploads", "invalid_type", "single_user_defined_uploads must be a boolean")
+    if selections.single_user_defined_uploads:
+        if selections.wepp_binary != SUPPORTED_BINARY:
+            raise BuilderConstraintError("wepp_binary", "unsupported_capability", f"Single-input uploads require {SUPPORTED_BINARY}.")
+        if EXCLUDED_FEATURES.intersection(selections.mods):
+            raise BuilderConstraintError("mods", "unsupported_capability", "Selected modules require Disturbed or SBS and cannot be used with single-input uploads.")
     chain = _selection_chain(
         resolved_registry,
         selections,
@@ -469,8 +477,11 @@ def resolve_builder_config(
         if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
         else resolve_builder_capability_graph(selections.locale, registry=resolved_registry)
     )
+    if selections.single_user_defined_uploads:
+        graph = single_input_capability_graph(graph)
     if (
-        capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+        selections.single_user_defined_uploads
+        or capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
         or capability_graph is not None
     ):
         for section_name, options in graph.as_config_sections().items():
@@ -502,7 +513,7 @@ def resolve_builder_config(
         (("config", "resolver_version"), 1, "resolver-v1"),
         (("config", "schema_version"), 1, "resolver-v1"),
         (("general", "cellsize"), effective_cellsize, "selection:cellsize"),
-        (("nodb", "mods"), ["disturbed", *(mod for mod in selections.mods if mod != "disturbed")], "builder:sbs-support"),
+        (("nodb", "mods"), list(selections.mods) if selections.single_user_defined_uploads else ["disturbed", *(mod for mod in selections.mods if mod != "disturbed")], "builder:single-input-policy" if selections.single_user_defined_uploads else "builder:sbs-support"),
         (("capability_defaults", "locale_profile"), selections.locale, "selection:locale"),
         (("capability_defaults", "dem_source"), selections.dem, "selection:dem"),
         (("capability_defaults", "climate_dataset"), selections.climate, "selection:climate"),
@@ -512,6 +523,11 @@ def resolve_builder_config(
         (("capability_defaults", "watershed_representation"), selections.watershed_representation, "selection:representation"),
         (("capability_defaults", "wepp_binary"), selections.wepp_binary, "selection:wepp_binary"),
     )
+    if selections.single_user_defined_uploads:
+        explicit_writes += (
+            (("nodb", "single_user_defined_uploads"), True, "builder:single-input-policy"),
+            (("watershed", "mofe_buffer"), False, "builder:single-input-policy"),
+        )
     if capability_schema_version == CAPABILITY_SCHEMA_VERSION:
         explicit_writes += ((
             ("capability_defaults", "climate_station_database"),

@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 from starlette.datastructures import FormData, UploadFile
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core import Watershed
@@ -574,6 +576,8 @@ async def _run_omni(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
@@ -659,6 +663,8 @@ async def _run_omni_contrasts(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
@@ -799,6 +805,8 @@ async def _dry_run_omni_contrasts(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
@@ -906,6 +914,8 @@ async def _dry_run_omni_contrasts(
 
 async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
     wd = get_wd(runid)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     try:
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_omni_contrasts)

@@ -20,6 +20,7 @@ Outputs and downstream consumers:
 
 from __future__ import annotations
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
 import os
 import shutil
 from os.path import exists as _exists
@@ -71,6 +72,7 @@ class Revegetation(NoDbBase):
             self._user_defined_cover_transform = False
 
     def validate_user_defined_cover_transform(self, fn: str) -> None:
+        require_feature_allowed(self, "revegetation")
         with self.locked():
             assert _exists(_join(self.revegetation_dir, fn)), fn
             self._cover_transform_fn = fn
@@ -81,6 +83,7 @@ class Revegetation(NoDbBase):
         return self._user_defined_cover_transform
 
     def load_cover_transform(self, reveg_scenario: str) -> None:
+        require_feature_allowed(self, "revegetation")
         if reveg_scenario == 'user_cover_transform':
             return
 

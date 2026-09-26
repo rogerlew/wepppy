@@ -27,6 +27,7 @@ class _LoggerStub:
 
 def test_build_landuse_selection_pair_is_persisted_in_one_lock_scope() -> None:
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda _section, _key, default=None: default
     landuse._mode = LanduseMode.Gridded
     landuse._nlcd_db = "nlcd/2019"
     lock_entries: list[str] = []
@@ -108,6 +109,7 @@ def test_build_multi_ofe_rejects_single_landuse_mode(
     run_dir.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda _section, _key, default=None: default
     landuse.wd = str(run_dir)
     landuse._mode = LanduseMode.Single
     landuse._mods = []
@@ -164,6 +166,7 @@ def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(
     run_dir.mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda _section, _key, default=None: default
     landuse.wd = str(run_dir)
     landuse._mode = LanduseMode.Single
     landuse._mods = []

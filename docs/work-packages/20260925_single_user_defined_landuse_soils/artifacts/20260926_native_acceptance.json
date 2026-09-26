@@ -1,0 +1,39 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "binary": "wepp_260803",
+  "synthetic_topology": true,
+  "hillslopes": [
+    {
+      "hill": "101",
+      "ofes": 2,
+      "native_success": true,
+      "elapsed_seconds": 0.11763739585876465,
+      "output_bytes": 10081,
+      "files": {
+        "wepp/runs/p1.man": "1e4a15745c513b19452e5d0c3ad6402e75fae5fe28b21b8cf2ecd06631482767",
+        "wepp/runs/p1.sol": "52967f4df3972d6ef05498c7b52ad312be41118fddbe1493c79356d1253ea68a",
+        "wepp/runs/p1.slp": "e23cce35d46bf5e05d820af15538d89a3f6e5d4d3e19e46e26639869db4e92f5",
+        "wepp/runs/p1.cli": "d4d009652f47b9cfa3655e8b0fae1466d9ecd80cb49bdf78a550f92ff81dc823",
+        "wepp/runs/p1.run": "de7fa14fafdae1ebfcc543204f8b0b5476a3e75f8b5d2a513d22dab760f2f6c7"
+      }
+    },
+    {
+      "hill": "102",
+      "ofes": 12,
+      "native_success": true,
+      "elapsed_seconds": 0.35179758071899414,
+      "output_bytes": 35308,
+      "files": {
+        "wepp/runs/p2.man": "3ca4240940590c4263c23a85c1eddd2338b3a91d5bade7a29e8b661ec160229d",
+        "wepp/runs/p2.sol": "2c650c7f425eadb2d671067d5bc7929d60de0bc2379776fac5ee14f0fcea2288",
+        "wepp/runs/p2.slp": "aa84eb2ea4f28441143bb99f2d99e300af0ed4d22ec68476a8f050a17534875d",
+        "wepp/runs/p2.cli": "d4d009652f47b9cfa3655e8b0fae1466d9ecd80cb49bdf78a550f92ff81dc823",
+        "wepp/runs/p2.run": "d845dc801212ae7780a4001f6484a63e104a0ba7a13aac3b699f0b7b0f34439a"
+      }
+    }
+  ]
+}

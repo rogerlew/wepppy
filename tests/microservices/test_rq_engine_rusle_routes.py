@@ -10,6 +10,13 @@ from wepppy.nodb.redis_prep import TaskEnum
 pytestmark = pytest.mark.microservice
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(rusle_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rusle_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(rusle_routes, "authorize_run_access", lambda claims, runid: None)

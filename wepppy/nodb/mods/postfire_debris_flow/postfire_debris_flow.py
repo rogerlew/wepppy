@@ -1,4 +1,5 @@
 """Optional NoDb state for the Staley M1 production workflow."""
+from wepppy.nodb.single_input_policy import require_feature_allowed
 from copy import deepcopy
 import re
 
@@ -58,6 +59,7 @@ class PostfireDebrisFlow(NoDbBase):
 
     def change(self, callback):
         """Refresh while locked; only this facade's state is modified."""
+        require_feature_allowed(self, "postfire_debris_flow")
         # Serialize short preference/worker mutations before the nonblocking NoDb
         # lock. Never hold this gate across scientific computation or publication.
         with self._mutation_gate() as gate:

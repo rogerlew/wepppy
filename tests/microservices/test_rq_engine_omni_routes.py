@@ -13,6 +13,13 @@ from wepppy.runtime_paths.errors import NoDirError
 pytestmark = pytest.mark.microservice
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(omni_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         omni_routes,

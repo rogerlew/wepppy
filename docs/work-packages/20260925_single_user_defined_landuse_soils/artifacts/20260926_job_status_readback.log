@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20260925_single_user_defined_landuse_soils/artifacts/validate_live_sources.py check
+{"kind": "landuse", "job_id": "cf73da99-1bdb-4c30-ba54-841934f6f356", "status": "finished", "origin": "default"}
+{"kind": "landuse", "filename": "Acceptance.MAN", "source_size": 2334}
+{"kind": "soils", "job_id": "5a7663e5-abe0-4c2b-8014-77a14aa446cc", "status": "finished", "origin": "default"}
+{"kind": "soils", "filename": "Acceptance.SOL", "source_size": 891}

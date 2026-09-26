@@ -98,6 +98,7 @@ def test_single_ofe_defaults_do_not_generate_mofe(scenario, monkeypatch):
 def scenario(tmp_path, monkeypatch):
     (tmp_path / 'landuse').mkdir()
     landuse = lu.Landuse.__new__(lu.Landuse)
+    landuse.config_get_str = lambda _section, _key, default=None: default
     landuse.wd = str(tmp_path)
     landuse._mods = []
     landuse._mapping = 'c3s-disturbed'

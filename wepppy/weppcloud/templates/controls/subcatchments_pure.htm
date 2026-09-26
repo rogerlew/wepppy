@@ -71,6 +71,9 @@
           value="{{ watershed.mofe_max_ofes }}">
       </div>
 
+      {% if (ron.single_user_defined_uploads | default(false)) %}
+      <p class="wc-field__help">Buffer OFEs are disabled because single landuse and soils upload is enabled.</p>
+      {% else %}
       <h4>Buffers</h4>
       <div class="wc-field wc-field--checkbox">
         <label class="wc-choice wc-choice--checkbox">
@@ -93,6 +96,7 @@
           type="text"
           value="{{ watershed.mofe_buffer_length }}">
       </div>
+      {% endif %}
     {% else %}
       {% if watershed.abstraction_backend_is_peridot %}
         <div class="wc-field wc-field--checkbox">

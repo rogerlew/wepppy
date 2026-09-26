@@ -55,6 +55,8 @@ import inspect
 import json
 import tempfile
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled, require_single_input_policy, SingleInputPolicyError
+from wepppy.nodb.single_input_sources import source_metadata, write_generated_source
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -136,6 +138,7 @@ class SoilsMode(IntEnum):
     UserDefined = 2
     RRED_Unburned = 3
     RRED_Burned = 4
+    SingleUserDefined = 5
     SpatialAPI = 9
 
 
@@ -170,6 +173,8 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
             return
 
         for name in os.listdir(resolved):
+            if name == "single-user-defined":
+                continue
             candidate = os.path.join(resolved, name)
             if os.path.isdir(candidate) and not os.path.islink(candidate):
                 shutil.rmtree(candidate)
@@ -178,7 +183,14 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
         return
 
     if os.path.isdir(path):
-        shutil.rmtree(path)
+        for name in os.listdir(path):
+            if name == "single-user-defined":
+                continue
+            candidate = os.path.join(path, name)
+            if os.path.isdir(candidate) and not os.path.islink(candidate):
+                shutil.rmtree(candidate)
+            else:
+                os.unlink(candidate)
     else:
         os.unlink(path)
 
@@ -485,6 +497,8 @@ class Soils(NoDbBase):
     @mode.setter
     @nodb_setter
     def mode(self, value: Any) -> None:
+        if isinstance(value, (SoilsMode, int)) and int(value) == 5:
+            require_single_input_policy(self, require_enabled=True)
         if isinstance(value, SoilsMode):
             self._mode = value
         elif isinstance(value, int):
@@ -1146,6 +1160,8 @@ class Soils(NoDbBase):
         max_workers: Optional[int] = None,
         retrieve_gridded_ssurgo: bool = True,
     ) -> None:
+        require_single_input_policy(self, watershed=self.watershed_instance,
+                                    require_enabled=self.mode == SoilsMode.SingleUserDefined)
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
@@ -1176,7 +1192,9 @@ class Soils(NoDbBase):
         run_authority = resolve_run_capability_authority(self)
         effective_locales = run_authority.runtime_tokens or tuple(self.locales or ())
 
-        if 'ChileCayumanque' in effective_locales:
+        if self.mode == SoilsMode.SingleUserDefined:
+            self._build_single_user_defined()
+        elif 'ChileCayumanque' in effective_locales:
             self.logger.info('  Locale: ChileCayumanque')
             self.build_chile(initial_sat=initial_sat, ksflag=ksflag)
         elif self.soils_map is not None:
@@ -1218,6 +1236,9 @@ class Soils(NoDbBase):
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.build_soils(self._mode)
             return
+
+        if single_input_uploads_enabled(self) and self.multi_ofe:
+            self._build_undisturbed_multiple_ofe()
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -1450,6 +1471,57 @@ class Soils(NoDbBase):
         self.logger.info('triggering SOILS_BUILD_COMPLETE')
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
+
+    @property
+    def single_user_defined_filename(self) -> Optional[str]:
+        metadata = source_metadata(self)
+        return metadata.get("filename") if isinstance(metadata, dict) else None
+
+    def _build_single_user_defined(self) -> None:
+        require_single_input_policy(self, watershed=self.watershed_instance, require_enabled=True)
+        path = write_generated_source(self, "soils")
+        summary = SoilSummary(mukey="single-user-defined", fname=os.path.basename(path),
+                              soils_dir=self.soils_dir, build_date=str(datetime.now()),
+                              desc="Single User-Defined")
+        summary.pct_coverage = 100.0
+        watershed = self.watershed_instance
+        summary.area = sum(watershed.hillslope_area(topaz_id) for topaz_id in watershed._subs_summary)
+        with self.locked():
+            self.domsoil_d = {str(topaz_id): "single-user-defined" for topaz_id in watershed._subs_summary}
+            self.ssurgo_domsoil_d = deepcopy(self.domsoil_d)
+            self.soils = {"single-user-defined": summary}
+            self._soils_is_vrt = False
+        self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+    def _build_undisturbed_multiple_ofe(self) -> None:
+        from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, WeppSoilUtil
+        from wepppy.wepp.single_input import validate_soil_text
+        from wepppy.nodb.core.wepp import _soil_has_symbolic_wepp_parameters
+        import tempfile
+        watershed = self.watershed_instance
+        require_single_input_policy(self, watershed=watershed)
+        for topaz_id in watershed._subs_summary:
+            count = int(watershed.mofe_nsegments[str(topaz_id)])
+            if not 1 <= count <= 32:
+                raise ValueError("Single-input projects support 1–32 OFEs per hillslope.")
+            key = self.domsoil_d[str(topaz_id)]
+            source = os.path.join(self.soils_dir, self.soils[key].fname)
+            soil = WeppSoilUtil(source, compute_erodibilities=False, compute_conductivity=False)
+            destination = os.path.join(self.soils_dir, f"hill_{topaz_id}.mofe.sol")
+            if self.mode == SoilsMode.SingleUserDefined:
+                SoilMultipleOfeSynth([source] * count).write(destination, ksflag=int(soil.obj["ksflag"]))
+            else:
+                # Catalog templates can contain symbolic parameters and trailing
+                # display colors. Normalize through the existing soil consumer.
+                if _soil_has_symbolic_wepp_parameters(soil):
+                    soil = WeppSoilUtil(source, compute_erodibilities=True, compute_conductivity=True).to7778()
+                with tempfile.TemporaryDirectory(dir=self.soils_dir, prefix=".mofe-source-") as directory:
+                    normalized = os.path.join(directory, "source.sol")
+                    soil.write(normalized)
+                    SoilMultipleOfeSynth([normalized] * count).write(destination, ksflag=int(soil.obj["ksflag"]))
+            if self.mode == SoilsMode.SingleUserDefined:
+                with open(destination) as stream:
+                    validate_soil_text(stream.read(), max_ofes=32)
 
     def _build_single(
         self, 

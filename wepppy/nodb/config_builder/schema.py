@@ -132,6 +132,7 @@ class BuilderSelections:
     mods: tuple[str, ...] = ()
     capability_profile: str = "continental-us-capabilities"
     cellsize_override: int | None = None
+    single_user_defined_uploads: bool = False
 
 
 @dataclass(frozen=True, slots=True)

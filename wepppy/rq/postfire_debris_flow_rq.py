@@ -1,6 +1,8 @@
 """Tracked workers for immutable Staley M1 upload and model attempts."""
 import logging
 from rq import get_current_job
+from wepppy.nodb.single_input_policy import require_feature_allowed
+from wepppy.nodb.core import Ron
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
 from pathlib import Path
@@ -25,6 +27,7 @@ def _retain_error(wd, identity):
 
 def _execute(runid, identity, kind, model='M1'):
     wd = get_wd(runid)
+    require_feature_allowed(Ron.getInstance(wd), "postfire_debris_flow")
     job = get_current_job()
     if job:
         StatusMessenger.publish(f"{runid}:postfire_debris_flow", f"rq:{job.id} STARTED {kind}({runid})")

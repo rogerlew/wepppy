@@ -16,6 +16,8 @@ from typing import Any, Dict
 import redis
 from rq import get_current_job
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
+from wepppy.nodb.core import Ron
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.nodb.mods.path_ce.preconditions import PathCEPreconditionError
@@ -43,6 +45,7 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
     StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
 
     wd = get_wd(runid)
+    require_feature_allowed(Ron.getInstance(wd), "path_ce")
     prep = RedisPrep.tryGetInstance(wd)
     if prep is not None:
         try:

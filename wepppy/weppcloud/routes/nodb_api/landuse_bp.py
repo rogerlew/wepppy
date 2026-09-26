@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Sequence,
 from urllib.parse import quote
 from uuid import uuid4
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from flask import Response
 
 from .._common import (
@@ -650,7 +651,7 @@ def report_landuse(runid: str, config: str) -> Response:
             landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
         report_context = build_landuse_report_context(landuse)
-        disturbed_preview_available = "disturbed" in tuple(getattr(landuse, "mods", ()))
+        disturbed_preview_available = not single_input_uploads_enabled(ron) and "disturbed" in tuple(getattr(landuse, "mods", ()))
 
         response = make_response(
             render_template(

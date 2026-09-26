@@ -93,6 +93,15 @@
         </div>
       </div>
 
+      <div class="wc-builder__field">
+        <label class="pure-checkbox" for="builder-single-inputs">
+          <input type="checkbox" id="builder-single-inputs" name="single_user_defined_uploads"
+                 aria-describedby="builder-single-inputs-help builder-single-inputs-error">
+          Enable single landuse and soils upload
+        </label>
+        <p id="builder-single-inputs-help" class="wc-builder__help">Allows independent management (.man, version 98.4) and soil (.sol, version 7778) uploads with WEPP 260803. Disables soil burn severity uploads, disturbed parameterization, dependent features and buffer OFEs for this project. Other multi-OFE configurations remain available.</p>
+        <p id="builder-single-inputs-error" class="wc-builder__error" data-builder-field-error="single_user_defined_uploads"></p>
+      </div>
       <fieldset class="wc-builder__field" data-builder-mods hidden aria-describedby="builder-mods-help builder-mods-error">
         <legend class="wc-builder__legend">Optional modules</legend>
         <div data-builder-mod-options></div>

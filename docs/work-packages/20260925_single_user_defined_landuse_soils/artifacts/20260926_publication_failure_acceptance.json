@@ -1,0 +1,34 @@
+[
+  {
+    "kind": "landuse",
+    "phase": "before",
+    "error_status": 500,
+    "durable_pointer_readable": true,
+    "cache_matches_durable": true,
+    "previous_generation_retained": true
+  },
+  {
+    "kind": "landuse",
+    "phase": "after",
+    "error_status": 500,
+    "durable_pointer_readable": true,
+    "cache_matches_durable": true,
+    "previous_generation_retained": true
+  },
+  {
+    "kind": "soils",
+    "phase": "before",
+    "error_status": 500,
+    "durable_pointer_readable": true,
+    "cache_matches_durable": true,
+    "previous_generation_retained": true
+  },
+  {
+    "kind": "soils",
+    "phase": "after",
+    "error_status": 500,
+    "durable_pointer_readable": true,
+    "cache_matches_durable": true,
+    "previous_generation_retained": true
+  }
+]

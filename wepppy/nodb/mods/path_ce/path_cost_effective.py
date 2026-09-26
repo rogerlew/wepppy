@@ -27,6 +27,7 @@ WGS geojson exports are missing).
 
 from __future__ import annotations
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
 import copy
 import hashlib
 import json
@@ -332,6 +333,7 @@ class PathCostEffective(NoDbBase):
     # ------------------------------------------------------------------
     def prepare_data(self, report: Optional[PreconditionReport] = None) -> pd.DataFrame:
         """Build the model frame from run artifacts; persists the four prep tables."""
+        require_feature_allowed(self.ron_instance, "path_ce")
         if report is None:
             report = self.validate()
         if not report.ok:
@@ -360,6 +362,7 @@ class PathCostEffective(NoDbBase):
         self, final_df: pd.DataFrame, config: Optional[Mapping[str, Any]] = None
     ) -> SolverResult:
         """Run the seam-wrapped solver and persist selection/sdyd/untreatable tables."""
+        require_feature_allowed(self.ron_instance, "path_ce")
         if config is None:
             config = self.config
         labels, unit_costs, quantities, fixed_costs = solver_vectors(config["treatments"])
@@ -446,6 +449,7 @@ class PathCostEffective(NoDbBase):
         self, final_df: pd.DataFrame, config: Optional[Mapping[str, Any]] = None
     ) -> Dict[str, Any]:
         """Run (or reuse) the threshold sweep; persists sweep table + manifest."""
+        require_feature_allowed(self.ron_instance, "path_ce")
         if config is None:
             config = self.config
         cache_key = self._sweep_cache_key(config)
@@ -559,6 +563,7 @@ class PathCostEffective(NoDbBase):
         self, status_callback: Optional[Callable[[str], None]] = None
     ) -> Dict[str, Any]:
         """Execute validate → prepare → solve → sweep and persist results."""
+        require_feature_allowed(self.ron_instance, "path_ce")
         emit = status_callback or (lambda message: None)
         # one immutable snapshot threads through every stage so a mid-run
         # config POST cannot mix treatment sets between stages

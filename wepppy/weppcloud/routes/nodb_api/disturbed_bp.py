@@ -23,6 +23,8 @@ from .._common import (
     send_file,
     success_factory,
 )
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.nodb.core import Ron
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.baer import Baer
@@ -234,6 +236,8 @@ def task_set_lookup_variant(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
 
     payload = parse_request_payload(request)
@@ -265,6 +269,8 @@ def modify_disturbed(runid: str, config: str) -> Response:
     """Render the CSV editor for disturbed land/soil lookup."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     try:
         lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
@@ -312,6 +318,8 @@ def reset_disturbed(runid: str, config: str) -> Response:
     """Reset the disturbed land/soil lookup to defaults."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     disturbed.reset_land_soil_lookup()
     return success_factory()
@@ -323,6 +331,8 @@ def load_extended_land_soil_lookup(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     disturbed.build_extended_land_soil_lookup()
     return success_factory()
@@ -335,6 +345,8 @@ def delete_extended_land_soil_lookup(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
 
     extended_lookup_fn = getattr(disturbed, 'extended_lookup_fn', None)
@@ -364,6 +376,8 @@ def sync_base_to_extended_land_soil_lookup(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     disturbed.build_extended_land_soil_lookup()
     return success_factory()
@@ -376,6 +390,8 @@ def has_sbs(runid: str, config: str) -> Response:
     """Return whether an SBS raster is registered with the disturbed controller."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     return jsonify(dict(has_sbs=disturbed.has_sbs))
 
@@ -386,6 +402,8 @@ def lookup_disturbed_lookup_meta(runid: str, config: str) -> Response:
     """Return run-scoped disturbed lookup fingerprint metadata."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
 
     try:
@@ -415,6 +433,8 @@ def lookup_disturbed_lookup_snapshot(runid: str, config: str) -> Response:
     """Return run-scoped disturbed lookup CSV + fingerprint from one locked read."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
 
     try:
@@ -437,6 +457,8 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
 
     # The frontend sends a raw JSON array of rows (list of lists).
     # Try to parse it directly first, falling back to dict payload format.
@@ -568,6 +590,8 @@ def query_baer_wgs_bounds(runid: str, config: str) -> Response:
     """Return BAER map metadata (bounds/classes) or error if no raster is registered."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -586,6 +610,8 @@ def query_baer_class_map(runid: str, config: str) -> Response:
     """Render the burn-class modification template for BAER maps."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
@@ -605,6 +631,8 @@ def task_baer_class_map(runid: str, config: str) -> Response:
     """Apply burn-class edits to the active BAER or disturbed map."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
 
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
@@ -644,6 +672,8 @@ def task_baer_modify_color_map(runid: str, config: str) -> Response:
     """Update the color map used to render BAER severity classes."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -678,6 +708,8 @@ def resources_baer_sbs(runid: str, config: str) -> Response:
     try:
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
             baer = Baer.getInstance(wd)
@@ -700,6 +732,8 @@ def set_firedate(runid: str, config: str) -> Response:
     """Persist the fire date for the disturbed controller."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     disturbed = Disturbed.getInstance(wd)
     try:
         payload = parse_request_payload(request)
@@ -718,6 +752,8 @@ def task_remove_sbs(runid: str, config: str) -> Response:
     """Remove the SBS raster from BAER/disturbed controllers."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
     if 'baer' in ron.mods:
         baer = Baer.getInstance(wd)
@@ -738,6 +774,8 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
     """Generate a uniform SBS raster with the requested severity value."""
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
     disturbed = Disturbed.getInstance(wd)
     payload = parse_request_payload(request)

@@ -62,6 +62,7 @@ def disturbed_factory(
         (run_dir / "soils").mkdir(parents=True, exist_ok=True)
 
         disturbed = Disturbed.__new__(Disturbed)
+        disturbed.config_get_str = lambda _section, _key, default=None: default
         disturbed.wd = str(run_dir)
         disturbed.logger = NoopLogger()
         disturbed._h0_max_om = 0.15

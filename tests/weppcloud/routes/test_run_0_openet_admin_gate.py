@@ -1495,3 +1495,26 @@ def test_run_page_bootstrap_public_readonly_ttl_missing_expires_at(run0_template
     assert re.search(r'"readonly"\s*:\s*true', js) is not None
     assert re.search(r'"isAuthenticated"\s*:\s*false', js) is not None
     assert re.search(r'"expiresAt"\s*:\s*null', js) is not None
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_single_input_policy_overrides_load_all_bootstrap(run0_template_app, enabled):
+    import json
+    from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES
+    context = _bootstrap_context({"Root"})
+    context["ash"].has_ash_results = False
+    context["show_rusle"] = True
+    context["ron"].single_user_defined_uploads = enabled
+    context["ron"].mods = list(EXCLUDED_FEATURES)
+    context["playwright_load_all"] = True
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    policy = js[js.index("function applySingleInputPolicy("):js.index("    window.site_prefix")]
+    # Execute the rendered policy after the same load-all flag expansion.
+    script = policy[:policy.index("    applySingleInputPolicy(modsFlags, runContext);")]
+    script += "\nconst flags = Object.fromEntries(" + json.dumps(sorted(EXCLUDED_FEATURES)) + ".map(x => [x, true]));"
+    script += "\nconst context = {flags: {singleUserDefinedUploads: " + json.dumps(enabled) + ", initialHasSbs: true}};"
+    script += "\napplySingleInputPolicy(flags, context);"
+    script += "\nif (Object.values(flags).some(x => x !== " + json.dumps(not enabled) + ")) process.exit(1);"
+    subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)
+    assert js.index("applySingleInputPolicy(modFlags, context);") > js.index("modFlags.baer = true;")

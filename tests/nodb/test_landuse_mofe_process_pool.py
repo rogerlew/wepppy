@@ -121,6 +121,7 @@ def _make_landuse_fixture(
     (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
 
     landuse = Landuse.__new__(Landuse)
+    landuse.config_get_str = lambda _section, _key, default=None: default
     landuse.wd = str(run_dir)
     landuse._mods = list(mods or [])
     landuse._mapping = "mock-map"

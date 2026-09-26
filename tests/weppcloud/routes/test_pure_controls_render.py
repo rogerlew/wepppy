@@ -2004,8 +2004,8 @@ def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) 
     )
 
     assert 'class="wc-control__description"' in rendered
-    assert "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled." in rendered
-    assert "MOFE requires a gridded landuse map." in rendered
+    assert "Single landuse for watershed is unavailable for MOFE; use a gridded map or, when enabled, Single User-Defined." in rendered
+    assert "Use a gridded map or, when enabled, Single User-Defined for MOFE." in rendered
 
     single_radio = re.search(r'id="landuse_mode1"[^>]*>', rendered)
     assert single_radio is not None
@@ -2135,12 +2135,14 @@ def test_interchange_advanced_template_renders_delete_after_interchange_checkbox
     assert "checked" in rendered
 
 
+@pytest.mark.parametrize("single_uploads", [False, True])
 def test_clip_soils_advanced_template_renders_dual_depth_controls(
-    jinja_env: Environment,
+    jinja_env: Environment, single_uploads: bool,
 ) -> None:
     template = jinja_env.get_template("controls/wepp_pure_advanced_options/clip_soils_depth.htm")
     rendered = template.render(
         soils=SimpleNamespace(
+            single_user_defined_uploads=single_uploads,
             clip_soils=True,
             clip_soils_depth=300,
             clip_soils_minimum=True,
@@ -2154,12 +2156,12 @@ def test_clip_soils_advanced_template_renders_dual_depth_controls(
     assert "Soils Maximum Depth" in rendered
     assert "Clip Soils Minimum Depth" in rendered
     assert "Soils Minimum Depth" in rendered
-    assert "Estimate wc and fc using Rosetta when soils have bd override" in rendered
+    assert ("Estimate wc and fc using Rosetta when soils have bd override" in rendered) is not single_uploads
     assert 'id="clip_soils"' in rendered
     assert 'id="clip_soils_depth"' in rendered
     assert 'id="clip_soils_minimum"' in rendered
     assert 'id="clip_soils_minimum_depth"' in rendered
-    assert 'id="rosetta_wc_fc_from_disturbed_bd_override"' in rendered
+    assert ('id="rosetta_wc_fc_from_disturbed_bd_override"' in rendered) is not single_uploads
 
 
 def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
@@ -4962,3 +4964,40 @@ def test_postfire_model_header_and_conditional_upload_group(jinja_env: Environme
     assert '<div class="wc-summary-pane" data-pfdf-required aria-live="polite">' in rendered
     assert 'data-pfdf-dnbr-fields' in rendered
     assert rendered.index('data-pfdf-dnbr-fields') < rendered.index('data-pfdf-summary') < rendered.index('Design storm rainfall')
+
+
+@pytest.mark.parametrize('kind,extension', [('landuse', 'man'), ('soil', 'sol')])
+def test_single_source_controls_use_sbs_feedback_and_escape_names(jinja_env, kind, extension):
+    common = dict(ron=SimpleNamespace(mods=set(), single_user_defined_uploads=True),
+                  wepp=SimpleNamespace(multi_ofe=True), disturbed=None,
+                  landuseoptions=[], landuse_management_mapping_options=[], soildboptions=[])
+    controller = SimpleNamespace(mode=SimpleNamespace(value=5), nlcd_db='nlcd/2019',
+                                 single_selection=0, single_dbselection=None, initial_sat=0.75,
+                                 ksflag=False, clear_ssurgo_cache_on_rebuild=False,
+                                 single_user_defined_filename='<unsafe>.MAN' if kind == 'landuse' else '<unsafe>.SOL')
+    common['landuse' if kind == 'landuse' else 'soils'] = controller
+    html = jinja_env.get_template(f'controls/{kind}_pure.htm').render(**common)
+    assert f'accept=".{extension},.{extension.upper()}"' in html
+    assert 'Single User-Defined' in html
+    assert f'<span class="wc-field__label">Current {kind} file</span>' in html
+    assert '<div class="wc-text-display">' in html
+    assert '&lt;unsafe&gt;' in html
+    assert '<unsafe>' not in html
+    assert 'all hillslopes and all OFEs' in html
+    assert 'No disturbed parameterization will be applied' in html
+    assert 'id="mofe_buffer_selection"' not in html
+    common['ron'].single_user_defined_uploads = False
+    html = jinja_env.get_template(f'controls/{kind}_pure.htm').render(**common)
+    assert f'id="{kind}_mode5"' not in html
+
+
+def test_uploaded_landuse_report_selects_accepted_source(jinja_env):
+    row = SimpleNamespace(key='single-user-defined', pct_coverage=100, cancov=0.5,
+                          cancov_override=None, inrcov=0.5, inrcov_override=None,
+                          rilcov=0.5, rilcov_override=None)
+    html = jinja_env.get_template('reports/landuse.htm').render(
+        report=[row], landuse=SimpleNamespace(mods=[], single_user_defined_filename='<source>.MAN'),
+        landuseoptions=[{'Key': 'first', 'Description': 'Catalog', 'ManagementFile': 'first.man'}])
+    assert '<option value="single-user-defined" selected>' in html
+    assert '&lt;source&gt;.MAN' in html
+    assert '<option value="first" ' in html

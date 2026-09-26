@@ -20,6 +20,7 @@ class SoilsMode(IntEnum):
     UserDefined = 2
     RRED_Unburned = 3
     RRED_Burned = 4
+    SingleUserDefined = 5
     SpatialAPI = 9
 
 
@@ -120,6 +121,8 @@ class Soils(NoDbBase):
     def domsoil_fn(self) -> str: ...
     @property
     def legend(self) -> List[str]: ...
+    @property
+    def single_user_defined_filename(self) -> str | None: ...
     def clean(self) -> None: ...
     def symlink_soils_map(
         self,

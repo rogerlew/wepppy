@@ -1,6 +1,6 @@
 # Single User-Defined landuse and soils
 
-**Status**: Open — Builder scope approved; contract checkpoint and implementation pending
+**Status**: Implemented — final regression validation and review closeout in progress
 **Started**: 2026-09-25 20:17 UTC
 **Owner**: Requesting operator; implementation unassigned
 **Security impact**: `high` — uploads, parsers, filesystem writes, and feature-policy enforcement
@@ -81,16 +81,14 @@ compatible RAP analysis, Ash, Geneva, and other independent features, with targe
 runtime checks. Correct missing registry declarations without breaking valid
 legacy alternatives. Enforce a single resolved policy across UI/API/build/refresh.
 
-## Remaining decisions before implementation
+## Resolved implementation decisions
 
-The [decision register](notes/discovery.md#decision-register) retains unresolved
-format/content, source OFE count, upload timing, replacement/concurrency, storage,
-and retention choices. Recommended initial formats are management 98.4/2016.3 and
-soil 7778, with a one-OFE source replicated into project topology. These are
-recommendations pending representative parser/serializer/executable evidence.
-Finalize exact mode values, capability IDs, payload fields, metadata, and supported
-configuration/binary combinations in the checkpoint. Builder policy, independent
-selection, multi-OFE support, compatible modifiers, and buffer exclusion are settled.
+The [SUDI-01 contract](../../schemas/single-user-defined-inputs-contract.md) resolves
+source format, OFE count, upload timing, replacement/concurrency, storage and
+retention. Initial support is management 98.4 and soil 7778 with one source OFE,
+replicated to all hillslopes and up to 32 non-buffer OFEs. Management 2016.3 is
+rejected because the selected native reader does not preserve its additional
+fields. Contract checkpoint `0efd7ea46` preceded runtime implementation.
 
 ## Compatibility and regression plan
 

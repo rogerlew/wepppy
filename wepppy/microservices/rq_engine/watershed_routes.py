@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from osgeo import gdal, osr
 from sqlalchemy.exc import SQLAlchemyError
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled, require_single_input_policy, SingleInputPolicyError
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.all_your_base.geo import utm_srid
 from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
@@ -1085,6 +1086,12 @@ async def build_subcatchments_and_abstract_watershed(
             if value is not None:
                 updates["bieger2015_widths"] = value
 
+        if updates.get("mofe_buffer") and single_input_uploads_enabled(watershed):
+            return error_response("Buffer OFEs are disabled for single-input upload projects.", status_code=400, code="unsupported_capability")
+        try:
+            require_single_input_policy(watershed, watershed=watershed)
+        except SingleInputPolicyError as exc:
+            return error_response(str(exc), status_code=409, code="unsupported_capability")
         if is_batch_context:
             watershed.apply_build_subcatchment_updates(**updates)
             return JSONResponse({"message": "Set subcatchment inputs for batch processing"})

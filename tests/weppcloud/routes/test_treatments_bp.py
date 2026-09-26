@@ -18,6 +18,9 @@ CONFIG = "cfg"
 
 @pytest.fixture()
 def treatments_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    from types import SimpleNamespace
+    monkeypatch.setattr(treatments_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(treatments_module.treatments_bp)
@@ -113,3 +116,17 @@ def test_set_mode_validates_integer_input(treatments_client):
     payload = response.get_json()
     assert payload["error"]["message"] == "mode must be an integer"
     assert TreatmentsStub.getInstance(run_dir).mode_assignments == []
+
+
+def test_single_input_project_rejects_excluded_mutation_before_hydration(treatments_client, monkeypatch):
+    from types import SimpleNamespace
+    value = treatments_client
+    client = value[0] if isinstance(value, tuple) else value
+    monkeypatch.setattr(treatments_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: "True"))
+    def forbidden_hydration(*args, **kwargs):
+        pytest.fail("Excluded controller must not be restored")
+    monkeypatch.setattr(treatments_module.Treatments, "getInstance", forbidden_hydration)
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/set_treatments_mode/", json={'mode': 1})
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "unsupported_capability"

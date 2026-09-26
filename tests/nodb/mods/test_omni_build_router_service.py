@@ -649,6 +649,7 @@ def test_build_router_dry_run_report_normalizes_selection_mode_alias() -> None:
 
 def _new_detached_omni(tmp_path: Path) -> omni_module.Omni:
     omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.config_get_str = lambda section, option, default=None: default
     omni.wd = str(tmp_path)
     return omni
 

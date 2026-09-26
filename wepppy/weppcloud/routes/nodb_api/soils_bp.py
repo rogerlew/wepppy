@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import uuid
+from wepppy.nodb.base import NoDbAlreadyLockedError
 
+from wepppy.nodb.single_input_policy import SingleInputPolicyError, single_input_uploads_enabled
+from wepppy.rq.single_input_admission import input_submission
+from wepppy.rq.submission_recovery import RqSubmissionConflict
+from wepppy.wepp.single_input import SingleInputError
 from flask import Response
 
 from .._common import (
@@ -18,7 +23,7 @@ from .._common import (
     success_factory,
 )
 
-from wepppy.nodb.core import Soils, SoilsMode
+from wepppy.nodb.core import Ron, Soils, SoilsMode
 from wepppy.nodb.project_config_capabilities import (
     BuilderRegistryUnavailableError,
     CapabilityAuthorityInvalidError,
@@ -64,22 +69,29 @@ def set_soil_mode(runid: str, config: str) -> Response:
 
     try:
         soils = Soils.getInstance(wd)
-        allowed_modes = soil_capability_modes(soils)
-        if (
-            allowed_modes is not None
-            and mode != int(soils.mode)
-            and mode not in allowed_modes
-        ):
-            return error_factory(
-                'Soil builder is not supported by this project.',
-                status_code=400,
-                code='unsupported_capability',
-                details=f'Unsupported soil builder mode: {mode}',
-            )
-        soils.mode = SoilsMode(mode)
-        if single_selection is not None:
-            soils.single_selection = single_selection
-        soils.single_dbselection = single_dbselection
+        with input_submission(soils, "soils", runid):
+            allowed_modes = soil_capability_modes(soils)
+            if (
+                allowed_modes is not None
+                and mode != int(soils.mode)
+                and mode not in allowed_modes
+            ):
+                return error_factory(
+                    'Soil builder is not supported by this project.',
+                    status_code=400,
+                    code='unsupported_capability',
+                    details=f'Unsupported soil builder mode: {mode}',
+                )
+            soils.mode = SoilsMode(mode)
+            if single_selection is not None:
+                soils.single_selection = single_selection
+            soils.single_dbselection = single_dbselection
+    except SingleInputError as exc:
+        return error_factory(str(exc), status_code=exc.status_code, code=exc.code)
+    except NoDbAlreadyLockedError:
+        return error_factory("Soils is busy; retry after the current mutation finishes.", status_code=409, code="conflict")
+    except RqSubmissionConflict as exc:
+        return error_factory(str(exc), status_code=409, code="job_active")
     except LocaleAuthorityInvalidError as exc:
         return error_factory(
             "Run locale authority is invalid.",
@@ -106,6 +118,8 @@ def set_soil_mode(runid: str, config: str) -> Response:
         )
         response.headers["Retry-After"] = "5"
         return response
+    except SingleInputPolicyError as exc:
+        return error_factory(str(exc), status_code=400, code="unsupported_capability")
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:61", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -198,6 +212,8 @@ def task_set_disturbed_sol_ver(runid: str, config: str) -> Response:
     try:
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "Disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         disturbed = Disturbed.getInstance(wd)
         disturbed.sol_ver = state
     except Exception:  # broad-except: boundary contract

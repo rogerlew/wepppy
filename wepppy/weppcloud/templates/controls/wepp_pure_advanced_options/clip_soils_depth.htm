@@ -33,12 +33,14 @@
        unit_name="mm",
        attrs={"class": "disable-readonly", "inputmode": "numeric"}
      ) }}
+  {% if not (soils.single_user_defined_uploads | default(false)) %}
   {{ ui.checkbox_field(
        "rosetta_wc_fc_from_disturbed_bd_override",
        "Estimate wc and fc using Rosetta when soils have bd override",
        checked=soils.rosetta_wc_fc_from_disturbed_bd_override,
        attrs={"class": "disable-readonly"}
      ) }}
+  {% endif %}
   {{ ui.numeric_field(
        "initial_sat",
        "Initial soil saturation",

@@ -297,7 +297,8 @@ var Landuse = (function () {
             dom.qs("#landuse_mode1_controls"),
             dom.qs("#landuse_mode2_controls"),
             dom.qs("#landuse_mode3_controls"),
-            dom.qs("#landuse_mode4_controls")
+            dom.qs("#landuse_mode4_controls"),
+            dom.qs("#landuse_mode5_controls")
         ];
 
         var baseTriggerEvent = landuse.triggerEvent.bind(landuse);
@@ -490,6 +491,13 @@ var Landuse = (function () {
             landuse.connect_status_stream(landuse);
 
             var formData = new FormData(formElement);
+            ["input_upload_landuse", "input_upload_single_landuse"].forEach(function (field) {
+                var file = formData.get(field);
+                var activeMode = field === "input_upload_landuse" ? 4 : 5;
+                if (landuse.mode !== activeMode || !file || !file.name) {
+                    formData.delete(field);
+                }
+            });
 
             http.requestWithSessionToken(
                 url_for_run("build-landuse", { prefix: "/rq-engine/api" }),
@@ -500,6 +508,16 @@ var Landuse = (function () {
                 }
             ).then(function (result) {
                 var response = result && result.body ? result.body : null;
+                if (response && response.result && response.result.single_user_defined_filename) {
+                    var filenameNode = dom.qs("#landuse_source_filename");
+                    var feedbackNode = dom.qs("#landuse_source_feedback");
+                    if (filenameNode) {
+                        filenameNode.textContent = response.result.single_user_defined_filename;
+                    }
+                    if (feedbackNode) {
+                        feedbackNode.hidden = false;
+                    }
+                }
                 if (response && response.job_id) {
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
                     landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
@@ -797,6 +815,7 @@ var Landuse = (function () {
 
         landuse.restore = function (mode, singleSelection) {
             var modeValue = parseInteger(mode, 0);
+            landuse.mode = modeValue;
             var singleValue = singleSelection === undefined || singleSelection === null ? null : String(singleSelection);
 
             var radio = document.getElementById("landuse_mode" + modeValue);

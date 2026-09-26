@@ -36,6 +36,17 @@
 {% set show_rusle = show_rusle if show_rusle is defined else ((('rusle' in mods_list and 'disturbed' in mods_list and rusle_backend_supported) or playwright_load_all)) %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
 
+{% if ron.single_user_defined_uploads | default(false) %}
+  {% set show_disturbed_sbs = false %}
+  {% set show_treatments = false %}
+  {% set show_omni = false %}
+  {% set show_omni_contrasts = false %}
+  {% set show_debris_flow = false %}
+  {% set show_path_ce = false %}
+  {% set show_rusle = false %}
+  {% set show_postfire_debris_flow = false %}
+{% endif %}
+
 {% block head_extras %}
 {{ super() }}
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>

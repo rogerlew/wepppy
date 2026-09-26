@@ -3,6 +3,7 @@
 import traceback
 
 from .._common import *  # noqa: F401,F403
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from wepppy.weppcloud.utils.helpers import run_lifecycle_mutation
 
 from wepppy.nodb.core import Ron
@@ -139,6 +140,8 @@ def get_scenarios(runid, config):
     authorize(runid, config)
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         return jsonify(Omni.getInstance(wd).scenarios)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -151,6 +154,8 @@ def get_scenario_run_state(runid, config):
     authorize(runid, config)
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         omni = Omni.getInstance(wd)
         return jsonify({
             'run_state': omni.scenario_run_state,
@@ -169,6 +174,8 @@ def delete_scenarios(runid, config):
     authorize(runid, config)
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         payload = parse_request_payload(request)
         scenario_names = payload.get('scenario_names') or payload.get('scenarios') or []
         if isinstance(scenario_names, str):
@@ -207,6 +214,8 @@ def omni_migration(runid, config):
 def query_omni_scenarios_report(runid, config):
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         omni = Omni.getInstance(wd)
         df_report = omni.scenarios_report()
 
@@ -250,6 +259,8 @@ def query_omni_contrasts_report(runid, config):
 
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
         omni = Omni.getInstance(wd)
         selection_mode = (omni.contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:

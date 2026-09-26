@@ -39,6 +39,7 @@ class LanduseMode(IntEnum):
     RRED_Unburned = 2
     RRED_Burned = 3
     UserDefined = 4
+    SingleUserDefined = 5
     SpatialAPI = 9
 
 
@@ -110,6 +111,8 @@ class Landuse(NoDbBase):
     def user_defined_landcover_fn(self) -> str | None: ...
     @user_defined_landcover_fn.setter
     def user_defined_landcover_fn(self, value: str | None) -> None: ...
+    @property
+    def single_user_defined_filename(self) -> str | None: ...
     def clean(self) -> None: ...
     def validate_landuse_mode_for_mofe(self, mode: Any | None = None) -> None: ...
     def symlink_landuse_map(

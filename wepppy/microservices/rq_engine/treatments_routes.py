@@ -12,6 +12,8 @@ from rq import Queue
 from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Landuse, WatershedNotAbstractedError
 from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
@@ -105,6 +107,8 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
 
     try:
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return error_response("treatments is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
         _preflight_treatments_roots(wd)
         treatments = Treatments.getInstance(wd)
         landuse = Landuse.getInstance(wd)

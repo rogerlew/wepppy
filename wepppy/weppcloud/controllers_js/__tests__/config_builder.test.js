@@ -139,6 +139,7 @@ function installDom() {
         <form data-builder-form>${["locale", "dem", "delineation_backend", "watershed_representation", "wepp_binary", "soil", "landuse", "climate", "climate_station_database"].map((field) => `
           <label for="builder-${field}">${field}</label><select id="builder-${field}" name="${field}"></select>
           <p data-builder-field-error="${field}"></p>`).join("")}
+          <input type="checkbox" name="single_user_defined_uploads">
           <p data-builder-cellsize></p>
           <div data-builder-override hidden><select name="cellsize_override" id="builder-cellsize-override"></select><p data-builder-field-error="cellsize_override"></p></div>
           <fieldset data-builder-mods hidden><div data-builder-mod-options></div><p data-builder-field-error="mods"></p></fieldset>
@@ -218,10 +219,22 @@ describe("Config Builder controller", () => {
         expect(http.request.mock.calls.at(-1)[1].json.selections).toEqual({
             locale: "continental-us", dem: "dem-a", delineation_backend: "wbt",
             watershed_representation: "single", wepp_binary: "wepp_260803", soil: "soil", landuse: "land",
-            climate: "climate", mods: [], capability_profile: "continental-us-capabilities",
+            climate: "climate", mods: [], single_user_defined_uploads: false, capability_profile: "continental-us-capabilities",
             climate_station_database: "stations-2015"
         });
         expect(http.request.mock.calls.at(-1)[1].json.builder_description_schema_version).toBe(2);
+    });
+
+    test("serializes the upload checkbox as an independent boolean", async () => {
+        const http = validatingHttp(description(false));
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+        expect(controller._selections().single_user_defined_uploads).toBe(false);
+        root.querySelector("[name=single_user_defined_uploads]").checked = true;
+        expect(controller._selections().single_user_defined_uploads).toBe(true);
+        expect(controller._selections().landuse).toBe("land");
+        expect(controller._selections().soil).toBe("soil");
     });
 
     test("clears an invalidated graph value visibly and never submits it", async () => {

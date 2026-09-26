@@ -306,6 +306,13 @@ def omni_module():
             sys.modules.pop(name, None)
 
 
+@pytest.fixture(autouse=True)
+def legacy_project_policy(omni_module, monkeypatch):
+    # These isolated controllers bypass NoDb initialization and model legacy runs.
+    monkeypatch.setattr(omni_module.Omni, "config_get_str",
+                        lambda self, section, option, default=None: default)
+
+
 def test_apply_contrast_output_triggers_creates_missing_diagnostics(tmp_path, omni_module):
     runs_dir = tmp_path / "runs"
     runs_dir.mkdir()

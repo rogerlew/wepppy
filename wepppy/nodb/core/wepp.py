@@ -65,6 +65,8 @@ Warning:
 """
 
 # standard library
+from wepppy.nodb.single_input_policy import require_wepp_input_policy, require_feature_allowed
+from wepppy.nodb.single_input_artifacts import validate_prepared_single_inputs
 import errno
 import logging
 import os
@@ -769,6 +771,7 @@ def prep_multi_ofe_hillslope(
             ManagementFile=Path(man_src).name,
             ManagementDir=str(Path(man_src).parent),
             Description=f'hill_{topaz_id} Multiple OFE',
+            NativeScenarioReferences=bool(args[14]) if len(args) > 14 else False,
             Color=(0, 0, 0, 255),
         )
         man = man.build_multiple_year_man(sim_years)
@@ -1278,6 +1281,7 @@ class Wepp(NoDbBase):
     @wepp_bin.setter
     @nodb_setter
     def wepp_bin(self, value: str) -> None:
+        require_wepp_input_policy(self, binary=value)
         self._wepp_bin = value
 
     @property
@@ -1692,6 +1696,7 @@ class Wepp(NoDbBase):
                         wepp_ui: Optional[bool] = None, pmet: Optional[bool] = None, snow: Optional[bool] = None,
                         man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                         max_workers: Optional[int] = None) -> None:
+        require_wepp_input_policy(self)
         _WEPP_PREP_SERVICE.prep_hillslopes(
             self,
             frost=frost,
@@ -1708,6 +1713,7 @@ class Wepp(NoDbBase):
 
 
     def _prep_revegetation(self) -> None:
+        require_feature_allowed(self, "revegetation")
         self.logger.info('    _prep_revegetation... ')
 
         self.logger.info('      prep pw0.cov... ')
@@ -1724,6 +1730,7 @@ class Wepp(NoDbBase):
 
     def _prep_firedate(self) -> None:
 
+        require_feature_allowed(self, "revegetation")
         self.logger.info('    prep firedate.txt... ')
         disturbed = Disturbed.getInstance(self.wd)
         if disturbed.fire_date is not None:
@@ -2110,6 +2117,7 @@ class Wepp(NoDbBase):
                     shutil.copyfile(projected_src_fn, dst_fn)
 
     def _prep_multi_ofe(self, translator, max_workers: Optional[int] = None):
+        require_wepp_input_policy(self)
         self.logger.info('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
@@ -2172,6 +2180,7 @@ class Wepp(NoDbBase):
                     clip_soils_minimum,
                     clip_soils_minimum_depth,
                     modify_kslast_pars,
+                    single_input_uploads_enabled(self),
                 )
             )
 
@@ -2278,9 +2287,11 @@ class Wepp(NoDbBase):
 
 
     def _prep_managements(self, translator):
+        require_wepp_input_policy(self)
         _WEPP_PREP_SERVICE.prep_managements(self, translator)
 
     def _prep_soils(self, translator, max_workers=None):
+        require_wepp_input_policy(self)
         _WEPP_PREP_SERVICE.prep_soils(self, translator, max_workers=max_workers)
 
 
@@ -2293,6 +2304,8 @@ class Wepp(NoDbBase):
 
     def _make_hillslope_runs(self, translator, reveg=False,
                   man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+        require_wepp_input_policy(self, reveg=reveg)
+        validate_prepared_single_inputs(self, translator)
         _WEPP_PREP_SERVICE.make_hillslope_runs(
             self,
             translator,
@@ -2306,6 +2319,7 @@ class Wepp(NoDbBase):
     def run_hillslopes(self,
                   man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                   max_workers: Optional[int] = None) -> None:
+        require_wepp_input_policy(self)
         _WEPP_RUN_SERVICE.run_hillslopes(
             self,
             man_relpath=man_relpath,
@@ -2322,6 +2336,7 @@ class Wepp(NoDbBase):
                        tcr: Optional[bool] = None, avke: Optional[float] = None,
                        channel_manning_roughness_coefficient_bare: Optional[float] = None,
                        channel_manning_roughness_coefficient_veg: Optional[float] = None) -> None:
+        require_wepp_input_policy(self)
         _WEPP_PREP_SERVICE.prep_watershed(
             self,
             erodibility=erodibility,
@@ -2739,6 +2754,7 @@ class Wepp(NoDbBase):
             )
 
     def run_watershed(self) -> None:
+        require_wepp_input_policy(self)
         _WEPP_RUN_SERVICE.run_watershed(self)
 
     def post_discord_wepp_run_complete(self):

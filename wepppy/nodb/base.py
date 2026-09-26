@@ -2115,6 +2115,12 @@ class NoDbBase(object):
     def delete_after_interchange(self) -> bool:
         return bool(self.config_get_bool("interchange", "delete_after_interchange", False))
 
+    @property
+    def single_user_defined_uploads(self) -> bool:
+        """Whether creation enabled independent single-file landuse/soil sources."""
+        from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+        return single_input_uploads_enabled(self)
+
     def config_get_bool(self, section: str, option: str, default=None):
         assert default is None or isbool(default)
         try:

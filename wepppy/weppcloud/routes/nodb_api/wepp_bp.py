@@ -11,6 +11,7 @@ import wepppy
 
 from .._common import *  # noqa: F401,F403
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from wepppy.all_your_base import isfloat, isint
 from wepppy.nodb import mods as nodb_mods
 from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
@@ -624,6 +625,8 @@ def view_management(runid, config, key):
 def view_management_effective(runid, config, key, texture):
     wd = get_wd(runid)
     assert wd is not None
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return error_factory("Disturbed previews are unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
 
     requested_texture = _normalize_disturbed_preview_texture(texture)
     if requested_texture is None:
@@ -962,7 +965,7 @@ def get_wepp_prep_details(runid, config):
     channels_summary = ron.chns_summary(abbreviated=True)
 
     unitizer = resolve_unitizer_presentation(wd)
-    disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
+    disturbed_preview_context = _build_disturbed_preview_context(() if single_input_uploads_enabled(ron) else getattr(ron, "mods", ()))
 
     return render_template('reports/wepp/prep_details.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
@@ -1562,7 +1565,7 @@ def report_ron_chn_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
-        disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
+        disturbed_preview_context = _build_disturbed_preview_context(() if single_input_uploads_enabled(ron) else getattr(ron, "mods", ()))
         return render_template('reports/hill.htm', runid=runid, config=config,
                             ron=ron,
                             d=ron.chn_summary(topaz_id),
@@ -1594,7 +1597,7 @@ def query_topaz_wepp_map(runid, config):
 def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
+    disturbed_preview_context = _build_disturbed_preview_context(() if single_input_uploads_enabled(ron) else getattr(ron, "mods", ()))
     return render_template('reports/hill.htm', runid=runid, config=config,
                            ron=ron,
                            d=ron.sub_summary(topaz_id),

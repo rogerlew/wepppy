@@ -17,6 +17,9 @@ CFG = "cfg"
 
 @pytest.fixture()
 def omni_bp_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+    from types import SimpleNamespace
+    monkeypatch.setattr(omni_bp_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: default))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["PROPAGATE_EXCEPTIONS"] = False
@@ -240,3 +243,17 @@ def test_delete_scenarios_coerces_non_sequence_payload_to_empty_list(
     payload = response.get_json()
     assert payload["Content"] == {"removed": [], "missing": []}
     assert stub.deleted_payloads == [[]]
+
+
+def test_single_input_project_rejects_excluded_mutation_before_hydration(omni_bp_client, monkeypatch):
+    from types import SimpleNamespace
+    value = omni_bp_client
+    client = value[0] if isinstance(value, tuple) else value
+    monkeypatch.setattr(omni_bp_module.Ron, "getInstance", lambda wd: SimpleNamespace(
+        config_get_str=lambda section, key, default=None: "True"))
+    def forbidden_hydration(*args, **kwargs):
+        pytest.fail("Excluded controller must not be restored")
+    monkeypatch.setattr(omni_bp_module.Omni, "getInstance", forbidden_hydration)
+    response = client.post(f"/runs/{RUN_ID}/{CFG}/api/omni/delete_scenarios", json={'scenarios': ['test']})
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "unsupported_capability"

@@ -14,6 +14,8 @@ import redis
 from rq import Queue, get_current_job
 from rq.job import Job
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -341,6 +343,7 @@ def run_omni_scenario_rq(
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -440,6 +443,7 @@ def run_omni_contrast_rq(
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -481,6 +485,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -769,6 +774,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -926,6 +932,7 @@ def _finalize_omni_contrasts_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -952,6 +959,7 @@ def delete_omni_contrasts_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -981,6 +989,7 @@ def _compile_hillslope_summaries_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
@@ -1004,6 +1013,7 @@ def _finalize_omni_scenarios_rq(runid: str) -> None:
     try:
         job = get_current_job()
         wd = get_wd(runid)
+        require_feature_allowed(Ron.getInstance(wd), "omni")
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')

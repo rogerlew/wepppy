@@ -26,6 +26,7 @@
         climate: "Climate dataset",
         climate_station_database: "Climate Station Database",
         mods: "Initialized modules",
+        single_user_defined_uploads: "Single landuse and soils upload",
         capabilities: "Derived capabilities",
         config_filename: "Runtime filename"
     };
@@ -225,6 +226,11 @@
         }
 
         var tuples = this._modelTuples();
+        var singleUploads = Boolean(this.form.elements.single_user_defined_uploads && this.form.elements.single_user_defined_uploads.checked);
+        if (singleUploads) {
+            tuples = tuples.filter(function (item) { return item.binary === "wepp_260803"; });
+            this.form.elements.wepp_binary.value = "wepp_260803";
+        }
         var backend = this.form.elements.delineation_backend.value;
         var binary = this.form.elements.wepp_binary.value;
         var representationIds = this._graphAxis("watershed_representations").filter(function (id) {
@@ -247,7 +253,10 @@
             });
         });
         this._setOptions("delineation_backend", backendIds);
-        this._renderMods(this._graphAxis("mods"), false);
+        var excluded = ["disturbed", "baer", "treatments", "omni", "omni_contrasts", "path_ce", "debris_flow", "rusle", "postfire_debris_flow", "revegetation", "rred"];
+        this._renderMods(this._graphAxis("mods").filter(function (id) {
+            return !singleUploads || excluded.indexOf(id) === -1;
+        }), false);
         this._renderCellsize();
         if (announce) { this._announceReplacements(previous); }
     };
@@ -307,7 +316,8 @@
             climate: this.form.elements.climate.value,
             climate_station_database: this.form.elements.climate_station_database.value,
             mods: Array.prototype.slice.call(this.modsOptions.querySelectorAll("input:checked")).map(function (input) { return input.value; }),
-            capability_profile: capabilityIds[0] || ""
+            capability_profile: capabilityIds[0] || "",
+            single_user_defined_uploads: Boolean(this.form.elements.single_user_defined_uploads && this.form.elements.single_user_defined_uploads.checked)
         };
         var dem = this.components[payload.dem];
         if (this.description.can_override_cellsize && dem && Number(this.overrideSelect.value) !== Number(dem.default_cellsize)) {
@@ -587,7 +597,7 @@
             this.creationKey = null;
             this.review.hidden = true;
             this._clearErrors();
-            if (event.target && ["locale", "delineation_backend", "watershed_representation", "wepp_binary"].indexOf(event.target.name) !== -1) {
+            if (event.target && ["locale", "delineation_backend", "watershed_representation", "wepp_binary", "single_user_defined_uploads"].indexOf(event.target.name) !== -1) {
                 this._renderDependencies(true, event.target.name);
             } else if (event.target && event.target.name === "dem") {
                 this._renderCellsize();

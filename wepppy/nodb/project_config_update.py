@@ -18,6 +18,7 @@ from pathlib import Path
 import tempfile
 from typing import Callable, Iterator, Mapping
 
+from wepppy.nodb.single_input_policy import single_input_capability_graph
 from wepppy.nodb.config_builder.registry import DEFAULT_PROFILES_ROOT, RegistryError, load_registry
 from wepppy.nodb.config_builder.resolver import (
     BuilderConstraintError,
@@ -517,6 +518,9 @@ def _builder_selections(
         not isinstance(station_database, str) or not station_database
     ):
         raise ConfigUpdateUnavailableError("Builder station-database selection is incomplete")
+    uploads = payload.get("single_user_defined_uploads", False)
+    if type(uploads) is not bool:
+        raise ConfigUpdateUnavailableError("Builder single-input selection is invalid")
     mods = payload.get("mods", [])
     if not isinstance(mods, list) or not all(isinstance(item, str) for item in mods):
         raise ConfigUpdateUnavailableError("Builder mod selections are invalid")
@@ -543,6 +547,7 @@ def _builder_selections(
         wepp_binary=str(payload["wepp_binary"]),
         soil=str(payload["soil"]), landuse=str(payload["landuse"]),
         climate=str(payload["climate"]), mods=tuple(mods),
+        single_user_defined_uploads=uploads,
         climate_station_database=(
             str(station_database) if isinstance(station_database, str)
             else "cligen-stations-2015"
@@ -868,7 +873,12 @@ def _assert_builder_congruence(
         if option in current.get(section, {}) and current[section][option] != resolved.config[section][option]:
             mismatches.append(f"{section}.{option}")
     manifest_mods = selections.get("mods", [])
-    effective_mods = ["disturbed", *(mod for mod in manifest_mods if mod != "disturbed")]
+    uploads = selections.get("single_user_defined_uploads", False)
+    if current.get("nodb", {}).get("single_user_defined_uploads", False) is not uploads:
+        mismatches.append("nodb.single_user_defined_uploads")
+    if uploads and current.get("watershed", {}).get("mofe_buffer", False) is not False:
+        mismatches.append("watershed.mofe_buffer")
+    effective_mods = manifest_mods if uploads else ["disturbed", *(mod for mod in manifest_mods if mod != "disturbed")]
     if current.get("nodb", {}).get("mods", []) not in (manifest_mods, effective_mods):
         mismatches.append("nodb.mods")
     if mismatches:
@@ -929,6 +939,8 @@ def _capability_refresh_payload(
     _assert_builder_congruence(current, manifest, registry, stored_graph, resolved_stored)
     selections = _builder_selections(manifest["selections"], capability_schema_version=3)  # type: ignore[arg-type,index]
     current_graph = resolve_builder_capability_graph(selections.locale, registry=registry)
+    if selections.single_user_defined_uploads:
+        current_graph = single_input_capability_graph(current_graph)
     resulting_graph = _selection_preserving_graph(stored_graph, current_graph)
     resolved_result = resolve_builder_config(
         selections,

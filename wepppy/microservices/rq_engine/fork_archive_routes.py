@@ -30,6 +30,8 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import lock_statuses, run_replacement_guard
 from wepppy.nodb.core import Ron
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.rq.single_input_admission import require_idle
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.job_id import new_rq_job_id
@@ -863,7 +865,9 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 cap_token = cap_token[0] if cap_token else ""
             _verify_cap_token(request, str(cap_token).strip())
 
-        source_config = Ron.getInstance(wd).config_stem
+        source_ron = Ron.getInstance(wd)
+        source_config = source_ron.config_stem
+        single_input_source = single_input_uploads_enabled(source_ron)
         owners = list(get_run_owners_lazy(runid) or [])
 
         dir_created = False
@@ -890,9 +894,21 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         fork_job_id = new_rq_job_id()
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         redis_conn = fork_admission.enter_context(redis.Redis(**conn_kwargs))
-        lease = fork_admission.enter_context(
-            rq_submission_lock(redis_conn, f"{new_runid}:fork", lifecycle_key=new_runid)
-        )
+        source_lease = None
+        if single_input_source:
+            # Order source and destination lifecycle leases before target writes.
+            leases = {}
+            for scoped_runid in sorted({runid, new_runid}):
+                leases[scoped_runid] = fork_admission.enter_context(
+                    rq_submission_lock(redis_conn, f"{scoped_runid}:fork", lifecycle_key=scoped_runid)
+                )
+            source_lease = leases[runid]
+            lease = leases[new_runid]
+            require_idle(RedisPrep.getInstance(wd), redis_conn)
+        else:
+            lease = fork_admission.enter_context(
+                rq_submission_lock(redis_conn, f"{new_runid}:fork", lifecycle_key=new_runid)
+            )
         receipt_key = f"{FORK_DESTINATION_RECEIPT_KEY_PREFIX}:{new_runid}"
         planned_key = f"{FORK_DESTINATION_PLANNED_KEY_PREFIX}:{new_runid}"
         planned = redis_conn.hgetall(planned_key)
@@ -1330,11 +1346,15 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         lease.checkpoint()
         if replacement_lease is not None:
             replacement_lease.checkpoint()
+        if source_lease is not None:
+            source_lease.checkpoint()
         prep.set_rq_job_id("fork_rq", fork_job_id)
         redis_conn.set(receipt_key, fork_job_id)
         lease.checkpoint()
         if replacement_lease is not None:
             replacement_lease.checkpoint()
+        if source_lease is not None:
+            source_lease.checkpoint()
         job = q.enqueue_call(
             fork_rq,
             (
@@ -1438,6 +1458,8 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
         with _archive_admission_boundary(), redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
             redis_conn, f"{runid}:archive", lifecycle_key=runid
         ) as lease:
+            if single_input_uploads_enabled(Ron.getInstance(wd)):
+                require_idle(prep, redis_conn)
             queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             state = _reconcile_archive_receipt(
                 prep, redis_conn, runid, lease_checkpoint=lease.checkpoint
@@ -1537,6 +1559,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
         with _archive_admission_boundary(), redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
             redis_conn, f"{runid}:archive", lifecycle_key=runid
         ) as lease:
+            if single_input_uploads_enabled(Ron.getInstance(wd)):
+                require_idle(prep, redis_conn)
             queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             state = _reconcile_archive_receipt(
                 prep, redis_conn, runid, lease_checkpoint=lease.checkpoint

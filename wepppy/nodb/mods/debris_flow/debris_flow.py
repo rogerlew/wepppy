@@ -32,6 +32,7 @@ from __future__ import annotations
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from wepppy.nodb.single_input_policy import require_feature_allowed
 import math
 import os
 from copy import deepcopy
@@ -200,6 +201,7 @@ class DebrisFlow(NoDbBase):
         ll: Optional[float | str] = None,
         req_datasource: Optional[str] = None
     ) -> None:
+        require_feature_allowed(self, "debris_flow")
         with self.locked():
             wd = self.wd
             soils = Soils.getInstance(wd)

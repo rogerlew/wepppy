@@ -176,6 +176,26 @@ describe("Landuse controller", () => {
         document.body.innerHTML = "";
     });
 
+    test.each([[4, "input_upload_landuse", "map.tif"], [5, "input_upload_single_landuse", "custom.MAN"]])(
+        "restored mode %i preserves a newly selected upload", async (mode, field, filename) => {
+            const NativeFormData = global.FormData;
+            const selected = new File(["source"], filename);
+            const constructor = jest.spyOn(global, "FormData").mockImplementation((form) => {
+                const data = new NativeFormData(form);
+                data.set(field, selected);
+                return data;
+            });
+            try {
+                landuse.restore(mode);
+                landuse.build();
+                await flushPromises();
+                expect(httpRequestMock.mock.calls[0][1].body.get(field).name).toBe(filename);
+            } finally {
+                constructor.mockRestore();
+            }
+        }
+    );
+
     test("build submits form data and records job id", async () => {
         const pollCompletionValues = [];
         baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
@@ -324,6 +344,18 @@ describe("Landuse controller", () => {
         );
         const requestOptions = httpRequestMock.mock.calls[0][1];
         expect(JSON.parse(requestOptions.body)).toEqual({ mappings: [{ dom: "5", newdom: "beta" }] });
+    });
+
+    test("uploaded source can stage a remap to the first catalog choice", () => {
+        landuse.infoElement.innerHTML = `<select data-landuse-role="mapping-select" data-landuse-dom="single-user-defined">
+            <option value="single-user-defined" selected>Accepted file</option>
+            <option value="first">First catalog management</option></select>`;
+        landuse.bindReportEvents();
+        const select = landuse.infoElement.querySelector("select");
+        expect(select.getAttribute("data-landuse-current")).toBe("single-user-defined");
+        select.value = "first";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        expect(landuse.get_staged_mapping_edits()).toEqual([{dom: "single-user-defined", newdom: "first"}]);
     });
 
     test("staged multi-edit submit posts one batch request", async () => {

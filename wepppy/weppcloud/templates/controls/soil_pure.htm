@@ -25,6 +25,13 @@
     "attrs": {"class": "disable-readonly"}
   }
 ] %}
+{% if ron.single_user_defined_uploads | default(false) %}
+  {% set mode_options = mode_options + [{
+    "id": "soil_mode5", "label": "Single User-Defined", "value": "5",
+    "selected": current_mode == 5,
+    "attrs": {"class": "disable-readonly"}
+  }] %}
+{% endif %}
 {% if soil_capability_modes is defined and soil_capability_modes is not none %}
   {% set filtered_modes = namespace(values=[]) %}
   {% for option in mode_options %}
@@ -64,6 +71,24 @@
   {% if 'rred' in ron.mods %}
     <input type="radio" id="soil_mode3" name="soil_mode" value="3" class="disable-readonly" hidden>
     <input type="radio" id="soil_mode4" name="soil_mode" value="4" class="disable-readonly" hidden>
+  {% endif %}
+
+  {% if ron.single_user_defined_uploads | default(false) %}
+  <div id="soil_mode5_controls" class="wc-stack"{% if current_mode != 5 %} style="display: none;"{% endif %}>
+    <div class="hide-readonly">
+    {{ ui.file_upload(
+         "input_upload_single_soil", "Upload soil file",
+         accept=".sol,.SOL",
+         help="Choose a plain-text WEPP version 7778 file with exactly one OFE (maximum 5 MiB). The user-defined soil will be applied to all hillslopes and all OFEs. No disturbed parameterization will be applied.",
+         extra_control_class="disable-readonly"
+       ) }}
+    </div>
+    {% set source_filename = soils.single_user_defined_filename | default(none) %}
+    <div id="soil_source_feedback"{% if not source_filename %} hidden{% endif %}>
+      {% set source_content %}<code id="soil_source_filename">{{ (source_filename or '') | e }}</code>{% endset %}
+      {{ ui.text_display(label="Current soil file", content=source_content) }}
+    </div>
+  </div>
   {% endif %}
 
   {% set mode0_style = '' if current_mode == 0 else 'display: none;' %}

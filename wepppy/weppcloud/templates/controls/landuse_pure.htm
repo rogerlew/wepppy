@@ -4,7 +4,7 @@
 {% set current_mode = landuse.mode.value if landuse.mode is not none else 0 %}
 {% set selected_landcover_dataset = selected_landcover_dataset if selected_landcover_dataset is defined else landuse.nlcd_db %}
 {% set single_landuse_disabled = wepp.multi_ofe %}
-{% set mofe_landuse_description = "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled." if single_landuse_disabled else none %}
+{% set mofe_landuse_description = "Single landuse for watershed is unavailable for MOFE; use a gridded map or, when enabled, Single User-Defined." if single_landuse_disabled else none %}
 
 {% set mode_options = [
   {
@@ -20,7 +20,7 @@
     "value": "1",
     "selected": current_mode == 1,
     "disabled": single_landuse_disabled,
-    "description": "MOFE requires a gridded landuse map." if single_landuse_disabled else none,
+    "description": "Use a gridded map or, when enabled, Single User-Defined for MOFE." if single_landuse_disabled else none,
     "attrs": {"class": "disable-readonly", "data-landuse-mode": "1", "data-landuse-role": "mode"}
   }
 ] %}
@@ -51,6 +51,13 @@
     "attrs": {"class": "disable-readonly", "data-landuse-mode": "4", "data-landuse-role": "mode"}
   }
 ] %}
+{% if ron.single_user_defined_uploads | default(false) %}
+  {% set mode_options = mode_options + [{
+    "id": "landuse_mode5", "label": "Single User-Defined", "value": "5",
+    "selected": current_mode == 5,
+    "attrs": {"class": "disable-readonly", "data-landuse-mode": "5", "data-landuse-role": "mode"}
+  }] %}
+{% endif %}
 {% if landuse_method_modes is defined and landuse_method_modes is not none %}
   {% set filtered_modes = namespace(values=[]) %}
   {% for option in mode_options %}
@@ -101,6 +108,24 @@
        layout="vertical",
        options=mode_options
      ) }}
+
+  {% if ron.single_user_defined_uploads | default(false) %}
+  <div id="landuse_mode5_controls" class="wc-stack"{% if current_mode != 5 %} style="display: none;"{% endif %}>
+    <div class="hide-readonly">
+    {{ ui.file_upload(
+         "input_upload_single_landuse", "Upload landuse file",
+         accept=".man,.MAN",
+         help="Choose a plain-text WEPP version 98.4 file with exactly one OFE (maximum 5 MiB). The user-defined landuse will be applied to all hillslopes and all OFEs. No disturbed parameterization will be applied.",
+         extra_control_class="disable-readonly"
+       ) }}
+    </div>
+    {% set source_filename = landuse.single_user_defined_filename | default(none) %}
+    <div id="landuse_source_feedback"{% if not source_filename %} hidden{% endif %}>
+      {% set source_content %}<code id="landuse_source_filename">{{ (source_filename or '') | e }}</code>{% endset %}
+      {{ ui.text_display(label="Current landuse file", content=source_content) }}
+    </div>
+  </div>
+  {% endif %}
 
   {% set mode0_style = '' if current_mode == 0 else 'display: none;' %}
   <div id="landuse_mode0_controls" class="wc-stack hide-readonly"{% if mode0_style %} style="{{ mode0_style }}"{% endif %}>
@@ -168,7 +193,7 @@
   </div>
 
   {% call ui.collapsible_card(title="Advanced options", description="Optional buffers and disturbance toggles.") %}
-    {% if wepp.multi_ofe %}
+    {% if wepp.multi_ofe and not (ron.single_user_defined_uploads | default(false)) %}
       {{ ui.select_field(
            "mofe_buffer_selection",
            "Select landuse for buffer",

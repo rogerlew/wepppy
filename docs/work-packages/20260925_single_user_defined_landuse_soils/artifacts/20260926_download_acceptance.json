@@ -1,0 +1,14 @@
+[
+  {
+    "kind": "landuse",
+    "download_status": 200,
+    "listing_status": 200,
+    "download_sha256": "d9f07a41f3be6f7d9cd43346adeef07feac00399d36b761d57fe8aefe8755e3b"
+  },
+  {
+    "kind": "soils",
+    "download_status": 200,
+    "listing_status": 200,
+    "download_sha256": "2a58b8e236c48c20afa9f436483f88c599c110effd4f2f870a4e2ac2a6b25a6a"
+  }
+]

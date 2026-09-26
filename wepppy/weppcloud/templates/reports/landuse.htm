@@ -60,6 +60,9 @@
             class="wc-landuse-report__select disable-readonly"
             data-landuse-role="mapping-select"
             data-landuse-dom="{{ row.key }}">
+            {% if row.key|string == 'single-user-defined' %}
+            <option value="single-user-defined" selected>Single User-Defined ({{ landuse.single_user_defined_filename | e }})</option>
+            {% endif %}
             {% for opt in sorted_landuseoptions %}
             <option value="{{ opt['Key'] }}" {% if row.key|string == opt['Key']|string %}selected{% endif %}>
               {{ opt["Description"] }} ({{ opt["ManagementFile"] }})

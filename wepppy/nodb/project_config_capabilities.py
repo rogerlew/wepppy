@@ -98,10 +98,10 @@ class CapabilityAuthorityInvalidError(ValueError):
 
 
 SOIL_BUILDER_MODES: Mapping[str, int] = MappingProxyType(
-    {"gridded": 0, "single_mukey": 1, "single_database": 2}
+    {"gridded": 0, "single_mukey": 1, "single_database": 2, "single-user-defined": 5}
 )
 LANDUSE_METHOD_MODES: Mapping[str, int] = MappingProxyType(
-    {"gridded": 0, "single": 1, "rred_unburned": 2, "rred_burned": 3, "upload": 4}
+    {"gridded": 0, "single": 1, "rred_unburned": 2, "rred_burned": 3, "upload": 4, "single-user-defined": 5}
 )
 _MANDATORY_V2_AXES = (
     "locale_profiles",
@@ -739,7 +739,7 @@ def resolve_named_preset_capabilities(
         landuse_ids.append(current_landuse)
     return {
         "climate_datasets": climate_ids,
-        "soil_builders": list(SOIL_BUILDER_MODES),
+        "soil_builders": [key for key in SOIL_BUILDER_MODES if key != "single-user-defined"],
         "landuse_datasets": landuse_ids,
         "mods": list(mods),
     }

@@ -11,6 +11,8 @@ from rq.exceptions import NoSuchJobError
 from rq.job import Job
 
 from .._common import *  # noqa: F401,F403
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
@@ -128,6 +130,8 @@ def _active_path_ce_job_id(wd: str, redis_conn: "redis.Redis") -> Optional[str]:
 def get_path_cost_effective_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = _ensure_controller(wd, f"{config}.cfg")
     return jsonify({"config": controller.config})
 
@@ -140,6 +144,8 @@ def get_path_cost_effective_config(runid: str, config: str) -> Response:
 def update_path_cost_effective_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = _ensure_controller(wd, f"{config}.cfg")
     raw_payload = parse_request_payload(request)
     try:
@@ -158,6 +164,8 @@ def update_path_cost_effective_config(runid: str, config: str) -> Response:
 def get_path_cost_effective_status(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = PathCostEffective.tryGetInstance(wd)
     if controller is None:
         return jsonify(
@@ -186,6 +194,8 @@ def get_path_cost_effective_status(runid: str, config: str) -> Response:
 def get_path_cost_effective_results(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = PathCostEffective.tryGetInstance(wd)
     if controller is None:
         return jsonify({"results": {}})
@@ -200,6 +210,8 @@ def get_path_cost_effective_results(runid: str, config: str) -> Response:
 def run_path_cost_effective(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    if single_input_uploads_enabled(Ron.getInstance(wd)):
+        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
     if "path_ce" not in (ron.mods or []):
         return error_factory("PATH Cost-Effective module is not enabled for this run.")

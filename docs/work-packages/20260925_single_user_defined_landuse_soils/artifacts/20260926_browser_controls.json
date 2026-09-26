@@ -1,0 +1,86 @@
+[
+  {
+    "theme": "default",
+    "kind": "landuse",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(31, 35, 40)",
+      "background": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "theme": "default",
+    "kind": "soil",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(31, 35, 40)",
+      "background": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "theme": "ayu-mirage",
+    "kind": "landuse",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(204, 202, 194)",
+      "background": "rgb(31, 36, 48)"
+    }
+  },
+  {
+    "theme": "ayu-mirage",
+    "kind": "soil",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(204, 202, 194)",
+      "background": "rgb(31, 36, 48)"
+    }
+  },
+  {
+    "theme": "light-high-contrast",
+    "kind": "landuse",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(5, 21, 38)",
+      "background": "rgb(255, 254, 250)"
+    }
+  },
+  {
+    "theme": "light-high-contrast",
+    "kind": "soil",
+    "chooser_visible": true,
+    "focusable": true,
+    "keyboard_tab_reachable": true,
+    "accepted_filename_preserved": true,
+    "feedback": {
+      "code": "CODE",
+      "display": "wc-text-display",
+      "color": "rgb(5, 21, 38)",
+      "background": "rgb(255, 254, 250)"
+    }
+  }
+]

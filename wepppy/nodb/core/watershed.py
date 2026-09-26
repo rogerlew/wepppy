@@ -53,6 +53,7 @@ Warning:
     WatershedBoundaryTouchesEdgeError handling for validation.
 """
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled, require_single_input_policy, SingleInputPolicyError
 from typing import Generator, Dict, Union, Tuple, Optional, List, Any
 
 import time
@@ -733,6 +734,9 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         bieger2015_widths: Optional[bool] = None,
     ) -> None:
         """Apply build-subcatchments updates in one lock/dump cycle."""
+        if mofe_buffer and single_input_uploads_enabled(self):
+            raise SingleInputPolicyError("Buffer OFEs are disabled for single-input upload projects.")
+        require_single_input_policy(self, watershed=self)
 
         if (
             clip_hillslopes is None

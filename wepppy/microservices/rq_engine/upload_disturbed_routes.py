@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
+from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.core import Ron
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
@@ -81,6 +83,8 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
 
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return error_response("disturbed is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
         ron = Ron.getInstance(wd)
         if "baer" in ron.mods:
             baer = Baer.getInstance(wd)
@@ -160,6 +164,8 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         from wepppy.nodb.mods.revegetation import Revegetation
 
         wd = get_wd(runid)
+        if single_input_uploads_enabled(Ron.getInstance(wd)):
+            return error_response("disturbed is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
         form = await request.form()
         upload = _extract_upload(form, "input_upload_cover_transform")
         if upload is None:

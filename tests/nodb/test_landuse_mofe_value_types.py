@@ -10,6 +10,7 @@ pytestmark = pytest.mark.unit
 def test_post_instance_loaded_normalizes_domlc_mofe_values_to_strings() -> None:
     # Bypass __init__ to test load-time normalization behavior without any run setup.
     instance = object.__new__(Landuse)
+    instance.config_get_str = lambda _section, _key, default=None: default
     instance.domlc_mofe_d = {"12": {"2": 111, "10": "42", "1": None}}
 
     result = Landuse._post_instance_loaded(instance)
