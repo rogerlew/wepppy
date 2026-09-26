@@ -6,6 +6,7 @@ import math
 import re
 from pathlib import Path
 import shlex
+import struct
 import unicodedata
 
 from wepppy.wepp.management.managements import Management, Loops, ScenarioReference
@@ -58,47 +59,87 @@ def decode_source(raw: bytes) -> str:
 
 def _number(token: str) -> float:
     value = float(token)
-    if not _NUMBER.fullmatch(token) or not math.isfinite(value) or abs(value) > 3.4028234e38 or (abs(value) < 1.4012985e-45 and any(char in "123456789" for char in token.lower().split("e", 1)[0])):
+    if len(token) > 64 or not _NUMBER.fullmatch(token) or not math.isfinite(value) or abs(value) > 3.4028234e38 or (abs(value) < 1.4012985e-45 and any(char in "123456789" for char in token.lower().split("e", 1)[0])):
         raise ValueError("Parameter is not a finite native REAL")
     return value
 
 
+def _native_real(token: str) -> float:
+    """Check ordered bounds at the native reader's single precision."""
+    return struct.unpack('f', struct.pack('f', _number(token)))[0]
+
+
+def _soil_tokens(line: str, text_fields: tuple[int, ...]) -> list[str]:
+    # shlex alone accepts native list-directed controls and incompatible escapes.
+    token = r"(?:'[^\"'\\]*'|\"[^\"'\\]*\"|[A-Za-z0-9_.:+-]+)"
+    if not re.fullmatch(token + r"(?:[ \t]+" + token + r")*", line):
+        raise ValueError("Unsupported native soil token syntax")
+    for index, raw in enumerate(re.findall(token, line)):
+        if index not in text_fields and not _NUMBER.fullmatch(raw):
+            raise ValueError("Quoted or nonnumeric soil parameter")
+    return shlex.split(line)
+
+
 def validate_soil_text(text: str, *, max_ofes: int = 1) -> None:
-    """Validate every7778 record before the permissive owned parser can repair it."""
+    """Validate complete native soil records before the permissive owned parser."""
     try:
         lines = [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
-        if _number(lines[0]) != 7778:
+        version = _number(lines[0])
+        if version not in (2006, 2006.2, 7778, 9002):
             raise ValueError("version")
-        count = lines[2].split()
-        if len(count) != 2 or not 1 <= int(count[0]) <= max_ofes or count[1] not in {"0", "1"}:
+        count = re.split(r"[ \t]+", lines[2])
+        if (len(count) != 2 or not re.fullmatch(r"[0-9]{1,2}", count[0])
+                or not 1 <= int(count[0]) <= max_ofes or count[1] not in {"0", "1"}):
             raise ValueError("OFE/ksflag")
         position = 3
         for _ in range(int(count[0])):
-            header = shlex.split(lines[position]); position += 1
-            if len(header) != 8 or not 1 <= int(header[2]) <= 10:
+            if version == 9002:
+                adjustment = _soil_tokens(lines[position], (1, 2)); position += 1
+                if (len(adjustment) != 5 or adjustment[0] not in {"0", "1"}
+                        or any(_number(value) <= 0 for value in adjustment[3:])):
+                    raise ValueError("9002 adjustment header")
+            header = _soil_tokens(lines[position], (0, 1)); position += 1
+            if (len(header) != (9 if version < 7778 else 8)
+                    or not re.fullmatch(r"[0-9]{1,2}", header[2]) or not 1 <= int(header[2]) <= 10):
                 raise ValueError("header/layers")
-            salb, sat, ki, kr, shear = map(_number, header[3:])
+            salb, sat, ki, kr, shear = map(_number, header[3:8])
             if not (0 <= salb <= 1 and 0 <= sat <= 1 and min(ki, kr, shear) >= 0):
                 raise ValueError("surface parameters")
-            previous_depth = 0.0
+            if version < 7778 and _number(header[8]) < 0:
+                raise ValueError("avke")
+            previous_depth = native_previous_depth = 0.0
             for _ in range(int(header[2])):
-                fields = lines[position].split(); position += 1
-                if len(fields) != 11:
+                fields = re.split(r"[ \t]+", lines[position]); position += 1
+                if len(fields) != (6 if version < 7778 else 18 if version == 9002 else 11):
                     raise ValueError("horizon width")
-                depth, bd, conductivity, anisotropy, fc, wp, sand, clay, om, cec, rock = map(_number, fields)
-                if not (depth > previous_depth and bd > 0 and conductivity >= 0 and anisotropy >= 0
-                        and 0 <= wp <= fc <= 1 and cec >= 0
+                values = list(map(_number, fields))
+                native_values = list(map(_native_real, fields))
+                if version < 7778:
+                    depth, sand, clay, om, cec, rock = values
+                else:
+                    depth, bd, conductivity, anisotropy, fc, wp, sand, clay, om, cec, rock = values[:11]
+                    if not (bd > 0 and conductivity >= 0 and anisotropy >= 0 and 0 <= wp <= fc <= 1):
+                        raise ValueError("hydraulic parameters")
+                if not (depth > previous_depth and cec >= 0
                         and all(0 <= value <= 100 for value in (sand, clay, om, rock)) and sand + clay <= 100):
                     raise ValueError("horizon parameters")
-                previous_depth = depth
-            restrictive = lines[position].split(); position += 1
+                if version == 9002:
+                    for hydraulic_values in (values[11:], native_values[11:]):
+                        residual, saturated, alpha, exponent, conductivity, wp, fc = hydraulic_values
+                        if not (0 <= residual < saturated <= 1 and alpha > 0 and exponent > 1
+                                and conductivity > 0 and 0 < wp < fc <= 1):
+                            raise ValueError("9002 hydraulic parameters")
+                if native_values[0] <= native_previous_depth:
+                    raise ValueError("Native horizon depths must increase")
+                previous_depth, native_previous_depth = depth, native_values[0]
+            restrictive = re.split(r"[ \t]+", lines[position]); position += 1
             if (len(restrictive) != 3 or restrictive[0] not in {"0", "1"}
                     or any(_number(value) < 0 for value in restrictive[1:])):
                 raise ValueError("restrictive layer")
         if position != len(lines):
             raise ValueError("trailing records")
     except (ValueError, IndexError, OverflowError) as exc:
-        raise SingleInputError("Invalid soil input. Use a complete version7778 file with one OFE and 1–10 valid layers.") from exc
+        raise SingleInputError("Invalid soil input. Use a complete version 2006, 2006.2, 7778, or 9002 file with one OFE and 1–10 valid layers.") from exc
 
 
 def _validate_management_graph(management: Management) -> None:

@@ -1,0 +1,97 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "umask": "0o22",
+  "binary": "wepp_260803",
+  "synthetic_topology": true,
+  "run": "/wc1/runs/si/single-input-acceptance-20260925",
+  "versions": [
+    {
+      "version": "2006",
+      "upload_status": 200,
+      "job_id": "82b790b6-b4f5-424d-bc81-c38395f9e960",
+      "job_status": "finished",
+      "fresh_worker_retry": true,
+      "single_ofe_service_preserved": true,
+      "download_status": 200,
+      "source_sha256": "e6174bf1df6bc178b665da61d189c1d069c55c535ad6cbe184714cbcc9cb5862",
+      "hillslopes": [
+        {
+          "hill": "101",
+          "ofes": 2,
+          "native_success": true,
+          "input_sha256": "76e645a214be4635e03b092019824a2c7dcc19c36e1549eb8fffd86e5aa97595",
+          "output_bytes": 9352,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/2006/p1.sol"
+        },
+        {
+          "hill": "102",
+          "ofes": 12,
+          "native_success": true,
+          "input_sha256": "e511fdb3911db007047efab5a2dfcc50995f1db54ae00dc1e478458a600e7fca",
+          "output_bytes": 35146,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/2006/p2.sol"
+        }
+      ]
+    },
+    {
+      "version": "2006.2",
+      "upload_status": 200,
+      "job_id": "c7cf2ffc-f057-455d-88d9-fcd5aff32aeb",
+      "job_status": "finished",
+      "fresh_worker_retry": true,
+      "single_ofe_service_preserved": true,
+      "download_status": 200,
+      "source_sha256": "a7bfc14a59bf4c7615d0738d1f3496048426d75369ad77413db112ab8505ec01",
+      "hillslopes": [
+        {
+          "hill": "101",
+          "ofes": 2,
+          "native_success": true,
+          "input_sha256": "880ee2d45b6319f05917fac4ad480f92bb2fd7ddefe091d64dd743ebbe55751f",
+          "output_bytes": 9352,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/2006.2/p1.sol"
+        },
+        {
+          "hill": "102",
+          "ofes": 12,
+          "native_success": true,
+          "input_sha256": "e9cdf7be65071182f4ef816da0b6ac4c85e20ab8580411219a54c0186b0a9002",
+          "output_bytes": 35146,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/2006.2/p2.sol"
+        }
+      ]
+    },
+    {
+      "version": "9002",
+      "upload_status": 200,
+      "job_id": "9711f71d-f1bd-4470-8bb8-28dbef755304",
+      "job_status": "finished",
+      "fresh_worker_retry": true,
+      "single_ofe_service_preserved": true,
+      "download_status": 200,
+      "source_sha256": "4581c3555d1a07058deec4666ac24903cbc80ce7748af6a8dc6551f283f3201a",
+      "hillslopes": [
+        {
+          "hill": "101",
+          "ofes": 2,
+          "native_success": true,
+          "input_sha256": "ee02a0b1b7b4c74f92b592a90c50309fd9b640d8628db0677bc5365fa1e4af14",
+          "output_bytes": 10081,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/9002/p1.sol"
+        },
+        {
+          "hill": "102",
+          "ofes": 12,
+          "native_success": true,
+          "input_sha256": "31a3f6af7d9ed26df957da5bf65f0385d8e88d34cb2946e73ea3131e6c5be05c",
+          "output_bytes": 35308,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/9002/p2.sol"
+        }
+      ]
+    }
+  ]
+}

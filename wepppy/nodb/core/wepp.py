@@ -629,20 +629,8 @@ class TCROpts(object):
             return '\n'
 
 
-def prep_soil(
-    args: Tuple[
-        str,
-        str,
-        str,
-        Optional[float],
-        Optional[Dict[str, Any]],
-        float,
-        bool,
-        float,
-        bool,
-        float,
-    ]
-) -> Tuple[str, float]:
+def prep_soil(args: Tuple[Any, ...]) -> Tuple[str, float]:
+    """Prepare a soil; optional eleventh argument preserves uploaded native fields."""
     t0 = time.time()
     # str,    str,    str,    float,  dict|None,          float,       bool,       float,            bool,               float
     (
@@ -656,10 +644,11 @@ def prep_soil(
         clip_soils_depth,
         clip_soils_minimum,
         clip_soils_minimum_depth,
-    ) = args
+    ) = args[:10]
+    preserve_input_format = bool(args[10]) if len(args) > 10 else False
 
-    soilu = WeppSoilUtil(src_fn)  # internally uses rosetta
-    if _soil_has_symbolic_wepp_parameters(soilu):
+    soilu = WeppSoilUtil(src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))  # internally uses rosetta
+    if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
         # Match legacy Tenerife template processing:
         # WeppSoilUtil(..., compute_erodibilities=True, compute_conductivity=True).to7778()
         soilu = WeppSoilUtil(
@@ -737,8 +726,9 @@ def prep_multi_ofe_hillslope(
         mixed_prefer='archive',
         allow_materialize_fallback=True,
     ) as soil_src_fn:
-        soilu = WeppSoilUtil(soil_src_fn)
-        if _soil_has_symbolic_wepp_parameters(soilu):
+        preserve_input_format = bool(args[15]) if len(args) > 15 else False
+        soilu = WeppSoilUtil(soil_src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))
+        if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
             soilu = WeppSoilUtil(
                 soil_src_fn,
                 compute_erodibilities=True,
@@ -2181,6 +2171,7 @@ class Wepp(NoDbBase):
                     clip_soils_minimum_depth,
                     modify_kslast_pars,
                     single_input_uploads_enabled(self),
+                    single_input_uploads_enabled(self) and int(soils.mode) == 5,
                 )
             )
 

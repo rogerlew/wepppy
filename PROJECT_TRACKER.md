@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Active: [Single-input soil formats](docs/work-packages/20260926_single_input_soil_formats/package.md)
+— extend uploads to 2006, 2006.2 and 9002, preserving native records through
+single/multiple-OFE preparation. Contract ancestor `313951562`; native and review gates in progress.
+
 Completed (code/local): [Omni thinning 60% and 70%](docs/work-packages/20260925_omni_thinning_60_70/package.md)
 — implemented `2d0891398`; eight variants, retained 65% and 40% default.
 308 focused Python, 913 frontend and 230 soil artifact tests pass. Broad run

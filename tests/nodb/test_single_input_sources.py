@@ -172,3 +172,21 @@ def test_stale_metadata_conflict_preserves_previous_generation(tmp_path):
     assert controller.durable == old
     assert controller._single_user_defined_source == old
     assert len(list((tmp_path / 'soils/single-user-defined').iterdir())) == 1
+
+
+@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+def test_new_format_publication_reuse_and_rejected_replacement(tmp_path, version):
+    from wepppy.wepp.soils.utils import WeppSoilUtil
+    raw = (SOL.parents[6] / f'tests/data/single_input_soils/{version}.sol').read_bytes()
+    controller = SourceController(tmp_path)
+    metadata = accept_source(controller, 'soils', raw, f'Uploaded {version}.SOL')
+    assert metadata['version'] == version
+    assert read_source(controller, 'soils')[0] == raw
+    generated = Path(write_generated_source(controller, 'soils'))
+    assert '#' not in generated.read_text()
+    assert WeppSoilUtil(str(generated), preserve_input_format=True).obj['datver'] == float(version)
+    with pytest.raises(SingleInputError):
+        accept_source(controller, 'soils', raw + b'\n42\n', 'Rejected.sol')
+    assert controller.durable == metadata
+    assert read_source(controller, 'soils')[0] == raw
+    assert (tmp_path / 'soils' / metadata['relative_path']).read_bytes() == raw

@@ -91,7 +91,7 @@ def _canonical_text(directory_fd, raw, kind):
     if kind == "soils":
         validate_soil_text(text)
         # Soil stacking counts noncomment rows, so write a normalized derived copy.
-        return "\n".join(line.strip() for line in text.splitlines() if line.strip()) + "\n"
+        return "\n".join(line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")) + "\n"
     name = f".validate-{uuid.uuid4().hex}.man"
     fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o666, dir_fd=directory_fd)
     try:
@@ -136,7 +136,7 @@ def _accept_source(controller, kind: str, raw: bytes, filename: str):
     name = f"{digest}.{extension}"
     with _directory(controller, kind, create=True) as directory_fd:
         _remove_interrupted_staging(directory_fd)
-        _canonical_text(directory_fd, raw, kind)
+        canonical = _canonical_text(directory_fd, raw, kind)
         created = False
         committed = False
         controller.lock()
@@ -163,7 +163,7 @@ def _accept_source(controller, kind: str, raw: bytes, filename: str):
             finally:
                 os.unlink(staging, dir_fd=directory_fd)
             metadata = {"filename": filename, "sha256": digest, "size_bytes": len(raw),
-                        "version": "98.4" if kind == "landuse" else "7778",
+                        "version": "98.4" if kind == "landuse" else f"{float(canonical.splitlines()[0]):g}",
                         "relative_path": f"{_DIRECTORY}/{name}"}
             if previous and previous.get("relative_path") != metadata["relative_path"]:
                 metadata["previous_relative_path"] = previous["relative_path"]

@@ -13,8 +13,8 @@ version and science values apart from existing explicit soil modifiers.
 
 - [x] Trace raw stacking, WSU reader/writer, preparation and native reader.
 - [x] Ratify contract checkpoint with two independent reviews; commit before runtime edits.
-- [ ] Implement admission, explicit preserving WSU path, preparation wiring, metadata and UI.
-- [ ] Verify generated single/multiple-OFE inputs and native executions.
+- [x] Implement admission, explicit preserving WSU path, preparation wiring, metadata and UI.
+- [x] Verify generated single/multiple-OFE inputs and native executions; live authenticated RQ and both preparation entry points pass.
 - [ ] Close correctness/security findings; update guides and commit.
 
 ## Surprises & Discoveries
@@ -26,6 +26,13 @@ reads it. Its current serializer excludes both 2006 versions and recomputes
 also classifies absent 2006 horizon conductivity as symbolic; preserving uploads
 must bypass that conversion. Raw `SoilMultipleOfeSynth` preserves all
 records and does not require redesign.
+
+Review caught native REAL collapse of strict inequalities. Validate original
+values and additionally native float32 ordering: rounding all fields first
+would hide invalid original texture sums or reject valid decimal texture sums.
+Both directions now have regressions. Live long-lived development RQ workers
+retained old modules; only these disposable failed jobs were retried in a fresh
+worker. No service restart or deployment was performed.
 
 ## Decision Log
 

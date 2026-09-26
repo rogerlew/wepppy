@@ -57,7 +57,11 @@ def _prepare_independent_sources(tmp_path, monkeypatch, uploaded_landuse, soil_s
     soils.domsoil_d = {hill: 'source' for hill in segments}
     soils.soils = {'source': SimpleNamespace(fname='source.sol')}
     monkeypatch.setattr(Soils, 'watershed_instance', property(lambda _: watershed))
-    shutil.copyfile(SOIL_DB / soil_source, tmp_path / 'soils/source.sol')
+    source_text = (SOIL_DB / soil_source).read_text()
+    if uploaded_soil:
+        from wepppy.nodb.single_input_sources import _canonical_text
+        source_text = _canonical_text(None, source_text.encode(), 'soils')
+    (tmp_path / 'soils/source.sol').write_text(source_text)
     soils._build_undisturbed_multiple_ofe()
     for wepp_id, (hill, count) in enumerate(watershed.mofe_nsegments.items(), 1):
         slope = tmp_path / f'watershed/slope_files/hillslopes/hill_{hill}.mofe.slp'
@@ -71,9 +75,16 @@ def _prepare_independent_sources(tmp_path, monkeypatch, uploaded_landuse, soil_s
             expected = [landuse.managements[assignments[hill][str(i)]].cancov for i in range(1, count + 1)]
             assert active_covers == pytest.approx(expected)
         prep_multi_ofe_hillslope((hill, wepp_id, str(tmp_path), str(tmp_path / 'wepp/runs'), 2,
-                                 None, 0.42, False, None, False, None, False, None, None, True))
+                                 None, 0.42, False, None, False, None, False, None, None, True, uploaded_soil))
         prepared = _management(tmp_path / f'wepp/runs/p{wepp_id}.man')
-        prepared_soil = WeppSoilUtil(str(tmp_path / f'wepp/runs/p{wepp_id}.sol'))
+        prepared_soil = WeppSoilUtil(str(tmp_path / f'wepp/runs/p{wepp_id}.sol'), preserve_input_format=uploaded_soil)
+        if uploaded_soil:
+            original = WeppSoilUtil(str(tmp_path / 'soils/source.sol'), preserve_input_format=True)
+            expected_ofe = original.obj['ofes'][0]
+            expected_ofe['sat'] = 0.42
+            assert prepared_soil.obj['datver'] == original.obj['datver']
+            assert prepared_soil.obj['ksflag'] == original.obj['ksflag']
+            assert all(ofe == expected_ofe for ofe in prepared_soil.obj['ofes'])
         assert prepared.nofe == count
         assert prepared.sim_years == 2
         assert len(prepared_soil.obj['ofes']) == count
@@ -91,10 +102,11 @@ def test_independent_sources_reach_all_hillslope_ofes(tmp_path, monkeypatch, upl
     _prepare_independent_sources(tmp_path, monkeypatch, uploaded_landuse, soil_source, uploaded_soil)
 
 
-@pytest.mark.parametrize('ofe_counts', [(2, 12), (32,)])
-def test_uploaded_management_and_soil_execute_with_certified_binary(tmp_path, monkeypatch, ofe_counts):
+@pytest.mark.parametrize('ofe_counts', [(1,), (2, 12), (32,)])
+@pytest.mark.parametrize('soil_source', ['Forest/Forest loam.sol'] + [str(ROOT / f'tests/data/single_input_soils/{version}.sol') for version in ('2006', '2006.2', '9002')])
+def test_uploaded_management_and_soil_execute_with_certified_binary(tmp_path, monkeypatch, ofe_counts, soil_source):
     from wepp_runner.wepp_runner import make_hillslope_run, run_hillslope
-    _prepare_independent_sources(tmp_path, monkeypatch, True, 'Forest/Forest loam.sol', True, ofe_counts)
+    _prepare_independent_sources(tmp_path, monkeypatch, True, soil_source, True, ofe_counts)
     runs = tmp_path / 'wepp/runs'
     (tmp_path / 'wepp/output').mkdir()
     for wepp_id in range(1, len(ofe_counts) + 1):
@@ -103,3 +115,44 @@ def test_uploaded_management_and_soil_execute_with_certified_binary(tmp_path, mo
         success, returned_id, _elapsed = run_hillslope(wepp_id, str(runs), wepp_bin='wepp_260803')
         assert success and returned_id == wepp_id
         assert (tmp_path / f'wepp/output/H{wepp_id}.loss.dat').stat().st_size > 0
+
+
+@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('count', [1, 3])
+def test_native_preparation_modifiers_preserve_uploaded_formats(tmp_path, monkeypatch, version, count):
+    from wepppy.nodb.core.wepp import prep_soil
+    from wepp_runner.wepp_runner import make_hillslope_run, run_hillslope
+    source = ROOT / f'tests/data/single_input_soils/{version}.sol'
+    _prepare_independent_sources(tmp_path, monkeypatch, False, str(source), True, (count,))
+    raw = source.read_bytes()
+    runs = tmp_path / 'wepp/runs'
+    # Exercise flag zero as well as the flag-one baseline native matrix.
+    if version == '9002':
+        for path in [tmp_path / 'soils/source.sol', tmp_path / 'soils/hill_101.mofe.sol']:
+            path.write_text(path.read_text().replace("1 'developed'", "0 'developed'"))
+    if count == 1:
+        prep_soil(('101', str(tmp_path / 'soils/source.sol'), str(runs / 'p1.sol'),
+                   0.012345, None, 0.42, True, 400, True, 1000, True))
+    else:
+        prep_multi_ofe_hillslope(('101', 1, str(tmp_path), str(runs), 2, 0.012345, 0.42,
+                                 False, None, True, 400, True, 1000, None, True, True))
+    prepared = WeppSoilUtil(str(runs / 'p1.sol'), preserve_input_format=True)
+    assert prepared.obj['datver'] == float(version)
+    for ofe in prepared.obj['ofes']:
+        assert ofe['res_lyr']['kslast'] == 0.012345
+        assert ofe['sat'] == 0.42
+        assert ofe['nsl'] == 1 and ofe['horizons'][0]['solthk'] == 400
+        if version == '9002':
+            assert ofe['horizons'][0]['native_hydraulics']['ks'] == 12.345
+            assert ofe['horizons'][0]['native_hydraulics']['fc'] == 0.2876
+            assert ofe['ksatadj'] == '0'
+        else:
+            assert ofe['avke'] == 37.25
+    (tmp_path / 'wepp/output').mkdir()
+    shutil.copyfile(ROOT / 'tests/disturbed/data/test_climate.cli', runs / 'p1.cli')
+    make_hillslope_run(1, 2, str(runs), reveg=False, wepp_bin='wepp_260803')
+    assert run_hillslope(1, str(runs), wepp_bin='wepp_260803')[0]
+    output = (tmp_path / 'wepp/output/H1.loss.dat').read_text()
+    import re
+    assert output and not re.search(r'\b(?:nan|inf(?:inity)?)\b', output, re.IGNORECASE)
+    assert source.read_bytes() == raw

@@ -209,6 +209,8 @@ class WeppSoilUtil(object):
         fn: str,
         compute_erodibilities: bool = False,
         compute_conductivity: bool = False,
+        *,
+        preserve_input_format: bool = False,
     ) -> None:
         """
         Parameters
@@ -219,7 +221,18 @@ class WeppSoilUtil(object):
             When True, recompute interrill/rill/shear values for the first horizon.
         compute_conductivity:
             When True, recompute hydraulic conductivity using the WEPP guidance formulas.
+        preserve_input_format:
+            Validate uploaded native records and retain their version/parameters on write.
+            Default False preserves existing catalog/Disturbed serialization.
         """
+        self._preserve_input_format = preserve_input_format
+        if preserve_input_format:
+            from pathlib import Path
+            from wepppy.wepp.single_input import validate_soil_text
+            if compute_erodibilities or compute_conductivity or not fn.endswith('.sol'):
+                raise ValueError("Preserved inputs require .sol text without recomputation")
+            validate_soil_text(Path(fn).read_text(), max_ofes=32)
+
         self.compute_erodibilities = compute_erodibilities
         self.compute_conductivity = compute_conductivity
 
@@ -240,6 +253,8 @@ class WeppSoilUtil(object):
         with open(fn) as fp:
             lines = fp.readlines()
 
+        if getattr(self, '_preserve_input_format', False):
+            lines = [L.strip() for L in lines]
         header = [L.replace('#', '').strip() for L in lines if L.startswith('#')]
 #        header = [L for L in header if L != '']
         lines = [L.strip() for L in lines if not L.startswith('#')]
@@ -311,6 +326,9 @@ class WeppSoilUtil(object):
                 # 1   2      3    4     5    6   7   8       9
                 slid, texid, nsl, salb, sat, ki, kr, shcrit, avke = line
 
+            if getattr(self, '_preserve_input_format', False) and datver == 2006.2:
+                avke = line[8]
+
             nsl = int(nsl)
 
             horizons = []
@@ -369,6 +387,8 @@ class WeppSoilUtil(object):
                          orgmat=try_parse(orgmat), 
                          cec=try_parse(cec), 
                          rfg=try_parse(rfg)))
+                if getattr(self, '_preserve_input_format', False) and datver == 9002:
+                    horizons[-1]['native_hydraulics'] = dict(zip(VG_PAR_KEYS, map(float, line[11:])))
 
             res_lyr = None
             if solwpv >= 2006:
@@ -443,7 +463,7 @@ class WeppSoilUtil(object):
         """Update the restrictive layer hydraulic conductivity."""
         luse = self.obj['ofes'][0]['luse']
 
-        if luse is not None:
+        if luse is not None and not getattr(self, '_preserve_input_format', False):
             if 'developed' in luse.lower():
                 return
 
@@ -472,6 +492,8 @@ class WeppSoilUtil(object):
                 horizon = ofe['horizons'][j]
                 if horizon['solthk'] <= max_depth:
                     horizons.append(horizon)
+                    if horizon['solthk'] == max_depth and getattr(self, '_preserve_input_format', False):
+                        break
                 else:
                     horizon['solthk'] = max_depth
                     horizons.append(horizon)
@@ -583,8 +605,40 @@ class WeppSoilUtil(object):
         new.obj['datver'] = 7778.0
         return new
 
+    def _serialize_preserved_input(self) -> str:
+        """Write uploaded fields without version migration or hydraulic prediction."""
+        from wepppy.wepp.single_input import validate_soil_text
+        version = self.obj['datver']
+        lines = [f'{version:g}']
+        lines.extend(f'# {line}' for line in self.obj['header'])
+        lines.extend([self.obj['solcom'], f"{self.obj['ntemp']} {self.obj['ksflag']}"])
+        for ofe in self.obj['ofes']:
+            if version == 9002:
+                lines.append(f"{ofe['ksatadj']} {_quote_wepp_text(ofe['luse'])} "
+                             f"{_quote_wepp_text(ofe['stext'])} {ofe['ksatfac']} {ofe['ksatrec']}")
+            header_keys = ['nsl', 'salb', 'sat', 'ki', 'kr', 'shcrit']
+            if version < 7778:
+                header_keys.append('avke')
+            lines.append(f"{_quote_wepp_text(ofe['slid'])} {_quote_wepp_text(ofe['texid'])} "
+                         + ' '.join(str(ofe[key]) for key in header_keys))
+            layer_keys = ('solthk sand clay orgmat cec rfg' if version < 7778 else
+                          'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg').split()
+            for horizon in ofe['horizons']:
+                values = [str(horizon[key]) for key in layer_keys]
+                if version == 9002:
+                    values.extend(str(horizon['native_hydraulics'][key]) for key in VG_PAR_KEYS)
+                lines.append(' '.join(values))
+            restrictive = ofe['res_lyr']
+            middle = 'anisrt' if version < 7778 else 'ui_bdrkth'
+            lines.append(f"{restrictive['slflag']} {restrictive[middle]} {restrictive['kslast']}")
+        text = '\n'.join(lines) + '\n'
+        validate_soil_text(text, max_ofes=32)
+        return text
+
     def __str__(self) -> str:
         """Serialize the soil definition back into WEPP ``.sol`` text."""
+        if getattr(self, '_preserve_input_format', False):
+            return self._serialize_preserved_input()
         header = self.obj['header'] 
         header = [f'# {L}' for L in header]
 

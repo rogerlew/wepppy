@@ -13,6 +13,8 @@ Canonical behavioral contract:
   regression evidence must read combined managements and prepared WEPP inputs.
   Cover edits regenerate managements; summary rebuild preserves canopy and both ground overrides.
   Applying configured cover defaults also regenerates once, including retries.
+* Uploaded soil preparation follows `docs/schemas/single-user-defined-inputs-contract.md`;
+  preserve admitted versions and explicit hydraulic values through single/MOFE preparation.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
   omitted kslast preserves saved state; explicit clearing remains supported.
 * Treatment soil class selection follows `docs/schemas/disturbed-treatment-soil-lookup-contract.md`:
