@@ -8,11 +8,16 @@ It is a creation-time choice; existing projects keep their current behavior.
 
 Choose the upload mode in either control, select a file, and click Build.
 Landuse accepts `.man` or `.MAN` management version 98.4; soils accepts `.sol` or
-`.SOL` soil versions 2006, 2006.2, 7778, or 9002. Each source must contain exactly one OFE. The server
+`.SOL` soil versions 2006, 2006.2, 7777, 7778, or 9002. Each source must contain exactly one OFE. The server
 validates the actual contents, not just the extension. Files must be UTF-8 text,
 at most 5 MiB. Windows line endings and a UTF-8 BOM are accepted. Management
 2016.3 and later-format fields are not supported: the certified WEPP binary does
 not consistently consume them.
+
+Version 7777 requires an eight-field header, ten values per layer (no per-layer
+anisotropy), and a three-value restrictive record with profile anisotropy. Its
+version and supplied values are preserved in generated inputs. WEPP’s native
+reader limits still apply, including its internal 1,800 mm soil-depth cap.
 
 Both 2006 versions require nine soil-header fields, including surface
 conductivity (`avke`), and six values per layer. Version 9002 requires its

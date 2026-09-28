@@ -1,0 +1,41 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "umask": "0o22",
+  "binary": "wepp_260803",
+  "synthetic_topology": true,
+  "run": "/wc1/runs/si/single-input-acceptance-20260925",
+  "versions": [
+    {
+      "version": "7777",
+      "upload_status": 200,
+      "job_id": "9b88943d-f2ca-4bca-9028-8e1345d64a7f",
+      "job_status": "finished",
+      "fresh_worker_retry": true,
+      "single_ofe_service_preserved": true,
+      "download_status": 200,
+      "source_sha256": "9ff8feb48350d47330b882d5ebe90076d07ee13d09335d4d12ac62fe6eda2350",
+      "hillslopes": [
+        {
+          "hill": "101",
+          "ofes": 2,
+          "native_success": true,
+          "input_sha256": "defabc166cd138e4a1cf88566b860cccaeed5986b2da62e49c25487c5b62b058",
+          "output_bytes": 9514,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/7777/p1.sol"
+        },
+        {
+          "hill": "102",
+          "ofes": 12,
+          "native_success": true,
+          "input_sha256": "722c8ca0fed750f010af34af2123b08515ab17a520d1dcf54f28a4af94d218d1",
+          "output_bytes": 34741,
+          "retained_input": "/wc1/runs/si/single-input-acceptance-20260925/soil-format-acceptance/7777/p2.sol"
+        }
+      ]
+    }
+  ]
+}

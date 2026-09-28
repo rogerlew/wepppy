@@ -12,9 +12,11 @@ already opts uploaded soils into this writer and owned synthesis repeats profile
 ## Progress
 
 - [x] Traced native and owned parser layouts.
-- [ ] Independently review and commit canonical contract checkpoint.
-- [ ] Implement validator/writer/help and regression coverage.
-- [ ] Validate consumed files/native execution, obtain reviews and close.
+- [x] Independently reviewed canonical contract committed as e3a12ba42.
+- [x] Implemented validator/writer/help and regression coverage.
+- [x] Focused205 and regression305 tests passed; native1/2/12/32OFE passed.
+- [x] Exact supplied-file authenticated upload/build/download and archive/restore passed.
+- [ ] Finish broad suite and independent reviews, then close.
 
 ## Surprises & Discoveries
 
@@ -50,4 +52,6 @@ temporary paths; source archives remain opaque. Revert code only with uploaded
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation.
+7777 is implemented and wired through existing upload/preparation paths. Focused
+artifact/native tests and live disposable-run acceptance pass. Broad regression
+and final review closure remain pending. No deployment performed.

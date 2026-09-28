@@ -421,7 +421,7 @@ with open('soil_summary.csv', 'w', newline='') as f:
 ### Preserve validated uploaded formats
 
 Use `WeppSoilUtil(path, preserve_input_format=True)` for Single User-Defined
-soils (2006, 2006.2, 7778, 9002). This validates complete native records, preserves
+soils (2006, 2006.2, 7777, 7778, 9002). This validates complete native records, preserves
 2006/2006.2 `avke` and 9002 appended hydraulic values, and writes the original
 format after compatible modifiers. It cannot be combined with conductivity or
 erodibility recomputation. The default parser/serializer retains its catalog and

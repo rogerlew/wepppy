@@ -16,7 +16,7 @@ def _records(version):
             if line.strip() and not line.startswith('#')]
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 def test_preserved_soil_roundtrip_and_modifiers(tmp_path, monkeypatch, version):
     import wepppy.wepp.soils.utils.wepp_soil_util as module
     def no_prediction(_version):
@@ -26,9 +26,9 @@ def test_preserved_soil_roundtrip_and_modifiers(tmp_path, monkeypatch, version):
     source = tmp_path / 'source.sol'; source.write_bytes(raw)
     soil = WeppSoilUtil(str(source), preserve_input_format=True)
     original = soil.obj['ofes'][0]
-    if version != '9002':
+    if version in ('2006', '2006.2'):
         assert original['avke'] == 37.25
-    else:
+    elif version == '9002':
         assert original['horizons'][0]['native_hydraulics'] == dict(
             theta_r=0.05, theta_s=0.45, alpha=0.0123, npar=1.61, ks=12.345, wp=0.1134, fc=0.2876)
     target = tmp_path / 'roundtrip.sol'
@@ -48,7 +48,7 @@ def test_preserved_soil_roundtrip_and_modifiers(tmp_path, monkeypatch, version):
     assert source.read_bytes() == raw
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 @pytest.mark.parametrize('label', ['/', ',', 'x,y', 'x!comment', "'O''Brien'", '"a\\"b"', "'a'junk"])
 def test_native_label_differentials_rejected(version, label):
     records = _records(version)
@@ -58,7 +58,7 @@ def test_native_label_differentials_rejected(version, label):
         validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 @pytest.mark.parametrize('mutation', ['header_short', 'header_extra', 'layer_short', 'layer_extra',
                                        'restrictive_short', 'restrictive_extra', 'trailing', 'quoted_number',
                                        'unicode_separator', 'bad_cec', 'bad_depth', 'eleven_layers', 'two_ofes'])
@@ -85,7 +85,7 @@ def test_native_record_shape_and_semantics_rejected(version, mutation):
     elif mutation == 'unicode_separator':
         records[layer] = records[layer].replace(' ', '\u00a0', 1)
     elif mutation == 'bad_cec':
-        fields = records[layer].split(); fields[9 if version == '9002' else 4] = '-1'
+        fields = records[layer].split(); fields[9 if version == '9002' else 8 if version == '7777' else 4] = '-1'
         records[layer] = ' '.join(fields)
     elif mutation == 'bad_depth':
         records[layer + 1] = records[layer + 1].replace('800 ', '400 ', 1)
@@ -97,7 +97,7 @@ def test_native_record_shape_and_semantics_rejected(version, mutation):
         validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 @pytest.mark.parametrize('value', ['nan', 'inf', '1e999', '1e-999', '1e-46', '1_000', '1,' , '1/'])
 def test_native_layer_numbers_rejected(version, value):
     records = _records(version)
@@ -140,7 +140,7 @@ def test_9002_bounds_must_survive_native_real_rounding(index, value):
         validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 def test_increasing_depth_must_survive_native_real_rounding(version):
     records = _records(version)
     layer = 5 if version == '9002' else 4
@@ -149,30 +149,30 @@ def test_increasing_depth_must_survive_native_real_rounding(version):
         validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 def test_native_rounding_must_not_hide_invalid_original_texture(version):
     records = _records(version)
     layer = 5 if version == '9002' else 4
     fields = records[layer].split()
-    start = 6 if version == '9002' else 1
+    start = 6 if version == '9002' else 5 if version == '7777' else 1
     fields[start:start + 2] = ['60.00000001', '40']
     records[layer] = ' '.join(fields)
     with pytest.raises(SingleInputError):
         validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 def test_valid_texture_sum_survives_native_rounding(version):
     records = _records(version)
     layer = 5 if version == '9002' else 4
     fields = records[layer].split()
-    start = 6 if version == '9002' else 1
+    start = 6 if version == '9002' else 5 if version == '7777' else 1
     fields[start:start + 2] = ['30.1', '69.9']
     records[layer] = ' '.join(fields)
     validate_soil_text('\n'.join(records))
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 @pytest.mark.parametrize('layers', [10, 11])
 def test_complete_profiles_at_native_layer_limit(version, layers):
     records = _records(version)
@@ -186,3 +186,32 @@ def test_complete_profiles_at_native_layer_limit(version, layers):
     else:
         with pytest.raises(SingleInputError):
             validate_soil_text(text)
+
+
+@pytest.mark.parametrize('index,value', [(1, '0'), (1, '-1'), (2, '-1'),
+                                       (3, '1.01'), (4, '-0.01'), (4, '0.31')])
+def test_7777_hydraulic_bounds_rejected(index, value):
+    records = _records('7777')
+    fields = records[4].split(); fields[index] = value
+    records[4] = ' '.join(fields)
+    with pytest.raises(SingleInputError):
+        validate_soil_text('\n'.join(records))
+
+
+def test_supplied_7777_preserves_exact_native_fields(tmp_path):
+    from wepppy.wepp.single_input import decode_source
+    source = SOURCES / 'boulderck_mica_1_7777.sol'
+    raw = source.read_bytes()
+    assert b'\r\n' in raw
+    validate_soil_text(decode_source(raw))
+    soil = WeppSoilUtil(str(source), preserve_input_format=True)
+    target = tmp_path / 'prepared.sol'
+    soil.write(str(target))
+    records = [line for line in target.read_text().splitlines() if not line.startswith('#')]
+    assert records[0] == '7777' and records[2] == '1 1'
+    import shlex
+    assert len(shlex.split(records[3])) == 8
+    assert list(map(float, records[4].split())) == [500, 1.29, 29.3, .35, .09, 27.4, 11.5, 3.5, 14.3, 3]
+    assert list(map(float, records[5].split())) == [2400, 1.5, 91.7, .22, .09, 75, 3.5, .39, 2.5, 40]
+    assert list(map(float, records[6].split())) == [1, 10, .46]
+    assert source.read_bytes() == raw

@@ -617,11 +617,12 @@ class WeppSoilUtil(object):
                 lines.append(f"{ofe['ksatadj']} {_quote_wepp_text(ofe['luse'])} "
                              f"{_quote_wepp_text(ofe['stext'])} {ofe['ksatfac']} {ofe['ksatrec']}")
             header_keys = ['nsl', 'salb', 'sat', 'ki', 'kr', 'shcrit']
-            if version < 7778:
+            if version < 7777:
                 header_keys.append('avke')
             lines.append(f"{_quote_wepp_text(ofe['slid'])} {_quote_wepp_text(ofe['texid'])} "
                          + ' '.join(str(ofe[key]) for key in header_keys))
-            layer_keys = ('solthk sand clay orgmat cec rfg' if version < 7778 else
+            layer_keys = ('solthk sand clay orgmat cec rfg' if version < 7777 else
+                          'solthk bd ksat fc wp sand clay orgmat cec rfg' if version == 7777 else
                           'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg').split()
             for horizon in ofe['horizons']:
                 values = [str(horizon[key]) for key in layer_keys]

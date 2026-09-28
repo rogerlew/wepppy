@@ -103,7 +103,7 @@ def test_independent_sources_reach_all_hillslope_ofes(tmp_path, monkeypatch, upl
 
 
 @pytest.mark.parametrize('ofe_counts', [(1,), (2, 12), (32,)])
-@pytest.mark.parametrize('soil_source', ['Forest/Forest loam.sol'] + [str(ROOT / f'tests/data/single_input_soils/{version}.sol') for version in ('2006', '2006.2', '9002')])
+@pytest.mark.parametrize('soil_source', ['Forest/Forest loam.sol'] + [str(ROOT / f'tests/data/single_input_soils/{version}.sol') for version in ('2006', '2006.2', '7777', '9002', 'boulderck_mica_1_7777')])
 def test_uploaded_management_and_soil_execute_with_certified_binary(tmp_path, monkeypatch, ofe_counts, soil_source):
     from wepp_runner.wepp_runner import make_hillslope_run, run_hillslope
     _prepare_independent_sources(tmp_path, monkeypatch, True, soil_source, True, ofe_counts)
@@ -114,10 +114,12 @@ def test_uploaded_management_and_soil_execute_with_certified_binary(tmp_path, mo
         make_hillslope_run(wepp_id, 2, str(runs), reveg=False, wepp_bin='wepp_260803')
         success, returned_id, _elapsed = run_hillslope(wepp_id, str(runs), wepp_bin='wepp_260803')
         assert success and returned_id == wepp_id
-        assert (tmp_path / f'wepp/output/H{wepp_id}.loss.dat').stat().st_size > 0
+        output = (tmp_path / f'wepp/output/H{wepp_id}.loss.dat').read_text()
+        import re
+        assert output and not re.search(r'\b(?:nan|inf(?:inity)?)\b', output, re.IGNORECASE)
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 @pytest.mark.parametrize('count', [1, 3])
 def test_native_preparation_modifiers_preserve_uploaded_formats(tmp_path, monkeypatch, version, count):
     from wepppy.nodb.core.wepp import prep_soil
@@ -146,6 +148,10 @@ def test_native_preparation_modifiers_preserve_uploaded_formats(tmp_path, monkey
             assert ofe['horizons'][0]['native_hydraulics']['ks'] == 12.345
             assert ofe['horizons'][0]['native_hydraulics']['fc'] == 0.2876
             assert ofe['ksatadj'] == '0'
+        elif version == '7777':
+            assert ofe['res_lyr']['anisrt'] == 23.75
+            assert ofe['horizons'][0]['ksat'] == 2.345
+            assert ofe['horizons'][0]['anisotropy'] is None
         else:
             assert ofe['avke'] == 37.25
     (tmp_path / 'wepp/output').mkdir()

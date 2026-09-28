@@ -85,7 +85,7 @@ def validate_soil_text(text: str, *, max_ofes: int = 1) -> None:
     try:
         lines = [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
         version = _number(lines[0])
-        if version not in (2006, 2006.2, 7778, 9002):
+        if version not in (2006, 2006.2, 7777, 7778, 9002):
             raise ValueError("version")
         count = re.split(r"[ \t]+", lines[2])
         if (len(count) != 2 or not re.fullmatch(r"[0-9]{1,2}", count[0])
@@ -99,26 +99,31 @@ def validate_soil_text(text: str, *, max_ofes: int = 1) -> None:
                         or any(_number(value) <= 0 for value in adjustment[3:])):
                     raise ValueError("9002 adjustment header")
             header = _soil_tokens(lines[position], (0, 1)); position += 1
-            if (len(header) != (9 if version < 7778 else 8)
+            if (len(header) != (9 if version < 7777 else 8)
                     or not re.fullmatch(r"[0-9]{1,2}", header[2]) or not 1 <= int(header[2]) <= 10):
                 raise ValueError("header/layers")
             salb, sat, ki, kr, shear = map(_number, header[3:8])
             if not (0 <= salb <= 1 and 0 <= sat <= 1 and min(ki, kr, shear) >= 0):
                 raise ValueError("surface parameters")
-            if version < 7778 and _number(header[8]) < 0:
+            if version < 7777 and _number(header[8]) < 0:
                 raise ValueError("avke")
             previous_depth = native_previous_depth = 0.0
             for _ in range(int(header[2])):
                 fields = re.split(r"[ \t]+", lines[position]); position += 1
-                if len(fields) != (6 if version < 7778 else 18 if version == 9002 else 11):
+                if len(fields) != (6 if version < 7777 else 10 if version == 7777 else 18 if version == 9002 else 11):
                     raise ValueError("horizon width")
                 values = list(map(_number, fields))
                 native_values = list(map(_native_real, fields))
-                if version < 7778:
+                if version < 7777:
                     depth, sand, clay, om, cec, rock = values
                 else:
-                    depth, bd, conductivity, anisotropy, fc, wp, sand, clay, om, cec, rock = values[:11]
-                    if not (bd > 0 and conductivity >= 0 and anisotropy >= 0 and 0 <= wp <= fc <= 1):
+                    if version == 7777:
+                        depth, bd, conductivity, fc, wp, sand, clay, om, cec, rock = values
+                    else:
+                        depth, bd, conductivity, anisotropy, fc, wp, sand, clay, om, cec, rock = values[:11]
+                        if anisotropy < 0:
+                            raise ValueError("layer anisotropy")
+                    if not (bd > 0 and conductivity >= 0 and 0 <= wp <= fc <= 1):
                         raise ValueError("hydraulic parameters")
                 if not (depth > previous_depth and cec >= 0
                         and all(0 <= value <= 100 for value in (sand, clay, om, rock)) and sand + clay <= 100):
@@ -139,7 +144,7 @@ def validate_soil_text(text: str, *, max_ofes: int = 1) -> None:
         if position != len(lines):
             raise ValueError("trailing records")
     except (ValueError, IndexError, OverflowError) as exc:
-        raise SingleInputError("Invalid soil input. Use a complete version 2006, 2006.2, 7778, or 9002 file with one OFE and 1–10 valid layers.") from exc
+        raise SingleInputError("Invalid soil input. Use a complete version 2006, 2006.2, 7777, 7778, or 9002 file with one OFE and 1–10 valid layers.") from exc
 
 
 def _validate_management_graph(management: Management) -> None:

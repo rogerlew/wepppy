@@ -174,7 +174,7 @@ def test_stale_metadata_conflict_preserves_previous_generation(tmp_path):
     assert len(list((tmp_path / 'soils/single-user-defined').iterdir())) == 1
 
 
-@pytest.mark.parametrize('version', ['2006', '2006.2', '9002'])
+@pytest.mark.parametrize('version', ['2006', '2006.2', '7777', '9002'])
 def test_new_format_publication_reuse_and_rejected_replacement(tmp_path, version):
     from wepppy.wepp.soils.utils import WeppSoilUtil
     raw = (SOL.parents[6] / f'tests/data/single_input_soils/{version}.sol').read_bytes()
