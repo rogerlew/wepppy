@@ -43,3 +43,45 @@ do not initialize Disturbed or apply its lookup transforms. Existing authorizati
 controller invariants remain in force. This explicit exception governs where
 earlier unconditional Disturbed statements conflict; no other defaults change.
 Implementation conformance is pending the SUDI-01 checkpoint and validation.
+
+## Continuous watershed runtime budget (WRT-01)
+
+Operator approved 2026-09-28; implementation pending. Continuous watershed child
+jobs use `3600 * max(12, ceil(years * hillslopes / 72000))` seconds: equivalently
+0.05 seconds per hillslope-year, rounded up to whole hours with a12-hour floor.
+Preserve a larger explicitly supplied pipeline timeout rather than reduce it.
+This is an execution allowance, not a scientific parameter or runtime guarantee.
+The empirical rationale is in [the wepp1 assessment](../investigations/20260928_wepp1_watershed_timeout_scaling/assessment.md).
+
+Apply identically to full, full no-preparation, watershed-only, and watershed-only
+no-preparation pipelines. For preparation paths use positive integral
+`climate.input_years` and `wepp.watershed_instance.sub_n`. For no-preparation
+paths, the owned continuous `wepp/runs/pw0.run` is authoritative: use its
+hillslope-count record and final simulation-years record, without rewriting it
+or requiring current saved settings to match. Both legacy master-pass prompt
+and modern omitted-prompt layouts are supported. Read at most1MiB. Missing,
+malformed, nonpositive or nonintegral workload inputs fail explicitly before
+enqueueing any children; never silently substitute a default workload. Existing
+valid integer-string year representations are accepted.
+
+Single-storm modes (including batch) retain their existing timeout and do not
+require continuous workload fields. Hillslope-only/preparation-only pipelines
+do not read unused watershed-budget inputs. Other stage timeouts and dependency
+edges remain unchanged. Compute and validate the budget before the first enqueue
+in each applicable pipeline to avoid partial graphs on workload errors.
+
+Store additive child job metadata under `watershed_timeout`: policy `WRT-01`,
+`years`, `hillslopes`, `seconds_per_hillslope_year` (0.05), `timeout_seconds`,
+`workload_source` (`controllers` or `prepared_run_file`) and selected `wepp_bin`.
+Preserve fork-failure lineage and other existing metadata. No NoDb schema changes.
+Absent optional fork metadata is normal. No new UI fields or caller-supplied
+timeout overrides are introduced. This finite calculated budget has no new
+arbitrary cap; it must fit the positive platform/RQ alarm range (2^31-1 seconds).
+Reject an out-of-range computed/supplied budget explicitly, never silently clamp.
+
+Existing RQ errors, auth, locks, output and completion semantics stay unchanged.
+Failed jobs keep their previously stored timeout; only new submissions receive
+the policy. Deployment, retrying production jobs and subprocess cleanup changes
+are outside WRT-01. Validate actual serialized RQ job timeout/metadata and the
+unchanged dependency tree on a disposable development run, including no-prep
+source immutability.

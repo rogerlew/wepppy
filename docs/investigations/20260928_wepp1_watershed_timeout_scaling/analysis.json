@@ -1,0 +1,198 @@
+{
+  "all": {
+    "n": 123,
+    "size_groups": 58,
+    "hills_channels_spearman": 0.9980115720029951,
+    "seconds_per_hillslope_year_q50_q90_q95_max": [
+      0.028069312831858408,
+      0.041197605817109136,
+      0.04728357770013037,
+      0.13692603333333334
+    ],
+    "models": {
+      "years": {
+        "log_coefficients": [
+          -1.0052746080395083,
+          1.3730716851640854
+        ],
+        "log_r2": 0.2410159437015459,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          4.34426544590697,
+          16.39584553835999
+        ]
+      },
+      "years_hills": {
+        "log_coefficients": [
+          -2.833679729570577,
+          0.8771425671782966,
+          0.9634626025535886
+        ],
+        "log_r2": 0.9871734857844561,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.1520609474364991,
+          1.3747052467610164
+        ]
+      },
+      "years_channels": {
+        "log_coefficients": [
+          -1.9425511574602299,
+          0.8862395116251918,
+          0.9382580117006173
+        ],
+        "log_r2": 0.9886831068829609,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.169763594084012,
+          1.3659367193840994
+        ]
+      },
+      "years_combined_size": {
+        "log_coefficients": [
+          -3.1633265764333367,
+          0.8814155693185424,
+          0.9579630712148318
+        ],
+        "log_r2": 0.9885139712152149,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.1578551096562426,
+          1.3676205996922577
+        ]
+      }
+    },
+    "100_year_bins": [
+      {
+        "hillslope_range": [
+          1,
+          100
+        ],
+        "n": 50,
+        "median_seconds": 42.4958505
+      },
+      {
+        "hillslope_range": [
+          101,
+          300
+        ],
+        "n": 22,
+        "median_seconds": 502.5637805
+      },
+      {
+        "hillslope_range": [
+          301,
+          700
+        ],
+        "n": 16,
+        "median_seconds": 955.4235994999999
+      },
+      {
+        "hillslope_range": [
+          701,
+          1500
+        ],
+        "n": 9,
+        "median_seconds": 2652.234193
+      },
+      {
+        "hillslope_range": [
+          1501,
+          3000
+        ],
+        "n": 1,
+        "median_seconds": 7554.72193
+      }
+    ]
+  },
+  "wepp_dcc52a6": {
+    "n": 112,
+    "size_groups": 52,
+    "hills_channels_spearman": 0.9975792057573539,
+    "seconds_per_hillslope_year_q50_q90_q95_max": [
+      0.02800632766881029,
+      0.041561829575221254,
+      0.046979824273794,
+      0.1363088
+    ],
+    "models": {
+      "years": {
+        "log_coefficients": [
+          -1.7218182019541752,
+          1.5217287280362246
+        ],
+        "log_r2": 0.26594748440405236,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          4.294846195606052,
+          15.94336527653873
+        ]
+      },
+      "years_hills": {
+        "log_coefficients": [
+          -2.8836140931895953,
+          0.8867569045521568,
+          0.966473532687511
+        ],
+        "log_r2": 0.9898597015278205,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.1483044633727206,
+          1.2764404057207284
+        ]
+      },
+      "years_channels": {
+        "log_coefficients": [
+          -2.0207403137902906,
+          0.9022083269500074,
+          0.9414687256687464
+        ],
+        "log_r2": 0.9923659191965079,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.1533926009240054,
+          1.280523491263075
+        ]
+      },
+      "years_combined_size": {
+        "log_coefficients": [
+          -3.2257749485479517,
+          0.8932337597943265,
+          0.9611858664387976
+        ],
+        "log_r2": 0.9915711391453398,
+        "held_out_size_group_median_error_factor_q50_q90": [
+          1.150021741501384,
+          1.2582246788446358
+        ]
+      }
+    },
+    "100_year_bins": [
+      {
+        "hillslope_range": [
+          1,
+          100
+        ],
+        "n": 49,
+        "median_seconds": 42.910136
+      },
+      {
+        "hillslope_range": [
+          101,
+          300
+        ],
+        "n": 22,
+        "median_seconds": 502.5637805
+      },
+      {
+        "hillslope_range": [
+          301,
+          700
+        ],
+        "n": 16,
+        "median_seconds": 955.4235994999999
+      },
+      {
+        "hillslope_range": [
+          701,
+          1500
+        ],
+        "n": 9,
+        "median_seconds": 2652.234193
+      }
+    ]
+  }
+}

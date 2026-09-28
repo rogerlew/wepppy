@@ -4380,3 +4380,5 @@ If this tracker format isn't working or you have suggestions:
   with final targeted conformance checks passing. Code `1003fe9ad`.
 
 - Completed 2026-09-28: [7777 single-file soil uploads](docs/work-packages/20260928_single_input_7777/package.md).
+
+- Active: [Watershed runtime budget](docs/work-packages/20260928_watershed_timeout_scaling/package.md).
