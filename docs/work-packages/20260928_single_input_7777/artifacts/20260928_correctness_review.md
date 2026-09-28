@@ -81,3 +81,15 @@ browse/download/archive paths. No observability exception is requested. Highest
 supported claim at review time: implemented and locally executed with consumed
 artifact verification; global regression/archive completion and deployment remain
 separately identified above.
+
+## Owner archive follow-up
+
+The actual archive/restore completed successfully after review; retained source
+metadata and bytes/hash match. See `20260928_archive_acceptance.json`. The broad
+regression result remains pending. No further production edits followed review.
+
+## Owner final gate completion
+
+Full regression completed: 9892 passed, 99 skipped, 12 subtests passed, exit 0.
+Archive/restore, frontend, stub completeness, exception and docs gates passed.
+All closeout conditions are satisfied; no production changes followed review.

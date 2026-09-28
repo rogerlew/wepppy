@@ -761,7 +761,7 @@ The `h0_max_om` parameter in migration methods filters out the first horizon if 
 - [wepppy.soils.ssurgo](../../../soils/README.md) - SSURGO data acquisition and WEPP file generation
 - [wepppy.wepp.soils.horizon_mixin](../horizon_mixin.py) - Erodibility and conductivity calculations
 - [wepppy.wepp.soils.soilsdb](../soilsdb/) - Pre-built WEPP soil library
-- [wepppy.nodb.core.soils](../../../nodb/core/README.md#soils-controller) - Soils NoDb controller
+- [wepppy.nodb.core.soils](../../../nodb/core/soils.py) - Soils NoDb controller
 
 ### Scientific References
 - Saxton, K.E., Rawls, W.J. (2006). "Soil Water Characteristic Estimates by Texture and Organic Matter for Hydrologic Solutions." *Soil Science Society of America Journal*, 70(5), 1569-1578.

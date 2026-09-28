@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-09-28T19:42:37Z`
+- Generated (UTC): `2026-09-28T19:43:40Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -35,7 +35,15 @@
 
 ## Changed Files
 
-_No changed-file analysis available (base ref missing or no analyzable files changed)._
+- Files analyzed: `5`; highest severity red: `1`, yellow: `0`; worsened metric entries: `5` (exceptions: `0`, actionable: `5`)
+
+| File | Lang | Highest | Key Metric Deltas |
+| --- | --- | --- | --- |
+| `tests/nodb/test_single_input_artifacts.py` | `python` | `green` | python_file_sloc 144->150 (worsened, green)<br>python_function_len 65->65 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/nodb/test_single_input_sources.py` | `python` | `green` | python_file_sloc 165->165 (unchanged, green)<br>python_function_len 15->15 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/wepp/test_single_input_soil_formats.py` | `python` | `green` | python_file_sloc 160->185 (worsened, green)<br>python_function_len 33->33 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/wepp/single_input.py` | `python` | `green` | python_file_sloc 190->195 (worsened, green)<br>python_function_len 60->65 (worsened, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/wepp/soils/utils/wepp_soil_util.py` | `python` | `red` | python_file_sloc 1115->1116 (worsened, yellow)<br>python_function_len 202->202 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
 
 ## Hotspots (Current Tree)
 
@@ -108,3 +116,10 @@ _No entries._
 - This report is observe-only: it does not block merges.
 - Use changed-file deltas to spot opportunistic cleanup candidates.
 - Prefer incremental reductions when touching hotspot files.
+
+## Amendment disposition
+
+The existing WSU parser hotspot is unchanged; the preserving writer adds one
+field-order branch. Validator growth is five lines for explicit 7777 hydraulics.
+Keep these localized branches rather than refactor unrelated parsing. Radon is
+unavailable on the host; complexity observations are partial and non-blocking.

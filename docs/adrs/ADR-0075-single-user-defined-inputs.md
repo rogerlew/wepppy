@@ -3,7 +3,7 @@
 ## Status
 
 Accepted product direction, 2026-09-25; independent reviews and local native
-acceptance passed for SUDI-01 and the SUDI-02 format amendment. Not deployed.
+acceptance passed for SUDI-01, SUDI-02 and SUDI-03. Not deployed.
 
 ## Decision and rationale
 
@@ -75,4 +75,5 @@ On 2026-09-28 the operator requested single-file 7777 uploads. Admit its native
 eight-field header, ten-field layers, and profile-anisotropy restrictive record.
 Preserve version and explicit values across all hillslopes/OFEs and compatible
 modifiers. Reject migration to 7778 as it adds a field the user did not supply.
-Implementation/native acceptance is pending; deployment remains separate.
+Implementation and local native acceptance passed on 2026-09-28, including the
+operator-supplied file through 32 OFEs; deployment remains separate.

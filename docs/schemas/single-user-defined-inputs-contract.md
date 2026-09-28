@@ -1,8 +1,8 @@
 # Single User-Defined landuse and soil inputs
 
 Status: operator-approved, independently reviewed and verified locally.
-SUDI-01 was approved 2026-09-25; SUDI-02 soil-format reviews passed 2026-09-26.
-Deployment remains separate. Amendments: SUDI-01 and SUDI-02. This contract composes Builder, landuse, soil, watershed,
+SUDI-01 was approved 2026-09-25; SUDI-02 soil-format reviews passed 2026-09-26; SUDI-03 passed 2026-09-28.
+Deployment remains separate. Amendments: SUDI-01, SUDI-02 and SUDI-03. This contract composes Builder, landuse, soil, watershed,
 feature activation and WEPP preparation only; it does not advance their unrelated
 work packages. See [ADR-0075](../adrs/ADR-0075-single-user-defined-inputs.md).
 
@@ -91,7 +91,7 @@ Validation must use the exact bytes later published.
 
 Supported formats are management 98.4 and soils 2006, 2006.2, 7777, 7778, and 9002.
 SUDI-03 adds 7777 at the operator’s request on 2026-09-28; implementation
-conformance is pending. Existing acceptance and source-lifecycle rules apply.
+and local native acceptance are verified. Existing acceptance and source-lifecycle rules apply.
 Soil-format amendment SUDI-02 is operator-approved and verified through native
 artifact acceptance; deployment remains separate. Reject management
 2016.3: the pinned native reader ignores modern rcc/usinrco/usrilco fields even
