@@ -4381,4 +4381,6 @@ If this tracker format isn't working or you have suggestions:
 
 - Completed 2026-09-28: [7777 single-file soil uploads](docs/work-packages/20260928_single_input_7777/package.md).
 
-- Active: [Watershed runtime budget](docs/work-packages/20260928_watershed_timeout_scaling/package.md).
+- Completed 2026-09-28: [Watershed runtime budget](docs/work-packages/20260928_watershed_timeout_scaling/package.md).
+  Implementation `aa2d1cd2a`; full suite 9,977 passed / 99 skipped; live Redis
+  validation and independent reviews passed. Deployment separate.

@@ -2,7 +2,7 @@
 
 ## Status and provenance
 
-Accepted direction, 2026-09-28; implementation pending. Decision venue: this
+Accepted, 2026-09-28. Implemented in `aa2d1cd2a`. Decision venue: this
 Codex/operator conversation (America/Los_Angeles). Participants: operator and
 Codex. Decision owner: operator (“let's implement the year plus hillslopes timeout
 please”). Implementer: Codex. Existing session commit authority applies.

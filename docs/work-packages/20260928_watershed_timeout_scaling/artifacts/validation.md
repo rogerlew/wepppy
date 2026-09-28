@@ -30,13 +30,17 @@ contract; a new native simulation is not necessary to validate unchanged model c
 - Scoped package, contract, ADR and RQ README document lint: passes.
 - `git diff --check`: passes.
 - Broad-exception changed-file enforcement: passes, zero new handlers.
-- Code-quality observability completed in observe-only mode; local `radon`
-  unavailable and ancestor-to-HEAD scan excludes uncommitted implementation.
-  No complexity gate is claimed. The helper is bounded and pipeline edits small.
+- Code-quality observability rerun against implementation `aa2d1cd2a`: helper
+  58 source lines / longest function 25 lines (green); pipeline 929→937 source
+  lines / longest function 352→354 lines (existing red band). The two entry
+  lines preserve existing orchestration structure rather than bundling a graph
+  refactor. Local `radon` unavailable; no cyclomatic-complexity claim is made.
 - Final correctness and security review artifacts: approved, no unresolved findings.
 
 `wctl run-pytest tests/rq -q --maxfail=1`: 1,216 passed, 29 skipped in 149 seconds.
-Full repository regression is pending.
+`wctl run-pytest tests --maxfail=1`: **9,977 passed, 99 skipped**, 3,190 warnings
+in 2,460.42 seconds (41 minutes). It started before the final bounded-reader
+correction; the 98 focused and 1,216 RQ checks above ran after that correction.
 
 ## Limits
 
@@ -44,3 +48,6 @@ This allowance is an empirical policy, not a runtime guarantee. Existing jobs ke
 their saved timeout. Timeout subprocess cleanup remains a separate known issue.
 No changes to native outputs, single-storm limits, other stage budgets or admission
 controls were part of this implementation.
+
+Implementation commit: `aa2d1cd2a`. The generated management JSON fixture was
+restored after tests. Unrelated `docs/usage-reports/` work was left untouched.

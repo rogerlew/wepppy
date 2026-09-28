@@ -14,8 +14,9 @@ No-prep executes checked-out native inputs, so saved controller counts may diffe
 - [x] Operator approved empirical years × hillslopes budget.
 - [x] Commit independently reviewed contract ancestor (`728965382`).
 - [x] Implement policy, metadata and four enqueue paths; add regression tests.
-- [ ] Verify real serialized RQ jobs/job tree, focused/broad tests and reviews.
-- [ ] Update tracker, close plan and commit; deployment separate.
+- [x] Verify real serialized RQ jobs/job tree, focused/broad tests and reviews.
+- [x] Update tracker and close plan; implementation committed as `aa2d1cd2a`;
+  final documentation closeout committed separately. Deployment remains separate.
 
 ## Surprises & Discoveries
 
@@ -63,4 +64,9 @@ code affects new enqueue only; do not modify already stored job timeouts.
 
 Implemented and wired. Focused tests: 98 passed. Four real Redis graphs saved
 27-hour budgets with unchanged source hashes, fork callbacks and child trees;
-41 disposable job records removed. Final reviews approved. Full suite pending.
+41 disposable job records removed. Final reviews approved. Full suite: 9,977
+passed / 99 skipped in 41 minutes; final RQ suite: 1,216 passed / 29 skipped.
+No production changes. Contract WRT-01 and ADR-0076 remain the durable authority.
+
+Closeout 2026-09-28: all gates completed; retained validation evidence and moved
+this plan to completed. Deployment and retries remain outside the work package.

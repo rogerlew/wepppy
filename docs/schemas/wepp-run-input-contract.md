@@ -46,7 +46,7 @@ Implementation conformance is pending the SUDI-01 checkpoint and validation.
 
 ## Continuous watershed runtime budget (WRT-01)
 
-Operator approved 2026-09-28; implementation pending. Continuous watershed child
+Operator approved 2026-09-28. Continuous watershed child
 jobs use `3600 * max(12, ceil(years * hillslopes / 72000))` seconds: equivalently
 0.05 seconds per hillslope-year, rounded up to whole hours with a 12-hour floor.
 Preserve a larger explicitly supplied pipeline timeout rather than reduce it.
