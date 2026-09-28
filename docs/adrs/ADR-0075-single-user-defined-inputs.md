@@ -68,3 +68,11 @@ headers for both 2006 versions. Uploaded 9002 adjustment settings remain supplie
 model inputs; disabling WEPPcloud Disturbed does not erase native file settings.
 No shared catalog parameterization, numerical defaults, or formulas change.
 The SUDI-02 canonical contract defines the validation bounds and acceptance.
+
+## SUDI-03: 7777 soil-format amendment
+
+On 2026-09-28 the operator requested single-file 7777 uploads. Admit its native
+eight-field header, ten-field layers, and profile-anisotropy restrictive record.
+Preserve version and explicit values across all hillslopes/OFEs and compatible
+modifiers. Reject migration to 7778 as it adds a field the user did not supply.
+Implementation/native acceptance is pending; deployment remains separate.

@@ -4378,3 +4378,5 @@ If this tracker format isn't working or you have suggestions:
   and verified restarted worker overlap/content rejection plus named recovery.
   Final correctness/security PASS; main full suite 8,971 passed / 99 skipped,
   with final targeted conformance checks passing. Code `1003fe9ad`.
+
+- Active: [7777 single-file soil uploads](docs/work-packages/20260928_single_input_7777/package.md).

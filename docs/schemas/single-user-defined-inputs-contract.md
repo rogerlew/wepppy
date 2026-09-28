@@ -89,7 +89,9 @@ invalid UTF-8 input; accept UTF-8 BOM and CRLF. Maximum 100,000 physical lines,
 16,384 bytes per line, and 64 characters per numeric token bound parsing work.
 Validation must use the exact bytes later published.
 
-Supported formats are management 98.4 and soils 2006, 2006.2, 7778, and 9002.
+Supported formats are management 98.4 and soils 2006, 2006.2, 7777, 7778, and 9002.
+SUDI-03 adds 7777 at the operator’s request on 2026-09-28; implementation
+conformance is pending. Existing acceptance and source-lifecycle rules apply.
 Soil-format amendment SUDI-02 is operator-approved and verified through native
 artifact acceptance; deployment remains separate. Reject management
 2016.3: the pinned native reader ignores modern rcc/usinrco/usrilco fields even
@@ -130,6 +132,15 @@ rock), and a three-field restrictive record (flag, anisotropy, conductivity).
 The pinned native reader consumes `avke` for both versions; eight-field 2006.2
 headers are rejected rather than guessing the missing value.
 
+Version 7777 requires eight soil-header fields and exactly ten layer fields:
+depth, density, conductivity, field capacity, wilting point, sand, clay, organic
+matter, CEC, rock. Density must be positive, conductivity nonnegative, and
+0 <= wilting point <= field capacity <= 1. Its three-field restrictive record
+is flag, profile anisotropy, conductivity, with nonnegative numeric values.
+Preserve these supplied values and version through single/MOFE preparation and
+compatible modifiers; do not add per-layer anisotropy, infer avke, or migrate
+to 7778. This admits the native superuser layout without hydraulic prediction.
+
 Versions 7778 and 9002 require eight soil-header fields and eleven base layer
 fields, including positive density, nonnegative conductivity/anisotropy,
 0 <= wilting point <= field capacity <= 1, and nonnegative CEC.
@@ -152,7 +163,11 @@ This prevents comments between records from disrupting native reads that do not
 skip comments. Prepared files put modifier provenance comments before the
 required free-text comment record, where the native reader skips comments.
 Reject missing/extra fields, four-field restrictive records, trailing content,
-non-finite or nonrepresentable values and inputs invoking silent numeric repair.
+non-finite or nonrepresentable values and inputs invoking silent WEPPcloud parser
+numeric repair. Preservation refers to source and generated input fields; native
+WEPP calculations and reader limits remain unchanged (including its 1800 mm
+soil-depth cap). A deeper valid source remains admissible and is not rewritten
+by WEPPcloud solely to match that native internal limit.
 Preserve source version, `avke`, `ksflag`, explicit restrictive values and all
 9002 hydraulic values through synthesis and preparation, except fields changed by
 explicit compatible modifiers. Do not estimate missing values, convert versions,
