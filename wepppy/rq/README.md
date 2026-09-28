@@ -26,6 +26,21 @@
   overlapping submission.
 - **Timeouts & observability.** Most jobs share a 12-hour timeout (43 200 s) to accommodate large WEPP runs. Modules fall back to deterministic logging (`cligen.log`, `render_deval_*.stderr`, etc.) so operators can debug failures outside of Redis.
 
+Continuous watershed jobs receive an allowance of 0.05 seconds per simulation
+year per hillslope, rounded up to whole hours, with a 12-hour minimum. Any larger
+existing pipeline allowance is preserved. For example, 1,000 years over 1,908
+hillslopes receives 27 hours; this is an allowance, not a runtime prediction.
+The full and watershed-only workflows both apply this policy. No-preparation
+workflows read workload from the checked-out `wepp/runs/pw0.run`, so newer saved
+settings cannot shorten that artifact's budget. Invalid workload fails before
+child submission. Single-storm, hillslope and preparation limits are unchanged.
+
+Operators can inspect the child job's `timeout` and `meta["watershed_timeout"]`
+for years, hillslopes, source, binary and policy version. Existing queued or
+failed jobs retain their stored timeout; automatic retry is not introduced.
+See [WRT-01](../../docs/schemas/wepp-run-input-contract.md#continuous-watershed-runtime-budget-wrt-01)
+and [ADR-0076](../../docs/adrs/ADR-0076-watershed-runtime-budget.md).
+
 ## Module Guide
 | Module | Primary entry points | Responsibility |
 | --- | --- | --- |
@@ -170,7 +185,7 @@ injectable controller state machine, but not its durable-store, Kubernetes API,
 or authenticated HTTP deployment adapters. Keep `kubernetes-job` disabled until
 the separately reviewed deployment supplies and operates those controls.
 
-- **Task structure.** Follow the established pattern: resolve `job = get_current_job()`, compute a status channel (`f"{runid}:panel"`), call `StatusMessenger.publish` for STARTED/COMPLETED/EXCEPTION, and `raise` so the worker records the failure. Timeouts default to 12 hours—set `timeout=TIMEOUT` when enqueuing child jobs.
+- **Task structure.** Follow the established pattern: resolve `job = get_current_job()`, compute a status channel (`f"{runid}:panel"`), call `StatusMessenger.publish` for STARTED/COMPLETED/EXCEPTION, and `raise` so the worker records the failure. Timeouts default to 12 hours—set `timeout=TIMEOUT` for ordinary children. Continuous watershed leaves use `watershed_timeout_options` at pipeline entry, before any enqueue; preserve its metadata when adding fork lineage.
 - **RedisPrep timestamps.** When a task materially advances a `TaskEnum`, call `prep.remove_timestamp(...)` just before the work starts and `prep.timestamp(...)` once it finishes. This keeps the dashboard in sync and prevents accidental short-circuiting the next time the run resumes.
 - **Job dependencies.** Parent tasks (batch, omni, project) should save child job ids in `job.meta['jobs:{order},runid:{child_runid}] = child_job.id`. The ordering string is arbitrary but should remain stable so `cancel_job` and `job_info` can display the tree predictably.
 - **Dependency graph automation.** When editing enqueue sites or dependency edges (`wepppy/rq/*.py`, `wepppy/microservices/rq_engine/*`, or rq-initiated route handlers), run `wctl check-rq-graph` before handoff. Regenerate artifacts with `python tools/check_rq_dependency_graph.py --write` when drift is reported.

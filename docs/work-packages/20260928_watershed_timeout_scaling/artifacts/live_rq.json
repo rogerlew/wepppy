@@ -1,0 +1,1030 @@
+{
+  "queue": "wrt-validation-efec3425cb5f43968e3f282c296d3b36",
+  "uid": 1000,
+  "gid": 993,
+  "graphs_executed": false,
+  "cases": [
+    {
+      "pipeline": "enqueue_wepp_pipeline",
+      "parent_id": "faef607a-37c2-4139-a895-ae3ff089436e",
+      "source_sha256_before": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "source_sha256_after": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "leaf_id": "7faca372-665c-458f-a2ba-eb82cb2c0eda",
+      "timeout": 97200,
+      "meta": {
+        "watershed_timeout": {
+          "policy": "WRT-01",
+          "years": 1000,
+          "hillslopes": 1908,
+          "seconds_per_hillslope_year": 0.05,
+          "timeout_seconds": 97200,
+          "workload_source": "controllers",
+          "wepp_bin": "wepp_dcc52a6"
+        },
+        "fork_failure": {
+          "target_runid": "wrt-validation",
+          "source_runid": "source"
+        }
+      },
+      "jobs": [
+        {
+          "id": "a4390d28-35ce-4769-b89d-537be4f0ec84",
+          "func": "wepppy.rq.wepp_rq._prep_slopes_rq",
+          "timeout": 14400,
+          "dependencies": []
+        },
+        {
+          "id": "cf2b47c3-6630-416c-821c-d1fada1b56db",
+          "func": "wepppy.rq.wepp_rq._prep_managements_rq",
+          "timeout": 14400,
+          "dependencies": []
+        },
+        {
+          "id": "d3a44a46-8ab1-4d9d-a47f-ddfde66b8a61",
+          "func": "wepppy.rq.wepp_rq._prep_soils_rq",
+          "timeout": 14400,
+          "dependencies": []
+        },
+        {
+          "id": "25765421-e4dd-40f1-b0e6-010f4206e9ec",
+          "func": "wepppy.rq.wepp_rq._prep_climates_rq",
+          "timeout": 14400,
+          "dependencies": []
+        },
+        {
+          "id": "5cba506a-36cd-4c23-b712-8ba8d69861dd",
+          "func": "wepppy.rq.wepp_rq._prep_remaining_rq",
+          "timeout": 14400,
+          "dependencies": [
+            "b'rq:job:a4390d28-35ce-4769-b89d-537be4f0ec84'",
+            "b'rq:job:25765421-e4dd-40f1-b0e6-010f4206e9ec'",
+            "b'rq:job:d3a44a46-8ab1-4d9d-a47f-ddfde66b8a61'",
+            "b'rq:job:cf2b47c3-6630-416c-821c-d1fada1b56db'"
+          ]
+        },
+        {
+          "id": "364e16a3-d7b6-4aab-b3bf-069711a42723",
+          "func": "wepppy.rq.wepp_rq._run_hillslopes_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:5cba506a-36cd-4c23-b712-8ba8d69861dd'"
+          ]
+        },
+        {
+          "id": "655f1a5f-5747-47e3-86ab-ba64003e25b2",
+          "func": "wepppy.rq.wepp_rq._prep_watershed_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:364e16a3-d7b6-4aab-b3bf-069711a42723'"
+          ]
+        },
+        {
+          "id": "454ccf87-1f37-4bcc-9035-e680f1953b95",
+          "func": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:364e16a3-d7b6-4aab-b3bf-069711a42723'"
+          ]
+        },
+        {
+          "id": "9e7b60ca-83e3-4fae-87a0-57a4be782549",
+          "func": "wepppy.rq.wepp_rq._build_totalwatsed3_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:454ccf87-1f37-4bcc-9035-e680f1953b95'"
+          ]
+        },
+        {
+          "id": "7faca372-665c-458f-a2ba-eb82cb2c0eda",
+          "func": "wepppy.rq.wepp_rq.run_watershed_rq",
+          "timeout": 97200,
+          "dependencies": [
+            "b'rq:job:655f1a5f-5747-47e3-86ab-ba64003e25b2'"
+          ]
+        },
+        {
+          "id": "5bcdbfdc-b65e-4ef9-8e39-06000c5009e2",
+          "func": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:7faca372-665c-458f-a2ba-eb82cb2c0eda'"
+          ]
+        },
+        {
+          "id": "4e81e6b5-7f0c-4ed7-a867-be13f0b9c9ac",
+          "func": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:454ccf87-1f37-4bcc-9035-e680f1953b95'",
+            "b'rq:job:7faca372-665c-458f-a2ba-eb82cb2c0eda'"
+          ]
+        },
+        {
+          "id": "86b3db6d-e8b3-4f0f-a0f2-1836bb34a3e0",
+          "func": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:7faca372-665c-458f-a2ba-eb82cb2c0eda'"
+          ]
+        },
+        {
+          "id": "7dd3c2a7-0e79-4e29-a6f4-38c19868a2ff",
+          "func": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:454ccf87-1f37-4bcc-9035-e680f1953b95'",
+            "b'rq:job:5bcdbfdc-b65e-4ef9-8e39-06000c5009e2'"
+          ]
+        },
+        {
+          "id": "d58fea5d-679c-42b7-be6d-2e1a0d6eec04",
+          "func": "wepppy.rq.wepp_rq._analyze_return_periods_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:7dd3c2a7-0e79-4e29-a6f4-38c19868a2ff'",
+            "b'rq:job:9e7b60ca-83e3-4fae-87a0-57a4be782549'"
+          ]
+        },
+        {
+          "id": "d9ea2422-4a79-4293-9ed1-e016ed936b1e",
+          "func": "wepppy.rq.wepp_rq._log_complete_rq",
+          "timeout": 180,
+          "dependencies": [
+            "b'rq:job:86b3db6d-e8b3-4f0f-a0f2-1836bb34a3e0'",
+            "b'rq:job:4e81e6b5-7f0c-4ed7-a867-be13f0b9c9ac'",
+            "b'rq:job:9e7b60ca-83e3-4fae-87a0-57a4be782549'",
+            "b'rq:job:7dd3c2a7-0e79-4e29-a6f4-38c19868a2ff'",
+            "b'rq:job:454ccf87-1f37-4bcc-9035-e680f1953b95'",
+            "b'rq:job:5bcdbfdc-b65e-4ef9-8e39-06000c5009e2'",
+            "b'rq:job:d58fea5d-679c-42b7-be6d-2e1a0d6eec04'"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "faef607a-37c2-4139-a895-ae3ff089436e",
+        "runid": "wrt-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "0": [
+            {
+              "job_id": "a4390d28-35ce-4769-b89d-537be4f0ec84",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_slopes_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "cf2b47c3-6630-416c-821c-d1fada1b56db",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_managements_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "d3a44a46-8ab1-4d9d-a47f-ddfde66b8a61",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_soils_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "25765421-e4dd-40f1-b0e6-010f4206e9ec",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_climates_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "5cba506a-36cd-4c23-b712-8ba8d69861dd",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_remaining_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "1": [
+            {
+              "job_id": "364e16a3-d7b6-4aab-b3bf-069711a42723",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "2": [
+            {
+              "job_id": "655f1a5f-5747-47e3-86ab-ba64003e25b2",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_watershed_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "454ccf87-1f37-4bcc-9035-e680f1953b95",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "9e7b60ca-83e3-4fae-87a0-57a4be782549",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "3": [
+            {
+              "job_id": "7faca372-665c-458f-a2ba-eb82cb2c0eda",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq.run_watershed_rq('wrt-validation', wepp_bin='wepp_dcc52a6')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "4": [
+            {
+              "job_id": "5bcdbfdc-b65e-4ef9-8e39-06000c5009e2",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "4e81e6b5-7f0c-4ed7-a867-be13f0b9c9ac",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "86b3db6d-e8b3-4f0f-a0f2-1836bb34a3e0",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "7dd3c2a7-0e79-4e29-a6f4-38c19868a2ff",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "d58fea5d-679c-42b7-be6d-2e1a0d6eec04",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "6": [
+            {
+              "job_id": "d9ea2422-4a79-4293-9ed1-e016ed936b1e",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pipeline": "enqueue_wepp_noprep_pipeline",
+      "parent_id": "e1d83356-bcf7-46dd-9afd-b3e7996005b1",
+      "source_sha256_before": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "source_sha256_after": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "leaf_id": "cbbaebb8-a18f-4551-95aa-b51f80476f31",
+      "timeout": 97200,
+      "meta": {
+        "watershed_timeout": {
+          "policy": "WRT-01",
+          "years": 1000,
+          "hillslopes": 1908,
+          "seconds_per_hillslope_year": 0.05,
+          "timeout_seconds": 97200,
+          "workload_source": "prepared_run_file",
+          "wepp_bin": "wepp_dcc52a6"
+        },
+        "fork_failure": {
+          "target_runid": "wrt-validation",
+          "source_runid": "source"
+        }
+      },
+      "jobs": [
+        {
+          "id": "47240ec5-4c55-45ca-857d-39e2a8802506",
+          "func": "wepppy.rq.wepp_rq._run_hillslopes_rq",
+          "timeout": 43200,
+          "dependencies": []
+        },
+        {
+          "id": "3753a9e0-6246-4edc-bb9f-ad22fb44d902",
+          "func": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:47240ec5-4c55-45ca-857d-39e2a8802506'"
+          ]
+        },
+        {
+          "id": "d90f3701-fcea-4a43-96fd-f51b1e681275",
+          "func": "wepppy.rq.wepp_rq._build_totalwatsed3_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:3753a9e0-6246-4edc-bb9f-ad22fb44d902'"
+          ]
+        },
+        {
+          "id": "cbbaebb8-a18f-4551-95aa-b51f80476f31",
+          "func": "wepppy.rq.wepp_rq.run_watershed_rq",
+          "timeout": 97200,
+          "dependencies": [
+            "b'rq:job:47240ec5-4c55-45ca-857d-39e2a8802506'"
+          ]
+        },
+        {
+          "id": "6d14de01-9ae4-4bae-8bed-29d3e23054de",
+          "func": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:cbbaebb8-a18f-4551-95aa-b51f80476f31'"
+          ]
+        },
+        {
+          "id": "e765d33d-ad41-4fe5-a2b0-075d0a36fead",
+          "func": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:cbbaebb8-a18f-4551-95aa-b51f80476f31'",
+            "b'rq:job:3753a9e0-6246-4edc-bb9f-ad22fb44d902'"
+          ]
+        },
+        {
+          "id": "e44946b4-755c-45f7-aae8-8b5feebaa14b",
+          "func": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:cbbaebb8-a18f-4551-95aa-b51f80476f31'"
+          ]
+        },
+        {
+          "id": "60926e53-f461-4d0a-9c88-f6c0e5219206",
+          "func": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:3753a9e0-6246-4edc-bb9f-ad22fb44d902'",
+            "b'rq:job:6d14de01-9ae4-4bae-8bed-29d3e23054de'"
+          ]
+        },
+        {
+          "id": "390f13d0-27a6-42c8-9f71-7d51f3b6b278",
+          "func": "wepppy.rq.wepp_rq._analyze_return_periods_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:d90f3701-fcea-4a43-96fd-f51b1e681275'",
+            "b'rq:job:60926e53-f461-4d0a-9c88-f6c0e5219206'"
+          ]
+        },
+        {
+          "id": "15a40fa9-09c4-4d34-b806-181288b184a8",
+          "func": "wepppy.rq.wepp_rq._log_complete_rq",
+          "timeout": 180,
+          "dependencies": [
+            "b'rq:job:e765d33d-ad41-4fe5-a2b0-075d0a36fead'",
+            "b'rq:job:3753a9e0-6246-4edc-bb9f-ad22fb44d902'",
+            "b'rq:job:60926e53-f461-4d0a-9c88-f6c0e5219206'",
+            "b'rq:job:d90f3701-fcea-4a43-96fd-f51b1e681275'",
+            "b'rq:job:6d14de01-9ae4-4bae-8bed-29d3e23054de'",
+            "b'rq:job:e44946b4-755c-45f7-aae8-8b5feebaa14b'",
+            "b'rq:job:390f13d0-27a6-42c8-9f71-7d51f3b6b278'"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "e1d83356-bcf7-46dd-9afd-b3e7996005b1",
+        "runid": "wrt-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "1": [
+            {
+              "job_id": "47240ec5-4c55-45ca-857d-39e2a8802506",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "2": [
+            {
+              "job_id": "3753a9e0-6246-4edc-bb9f-ad22fb44d902",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "d90f3701-fcea-4a43-96fd-f51b1e681275",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "3": [
+            {
+              "job_id": "cbbaebb8-a18f-4551-95aa-b51f80476f31",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq.run_watershed_rq('wrt-validation', wepp_bin='wepp_dcc52a6')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "4": [
+            {
+              "job_id": "6d14de01-9ae4-4bae-8bed-29d3e23054de",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "e765d33d-ad41-4fe5-a2b0-075d0a36fead",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "e44946b4-755c-45f7-aae8-8b5feebaa14b",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "60926e53-f461-4d0a-9c88-f6c0e5219206",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "390f13d0-27a6-42c8-9f71-7d51f3b6b278",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "6": [
+            {
+              "job_id": "15a40fa9-09c4-4d34-b806-181288b184a8",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pipeline": "enqueue_watershed_pipeline",
+      "parent_id": "bfd7c277-3557-4a29-a388-133cf8c6e32b",
+      "source_sha256_before": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "source_sha256_after": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "leaf_id": "b5d0439c-99d8-4afc-8f7b-4eb07048b661",
+      "timeout": 97200,
+      "meta": {
+        "watershed_timeout": {
+          "policy": "WRT-01",
+          "years": 1000,
+          "hillslopes": 1908,
+          "seconds_per_hillslope_year": 0.05,
+          "timeout_seconds": 97200,
+          "workload_source": "controllers",
+          "wepp_bin": "wepp_dcc52a6"
+        },
+        "fork_failure": {
+          "target_runid": "wrt-validation",
+          "source_runid": "source"
+        }
+      },
+      "jobs": [
+        {
+          "id": "90290641-66de-4225-9944-d647c6ad7f0c",
+          "func": "wepppy.rq.wepp_rq._prep_watershed_rq",
+          "timeout": 43200,
+          "dependencies": []
+        },
+        {
+          "id": "b5d0439c-99d8-4afc-8f7b-4eb07048b661",
+          "func": "wepppy.rq.wepp_rq.run_watershed_rq",
+          "timeout": 97200,
+          "dependencies": [
+            "b'rq:job:90290641-66de-4225-9944-d647c6ad7f0c'"
+          ]
+        },
+        {
+          "id": "fd975c15-76f3-4f96-89a6-a747032317a8",
+          "func": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:b5d0439c-99d8-4afc-8f7b-4eb07048b661'"
+          ]
+        },
+        {
+          "id": "de4c4c8d-3a01-4bb3-aca1-d594d7606143",
+          "func": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:b5d0439c-99d8-4afc-8f7b-4eb07048b661'"
+          ]
+        },
+        {
+          "id": "8af6ae41-d7d2-4103-a4e8-2f4ec744721c",
+          "func": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:fd975c15-76f3-4f96-89a6-a747032317a8'"
+          ]
+        },
+        {
+          "id": "42ec8bc8-0662-41c2-be33-e1769c5a54b1",
+          "func": "wepppy.rq.wepp_rq._log_complete_rq",
+          "timeout": 180,
+          "dependencies": [
+            "b'rq:job:fd975c15-76f3-4f96-89a6-a747032317a8'",
+            "b'rq:job:8af6ae41-d7d2-4103-a4e8-2f4ec744721c'",
+            "b'rq:job:de4c4c8d-3a01-4bb3-aca1-d594d7606143'"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "bfd7c277-3557-4a29-a388-133cf8c6e32b",
+        "runid": "wrt-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "2": [
+            {
+              "job_id": "90290641-66de-4225-9944-d647c6ad7f0c",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._prep_watershed_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "3": [
+            {
+              "job_id": "b5d0439c-99d8-4afc-8f7b-4eb07048b661",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq.run_watershed_rq('wrt-validation', wepp_bin='wepp_dcc52a6')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "4": [
+            {
+              "job_id": "fd975c15-76f3-4f96-89a6-a747032317a8",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "de4c4c8d-3a01-4bb3-aca1-d594d7606143",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "8af6ae41-d7d2-4103-a4e8-2f4ec744721c",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "6": [
+            {
+              "job_id": "42ec8bc8-0662-41c2-be33-e1769c5a54b1",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation', auto_commit_inputs=True, commit_stage='WEPP watershed pipeline')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pipeline": "enqueue_watershed_noprep_pipeline",
+      "parent_id": "88f96296-952b-4c9e-9784-bf5ce0e195be",
+      "source_sha256_before": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "source_sha256_after": "2448cfe9f78b9591467b3a9c818f0498d6ef67afb7c48dd2f70c88753ee1d4e3",
+      "leaf_id": "d166ff58-17ee-4544-b3f6-5050ee65b364",
+      "timeout": 97200,
+      "meta": {
+        "watershed_timeout": {
+          "policy": "WRT-01",
+          "years": 1000,
+          "hillslopes": 1908,
+          "seconds_per_hillslope_year": 0.05,
+          "timeout_seconds": 97200,
+          "workload_source": "prepared_run_file",
+          "wepp_bin": "wepp_dcc52a6"
+        },
+        "fork_failure": {
+          "target_runid": "wrt-validation",
+          "source_runid": "source"
+        }
+      },
+      "jobs": [
+        {
+          "id": "d166ff58-17ee-4544-b3f6-5050ee65b364",
+          "func": "wepppy.rq.wepp_rq.run_watershed_rq",
+          "timeout": 97200,
+          "dependencies": []
+        },
+        {
+          "id": "ef9a387c-b240-407d-8071-b254d5a75704",
+          "func": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:d166ff58-17ee-4544-b3f6-5050ee65b364'"
+          ]
+        },
+        {
+          "id": "221a30fa-fd01-44dd-b86d-83b8097664bd",
+          "func": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:d166ff58-17ee-4544-b3f6-5050ee65b364'"
+          ]
+        },
+        {
+          "id": "8a59ed78-a928-4014-bd63-27a71e078549",
+          "func": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+          "timeout": 43200,
+          "dependencies": [
+            "b'rq:job:ef9a387c-b240-407d-8071-b254d5a75704'"
+          ]
+        },
+        {
+          "id": "c34231f7-66d9-4095-a5a8-f1a153e456c6",
+          "func": "wepppy.rq.wepp_rq._log_complete_rq",
+          "timeout": 180,
+          "dependencies": [
+            "b'rq:job:221a30fa-fd01-44dd-b86d-83b8097664bd'",
+            "b'rq:job:8a59ed78-a928-4014-bd63-27a71e078549'",
+            "b'rq:job:ef9a387c-b240-407d-8071-b254d5a75704'"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "88f96296-952b-4c9e-9784-bf5ce0e195be",
+        "runid": "wrt-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "3": [
+            {
+              "job_id": "d166ff58-17ee-4544-b3f6-5050ee65b364",
+              "runid": "wrt-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq.run_watershed_rq('wrt-validation', wepp_bin='wepp_dcc52a6')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "4": [
+            {
+              "job_id": "ef9a387c-b240-407d-8071-b254d5a75704",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "221a30fa-fd01-44dd-b86d-83b8097664bd",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "8a59ed78-a928-4014-bd63-27a71e078549",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "6": [
+            {
+              "job_id": "c34231f7-66d9-4095-a5a8-f1a153e456c6",
+              "runid": "wrt-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._log_complete_rq('wrt-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "cleanup_verified": true
+}

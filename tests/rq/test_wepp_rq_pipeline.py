@@ -26,6 +26,8 @@ class _DummyQueue:
         args=(),
         kwargs=None,
         timeout=None,
+        meta=None,
+        on_failure=None,
         depends_on=None,
         job_id=None,
     ):
@@ -36,12 +38,29 @@ class _DummyQueue:
                 "args": args,
                 "kwargs": kwargs,
                 "timeout": timeout,
+                "meta": meta,
+                "on_failure": on_failure,
                 "depends_on": depends_on,
                 "job_id": job_id,
                 "job": job,
             }
         )
         return job
+
+
+
+def _wepp(tmp_path, **overrides):
+    from wepp_runner.wepp_runner import make_watershed_run
+    make_watershed_run(100, [1, 2], str(tmp_path), wepp_bin="wepp_260803")
+    values = dict(runs_dir=str(tmp_path), watershed_instance=SimpleNamespace(sub_n=2))
+    values.update(overrides)
+    return SimpleNamespace(**values)
+
+
+def _climate(**overrides):
+    values = dict(input_years=100, is_single_storm=False)
+    values.update(overrides)
+    return SimpleNamespace(**values)
 
 
 def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
@@ -107,7 +126,7 @@ def test_enqueue_log_complete_tracks_meta_and_kwargs() -> None:
     assert q.calls[0]["kwargs"] == {"auto_commit_inputs": True}
 
 
-def test_enqueue_watershed_noprep_pipeline_skips_loss_grid_without_hillslope_outputs() -> None:
+def test_enqueue_watershed_noprep_pipeline_skips_loss_grid_without_hillslope_outputs(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     status_messages: list[str] = []
@@ -123,13 +142,13 @@ def test_enqueue_watershed_noprep_pipeline_skips_loss_grid_without_hillslope_out
         _post_legacy_arc_export_rq=object(),
         _log_complete_rq=object(),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         wepp_bin="wepp_bin",
         prep_details_on_run_completion=False,
         multi_ofe=False,
         legacy_arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         climate_mode="continuous",
         ss_batch_storms=[],
     )
@@ -154,7 +173,7 @@ def test_enqueue_watershed_noprep_pipeline_skips_loss_grid_without_hillslope_out
     assert parent_job.meta["jobs:6,func:_log_complete_rq"] == final_job.id
 
 
-def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -> None:
+def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -184,7 +203,7 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
         _log_complete_rq=object(),
         ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         multi_ofe=True,
         run_wepp_watershed=False,
         mods=["swat"],
@@ -195,7 +214,7 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
         legacy_arc_export_on_run_completion=False,
         arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         delete_after_interchange=True,  # intentionally opposite of wepp.delete_after_interchange
         is_single_storm=False,
         climate_mode="continuous",
@@ -222,7 +241,7 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
     _assert_depends_on(swat_run_call, [swat_build_call["job"].id])
 
 
-def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_enabled() -> None:
+def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_enabled(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -252,7 +271,7 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
         _log_complete_rq=object(),
         ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         multi_ofe=True,
         run_wepp_watershed=False,
         mods=["swat"],
@@ -263,7 +282,7 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
         legacy_arc_export_on_run_completion=False,
         arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         delete_after_interchange=False,  # intentionally opposite of wepp.delete_after_interchange
         is_single_storm=False,
         climate_mode="continuous",
@@ -293,7 +312,7 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
     )
 
 
-def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
+def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -323,7 +342,7 @@ def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_
         _log_complete_rq=object(),
         ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         multi_ofe=True,
         run_wepp_watershed=True,
         mods=[],
@@ -334,7 +353,7 @@ def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_
         legacy_arc_export_on_run_completion=False,
         arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         is_single_storm=False,
         climate_mode="continuous",
         ss_batch_storms=[],
@@ -364,7 +383,7 @@ def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_
     )
 
 
-def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
+def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -379,13 +398,13 @@ def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup
         _log_complete_rq=object(),
         _prep_watershed_rq=object(),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         wepp_bin="wepp_bin",
         prep_details_on_run_completion=False,
         multi_ofe=True,
         legacy_arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         climate_mode="continuous",
         ss_batch_storms=[],
     )
@@ -409,7 +428,7 @@ def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup
     _assert_depends_on(post_watershed_interchange_call, [cleanup_call["job"].id])
 
 
-def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
+def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -430,7 +449,7 @@ def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_clean
         _log_complete_rq=object(),
         ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         run_wepp_watershed=True,
         multi_ofe=True,
         wepp_bin="wepp_bin",
@@ -439,7 +458,7 @@ def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_clean
         legacy_arc_export_on_run_completion=False,
         arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         is_single_storm=False,
         climate_mode="continuous",
         ss_batch_storms=[],
@@ -469,7 +488,7 @@ def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_clean
     )
 
 
-def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
+def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_cleanup(tmp_path) -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
     tasks = SimpleNamespace(
@@ -483,13 +502,13 @@ def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_
         _post_legacy_arc_export_rq=object(),
         _log_complete_rq=object(),
     )
-    wepp = SimpleNamespace(
+    wepp = _wepp(tmp_path,
         wepp_bin="wepp_bin",
         prep_details_on_run_completion=False,
         multi_ofe=True,
         legacy_arc_export_on_run_completion=False,
     )
-    climate = SimpleNamespace(
+    climate = _climate(
         climate_mode="continuous",
         ss_batch_storms=[],
     )
@@ -565,3 +584,104 @@ def test_enqueue_wepp_prep_only_pipeline_skips_run_and_postrun_jobs() -> None:
         "commit_stage": "WEPP prep-only pipeline",
     }
     assert parent_job.meta["jobs:6,func:_log_prep_complete_rq"] == final_job.id
+
+
+def _timeout_pipeline_inputs(tmp_path, *, single_storm=False, run_watershed=True):
+    from wepppy.rq import wepp_rq as tasks
+    from wepp_runner.wepp_runner import make_watershed_run
+    wepp = _wepp(tmp_path, wepp_bin='wepp_260803', multi_ofe=False,
+                 run_wepp_watershed=run_watershed, mods=[],
+                 prep_details_on_run_completion=False, dss_export_on_run_completion=False,
+                 legacy_arc_export_on_run_completion=False, arc_export_on_run_completion=False)
+    wepp.watershed_instance.sub_n = 1908
+    climate = _climate(input_years=1000, is_single_storm=single_storm,
+                       climate_mode=tasks.ClimateMode.SingleStorm if single_storm else tasks.ClimateMode.Vanilla,
+                       ss_batch_storms=[])
+    make_watershed_run(1000, list(range(1, 1909)), str(tmp_path), wepp_bin='wepp_260803')
+    return wepp, climate, tasks
+
+
+def _call_timeout_pipeline(name, q, parent, wepp, climate, tasks):
+    extra = {'has_hillslope_outputs': True} if name.startswith('enqueue_watershed') else {}
+    return getattr(pipeline, name)(q, parent, 'timeout-test', wepp=wepp, climate=climate,
+                                  tasks=tasks, timeout=43200, **extra)
+
+
+_TIMEOUT_PATHS = ['enqueue_wepp_pipeline', 'enqueue_wepp_noprep_pipeline',
+                  'enqueue_watershed_pipeline', 'enqueue_watershed_noprep_pipeline']
+
+
+@pytest.mark.parametrize('name', _TIMEOUT_PATHS)
+@pytest.mark.parametrize('single_storm', [False, True])
+def test_all_paths_scale_only_continuous_watershed_leaf(tmp_path, name, single_storm):
+    wepp, climate, tasks = _timeout_pipeline_inputs(tmp_path, single_storm=single_storm)
+    if 'noprep' in name:
+        # A checkout can differ from durable settings; never resize or rewrite its inputs.
+        climate.input_years = 1
+        wepp.watershed_instance.sub_n = 1
+    before = (tmp_path / 'pw0.run').read_bytes()
+    q = _DummyQueue(); parent = _make_parent_job()
+    _call_timeout_pipeline(name, q, parent, wepp, climate, tasks)
+    leaf = next(c for c in q.calls if c['func'] is tasks.run_watershed_rq)
+    assert leaf['timeout'] == (43200 if single_storm else 97200)
+    if single_storm:
+        assert leaf['meta'] is None
+    else:
+        budget = leaf['meta']['watershed_timeout']
+        assert (budget['years'], budget['hillslopes']) == (1000, 1908)
+        assert budget['workload_source'] == ('prepared_run_file' if 'noprep' in name else 'controllers')
+    assert all(c['timeout'] in (None, '4h', 43200) for c in q.calls if c is not leaf)
+    assert (tmp_path / 'pw0.run').read_bytes() == before
+
+
+@pytest.mark.parametrize('name', _TIMEOUT_PATHS)
+def test_invalid_workload_fails_before_any_child_or_parent_mutation(tmp_path, name):
+    wepp, climate, tasks = _timeout_pipeline_inputs(tmp_path)
+    if 'noprep' in name:
+        (tmp_path / 'pw0.run').unlink()
+    else:
+        climate.input_years = 0
+    q = _DummyQueue(); parent = _make_parent_job()
+    with pytest.raises((ValueError, FileNotFoundError)):
+        _call_timeout_pipeline(name, q, parent, wepp, climate, tasks)
+    assert q.calls == [] and parent.meta == {} and parent.saves == 0
+
+
+def test_timeout_metadata_preserves_fork_lineage_and_callback(tmp_path):
+    from wepppy.rq.fork_failure import report_fork_failure
+    wepp, climate, tasks = _timeout_pipeline_inputs(tmp_path)
+    q = _DummyQueue(); parent = _make_parent_job()
+    lineage = {'target_runid': 'timeout-test', 'source_runid': 'source-test'}
+    parent.meta['fork_failure'] = lineage.copy()
+    _call_timeout_pipeline('enqueue_watershed_pipeline', q, parent, wepp, climate, tasks)
+    leaf = next(c for c in q.calls if c['func'] is tasks.run_watershed_rq)
+    assert leaf['meta']['watershed_timeout']['timeout_seconds'] == 97200
+    assert leaf['meta']['fork_failure'] == lineage
+    assert leaf['on_failure'] is report_fork_failure
+    assert parent.meta['fork_failure'] == lineage
+
+
+@pytest.mark.parametrize('name', ['enqueue_wepp_pipeline', 'enqueue_wepp_noprep_pipeline'])
+def test_hillslope_only_ignores_absent_continuous_workload(tmp_path, name):
+    wepp, climate, tasks = _timeout_pipeline_inputs(tmp_path, run_watershed=False)
+    del climate.input_years
+    del wepp.watershed_instance
+    (tmp_path / 'pw0.run').unlink()
+    q = _DummyQueue()
+    _call_timeout_pipeline(name, q, _make_parent_job(), wepp, climate, tasks)
+    assert all(c['func'] is not tasks.run_watershed_rq for c in q.calls)
+
+
+@pytest.mark.parametrize('name', _TIMEOUT_PATHS)
+def test_batch_single_storm_preserves_timeout_without_continuous_inputs(tmp_path, name):
+    wepp, climate, tasks = _timeout_pipeline_inputs(tmp_path, single_storm=True)
+    climate.climate_mode = tasks.ClimateMode.SingleStormBatch
+    climate.ss_batch_storms = [{'ss_batch_id': 'storm-a'}]
+    del climate.input_years
+    del wepp.watershed_instance
+    (tmp_path / 'pw0.run').unlink()
+    q = _DummyQueue()
+    _call_timeout_pipeline(name, q, _make_parent_job(), wepp, climate, tasks)
+    leaf = next(c for c in q.calls if c['func'] is tasks.run_ss_batch_watershed_rq)
+    assert leaf['timeout'] == 43200 and leaf['meta'] is None
+    assert all(c['func'] is not tasks.run_watershed_rq for c in q.calls)

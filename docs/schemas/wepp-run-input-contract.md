@@ -48,7 +48,7 @@ Implementation conformance is pending the SUDI-01 checkpoint and validation.
 
 Operator approved 2026-09-28; implementation pending. Continuous watershed child
 jobs use `3600 * max(12, ceil(years * hillslopes / 72000))` seconds: equivalently
-0.05 seconds per hillslope-year, rounded up to whole hours with a12-hour floor.
+0.05 seconds per hillslope-year, rounded up to whole hours with a 12-hour floor.
 Preserve a larger explicitly supplied pipeline timeout rather than reduce it.
 This is an execution allowance, not a scientific parameter or runtime guarantee.
 The empirical rationale is in [the wepp1 assessment](../investigations/20260928_wepp1_watershed_timeout_scaling/assessment.md).
@@ -59,7 +59,7 @@ no-preparation pipelines. For preparation paths use positive integral
 paths, the owned continuous `wepp/runs/pw0.run` is authoritative: use its
 hillslope-count record and final simulation-years record, without rewriting it
 or requiring current saved settings to match. Both legacy master-pass prompt
-and modern omitted-prompt layouts are supported. Read at most1MiB. Missing,
+and modern omitted-prompt layouts are supported. Read at most 1 MiB. Missing,
 malformed, nonpositive or nonintegral workload inputs fail explicitly before
 enqueueing any children; never silently substitute a default workload. Existing
 valid integer-string year representations are accepted.

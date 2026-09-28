@@ -6,6 +6,7 @@ from rq import Queue
 from rq.job import Job
 
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.watershed_timeout import watershed_timeout_options
 
 
 def _delete_after_interchange_enabled(*, wepp: Any, climate: Any) -> bool:
@@ -30,20 +31,21 @@ def _enqueue(
     args: tuple[Any, ...] | list[Any] = (),
     kwargs: Optional[dict[str, Any]] = None,
     timeout: Any = None,
+    meta: Optional[dict[str, Any]] = None,
     depends_on: Any = None,
 ) -> Job:
     child_job_id = new_rq_job_id()
     parent_job.meta[key] = child_job_id
     parent_job.save()
     fork_options: dict[str, Any] = {}
+    if meta is not None:
+        fork_options["meta"] = dict(meta)
     lineage = parent_job.meta.get("fork_failure")
     if isinstance(lineage, dict) and args and args[0] == lineage.get("target_runid"):
         from wepppy.rq.fork_failure import report_fork_failure
 
-        fork_options = {
-            "meta": {"fork_failure": dict(lineage)},
-            "on_failure": report_fork_failure,
-        }
+        fork_options.setdefault("meta", {})["fork_failure"] = dict(lineage)
+        fork_options["on_failure"] = report_fork_failure
     child_job = q.enqueue_call(
         func=func,
         args=args,
@@ -106,6 +108,8 @@ def enqueue_wepp_pipeline(
     tasks: Any,
     timeout: int,
 ) -> Job:
+    watershed_options = (watershed_timeout_options(wepp, climate, timeout, prepared_inputs=False)
+                         if wepp.run_wepp_watershed else {})
     jobs0_hillslopes_prep: list[Job] = []
 
     if wepp.multi_ofe:
@@ -303,7 +307,7 @@ def enqueue_wepp_pipeline(
                     func=tasks.run_watershed_rq,
                     args=[runid],
                     kwargs={"wepp_bin": wepp.wepp_bin},
-                    timeout=timeout,
+                    **watershed_options,
                     depends_on=job2_watershed_prep,
                 )
             )
@@ -558,6 +562,8 @@ def enqueue_wepp_noprep_pipeline(
     tasks: Any,
     timeout: int,
 ) -> Job:
+    watershed_options = (watershed_timeout_options(wepp, climate, timeout, prepared_inputs=True)
+                         if wepp.run_wepp_watershed else {})
     # Bootstrap no-prep contract:
     # - run against current checked-out WEPP inputs under `wepp/runs/`
     # - never enqueue prep/regeneration jobs (for example `_prep_watershed_rq`)
@@ -624,7 +630,7 @@ def enqueue_wepp_noprep_pipeline(
                     func=tasks.run_watershed_rq,
                     args=[runid],
                     kwargs={"wepp_bin": wepp.wepp_bin},
-                    timeout=timeout,
+                    **watershed_options,
                     depends_on=jobs1_hillslopes,
                 )
             )
@@ -775,6 +781,7 @@ def enqueue_watershed_pipeline(
     has_hillslope_outputs: bool,
     publish_status: Callable[[str], None] | None = None,
 ) -> Job:
+    watershed_options = watershed_timeout_options(wepp, climate, timeout, prepared_inputs=False)
     job2_watershed_prep = _enqueue(
         q,
         parent_job,
@@ -809,7 +816,7 @@ def enqueue_watershed_pipeline(
                 func=tasks.run_watershed_rq,
                 args=[runid],
                 kwargs={"wepp_bin": wepp.wepp_bin},
-                timeout=timeout,
+                **watershed_options,
                 depends_on=job2_watershed_prep,
             )
         )
@@ -907,6 +914,7 @@ def enqueue_watershed_noprep_pipeline(
     has_hillslope_outputs: bool,
     publish_status: Callable[[str], None] | None = None,
 ) -> Job:
+    watershed_options = watershed_timeout_options(wepp, climate, timeout, prepared_inputs=True)
     # Bootstrap no-prep contract:
     # - execute watershed using checked-out inputs as-is
     # - do not enqueue `_prep_watershed_rq` in this path
@@ -934,7 +942,7 @@ def enqueue_watershed_noprep_pipeline(
                 func=tasks.run_watershed_rq,
                 args=[runid],
                 kwargs={"wepp_bin": wepp.wepp_bin},
-                timeout=timeout,
+                **watershed_options,
             )
         )
 
