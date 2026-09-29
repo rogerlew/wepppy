@@ -465,6 +465,10 @@ This sequence is the canonical path for diagnosing scenario treatment failures, 
    Contrast clones preserve inherited base `wepp/runs` sidecars such as
    `chan.inp` and `tc.txt`; contrast output switches may create missing
    diagnostic sidecars, but disabled switches do not remove inherited sidecars.
+   `chan.inp` is required when either channel diagnostics or watershed
+   event-by-event output is enabled because WEPP uses its channel selection for
+   both products. Contrast preparation fails before execution if that required
+   sidecar cannot be prepared.
 7. **Reporting**: `contrasts_report()` computes deltas between control and contrast metrics
 
 For cumulative mode, `contrast_id` is the sequential run/sidecar ID (1..N), while the selected hillslope ID is represented in the PSV value list.

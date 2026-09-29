@@ -1,11 +1,15 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-25
-**Active Packages**: 38
+**Last Updated**: 2026-09-28
+**Active Packages**: 39
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active: [Omni contrast EBE sidecar integrity](docs/work-packages/20260928_omni_contrast_ebe_sidecars/package.md)
+— make the EBE-to-`chan.inp` dependency executable, audit inherited WEPP run
+sidecars, and repair the 69 header-only `strategic-eloquence` contrast outputs.
 
 Completed (code/local): [Single-input soil formats](docs/work-packages/20260926_single_input_soil_formats/package.md)
 — uploads support 2006, 2006.2 and 9002 alongside 7778, preserving native records

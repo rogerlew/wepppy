@@ -268,12 +268,11 @@ def _apply_contrast_output_triggers(wepp: Wepp, output_options: Dict[str, bool])
     runs_dir = wepp.runs_dir
 
     chan_inp_path = _join(runs_dir, "chan.inp")
-    if output_options.get("chan_out", False):
+    # WEPP uses chan.inp both for channel diagnostics and to populate the
+    # channel selection iterated by the watershed event-by-event writer.
+    if output_options.get("chan_out", False) or output_options.get("ebe_pw0", False):
         if not _exists(chan_inp_path):
-            try:
-                wepp._prep_channel_input()
-            except Exception as exc:
-                LOGGER.warning("Failed to prepare chan.inp for contrast outputs: %s", exc)
+            wepp._prep_channel_input()
 
     tc_path = _join(runs_dir, "tc.txt")
     if output_options.get("tcr_out", False):

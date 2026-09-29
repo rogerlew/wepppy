@@ -339,6 +339,46 @@ def test_apply_contrast_output_triggers_creates_missing_diagnostics(tmp_path, om
     assert created["chan"] == 1
 
 
+def test_apply_contrast_output_triggers_prepares_chan_input_for_ebe_only(tmp_path, omni_module):
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+
+    class DummyWepp:
+        def __init__(self, runs_dir):
+            self.runs_dir = str(runs_dir)
+
+        def _prep_channel_input(self):
+            (Path(self.runs_dir) / "chan.inp").write_text("outlet-channel", encoding="ascii")
+
+    omni_module._apply_contrast_output_triggers(
+        DummyWepp(runs_dir),
+        {"chan_out": False, "ebe_pw0": True, "tcr_out": False},
+    )
+
+    assert (runs_dir / "chan.inp").read_text(encoding="ascii") == "outlet-channel"
+
+
+def test_apply_contrast_output_triggers_propagates_required_sidecar_failure(
+    tmp_path,
+    omni_module,
+):
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+
+    class DummyWepp:
+        def __init__(self, runs_dir):
+            self.runs_dir = str(runs_dir)
+
+        def _prep_channel_input(self):
+            raise OSError("cannot prepare channel selection")
+
+    with pytest.raises(OSError, match="cannot prepare channel selection"):
+        omni_module._apply_contrast_output_triggers(
+            DummyWepp(runs_dir),
+            {"chan_out": False, "ebe_pw0": True, "tcr_out": False},
+        )
+
+
 def test_apply_contrast_output_triggers_preserves_inherited_sidecars(tmp_path, omni_module):
     runs_dir = tmp_path / "runs"
     runs_dir.mkdir()
@@ -3299,6 +3339,10 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     (wd / "wepp" / "runs").mkdir(parents=True)
     (wd / "wepp" / "output").mkdir(parents=True)
     (wd / "wepp" / "runs" / "H1.run").write_text("run", encoding="ascii")
+    for sidecar in ("chan.inp", "tc.txt", "snow.txt", "wepp_ui.txt"):
+        (wd / "wepp" / "runs" / sidecar).write_text(sidecar, encoding="ascii")
+    (wd / "wepp" / "runs" / "pw0.run").write_text("parent run", encoding="ascii")
+    (wd / "wepp" / "runs" / "pw0.err").write_text("parent log", encoding="ascii")
 
     (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
     (wd / "soils.nodir").write_text("soils", encoding="ascii")
@@ -3369,6 +3413,12 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     assert (new_wd / "soils").is_dir()
     assert list((new_wd / "soils").iterdir()) == []
     assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260803"
+    for sidecar in ("chan.inp", "tc.txt", "snow.txt", "wepp_ui.txt"):
+        inherited = new_wd / "wepp" / "runs" / sidecar
+        assert inherited.is_symlink()
+        assert inherited.read_text(encoding="ascii") == sidecar
+    assert not (new_wd / "wepp" / "runs" / "pw0.run").exists()
+    assert not (new_wd / "wepp" / "runs" / "pw0.err").exists()
 
 def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"
