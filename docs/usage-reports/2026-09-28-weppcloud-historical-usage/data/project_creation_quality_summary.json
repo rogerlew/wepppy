@@ -1,0 +1,66 @@
+{
+  "criterion": "owner_id is present OR retained dot logs contain authenticated access, excluding same-day interface sweeps with at least 10 projects across at least 10 distinct configurations and at least 70 percent configuration uniqueness",
+  "by_year": {
+    "2020": {
+      "raw_database_records": 200,
+      "human_evidenced_projects": 116,
+      "ownerless_without_authenticated_or_artifact_evidence": 84
+    },
+    "2021": {
+      "raw_database_records": 2480,
+      "human_evidenced_projects": 119,
+      "ownerless_without_authenticated_or_artifact_evidence": 2361
+    },
+    "2022": {
+      "raw_database_records": 10559,
+      "human_evidenced_projects": 1184,
+      "ownerless_without_authenticated_or_artifact_evidence": 9375
+    },
+    "2023": {
+      "raw_database_records": 10835,
+      "human_evidenced_projects": 1352,
+      "ownerless_without_authenticated_or_artifact_evidence": 9483
+    },
+    "2024": {
+      "raw_database_records": 6777,
+      "human_evidenced_projects": 2193,
+      "registered_interface_sweep_projects": 677,
+      "ownerless_without_authenticated_or_artifact_evidence": 3907
+    },
+    "2025": {
+      "raw_database_records": 1090,
+      "human_evidenced_projects": 587,
+      "registered_interface_sweep_projects": 503,
+      "ownerless_without_authenticated_or_artifact_evidence": 0
+    },
+    "2026": {
+      "raw_database_records": 1639,
+      "human_evidenced_projects": 1639,
+      "ownerless_without_authenticated_or_artifact_evidence": 0
+    }
+  },
+  "email_domain_sector_by_year": {
+    "2020": {"government": 24, "education": 85, "other": 7},
+    "2021": {"government": 45, "education": 62, "other": 12},
+    "2022": {"government": 368, "education": 575, "other": 241},
+    "2023": {"government": 397, "education": 648, "other": 307},
+    "2024": {"government": 901, "education": 585, "other": 707},
+    "2025": {"government": 98, "education": 338, "other": 151},
+    "2026": {"government": 1074, "education": 176, "other": 389}
+  },
+  "totals": {
+    "raw_database_records": 33580,
+    "human_evidenced_projects": 7190,
+    "owner_backed_projects": 8357,
+    "additional_ownerless_projects_with_authenticated_access": 13,
+    "excluded_ownerless_records": 25210,
+    "excluded_registered_interface_sweep_projects": 1180,
+    "excluded_records_total": 26390
+  },
+  "limitations": [
+    "This is a conservative human-use series, not a count of successful model executions.",
+    "Legitimate historical ownerless projects without a retained authenticated access log are excluded.",
+    "Automated batch or campaign projects with an authenticated owner are included unless they match the narrow cross-interface sweep signature.",
+    "Registered crawler sweeps are evident from September 2024 through February 2025; ownership alone is not sufficient evidence of human use."
+  ]
+}

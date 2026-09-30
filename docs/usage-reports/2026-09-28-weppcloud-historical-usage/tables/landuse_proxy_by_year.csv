@@ -1,0 +1,8 @@
+year,human_evidenced_projects,projects_with_classified_landuse_parquet,classified_coverage_pct,natural_seminatural_dominant,agriculture_dominant,developed_dominant,water_snow_barren_dominant,mixed_agriculture_natural,mixed_or_other,missing_landuse_parquet,unsupported_locale_or_source,unclassified_parquet
+2020,116,1,0.8620689655172413,1,0,0,0,0,0,115,0,0
+2021,119,1,0.8403361344537815,1,0,0,0,0,0,117,1,0
+2022,1184,2,0.16891891891891891,2,0,0,0,0,0,1154,28,0
+2023,1352,188,13.905325443786982,169,15,1,0,0,3,1126,38,0
+2024,2193,1505,68.62745098039215,1304,106,21,47,5,22,605,83,0
+2025,587,253,43.100511073253834,212,24,2,1,0,14,328,6,0
+2026,1639,1166,71.14093959731544,1128,12,15,0,1,10,371,100,2

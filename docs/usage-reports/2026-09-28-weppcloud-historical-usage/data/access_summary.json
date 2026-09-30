@@ -1,0 +1,977 @@
+{
+  "authenticated_user_sector_by_domain": {
+    "commercial_or_other": 65,
+    "government": 149,
+    "nonprofit_or_organization": 9,
+    "personal_email_provider": 215,
+    "university_or_education": 133
+  },
+  "by_month": {
+    "2019-06": {
+      "access_events": 2,
+      "distinct_authenticated_users": 2,
+      "distinct_projects_accessed": 2,
+      "projects_first_seen_in_retained_logs": 2
+    },
+    "2019-07": {
+      "access_events": 4,
+      "distinct_authenticated_users": 0,
+      "distinct_projects_accessed": 2,
+      "projects_first_seen_in_retained_logs": 2
+    },
+    "2019-08": {
+      "access_events": 3,
+      "distinct_authenticated_users": 2,
+      "distinct_projects_accessed": 3,
+      "projects_first_seen_in_retained_logs": 2
+    },
+    "2019-09": {
+      "access_events": 16,
+      "distinct_authenticated_users": 1,
+      "distinct_projects_accessed": 10,
+      "projects_first_seen_in_retained_logs": 10
+    },
+    "2019-10": {
+      "access_events": 85,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 58,
+      "projects_first_seen_in_retained_logs": 56
+    },
+    "2019-11": {
+      "access_events": 29,
+      "distinct_authenticated_users": 1,
+      "distinct_projects_accessed": 22,
+      "projects_first_seen_in_retained_logs": 21
+    },
+    "2019-12": {
+      "access_events": 8,
+      "distinct_authenticated_users": 0,
+      "distinct_projects_accessed": 4,
+      "projects_first_seen_in_retained_logs": 1
+    },
+    "2020-01": {
+      "access_events": 7,
+      "distinct_authenticated_users": 1,
+      "distinct_projects_accessed": 4,
+      "projects_first_seen_in_retained_logs": 3
+    },
+    "2020-02": {
+      "access_events": 6,
+      "distinct_authenticated_users": 0,
+      "distinct_projects_accessed": 2,
+      "projects_first_seen_in_retained_logs": 1
+    },
+    "2020-03": {
+      "access_events": 127,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 44,
+      "projects_first_seen_in_retained_logs": 43
+    },
+    "2020-04": {
+      "access_events": 20,
+      "distinct_authenticated_users": 1,
+      "distinct_projects_accessed": 8,
+      "projects_first_seen_in_retained_logs": 5
+    },
+    "2020-05": {
+      "access_events": 183,
+      "distinct_authenticated_users": 0,
+      "distinct_projects_accessed": 136,
+      "projects_first_seen_in_retained_logs": 120
+    },
+    "2020-06": {
+      "access_events": 299,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 135,
+      "projects_first_seen_in_retained_logs": 16
+    },
+    "2020-07": {
+      "access_events": 253,
+      "distinct_authenticated_users": 1,
+      "distinct_projects_accessed": 111,
+      "projects_first_seen_in_retained_logs": 31
+    },
+    "2020-08": {
+      "access_events": 88,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 54,
+      "projects_first_seen_in_retained_logs": 37
+    },
+    "2020-09": {
+      "access_events": 387,
+      "distinct_authenticated_users": 6,
+      "distinct_projects_accessed": 139,
+      "projects_first_seen_in_retained_logs": 56
+    },
+    "2020-10": {
+      "access_events": 449,
+      "distinct_authenticated_users": 9,
+      "distinct_projects_accessed": 158,
+      "projects_first_seen_in_retained_logs": 64
+    },
+    "2020-11": {
+      "access_events": 1123,
+      "distinct_authenticated_users": 7,
+      "distinct_projects_accessed": 867,
+      "projects_first_seen_in_retained_logs": 787
+    },
+    "2020-12": {
+      "access_events": 1900,
+      "distinct_authenticated_users": 7,
+      "distinct_projects_accessed": 869,
+      "projects_first_seen_in_retained_logs": 48
+    },
+    "2021-01": {
+      "access_events": 542,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 337,
+      "projects_first_seen_in_retained_logs": 34
+    },
+    "2021-02": {
+      "access_events": 1173,
+      "distinct_authenticated_users": 3,
+      "distinct_projects_accessed": 741,
+      "projects_first_seen_in_retained_logs": 73
+    },
+    "2021-03": {
+      "access_events": 3754,
+      "distinct_authenticated_users": 4,
+      "distinct_projects_accessed": 1621,
+      "projects_first_seen_in_retained_logs": 703
+    },
+    "2021-04": {
+      "access_events": 3944,
+      "distinct_authenticated_users": 4,
+      "distinct_projects_accessed": 1479,
+      "projects_first_seen_in_retained_logs": 35
+    },
+    "2021-05": {
+      "access_events": 4738,
+      "distinct_authenticated_users": 8,
+      "distinct_projects_accessed": 1159,
+      "projects_first_seen_in_retained_logs": 16
+    },
+    "2021-06": {
+      "access_events": 2554,
+      "distinct_authenticated_users": 4,
+      "distinct_projects_accessed": 1147,
+      "projects_first_seen_in_retained_logs": 1
+    },
+    "2021-07": {
+      "access_events": 2236,
+      "distinct_authenticated_users": 8,
+      "distinct_projects_accessed": 1115,
+      "projects_first_seen_in_retained_logs": 11
+    },
+    "2021-08": {
+      "access_events": 4028,
+      "distinct_authenticated_users": 5,
+      "distinct_projects_accessed": 1126,
+      "projects_first_seen_in_retained_logs": 10
+    },
+    "2021-09": {
+      "access_events": 2542,
+      "distinct_authenticated_users": 5,
+      "distinct_projects_accessed": 1117,
+      "projects_first_seen_in_retained_logs": 65
+    },
+    "2021-10": {
+      "access_events": 5070,
+      "distinct_authenticated_users": 2,
+      "distinct_projects_accessed": 1253,
+      "projects_first_seen_in_retained_logs": 4
+    },
+    "2021-11": {
+      "access_events": 4867,
+      "distinct_authenticated_users": 7,
+      "distinct_projects_accessed": 1008,
+      "projects_first_seen_in_retained_logs": 4
+    },
+    "2021-12": {
+      "access_events": 4383,
+      "distinct_authenticated_users": 4,
+      "distinct_projects_accessed": 1020,
+      "projects_first_seen_in_retained_logs": 7
+    },
+    "2022-01": {
+      "access_events": 4140,
+      "distinct_authenticated_users": 4,
+      "distinct_projects_accessed": 886,
+      "projects_first_seen_in_retained_logs": 14
+    },
+    "2022-02": {
+      "access_events": 4821,
+      "distinct_authenticated_users": 2,
+      "distinct_projects_accessed": 1038,
+      "projects_first_seen_in_retained_logs": 15
+    },
+    "2022-03": {
+      "access_events": 3717,
+      "distinct_authenticated_users": 2,
+      "distinct_projects_accessed": 890,
+      "projects_first_seen_in_retained_logs": 9
+    },
+    "2022-04": {
+      "access_events": 2302,
+      "distinct_authenticated_users": 5,
+      "distinct_projects_accessed": 815,
+      "projects_first_seen_in_retained_logs": 8
+    },
+    "2022-05": {
+      "access_events": 4150,
+      "distinct_authenticated_users": 12,
+      "distinct_projects_accessed": 922,
+      "projects_first_seen_in_retained_logs": 18
+    },
+    "2022-06": {
+      "access_events": 8836,
+      "distinct_authenticated_users": 5,
+      "distinct_projects_accessed": 909,
+      "projects_first_seen_in_retained_logs": 13
+    },
+    "2022-07": {
+      "access_events": 3677,
+      "distinct_authenticated_users": 6,
+      "distinct_projects_accessed": 900,
+      "projects_first_seen_in_retained_logs": 28
+    },
+    "2022-08": {
+      "access_events": 5006,
+      "distinct_authenticated_users": 6,
+      "distinct_projects_accessed": 898,
+      "projects_first_seen_in_retained_logs": 10
+    },
+    "2022-09": {
+      "access_events": 6385,
+      "distinct_authenticated_users": 8,
+      "distinct_projects_accessed": 927,
+      "projects_first_seen_in_retained_logs": 8
+    },
+    "2022-10": {
+      "access_events": 5793,
+      "distinct_authenticated_users": 9,
+      "distinct_projects_accessed": 953,
+      "projects_first_seen_in_retained_logs": 21
+    },
+    "2022-11": {
+      "access_events": 6595,
+      "distinct_authenticated_users": 13,
+      "distinct_projects_accessed": 1001,
+      "projects_first_seen_in_retained_logs": 25
+    },
+    "2022-12": {
+      "access_events": 9945,
+      "distinct_authenticated_users": 14,
+      "distinct_projects_accessed": 1024,
+      "projects_first_seen_in_retained_logs": 37
+    },
+    "2023-01": {
+      "access_events": 3954,
+      "distinct_authenticated_users": 16,
+      "distinct_projects_accessed": 912,
+      "projects_first_seen_in_retained_logs": 40
+    },
+    "2023-02": {
+      "access_events": 6525,
+      "distinct_authenticated_users": 27,
+      "distinct_projects_accessed": 1065,
+      "projects_first_seen_in_retained_logs": 147
+    },
+    "2023-03": {
+      "access_events": 7416,
+      "distinct_authenticated_users": 16,
+      "distinct_projects_accessed": 959,
+      "projects_first_seen_in_retained_logs": 78
+    },
+    "2023-04": {
+      "access_events": 2842,
+      "distinct_authenticated_users": 33,
+      "distinct_projects_accessed": 1074,
+      "projects_first_seen_in_retained_logs": 198
+    },
+    "2023-05": {
+      "access_events": 6719,
+      "distinct_authenticated_users": 45,
+      "distinct_projects_accessed": 1042,
+      "projects_first_seen_in_retained_logs": 121
+    },
+    "2023-06": {
+      "access_events": 3867,
+      "distinct_authenticated_users": 15,
+      "distinct_projects_accessed": 1034,
+      "projects_first_seen_in_retained_logs": 85
+    },
+    "2023-07": {
+      "access_events": 5141,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 1041,
+      "projects_first_seen_in_retained_logs": 75
+    },
+    "2023-08": {
+      "access_events": 6831,
+      "distinct_authenticated_users": 29,
+      "distinct_projects_accessed": 1159,
+      "projects_first_seen_in_retained_logs": 224
+    },
+    "2023-09": {
+      "access_events": 4111,
+      "distinct_authenticated_users": 34,
+      "distinct_projects_accessed": 1147,
+      "projects_first_seen_in_retained_logs": 240
+    },
+    "2023-10": {
+      "access_events": 3324,
+      "distinct_authenticated_users": 26,
+      "distinct_projects_accessed": 1097,
+      "projects_first_seen_in_retained_logs": 199
+    },
+    "2023-11": {
+      "access_events": 7627,
+      "distinct_authenticated_users": 24,
+      "distinct_projects_accessed": 1080,
+      "projects_first_seen_in_retained_logs": 113
+    },
+    "2023-12": {
+      "access_events": 4426,
+      "distinct_authenticated_users": 11,
+      "distinct_projects_accessed": 1090,
+      "projects_first_seen_in_retained_logs": 68
+    },
+    "2024-01": {
+      "access_events": 3086,
+      "distinct_authenticated_users": 19,
+      "distinct_projects_accessed": 991,
+      "projects_first_seen_in_retained_logs": 76
+    },
+    "2024-02": {
+      "access_events": 8286,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 1203,
+      "projects_first_seen_in_retained_logs": 134
+    },
+    "2024-03": {
+      "access_events": 4987,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 1017,
+      "projects_first_seen_in_retained_logs": 113
+    },
+    "2024-04": {
+      "access_events": 10388,
+      "distinct_authenticated_users": 51,
+      "distinct_projects_accessed": 1201,
+      "projects_first_seen_in_retained_logs": 245
+    },
+    "2024-05": {
+      "access_events": 6480,
+      "distinct_authenticated_users": 45,
+      "distinct_projects_accessed": 1080,
+      "projects_first_seen_in_retained_logs": 169
+    },
+    "2024-06": {
+      "access_events": 3932,
+      "distinct_authenticated_users": 29,
+      "distinct_projects_accessed": 1087,
+      "projects_first_seen_in_retained_logs": 158
+    },
+    "2024-07": {
+      "access_events": 4480,
+      "distinct_authenticated_users": 41,
+      "distinct_projects_accessed": 1343,
+      "projects_first_seen_in_retained_logs": 346
+    },
+    "2024-08": {
+      "access_events": 6110,
+      "distinct_authenticated_users": 32,
+      "distinct_projects_accessed": 1382,
+      "projects_first_seen_in_retained_logs": 330
+    },
+    "2024-09": {
+      "access_events": 5246,
+      "distinct_authenticated_users": 58,
+      "distinct_projects_accessed": 1432,
+      "projects_first_seen_in_retained_logs": 518
+    },
+    "2024-10": {
+      "access_events": 3845,
+      "distinct_authenticated_users": 52,
+      "distinct_projects_accessed": 1207,
+      "projects_first_seen_in_retained_logs": 341
+    },
+    "2024-11": {
+      "access_events": 3833,
+      "distinct_authenticated_users": 44,
+      "distinct_projects_accessed": 1252,
+      "projects_first_seen_in_retained_logs": 386
+    },
+    "2024-12": {
+      "access_events": 3091,
+      "distinct_authenticated_users": 47,
+      "distinct_projects_accessed": 1354,
+      "projects_first_seen_in_retained_logs": 546
+    },
+    "2025-01": {
+      "access_events": 3098,
+      "distinct_authenticated_users": 45,
+      "distinct_projects_accessed": 1219,
+      "projects_first_seen_in_retained_logs": 416
+    },
+    "2025-02": {
+      "access_events": 4387,
+      "distinct_authenticated_users": 44,
+      "distinct_projects_accessed": 1330,
+      "projects_first_seen_in_retained_logs": 411
+    },
+    "2025-03": {
+      "access_events": 2736,
+      "distinct_authenticated_users": 32,
+      "distinct_projects_accessed": 1066,
+      "projects_first_seen_in_retained_logs": 289
+    },
+    "2025-04": {
+      "access_events": 6000,
+      "distinct_authenticated_users": 28,
+      "distinct_projects_accessed": 1025,
+      "projects_first_seen_in_retained_logs": 104
+    },
+    "2025-05": {
+      "access_events": 1278,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 528,
+      "projects_first_seen_in_retained_logs": 15
+    },
+    "2025-06": {
+      "access_events": 2666,
+      "distinct_authenticated_users": 18,
+      "distinct_projects_accessed": 1097,
+      "projects_first_seen_in_retained_logs": 2
+    },
+    "2025-07": {
+      "access_events": 889,
+      "distinct_authenticated_users": 10,
+      "distinct_projects_accessed": 467,
+      "projects_first_seen_in_retained_logs": 1
+    },
+    "2025-08": {
+      "access_events": 1733,
+      "distinct_authenticated_users": 11,
+      "distinct_projects_accessed": 846,
+      "projects_first_seen_in_retained_logs": 5
+    },
+    "2025-09": {
+      "access_events": 5390,
+      "distinct_authenticated_users": 17,
+      "distinct_projects_accessed": 921,
+      "projects_first_seen_in_retained_logs": 15
+    },
+    "2025-10": {
+      "access_events": 1578,
+      "distinct_authenticated_users": 11,
+      "distinct_projects_accessed": 747,
+      "projects_first_seen_in_retained_logs": 3
+    },
+    "2025-11": {
+      "access_events": 2700,
+      "distinct_authenticated_users": 9,
+      "distinct_projects_accessed": 1129,
+      "projects_first_seen_in_retained_logs": 1
+    },
+    "2025-12": {
+      "access_events": 1020,
+      "distinct_authenticated_users": 7,
+      "distinct_projects_accessed": 494,
+      "projects_first_seen_in_retained_logs": 3
+    },
+    "2026-01": {
+      "access_events": 82,
+      "distinct_authenticated_users": 5,
+      "distinct_projects_accessed": 15,
+      "projects_first_seen_in_retained_logs": 3
+    },
+    "2026-02": {
+      "access_events": 120,
+      "distinct_authenticated_users": 10,
+      "distinct_projects_accessed": 22,
+      "projects_first_seen_in_retained_logs": 11
+    },
+    "2026-03": {
+      "access_events": 404,
+      "distinct_authenticated_users": 15,
+      "distinct_projects_accessed": 72,
+      "projects_first_seen_in_retained_logs": 19
+    },
+    "2026-04": {
+      "access_events": 538,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 71,
+      "projects_first_seen_in_retained_logs": 45
+    },
+    "2026-05": {
+      "access_events": 216,
+      "distinct_authenticated_users": 21,
+      "distinct_projects_accessed": 55,
+      "projects_first_seen_in_retained_logs": 18
+    },
+    "2026-06": {
+      "access_events": 397,
+      "distinct_authenticated_users": 16,
+      "distinct_projects_accessed": 102,
+      "projects_first_seen_in_retained_logs": 44
+    },
+    "2026-07": {
+      "access_events": 1308,
+      "distinct_authenticated_users": 60,
+      "distinct_projects_accessed": 549,
+      "projects_first_seen_in_retained_logs": 415
+    },
+    "2026-08": {
+      "access_events": 2355,
+      "distinct_authenticated_users": 63,
+      "distinct_projects_accessed": 722,
+      "projects_first_seen_in_retained_logs": 544
+    },
+    "2026-09": {
+      "access_events": 2306,
+      "distinct_authenticated_users": 63,
+      "distinct_projects_accessed": 650,
+      "projects_first_seen_in_retained_logs": 519
+    }
+  },
+  "by_year": {
+    "2019": {
+      "access_events": 147,
+      "distinct_authenticated_users": 7,
+      "distinct_projects_accessed": 94,
+      "projects_first_seen_in_retained_logs": 94
+    },
+    "2020": {
+      "access_events": 4842,
+      "distinct_authenticated_users": 23,
+      "distinct_projects_accessed": 1225,
+      "projects_first_seen_in_retained_logs": 1211
+    },
+    "2021": {
+      "access_events": 39831,
+      "distinct_authenticated_users": 29,
+      "distinct_projects_accessed": 1917,
+      "projects_first_seen_in_retained_logs": 963
+    },
+    "2022": {
+      "access_events": 65367,
+      "distinct_authenticated_users": 34,
+      "distinct_projects_accessed": 1549,
+      "projects_first_seen_in_retained_logs": 206
+    },
+    "2023": {
+      "access_events": 62783,
+      "distinct_authenticated_users": 127,
+      "distinct_projects_accessed": 2984,
+      "projects_first_seen_in_retained_logs": 1588
+    },
+    "2024": {
+      "access_events": 63764,
+      "distinct_authenticated_users": 243,
+      "distinct_projects_accessed": 4856,
+      "projects_first_seen_in_retained_logs": 3362
+    },
+    "2025": {
+      "access_events": 33475,
+      "distinct_authenticated_users": 126,
+      "distinct_projects_accessed": 2535,
+      "projects_first_seen_in_retained_logs": 1265
+    },
+    "2026": {
+      "access_events": 7726,
+      "distinct_authenticated_users": 140,
+      "distinct_projects_accessed": 1812,
+      "projects_first_seen_in_retained_logs": 1618
+    }
+  },
+  "coverage": {
+    "earliest": "2019-06-07T10:44:41.713196",
+    "latest": "2026-09-28T14:59:12.573682"
+  },
+  "limitations": [
+    "Only presently discoverable dot logs compiled into access.csv are represented.",
+    "Access events are project-page loads, not model executions.",
+    "Hillslope counts are current artifact inventory per retained project, not repeated completed executions."
+  ],
+  "project_config_buckets": {
+    "australia": 188,
+    "disturbed_or_other": 9123,
+    "europe": 331,
+    "revegetation": 472,
+    "rhem": 193
+  },
+  "source": "/geodata/weppcloud_runs/access.csv",
+  "top_authenticated_user_domains": [
+    [
+      "gmail.com",
+      134
+    ],
+    [
+      "usda.gov",
+      107
+    ],
+    [
+      "yahoo.com",
+      63
+    ],
+    [
+      "vandals.uidaho.edu",
+      43
+    ],
+    [
+      "wsu.edu",
+      29
+    ],
+    [
+      "outlook.com",
+      14
+    ],
+    [
+      "blm.gov",
+      14
+    ],
+    [
+      "uidaho.edu",
+      10
+    ],
+    [
+      "usgs.gov",
+      9
+    ],
+    [
+      "iastate.edu",
+      7
+    ],
+    [
+      "humboldt.edu",
+      4
+    ],
+    [
+      "wrightwater.com",
+      4
+    ],
+    [
+      "portlandoregon.gov",
+      4
+    ],
+    [
+      "noaa.gov",
+      3
+    ],
+    [
+      "ull.edu.es",
+      3
+    ],
+    [
+      "blueforest.org",
+      3
+    ],
+    [
+      "auburn.edu",
+      3
+    ],
+    [
+      "uclm.es",
+      2
+    ],
+    [
+      "163.com",
+      2
+    ],
+    [
+      "fs.fed.us",
+      2
+    ],
+    [
+      "tamu.edu",
+      2
+    ],
+    [
+      "ecy.wa.gov",
+      2
+    ],
+    [
+      "imagecatinc.com",
+      2
+    ],
+    [
+      "dri.edu",
+      2
+    ],
+    [
+      "unizar.es",
+      2
+    ],
+    [
+      "umn.edu",
+      2
+    ],
+    [
+      "hotmail.com",
+      2
+    ],
+    [
+      "sublettecd.com",
+      2
+    ],
+    [
+      "jeffco.us",
+      2
+    ],
+    [
+      "conservation.ca.gov",
+      2
+    ],
+    [
+      "sdsu.edu",
+      1
+    ],
+    [
+      "limno.com",
+      1
+    ],
+    [
+      "norwalk.iowa.gov",
+      1
+    ],
+    [
+      "tailwaterlimited.com",
+      1
+    ],
+    [
+      "matrixdesigngroup.com",
+      1
+    ],
+    [
+      "ucsd.edu",
+      1
+    ],
+    [
+      "wwwheeler.com",
+      1
+    ],
+    [
+      "mail.weber.edu",
+      1
+    ],
+    [
+      "jefuller.com",
+      1
+    ],
+    [
+      "bia.gov",
+      1
+    ]
+  ],
+  "top_exact_configs": [
+    [
+      "disturbed9002",
+      4412
+    ],
+    [
+      "lt-wepp_bd16b69-snow",
+      1190
+    ],
+    [
+      "baer",
+      317
+    ],
+    [
+      "0",
+      302
+    ],
+    [
+      "lt-fire-future-snow",
+      293
+    ],
+    [
+      "eu-disturbed",
+      240
+    ],
+    [
+      "reveg",
+      194
+    ],
+    [
+      "disturbed",
+      193
+    ],
+    [
+      "disturbed9002_wbt",
+      191
+    ],
+    [
+      "rhem",
+      189
+    ],
+    [
+      "13",
+      176
+    ],
+    [
+      "lt-fire-snow",
+      161
+    ],
+    [
+      "au-disturbed",
+      144
+    ],
+    [
+      "disturbed9002-10-mofe",
+      140
+    ],
+    [
+      "disturbed-ak",
+      140
+    ],
+    [
+      "reveg-10m-mofe",
+      140
+    ],
+    [
+      "reveg-mofe",
+      138
+    ],
+    [
+      "disturbed-hi",
+      130
+    ],
+    [
+      "lt",
+      130
+    ],
+    [
+      "portland",
+      122
+    ],
+    [
+      "disturbed9002-mofe",
+      78
+    ],
+    [
+      "seattle-snow",
+      72
+    ],
+    [
+      "portland-snow",
+      72
+    ],
+    [
+      "earth",
+      57
+    ],
+    [
+      "<unknown>",
+      55
+    ],
+    [
+      "portland-wepp_bd16b69_snow",
+      50
+    ],
+    [
+      "disturbed-vi",
+      49
+    ],
+    [
+      "disturbed10",
+      43
+    ],
+    [
+      "baer-rred",
+      42
+    ],
+    [
+      "lt-fire-future",
+      39
+    ],
+    [
+      "cedar23",
+      37
+    ],
+    [
+      "portland-disturbed",
+      35
+    ],
+    [
+      "portland-simfire-eagle-snow",
+      34
+    ],
+    [
+      "eu",
+      29
+    ],
+    [
+      "portland-simfire-norse-snow",
+      28
+    ],
+    [
+      "canada-wbt-mofe",
+      27
+    ],
+    [
+      "seattle-snow-9002",
+      26
+    ],
+    [
+      "au-fire",
+      23
+    ],
+    [
+      "au",
+      21
+    ],
+    [
+      "lt-fire",
+      20
+    ],
+    [
+      "disturbed-anu-ash",
+      20
+    ],
+    [
+      "disturbed9002-10m",
+      19
+    ],
+    [
+      "disturbed-mofe",
+      18
+    ],
+    [
+      "palouse",
+      16
+    ],
+    [
+      "eu-fire2",
+      15
+    ],
+    [
+      "cda",
+      15
+    ],
+    [
+      "disturbed-tree-observed",
+      15
+    ],
+    [
+      "eu-aragon-disturbed",
+      14
+    ],
+    [
+      "eu-75",
+      14
+    ],
+    [
+      "portland-10-mofe",
+      11
+    ]
+  ],
+  "totals": {
+    "access_events": 277935,
+    "ash_hillslope_inventory": 1972,
+    "distinct_authenticated_users": 571,
+    "distinct_projects_accessed": 10307,
+    "hillslope_inventory": 778515
+  }
+}
