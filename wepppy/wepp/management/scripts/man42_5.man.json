@@ -1,5 +1,8 @@
 {
   "py/object": "wepppy.wepp.management.managements.Management",
+  "_strict_upload": false,
+  "_native_scenario_references": false,
+  "_input_max_ofes": 1,
   "key": null,
   "man_fn": "man42_5.man",
   "man_dir": "",
