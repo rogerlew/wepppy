@@ -1,7 +1,11 @@
 # Catalog projection contract checkpoint
 
-**Status**: Independent correctness/security contract reviews PASS; all findings
-closed. Detailed ratification and accepted ancestor pending.
+**Status**: Accepted for implementation; independent contract reviews PASS.
+Operator execution authorization: 2026-09-30 UTC, following review commit
+`442aa56d2`: execute this package and hold when ready to deploy to forest.
+This approves the reviewed behavior and initial limits for implementation and
+validation, not measured capacity claims or deployment. No live migration,
+service restart, sweep activation, or read-mode cutover is authorized.
 **Date**: 2026-09-30 UTC.
 **Starting implementation revision**: `c8497e2cbf210ebc74ef51e2c73cb5351373da2f`.
 
@@ -54,13 +58,14 @@ latency evidence, not only row/job counts.
 
 Independent contract reviewer 1: Dirac; final contract-only PASS, COR-01 through COR-05 closed.
 Independent contract reviewer 2: Ohm; final contract-only PASS, SEC-01 through SEC-05 closed.
-Detailed operator ratification/disposition: pending.
+Detailed operator ratification/disposition: execution authorized on 2026-09-30 UTC.
 Correctness/security initial verdicts: HOLD; post-fix verdicts: PASS. No risk acceptance.
 See [review disposition](2026-09-30_contract_review_disposition.md) for all
 findings, changes, and supplemental OPS-01 closure.
 Specification commit: `62d4273d9`, authorized by the operator's prior commit request.
-Accepted contract ancestor SHA: not yet established; that specification commit
-predates the independent reviews and cannot be represented as their checkpoint.
+Reviewed contract ancestor: `442aa56d2`; the acceptance-record commit immediately
+following it completes the pre-implementation checkpoint. Record that commit's
+SHA in the tracker before runtime edits.
 
 Once reviews and detailed disposition are complete and committing is authorized,
 commit this specification/ADR/shared-contract set separately, then record its

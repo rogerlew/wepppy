@@ -4,8 +4,8 @@
 This ExecPlan is a living document maintained under
 `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries,
 Decision Log, and Outcomes & Retrospective current together with this package's
-`tracker.md`. The current authorized task is contract review and findings
-disposition, not runtime implementation or deployment. No other active package
+`tracker.md`. The current authorized task is implementation and pre-deployment
+validation, holding before forest deployment. No other active package
 is being executed here.
 
 
@@ -35,7 +35,8 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 - [x] (2026-09-30 UTC) Author canonical specification, ADR, shared amendments, package, and rollout plan.
 - [x] (2026-09-30 UTC) Obtain independent initial correctness/security findings.
 - [x] (2026-09-30 UTC) Close all findings with independent post-fix contract PASS verdicts.
-- [ ] M0: Detailed ratification and accepted ancestor checkpoint remain separate requirements.
+- [x] (2026-09-30 UTC) Operator authorized the reviewed package for implementation; forest deployment remains on hold.
+- [ ] M0: Record acceptance checkpoint SHA before runtime edits.
 - [ ] M1: Schema, repository, extractor, operator seed/status/compare, and direct tests.
 - [ ] M2: Portable notification interface and complete process/producer wiring.
 - [ ] M3: Serialized refresh, reconciliation, scheduler coalescing, CLI, and capacity proof.
@@ -318,3 +319,7 @@ No new dependency, secret transport, daemon, or deployment topology is allowed.
 Revision note (2026-09-30 UTC): initial plan authored from operator-approved
 architecture and host sequence; detailed behavior and defaults await the M0
 checkpoint. No implementation or deployment is claimed.
+Execution authorization (2026-09-30 UTC, operator): execute this reviewed package
+and hold when ready to deploy to forest. Implement M1–M4 and isolated validation;
+do not migrate the live application database, restart/recreate services, enable
+sweeps, or switch live readers. Host acceptance/soak gates remain M5 work.

@@ -1,7 +1,7 @@
 # Run catalog projection tracker
 
 **Updated**: 2026-09-30 UTC
-**Status**: Independent contract reviews PASS; findings closed; runtime unchanged.
+**Status**: Implementation authorized; preparing M0 checkpoint; hold before forest deployment.
 
 ## Task board
 
@@ -11,7 +11,8 @@
   implementation sequence, and forest → forest1 → wepp1 rollout specification.
 - [x] Create ADR, execution package, active ExecPlan, and review gates.
 - [x] Independent correctness/security contract reviews and findings disposition.
-- [ ] M0: detailed ratification and accepted ancestor pending.
+- [x] Operator ratified the reviewed plan by authorizing execution on 2026-09-30 UTC.
+- [ ] M0: record acceptance checkpoint SHA before runtime edits.
 - [ ] M1: additive migration/repository/extractor and real SQL/file parity tests.
 - [ ] M2: portable observer and complete producer/process wiring.
 - [ ] M3: refresh/reconciliation, scheduler, CLI, metrics, capacity evidence.
