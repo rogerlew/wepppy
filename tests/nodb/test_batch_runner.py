@@ -71,8 +71,9 @@ def test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled(
     monkeypatch.setattr(
         batch_runner_mod,
         "clear_locks",
-        lambda runid: state_reset_calls.append(("locks", runid)) or [],
+        lambda runid, **kwargs: state_reset_calls.append(("locks", runid)) or [],
     )
+    monkeypatch.setattr(batch_runner_mod, "lock_statuses", lambda _: {"soils.nodb": True})
     monkeypatch.setattr(
         batch_runner_mod.RedisPrep,
         "getInstance",

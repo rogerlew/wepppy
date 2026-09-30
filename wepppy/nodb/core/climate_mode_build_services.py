@@ -46,7 +46,7 @@ class ClimateModeBuildServices:
                 # Maintains current compatibility behavior for legacy naming.
                 climate._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs)
             else:
-                climate._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
+                climate._build_climate_observed_daymet(verbose=verbose, attrs=attrs, replace_existing=True)
                 self._run_prism_revision_if_multiple(climate, verbose=verbose)
 
         elif climate_mode == ClimateMode.Future:

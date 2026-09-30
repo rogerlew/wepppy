@@ -350,7 +350,7 @@ def test_old_publication_cannot_rollback_new_owner(controllers):
                     pass
             raise ValueError("old publisher failed")
     assert target.read_text() == "second"
-    assert list(Path(rap.rap_dir).glob(".derived-backup-*/artifact.txt"))
+    assert list(Path(rap.rap_dir).glob("derived-backup-*/artifact.txt"))
 
 
 def test_rap_missing_source_fails_before_publication(controllers):
@@ -479,7 +479,7 @@ def test_unknown_commit_keeps_recovery_copies(controllers, monkeypatch):
     monkeypatch.setattr(rap_module, "identify_median_single_raster_key", lambda **_: {"1": 75.0})
     with pytest.raises(RuntimeError, match="outcome unknown"):
         rap.analyze()
-    backups = list(Path(rap.rap_dir).glob(".derived-backup-*/rap_ts.parquet"))
+    backups = list(Path(rap.rap_dir).glob("derived-backup-*/rap_ts.parquet"))
     assert len(backups) == 1
     assert backups[0].read_bytes() == previous
     assert Path(rap.rap_dir, "rap_ts.parquet").read_bytes() != previous

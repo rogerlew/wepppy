@@ -83,6 +83,7 @@ def _write_climate_state(path: Path, *, observed_start_year, observed_end_year) 
     path.write_text(
         json.dumps(
             {
+                "py/object": "wepppy.nodb.core.climate.Climate",
                 "wd": str(path.parent),
                 "_climate_mode": 9,
                 "_climate_spatialmode": 0,
@@ -225,15 +226,17 @@ def test_clear_batch_leaf_nodb_state_clears_cache_and_locks(
     monkeypatch.setattr(
         batch_runner_module,
         "clear_locks",
-        lambda value: events.append(("locks", value)) or ["climate.nodb"],
+        lambda value, **kwargs: events.append(("locks", value)) or ["soils.nodb"],
     )
+
+    monkeypatch.setattr(batch_runner_module, "lock_statuses", lambda _: {"climate.nodb": True, "soils.nodb": True})
 
     locks_cleared = batch_runner_module._clear_batch_leaf_nodb_state(
         runid,
         batch_runner_module.logging.getLogger("test.batch.cleanup"),
     )
 
-    assert locks_cleared == ("climate.nodb",)
+    assert locks_cleared == ("soils.nodb",)
     assert events == [("cache", runid), ("locks", runid)]
 
 
@@ -653,6 +656,7 @@ def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_times
         runner.run_batch_project(_feature("retry-leaf"))
 
     state = json.loads((run_dir / "climate.nodb").read_text(encoding="utf-8"))
+    state = state.get("py/state", state)
     assert state["_observed_start_year"] == 1985
     assert state["_observed_end_year"] == 2024
     timestamps = _FakeRedisPrep.timestamps_by_wd[str(run_dir)]
@@ -812,7 +816,7 @@ def test_run_batch_project_rehydrates_climate_inside_lock_for_downstream_readers
         lambda _runid: str(run_dir),
     )
     monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_args: ())
-    monkeypatch.setattr(runner, "resync_base_project_attributes", lambda *_args: None)
+    monkeypatch.setattr(runner, "_resync_base_project_attributes_owned", lambda *_args: None)
     monkeypatch.setattr(
         runner,
         "_get_run_logger",
@@ -844,7 +848,7 @@ def test_run_batch_project_rehydrates_climate_inside_lock_for_downstream_readers
         events.append(("lock-exit", root))
         return result
 
-    monkeypatch.setattr(batch_runner_module, "_run_with_directory_root_lock", _lock)
+    monkeypatch.setattr(batch_runner_module, "_run_with_climate_leaf_lock", lambda wd, callback, *, purpose: _lock(wd, "climate", callback, purpose=purpose))
     downstream: list[object] = []
     monkeypatch.setattr(
         batch_runner_module,
@@ -1603,7 +1607,7 @@ def test_batch_phases_stop_at_interchange_and_rehydrate(
     events = []
     monkeypatch.setattr(batch_runner_module, "get_wd", lambda _: str(run_dir))
     monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_: ())
-    monkeypatch.setattr(runner, "resync_base_project_attributes", lambda *_: None)
+    monkeypatch.setattr(runner, "_resync_base_project_attributes_owned", lambda *_: None)
     for cls in (batch_runner_module.Ron, batch_runner_module.Watershed,
                 batch_runner_module.Landuse, batch_runner_module.Soils):
         monkeypatch.setattr(cls, "getInstance", lambda _: SimpleNamespace())

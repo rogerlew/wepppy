@@ -1,0 +1,122 @@
+{
+  "environment": "forest/weppcloud development container",
+  "fixture": "offline acquisition; real CLIGEN, GDAL/PRISM revision and WEPP preparation",
+  "manifest": {
+    "climate/_1.cli": {
+      "sha256": "2d57b9b243e22272f728897279316380fa214956b2fc42a1db99efbef693c8fb",
+      "bytes": 26492
+    },
+    "climate/cligen_wepp.log": {
+      "sha256": "5678457f04876d53bab13d7d0be6e3b2d1dd2d1e349e6a36257899e68f39b021",
+      "bytes": 1989
+    },
+    "climate/daymet_2001-2001.parquet": {
+      "sha256": "fd3aa4e59934c962e00d5b0cb2a624a990fb2981ba735f134b3fb027a21fb5fe",
+      "bytes": 7648
+    },
+    "climate/ok343497.par": {
+      "sha256": "35e15be80a6e14464838de4717372516d49a2c4bcafbfb99a04b12af55efbc3a",
+      "bytes": 7022
+    },
+    "climate/old.cli": {
+      "sha256": "cebe4edf7528fe95bd05f0297324f6d410f907da53558b9247fac97274bbe636",
+      "bytes": 11
+    },
+    "climate/ppt.tif": {
+      "sha256": "96ff85a0823e2e21e60d192992daa6247f1350f67f1efc6c5010eff1540a709b",
+      "bytes": 1216
+    },
+    "climate/tmax.tif": {
+      "sha256": "4cab7bdfa557eee204e2740f52367b3ba056e233e0ad60a928f19d22804dfb92",
+      "bytes": 1216
+    },
+    "climate/tmin.tif": {
+      "sha256": "557110144f37d03fa2b77d88bc766f514de958b30f85926c968b4d9b516f44bc",
+      "bytes": 1216
+    },
+    "climate/wepp.cli": {
+      "sha256": "bcb42a1d74fc0b85fcc7ca33c1a0b32d12a66efdb80b5165deee61c48c871c85",
+      "bytes": 26492
+    },
+    "climate/ws.prn": {
+      "sha256": "3487cf57e2d7e1b23469fd09960ba3638e22ca74cfdd9ed23234546f24600f1b",
+      "bytes": 11680
+    },
+    "baseline/_1.cli": {
+      "sha256": "2d57b9b243e22272f728897279316380fa214956b2fc42a1db99efbef693c8fb",
+      "bytes": 26492
+    },
+    "baseline/cligen_wepp.log": {
+      "sha256": "5678457f04876d53bab13d7d0be6e3b2d1dd2d1e349e6a36257899e68f39b021",
+      "bytes": 1989
+    },
+    "baseline/daymet_2001-2001.parquet": {
+      "sha256": "fd3aa4e59934c962e00d5b0cb2a624a990fb2981ba735f134b3fb027a21fb5fe",
+      "bytes": 7648
+    },
+    "baseline/ok343497.par": {
+      "sha256": "35e15be80a6e14464838de4717372516d49a2c4bcafbfb99a04b12af55efbc3a",
+      "bytes": 7022
+    },
+    "baseline/ppt.tif": {
+      "sha256": "96ff85a0823e2e21e60d192992daa6247f1350f67f1efc6c5010eff1540a709b",
+      "bytes": 1216
+    },
+    "baseline/tmax.tif": {
+      "sha256": "4cab7bdfa557eee204e2740f52367b3ba056e233e0ad60a928f19d22804dfb92",
+      "bytes": 1216
+    },
+    "baseline/tmin.tif": {
+      "sha256": "557110144f37d03fa2b77d88bc766f514de958b30f85926c968b4d9b516f44bc",
+      "bytes": 1216
+    },
+    "baseline/wepp.cli": {
+      "sha256": "bcb42a1d74fc0b85fcc7ca33c1a0b32d12a66efdb80b5165deee61c48c871c85",
+      "bytes": 26492
+    },
+    "baseline/ws.prn": {
+      "sha256": "3487cf57e2d7e1b23469fd09960ba3638e22ca74cfdd9ed23234546f24600f1b",
+      "bytes": 11680
+    },
+    "wepp/runs/p1.cli": {
+      "sha256": "2d57b9b243e22272f728897279316380fa214956b2fc42a1db99efbef693c8fb",
+      "bytes": 26492
+    }
+  },
+  "semantics": {
+    "source_rows": 365,
+    "source_columns": [
+      "prcp(mm/day)",
+      "tmax(degc)",
+      "tmin(degc)",
+      "srad(l/day)",
+      "tdew(degc)"
+    ],
+    "source_means": {
+      "prcp(mm/day)": 2.539999999999999,
+      "tmax(degc)": 15.0,
+      "tmin(degc)": 5.0,
+      "srad(l/day)": 200.0,
+      "tdew(degc)": 3.0
+    },
+    "cli_rows": 365,
+    "cli_columns": [
+      "da",
+      "mo",
+      "year",
+      "prcp",
+      "dur",
+      "tp",
+      "ip",
+      "tmax",
+      "tmin",
+      "rad",
+      "w-vl",
+      "w-dir",
+      "tdew"
+    ],
+    "revised_matches_legacy": true,
+    "consumed_matches_revised": true,
+    "consumed_bytes_match_revised": true
+  }
+}

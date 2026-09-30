@@ -61,7 +61,7 @@ with a typed empty table. The six cover bands and existing column names/units
 remain unchanged. Conflicts fail explicitly before publication; unsuccessful
 finalization does not publish a completion timestamp.
 
-Interrupted publication can retain `.derived-backup-*` recovery copies. See
+Interrupted publication can retain `derived-backup-*` recovery copies. See
 [Climate/RAP finalization and recovery](../../../../docs/dev-notes/batch-climate-rap-finalization.md)
 before recovery, especially when lock ownership or commit outcome is uncertain.
 ## Quick start / examples

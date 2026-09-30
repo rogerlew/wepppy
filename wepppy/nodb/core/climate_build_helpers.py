@@ -1095,7 +1095,7 @@ def run_prism_revision(climate: "Climate", verbose: bool = False) -> None:
 
     from .climate import ClimateMode
 
-    if climate.climate_mode == ClimateMode.GridMetPRISM:
+    if climate.climate_mode in (ClimateMode.GridMetPRISM, ClimateMode.Observed, ClimateMode.ObservedPRISM):
         run_prism_revision_build(climate, verbose=verbose)
         return
 

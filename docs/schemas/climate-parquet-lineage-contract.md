@@ -152,3 +152,36 @@ parquet producer lineage and interpretation versions are unaffected.
 
 Implementation conformance: source-preservation fix verified by focused tests
 and real CLIGEN replay; see the 20260917_daymet_source_preservation work package.
+
+Observed Daymet builds retain failed computation attempts under visible
+`climate/daymet-build-<id>/`; observed PRISM revision uses
+`climate/prism-build-<id>/`. These directories contain acquired source data,
+PRN/CLI/parameter files, radiation provenance, tiles and worker diagnostics as
+applicable, plus `build-status.json` with kind, working/failed state, observed
+year bounds and UTC update time. They are ordinary project records: the normal
+authorized browser/download and project archive/restore paths must include
+them with their bytes and directory modes. A rebuild must preserve earlier
+failed attempts. Empty optional state is valid; records are created only when
+collection starts. Malformed relevant controller inputs reject publication.
+
+Publication uses redundant `.climate-publish-*` coordination copies; originals
+remain inspectable if publication or NoDb commit fails. Successful publication
+may remove the redundant attempt after all numerical files reach their ordinary
+climate filenames. `derived-backup-*` recovery directories remain visible if
+rollback or commit classification is interrupted. Historical hidden
+`.derived-backup-*` copies remain recovery records and must not be deleted by
+a rebuild; this change does not migrate them. Never restore recovery bytes over
+a newer writer without checking controller and artifact ownership.
+
+Observed Multiple builds commit once per finalized stage. PRISM consumes freshly
+finalized Daymet; if PRISM fails, channel Daymet remains committed, prior full-build
+hillslope outputs are removed, and subclimate mappings remain unset. Incomplete
+Multiple climate must report `has_climate` false, reject WEPP preparation, and
+omit completion/export/event hooks. This preserves established stage sequencing;
+combined-build atomicity would change the workflow.
+
+Rationale: staging must preserve the prior accepted climate without discarding
+the only source or diagnostic evidence from a failed calculation. Hidden
+coordination copies are redundant, never the only inspectable work product.
+Scientific source units, generated filenames, catalog/timestamp ordering and
+the stale-write rejection contract are unchanged.

@@ -1469,42 +1469,10 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
 
-    def _build_climate_observed_daymet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        with self.locked():
-            self.set_attrs(attrs)
-            self.logger.info('  running _build_climate_observed_daymet')
+    def _build_climate_observed_daymet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None, *, replace_existing: bool = False) -> None:
+        from .climate_observed_build import run_observed_daymet_build
 
-            watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.require_centroid()
-
-            cli_dir = self.cli_dir
-            start_year, end_year = self._require_observed_year_bounds_for_build()
-            assert end_year <= self.daymet_last_available_year, end_year
-
-            self._input_years = end_year - start_year + 1
-
-            stationManager = CligenStationsManager(version=self.cligen_db)
-            climatestation = self.climatestation
-            stationMeta = stationManager.get_station_fromid(climatestation)
-
-            par_fn = stationMeta.par
-            cligen = Cligen(stationMeta, wd=cli_dir)
-
-            cli_fn = 'wepp.cli'
-            prn_fn = 'ws.prn'
-            self.logger.info('  building {}... '.format(cli_fn))
-
-            
-            build_observed_daymet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
-                                  gridmet_wind=self.use_gridmet_wind_when_applicable,
-                                  adjust_mx_pt5=self.adjust_mx_pt5,
-                                  silent_pass_observed_quality_guard=self.silent_pass_observed_quality_guard)
-            self._publish_quality_guard_bypass_warning_if_needed(cligen)
-
-            climate = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = climate.calc_monthlies()
-            self.cli_fn = cli_fn
-            self.par_fn = par_fn
+        run_observed_daymet_build(self, verbose=verbose, attrs=attrs, replace_existing=replace_existing)
 
     def _build_climate_observed_gridmet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.set_attrs(attrs)

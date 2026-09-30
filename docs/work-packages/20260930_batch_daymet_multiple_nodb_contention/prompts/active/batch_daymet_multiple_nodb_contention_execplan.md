@@ -26,16 +26,41 @@ cluster integration, deployment, run repair, or incident resolution.
 - [x] (2026-09-30 19:00Z) Capture the live incident signature and deployed
   revision.
 - [x] (2026-09-30 19:00Z) Scaffold the package, tracker, and ExecPlan.
-- [ ] Reproduce the stale write with real files on forest.
-- [ ] Attribute every writer and lock identity on the failing path.
-- [ ] Implement the smallest contract-conforming ownership correction.
-- [ ] Validate generated artifacts and downstream-consumed climate input.
-- [ ] Run focused and broad forest regression suites.
-- [ ] Complete independent correctness and security reviews.
+- [x] (2026-09-30 19:12Z) Reproduce both Daymet and PRISM stale writes with
+  real files through the observed/Multiple router; two pre-fix failures retained.
+- [ ] Attribute incident writer and cross-node lock identity (source inventory
+  complete; cluster access pending).
+- [x] (2026-09-30) Implement Daymet/observed PRISM bounded finalization and
+  climate leaf ownership before startup/reset/resync.
+- [x] (2026-09-30) Real CLIGEN and GDAL/PRISM parity, source parquet/PRN
+  semantics, and exact WEPP hillside CLI copy validated on forest.
+- [x] (2026-09-30) Final focused 117 passed; full repository 10015 passed,
+  99 skipped in 2433.36 seconds. Final additions covered by targeted run.
+- [x] (2026-09-30) Independent correctness and security reviews cleared local
+  findings; production identity and cluster release gates remain open.
 - [ ] Pass the open-wepp.org integration gate and retain exact evidence.
-- [ ] Close documentation with a claim no broader than the evidence.
+- [x] (2026-09-30) Documentation and retained artifacts state forest validated;
+  external integration and incident attribution remain open.
 
 ## Surprises & Discoveries
+
+- Observation: full Climate.build previously cleared Daymet artifacts before
+  collection. Correcting only the builder would leave failure behavior broken.
+  Full builds now defer replacement until commit; direct builders retain sidecars.
+- Observation: reset of a managed projection changes effective-root lock identity.
+  Existing lexical and effective maintenance guards, acquired in stable order,
+  exclude a duplicate on both sides of reset. The callback is outside acquisition
+  retry handling, preventing a nested lock error from replaying startup.
+- Observation: destructive staging and rollback would lose failed work products.
+  Visible Daymet/observed PRISM attempts retain working/failed status and numerical
+  files; existing publication operates on redundant copies. Interrupted recovery
+  backups now use a visible prefix. Canonical inventory is in the Daymet source
+  preservation section of docs/schemas/climate-parquet-lineage-contract.md.
+
+- Observation: observed PRISM still selects the legacy builder; the bounded
+  finalizer was gated exclusively on GridMetPRISM. Batch base resynchronization
+  and startup bypass climate-directory ownership. They are source-level competing
+  writers, not an attributed cluster cause.
 
 - Observation: collect/finalize support exists but does not cover the entire
   live path. The observed-Daymet single build still holds `with self.locked()`
@@ -52,6 +77,36 @@ cluster integration, deployment, run repair, or incident resolution.
 
 ## Decision Log
 
+- Decision: preserve one durable commit per finalized stage. A successful Daymet
+  stage remains committed if PRISM fails; incomplete Multiple climate remains
+  unavailable to WEPP preparation and receives no completion/export/event hook.
+  Rationale: the existing plan and NoDb contract require PRISM to consume fresh
+  finalized Daymet state. Combined-build atomicity would be a new behavior.
+  Date/Author: 2026-09-30, Codex; independent correctness review confirmed this
+  reading and the full-router failure regression passes.
+
+- Decision: extend the existing climate directory ownership over hillslope
+  startup and execution, using lexical/effective guards where they differ;
+  retain live Climate tokens and use locked fresh controller resynchronization.
+  Rationale: real duplicate/reset and controller-token tests prove the simpler
+  build-only guard misses these writers. This reuses existing maintenance locks;
+  no queue, protocol, lease extension, or topology is added. The later watershed
+  phase and non-climate cleanup are outside this correction.
+  Date/Author: 2026-09-30, Codex; independent reviewers confirmed the boundary.
+
+- Decision: retain visible attempted outputs and publish redundant copies.
+  Rationale: the unchanged artifact-observability standard requires preserving
+  failed scientific work and recovery evidence; auto-deleting temporary stages
+  violate it. Success removes only redundant copies; real browser/archive/restore
+  tests cover working, failed and unknown-commit recovery records.
+  Date/Author: 2026-09-30, Codex; correctness/security review findings.
+
+- Decision: extend the existing observed builder finalization to Daymet and
+  route Observed/ObservedPRISM PRISM revision through its existing finalizer.
+  Rationale: both real-file stages fail under the unchanged persistence contract;
+  preserve numerical calls and Daymet sidecar behavior.
+  Date/Author: 2026-09-30, Codex.
+
 - Decision: treat this as conformance repair and faithful extraction, not a new
   queue or persistence design.
   Rationale: the repository already defines and implements the required
@@ -66,8 +121,15 @@ cluster integration, deployment, run repair, or incident resolution.
 
 ## Outcomes & Retrospective
 
-The package is scaffolded and the highest supported claim is `diagnosed`.
-Implementation and validation have not begun.
+The local implementation and scientific/artifact validation are complete.
+Both pre-fix stages reproduce actual serializer stale-write errors. Initial
+focused suites passed 84 tests; the final 35-case regression module covers
+numerical parity, concurrency, failure/readiness, legacy resynchronization,
+and actual browser/archive/restore. Independent correctness and security
+reviews cleared all local findings. The full repository suite passed 10015 tests with 99 skips in 2433.36 seconds.
+Incident writer attribution and cross-node production identity remain unproven;
+cluster integration, deployment, affected-run repair and incident closure are
+not claimed. See the retained artifacts and tracker.
 
 ## Context and Orientation
 
@@ -154,7 +216,7 @@ Work from the WEPPpy repository root on forest.
 Create the real-file reproduction and run the narrowest test first. Record the
 exact new test path in this plan once selected.
 
-    wctl run-pytest tests/nodb/<focused-climate-test>.py -x -vv
+    wctl run-pytest tests/nodb/test_batch_daymet_multiple_contention.py -x -vv
 
 After implementation, run the affected suites and contract checks.
 
@@ -226,3 +288,15 @@ recorded complexity-budget gate.
 Plan revision note: created 2026-09-30 to turn the live full-fleet batch
 recurrence into a self-contained forest implementation plan with a distinct
 open-wepp.org file-integration acceptance gate.
+
+Plan revision note: 2026-09-30 execution recorded both serializer reproductions,
+source-level ownership bypasses, initial implementation and cluster-access gap.
+
+Plan revision note: execution expanded ownership only after real reset/token
+reproductions and retained failed artifacts to satisfy existing observability.
+The numerical replay uses real CLIGEN/GDAL/PRISM and the actual WEPP copy boundary.
+
+Plan revision note: final forest handoff records 117 focused passes, full-suite
+10015 passes/99 skips, completed independent reviews and exact generated artifact
+manifest. Cluster gate is blocked on missing approved access/fixture; no deployment,
+incident repair or environment-validation claim is made.

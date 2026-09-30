@@ -1,6 +1,6 @@
 # Batch Daymet Multiple NoDb Contention
 
-**Status**: Open (2026-09-30)
+**Status**: Forest validation complete; cluster acceptance pending (2026-09-30)
 **Timezone**: UTC
 
 ## Overview
@@ -85,7 +85,7 @@ separate explicit execution gate, using retained job and artifact evidence.
 - **New mechanisms permitted**: none initially.
 - **Simplest plausible change tested first**: extend the existing climate
   collect/finalize ownership boundary to observed Daymet followed by PRISM
-  revision, with a fresh controller rehydrate and one durable commit.
+  revision, with a fresh controller rehydrate and one durable commit per finalized stage.
 - **Real acceptance condition**: a production-equivalent multi-worker batch
   leaf completes on open-wepp.org without `NoDbStaleWriteError`, produces the
   expected climate artifacts, and preserves a deliberate unrelated concurrent
@@ -141,27 +141,28 @@ contract change, stop at the ancestor-checkpoint gate before implementation.
   serializer commit.
 - **Actual-project/environment gate**: forest for implementation validation;
   open-wepp.org for the final bounded file integration test.
-- **Highest completion claim currently supported**: diagnosed.
+- **Highest completion claim currently supported**: forest validated (focused/broad tests, scientific artifacts and independent
+  reviews); cluster acceptance pending.
 
 ## Success Criteria
 
-- [ ] A deterministic real-file test reproduces the live same-size stale-write
+- [x] A deterministic real-file test reproduces the live same-size stale-write
       signature before the change.
 - [ ] Source attribution identifies the competing writer or proves the precise
       lock boundary that permits it.
-- [ ] Observed Daymet plus PRISM `Multiple` uses the established
+- [x] Observed Daymet plus PRISM `Multiple` uses the established
       collect-then-finalize ownership contract with no long-lived stale dump.
-- [ ] Relevant concurrent input changes reject publication; unrelated durable
+- [x] Relevant concurrent input changes reject publication; unrelated durable
       edits survive successful finalization.
-- [ ] Generated climate artifacts and downstream consumed inputs are
+- [x] Generated climate artifacts and downstream consumed inputs are
       semantically equivalent for an unchanged fixture.
-- [ ] Focused NoDb/climate/batch tests and the full repository suite pass on
+- [x] Focused NoDb/climate/batch tests and the full repository suite pass on
       forest.
-- [ ] Independent correctness and security reviews have no unresolved medium
+- [x] Independent correctness and security reviews have no unresolved medium
       or high findings.
 - [ ] A separately authorized open-wepp.org file integration run passes with
       exact revision, job-tree, file-content, and user-facing evidence retained.
-- [ ] Deployment, batch repair, and incident resolution are claimed only when
+- [x] Deployment, batch repair, and incident resolution are claimed only when
       their distinct evidence gates are satisfied.
 
 ## Parameterization ADR Gate

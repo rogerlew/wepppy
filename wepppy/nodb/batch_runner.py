@@ -19,6 +19,8 @@ from contextlib import ExitStack
 from pathlib import Path
 import shutil
 import time
+
+import jsonpickle
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
 
 from wepppy.all_your_base.geo import raster_stacker
@@ -53,7 +55,8 @@ from wepppy.runtime_paths.thaw_freeze import (
 )
 
 
-from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
+from ._derived_build import finalize as finalize_derived_build
+from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks, lock_statuses
 from .redis_prep import RedisPrep, TaskEnum
 
 
@@ -146,11 +149,16 @@ def _reset_run_workspace(runid_wd: str | Path, logger: logging.Logger) -> None:
 
 
 def _clear_batch_leaf_nodb_state(runid: str, logger: logging.Logger) -> Tuple[str, ...]:
-    logger.info(f'clearing NoDb cache and locks for runid: {runid}')
+    logger.info(f'clearing NoDb cache and non-climate locks for runid: {runid}')
     clear_nodb_file_cache(runid)
     logger.info('cleared NoDb file cache')
     try:
-        locks_cleared = clear_locks(runid)
+        locks_cleared = []
+        # Climate can also have a standalone/UI writer without directory-root
+        # ownership. Never revoke its live token during automatic batch startup.
+        for relpath, locked in lock_statuses(runid).items():
+            if locked and relpath.endswith(".nodb") and Path(relpath).name != "climate.nodb":
+                locks_cleared.extend(clear_locks(runid, pup_relpath=relpath))
     except RuntimeError as exc:
         logger.warning(f'failed to clear NoDb locks for {runid}: {exc}')
         return ()
@@ -200,6 +208,36 @@ def _run_with_directory_root_lock(
             if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
                 raise
             time.sleep(retry_delay_seconds * attempt)
+
+
+
+def _run_with_climate_leaf_lock(wd: str, callback, *, purpose: str):
+    """Exclude duplicate startup and builds across a climate-root replacement.
+
+    Retain the effective-root guard and also guard its lexical path when a
+    managed projection resolves elsewhere. Reset can change the effective path.
+    Retry acquisition only; a callback failure must never replay the leaf.
+    """
+    lexical = os.path.normcase(os.path.normpath(os.path.abspath(_join(wd, "climate"))))
+    effective = nodir_maintenance_lock_scope_token(wd, "climate", scope=_BATCH_LOCK_SCOPE)
+    scope_tokens = tuple(sorted({lexical, effective}))
+    attempts = max(1, int(_BATCH_LOCK_RETRY_ATTEMPTS))
+    delay = max(0.0, float(_BATCH_LOCK_RETRY_SECONDS))
+    for attempt in range(1, attempts + 1):
+        with ExitStack() as stack:
+            try:
+                for token in scope_tokens:
+                    stack.enter_context(nodir_maintenance_lock(
+                        wd, "climate", purpose=purpose, scope=_BATCH_LOCK_SCOPE,
+                        scope_token=token,
+                    ))
+            except NoDirError as exc:
+                stack.close()
+                if exc.code != "NODIR_LOCKED" or attempt >= attempts:
+                    raise
+                time.sleep(delay * attempt)
+                continue
+            return callback()
 
 
 def _build_climate_at_mutation_boundary(runid: str, wd: str) -> Climate:
@@ -525,6 +563,18 @@ class BatchRunner(NoDbBase):
         watershed_feature: WatershedFeature,
         job_id: Optional[str] = None,
     ) -> Tuple[str, ...]:
+        wd = get_wd(f'batch;;{self.batch_name};;{watershed_feature.runid}')
+        return _run_with_climate_leaf_lock(
+            wd,
+            lambda: self._run_batch_hillslopes_owned(watershed_feature, job_id=job_id),
+            purpose="batch-run-hillslopes",
+        )
+
+    def _run_batch_hillslopes_owned(
+        self,
+        watershed_feature: WatershedFeature,
+        job_id: Optional[str] = None,
+    ) -> Tuple[str, ...]:
         runid = f'batch;;{self.batch_name};;{watershed_feature.runid}'
         runid_wd = get_wd(runid)
 
@@ -592,7 +642,7 @@ class BatchRunner(NoDbBase):
             prep.remove_all_timestamp()
             logger.info(prep.timestamps_report())
 
-        self.resync_base_project_attributes(runid_wd, prep, logger)
+        self._resync_base_project_attributes_owned(runid_wd, prep, logger)
 
         logger.info('getting NoDb instances')
         ron = Ron.getInstance(runid_wd)
@@ -666,12 +716,8 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             logger.info(f'building climate')
-            climate = _run_with_directory_root_lock(
-                runid_wd,
-                "climate",
-                lambda: _build_climate_at_mutation_boundary(runid, runid_wd),
-                purpose="batch-run-build-climate",
-            )
+            _require_directory_root(runid_wd, "climate")
+            climate = _build_climate_at_mutation_boundary(runid, runid_wd)
         else:
             climate = Climate.getInstance(runid_wd)
 
@@ -1286,6 +1332,18 @@ class BatchRunner(NoDbBase):
         prep: RedisPrep,
         logger: logging.Logger,
     ) -> Dict[str, Any]:
+        return _run_with_climate_leaf_lock(
+            run_wd,
+            lambda: self._resync_base_project_attributes_owned(run_wd, prep, logger),
+            purpose="batch-run-base-resync",
+        )
+
+    def _resync_base_project_attributes_owned(
+        self,
+        run_wd: str,
+        prep: RedisPrep,
+        logger: logging.Logger,
+    ) -> Dict[str, Any]:
         changes: List[Dict[str, Any]] = []
         errors: List[str] = []
         invalidate_tasks: List[TaskEnum] = []
@@ -1303,7 +1361,7 @@ class BatchRunner(NoDbBase):
                 continue
 
             try:
-                _base_document, base_state = _load_nodb_document(base_path)
+                base_document, base_state = _load_nodb_document(base_path)
                 run_document, run_state = _load_nodb_document(run_path)
             except (OSError, ValueError, json.JSONDecodeError) as exc:
                 errors.append(f"{filename}: {type(exc).__name__}: {exc}")
@@ -1334,10 +1392,40 @@ class BatchRunner(NoDbBase):
                     file_changed = True
 
             if file_changed:
-                _write_nodb_document(run_path, run_document)
-                for task in rule["invalidate_tasks"]:
-                    if task not in invalidate_tasks:
-                        invalidate_tasks.append(task)
+                if filename == "climate.nodb":
+                    # Initial comparison is advisory; establish the mutation
+                    # base again inside the short controller transaction.
+                    changes[:] = [change for change in changes if change["file"] != filename]
+                    # Apply the normal reader's legacy-module admission before
+                    # decoding allowlisted enum values from the base document.
+                    Climate._ensure_legacy_module_imports(json.dumps(base_document))
+                    controller = Climate.getInstance(run_wd)
+                    with finalize_derived_build(controller):
+                        _fresh_document, fresh_state = _load_nodb_document(run_path)
+                        attributes = _base_project_resync_attributes(
+                            filename, rule["attributes"], base_state, fresh_state,
+                        )
+                        file_changed = False
+                        for attr in attributes:
+                            if attr not in base_state:
+                                continue
+                            value = base_state[attr]
+                            previous = fresh_state.get(attr, _MISSING_STATE_VALUE)
+                            if previous is not _MISSING_STATE_VALUE and previous == value:
+                                continue
+                            changes.append({
+                                "file": filename, "attribute": attr,
+                                "current": None if previous is _MISSING_STATE_VALUE else _json_clone(previous),
+                                "base": _json_clone(value),
+                            })
+                            setattr(controller, attr, jsonpickle.decode(json.dumps(value)))
+                            file_changed = True
+                else:
+                    _write_nodb_document(run_path, run_document)
+                if file_changed:
+                    for task in rule["invalidate_tasks"]:
+                        if task not in invalidate_tasks:
+                            invalidate_tasks.append(task)
 
         invalidated_task_values: List[str] = []
         for task in invalidate_tasks:

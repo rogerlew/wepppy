@@ -93,7 +93,7 @@ class ClimateBuildRouter:
         assert not climate.islocked()
 
         staged_observed = (
-            climate.climate_mode == ClimateMode.GridMetPRISM
+            climate.climate_mode in (ClimateMode.GridMetPRISM, ClimateMode.Observed, ClimateMode.ObservedPRISM)
             and climate.climate_spatialmode != ClimateSpatialMode.MultipleInterpolated
         )
         if not staged_observed:

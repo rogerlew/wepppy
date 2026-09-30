@@ -121,7 +121,7 @@ def publish_files(staged: str | Path, destination: str | Path, controller, *, re
     published = []
     completed = False
     unknown_commit = False
-    backup = Path(tempfile.mkdtemp(prefix=".derived-backup-", dir=destination))
+    backup = Path(tempfile.mkdtemp(prefix="derived-backup-", dir=destination))
     cleanup = False
     try:
         try:
