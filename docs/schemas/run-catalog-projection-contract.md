@@ -1,10 +1,10 @@
 # Run catalog PostgreSQL projection specification
 
-Status: implementation specification, 2026-09-30; implementation pending.
-The operator endorsed the architecture and requested **forest → forest1 →
-wepp1** rollout. Detailed semantics below require the repository's contract
-checkpoint before runtime edits; independent reviews and the ancestor commit
-are not yet complete. This document is not deployment evidence.
+Status: implementation in progress, 2026-09-30; deployment on hold.
+The operator authorized execution through readiness for **forest**, with later
+**forest1 → wepp1** rollout. Independent contract reviews passed and accepted
+checkpoint `db8e6be126fb231f16dd5e76f322d2b03089c10c` precedes runtime edits.
+This document is not deployment evidence.
 
 Execution: [work package](../work-packages/20260930_run_catalog_projection/package.md)
 and [ExecPlan](../work-packages/20260930_run_catalog_projection/prompts/active/run_catalog_projection_execplan.md).
@@ -260,6 +260,12 @@ refresh pool separate from request capacity and report transaction/job age.
 Bounded concurrency avoids a new lease table/service. Hard NFS waits are not
 bounded by Python timeouts; operational job/transaction limits are not a promise
 of hard cancellation. Once the transaction is aborted it cannot publish.
+The two-reader physical bound assumes intact coordination; lost coordinator
+connections cannot cancel kernel-blocked reads. Check coordination again after
+final source verification and discard work on detected loss without reconnecting
+to publish it. This check is not atomic with a separate per-run commit; the
+per-run advisory transaction, revision, incarnation and source-version fences
+remain authoritative. Do not claim an additional atomic coordinator-loss fence.
 
 ### 6.3 Non-mutating extraction
 
@@ -501,6 +507,13 @@ not permission to run a legacy reader or lose post-commit failure telemetry.
 
 The operator preflight rejects read promotion until migration, catalog writes,
 producer initialization, a healthy sweep, and coverage/freshness checks pass.
+The CLI reports `technical_ready` for its automated SQL/RQ observations, never
+unqualified promotion readiness. It always reports
+`gate_status=operator_evidence_required` and the remaining operator witnesses.
+A zero CLI exit is not activation, cutover, or promotion authorization: the
+completed, retained stage-specific run sheet in section 11.1 is mandatory.
+This separates machine observations from operator evidence without adding an
+evidence-ingestion protocol or weakening any release obligation.
 After cutover, loss of those dynamic signals marks readiness unhealthy and
 reports the specified stale/error states; it does not introduce a startup loop
 or silently change read mode. Test full-stack restart with the scheduler absent
@@ -680,6 +693,29 @@ new jobs. An incompatible consumer blocks sweep activation and promotion;
 resolve producer/consumer rollout scope explicitly. Do not silently deploy
 additional hosts, remove their queue subscriptions, or introduce a new queue.
 Retain mixed-version and wrong-database preflight rejection evidence.
+
+URI hostname/port/database hashes are configuration hints and admission
+namespaces, not database identity or compatibility proof. Before admission,
+prove job-origin database access using fresh random signed-bigint advisory
+nonces: hold an exclusive transaction-scoped lock on one nonce in the origin
+database; each eligible consumer uses its actual adapter, credentials and
+effective configuration on a separate connection to probe that nonce and a
+fresh unheld control nonce with `pg_try_advisory_xact_lock(bigint)`. Require
+held nonce → false and control nonce → true while the coordinator demonstrably
+retains its lock. Errors, timeouts, lost coordinator, or unexpected results mean
+HOLD. End all probe transactions explicitly; never leave session locks in pools.
+Identically named databases in separate Compose networks must fail this test.
+Record the consumer revision, effective configuration, runtime identity, mounts,
+probe results, and mutation/readback witnesses. Restart, candidate/configuration/
+mount changes, or eligible-consumer membership changes invalidate affected
+witnesses; revalidate before resuming admission with existing drain/deploy tools.
+Configuration agreement cannot waive this connection-bound proof; operator
+evidence cannot waive a failed probe or other failed automated check.
+
+Keep gates in order: consumer proof before sweep activation; producer witnesses,
+coverage, semantic comparisons and omission disposition before read cutover;
+latency, full reconciliation and at least 48 healthy hours before host promotion.
+The final observation window is not a prerequisite for initial shadow activation.
 
 Seed/backfill while reads remain legacy. Classify every registration; unresolved
 transient read failures block cutover. Missing/invalid Ron needs an explained
