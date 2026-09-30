@@ -1,6 +1,7 @@
 # Catalog projection contract checkpoint
 
-**Status**: Prepared; independent review and ancestor commit pending.
+**Status**: Independent correctness/security contract reviews PASS; all findings
+closed. Detailed ratification and accepted ancestor pending.
 **Date**: 2026-09-30 UTC.
 **Starting implementation revision**: `c8497e2cbf210ebc74ef51e2c73cb5351373da2f`.
 
@@ -21,7 +22,7 @@ as the required independent contract reviews.
 | `docs/schemas/nodb-persistence-concurrency-contract.md` | Explicit optional post-commit integration replaces direct web dependency; durable file authority unchanged |
 | `docs/ui-docs/contracts/runs-catalog-ttl-deletion-contract.md` | SQL projection as read source after cutover; freshness-dependent TTL suppression; policy/deletion authority unchanged |
 | `docs/adrs/ADR-0078-run-catalog-projection.md` | Architecture rationale and proposed workflow limits |
-| `docs/schemas/rq-response-contract.md` | Preserve response/error semantics for producer/worker boundaries |
+| `docs/schemas/rq-response-contract.md` | Catalog-only identifier exception and bounded job-info/jobstatus disclosure, including outer failures and retained-record rollback; unrelated polling preserved |
 | `docs/schemas/weppcloud-csrf-contract.md` | Preserve existing session/mutation protection; no new browser mutation endpoint |
 | `docs/schemas/run-sync-contract.md` | Preserve transfer success/provenance order; catalog notification only after completed source publication |
 | `docs/standards/contract-first-change-standard.md` | Reviews and accepted contract ancestor before runtime implementation |
@@ -51,12 +52,15 @@ latency evidence, not only row/job counts.
 
 ## Review and commit gate
 
-Independent contract reviewer 1: pending.
-Independent contract reviewer 2: pending.
+Independent contract reviewer 1: Dirac; final contract-only PASS, COR-01 through COR-05 closed.
+Independent contract reviewer 2: Ohm; final contract-only PASS, SEC-01 through SEC-05 closed.
 Detailed operator ratification/disposition: pending.
-Correctness/security review artifacts: prepared, not signed off.
-Unresolved finding disposition: no review findings have yet been collected.
-Contract ancestor SHA: not created; no commit was requested in this task.
+Correctness/security initial verdicts: HOLD; post-fix verdicts: PASS. No risk acceptance.
+See [review disposition](2026-09-30_contract_review_disposition.md) for all
+findings, changes, and supplemental OPS-01 closure.
+Specification commit: `62d4273d9`, authorized by the operator's prior commit request.
+Accepted contract ancestor SHA: not yet established; that specification commit
+predates the independent reviews and cannot be represented as their checkpoint.
 
 Once reviews and detailed disposition are complete and committing is authorized,
 commit this specification/ADR/shared-contract set separately, then record its

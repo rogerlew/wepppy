@@ -2,11 +2,17 @@
 
 ## Metadata and triage
 
-Reviewer: unassigned. Date: 2026-09-30 UTC. Base:
+Reviewer: Ohm, independent read-only `security_reviewer` agent
+`01a0f460-864f-7eb3-87aa-d9e763b175f5`. Date: 2026-09-30 UTC.
+Reviewed specification: `62d4273d9006156745649b12f3bb96225cb5042f`
+plus the author's section 8 startup/readiness amendment. Runtime baseline:
 `c8497e2cbf210ebc74ef51e2c73cb5351373da2f`.
 Scope: authenticated catalog/query changes, source extraction, worker adapter,
 registration lifecycle, and operator controls. Impact: **high**; dedicated
-review required. Gate: **pending / hold**, not a completed review.
+review required. Initial contract-only verdict: **HOLD**, one high and three
+medium findings. Final independent contract-only verdict: **PASS** after two
+amendment rounds; runtime checks below remain
+future implementation obligations, not evidence claimed by contract review.
 
 Related: [correctness review](2026-09-30_correctness_review.md),
 [contract decision](2026-09-30_contract_decision.md), and
@@ -46,11 +52,26 @@ must survive every protection, alongside rejection of hostile inputs.
 
 ## Findings, evidence, and sign-off
 
-No independent findings or acceptance evidence collected yet. Record each
-finding's severity, surface, evidence, remedy, and disposition. Close medium/high
-findings before release; any accepted residual risk needs security reviewer
-recommendation and explicit owner acknowledgment. A passing unit suite does
-not replace real file/SQL and production-equivalent workflow evidence.
+| ID | Severity | Finding | Author disposition |
+| --- | --- | --- | --- |
+| SEC-01 | High | Source links/event identity could bind another project's metadata to an authorized row | Explicit registration/configuration/fixed-source binding, descriptor containment, and supported same-project/grouped/legacy cases |
+| SEC-02 | Medium | Existing grouped path resolution repairs files | Pure resolver, no repair calls, full directory/link inventory comparison |
+| SEC-03 | Medium | Old shared batch consumers and rollback can encounter an unknown callable | All-consumer activation gate; catalog-only queued/started drain protocol before incompatible rollback |
+| SEC-04 | Medium | Public job-info exposes multi-user sweep details | Reserved opaque namespace and narrowly scoped single/batch/recursive/failure redaction; matching RQ response amendment |
+| SEC-05 | Medium | Reserved prefix conflicts with canonical identifier generation | Explicit catalog-only prefixed UUID exception and exact-string handling; duplicate of COR-05 |
 
-Security reviewer sign-off: pending. Package owner acknowledgment: pending.
-Release recommendation: hold until required review/evidence exists.
+Ohm independently confirmed OPS-01's static-startup/dynamic-readiness correction.
+First re-review closed SEC-01/02/03 but held SEC-04 for jobstatus and outer
+polling errors; both contracts now explicitly cover those pre-deserialization
+and aggregation paths. All five security findings were accepted for correction;
+none is risk-accepted. COR-04 separately requires redaction-compatible public
+serializers throughout terminal job retention, even after application rollback.
+See the [disposition record](2026-09-30_contract_review_disposition.md) for source
+evidence, detailed scenarios, and validation cases. Failed post-replace mirror
+work remains distinct from existing explicit monotonic-signature errors.
+
+Ohm confirmed SEC-01 through SEC-05, OPS-01, and COR-04 closed at contract level;
+no unresolved security/operations contract blockers were identified.
+Independent post-fix contract verdict: **PASS**. Runtime security validation,
+operator policy ratification, and deployment release recommendation remain
+separate gates; no runtime or environment proof is claimed.

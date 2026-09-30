@@ -38,6 +38,12 @@ Creation access policy and its conditional 403/503 errors are defined in
 - Existing bare-hex job IDs remain valid compatibility records and MUST remain
   inspectable for their Redis lifetime. This compatibility does not authorize
   new bare-hex RQ job IDs.
+- Catalog-only exception (specified; implementation pending): sweep IDs use
+  `run_catalog_sweep_<canonical-hyphenated-UUID>`, with the suffix produced by
+  `wepppy.rq.job_id.new_rq_job_id()`. Preserve the complete prefixed exact string
+  through enqueue, coalescing, persistence, lookup, polling, and cancellation.
+  This reserved prefix enables classification before deserialization; see
+  [maintenance disclosure](#run-catalog-maintenance-disclosure-specified-implementation-pending).
 - These rules apply to RQ job IDs, not error IDs, JWT `jti` values, filenames,
   lock-owner tokens, or other non-job correlation identifiers.
 - Implementation conforms as of `41b23983d`: preallocated UUID RQ job IDs use
@@ -208,6 +214,33 @@ Landuse first-class route notes (2026-04-24):
   the non-privileged path never issues a stop command after handoff.
 - Other queue origins, including verified Culvert jobs using the legacy scope,
   retain their existing cancellation behavior.
+
+### Run catalog maintenance disclosure (specified; implementation pending)
+
+The [catalog projection contract](run-catalog-projection-contract.md#91-public-rq-disclosure-boundary)
+defines a bounded disclosure exception for server-minted catalog sweep jobs in
+the reserved `run_catalog_sweep_` ID namespace using the identifier exception
+above. Single/batch job-info, recursive nodes, jobstatus, outer polling error
+responses, and failed fetch/import/abandonment paths must not expose projection
+values, run/account identifiers, source paths, database connection details,
+aggregate deployment counts, raw job results, or traceback fields for these
+jobs. Return constant description `Run catalog maintenance`, `result=null`,
+`exc_info=null`, normal status/timestamps, and on failure only the specified
+bounded maintenance error plus opaque correlation ID. Set identifying metadata
+before enqueue; the reserved opaque job ID permits safe classification when
+deserialization fails. Private operator CLI/server logs retain detailed evidence.
+
+This exception covers unexpected failures as well as expected ones because
+maintenance spans multiple users. Successful jobstatus schemas remain unchanged;
+reserved-ID status fetch/deserialization/aggregation errors use the same bounded
+maintenance error, never traceback text. Redaction-compatible public serializers
+must remain deployed for the entire retained lifetime of catalog jobs, including
+terminal jobs and application rollback; see catalog section 11.5. It does not alter
+polling authorization, or traceback behavior for unrelated jobs. Verify anonymous
+and unrelated callers across single/batch success, SQL/filesystem failures,
+import failures, status aggregation errors, abandoned workers, and retained failed
+jobs after rollback. Implementation and checkpoint are pending;
+do not treat this amendment as deployed redaction.
 
 ### WBT DEM-boundary controlled failure
 

@@ -2,11 +2,14 @@
 
 ## Metadata and status
 
-Reviewer: unassigned. Date: 2026-09-30 UTC. Scope: specification and future
-implementation. Base: `c8497e2cbf210ebc74ef51e2c73cb5351373da2f`.
+Reviewer: Dirac, independent read-only `reviewer` agent
+`01a0f460-85ce-7b71-9137-0ceea20a52e8`. Date: 2026-09-30 UTC.
+Reviewed specification commit: `62d4273d9006156745649b12f3bb96225cb5042f`.
+Runtime baseline: `c8497e2cbf210ebc74ef51e2c73cb5351373da2f`.
 Authority: [catalog specification](../../../schemas/run-catalog-projection-contract.md).
-Gate: **pending / hold**. This is a prepared review artifact, not a completed
-independent review. No passing verdict or finding count is asserted.
+Initial contract-only verdict: **HOLD**, with two medium and one low finding.
+Final independent contract-only verdict: **PASS**, after two amendment rounds.
+Runtime tests/deployment are future gates, not claimed by this review.
 
 ## User outcome and valid states
 
@@ -43,8 +46,21 @@ reconciliation. Source counts/mtime/RQ SUCCESS are not substitutes for content.
 
 ## Findings and sign-off
 
-No independent findings collected yet. Reviewer must enumerate severity,
-source, affected valid state, evidence, remedy, and disposition for each finding.
-Close all medium/high findings before acceptance. Security review is separate
-and cannot substitute for correctness or user-experience approval.
-Reviewer sign-off and package-owner disposition: pending.
+| ID | Severity | Finding | Author disposition |
+| --- | --- | --- | --- |
+| COR-01 | Medium | TTL failed-source retention conflicts with ready-only expiry CHECK | Clear stored expiry on failure; preserve prior observation time and successful Ron updates; require recovery transition test |
+| COR-02 | Medium | Finalizer-gated pending state lacks a recoverable completion predicate | Define metadata readiness independent of job completion; specify partial/failed/lost-event/restart behavior and initial optional-TTL failure visibility |
+| COR-03 | Low | Null policy bypasses the original CHECK through SQL three-valued logic | Require null-safe `IS TRUE`; specify constraint truth table |
+| COR-04 | High | Application rollback removes redaction while terminal diagnostics remain public | Require compatible public serializers throughout retained job lifetime, including rollback |
+| COR-05 | Medium | Reserved prefix conflicts with canonical identifier generation | Explicit catalog-only prefixed UUID exception and exact-string handling; duplicate of SEC-05 |
+
+Exact references, scenario, remedies, and other review obligations are in the
+[disposition record](2026-09-30_contract_review_disposition.md). No risk acceptance
+was requested. Reviewer found no additional blockers in the existing locking
+intent but requires future coordinator-loss, revision, UUID, and coalescing
+tests. The scheduler wakeup and portable extraction details were also clarified.
+
+Dirac confirmed COR-01 through COR-05 closed and supported SEC-04 closure;
+no new blocking contradictions were found. Independent post-fix verdict: **PASS**.
+Operator detailed-policy ratification
+and runtime correctness/UX sign-off remain separate requirements.

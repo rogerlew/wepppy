@@ -1,6 +1,7 @@
 # ADR-0078: Portable projects with a PostgreSQL runs catalog
 
-Status: architecture endorsed; detailed operating limits proposed for contract review.
+Status: architecture endorsed; independent contract reviews passed;
+detailed operating limits remain proposed for operator ratification.
 Date: 2026-09-30. Implementation and deployment pending.
 
 ## Context and decision
@@ -23,7 +24,10 @@ schema, protocols, user behavior, and release sequence.
 
 - Venue: Codex conversation, September 30, 2026, America/Los_Angeles; artifact
   authoring recorded in UTC in the work-package tracker.
-- Participants: requesting operator and Codex; no independent reviewers yet.
+- Participants in the original decision: requesting operator and Codex.
+  Independent contract reviewers on 2026-09-30: Dirac (correctness) and Ohm
+  (security/operations); findings and post-fix verdicts are retained in the
+  [disposition record](../work-packages/20260930_run_catalog_projection/artifacts/2026-09-30_contract_review_disposition.md).
 - Decision owner: requesting operator for portable-project requirement,
   architecture endorsement, and forest → forest1 → wepp1 sequence.
 - Specification author: Codex. Runtime implementer: not yet assigned.
@@ -76,6 +80,24 @@ Known-dirty/old TTL observations are suppressed. These are explicit contract
 deltas, not incidental fallbacks; correctness/security review must examine them.
 Missing/invalid Ron retains current omission behavior. Readonly and deletion
 authority remain in their existing mutation paths.
+
+## Contract review refinements
+
+Readiness depends on available Ron/READONLY metadata, not job completion or
+delivery of a finalizer notification. This preserves the existing reader's
+ability to list a partially initialized project and allows reconciliation to
+recover lost final events without a new durable lifecycle marker. Optional TTL
+failure clears the stored expiration, retains its observation time, and does
+not hide otherwise usable initial metadata. The expiration CHECK is null-safe.
+
+Source resolution has a pure, descriptor-bound containment seam; grouped input
+repair is not part of catalog reads. Every eligible batch consumer must support
+the sweep before activation, even if older writers could otherwise be tolerated
+through reconciliation. Public RQ details for this multi-user maintenance job
+have a narrowly scoped redaction rule. Startup checks static configuration;
+live source/DB/sweep readiness gates promotion rather than process construction.
+These refinements close design contradictions without changing file authority,
+adding infrastructure, widening runtime permissions, or claiming runtime proof.
 
 ## Risk, validation, and rollback
 

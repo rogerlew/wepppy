@@ -4,8 +4,9 @@
 This ExecPlan is a living document maintained under
 `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries,
 Decision Log, and Outcomes & Retrospective current together with this package's
-`tracker.md`. The current authorized task is specification authoring, not runtime
-implementation or deployment. No other active package is being executed here.
+`tracker.md`. The current authorized task is contract review and findings
+disposition, not runtime implementation or deployment. No other active package
+is being executed here.
 
 
 ## Purpose / Big Picture
@@ -32,7 +33,9 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 - [x] (2026-09-30 UTC) Profile production and retain the 169.56-second baseline.
 - [x] (2026-09-30 UTC) Record portable-project requirement and operator-endorsed architecture.
 - [x] (2026-09-30 UTC) Author canonical specification, ADR, shared amendments, package, and rollout plan.
-- [ ] M0: Independent contract reviews, detailed ratification, and ancestor checkpoint.
+- [x] (2026-09-30 UTC) Obtain independent initial correctness/security findings.
+- [x] (2026-09-30 UTC) Close all findings with independent post-fix contract PASS verdicts.
+- [ ] M0: Detailed ratification and accepted ancestor checkpoint remain separate requirements.
 - [ ] M1: Schema, repository, extractor, operator seed/status/compare, and direct tests.
 - [ ] M2: Portable notification interface and complete process/producer wiring.
 - [ ] M3: Serialized refresh, reconciliation, scheduler coalescing, CLI, and capacity proof.
@@ -59,6 +62,14 @@ The scheduler already accepts per-task startup/jitter overrides, but currently
 enqueues each due task without catalog-specific coalescing. A 15-second sweep
 therefore needs admission coalescing to avoid growing the batch queue.
 
+Initial review found a TTL CHECK/retention contradiction, null-policy CHECK
+loophole, and finalizer-gated readiness without durable completion evidence.
+Metadata availability now defines readiness, optional TTL failure clears stored
+expiry, and the CHECK is null-safe. Security review requires descriptor-bound
+source containment and pure grouped resolution, compatible remote sweep
+consumers, and a public-safe catalog-specific RQ diagnostic boundary. The
+scheduler's 30-second sleep also needs bounded wakeup for the 15-second task.
+
 
 ## Decision Log
 
@@ -72,19 +83,28 @@ Decision (2026-09-30 UTC, operator): stage forest → forest1 → wepp1. Rationa
 validate integration on development and production-compose rehearsal before
 production. This does not select the companion worker as forest1 acceptance.
 
-Specification decision (2026-09-30 UTC, Codex; review pending): one projection
+Specification decision (2026-09-30 UTC, Codex; technical review passed): one projection
 table with per-row revision and scheduling metadata, bounded existing-queue
 refresh, and explicit stale-state presentation. No cursor/outbox table or new
 service. Numeric limits and detailed UI policies are recorded in ADR-0078 and
 must pass the contract checkpoint and measured capacity gate.
 
+Review disposition (2026-09-30 UTC): Dirac and Ohm independently confirmed
+contract-only PASS after two amendment rounds. All ten distinct findings were
+corrected, including TTL constraints/readiness, source identity/pure resolution,
+worker compatibility, polling/identifier/rollback safety, and startup readiness.
+Detailed operator ratification and runtime evidence are not supplied by review.
+
 
 ## Outcomes & Retrospective
 
 
-Specification and executable sequence authored. Runtime is unchanged; no
-independent review, implementation test, migration, deployment, or incident
-resolution is claimed. The next work is M0 contract review, not live activation.
+Specification and executable sequence authored; independent correctness and
+security contract reviews passed with all findings closed. Runtime is unchanged;
+no implementation test, migration, deployment, or incident resolution is claimed.
+Next are detailed operator ratification and the accepted checkpoint, not activation.
+Review-session documentation lint, relative link targets, and whitespace checks
+passed. Spelling preview left unrelated existing tracker prose unchanged.
 
 
 ## Context and Orientation
@@ -132,7 +152,9 @@ Keep shared table metadata separate from importing the full Flask app; bind
 app and worker sessions through the deployment adapter. Implement state/type
 constraints, seed/rebuild incarnation fencing, and current/legacy extraction
 without NoDb construction or file writes. Real PostgreSQL and filesystem tests
-must establish schema and value parity. Existing routes remain legacy.
+must establish schema and value parity, null-safe TTL transitions, pure grouped
+resolution, descriptor-bound containment, and unchanged directory/link inventories.
+Existing routes remain legacy.
 
 M2 adds `wepppy/nodb/persistence_events.py`, frozen commit records, explicit
 observer installation, and bounded deployment SQL notifications. Replace the
@@ -148,6 +170,9 @@ per-row reconciliation progress, and the global sweep/concurrency boundary.
 Implement remaining CLI subcommands and one bounded task in
 `wepppy/rq/run_catalog_rq.py`. Reuse scheduler per-task delay/jitter controls
 and add opt-in atomic coalescing without changing existing task scheduling.
+Bound scheduler wakeup by the next catalog due time. Implement the reserved
+prefixed UUID exception and public-safe job-info/jobstatus outer error handling,
+including failures before deserialization; test unrelated polling compatibility.
 Update `wepppy/rq/job-dependencies-catalog.md`, generated graph, and live tree
 evidence. Measure queue delay, source-read capacity, and full-reconciliation
 completion under sustained writes; do not add queues or services without a
@@ -169,6 +194,10 @@ and tests the original large account. Each stage retains 48 healthy hours and
 a full reconciliation cycle. Seven further healthy days after wepp1 precede
 the reviewed legacy-read retirement disposition. Do not accelerate calendar
 observation by repeatedly invoking a sweep or calling unit tests a soak test.
+Gate every eligible queue consumer before admission; drain/remove catalog-only
+work before incompatible worker rollback. Public serializers must retain
+redaction for the lifetime of retained catalog job records, including terminal
+failures; test anonymous polling after rollback independently of queue draining.
 
 
 ## Concrete Steps

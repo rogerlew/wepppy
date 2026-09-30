@@ -111,10 +111,19 @@ do not introduce new coordinate cutoffs. Reconstruct the existing `map_center`
 pair or null in JSON. Unsupported map data yields null map fields and an
 operator diagnostic, not omission of an otherwise valid list row.
 
-Enforce `ttl_deletion_at IS NULL OR (ttl_policy = 'rolling_90d' AND
-ttl_state = 'ready')`. TTL `ready` means a readable mapping normalized
+Enforce the null-safe constraint `ttl_deletion_at IS NULL OR
+((ttl_policy = 'rolling_90d' AND ttl_state = 'ready') IS TRUE)`.
+The `IS TRUE` is required: PostgreSQL CHECK accepts SQL NULL, which must not
+permit a non-null expiration with a null policy. TTL `ready` means a readable mapping normalized
 successfully, not necessarily an active expiration. Disabled, excluded,
 unknown-policy, or invalid-expiration states have null expiration.
+
+Constraint validation must cover null expiration with every admitted state/
+policy (accepted), non-null expiration with ready/rolling policy (accepted),
+and non-null expiration with null/unknown/non-rolling policy or any non-ready
+state (rejected). On transient TTL failure clear the stored expiration; it is
+explicitly exempt from last-good value retention. Preserve its prior successful
+observation time and retain policy only as diagnostic history until reread.
 
 ### 3.2 Indexes, migration, and rebuild
 
@@ -191,9 +200,24 @@ does not constitute wired completion.
 Maintain an exact writer/process/test/live-evidence inventory in the package.
 Search direct writes, not just setters. Grouped and legacy identity resolution
 must preserve the current mapping; a child notification cannot register or
-invalidate an unrelated parent. Registration before files are ready remains
-pending until the finalizer invalidates. Missing projections for existing
+invalidate an unrelated parent. Catalog readiness means availability of the
+required metadata, not successful completion of a fork/create/model job.
+Finalizer notifications accelerate another observation but are never the
+authority for readiness. Missing projections for existing
 registrations may be seeded; missing registrations are never synthesized.
+
+Registration before enqueue starts with pending/unobserved metadata. If the
+first extraction finds missing Ron, classify it missing/unavailable as the
+existing reader would; if readable Ron and a known READONLY state appear during
+publication, the row can become visible before job completion. No row promises
+that the model/job succeeded. Successful finalization requests a fresh snapshot.
+If that notification is lost, reconciliation reaches the same result from
+current files. Failed/abandoned creation can remain missing/unavailable or have
+visible usable metadata, independently of the job's failed status. Restart and
+backfill use these same rules, with no hidden finalizer latch or completion
+marker. Preserve existing job-status/error surfaces for lifecycle progress.
+Test registration-before-enqueue, absent/partial sources, successful and failed
+publication, lost final notification, abandonment, and restart/backfill.
 
 ## 6. Synchronization protocol
 
@@ -278,6 +302,12 @@ Database-only status/seed/preflight operations do not take the sweep lock.
 
 Use the scheduler's existing per-task overrides: `initial_delay_seconds: 0`
 and `jitter_seconds: 0` for this task only. Preserve every other task's behavior.
+The current scheduler loop also sleeps 30 seconds; zero startup delay/jitter
+alone cannot achieve a 15-second cadence. While this task is enabled, bound
+sleep by its next due time as well as the configured ordinary sleep interval.
+Do not change other tasks' intervals, initial delays, jitter, or failure-retry
+semantics. Test real dispatch timestamps and disable/re-enable behavior, not
+only configuration parsing, before claiming the cadence target.
 `wepppy/tools/scheduler.py` currently enqueues each due invocation; a fixed job
 ID alone is not proof of deduplication. Add opt-in coalescing for this task:
 atomically admit at most one queued/started sweep per deployment identity using
@@ -314,6 +344,55 @@ is neither an atomic NFS/PostgreSQL transaction nor a transactional outbox.
 Reconciliation supplies bounded repair under healthy storage/database operation.
 If measured capacity fails acceptance, block promotion and document evidence
 before adding infrastructure or durable project-side notification state.
+
+### 6.5 Source identity, containment, and pure resolution
+
+Bind every observation to an existing registration, its validated canonical
+run identifier, and a location derived from trusted deployment root/group
+configuration. Neither `ProjectCommit.wd`, Redis path-cache values, stored
+`source_locator`, nor a path embedded in Ron can change that binding. The
+notification adapter performs only lexical identifier/location consistency
+checks using those configured mappings; it does no filesystem resolution on
+the save path. Inconsistent event pairs are rejected as catalog hints with a
+bounded diagnostic. Existing parent-run last-modified mirroring for grouped
+controllers is a separate explicitly mapped action; it cannot redirect a child
+catalog observation into its parent or synthesize child registration.
+
+Extraction and pre-publication identity checks require a **side-effect-free
+resolver**, separate from repair behavior in `helpers.get_wd`. Preserve primary,
+legacy, grouped, and operator-configured root mappings, but do not invoke
+`_ensure_omni_shared_inputs`, create/delete/repair links, stamp files, or use
+request context overrides. Existing ordinary workflow repair remains unchanged.
+Resolve/check the expected project boundary before opening fixed source names
+`ron.nodb`, `READONLY`, and `TTL`. A source JSON field never supplies filenames.
+
+Operator-configured storage-root aliases may resolve to their configured
+canonical target. Below that boundary, project-controlled links cannot redirect
+the registered project root, its ancestors, or a catalog source into another
+project or outside its approved source boundary. A source link wholly inside
+the same verified project boundary is allowed, with the current absent-marker
+semantics preserved for genuinely missing targets. Established explicit grouped
+mapping, not an arbitrary symlink, defines a child's boundary. Shared-input
+links such as climate/watershed/DEM remain valid and untouched; they are not
+catalog sources. A previously supported deployment alias requiring a different
+source binding must be represented in trusted configuration and covered by
+legacy parity tests before cutover, not silently rejected or trusted on sight.
+
+Containment must be bound to the actual opened descriptor/directory chain;
+`realpath`/`exists` followed by an unchecked `open` is insufficient. Use a
+descriptor-relative constrained traversal/open, or equivalent verified-open
+primitive, and verify descriptor identity through publication checks. Changed
+ancestors, cross-project redirects, and mismatched source bindings discard the
+observation with an explicit internal `source_scope_mismatch`/drift diagnostic.
+They never publish another project's metadata and never repair its files.
+Existing coherent-read helpers may be reused only behind that containment seam;
+their current ordinary `open` is not itself a containment guarantee.
+
+Real-file tests must cover cross-project leaf and ancestor links, event/path
+mismatch, path replacement races, valid legacy/grouped roots, within-project
+links, and standalone operation. Compare the entire directory/link inventory
+before and after extraction and `compare`, including missing/dangling shared
+links; checking only the three source file hashes cannot prove a read is pure.
 
 ## 7. Public reads and compatibility
 
@@ -357,7 +436,22 @@ Confirmed Ron absence/invalidity must not be overridden by retained old fields.
 An I/O error is not proof of deletion. Successful READONLY absence is distinct
 from failed stat/permission checks. On partial failure, publish successful
 source observations and failed source states, retain last-good failed-source
-values, but do not acknowledge the dirty revision. A clean reconciliation that
+values **except clear `ttl_deletion_at` on TTL failure**, but do not acknowledge
+the dirty revision. Keep last completed `source_versions` observations for
+failed sources; failure state/error metadata records the unsuccessful attempt.
+For Ron, a retained usable snapshot requires a last completed source token in
+`ready` state. Confirmed missing/invalid observations replace that token and
+clear the obsolete display values, so a later I/O error cannot revive a row
+already confirmed absent/invalid. Required Ron and READONLY observations, not
+aggregate `indexed_revision > 0`, determine initial visibility: an initial
+successful Ron/READONLY read with unreadable optional TTL is a visible stale
+row with null expiration, not an indefinitely hidden new project.
+
+For ready(active TTL) → unreadable → ready, publish any simultaneous successful
+Ron change, clear expiry during failure, keep the TTL observation timestamp
+unchanged, leave the row dirty, then restore only the newly read expiry/time
+after recovery. Require this transition as a real SQL constraint/state test.
+A clean reconciliation that
 finds transient failure makes the row dirty before returning. Invalid/missing
 sources are terminal observations and can acknowledge the generation; they
 remain eligible for future reconciliation.
@@ -395,11 +489,24 @@ Separate persistence integration, projection maintenance, and read selection:
 - `WEPPCLOUD_RUN_CATALOG_READ_MODE=legacy|postgres`; staging default `legacy`.
 - Explicit scheduler task enablement; a read flag never silently starts work.
 
-Reject invalid combinations, including database reads without catalog writes
-and a healthy sweep. Enabled but missing adapter/configuration is an explicit
-preflight error. Transient runtime DB failure retains the post-commit semantics
-above. Shadow operation means catalog writes/sweeps plus legacy reads and
-operator-run comparisons, not double-scanning every request.
+Separate static startup validation from live promotion readiness. Startup
+rejects unknown modes, missing required adapter/secret configuration, and
+incompatible selections such as database reads with timestamp-only writes.
+Do not require a currently running sweep, recent successful reconciliation,
+or a successful live database connection to construct/start a correctly
+configured process: canonical deployment recreates workers and scheduler, and
+outage recovery must be able to restart them. Missing schema or database
+unavailability is an explicit readiness failure and database-mode request error,
+not permission to run a legacy reader or lose post-commit failure telemetry.
+
+The operator preflight rejects read promotion until migration, catalog writes,
+producer initialization, a healthy sweep, and coverage/freshness checks pass.
+After cutover, loss of those dynamic signals marks readiness unhealthy and
+reports the specified stale/error states; it does not introduce a startup loop
+or silently change read mode. Test full-stack restart with the scheduler absent
+initially, database outage at restart, and recovery without editing modes.
+Shadow operation means catalog writes/sweeps plus legacy reads and explicit
+operator comparisons, not double-scanning every request.
 
 Adapter limits start at connection timeout 1 second, pool wait 250 ms, SQL lock
 timeout 250 ms, statement timeout 1 second, and zero inline retries. Validate
@@ -456,6 +563,45 @@ members. Run inputs/outputs retain existing browse/download/archive observabilit
 Retain redacted source→SQL→JSON comparison evidence in the work package. Secrets
 follow current file conventions; a companion worker must use its job-origin
 database, not a database chosen from its physical hostname.
+
+### 9.1 Public RQ disclosure boundary
+
+Catalog sweeps use a trusted fixed callable and server-minted opaque job IDs
+of exact form `run_catalog_sweep_<canonical-hyphenated-UUID>`, using
+`wepppy.rq.job_id.new_rq_job_id()` for the suffix. This is the catalog-only
+exception to the shared RQ identifier generation rule. Enqueue, coalescing,
+persistence, lookup, polling, and cancellation preserve the complete exact
+string; unrelated identifiers are unchanged. IDs, job arguments, descriptions,
+and public metadata contain no account/run identifiers, database DSNs, host
+names, source paths, projection snapshots, or deployment-wide counts. Coalescing
+may use a private deployment key; it must not embed that private identity into
+the public job description or result.
+
+Both single and batch job-info serializers, including recursive nodes and
+fetch/import/abandonment failure paths for that reserved job namespace, expose
+only normal job identity/status/timestamps, the constant description
+`Run catalog maintenance`, `result=null`, and `exc_info=null`. Failures expose
+only `error.code=run_catalog_maintenance_failed`, message `Run catalog maintenance
+failed; consult operator diagnostics.`, and an opaque `error_id`. Do not depend
+only on a cooperative task catch: import failure, worker death, and generic RQ
+tracebacks also require this narrowly scoped serializer rule. The scheduler
+sets the identifying metadata before enqueue; the reserved opaque ID enables
+safe classification even when job deserialization fails.
+
+Detailed per-run outcomes, SQL/source errors, and aggregate counts remain in
+authenticated operator CLI/log evidence, correlated by job/error IDs. Public
+jobstatus retains its existing successful status schema, but reserved-ID errors
+in status fetch/deserialization/aggregation and outer polling handlers must use
+the same bounded maintenance error without traceback or private details.
+Classify the reserved ID before deserialization, not only inside job-info.
+This bounded exception is
+cross-linked in the RQ response contract; it changes no unrelated job's polling
+authorization or traceback behavior. Verify success, expected/unexpected SQL
+and filesystem failure, import failure, and abandonment through single/batch
+job-info and jobstatus (including outer error responses) as an anonymous or
+unrelated caller. Test exact-string generation/enqueue/fetch/cancellation and
+classification before deserialization. Job success still means an
+attempt completed, not that every projection is current.
 
 ## 10. Implementation sequence
 
@@ -525,6 +671,16 @@ candidate staging boundary, record the canonical command in its run sheet;
 do not invent a parallel image/registry workflow. Startup must support this
 schema-install phase without attempting catalog SQL prematurely.
 
+Before enqueueing any new sweep callable, inventory **every worker eligible to
+consume its existing queue**, including remote/companion workers. Each must
+support that callable and its reserved-job disclosure contract, have the correct
+job-origin database modes/secrets, and see the approved source mounts. An old
+writer can be tolerated through reconciliation only if it cannot consume these
+new jobs. An incompatible consumer blocks sweep activation and promotion;
+resolve producer/consumer rollout scope explicitly. Do not silently deploy
+additional hosts, remove their queue subscriptions, or introduce a new queue.
+Retain mixed-version and wrong-database preflight rejection evidence.
+
 Seed/backfill while reads remain legacy. Classify every registration; unresolved
 transient read failures block cutover. Missing/invalid Ron needs an explained
 omission manifest, not invented values. The observed 805 registered / 615
@@ -580,8 +736,9 @@ deployment is implied by this plan.
 Enable shadow writes/sweeps, backfill, compare, then cut over after preflight.
 Benchmark the operator-designated large account (user ID 11 during profiling),
 empty/small/shared/admin scopes, and map-data. Preserve privacy in artifacts.
-If old remote writers share the DB, explicitly measure their reconciliation-only
-recovery. Do not claim 60-second notification coverage for them; if real
+If old remote writers share the DB but cannot consume catalog sweeps, explicitly
+measure their reconciliation-only recovery. Eligible sweep consumers must all
+pass the compatibility gate in section 11.1. Do not claim 60-second notification coverage for old writers; if real
 workflows require it, block promotion until producer rollout scope is resolved.
 
 Mark deployed, environment-validated, and incident-resolved separately. The
@@ -605,6 +762,26 @@ Never drop tables, replay SQL into NoDb, delete project files, or clear unrelate
 Redis queues for rollback. Recovered candidates must reconcile, compare, and
 preflight before re-enabling reads. Database restores use existing tooling;
 restored projections are revalidated against current files/registrations.
+
+Before rolling any eligible consumer back to code without the sweep callable,
+disable catalog enqueue admission and drain started catalog sweeps under existing
+active-job gates. Remove/cancel only queued catalog sweep jobs through supported
+RQ operations, reconcile their private coalescing records, and retain dirty SQL
+state. Verify no queued/started catalog jobs can reach the old consumer before
+its rollback; preserve all unrelated jobs. Do not count a read-mode switch alone
+as worker rollback safety. Re-enable sweep admission only after every eligible
+consumer again satisfies the compatibility gate. Test queued and started cases.
+
+Public polling serializers have a separate rollback gate: redaction-compatible
+code must remain deployed for the entire retained lifetime of catalog job
+records, including failed/finished records, recursive references, and stored
+results. A previous revision without this protection is not a valid public
+polling rollback while those records remain. Use a known-good rollback candidate
+that retains this narrow protection; do not silently downgrade it or assume
+queue draining deletes terminal evidence. This contract does not authorize
+bulk Redis cleanup or introduce a new sanitization tool. Test anonymous single/
+batch job-info and jobstatus after rollback with retained failed terminal jobs
+containing private diagnostic canaries; no raw details may escape.
 
 ## 12. Acceptance and documentation
 

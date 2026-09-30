@@ -1,6 +1,6 @@
 # PostgreSQL run catalog projection
 
-**Status**: Open — specification authored; implementation not started (2026-09-30)
+**Status**: Open — contract reviews passed; implementation not started (2026-09-30)
 **Timezone**: UTC
 
 ## Purpose and authority
@@ -14,7 +14,8 @@ The durable requirements live in the
 This package organizes execution, not a competing schema. Follow the
 [active ExecPlan](prompts/active/run_catalog_projection_execplan.md) and
 [tracker](tracker.md). Architecture and forest → forest1 → wepp1 order were
-endorsed by the operator; detailed review and the contract ancestor are pending.
+endorsed by the operator; independent technical reviews passed. Detailed operator
+ratification and the accepted contract ancestor remain pending.
 
 ## Scope and complexity budget
 
@@ -42,7 +43,7 @@ Direct file and PostgreSQL boundaries are mandatory. Test representative
 save/run/archive/restore behavior to prove portable project inputs/outputs remain
 unchanged. Real forest, forest1, and wepp1 workflows under actual identities,
 groups, mounts, umask, and orchestration are deployment gates. Current highest
-claim: diagnosed; specification authored, no runtime implementation.
+claim: diagnosed; specification independently reviewed, no runtime implementation.
 
 ## Success criteria
 
@@ -63,13 +64,14 @@ Security impact: **high**, because authenticated metadata enumeration, source
 path handling, worker database connections, and serialization boundaries change.
 Dedicated [security review](artifacts/2026-09-30_security_review.md) and
 [correctness review](artifacts/2026-09-30_correctness_review.md) are required.
-Both are currently pending, not passed. Two independent contract reviews must
-be dispositioned before the ancestor checkpoint; authoring is not self-approval.
+Both independent contract reviews passed after findings disposition; see the
+[closure record](artifacts/2026-09-30_contract_review_disposition.md). Runtime
+reviews and deployment proof remain pending; authoring is not self-approval.
 
 Parameterization: no scientific changes. Workflow cadence, retry, stale-state
 presentation and observation defaults are recorded in
 [ADR-0078](../../adrs/ADR-0078-run-catalog-projection.md), with detailed numerical
-choices explicitly pending review/capacity validation.
+choices explicitly pending operator ratification and capacity validation.
 
 ## Incident lifecycle and delivery
 
