@@ -1,11 +1,16 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-28
-**Active Packages**: 39
+**Last Updated**: 2026-09-30
+**Active Packages**: 40
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active: [Batch Daymet Multiple NoDb contention](docs/work-packages/20260930_batch_daymet_multiple_nodb_contention/package.md)
+— attribute and correct recurrent `climate.nodb` stale writes in the legacy
+observed-Daymet/`Multiple` batch path; execute and validate on forest, then run
+a separately gated file integration test on the open-wepp.org cluster.
 
 Active: [Omni contrast EBE sidecar integrity](docs/work-packages/20260928_omni_contrast_ebe_sidecars/package.md)
 — make the EBE-to-`chan.inp` dependency executable, audit inherited WEPP run
