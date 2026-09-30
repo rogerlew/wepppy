@@ -208,6 +208,23 @@ freshness execution package; payload/version association is durable governance.
   - mirror `last_modified` into Redis lock hash.
 - Failures in these mirrors MUST NOT reclassify a committed file write as failed persistence.
 
+### Portable deployment observer (specified; implementation pending)
+
+The [run catalog projection specification](run-catalog-projection-contract.md)
+defines the planned replacement of the direct WEPPcloud timestamp import with
+an optional, storage-neutral post-commit observer. Files remain authoritative;
+lock ownership, stale-write rejection, atomic replacement, and existing Redis
+mirrors are unchanged. Standalone-disabled integration must not import web/SQL
+dependencies or attempt database access. Enabled-deployment SQL failures remain
+observable post-commit mirror failures, never rollback of committed file state.
+
+Ron commits additionally invalidate the rebuildable catalog; other NoDb dumps
+retain only their existing last-modified semantics. READONLY and TTL have
+separate producer boundaries. This amendment is part of the pending catalog
+contract checkpoint, not a claim the observer is wired or deployed. The catalog
+specification governs reconciliation/freshness and never grants SQL authority
+over scientific project files.
+
 ## Why Temp Files Are Required
 - Direct truncate/write is unsafe under concurrency because readers can observe:
   - empty file at open time,

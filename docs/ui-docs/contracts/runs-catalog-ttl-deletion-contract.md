@@ -63,6 +63,29 @@ least-privileged authenticated Runs-catalog user. It explains rolling deletion,
 access refresh, disabled TTL, and the existing role-gated control. It does not
 guarantee an exact retention duration beyond the displayed per-run timestamp.
 
+## PostgreSQL projection amendment (specified; implementation pending)
+
+The [catalog projection specification](../../schemas/run-catalog-projection-contract.md)
+defines an opt-in database-only read path after its contract checkpoint and
+staged cutover. The original "no database column" statement describes the
+implemented REM-02 change; the new additive projection is a separately reviewed
+change, not a claim that REM-02 implemented SQL storage.
+
+After cutover, authorization still precedes scope selection and no request
+opens TTL/project files or triggers repair. A background non-mutating extractor
+preserves the existing normalization and expiration validation. Known-dirty,
+unreadable, or older-than-24-hour TTL observations emit null `ttl_deletion_at`
+and use Last Modified; active current observations retain the same UTC format,
+label, and immutable same-origin Learn More link. Additive scoped freshness
+metadata and accessible stale/updating presentation are specified in that
+contract. Policy calculations, TTL touch, readonly/ownership authorization,
+and physical deletion authority remain unchanged.
+
+This detailed freshness policy is pending independent review/ratification and
+implementation. Verify source→SQL→JSON→browser propagation, no request project
+I/O, scoped counts, dirty/error/recovery states, and current/legacy parity before
+activation. Legacy mode retains the existing behavior during rollout/rollback.
+
 ## Verification
 
 Evidence must include focused metadata (including every fallback listed above),

@@ -2,10 +2,15 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-30
-**Active Packages**: 40
+**Active Packages**: 41
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active (specification): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
+— preserve portable NoDb projects while moving catalog reads off NFS; additive
+schema, observer/reconciliation, and forest → forest1 → wepp1 rollout specified.
+Contract review, implementation, and deployments remain pending.
 
 Active: [Batch Daymet Multiple NoDb contention](docs/work-packages/20260930_batch_daymet_multiple_nodb_contention/package.md)
 — attribute and correct recurrent `climate.nodb` stale writes in the legacy
