@@ -72,7 +72,7 @@ def _build_gl_dashboard_wepp_paths(output_scope: str = "baseline") -> Dict[str, 
 
 
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
-_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+_GEOJSON_MAX_BYTES = 30 * 1024 * 1024
 _GEOJSON_MAX_MB = int(_GEOJSON_MAX_BYTES // (1024 * 1024))
 
 

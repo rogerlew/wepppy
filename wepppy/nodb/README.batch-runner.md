@@ -129,7 +129,7 @@ Templates are validated before runs can start. Validation checks for evaluation 
 - Must be a valid GeoJSON `FeatureCollection`
 - Features should be `Polygon` or `MultiPolygon` geometries (for watershed boundary masking) or `Point` geometries (for outlet-based delineation)
 - Each feature must have properties referenced by the run ID template
-- Maximum upload size: 10 MB (configurable via `BATCH_GEOJSON_MAX_MB`)
+- Maximum upload size: 30 MiB (configurable via `BATCH_GEOJSON_MAX_MB`)
 - CRS should be WGS84 (EPSG:4326) for the WGS version; UTM projections also supported
 
 ### LPT Scheduling
@@ -286,7 +286,7 @@ python -m tools.batch_prep_from_pourpoints \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BATCH_RUNNER_ENABLED` | `false` | Feature flag gating batch creation in the UI |
-| `BATCH_GEOJSON_MAX_MB` | `10` | Maximum GeoJSON upload size in megabytes |
+| `BATCH_GEOJSON_MAX_MB` | `30` | Maximum GeoJSON upload size in MiB |
 | `RQ_REDIS_URL` | `redis://localhost:6379/9` | Redis connection for RQ job queue |
 
 ### Base Config

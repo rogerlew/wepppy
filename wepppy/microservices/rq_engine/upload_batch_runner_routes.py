@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
-GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+GEOJSON_MAX_BYTES = 30 * 1024 * 1024
 SBS_MAP_MAX_BYTES = 100 * 1024 * 1024
 SBS_MAP_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 

@@ -31,9 +31,9 @@ def config_app(app, logger=None):
     if 'BATCH_GEOJSON_MAX_MB' not in app.config:
         raw_limit = os.getenv('BATCH_GEOJSON_MAX_MB')
         try:
-            app.config['BATCH_GEOJSON_MAX_MB'] = int(raw_limit) if raw_limit else 10
+            app.config['BATCH_GEOJSON_MAX_MB'] = int(raw_limit) if raw_limit else 30
         except (TypeError, ValueError):
-            app.config['BATCH_GEOJSON_MAX_MB'] = 10
+            app.config['BATCH_GEOJSON_MAX_MB'] = 30
 
     skip_batch_auth = os.getenv('BATCH_RUNNER_SKIP_AUTH')
     if skip_batch_auth is None:
