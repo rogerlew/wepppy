@@ -107,6 +107,13 @@ change deployed integration scopes, token TTLs, polling modes or signing keys.
   existing delegated human bindings and preserve authorized service conversions
   under the FA-01 milestone-zero contract.
 
+FA-01 restricted admission uses the canonical access contract's optional signed
+`feature_access_principal` object (`version: 1`, `kind`, `id`) for new derivatives.
+It is issuer-derived identity provenance, not group authority. Old sessions keep
+ordinary anonymous functionality; only restricted operations require verified
+live human binding or authenticated refresh when provenance is unavailable.
+No general creator grant, different scope bundle or token TTL is introduced.
+
 ### MCP token (query-engine)
 - `token_class=mcp`
 - Preferred issued shape (WEPPcloud): include `token_class=mcp`, `sub`,

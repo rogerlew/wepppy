@@ -3,12 +3,12 @@
 
 This ExecPlan is maintained under `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current. This plan is the active plan for the feature-access package only; it does not execute or close other active initiatives.
 
-The operator requested a reconciled policy amendment and implementation plan. Those documentation deliverables are prepared. Runtime milestones below are future work: do not execute them before the required contract checkpoint and authority for implementation exist.
+The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. Runtime milestones below are future work: do not execute them before the required contract checkpoint and authority for implementation exist.
 
 ## Purpose and outcome
 
 
-An ordinary authenticated user will be able to become a PowerUser by acknowledging the short training statement and answering the two policy questions. A maintainer will be able to give a named user one internal feature through group membership, recording the reason and times, without giving that user Dev/Admin/Root or requiring multiple reviewers. Anyone inspecting a public project will see its applicable existing non-embargoed feature state/results read-only; actions require separate permission.
+An ordinary authenticated user will be able to become a PowerUser by acknowledging the short training statement and answering the two policy questions. A maintainer will be able to give a named user one internal feature through group membership, recording the reason and times, without giving that user Dev/Admin/Root or requiring multiple reviewers. Users lacking a limited feature's entitlement can inspect its non-embargoed state/results read-only. Anonymous creation and ordinary functionality remain unchanged; no global public-writer gate is introduced.
 
 OpenET and Batch have separate groups, initially containing only the requesting maintainer. Human Culvert access also becomes group-based, while its existing authorized long-lived service JWT continues to perform its explicitly inventoried operations. Maturity overrides stop promoting Experimental configurations to Preview merely because they use multiple OFEs. Public release of embargoed contrast data and PowerUser suspension/reapplication/permanent revocation are not included.
 
@@ -22,8 +22,11 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01 20:47 UTC) Prepared this plan, tracker, surface inventory and pending review gates.
 - [x] (2026-10-01 21:05 UTC) Documentation checks passed: 20 Markdown files linted, relative link targets resolved, diff whitespace clean, root AGENTS size 160/160. Spelling previews inspected; unrelated tracker prose retained.
 - [x] (2026-10-01 21:13 UTC) Independent prepared-amendment reviews dispatched; four unique findings accepted and corrected in contracts. Both reviewers confirmed the fixes; completed milestone-zero review remains pending; see `artifacts/2026-10-01_contract_reviews.md`.
-- [ ] Freeze exact endpoint/artifact matrix and resolve public write authority, anonymous creator compatibility, designated account and Culvert service inventory.
-- [ ] Obtain independent contract reviews, disposition findings and record the standalone ancestor checkpoint revision.
+- [x] (2026-10-01) Committed review disposition `36f35b6f0`; traced 239 route declarations, credential paths, missing anonymous creator proof and artifact side effects. Bounded source/transport review fixes independently confirmed.
+- [x] (2026-10-01) Operator clarified feature-only read-only scope, designated rogerlew@gmail.com and wepp2 Culvert client; verified local/production account and redacted credential metadata.
+- [x] (2026-10-01) Prepared bounded route/data/principal/transport matrix; expired configured Culvert token recorded as later live-acceptance dependency.
+- [x] (2026-10-01) Independent correctness/security reviews accepted the narrowed matrix after fixes; zero unresolved High/Medium findings, recorded in `artifacts/2026-10-01_m0_reviews.md`.
+- [ ] Record the standalone accepted ancestor checkpoint revision after committing reviewed contracts.
 - [ ] Implement additive account records, shared evaluator and direct persistence tests.
 - [ ] Implement single-maintainer group UI and initial memberships with real readback evidence.
 - [ ] Wire protected action/data admission and public inspection, including Culvert compatibility.
@@ -39,7 +42,7 @@ Profile-issued PowerUser JWTs last 90 days. Existing grouped browse tests allow 
 
 There is no persisted user group model even though profile token issuance has a `groups` claim hook. Registry caches are process-wide and cannot become mutable membership caches. Culvert returns a separate seven-day batch-scoped browse token; it is not the long-lived submission/polling credential.
 
-The current public-read helper `wepppy/weppcloud/utils/helpers.py:authorize` is not proof of write ownership. Its `require_owner` parameter is reserved rather than an enforced owner-only contract. Public readonly UI alone would leave direct write paths reachable; legitimate anonymous creators also need a defined writer identity before tightening them.
+Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
 
@@ -56,10 +59,12 @@ The current public-read helper `wepppy/weppcloud/utils/helpers.py:authorize` is 
 
 2026-10-01, review disposition: private grouped admission must check live membership for verified human sessions and human-delegated service credentials as well as user tokens. Token-class conversion must preserve provenance; independent Culvert credentials retain their explicit service path. Corrected UI entitlement and acknowledgment timing inconsistencies.
 
+2026-10-01, operator clarification: only limited-access features become read-only for unentitled users. Ordinary anonymous behavior stays unchanged; earlier writer/creator proposals are withdrawn. The designated account is rogerlew@gmail.com, resolved per deployment; Culvert client is on wepp2.
+
 ## Outcomes & Retrospective
 
 
-Planning outcome: the policy and technical documents now have a consistent target, with the existing embargo exception explicit. Documentation received independent prepared-plan review and post-fix confirmation, but is not an accepted implementation checkpoint. No runtime files, users, memberships, credentials or deployment state were changed. The remaining milestone-zero work is concrete identity and boundary verification, not a return to dual-review governance or deferred PowerUser sanctions.
+Milestone-zero outcome: bounded source, transport, identity and deployed credential evidence are prepared. Final narrowed-scope reviews passed after fixes; record the ancestor commit before runtime work. The existing expired Culvert credential prevents positive live integration acceptance until operator renewal; it does not justify new auth policy, token rotation or wider scope. Runtime files, accounts, memberships and credentials remain unchanged.
 
 ## Context and orientation
 
@@ -74,17 +79,15 @@ Read nearest AGENTS before implementation, including `wepppy/weppcloud/AGENTS.md
 
 ## Milestone zero: close the technical contract checkpoint
 
+Use the exact declarations and admission classifications in `artifacts/2026-10-01_route_inventory.tsv`, the resource/data matrix in `artifacts/2026-10-01_milestone_zero.md`, and `artifacts/2026-10-01_credential_matrix.md`. Scope is limited-feature admission and protected data: preserve ordinary anonymous creation, editing, session flows and model work. Do not add a general writer/owner gate, creator credential or legacy-recovery process. Existing project readonly and narrower authenticated-only contracts remain as they are.
 
-Use `artifacts/2026-10-01_surface_inventory.md` to trace every public feature read and corresponding mutation, including GET handlers that mutate. Expand it to exact method/path/function entries with principal type, read/write evidence, feature entitlement, request/response expectations and tests. Trace generic files, query datasets, mixed archives, child/fork paths and PATH-CE's consumption of contrasts so the embargo exception cannot be bypassed by an alternate reader. Record how a mixed bundle behaves without denying unrelated public project views; do not invent a filename heuristic from one example.
+The operator specified `rogerlew@gmail.com` on every deployment. Read-only lookup verified local ID 1 and wepp1 ID 12, both active; use per-deployment lookup only for seeding, never request authorization. The Culvert client is `/workdir/Culvert_web_app` on wepp2. Its configured submit-only service credential has no run claims; actual wepp1 validation verified its signature and rejected its September 1 expiry. Preserve independent service admission, existing open polling and returned seven-day batch browse tokens. No renewal is authorized. A successful live compatibility run is a later prerequisite after the operator repairs the expired credential; the documented expiration is not a reason to bypass validation or block this design checkpoint.
 
-Resolve the designated maintainer's canonical database account by verified account records/operator input; retain a reference, never a fabricated ID. Inventory the actual Culvert integration's owner, subject, credential identifier/fingerprint, audiences, scopes, expiry, resource claims, client consumers and revocation mechanism without copying a secret JWT. Exercise a non-mutating authenticated compatibility probe where available. The integration may have no human user identity; group changes must not reinterpret it as one.
+Freeze feature-only principal provenance and legacy handling, exact Profile/admin transport, mixed-result projection and protected bundle denial in the canonical FA-01 contract. Shared endpoints gain conditional checks only for a protected workflow/contrast child resource, an internal feature action or embargoed data. Public base reads and ordinary non-protected aliases remain unchanged. Preserve ordinary query/cache behavior and incidental invalidation of feature timestamps; inspect-only restricted feature views must not execute that feature or regenerate protected results.
 
-For public actions, identify and document existing owner/authorized-writer and legitimate anonymous creator evidence. A read-scoped public session does not prove creator authority. If the current system cannot distinguish them, define and ratify the smallest writer-boundary amendment before code, preserving supported anonymous creation. Do not add a service or silently require new login behavior. Record absent/empty/populated/legacy/hostile states independently from role/request combinations. Freeze token-class-aware identity provenance across bearer-to-session conversions; anonymous sessions stay anonymous, and service/MCP subjects or conversion cannot manufacture a human account binding. Inventory any existing explicit delegation, including `routes/user.py:mint_run_token` and `admin-run-token:<user_id>` credentials: protected admission checks the verified originating human's current membership, not a blanket service-class exemption. Include valid human sessions, numeric service subjects matching a member ID, and service-derived role/group-looking claims.
+The canonical query owner is `wepppy/query_engine/README.md`; protected polling projection belongs in `docs/schemas/rq-response-contract.md`. Include synthetic contrast/PATH-CE result allow/deny cases for single/batch/recursive job-info while preserving lifecycle/queue and ordinary Culvert polling.
 
-Complete `artifacts/2026-10-01_contract_decision.md`, amending every newly implicated canonical contract. Resolve the existing PowerUser TTL-control OR-versus-ALL role mismatch only under its own cited contract; do not broaden it incidentally. Obtain two independent read-only technical contract reviews, disposition medium/high findings, and commit the checkpoint as a standalone ancestor when commit authority is available. Record its SHA and ancestry. Stop before runtime edits if any of these gates is incomplete. The current user's request is documentation preparation, not a command to proceed through the remaining runtime milestones.
-
-Acceptance is a reviewable, exact matrix with no invented account/service identity, no unresolved public writer boundary, and an accepted ancestor revision. The already-authorized single-maintainer membership workflow does not require a second operational reviewer.
-
+Reconcile all affected canonical contracts and record the operator clarification and read-only production evidence in the checkpoint. Keep the unrelated PowerUser TTL-control OR-versus-ALL mismatch separate. Obtain two independent read-only reviews of the narrowed matrix, disposition medium/high findings and commit the accepted checkpoint as a standalone ancestor; record its SHA. The current authorization ends at milestone zero, with no runtime edits or deployment. Acceptance is the reviewed bounded matrix and committed ancestor, with the expired-credential limitation explicitly carried into implementation/rollout gates.
 ## Milestone one: additive records and shared decisions
 
 
@@ -96,7 +99,7 @@ In `utils/feature_access.py`, implement a shared evaluator with verified princip
 
 Add registry fields `access_group` and `access_mode` as specified by FA-01. Group-only features are OpenET, Batch and human Culvert; Omni Contrasts, PATH-CE and AgFields permit the preserved Dev/Root path or current group membership. Public inspection is not evaluated by the action gate. PATH-CE actions that consume restricted contrasts need contrast entitlement too, with no automatic membership grant.
 
-Acceptance uses direct real-database tests for atomic membership-plus-event commits, rollback on injected failure, concurrent duplicate adds/removes, preservation of history, expired/review-only memberships and old-token reads of current membership. Unit tests must also prove Root without OpenET/Batch membership is denied and a valid group member still needs run/write/backend/scope permission. This milestone alone does not enable new UI or claim runtime wiring.
+Acceptance uses direct real-database tests for atomic membership-plus-event commits, rollback on injected failure, concurrent duplicate adds/removes, preservation of history, expired/review-only memberships and old-token reads of current membership. Unit tests must also prove Root without OpenET/Batch membership is denied and a valid group member still needs existing run/backend/scope permission. This milestone alone does not enable new UI or claim runtime wiring.
 
 ## Milestone two: simple group administration and acknowledgment
 
@@ -118,7 +121,7 @@ Address OpenET and Batch's hard-coded Admin checks with group-only admission, PA
 
 Apply the existing embargo exception to exact artifact/report/query paths registered in milestone zero, including retained/forked data and bundled downloads. Keep normal public non-embargoed views usable. Mutation authorization applies even when an action endpoint uses a misleading safe verb; correct method/CSRF behavior only within the accepted route contract. Already-admitted work may finish; membership changes do not rewrite persisted mod state or cancel jobs.
 
-Acceptance traverses real application boundaries for anonymous public readers, ordinary users, group members/nonmembers, each technical role individually, and the actual class of service token. A public read of never-used optional state creates no files/jobs. Denied direct calls enqueue nothing. A stale user JWT loses protected group access after removal. Private data is unavailable through broad PowerUser claims. Existing authorized service artifact download remains byte-correct.
+Acceptance traverses real application boundaries for anonymous public readers, ordinary users, group members/nonmembers, each technical role individually, and the actual class of service token. A new inspect-only restricted-feature view of never-used state does not initialize that feature or enqueue work. Ordinary anonymous behavior remains unchanged. Denied direct calls enqueue nothing. A stale user JWT loses protected group access after removal. Private data is unavailable through broad PowerUser claims. Existing authorized service artifact download remains byte-correct.
 
 ## Milestone four: conservative maturity and PowerUser onboarding
 
@@ -183,4 +186,6 @@ Duplicate onboarding/add/remove requests must not create duplicate grants. Datab
 
 Retain checkpoint SHA, reviewed surface/state matrices, redacted identity inventory, migration readback, direct denial/no-side-effect evidence, service compatibility, browser screenshots/results and generated-output manifests under this package's artifacts. Record residual scope limits rather than claiming complete parity from a green suite. Reconcile links and living sections after every milestone.
 
-Revision note, 2026-10-01: created for the operator-requested policy amendment and plan. Runtime milestones are deliberately gated on a reviewed ancestor, verified identities and concrete public-writer authority; PowerUser sanctions remain excluded.
+Revision note, 2026-10-01: created for the operator-requested policy amendment and plan. Runtime milestones are deliberately gated on a reviewed ancestor, verified identities and the feature-only scope boundary; PowerUser sanctions remain excluded.
+
+Revision note, 2026-10-01 scope correction: removed the broader creator/writer proposal after explicit operator clarification; recorded deployment-specific account identity and the expired submit-only Culvert credential without changing it.

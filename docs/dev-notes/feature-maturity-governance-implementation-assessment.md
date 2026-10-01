@@ -8,6 +8,8 @@ Status: Assessment complete; implementation recommendations updated for operator
 
 The [feature access governance amendment](../schemas/feature-access-governance-contract.md) records the subsequent operator decisions and rationale. The inventory below describes the assessed implementation and ratified policy; the delivery recommendations now target public read-only feature views, single-maintainer group administration, conservative maturity, internal Batch/Culvert workflows and maintainer-only OpenET/Batch actions. Cross-contract reconciliation is prepared in FA-01; the reviewed technical checkpoint and implementation remain pending. See the [implementation work package](../work-packages/20261001_feature_access_governance/package.md) and its active plan.
 
+Scope clarification, 2026-10-01: only limited-access features become read-only for callers lacking their entitlement. Ordinary anonymous creation and functionality remain unchanged; prior generic writer/creator-proof proposals are superseded. The M0 record contains verified account/client metadata and the existing expired Culvert credential limitation.
+
 ## Conclusion
 
 WEPPcloud implements a useful maturity registry and coarse role gates, but not the access-governance lifecycle in the [ratified policy][policy]. PowerUser self-service and scoped collaborator groups are missing. Closing those two UI gaps alone would leave inconsistent execution permissions, absent membership audit records, and undefined group-removal behavior.

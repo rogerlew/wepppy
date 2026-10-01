@@ -205,6 +205,27 @@ Landuse first-class route notes (2026-04-24):
     a terminal failed descendant's same sanitized error after no descendant
     remains active.
 
+### FA-01 protected job results (specified; implementation pending)
+
+[FA-01](feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery)
+preserves the existing polling auth mode and lifecycle/status/progress/queue
+fields. It adds a conditional read projection for embargoed contrast/PATH-CE
+data in single job-info, batch job-info and every recursive child node.
+For callers lacking the retained contrast read entitlement, a wholly protected
+`result` becomes `null`; mixed results retain only explicitly classified
+non-protected fields. Selected/treatment hillslopes, costs, sediment-reduction
+values and other protected solver outputs must not leak through descriptions,
+metadata or errors. Entitled callers retain the existing result shape.
+Ordinary job results and Culvert client polling remain unchanged; no global
+authenticated-polling requirement or new token scope is introduced.
+
+Implementation acceptance must exercise synthetic PATH-CE/contrast results
+through GET single, POST batch and recursive child job-info for both entitled
+and unentitled callers, including open polling, mixed trees and protected
+auxiliary fields. Confirm lifecycle/queue fields and ordinary Culvert responses
+remain usable and unchanged. This amendment is a contract target, not a claim
+that current polling already projects those results.
+
 ## Job cancellation
 
 - Cancellation retains run-access and scope checks.

@@ -1,6 +1,9 @@
 # FA-01 review gates
 
-Prepared: 2026-10-01 20:47 UTC. Updated after independent prepared-amendment review on 2026-10-01. Status: planning review passed after fixes; completed milestone-zero checkpoint and implementation reviews pending.
+Scope update, 2026-10-01: the operator clarified that only limited features become read-only for callers lacking access; ordinary anonymous creation/functionality is unchanged. Earlier general writer/creator-proof requirements in this historical review are superseded. Current scope and deployed evidence are in [the M0 record](2026-10-01_milestone_zero.md). Final narrowed-checkpoint reviews are separate from the earlier review confirmations.
+
+
+Prepared: 2026-10-01 20:47 UTC. Updated after independent prepared-amendment review on 2026-10-01. Status: planning review passed after fixes; milestone-zero design reviews passed; implementation reviews pending.
 
 ## Contract reviews
 
@@ -20,4 +23,4 @@ The [security review preparation](2026-10-01_security_review.md) records high im
 
 ## Current evidence
 
-Assessment tests: 275 passed before this planning increment. Documentation validation: 20 Markdown files passed lint with no errors/warnings; relative file links resolved; whitespace and root AGENTS size checks passed. Spelling previews inspected. Runtime/migration/browser/service acceptance: not performed. Prepared amendment commit: `4cd85e2d5`; accepted runtime contract ancestor: not created. Current task is the prepared amendment and plan, not implementation acceptance.
+Assessment tests: 275 passed before this planning increment. Documentation validation: 20 Markdown files passed lint with no errors/warnings; relative file links resolved; whitespace and root AGENTS size checks passed. Spelling previews inspected. Runtime/migration/browser/service acceptance: not performed. Prepared amendment commit: `4cd85e2d5`; accepted contract ancestor: recorded in the package tracker. Current M0 review: [two independent approvals after fixes](2026-10-01_m0_reviews.md), zero unresolved High/Medium findings. Runtime acceptance is pending.

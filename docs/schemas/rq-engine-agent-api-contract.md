@@ -45,7 +45,7 @@ human binding at milestone zero. Stale JWT group claims are not authoritative.
 Human-delegated service credentials also require their verified originating
 account's current membership for group-protected operations; token class alone
 does not establish an independent integration exemption. Run access and required operation scopes
-remain additive, and public read permission does not authorize mutation.
+remain additive. Public read permission does not grant restricted-feature entitlement; ordinary anonymous creation and operations remain unchanged, with no new global owner/writer gate.
 
 Accepted token classes follow `docs/dev-notes/auth-token.spec.md`:
 - `user`

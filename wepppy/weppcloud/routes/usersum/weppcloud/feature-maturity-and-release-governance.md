@@ -251,9 +251,9 @@ Routes and templates should not duplicate maturity or visibility rules.
 
 ### Policy 2: Separate public inspection from permission to act
 
-Public projects should expose their feature views and existing results for read-only inspection, including internal features whose actions remain restricted. A public view must not initialize missing feature state, acquire external data, submit jobs, or mutate the project. Absent results should be shown as not yet available.
+Public projects should expose existing non-embargoed views/results of limited-access features to users who lack those features' action permission. Those features are read-only for that viewer: no activation, configuration, acquisition, execution, retry, deletion or other restricted-feature mutation through UI or direct endpoints. Their inspect-only views must not initialize the restricted feature or produce new protected results.
 
-Users without action authorization may inspect these views but must not activate, configure, execute, retry, delete, or otherwise mutate the feature through the UI or a direct endpoint. Being public does not grant a project or feature action permission. Existing run access, readonly state, capability, backend and service boundaries remain additive.
+Anonymous project creation and existing anonymous functionality remain unaffected. This is a feature-level access rule, not a project-wide read-only policy or a new owner/creator credential requirement. Existing ordinary project authorization and explicit project readonly, capability, backend and service boundaries remain as they are. Publicity does not grant internal-feature entitlement.
 
 Existing publication-embargo restrictions remain an explicit exception pending a separate decision on public exposure of embargoed outputs. [ADR-0001](../../../../../docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) currently restricts Omni Contrasts data even on a public project. Its disabled name-only discoverability is permitted; it does not release the results.
 

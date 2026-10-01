@@ -1,5 +1,8 @@
 # FA-01 independent contract review and disposition
 
+Scope update, 2026-10-01: the operator clarified that only limited features become read-only for callers lacking access; ordinary anonymous creation/functionality is unchanged. Earlier general writer/creator-proof requirements in this historical review are superseded. Current scope and deployed evidence are in [the M0 record](2026-10-01_milestone_zero.md). Final narrowed-checkpoint reviews are separate from the earlier review confirmations.
+
+
 Reviewed baseline: `4cd85e2d506b54afd37bbe6f1df37cb62ae0a422`.
 
 Review requested by the operator on 2026-10-01 after committing the prepared amendment. Review scope is documentation and plan readiness, not implementation acceptance. Both reviewers were read-only and independently inspected contracts and relevant source. Author dispositions below are not reviewer approval.

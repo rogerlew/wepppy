@@ -181,6 +181,20 @@ Source-of-truth implementation:
 Source-of-truth implementation:
 - `wepppy/microservices/rq_engine/session_routes.py`
 
+## FA-01 restricted-feature admission amendment
+
+Implementation/checkpoint pending. The [feature-access contract](feature-access-governance-contract.md)
+adds trusted origin metadata to derivative credentials for restricted admission
+and requires current human membership on protected Batch/Culvert/feature paths.
+Both rq-engine issuance and Flask's run-page browse bridge must preserve that
+origin; generic numeric subjects never establish human identity. Legacy sessions
+may resolve human origin from their own valid, non-tombstoned live Flask payload,
+or refresh through verified identity for a restricted operation. Ordinary
+anonymous creation, public editing, token issuance, refresh, scopes, lifetimes,
+logout and existing session admission remain unchanged. No creator credential
+or general project-writer requirement is added. Existing tombstone rules still
+apply to grouped consumers as well as ordinary run consumers.
+
 ## Session Refresh Contract
 - Authenticated pages rendered from `templates/base_pure.htm` MUST load `static/js/session_heartbeat.js`.
 - Heartbeat client behavior MUST be:

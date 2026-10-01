@@ -21,7 +21,7 @@ Validated user tokens and browser identities continue through existing active-us
 FA-01 [feature access governance](feature-access-governance-contract.md) separates
 informational inspection from launch authorization; implementation/checkpoint
 pending. This does not add internal presets or change anonymous creation
-defaults. Before a restricted preset is introduced, both its launch UI and
+defaults or ordinary anonymous functionality. No creator credential, legacy-owner recovery or general public-writer gate is added by FA-01. Before a restricted preset is introduced, both its launch UI and
 creation API must enforce its effective entitlement. Existing named presets,
 Builder locale/capability ownership and creation-token rules remain unchanged.
 

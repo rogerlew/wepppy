@@ -184,6 +184,8 @@ Queries are **stateless** and **ephemeral**:
 - Revocation checks enforce denylisted `jti` values
 - Audit logs track query execution per user
 
+FA-01 amendment (specified; implementation pending): [feature access governance](../../docs/schemas/feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery) applies the retained contrast/PATH-CE embargo to web and MCP catalog entries, referenced query datasets and returned structured data. Omit only protected catalog entries for callers lacking read entitlement; reject queries referencing protected inputs before execution and project mixed structured data. Ordinary anonymous query/catalog access and existing activation/cache behavior remain unchanged. This amendment does not change token scopes, run checks or sandboxing.
+
 ### Data Sources
 
 The query engine operates on **filesystem-backed datasets** within a WEPPcloud run directory:
@@ -275,6 +277,8 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
   - `queries:execute` – execute queries (implies validate).
 - Tokens are mapped to a user identity and an allow-list of run IDs. All endpoints verify both scope and run ownership.
 - Optional per-run rate limits are enforced per token to prevent abuse.
+
+For FA-01 restricted admission, trusted human-issued MCP credentials preserve human provenance under the [principal adapter contract](../../docs/schemas/feature-access-governance-contract.md#tokens-and-admission-timing). Resolve command-bar `get_id()` subjects through their existing `fs_uniquifier` identity binding; never infer a human account from an arbitrary numeric MCP/service subject. Protected human reads use current entitlement, not stale token group claims. Ordinary MCP behavior and independently authorized service credentials retain their existing contracts.
 
 ## 4. Resource Model
 

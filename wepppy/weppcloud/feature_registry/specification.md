@@ -18,9 +18,9 @@ This specification covers two registries in one subsystem:
 
 - Public projects expose existing feature views/results read-only to viewers
   without action permission, subject to the explicit publication-embargo
-  exception in FA-01 and ADR-0001. Rendering must not initialize optional state.
+  exception in FA-01 and ADR-0001. New inspect-only restricted-feature views must not initialize that feature.
 - Action controls require the feature's effective role/group entitlement and
-  project write authority; otherwise disable/omit them with a clear reason.
+  existing operation/run authorization; otherwise disable/omit them with a clear reason. FA-01 adds no general owner/writer gate and preserves anonymous functionality.
 - `menu_min_role` may provide disabled name discovery; it is not read or action
   authorization and does not release embargoed results.
 - A caller without effective feature entitlement receives the exact disabled
@@ -152,7 +152,7 @@ Feature action availability requires all:
 - effective feature entitlement: current group membership for `group_only`,
   legacy `min_role` audience or current membership for `role_or_group`, and
   legacy role audience when no group policy is declared
-- project write authority (public read access alone is insufficient)
+- existing operation/run authorization; public access never substitutes for restricted-feature entitlement, but ordinary anonymous behavior remains unchanged
 - backend matches `requires_backend` (or it is `any`)
 - all `requires_features` are active for the run
 

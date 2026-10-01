@@ -12,7 +12,7 @@ The [ratified policy](../../wepppy/weppcloud/routes/usersum/weppcloud/feature-ma
 
 ## Decision
 
-FA-01, the [feature access contract](../schemas/feature-access-governance-contract.md), separates public-project inspection from feature actions. Existing non-embargoed feature state/results are inspectable without granting actions; the current Omni Contrasts embargo restriction remains an explicit exception because its public release has not been authorized.
+FA-01, the [feature access contract](../schemas/feature-access-governance-contract.md), separates public-project inspection from feature actions. Limited-access feature state/results are inspectable without granting restricted actions; ordinary anonymous creation and functionality remain unchanged. No global writer gate or anonymous creator credential is introduced; the current Omni Contrasts embargo restriction remains an explicit exception because its public release has not been authorized.
 
 One authorized maintainer administers scoped groups with recorded person, group, effective scope, reason, actor and timestamps. This replaces dual-reviewer requirements, including two attestations by one person. Group changes retain history. Internal onboarding acknowledgment remains separate from the single administrative decision.
 
@@ -26,7 +26,7 @@ Maturity remains conservative: the multi-OFE override may make Stable/Preview co
 
 The decision venue is the 2026-10-01 user-agent conversation. The authorizing principal is the requesting project maintainer; Codex records the documentation. The maintainer explicitly selected single-person group administration, account-only initial OpenET/Batch membership enforced through groups, conservative maturity and the PowerUser lifecycle exclusions, and requested the reconciled amendment and implementation plan.
 
-The maintainer has not explicitly answered the embargoed-public-results question. Preserving ADR-0001's existing restriction is continuity, not an inference of consent to release results. Exact account ID and deployed Culvert credential details are implementation checkpoint inputs, not invented identities.
+The maintainer has not explicitly answered the embargoed-public-results question. Preserving ADR-0001's existing restriction is continuity, not an inference of consent to release results. The operator subsequently identified `rogerlew@gmail.com` on every deployment and `/workdir/Culvert_web_app` on wepp2, and clarified that read-only applies only to limited features for users lacking access. The broader anonymous creator/writer proposal was rejected as outside scope. Account IDs are resolved per deployment; existing credential expiry remains enforced.
 
 ## Rationale and alternatives
 
@@ -38,7 +38,7 @@ Self-service before grouped-data reconciliation was rejected because PowerUser c
 
 ## Consequences and compatibility
 
-Runtime conformance is pending. Group-only OpenET/Batch/Culvert human admission intentionally replaces coarse role admission; preserve legacy Dev/Root entitlement for the other registered internal features and unrelated operational powers. Current Culvert service integrations must pass compatibility checks before enforcement changes. Public read views must not create NoDb state or jobs. Group changes and their audit events must commit atomically.
+Runtime conformance is pending. Group-only OpenET/Batch/Culvert human admission intentionally replaces coarse role admission; preserve legacy Dev/Root entitlement for the other registered internal features and unrelated operational powers. Current Culvert service integrations must pass compatibility checks before enforcement changes. New inspect-only restricted-feature views must not create their feature state or jobs; ordinary anonymous behavior remains unchanged. Group changes and their audit events must commit atomically.
 
 The [work package](../work-packages/20261001_feature_access_governance/package.md) includes additive database migration, exact endpoint/state inventory, contract reviews, live workflow acceptance and rollout/rollback gates. The current documentation preparation does not authorize deployment or claim that the pre-implementation ancestor checkpoint is complete.
 
