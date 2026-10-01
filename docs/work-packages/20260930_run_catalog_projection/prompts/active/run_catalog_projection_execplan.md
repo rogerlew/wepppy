@@ -47,6 +47,7 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 - [x] M3 implementation: serialized refresh, reconciliation, scheduler coalescing, CLI, SQL/Redis fault tests and isolated capacity measurements.
 - [x] M4 implementation: SQL-only routes, freshness UI, authenticated scope regression and isolated file-to-browser evidence.
 - [x] (2026-10-01 UTC) Independent bounded implementation and evidence-method reviews passed with all findings closed; requested pre-forest deployment hold reached.
+- [x] (2026-10-01 UTC) Operator authorized forest steps 1–5; candidate committed, additive migration applied, consumer origin proof passed, shadow compared and postgres reads activated with browser evidence.
 - [ ] M5 prerequisite/acceptance: production-equivalent producer/consumer mounts, startup, real queue/model capacity, browser-map/network timing, and stage-specific operator evidence.
 - [ ] M5: Forest acceptance, full cycle, rollback, and observation.
 - [ ] M5: Forest1 production rehearsal, full cycle, rollback, and observation.
@@ -86,6 +87,13 @@ timing requires matched producer-specific baselines. Counterbalanced raw samples
 retain earlier adverse measurements; TTL has limited isolated timing margin.
 Full NoDb convenience imports already reach Flask through BatchRunner/helpers;
 the new portable seam does not add that dependency or require PostgreSQL.
+
+Forest contains 463 registrations including old test records, not an 805-run
+production scope. Of these, 368 have missing Ron/TTL and 95 are readable. The
+principal authorized account returns 85 projects identically from all three
+legacy/SQL surfaces. Two new dev-agent witness projects bring totals to 465/97.
+Flask migration commands require an explicit app module in this container;
+host static builds need repository virtualenv Python for Jinja2.
 
 
 ## Decision Log
@@ -130,13 +138,17 @@ archive, SQL, HTTP and Chromium boundaries. The broad suite passed; final
 targeted functional regression passed 487 tests, separate SQL/performance
 validation passed 24 tests, and the final reader suite passed eight tests.
 Correctness and security implementation reviews passed within predeployment scope.
-The live application schema is not migrated. No service restart, sweep activation,
-read cutover or deployment has occurred. M5 capacity, identities/mounts, live
-producer/consumer witnesses, rollback and elapsed observation remain mandatory.
+Forest now runs migration `d30c91a7b802`, catalog writes, scheduled sweeps and
+postgres reads. Live consumer origin/mount proof, source/SQL/HTTP parity and
+browser table/map checks passed. Three 100-request authenticated series on the
+actual 85-project scope passed, with p95 56–66 ms and concurrent checks.
+M5 complete capacity/rollback/elapsed observation remain mandatory.
 Handoff evidence: `artifacts/2026-09-30_predeploy_validation.md`; operations and
-developer integration: `docs/dev-notes/run-catalog-operations.md`. Runtime changes
-remain uncommitted for operator inspection; the two docs-only contract checkpoints
-are committed ancestors. No production acceptance or package closeout is claimed.
+developer integration: `docs/dev-notes/run-catalog-operations.md`. Runtime candidate
+is committed as `3e6cbdcb9`; live evidence is in
+`artifacts/2026-10-01_forest_deployment.md`. Forest-local schedule activation is
+intentionally uncommitted; env flags are gitignored host configuration. No
+other host deployment, production acceptance or package closeout is claimed.
 
 
 ## Context and Orientation

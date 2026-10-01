@@ -1,7 +1,7 @@
 # Run catalog projection tracker
 
 **Updated**: 2026-10-01 UTC
-**Status**: Forest steps 1–5 authorized; deployment preflight underway.
+**Status**: Forest steps 1–5 complete; PostgreSQL reads live; observation/promotion pending.
 
 Implementation evidence and current findings:
 [review disposition](artifacts/2026-09-30_implementation_review.md),
@@ -14,7 +14,9 @@ deselected and measured separately. Profiling identified commit-dominated,
 phase-sensitive timing. Counterbalanced SQL/performance validation passed 24
 tests; corrected matched READONLY evidence and the final eight-test reader suite
 also passed. See [validation and retained risks](artifacts/2026-09-30_predeploy_validation.md).
-No host capacity acceptance or deployment is claimed.
+Forest deployment evidence: [run sheet](artifacts/2026-10-01_forest_deployment.md).
+No completed host soak, representative production-scale acceptance or promotion
+is claimed.
 
 ## Task board
 
@@ -32,6 +34,7 @@ No host capacity acceptance or deployment is claimed.
 - [x] M4 implementation: SQL readers, compatible payloads, freshness UI and isolated browser/HTTP tests.
 - [ ] M5 host evidence: production-equivalent initialization/mounts, queue capacity, network/browser timing and full producer/consumer witnesses.
 - [ ] M5a: forest acceptance and healthy observation.
+- [x] Forest candidate commit, migration, consumer proof, shadow/backfill and read cutover.
 - [ ] M5b: forest1 test-production rehearsal and healthy observation.
 - [ ] M5c: wepp1 shadow/backfill/cutover and healthy observation.
 - [ ] Legacy reader retirement disposition and final review/closeout.
@@ -87,17 +90,16 @@ post-fix PASS verdicts. The [disposition record](artifacts/2026-09-30_contract_r
 closes all ten distinct findings (including one author finding and one duplicate
 reported by both reviewers); none is risk-accepted. Runtime gates remain pending.
 Contract ancestor SHA: `db8e6be126fb231f16dd5e76f322d2b03089c10c`.
-Implementation SHA: **none**.
+Implementation SHA: `3e6cbdcb9`.
 Do not treat the architecture endorsement as a completed independent review.
 
 ## Next handoff
 
-M0 is complete. Initial schema/file/SQL tests passed (11 extractor, 3 isolated
-PostgreSQL); portable observer and NoDb regression tests passed (136). Early M1
-implementation reviews are running. Complete wiring, fault/race/route/browser
-validation, documentation, and final reviews before declaring deploy readiness.
-The operator subsequently authorized forest steps 1–5, including gated read
-cutover. Forest acceptance uses its actual single-account scope and controlled
-traffic, not an unavailable 805-run dataset. Representative host-scale evidence
-is deferred to the first eligible stage, before wepp1 read cutover if necessary.
-No other host deployment or promotion is authorized by this amendment.
+Forest steps 1–5 are complete. Web reads are postgres; producers use catalog
+writes; the existing scheduler admits 15-second sweeps. Forest-local schedule
+activation remains an intentionally uncommitted configuration change; do not
+ship it as a global default. The gitignored forest env retains mode settings.
+Keep the two dev-agent smoke projects as deployment witnesses for observation.
+Complete remaining host acceptance, rollback rehearsal and >=48 healthy hours
+before promotion. Representative host-scale evidence belongs on the first
+eligible stage, before wepp1 cutover if necessary. No other host was deployed.

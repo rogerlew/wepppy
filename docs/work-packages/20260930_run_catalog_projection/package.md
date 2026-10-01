@@ -1,6 +1,6 @@
 # PostgreSQL run catalog projection
 
-**Status**: Open — predeployment implementation complete; holding before forest deployment (2026-10-01 UTC)
+**Status**: Open — forest steps 1–5 deployed; observation/promotion pending (2026-10-01 UTC)
 **Timezone**: UTC
 
 ## Purpose and authority

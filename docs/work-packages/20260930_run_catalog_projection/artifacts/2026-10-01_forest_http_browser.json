@@ -1,0 +1,68 @@
+{
+  "tableMs": 1310,
+  "tableRows": 26,
+  "mapCanvas": 1,
+  "errors": [],
+  "results": [
+    {
+      "endpoint": "/runs/catalog?alias=1&include_ron_meta=true",
+      "requests": 100,
+      "rows": 85,
+      "bytes": 30480,
+      "p95Ms": 66.00937900000008,
+      "p99Ms": 81.45520499999975,
+      "concurrentFourBatchesOfFiveMs": [
+        208.1760949999998,
+        307.70334,
+        282.94536400000015,
+        307.29768200000035
+      ],
+      "scope": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 141
+      }
+    },
+    {
+      "endpoint": "/runs/map-data?alias=1",
+      "requests": 100,
+      "rows": 85,
+      "bytes": 20957,
+      "p95Ms": 56.0204190000004,
+      "p99Ms": 68.85311300000103,
+      "concurrentFourBatchesOfFiveMs": [
+        244.3668830000006,
+        331.0710159999999,
+        296.07259200000044,
+        280.40570800000023
+      ],
+      "scope": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 141
+      }
+    },
+    {
+      "endpoint": "/runs?format=json&alias=1&per_page=1000",
+      "requests": 100,
+      "rows": 85,
+      "bytes": 30614,
+      "p95Ms": 57.86162500000137,
+      "p99Ms": 60.14899999999943,
+      "concurrentFourBatchesOfFiveMs": [
+        173.78236099999776,
+        252.3894599999985,
+        215.78392299999905,
+        316.7736019999975
+      ],
+      "scope": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 141
+      }
+    }
+  ]
+}

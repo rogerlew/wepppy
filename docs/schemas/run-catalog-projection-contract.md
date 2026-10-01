@@ -1,7 +1,7 @@
 # Run catalog PostgreSQL projection specification
 
-Status: predeployment implementation validated, 2026-10-01 UTC; deployment on hold.
-The operator authorized execution through readiness for **forest**, with later
+Status: forest read cutover completed, 2026-10-01 UTC; observation pending.
+The operator authorized execution through gated cutover on **forest**, with later
 **forest1 → wepp1** rollout. Independent contract reviews passed and accepted
 checkpoint `db8e6be126fb231f16dd5e76f322d2b03089c10c` precedes runtime edits.
 This document is not deployment evidence.

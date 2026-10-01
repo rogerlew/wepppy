@@ -504,7 +504,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
   `docker compose -f docker/docker-compose.dev.yml logs -f status`
 
 - **Run database migrations (inside app container)**  
-  `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud flask db upgrade`
+  `wctl exec -T weppcloud flask --app wepppy.weppcloud.app db upgrade`
 
 - **Inspect Redis**  
   `docker compose -f docker/docker-compose.dev.yml exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)"'`
