@@ -1,0 +1,815 @@
+{
+  "status": {
+    "projected": 200,
+    "dirty": 0,
+    "pending": 0,
+    "ready": 41,
+    "unavailable": 159,
+    "oldest_dirty_at": null,
+    "oldest_reconciled_at": "2026-10-01 05:45:14.205667+00:00",
+    "latest_attempt_at": "2026-10-01 05:45:59.740006+00:00",
+    "errors": 0,
+    "transient_failures": 0,
+    "unreconciled": 0,
+    "registered": 200
+  },
+  "compared": 200,
+  "all_match": true,
+  "omissions": [
+    {
+      "run_id": 1,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 2,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 3,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 4,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 5,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 6,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 7,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 8,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 9,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 10,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 11,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 12,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 13,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 14,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 15,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 16,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 17,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 18,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 19,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 20,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 21,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 22,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 23,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 24,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 25,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 26,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 27,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 28,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 29,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 30,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 31,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 32,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 33,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 34,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 35,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 36,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 37,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 38,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 39,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 40,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 41,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 42,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 43,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 44,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 45,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 46,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 47,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 48,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 49,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 50,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 51,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 52,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 54,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 55,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 56,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 57,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 58,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 59,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 60,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 61,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 63,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 64,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 65,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 66,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 67,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 70,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 71,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 72,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 74,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 76,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 77,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 96,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 97,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 98,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 99,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 100,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 101,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 102,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 103,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 104,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 105,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 106,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 108,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 109,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 111,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 113,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 114,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 115,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 116,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 117,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 118,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 119,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 120,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 121,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 123,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 125,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 126,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 127,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 128,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 129,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 131,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 132,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 134,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 135,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 136,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 138,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 139,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 140,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 141,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 143,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 144,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 145,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 146,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 147,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 148,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 149,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 150,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 151,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 153,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 154,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 155,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 156,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 157,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 158,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 160,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 161,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 162,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 163,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 164,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 165,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 166,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 176,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 177,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 179,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 180,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 182,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 183,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 184,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 185,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 186,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 188,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 189,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 190,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 191,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 192,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 193,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 194,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 198,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 199,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 200,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 201,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 207,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 208,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 209,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 213,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 215,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 216,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 217,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    },
+    {
+      "run_id": 222,
+      "ron_state": "missing",
+      "ttl_state": "missing"
+    }
+  ]
+}

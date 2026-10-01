@@ -24,9 +24,13 @@ def pytest_configure(config) -> None:
 
 @pytest.fixture(autouse=True)
 def _clear_secret_file_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Ensure host-configured `*_FILE` vars do not leak into unit tests."""
+    """Isolate host secrets and deployment catalog modes from test configuration."""
 
     for key in (
+        "WEPPPY_PROJECT_COMMIT_MODE",
+        "WEPPCLOUD_RUN_CATALOG_WRITE_MODE",
+        "WEPPCLOUD_RUN_CATALOG_READ_MODE",
+        "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED",
         "ADMIN_PASSWORD_FILE",
         "AGENT_JWT_SECRET_FILE",
         "CAP_SECRET_FILE",

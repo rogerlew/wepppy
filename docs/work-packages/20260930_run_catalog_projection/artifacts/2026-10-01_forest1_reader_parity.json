@@ -1,0 +1,187 @@
+{
+  "method": "direct app-context readers; not authenticated HTTP/browser evidence",
+  "reports": [
+    {
+      "user_id": 1,
+      "surface": "table",
+      "registrations": 156,
+      "returned": 32,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 124
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 1,
+      "surface": "map",
+      "registrations": 156,
+      "returned": 32,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 124
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 2,
+      "surface": "table",
+      "registrations": 2,
+      "returned": 0,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 2
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 2,
+      "surface": "map",
+      "registrations": 2,
+      "returned": 0,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 2
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 3,
+      "surface": "table",
+      "registrations": 15,
+      "returned": 5,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 10
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 3,
+      "surface": "map",
+      "registrations": 15,
+      "returned": 5,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 10
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 4,
+      "surface": "table",
+      "registrations": 19,
+      "returned": 2,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 17
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 4,
+      "surface": "map",
+      "registrations": 19,
+      "returned": 2,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 17
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 5,
+      "surface": "table",
+      "registrations": 4,
+      "returned": 1,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 3
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 5,
+      "surface": "map",
+      "registrations": 4,
+      "returned": 1,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 3
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 6,
+      "surface": "table",
+      "registrations": 2,
+      "returned": 1,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 1
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 6,
+      "surface": "map",
+      "registrations": 2,
+      "returned": 1,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 1
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 7,
+      "surface": "table",
+      "registrations": 2,
+      "returned": 0,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 2
+      },
+      "exact_legacy_fields": true
+    },
+    {
+      "user_id": 7,
+      "surface": "map",
+      "registrations": 2,
+      "returned": 0,
+      "status": {
+        "mode": "postgres",
+        "pending": 0,
+        "stale": 0,
+        "unavailable": 2
+      },
+      "exact_legacy_fields": true
+    }
+  ]
+}

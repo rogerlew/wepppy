@@ -30,6 +30,8 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 ## Progress
 
 - [x] (2026-10-01 UTC) Operator authorized startup-fix commit/redeploy and a default-off environment-controlled sweep switch. Forest's enabled setting moves to its gitignored environment; no global enablement or new service.
+- [x] (2026-10-01 05:47 UTC) Forest1 repair `2f61fb1e5` passed two canonical deployments; migration and profiled worker update completed. Four actual-environment origin probes passed; scheduled shadow covers 200 registrations, with all source and seven-account reader comparisons matching. Reads remain legacy pending authenticated browser/workflow witnesses.
+- [x] (2026-10-01 05:59 UTC) Shared test environment isolation corrected; final observer/RQ/catalog/tools/microservice selection passed 3,060 tests with 29 skips. No additional runtime changes or full-suite pass claimed.
 
 
 - [x] (2026-09-30 UTC) Profile production and retain the 169.56-second baseline.
@@ -59,6 +61,12 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 
 
 ## Surprises & Discoveries
+
+Forest1 has no usable dev-agent credentials and retains OAuth-only login. Internal
+reader parity can be verified without impersonating a session but cannot replace
+authenticated browser or live mutation evidence. Keep read cutover held rather
+than altering auth defaults. The wrapper requires `wctl docker compose --profile`,
+not a top-level `wctl --profile` option.
 
 
 NoDb already calls a PostgreSQL timestamp helper after save, but the helper
@@ -132,6 +140,19 @@ handoff stops before forest deployment; no M5 proof or package closure is claime
 
 
 ## Outcomes & Retrospective
+
+Latest forest1 outcome: uniform repaired candidate, successful two-deploy rehearsal,
+healthy 200-registration shadow, explicit legacy-read hold. Startup coupling is
+fixed at the ASGI boundary and baked schedules are now safely host-activated.
+Remaining live-browser/workflow gates are distinct from the waived idle soak;
+no wepp1 deployment or full acceptance is claimed.
+The full sanity rerun passed 4,813 cases before a standalone-defaults test
+inherited forest's live write/read settings. A 37-case focused rerun passed;
+subsequent worker tests demonstrated that isolation belongs in the shared
+secret-scrubbing fixture rather than individual tests. Full-suite end-to-end
+success is not claimed.
+The final combined regression selection passed 3,060 tests with 29 skips after
+shared environment isolation, including both previously failing worker cases.
 
 
 Implementation now includes schema, data-only extraction, portable observer,

@@ -1,7 +1,7 @@
 # Run catalog projection tracker
 
 **Updated**: 2026-10-01 UTC
-**Status**: Forest1 switched to master; deployment failed startup/stability gate; affected read services restored, catalog inactive.
+**Status**: Forest1 repair deployed twice successfully; catalog shadow healthy across 200 registrations; legacy reads held pending authenticated browser/workflow evidence.
 
 Implementation evidence and current findings:
 [review disposition](artifacts/2026-09-30_implementation_review.md),
@@ -35,6 +35,7 @@ is claimed.
 - [ ] M5 host evidence: production-equivalent initialization/mounts, queue capacity, network/browser timing and full producer/consumer witnesses.
 - [ ] M5a: forest acceptance and healthy observation.
 - [x] Forest candidate commit, migration, consumer proof, shadow/backfill and read cutover.
+- [x] Forest1 candidate `2f61fb1e5`: two canonical deployments, additive migration, four live consumer proofs, scheduled backfill and exact source/reader parity.
 - [ ] M5b: forest1 test-production rehearsal and healthy observation.
 - [ ] M5c: wepp1 shadow/backfill/cutover and healthy observation.
 - [ ] Legacy reader retirement disposition and final review/closeout.
@@ -94,6 +95,21 @@ Implementation SHA: `3e6cbdcb9`.
 Do not treat the architecture endorsement as a completed independent review.
 
 ## Next handoff
+
+Forest1 now runs `2f61fb1e5`, migration `d30c91a7b802`, catalog writes and enabled
+sweeps, with legacy reads deliberately retained. Both canonical repair/shadow
+deployments passed; the profiled fork/archive worker was separately updated.
+All 200 source comparisons and seven-account table/map reader comparisons pass;
+technical preflight is ready. Current action is authenticated OAuth/browser and
+live workflow validation, then an explicit read cutover—not another idle wait.
+Full sanity stopped after 4,813 passes on a deployment-environment leak in one
+test; a 37-case focused rerun passed. Further worker tests exposed the same
+leak, now addressed centrally beside existing test secret scrubbing.
+Final combined observer/RQ/catalog/tools/microservice validation passed 3,060
+tests with 29 skips. No full-suite pass is claimed. Graph and exception checks pass.
+Details: forest1 run sheet, “Current hold”.
+
+### Historical failure disposition
 
 Branch switch was approved and completed with the feature branch preserved.
 The resumed rollout exposed catalog initialization during shared rq-engine
