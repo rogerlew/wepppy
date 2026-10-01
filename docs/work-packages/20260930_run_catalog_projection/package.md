@@ -1,6 +1,6 @@
 # PostgreSQL run catalog projection
 
-**Status**: Open — contract reviews passed; implementation not started (2026-09-30)
+**Status**: Open — predeployment implementation complete; holding before forest deployment (2026-10-01 UTC)
 **Timezone**: UTC
 
 ## Purpose and authority
@@ -15,7 +15,7 @@ This package organizes execution, not a competing schema. Follow the
 [active ExecPlan](prompts/active/run_catalog_projection_execplan.md) and
 [tracker](tracker.md). Architecture and forest → forest1 → wepp1 order were
 endorsed by the operator; independent technical reviews passed. Detailed operator
-ratification and the accepted contract ancestor remain pending.
+ratification and accepted checkpoints now precede runtime implementation.
 
 ## Scope and complexity budget
 
@@ -66,12 +66,13 @@ Dedicated [security review](artifacts/2026-09-30_security_review.md) and
 [correctness review](artifacts/2026-09-30_correctness_review.md) are required.
 Both independent contract reviews passed after findings disposition; see the
 [closure record](artifacts/2026-09-30_contract_review_disposition.md). Runtime
-reviews and deployment proof remain pending; authoring is not self-approval.
+review is tracked in the [implementation disposition](artifacts/2026-09-30_implementation_review.md);
+deployment proof remains pending. Authoring is not self-approval.
 
 Parameterization: no scientific changes. Workflow cadence, retry, stale-state
 presentation and observation defaults are recorded in
 [ADR-0078](../../adrs/ADR-0078-run-catalog-projection.md), with detailed numerical
-choices explicitly pending operator ratification and capacity validation.
+choices authorized for implementation and still subject to host capacity validation.
 
 ## Incident lifecycle and delivery
 

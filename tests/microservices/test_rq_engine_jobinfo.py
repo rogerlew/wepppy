@@ -11,6 +11,30 @@ from wepppy.weppcloud.utils import auth_tokens
 pytestmark = pytest.mark.microservice
 
 
+@pytest.mark.parametrize("endpoint,helper", [("jobstatus", "get_wepppy_rq_job_status"), ("jobinfo", "get_wepppy_rq_job_info")])
+def test_catalog_outer_failures_are_private(monkeypatch, endpoint, helper):
+    def fail(identifier):
+        raise RuntimeError("private-source-and-database-canary")
+    monkeypatch.setattr(job_routes, helper, fail)
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/{endpoint}/run_catalog_sweep_00000000-0000-0000-0000-000000000001")
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "run_catalog_maintenance_failed"
+    assert "private-source-and-database-canary" not in response.text
+    assert "traceback" not in response.text.lower()
+
+
+def test_catalog_batch_outer_failure_is_private(monkeypatch):
+    def fail(identifiers):
+        raise RuntimeError("private-source-and-database-canary")
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fail)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/jobinfo", json={"job_ids": ["run_catalog_sweep_00000000-0000-0000-0000-000000000001"]})
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "run_catalog_maintenance_failed"
+    assert "private-source-and-database-canary" not in response.text
+
+
 @pytest.fixture(autouse=True)
 def _reset_polling_state(monkeypatch: pytest.MonkeyPatch):
     job_routes._POLL_RATE_LIMIT_BUCKETS.clear()
@@ -340,6 +364,33 @@ def _issue_rq_token(
         extra_claims={"jti": "test-jti", **(extra_claims or {})},
     )
     return payload["token"]
+
+
+@pytest.mark.parametrize("roles", [[], ["Admin"], ["Root"]])
+@pytest.mark.parametrize("failure", [False, True])
+def test_catalog_cancellation_requires_operator_and_redacts(monkeypatch, roles, failure):
+    identifier = "run_catalog_sweep_00000000-0000-4000-8000-000000000001"
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    token = _issue_rq_token(monkeypatch, extra_claims={"token_class": "service", "runs": ["unrelated"], "roles": roles})
+    observed = []
+
+    def fetch(job_id):
+        observed.append(job_id)
+        if failure:
+            raise RuntimeError("private-catalog-path-password")
+        return {"job_id": job_id, "status": "started", "runid": None}
+
+    def cancel(job_id, **kwargs):
+        assert job_id == identifier
+        return {"status": "ok"}
+
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", fetch)
+    monkeypatch.setattr(job_routes, "cancel_jobs", cancel)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/canceljob/" + identifier, headers={"Authorization": "Bearer " + token})
+    assert response.status_code == (403 if not roles else 500 if failure else 200)
+    assert observed == ([identifier] if roles else [])
+    assert "private-catalog-path-password" not in response.text
 
 
 def test_canceljob_requires_auth() -> None:

@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from fastapi import APIRouter, Request, status
+from fastapi.responses import JSONResponse
 
 from wepppy.rq.cancel_job import cancel_jobs
 from wepppy.rq.job_info import (
@@ -303,6 +304,9 @@ def jobstatus(job_id: str, request: Request):
             success=False,
             reason="exception",
         )
+        from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if is_catalog_job(job_id):
+            return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Error Handling Request")
 
 
@@ -369,6 +373,9 @@ def jobinfo(job_id: str, request: Request):
             success=False,
             reason="exception",
         )
+        from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if is_catalog_job(job_id):
+            return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Error Handling Request")
 
 
@@ -391,6 +398,7 @@ def jobinfo(job_id: str, request: Request):
     ),
 )
 async def jobinfo_batch(request: Request):
+    job_ids = []
     claims, guard_response = _polling_guard(endpoint="jobinfo_batch", request=request, job_id="batch")
     if guard_response is not None:
         return guard_response
@@ -433,6 +441,9 @@ async def jobinfo_batch(request: Request):
             success=False,
             reason="exception",
         )
+        from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if any(is_catalog_job(job_id) for job_id in job_ids):
+            return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Failed to retrieve batch job info")
 
 
@@ -456,15 +467,21 @@ async def jobinfo_batch(request: Request):
     ),
 )
 def canceljob(job_id: str, request: Request):
+    from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+    catalog_job = is_catalog_job(job_id)
     try:
         claims, accepted_scopes = _authorize_cancel_request(request)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine canceljob auth failed")
+        if catalog_job:
+            return JSONResponse(maintenance_error(), status_code=401)
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
+        if catalog_job and not _is_admin_or_root(claims):
+            raise AuthError("Catalog maintenance cancellation requires Admin or Root", status_code=403, code="forbidden")
         job_info = get_wepppy_rq_job_info(job_id)
         if job_info.get("status") == "not_found":
             return error_response(
@@ -493,6 +510,8 @@ def canceljob(job_id: str, request: Request):
             allow_started_fork_archive=_is_admin_or_root(claims),
         )
         if "error" in payload:
+            if catalog_job:
+                return JSONResponse(maintenance_error(), status_code=500)
             if payload.get("code") == "forbidden":
                 return error_response(
                     payload["error"],
@@ -516,6 +535,8 @@ def canceljob(job_id: str, request: Request):
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine canceljob failed")
+        if catalog_job:
+            return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Failed to cancel job")
 
 

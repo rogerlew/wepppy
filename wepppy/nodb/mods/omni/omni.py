@@ -573,6 +573,8 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
     # remove READONLY file flag if present
     if _exists(_join(new_wd, 'READONLY')):
         os.remove(_join(new_wd, 'READONLY'))
+        from wepppy.nodb.persistence_events import notify_committed
+        notify_committed(new_wd, runid, "readonly")
 
 
 def _parse_optional_int_percent(value: Any) -> Optional[int]:

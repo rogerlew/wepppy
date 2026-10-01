@@ -29,6 +29,7 @@ services:
     entrypoint: *wepppyo3-interchange-entrypoint
     secrets:
       - redis_password
+      - postgres_password
       - source: discord_bot_token
         target: /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token
     environment:
@@ -37,6 +38,11 @@ services:
       RQ_REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to production Redis DB 9}
       REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to production Redis DB 9}
       REDIS_PASSWORD_FILE: /run/secrets/redis_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_HOST: ${POSTGRES_HOST:?Set POSTGRES_HOST to the job-origin PostgreSQL host}
+      WEPPPY_PROJECT_COMMIT_MODE: ${WEPPPY_PROJECT_COMMIT_MODE:-postgres}
+      WEPPCLOUD_RUN_CATALOG_WRITE_MODE: ${WEPPCLOUD_RUN_CATALOG_WRITE_MODE:-timestamp_only}
+      WEPPCLOUD_RUN_CATALOG_READ_MODE: ${WEPPCLOUD_RUN_CATALOG_READ_MODE:-legacy}
       WC1_DIR: /wc1
       GEODATA_DIR: /geodata
       WEPPPY_PROJECT_CONFIG_READER_ENABLED: ${WEPPPY_PROJECT_CONFIG_READER_ENABLED:-false}
@@ -57,6 +63,8 @@ services:
         exec /workdir/wepppy/docker/rq-worker-startup.sh 1 fork-archive
 
 secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
   redis_password:
     file: ./secrets/redis_password
   # Preserve the production worker import contract even when notifications are

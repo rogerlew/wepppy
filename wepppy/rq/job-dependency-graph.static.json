@@ -699,6 +699,16 @@
   },
   {
     "depends_on": [],
+    "enqueue_target": "sweep_run_catalog",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_sweep",
+    "source_lineno": 93,
+    "source_module": "wepppy/rq/run_catalog_rq.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "_run_swat_rq",
     "job_meta_stage": "jobs:0",
     "notes": [],

@@ -120,6 +120,7 @@
         <div id="runs-delete-status" class="wc-text-muted" aria-live="polite" style="margin-left: var(--wc-space-sm);"></div>
       </div>
 
+      <p id="runs_catalog_status" class="wc-text-muted" role="status" aria-live="polite" hidden></p>
       <div class="wc-table-wrapper">
         <table class="wc-table wc-table--dense" id="runs_table">
           <thead>
@@ -393,7 +394,7 @@
     if (showOwner) {
       appendCell(formatOptionalValue(run.owner || ''));
     }
-    appendCell(formatOptionalValue(run.name || ''));
+    appendCell(formatOptionalValue(run.name || '') + (run.catalog_state === 'stale' ? ' (metadata updating)' : ''));
     appendCell(formatOptionalValue(run.scenario || ''));
     appendCell(formatOptionalValue(run.runid || ''));
     appendCell(formatOptionalValue(run.config || ''));
@@ -893,6 +894,16 @@
         ...run,
         searchIndex: buildSearchIndex(run),
       }));
+      const catalogStatus = document.getElementById('runs_catalog_status');
+      const summary = payload && payload.catalog_status;
+      if (catalogStatus) {
+        const updating = summary ? summary.pending + summary.stale : 0;
+        const unavailable = summary ? summary.unavailable : 0;
+        catalogStatus.hidden = !updating && !unavailable;
+        catalogStatus.textContent = updating || unavailable
+          ? `Metadata updating: ${updating}. Unavailable projects: ${unavailable}. Dates may be temporarily unavailable; refresh later.`
+          : '';
+      }
       runsCatalogLoaded = true;
       applyRunsFilter({ resetPage: false });
     } catch (error) {

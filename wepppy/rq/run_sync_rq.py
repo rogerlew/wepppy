@@ -551,6 +551,8 @@ def run_sync_rq(
             version_at_pull,
         )
         _publish_status(status_channel, job_id, "REGISTERED", str(run_root))
+        from wepppy.weppcloud.run_catalog import notify_path_commit
+        notify_path_commit(run_root, "lifecycle")
         _publish_status(status_channel, job_id, "COMPLETE", f"{func_name}({normalized_runid}, {normalized_config})")
         return {
             "runid": normalized_runid,

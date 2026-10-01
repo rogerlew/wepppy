@@ -134,6 +134,8 @@ def _write_payload(path: Path, payload: Dict[str, Any]) -> None:
     with tmp_path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2, sort_keys=True)
     tmp_path.replace(path)
+    from wepppy.weppcloud.run_catalog import notify_path_commit
+    notify_path_commit(path.parent, "ttl")
 
 
 def _normalize_payload(payload: Dict[str, Any]) -> Dict[str, Any]:

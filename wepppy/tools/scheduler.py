@@ -203,6 +203,10 @@ def _resolve_task_callable(task: TaskState) -> Optional[Callable[..., Any]]:
 
 def _enqueue_task(queue: Queue, task: TaskState) -> bool:
     spec = task.spec
+    if spec.func_path == "wepppy.rq.run_catalog_rq.sweep_run_catalog":
+        from wepppy.rq.run_catalog_rq import enqueue_sweep
+        enqueue_sweep(queue, timeout=spec.job_timeout or 3600, result_ttl=spec.result_ttl or 86400)
+        return True
     func = _resolve_task_callable(task)
     if func is None:
         return False
@@ -364,10 +368,15 @@ def run_scheduler(
                 task.next_run = _failure_retry_time(now, sleep_seconds)
         if run_once:
             break
-        time.sleep(sleep_seconds)
+        catalog_due = [task.next_run for task in states if task.spec.enabled
+                       and task.spec.func_path == "wepppy.rq.run_catalog_rq.sweep_run_catalog"]
+        delay = min(sleep_seconds, max(0.01, min(catalog_due) - time.monotonic())) if catalog_due else sleep_seconds
+        time.sleep(delay)
 
 
 def main() -> None:
+    from wepppy.nodb.persistence_events import initialize_project_commits
+    initialize_project_commits()
     parser = argparse.ArgumentParser(description="Enqueue scheduled RQ tasks.")
     parser.add_argument(
         "--config",

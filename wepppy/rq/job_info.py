@@ -14,6 +14,7 @@ from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.utils import utcnow
+from wepppy.rq.run_catalog_rq import is_catalog_job, safe_job_details
 
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -102,6 +103,8 @@ def _build_queue_snapshot(
 
 
 def _resolve_runid(job: Job) -> str | None:
+    if is_catalog_job(job.id):
+        return None
     meta = job.meta if isinstance(job.meta, dict) else {}
     runid = meta.get("runid")
     if runid:
@@ -138,6 +141,8 @@ def recursive_get_job_details(
     queue_candidates: list[Tuple[str, str, str | None]] | None = None,
 ) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
+    if is_catalog_job(job.id):
+        return safe_job_details(job.id, job)
     elapsed_s = None
     if job.started_at:
         if job.ended_at:
@@ -206,6 +211,11 @@ def recursive_get_job_details(
                 )
             except NoSuchJobError:
                 child_job_info = None
+            except Exception:  # broad-except: catalog-only disclosure boundary before deserialization; other jobs re-raise.
+                if not is_catalog_job(child_job_id):
+                    raise
+                logger.exception("Catalog child polling failed")
+                child_job_info = safe_job_details(child_job_id)
             job_info.setdefault("children", {}).setdefault(job_order, []).append(child_job_info)
 
     child_details = [
@@ -231,6 +241,16 @@ def recursive_get_job_details(
 
 def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
     """Return the recursive job tree for a single job id."""
+    if is_catalog_job(job_id):
+        try:
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+                job = Job.fetch(job_id, connection=connection)
+                return safe_job_details(job_id, job)
+        except NoSuchJobError:
+            return {"job_id": job_id, "status": "not_found"}
+        except Exception:  # broad-except: reserved-job disclosure boundary for every helper caller.
+            logger.exception("Catalog job polling failed job_id=%s", job_id)
+            return safe_job_details(job_id)
     now = utcnow()
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
@@ -289,6 +309,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                     "status": "error",
                     "exc_info": str(exc),
                 }
+                if is_catalog_job(job_id):
+                    results[job_id] = safe_job_details(job_id)
                 continue
 
             if not job:
@@ -310,6 +332,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                     "status": "error",
                     "exc_info": str(exc),
                 }
+                if is_catalog_job(job_id):
+                    results[job_id] = safe_job_details(job_id)
 
     return results
 

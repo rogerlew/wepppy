@@ -1,6 +1,6 @@
 # Run catalog PostgreSQL projection specification
 
-Status: implementation in progress, 2026-09-30; deployment on hold.
+Status: predeployment implementation validated, 2026-10-01 UTC; deployment on hold.
 The operator authorized execution through readiness for **forest**, with later
 **forest1 → wepp1** rollout. Independent contract reviews passed and accepted
 checkpoint `db8e6be126fb231f16dd5e76f322d2b03089c10c` precedes runtime edits.
@@ -538,10 +538,24 @@ Promotion targets under healthy infrastructure:
   p99 <=2.5 seconds over >=100 sequential authenticated requests, plus a recorded
   concurrent-reader check. Record browser readiness, server/TTFB, payload size,
   and process-cache conditions separately.
+  Forest uses its actual single-account project scope with controlled requests;
+  absence of 805 projects does not block forest cutover or promotion. Retain
+  isolated scale evidence separately and validate representative host scale on
+  the first stage with that dataset, on wepp1 in shadow before read cutover if
+  unavailable earlier. Do not assume forest1 has the production dataset.
 - Zero project filesystem calls on database read paths; zero unauthorized data
   exposure and zero project changes by extraction.
 - Healthy notification overhead: added p95 <=50 ms on interactive mutations;
   retain baseline and unavailable-database worst-case measurements.
+
+Use producer-specific, matched performance baselines. NoDb saves already pay
+for a synchronous timestamp-mirror commit; compare timestamp-only versus catalog
+mode and also characterize the legacy helper versus its replacement. TTL and
+READONLY previously had no SQL mirror: their baseline must not invent one.
+Measure complete mutations and observer time, counterbalance/interleave mode
+order, retain raw samples, and label paired-delta p95 separately from differences
+between mode p95s. Include commit/locking cost; no durability relaxation or
+threshold waiver follows from sharing the existing NoDb transaction.
 
 These are acceptance limits, not achieved claims. Cadence, concurrency, stale
 window, and retry choices are recorded in ADR-0078. Adjustments require capacity

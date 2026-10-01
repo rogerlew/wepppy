@@ -261,6 +261,8 @@ def run_all_migrations(
     Returns:
         MigrationResult with details of what was applied/skipped/failed
     """
+    from wepppy.nodb.persistence_events import initialize_project_commits
+    initialize_project_commits()
     result = MigrationResult(wd=wd)
     run_path = Path(wd)
 
@@ -305,4 +307,7 @@ def run_all_migrations(
                 on_progress(name, f"{name}: ERROR - {exc}")
 
     result.completed_at = datetime.now(timezone.utc)
+    if result.success and not dry_run:
+        from wepppy.weppcloud.run_catalog import notify_path_commit
+        notify_path_commit(wd, "lifecycle")
     return result

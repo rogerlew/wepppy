@@ -164,6 +164,9 @@ def migrations_rq(
                 raise
         
         publish_and_log("TRIGGER", "migrations MIGRATION_COMPLETE")
+        if result.success:
+            from wepppy.weppcloud.run_catalog import notify_path_commit
+            notify_path_commit(wd, "lifecycle")
         
         return result.to_dict()
         

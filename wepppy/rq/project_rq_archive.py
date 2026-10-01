@@ -373,7 +373,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     prep = None
     try:
         prep = runtime.get_prep_from_runid(runid)
-        wd = Path(runtime.get_wd(runid)).resolve()
+        notification_wd = runtime.get_wd(runid)
+        wd = Path(notification_wd).resolve()
 
         archives_dir = wd / "archives"
         archive_path = (archives_dir / archive_name).resolve()
@@ -460,6 +461,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
             for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
                 os.chmod(directory, mode)
 
+        from wepppy.nodb.persistence_events import notify_committed
+        notify_committed(str(notification_wd), runid, "lifecycle")
         try:
             cleared_entries = runtime.clear_nodb_file_cache(runid)
         except Exception as exc:

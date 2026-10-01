@@ -1,7 +1,20 @@
 # Run catalog projection tracker
 
-**Updated**: 2026-09-30 UTC
-**Status**: Implementation authorized; preparing M0 checkpoint; hold before forest deployment.
+**Updated**: 2026-10-01 UTC
+**Status**: Forest steps 1–5 authorized; deployment preflight underway.
+
+Implementation evidence and current findings:
+[review disposition](artifacts/2026-09-30_implementation_review.md),
+[producer inventory](artifacts/producer_inventory.md), and
+[operator/developer guide](../../dev-notes/run-catalog-operations.md).
+Clarification checkpoint: `bf6b0584f7d9a4831576559e9354ff4bb53fa8b6`.
+Broad suite: 10,034 passed, 99 skipped, 12 subtests before final review fixes.
+Final functional targeted validation: 487 passed, three performance cases
+deselected and measured separately. Profiling identified commit-dominated,
+phase-sensitive timing. Counterbalanced SQL/performance validation passed 24
+tests; corrected matched READONLY evidence and the final eight-test reader suite
+also passed. See [validation and retained risks](artifacts/2026-09-30_predeploy_validation.md).
+No host capacity acceptance or deployment is claimed.
 
 ## Task board
 
@@ -12,11 +25,12 @@
 - [x] Create ADR, execution package, active ExecPlan, and review gates.
 - [x] Independent correctness/security contract reviews and findings disposition.
 - [x] Operator ratified the reviewed plan by authorizing execution on 2026-09-30 UTC.
-- [ ] M0: record acceptance checkpoint SHA before runtime edits.
-- [ ] M1: additive migration/repository/extractor and real SQL/file parity tests.
-- [ ] M2: portable observer and complete producer/process wiring.
-- [ ] M3: refresh/reconciliation, scheduler, CLI, metrics, capacity evidence.
-- [ ] M4: database readers, compatible payloads, freshness UI and browser tests.
+- [x] M0: acceptance checkpoint `db8e6be126fb231f16dd5e76f322d2b03089c10c` precedes runtime edits.
+- [x] M1 implementation: additive migration/repository/extractor and real SQL/file tests.
+- [x] M2 implementation: portable observer and inventoried producer/process wiring.
+- [x] M3 implementation: maintenance, scheduler, CLI, metrics and isolated timing/fairness evidence.
+- [x] M4 implementation: SQL readers, compatible payloads, freshness UI and isolated browser/HTTP tests.
+- [ ] M5 host evidence: production-equivalent initialization/mounts, queue capacity, network/browser timing and full producer/consumer witnesses.
 - [ ] M5a: forest acceptance and healthy observation.
 - [ ] M5b: forest1 test-production rehearsal and healthy observation.
 - [ ] M5c: wepp1 shadow/backfill/cutover and healthy observation.
@@ -72,11 +86,18 @@ tests were run because this change set only revises documentation.
 post-fix PASS verdicts. The [disposition record](artifacts/2026-09-30_contract_review_disposition.md)
 closes all ten distinct findings (including one author finding and one duplicate
 reported by both reviewers); none is risk-accepted. Runtime gates remain pending.
-Contract ancestor SHA: **not created**. Implementation SHA: **none**.
+Contract ancestor SHA: `db8e6be126fb231f16dd5e76f322d2b03089c10c`.
+Implementation SHA: **none**.
 Do not treat the architecture endorsement as a completed independent review.
 
 ## Next handoff
 
-Complete M0 detailed operator ratification and the accepted contract checkpoint
-before changing runtime. Independent technical reviews are complete. Then follow
-the ExecPlan milestone order. Update this tracker and the active plan together.
+M0 is complete. Initial schema/file/SQL tests passed (11 extractor, 3 isolated
+PostgreSQL); portable observer and NoDb regression tests passed (136). Early M1
+implementation reviews are running. Complete wiring, fault/race/route/browser
+validation, documentation, and final reviews before declaring deploy readiness.
+The operator subsequently authorized forest steps 1–5, including gated read
+cutover. Forest acceptance uses its actual single-account scope and controlled
+traffic, not an unavailable 805-run dataset. Representative host-scale evidence
+is deferred to the first eligible stage, before wepp1 read cutover if necessary.
+No other host deployment or promotion is authorized by this amendment.

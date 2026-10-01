@@ -151,6 +151,12 @@ def _handle_csrf_error(exc: CSRFError):
 # Create database connection object
 db = SQLAlchemy(app)
 
+from wepppy.weppcloud.run_catalog.schema import catalog_table
+from wepppy.nodb.persistence_events import initialize_project_commits
+
+run_catalog_table = catalog_table(db.metadata)
+initialize_project_commits()
+
 # Define models
 roles_users = db.Table(
     'roles_users',
@@ -235,6 +241,16 @@ class Run(db.Model):
                     name=ron.name,
                     scenario=ron.scenario,
                     readonly=ron.readonly)
+
+
+def _seed_registered_run_catalog(mapper, connection, run):
+    if os.getenv("WEPPCLOUD_RUN_CATALOG_WRITE_MODE", "timestamp_only") == "catalog":
+        from wepppy.weppcloud.run_catalog.repository import seed
+        seed(connection, run_id=run.id)
+
+
+from sqlalchemy import event as sqlalchemy_event
+sqlalchemy_event.listen(Run, "after_insert", _seed_registered_run_catalog)
 
 
 class RunMigration(db.Model):

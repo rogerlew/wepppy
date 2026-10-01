@@ -4,8 +4,8 @@
 This ExecPlan is a living document maintained under
 `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries,
 Decision Log, and Outcomes & Retrospective current together with this package's
-`tracker.md`. The current authorized task is implementation and pre-deployment
-validation, holding before forest deployment. No other active package
+`tracker.md`. The current authorized task is forest deployment steps 1–5,
+through gated read cutover, without promotion to another host. No other active package
 is being executed here.
 
 
@@ -36,11 +36,18 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 - [x] (2026-09-30 UTC) Obtain independent initial correctness/security findings.
 - [x] (2026-09-30 UTC) Close all findings with independent post-fix contract PASS verdicts.
 - [x] (2026-09-30 UTC) Operator authorized the reviewed package for implementation; forest deployment remains on hold.
-- [ ] M0: Record acceptance checkpoint SHA before runtime edits.
-- [ ] M1: Schema, repository, extractor, operator seed/status/compare, and direct tests.
-- [ ] M2: Portable notification interface and complete process/producer wiring.
-- [ ] M3: Serialized refresh, reconciliation, scheduler coalescing, CLI, and capacity proof.
-- [ ] M4: Database-only routes, freshness UI, regression and browser evidence.
+- [x] M0: Acceptance checkpoint `db8e6be126fb231f16dd5e76f322d2b03089c10c` recorded before runtime edits.
+- [x] M1 implementation: schema, repository, extractor, operator seed/status/compare and real SQL/file tests.
+- [x] (2026-09-30 UTC) Initial additive migration/extractor/SQL tests: 11 file tests and 3 isolated-schema PostgreSQL tests passed.
+- [x] (2026-09-30 UTC) Initial portable observer change passed 136 focused NoDb tests; implementation review remains open.
+- [x] Clarification checkpoint `bf6b0584f7d9a4831576559e9354ff4bb53fa8b6`: both independent reviewers approved technical/operator readiness separation and connection-bound consumer proof before follow-on CLI edits.
+- [x] Real file → observer → PostgreSQL → HTTP → Chromium chain passed in isolation; real authenticated SQL alias/shared-scope routes and a real isolated RQ sweep passed.
+- [x] Broad pre-handoff run passed: 10,034 tests, 99 skipped, 12 subtests (started before final review fixes; latest targeted rerun required).
+- [x] M2 implementation: portable observer and inventoried producer/process wiring; deployment startup/identity witnesses remain M5.
+- [x] M3 implementation: serialized refresh, reconciliation, scheduler coalescing, CLI, SQL/Redis fault tests and isolated capacity measurements.
+- [x] M4 implementation: SQL-only routes, freshness UI, authenticated scope regression and isolated file-to-browser evidence.
+- [x] (2026-10-01 UTC) Independent bounded implementation and evidence-method reviews passed with all findings closed; requested pre-forest deployment hold reached.
+- [ ] M5 prerequisite/acceptance: production-equivalent producer/consumer mounts, startup, real queue/model capacity, browser-map/network timing, and stage-specific operator evidence.
 - [ ] M5: Forest acceptance, full cycle, rollback, and observation.
 - [ ] M5: Forest1 production rehearsal, full cycle, rollback, and observation.
 - [ ] M5: Wepp1 backfill/cutover, full cycle, original-workflow acceptance.
@@ -71,6 +78,15 @@ source containment and pure grouped resolution, compatible remote sweep
 consumers, and a public-safe catalog-specific RQ diagnostic boundary. The
 scheduler's 30-second sleep also needs bounded wakeup for the 15-second task.
 
+Implementation review exposed serializer-envelope, grouped-identity,
+descriptor-binding, archive-finalizer and public-error-boundary defects; their
+fixes and independent dispositions are retained in the implementation review.
+NoDb's existing commit cost dominates absolute observer latency, so incremental
+timing requires matched producer-specific baselines. Counterbalanced raw samples
+retain earlier adverse measurements; TTL has limited isolated timing margin.
+Full NoDb convenience imports already reach Flask through BatchRunner/helpers;
+the new portable seam does not add that dependency or require PostgreSQL.
+
 
 ## Decision Log
 
@@ -96,16 +112,31 @@ corrected, including TTL constraints/readiness, source identity/pure resolution,
 worker compatibility, polling/identifier/rollback safety, and startup readiness.
 Detailed operator ratification and runtime evidence are not supplied by review.
 
+Implementation disposition (2026-10-01 UTC): accepted clarification checkpoint
+`bf6b0584f7d9a4831576559e9354ff4bb53fa8b6` separates automated technical readiness
+from mandatory stage-specific operator witnesses. URI hashes are not identity
+proof; each eligible consumer needs the actual-connection nonce and mount tests.
+Both reviewers returned bounded predeployment implementation PASS. The current
+handoff stops before forest deployment; no M5 proof or package closure is claimed.
+
 
 ## Outcomes & Retrospective
 
 
-Specification and executable sequence authored; independent correctness and
-security contract reviews passed with all findings closed. Runtime is unchanged;
-no implementation test, migration, deployment, or incident resolution is claimed.
-Next are detailed operator ratification and the accepted checkpoint, not activation.
-Review-session documentation lint, relative link targets, and whitespace checks
-passed. Spelling preview left unrelated existing tracker prose unchanged.
+Implementation now includes schema, data-only extraction, portable observer,
+process/producer wiring, coalesced maintenance, CLI and SQL-only readers. Tests
+use isolated PostgreSQL schemas and owned Redis queues, including actual file,
+archive, SQL, HTTP and Chromium boundaries. The broad suite passed; final
+targeted functional regression passed 487 tests, separate SQL/performance
+validation passed 24 tests, and the final reader suite passed eight tests.
+Correctness and security implementation reviews passed within predeployment scope.
+The live application schema is not migrated. No service restart, sweep activation,
+read cutover or deployment has occurred. M5 capacity, identities/mounts, live
+producer/consumer witnesses, rollback and elapsed observation remain mandatory.
+Handoff evidence: `artifacts/2026-09-30_predeploy_validation.md`; operations and
+developer integration: `docs/dev-notes/run-catalog-operations.md`. Runtime changes
+remain uncommitted for operator inspection; the two docs-only contract checkpoints
+are committed ancestors. No production acceptance or package closeout is claimed.
 
 
 ## Context and Orientation
@@ -211,15 +242,15 @@ infrastructure failures during specification authoring.
 
     wctl run-pytest tests/nodb/test_base_boundary_characterization.py tests/nodb/test_base_unit.py tests/nodb/test_base_misc.py
     wctl run-pytest tests/weppcloud/routes/test_runs_catalog_contract.py
-    wctl run-pytest tests/weppcloud/test_run_catalog.py tests/nodb/test_persistence_events.py tests/rq/test_run_catalog_rq.py
+    wctl run-pytest tests/weppcloud/test_run_catalog_extractor.py tests/weppcloud/test_run_catalog_postgres.py tests/weppcloud/test_run_catalog_reader.py tests/weppcloud/test_run_catalog_cli.py tests/nodb/test_persistence_events.py tests/rq/test_run_catalog_rq.py
     wctl check-rq-graph
     wctl check-test-stubs
     wctl run-npm lint
     wctl run-npm test
     wctl run-pytest tests --maxfail=1
 
-New tests are proposed filenames, not claims they exist. Add focused TTL,
-migration, scheduler, and producer tests beside existing suites. Run applicable
+The catalog tests now exist. Focused TTL, migration, scheduler, registration,
+restore, notification and producer regressions supplement existing suites. Run applicable
 stubtest commands for changed public APIs. Inspect new code with
 `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`
 and non-blocking quality observability; run the existing vulture gate if this
@@ -323,3 +354,8 @@ Execution authorization (2026-09-30 UTC, operator): execute this reviewed packag
 and hold when ready to deploy to forest. Implement M1–M4 and isolated validation;
 do not migrate the live application database, restart/recreate services, enable
 sweeps, or switch live readers. Host acceptance/soak gates remain M5 work.
+Operator amendment: forest has one account and lacks the 805-run scope. Use
+actual forest projects and controlled traffic; retain isolated scale evidence
+separately and require representative host scale on the first eligible stage,
+before wepp1 cutover if unavailable earlier. The operator authorized steps 1–5;
+48-hour observation and full reconciliation still gate host promotion.

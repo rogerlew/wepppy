@@ -1292,6 +1292,9 @@ def prepare_fork_run(
         if os.path.exists(fn):
             os.remove(fn)
 
+    from wepppy.weppcloud.run_catalog import notify_path_commit
+    notify_path_commit(new_wd, "readonly")
+
     publish_status(status_channel, "Cleanup locks, READONLY, PUBLIC... done.\n")
 
     if skip_omni_scenarios_contrasts:
@@ -1374,4 +1377,5 @@ def prepare_fork_run(
         )
         publish_status(status_channel, "Rebuilding Soils... done.\n")
 
+    notify_path_commit(new_wd, "lifecycle")
     return new_wd

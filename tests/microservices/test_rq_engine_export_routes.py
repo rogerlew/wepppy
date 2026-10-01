@@ -27,6 +27,28 @@ class _AttrShapedError(RuntimeError):
         self.message = "attr-shaped"
 
 
+@pytest.mark.parametrize("kind", ["features", "ermit"])
+def test_export_download_cannot_disclose_catalog_fetch_failure(tmp_path, monkeypatch, kind):
+    from contextlib import nullcontext
+    from wepppy.rq import job_info
+    identifier = "run_catalog_sweep_00000000-0000-4000-8000-000000000001"
+    monkeypatch.setattr(export_routes, "_authorize_download_or_public", lambda *args, **kwargs: None)
+    monkeypatch.setattr(export_routes, "get_wd", lambda *args, **kwargs: str(tmp_path))
+    monkeypatch.setattr(export_routes, "_resolve_export_wd", lambda *args, **kwargs: str(tmp_path))
+    monkeypatch.setattr(job_info.redis, "Redis", lambda **kwargs: nullcontext(object()))
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("private-catalog-database-path-canary")
+
+    monkeypatch.setattr(job_info.Job, "fetch", fail)
+    monkeypatch.setattr(export_routes, "get_wepppy_rq_job_info", job_info.get_wepppy_rq_job_info)
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/public-run/cfg/export/{kind}/job/{identifier}/download")
+    assert response.status_code == 409
+    assert "canary" not in response.text
+    assert "traceback" not in response.text
+
+
 def test_export_geopackage_propagates_nodir_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     runid = "run-export-nodir"
     run_root = tmp_path / runid

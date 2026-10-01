@@ -4,6 +4,15 @@ initial_delay_seconds: 900
 jitter_seconds: 300
 
 tasks:
+  - name: run_catalog
+    func: wepppy.rq.run_catalog_rq.sweep_run_catalog
+    enabled: false
+    interval_seconds: 15
+    initial_delay_seconds: 0
+    jitter_seconds: 0
+    queue: batch
+    job_timeout: 3600
+    result_ttl: 86400
   - name: ttl_gc
     func: wepppy.rq.project_rq.gc_runs_rq
     interval_seconds: 86400

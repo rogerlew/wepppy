@@ -109,9 +109,21 @@ class WepppyRqWorker(Worker):
     """RQ worker that attaches run-scoped logs and supports SIGUSR1 cancellations."""
 
     def __init__(self, *args, **kwargs):
+        from wepppy.nodb.persistence_events import initialize_project_commits
+        initialize_project_commits()
         super().__init__(*args, **kwargs)
         # Set the signal handler for SIGUSR1
         signal.signal(signal.SIGUSR1, self.handle_cancel_signal)
+
+    def register_birth(self):
+        super().register_birth()
+        if os.getenv("WEPPPY_PROJECT_COMMIT_MODE", "disabled") == "postgres":
+            import json
+            from wepppy.rq.run_catalog_rq import deployment_identity
+            self.connection.hset(self.key, "run_catalog_configuration", json.dumps({
+                "protocol": 1, "database": deployment_identity(),
+                "write_mode": os.getenv("WEPPCLOUD_RUN_CATALOG_WRITE_MODE", "timestamp_only"),
+            }))
 
     def _start_job_coverage(self, job: Job):
         if not PROFILE_COVERAGE_SETTINGS.enabled:
@@ -171,6 +183,8 @@ class WepppyRqWorker(Worker):
         
     def perform_job(self, job: 'Job', queue: 'Queue') -> bool:
         """Override perform_job to capture PID/runid metadata and log to rq.log."""
+        from wepppy.nodb.persistence_events import initialize_project_commits
+        initialize_project_commits()
         self.default_result_ttl = DEFAULT_RESULT_TTL
         runid = _extract_runid(job)
         if not isinstance(job.meta, dict):

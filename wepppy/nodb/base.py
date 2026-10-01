@@ -1934,6 +1934,9 @@ class NoDbBase(object):
                     os.remove(temp_path)
                 except OSError:
                     pass
+            if replaced:
+                from wepppy.nodb.persistence_events import notify_committed
+                notify_committed(self.wd, self.runid, "nodb", self.filename)
 
         write_version(self.wd, CURRENT_VERSION)
 
@@ -1951,15 +1954,6 @@ class NoDbBase(object):
                     exc_info=True,
                 )
 
-        try:
-            from wepppy.weppcloud.db_api import update_last_modified
-            update_last_modified(self.runid)
-        except Exception:
-            logging.getLogger(__name__).debug(
-                "NoDbBase.dump: update_last_modified failed for runid=%s",
-                self.runid,
-                exc_info=True,
-            )
         try:
             if redis_lock_client is not None:
                 ts = self._nodb_mtime if self._nodb_mtime is not None else time()
@@ -2427,6 +2421,9 @@ class NoDbBase(object):
                 os.remove(path)
 
             assert not self.readonly
+
+        from wepppy.nodb.persistence_events import notify_committed
+        notify_committed(self.wd, self.runid, "readonly")
 
     @staticmethod
     def ispublic(wd):

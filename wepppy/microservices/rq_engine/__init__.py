@@ -62,6 +62,8 @@ from .wepp_routes import router as wepp_router
 from .ash_routes import router as ash_router
 
 app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
+from wepppy.nodb.persistence_events import initialize_project_commits
+initialize_project_commits()
 install_correlation_log_record_factory()
 install_rq_auth_actor_hook()
 validate_session_cookie_profile()

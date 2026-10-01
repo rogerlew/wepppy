@@ -22,6 +22,34 @@ class _RecordingQueue:
         self.enqueued.append(getattr(func, "__name__", repr(func)))
 
 
+@pytest.mark.parametrize("enabled", [False, True])
+def test_catalog_dispatch_cadence_and_disabled_restart(monkeypatch, enabled):
+    from wepppy.rq import run_catalog_rq
+    clock = [0.0]
+    dispatched = []
+    stop_handler = []
+    config = {"tasks": [{"name": "catalog", "func": "wepppy.rq.run_catalog_rq.sweep_run_catalog",
+                         "interval_seconds": 15, "queue": "batch", "enabled": enabled,
+                         "initial_delay_seconds": 0, "jitter_seconds": 0}]}
+
+    def sleep(delay):
+        clock[0] += delay
+        if clock[0] >= 46:
+            stop_handler[0](None, None)
+
+    monkeypatch.setattr(scheduler, "_load_config", lambda path: config)
+    monkeypatch.setattr(scheduler, "Queue", _RecordingQueue)
+    monkeypatch.setattr(scheduler.redis, "Redis", lambda **kwargs: object())
+    monkeypatch.setattr(scheduler, "redis_connection_kwargs", lambda database: {})
+    monkeypatch.setattr(scheduler.signal, "signal", lambda signum, handler: stop_handler.append(handler))
+    monkeypatch.setattr(scheduler.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(scheduler.time, "sleep", sleep)
+    monkeypatch.setattr(scheduler, "_monitor_run_locations_freshness", lambda *args: None)
+    monkeypatch.setattr(run_catalog_rq, "enqueue_sweep", lambda *args, **kwargs: dispatched.append(clock[0]) or False)
+    scheduler.run_scheduler("ignored.yml", sleep_seconds=30, dry_run=False, run_once=False)
+    assert dispatched == ([0, 15, 30, 45] if enabled else [])
+
+
 def test_enqueue_task_skips_when_callable_resolution_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     spec = scheduler.TaskSpec(
         name="broken",

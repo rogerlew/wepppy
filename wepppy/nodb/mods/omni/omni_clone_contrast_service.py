@@ -462,5 +462,9 @@ class OmniCloneContrastService:
 
         if _exists(_join(new_wd, "READONLY")):
             os.remove(_join(new_wd, "READONLY"))
+            from wepppy.nodb.persistence_events import notify_committed
+            notify_committed(new_wd, runid, "readonly")
 
+        from wepppy.nodb.persistence_events import notify_committed
+        notify_committed(new_wd, runid, "lifecycle")
         return new_wd

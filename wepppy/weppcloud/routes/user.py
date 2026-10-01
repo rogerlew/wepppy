@@ -873,6 +873,27 @@ def runs():
 
         format_param = (request.args.get('format') or request.args.get('fomat') or '').lower()
         if format_param == 'json':
+            if os.getenv("WEPPCLOUD_RUN_CATALOG_READ_MODE", "legacy") == "postgres":
+                from wepppy.weppcloud.run_catalog.reader import collect
+                query = _runs_query_for_user(selected_user_id)
+                if sort_param in DB_SORT_FIELDS:
+                    column = getattr(Run, sort_param)
+                    order = column.desc() if is_desc else column.asc()
+                    if sort_param in {'last_modified', 'date_created'}:
+                        order = order.nullslast()
+                    query = query.order_by(order, Run.id.desc() if is_desc else Run.id.asc())
+                else:
+                    query = query.order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
+                projected, catalog_status = collect(query)
+                if sort_param in DB_SORT_FIELDS:
+                    pagination = SimplePagination(max(1, page), per_page, len(projected))
+                    metas = [value for value in projected[(max(1, page) - 1) * per_page:max(1, page) * per_page] if value is not None]
+                else:
+                    metas = _sort_metas([value for value in projected if value is not None], sort_param, is_desc)
+                    metas, pagination = _slice_for_page(metas, page, per_page)
+                return jsonify(metas=metas, pagination=_pagination_payload(pagination),
+                               sort=sort_param, direction=direction_param, per_page=per_page,
+                               catalog_status=catalog_status)
             base_query = _runs_query_for_user(selected_user_id).order_by(
                 Run.last_modified.desc().nullslast(),
                 Run.id.desc(),
@@ -938,6 +959,12 @@ def runs_catalog():
         selected_user_id, missing_alias = _resolve_runs_user_id(requested_alias)
         if missing_alias is not None and _is_admin_runs_viewer():
             return error_factory(f"user alias '{missing_alias}' not found", status_code=404)
+        if os.getenv("WEPPCLOUD_RUN_CATALOG_READ_MODE", "legacy") == "postgres":
+            from wepppy.weppcloud.run_catalog.reader import collect
+            projected, catalog_status = collect(_runs_query_for_user(selected_user_id))
+            metas = _sort_metas([value for value in projected if value is not None], sort_param, is_desc)
+            return jsonify(runs=metas, sort=sort_param, direction=direction_param,
+                           total=len(metas), catalog_status=catalog_status)
         runs_all = _collect_run_rows(_runs_query_for_user(selected_user_id))
 
         if include_ron_meta or len(runs_all) <= CATALOG_RON_META_MAX_RUNS:
@@ -973,6 +1000,10 @@ def runs_map_data():
             Run.last_modified.desc().nullslast(),
             Run.id.desc(),
         )
+        if os.getenv("WEPPCLOUD_RUN_CATALOG_READ_MODE", "legacy") == "postgres":
+            from wepppy.weppcloud.run_catalog.reader import collect
+            projected, catalog_status = collect(query, map_only=True)
+            return jsonify(runs=[value for value in projected if value is not None], catalog_status=catalog_status)
         run_rows = _collect_run_rows(query)
         metas = _collect_map_metas_for_runs(run_rows)
         return jsonify(runs=metas)

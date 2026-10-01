@@ -1,10 +1,19 @@
 # ADR-0078: Portable projects with a PostgreSQL runs catalog
 
-Status: architecture endorsed; independent contract reviews passed;
-detailed operating limits remain proposed for operator ratification.
-Date: 2026-09-30. Implementation and deployment pending.
+Status: accepted for implementation by operator execution request;
+independent contract reviews passed. Operating limits still require measured
+host acceptance, not an assumption of capacity.
+Date: 2026-09-30; predeployment implementation validated 2026-10-01 UTC.
+Forest deployment remains on hold.
 
 ## Context and decision
+
+Measurement clarification (implementation review): the unchanged 50 ms added-p95
+target uses the producer's actual previous behavior. NoDb retains its timestamp
+SQL commit; TTL/READONLY do not have that baseline. Counterbalanced complete
+mutations, observer samples and legacy-helper characterization distinguish
+incremental work from phase-dependent storage latency. No durability setting
+or operating limit changes.
 
 The [production profile](../investigations/2026-09-30-user-runs-performance.md)
 measured 169.56 seconds to build an 805-run catalog, dominated by project

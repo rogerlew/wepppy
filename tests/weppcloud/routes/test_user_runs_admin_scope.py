@@ -16,12 +16,13 @@ from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMix
 from flask_security.utils import hash_password, login_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import Forbidden
+from tests.weppcloud.test_run_catalog_postgres import database
 
 pytestmark = pytest.mark.routes
 
 
 @pytest.fixture()
-def runs_scope_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
+def runs_scope_client(monkeypatch: pytest.MonkeyPatch, tmp_path, request):
     app = Flask(__name__)
     app.config.update(
         SECRET_KEY="runs-scope-secret",
@@ -35,6 +36,13 @@ def runs_scope_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
         SECURITY_UNAUTHORIZED_VIEW=None,
     )
 
+    if getattr(request, "param", None) == "postgres":
+        import sqlalchemy as sa
+        engine = request.getfixturevalue("database")
+        with engine.connect() as connection:
+            schema = connection.scalar(sa.text("SELECT current_schema()"))
+        app.config["SQLALCHEMY_DATABASE_URI"] = engine.url
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"connect_args": {"options": "-csearch_path=" + schema}, "hide_parameters": True}
     db = SQLAlchemy()
     db.init_app(app)
 
@@ -188,6 +196,52 @@ def runs_scope_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 def _login(client, user_id: int) -> None:
     response = client.get(f"/test-login/{user_id}")
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize("runs_scope_client", ["postgres"], indirect=True)
+@pytest.mark.parametrize("endpoint", ["/runs/catalog", "/runs/map-data", "/runs?format=json"])
+def test_postgres_authenticated_alias_and_shared_scope(runs_scope_client, monkeypatch, endpoint):
+    import sqlalchemy as sa
+    from datetime import timezone
+    import wepppy.weppcloud.app as app_module
+    from wepppy.weppcloud.run_catalog import repository
+    from wepppy.weppcloud.run_catalog.schema import catalog
+    client = runs_scope_client["client"]
+    route_module = runs_scope_client["module"]
+    monkeypatch.setenv("WEPPCLOUD_RUN_CATALOG_READ_MODE", "postgres")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Authenticated SQL route touched project storage")
+
+    monkeypatch.setattr(route_module, "get_wd", forbidden)
+    monkeypatch.setattr(route_module, "_collect_run_rows", forbidden)
+    with client.application.app_context():
+        with app_module.db.engine.begin() as connection:
+            repository.seed(connection)
+            now = datetime.now(timezone.utc)
+            connection.execute(catalog.update().values(name="SQL name", scenario="", readonly=False,
+                ron_state="ready", readonly_state="ready", ttl_state="missing", indexed_revision=1,
+                source_versions={"ron": {"state": "ready"}}, ron_observed_at=now, readonly_observed_at=now,
+                last_attempt_at=now, refreshed_at=now))
+    assert client.get(endpoint).status_code == 401
+    separator = "&" if "?" in endpoint else "?"
+    aliased = endpoint + separator + "alias=other@example.com"
+    key = "metas" if "format=json" in endpoint else "runs"
+    _login(client, runs_scope_client["owner_id"])
+    response = client.get(aliased)
+    assert response.status_code == 200
+    assert {row["runid"] for row in response.json[key]} == {"owner-run"}
+    _login(client, runs_scope_client["admin_id"])
+    response = client.get(aliased)
+    assert response.status_code == 200
+    assert {row["runid"] for row in response.json[key]} == {"other-run"}
+    with client.application.app_context():
+        run = app_module.Run.query.filter_by(runid="other-run").one()
+        app_module.db.session.execute(app_module.runs_users.insert().values(user_id=runs_scope_client["owner_id"], run_id=run.id))
+        app_module.db.session.commit()
+    _login(client, runs_scope_client["owner_id"])
+    response = client.get(endpoint)
+    assert {row["runid"] for row in response.json[key]} == {"owner-run", "other-run"}
 
 
 def test_runs_users_requires_admin_role(runs_scope_client) -> None:

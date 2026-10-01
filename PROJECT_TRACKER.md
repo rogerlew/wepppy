@@ -7,11 +7,12 @@
 
 ## Purpose
 
-Active (specification): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
+Active (implementation): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
 — preserve portable NoDb projects while moving catalog reads off NFS; additive
 schema, observer/reconciliation, and forest → forest1 → wepp1 rollout specified.
-Independent contract reviews passed with findings closed; detailed ratification,
-accepted checkpoint, implementation, and deployments remain pending.
+Independent contract reviews passed; accepted checkpoint precedes runtime edits.
+Implementation and isolated validation are complete; holding before forest deployment.
+Production-equivalent stage evidence and observation windows remain required.
 
 Active: [Batch Daymet Multiple NoDb contention](docs/work-packages/20260930_batch_daymet_multiple_nodb_contention/package.md)
 — attribute and correct recurrent `climate.nodb` stale writes in the legacy
