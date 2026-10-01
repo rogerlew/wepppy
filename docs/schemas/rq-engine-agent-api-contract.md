@@ -36,8 +36,15 @@ operations. OpenET and Batch actions require their feature groups even for
 Admin/Dev/Root. Initially those groups contain only the designated maintainer.
 Human Culvert workflow admission uses its group plus applicable operation/resource
 checks; the existing authorized service integration keeps its credential/scope
-path. User/session principals are resolved to canonical account IDs; stale JWT
-group claims are not authoritative. Run access and required operation scopes
+path. Principal resolution is token-class aware: user credentials and verified
+human-bound sessions resolve their canonical account; anonymous sessions remain
+anonymous. Session `sub` is never an account ID. Service/MCP-to-session
+conversion preserves origin/resource limits and grants no human identity or
+group entitlement, even with a numeric subject. Freeze any explicitly delegated
+human binding at milestone zero. Stale JWT group claims are not authoritative.
+Human-delegated service credentials also require their verified originating
+account's current membership for group-protected operations; token class alone
+does not establish an independent integration exemption. Run access and required operation scopes
 remain additive, and public read permission does not authorize mutation.
 
 Accepted token classes follow `docs/dev-notes/auth-token.spec.md`:

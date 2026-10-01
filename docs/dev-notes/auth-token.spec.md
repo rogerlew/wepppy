@@ -54,6 +54,8 @@ following environment variables:
     reads and token validation remain unchanged.
 
 ### Service token
+
+FA-01 distinguishes independent registered service integrations from human-delegated service credentials. Existing `admin-run-token:<user_id>` credentials require their verified originating human's current membership for protected group admission, plus resource/scopes. Verify provenance against trusted issuance; a subject prefix or token class alone is not authority. Preserve unrelated mint permissions/TTLs and the separately inventoried Culvert integration and returned browse credential.
 - `token_class=service`
 - Required claims: `sub`, `service_groups`, `aud`, `scope`, `iat`, `exp`, `jti`.
 - Authorization: map `service_groups` to scope bundles (for example `culverts`).
@@ -93,6 +95,17 @@ change deployed integration scopes, token TTLs, polling modes or signing keys.
 - Required claims: `sub` (session id), `runid`, `session_id`, `aud`, `scope`, `iat`, `exp`, `jti`.
 - Optional authenticated-session claims: `user_id` (int), `roles` (`list[str]`).
 - Authorization: run-scoped access only, optionally validated against the active session store.
+- FA-01 (implementation/checkpoint pending): verified human-derived sessions also
+  require current feature/workflow membership for group-protected operations,
+  including private Batch reads. Resource claims and roles do not replace this
+  check at issuance or consumption; removed membership invalidates subsequent
+  protected admissions even with a still-valid session. Existing public reads
+  remain separate. Session `sub` is not a database user ID. Authenticated
+  `user_id` requires verified human provenance. Service/MCP-derived sessions
+  retain their verified origin/resource limits; numeric subjects, role/group
+  claims or token-class conversion cannot manufacture human identity. Inventory
+  existing delegated human bindings and preserve authorized service conversions
+  under the FA-01 milestone-zero contract.
 
 ### MCP token (query-engine)
 - `token_class=mcp`

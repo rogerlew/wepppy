@@ -34,7 +34,7 @@ Highest current completion claim: diagnosed; amendment/plan prepared. No impleme
 
 ## Security and correctness gates
 
-Security impact: high (privilege assignment, group enforcement, JWT/session identity, public data and restricted actions). Dedicated independent security and correctness review artifacts are required before runtime closeout. The initial [review gate record](artifacts/2026-10-01_review_gates.md) records pending evidence; it is not a pass or reviewer sign-off.
+Security impact: high (privilege assignment, group enforcement, JWT/session identity, public data and restricted actions). Dedicated independent security and correctness review artifacts are required before runtime closeout. The [review gate record](artifacts/2026-10-01_review_gates.md) links independent prepared-plan reviews and confirmed fixes. Planning readiness is approved; completed milestone-zero and implementation evidence remain pending.
 
 Follow `docs/standards/contract-first-change-standard.md`: resolve the complete surface matrix, obtain two independent read-only contract reviews and disposition findings, then record the standalone ancestor commit before runtime changes. No reviewer may approve their own amendment. This engineering gate remains separate from the user-directed single-maintainer membership workflow.
 

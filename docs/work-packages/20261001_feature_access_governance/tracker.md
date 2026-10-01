@@ -6,7 +6,7 @@ Started: 2026-10-01 20:47 UTC
 
 Current phase: amendment and implementation planning
 
-Security impact: high; independent contract, correctness and security reviews pending.
+Security impact: high; prepared-amendment reviews dispatched and disposition recorded. Completed milestone-zero and implementation reviews remain pending.
 
 ## Progress
 
@@ -19,6 +19,8 @@ Security impact: high; independent contract, correctness and security reviews pe
 - [ ] Obtain two independent contract reviews, close findings, and record accepted ancestor commit.
 - [ ] Implement database/evaluator, group management, read/action enforcement and PowerUser onboarding in plan order.
 - [ ] Complete independent correctness/security reviews and real workflow acceptance before rollout.
+
+- [x] (2026-10-01 21:13 UTC) Dispatched independent correctness/security reviews of `4cd85e2d5`; accepted and corrected four unique contract findings, including human-derived session/service group checks.
 
 ## Decision log
 
@@ -34,10 +36,12 @@ Security impact: high; independent contract, correctness and security reviews pe
 
 Starting revision: `45a39a8337d37c7f7d30087ff4d23c03610072b3`.
 
-Contract ancestor revision: not created. Independent reviews: not performed. Runtime edits: none. Account/token mutations: none. Deployment: none.
+Prepared amendment commit: `4cd85e2d5`. Accepted runtime contract ancestor: not created. Independent prepared-amendment reviews: [findings/disposition](artifacts/2026-10-01_contract_reviews.md); both reviewers confirmed fixes and planning readiness, with no unresolved high/medium findings. Runtime edits: none. Account/token mutations: none. Deployment: none.
 
 Prepared records: [decision](artifacts/2026-10-01_contract_decision.md), [surface inventory](artifacts/2026-10-01_surface_inventory.md), [review gates](artifacts/2026-10-01_review_gates.md). Documentation checks passed: all 20 changed/new Markdown files linted with zero errors/warnings; relative link targets resolved; `git diff --check` clean; root AGENTS size 160/160. Spelling previews inspected without rewriting unrelated tracker prose.
 
 ## Next steps
 
 Milestone zero of the [ExecPlan](prompts/active/feature_access_governance_execplan.md) closes concrete identity, writer-authority and surface questions, then gets the exact technical matrix reviewed. Runtime work is not authorized by an uncommitted, unreviewed plan. Preserve the current branch and unrelated working-tree changes.
+
+Review-disposition validation (2026-10-01): all 15 changed/new Markdown files passed `wctl doc-lint` with zero errors/warnings; relative link targets resolved and `git diff --check` passed. New review artifact spelling preview was unchanged. No runtime tests were rerun for this documentation-only change.

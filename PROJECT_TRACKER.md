@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Planning: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Runtime and independent reviews pending.
+Planning: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Independent prepared-plan reviews passed after fixes; milestone-zero checkpoint and runtime pending.
 
 Active (implementation): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
 — preserve portable NoDb projects while moving catalog reads off NFS; additive

@@ -1,10 +1,10 @@
 # FA-01 security review preparation
 
-Status: Not reviewed; hold for independent checkpoint and implementation review.
+Status: Prepared-plan security review passed after documented fixes; hold for completed milestone-zero checkpoint and implementation review.
 
 Package: `docs/work-packages/20261001_feature_access_governance/`
 
-Prepared by: Codex, amendment author, 2026-10-01 20:47 UTC. Independent reviewer: unassigned.
+Prepared by: Codex, amendment author, 2026-10-01 20:47 UTC. Prepared-plan independent reviewer: `/root/contract_security`; implementation reviewer remains unassigned.
 
 ## Triage
 
@@ -29,6 +29,6 @@ The reviewer must use the separate state/principal matrix in `2026-10-01_surface
 
 ## Findings and verdict
 
-No independent findings inventory or sign-off exists yet. Do not interpret this as zero findings. Gate: hold. The author has identified milestone-zero gaps (writer authority, exact artifacts and verified identities) that must be resolved before the technical review can pass.
+[Independent prepared-plan findings and disposition](2026-10-01_contract_reviews.md) record the High private-credential admission issue and Medium identity-provenance issue, both independently confirmed closed in documentation. Prepared-plan verdict: ready for milestone zero, no unresolved High/Medium findings from that review. Runtime gate: hold. Writer authority, exact artifacts, verified identities and provenance mechanics remain milestone-zero inputs; no runtime or implementation review pass is claimed.
 
 Use `docs/prompt_templates/security_review_template.md` for the completed review, including actual checks of authentication/session/CSRF, secrets, input/path, queues, cross-service access, data concurrency, logging and rollback. The single-maintainer operational approval model does not waive engineering review.

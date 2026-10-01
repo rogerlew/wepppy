@@ -38,13 +38,19 @@ File prefixes in the middle rows are `wepppy/weppcloud/` for Flask and `wepppy/m
 | Populated | Read existing results; actions require project writer and effective feature entitlement |
 | Supported legacy | Existing PowerUser/Dev paths preserved where specified; no invented acknowledgments; current group-only restrictions explicit |
 | Malformed group/resource/identity | Bounded explicit error, no grant/no mutation/no secret leakage |
-| Membership removed/expired | New protected admission denied even with an old user JWT; already-admitted jobs may finish |
+| Membership removed/expired | New protected admission denied even with an old user JWT or human-derived session; already-admitted jobs may finish |
 | Review date passed, no expiry | Current membership remains effective pending documented reassessment |
 | Database unavailable | Explicit unavailable result where membership is required; no broad-role fallback |
 | Public with embargoed artifacts | Non-embargoed views remain readable; protected representations follow retained exception |
 | Readonly project / unsupported backend | Read retained permitted results; no action privilege override |
 
 Cross these states with anonymous public visitor, ordinary authenticated nonowner/owner, PowerUser, group member/nonmember, each technical role individually, legitimate anonymous creator session, verified Culvert submitting service, returned browse token and wrong-resource/expired/revoked tokens. Root group administration and Root feature execution are separate cases.
+
+Trace private Batch session issuance and every session consumer explicitly. Test Admin/Root without the group, a removed member with an old session, a valid member with a scoped session, and the public Batch exception; resource scope alone is insufficient for private human access.
+
+Trace bearer-to-session identity conversion (`session_routes.py:_identity_from_claims` and its callers). Include a logged-in human session, anonymous public session, service subject numerically equal to a member account ID, and service/MCP-derived sessions with human-looking roles/groups. Preserve authorized service outcomes without treating those credentials as human members.
+
+Trace trusted human-delegated service issuance at `routes/user.py:mint_run_token` (`admin-run-token:<user_id>`) and Batch base-run aliases in browse/download. Test a valid member, Admin/Root nonmember, and removed member using an old delegated token. Require live originating-human membership without changing unrelated mint permissions or treating arbitrary service subjects as human accounts. Independent Culvert service/browse credentials retain their own positive compatibility cases.
 
 ## Still to freeze
 

@@ -643,7 +643,7 @@ Internal Collaborator access may be approved when:
 
 - the request has a clear research, testing, agency, operational, maintenance, or dependent-project purpose;
 - the requested use is compatible with the feature maturity state;
-- the user accepts the relevant onboarding text;
+- the relevant onboarding text is identified for the user; acknowledgment is required before group-based protected actions, but may follow the recorded membership grant;
 - the access can be scoped narrowly enough to avoid unnecessary exposure;
 - compute, storage, support, and scientific-risk burdens are acceptable;
 - any active publication embargo or originating-team priority window is respected;

@@ -33,13 +33,20 @@ token signature/audience/scope, root-only path or CSRF requirements.
 | `/weppcloud/batch/{batch_name}/browse|download|gdalinfo|dtale/*` | Allowed only when base run is public and path is non-root-only | `session`, `user`, `service` | `session` claims may be scoped to batch base run alias (`batch;;{batch_name};;_base`). |
 
 ## Group Route Identifier Rules
-- Grouped routes (`/batch/*`, `/culverts/*`) MUST authorize the requested identifier:
-  service/session tokens use their bounded resource claims; user tokens resolve
-  current server-side workflow-group membership for private grouped roots.
+- Grouped routes (`/batch/*`, `/culverts/*`) MUST authorize the requested identifier.
+  Service and session resource claims remain required where applicable. For
+  private grouped roots, both user tokens and verified human-derived session
+  tokens require current server-side workflow-group membership; a session's
+  resource claim or technical role does not replace that check. This does not
+  add session-token support to Culvert routes. Human-delegated service
+  credentials, including trusted `admin-run-token:<user_id>` issuance, also
+  require current membership of their verified originating account. A service
+  token class alone is not an independent integration exemption; preserve the
+  explicitly inventoried Culvert integration/browse credential path.
 - For culvert routes, identifier is `uuid`.
 - For batch routes, identifier is `batch_name`, with alias support for `batch;;{batch_name};;_base` when token class is `session`.
 - Service tokens MUST include run scope claims (`runs` or `runid`).
-- Private Batch user access requires the `batch_runner` group; private Culvert
+- Private Batch human access requires the `batch_runner` group; private Culvert
   user access requires `culvert_runner`. PowerUser/Admin/Dev/Root claims alone
   are insufficient. Do not embed a full run list in user tokens or use JWT
   `groups` as durable authorization. Preserve the existing public Batch base-run
@@ -59,6 +66,11 @@ token signature/audience/scope, root-only path or CSRF requirements.
   2. bearer token header.
 - Invalid/stale cookie auth MUST fall back to bearer token when present.
 - Batch run session bridge flows MUST provide a browse cookie that batch routes can consume after run-context re-auth.
+- Private Batch session issuance and consumption must preserve verified human
+  identity and check current membership. Removed/expired membership is denied
+  even with a previously issued session; Admin/Root alone cannot mint a session
+  that bypasses the group. Public Batch reads and genuine service credentials
+  keep their separately specified paths.
 
 ## Root-Only Path Rules
 - Paths under `_logs` and sensitive filenames such as `exceptions.log` and `exception_factory.log` are root-only.

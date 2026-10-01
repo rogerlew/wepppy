@@ -23,11 +23,13 @@ This specification covers two registries in one subsystem:
   project write authority; otherwise disable/omit them with a clear reason.
 - `menu_min_role` may provide disabled name discovery; it is not read or action
   authorization and does not release embargoed results.
-- A caller below `min_role` receives the exact disabled reason
-  `Not Authorized`.
-- If a config is shown, user can launch it.
+- A caller without effective feature entitlement receives the exact disabled
+  reason `Not Authorized`; a group grant can satisfy entitlement below `min_role`.
+- Informational config cards may be shown without launch authority; launch
+  controls require the config and project-creation permissions.
 - Project `readonly` independently disables mutations for every feature group.
-- Do not show tease-only controls that user cannot use.
+- Disabled discovery controls must explain the restriction; they do not grant
+  action permission.
 
 ## Canonical Authority
 

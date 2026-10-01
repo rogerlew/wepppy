@@ -10,7 +10,7 @@ Status: Prepared amendment; not an accepted runtime checkpoint. Independent revi
 
 The user requested the assessment, then directed public-project read-only feature views, internal Batch/Culvert workflows, conservative maturity and single-maintainer auditable group changes. The user explicitly required separate group enforcement with only their account initially admitted for OpenET/Batch, deferred PowerUser suspension/reapplication/permanent revocation, and requested the reconciled amendment and implementation plan.
 
-This authorizes documentation preparation. It does not supply an exact deployed account ID, a Culvert service credential inventory, permission to expose embargoed results, or production deployment authority. Preserve the current embargo exception and credential behavior while resolving the technical inventory. The prior ratification commit authorization is not recorded here as authorization to commit this new package.
+This authorizes documentation preparation. It does not supply an exact deployed account ID, a Culvert service credential inventory, permission to expose embargoed results, or production deployment authority. Preserve the current embargo exception and credential behavior while resolving the technical inventory. The operator subsequently authorized committing this prepared amendment, producing `4cd85e2d5`, and then requested independent review and findings disposition. That commit is preparation evidence, not an accepted runtime checkpoint.
 
 ## Canonical authority matrix
 
@@ -45,7 +45,7 @@ Keep non-targeted technical-role powers, existing named-preset creation and curr
 
 Security impact is high. Test real persistence transactions and every changed auth boundary with both valid and hostile states. Freeze the surface inventory for public reads, private reads, actions, mixed bundles and service credentials. Include current-role matrix, group membership removal with a stale JWT, Root without group, scoped user without technical role, private resource mismatch, public empty feature state, legacy account, readonly project, backend/prerequisite mismatch and valid service tokens.
 
-The 275 prior tests are assessment evidence only. Runtime acceptance requires focused and broad tests, accessible browser flows and real authorized model/output readback. Two independent pre-implementation contract reviews, plus independent correctness/security implementation reviews, are required by repository standards. None has been performed for this checkpoint.
+The 275 prior tests are assessment evidence only. Runtime acceptance requires focused and broad tests, accessible browser flows and real authorized model/output readback. Two independent pre-implementation contract reviews, plus independent correctness/security implementation reviews, are required by repository standards. The prepared amendment has now received independent contract reviews; see [findings and disposition](2026-10-01_contract_reviews.md). These do not substitute for review of the completed milestone-zero matrix or implementation evidence.
 
 ## Outstanding checkpoint evidence
 

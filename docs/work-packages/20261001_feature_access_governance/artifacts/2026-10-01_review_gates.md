@@ -1,8 +1,10 @@
 # FA-01 review gates
 
-Prepared: 2026-10-01 20:47 UTC. Status: pending; no independent review has been claimed.
+Prepared: 2026-10-01 20:47 UTC. Updated after independent prepared-amendment review on 2026-10-01. Status: planning review passed after fixes; completed milestone-zero checkpoint and implementation reviews pending.
 
 ## Contract reviews
+
+[Prepared-amendment reviews and disposition](2026-10-01_contract_reviews.md) record four accepted findings and independent confirmation of all fixes. Both reviewers approve proceeding into milestone zero, not runtime implementation.
 
 Two independent read-only reviewers must assess the exact prepared checkpoint after milestone-zero evidence is complete. One review must cover correctness/valid-state UX and cross-contract consistency; the other must cover authority, compatibility and security boundaries. Record reviewer identity, reviewed revision, findings, author disposition and post-fix confirmation. The author cannot sign off their own amendment.
 
@@ -18,4 +20,4 @@ The [security review preparation](2026-10-01_security_review.md) records high im
 
 ## Current evidence
 
-Assessment tests: 275 passed before this planning increment. Documentation validation: 20 Markdown files passed lint with no errors/warnings; relative file links resolved; whitespace and root AGENTS size checks passed. Spelling previews inspected. Runtime/migration/browser/service acceptance: not performed. Contract ancestor: not created. Current task is the prepared amendment and plan, not implementation acceptance.
+Assessment tests: 275 passed before this planning increment. Documentation validation: 20 Markdown files passed lint with no errors/warnings; relative file links resolved; whitespace and root AGENTS size checks passed. Spelling previews inspected. Runtime/migration/browser/service acceptance: not performed. Prepared amendment commit: `4cd85e2d5`; accepted runtime contract ancestor: not created. Current task is the prepared amendment and plan, not implementation acceptance.
