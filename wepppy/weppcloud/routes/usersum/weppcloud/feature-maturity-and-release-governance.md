@@ -1,6 +1,8 @@
 # Feature Maturity and Release Governance
 
-Status: Draft  
+Status: Ratified\
+Effective date: 2026-10-01\
+Ratification record: [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md)\
 Applies to: WEPPcloud user-facing features, run-page modules, launchable configs, and major analysis workflows  
 Related implementation: `wepppy/weppcloud/feature_registry/`
 
@@ -979,6 +981,14 @@ A fitting/calibration feature may be experimental if implementation, interpretat
 If a model parameterization performs poorly or unpredictably in a region or vegetation/soil domain, the issue should be documented as a domain limitation. The correct response may be warning text, maturity downgrade, targeted validation, or deprecation of a configuration for that domain.
 
 ## Policy Maintenance
+
+### Ratification Record
+
+The project maintainer ratified this policy effective 2026-10-01 after reporting that repeated requests for collaborator feedback had received no response. Adoption rests on the maintainer's explicit decision; absence of feedback does not establish collaborator endorsement or consensus.
+
+[ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md) records the authority path, rationale, and review date. Subsequent feedback may be considered through the amendment process below.
+
+### Amendments
 
 This policy should be updated when the project’s release process changes.
 
