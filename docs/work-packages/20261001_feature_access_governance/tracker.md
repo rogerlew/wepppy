@@ -2,7 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: milestone-zero independent reviews passed; recording accepted ancestor. Runtime work has not started.
+Current phase: milestone zero complete; accepted documentation checkpoint committed. Runtime work has not started.
 
 ## Progress
 
@@ -13,7 +13,7 @@ Current phase: milestone-zero independent reviews passed; recording accepted anc
 - [x] Verified wepp2 Culvert client configuration/source and operation-token metadata; actual wepp1 signature matches, normal validation rejects expired token.
 - [x] Froze bounded 516-declaration/79-file route snapshot, protected data/resource matrix, principal adapters and new web transport.
 - [x] Completed final narrowed-checkpoint security/correctness reviews and findings disposition; zero unresolved High/Medium findings.
-- [ ] Commit standalone accepted checkpoint and record its revision.
+- [x] Committed standalone accepted checkpoint `d3639f970669411e9c0f5bf8e80898645c947559`.
 - [ ] Implement milestones one through five only under subsequent runtime authority.
 
 ## Decision log
@@ -28,7 +28,7 @@ Current phase: milestone-zero independent reviews passed; recording accepted anc
 
 [M0 evidence](artifacts/2026-10-01_milestone_zero.md), [credential matrix](artifacts/2026-10-01_credential_matrix.md), [route inventory](artifacts/2026-10-01_route_inventory.tsv), [contract decision](artifacts/2026-10-01_contract_decision.md), and [earlier reviews](artifacts/2026-10-01_contract_reviews.md).
 
-Accepted checkpoint revision: pending. Final review record: [independent M0 disposition](artifacts/2026-10-01_m0_reviews.md). No runtime, account, membership, token or deployment mutation occurred. Read-only operations used local account DB, wepp1 account DB/rq-engine validator, and wepp2 Culvert worker/configuration; secret values were not retained.
+Accepted checkpoint revision: `d3639f970669411e9c0f5bf8e80898645c947559`. Final review record: [independent M0 disposition](artifacts/2026-10-01_m0_reviews.md). No runtime, account, membership, token or deployment mutation occurred. Read-only operations used local account DB, wepp1 account DB/rq-engine validator, and wepp2 Culvert worker/configuration; secret values were not retained.
 
 ## Next milestone and operational dependency
 

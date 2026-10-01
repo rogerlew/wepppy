@@ -26,7 +26,7 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01) Operator clarified feature-only read-only scope, designated rogerlew@gmail.com and wepp2 Culvert client; verified local/production account and redacted credential metadata.
 - [x] (2026-10-01) Prepared bounded route/data/principal/transport matrix; expired configured Culvert token recorded as later live-acceptance dependency.
 - [x] (2026-10-01) Independent correctness/security reviews accepted the narrowed matrix after fixes; zero unresolved High/Medium findings, recorded in `artifacts/2026-10-01_m0_reviews.md`.
-- [ ] Record the standalone accepted ancestor checkpoint revision after committing reviewed contracts.
+- [x] (2026-10-01) Accepted standalone contract ancestor: `d3639f970669411e9c0f5bf8e80898645c947559`; M0 complete.
 - [ ] Implement additive account records, shared evaluator and direct persistence tests.
 - [ ] Implement single-maintainer group UI and initial memberships with real readback evidence.
 - [ ] Wire protected action/data admission and public inspection, including Culvert compatibility.
@@ -64,7 +64,7 @@ Source investigation found no durable anonymous creator proof, but the operator 
 ## Outcomes & Retrospective
 
 
-Milestone-zero outcome: bounded source, transport, identity and deployed credential evidence are prepared. Final narrowed-scope reviews passed after fixes; record the ancestor commit before runtime work. The existing expired Culvert credential prevents positive live integration acceptance until operator renewal; it does not justify new auth policy, token rotation or wider scope. Runtime files, accounts, memberships and credentials remain unchanged.
+Milestone-zero outcome: bounded source, transport, identity and deployed credential evidence are prepared. Final narrowed-scope reviews passed after fixes; accepted ancestor `d3639f970669411e9c0f5bf8e80898645c947559` closes milestone zero. The existing expired Culvert credential prevents positive live integration acceptance until operator renewal; it does not justify new auth policy, token rotation or wider scope. Runtime files, accounts, memberships and credentials remain unchanged.
 
 ## Context and orientation
 
