@@ -1,11 +1,13 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-30
-**Active Packages**: 41
+**Last Updated**: 2026-10-01
+**Active Packages**: 42
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Planning: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Runtime and independent reviews pending.
 
 Active (implementation): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
 — preserve portable NoDb projects while moving catalog reads off NFS; additive
@@ -260,6 +262,12 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Feature access governance
+
+**Status**: Amendment and plan prepared; technical checkpoint pending.
+**Link**: [Work package](docs/work-packages/20261001_feature_access_governance/package.md)
+**Scope**: Auditable single-maintainer groups, maintainer-only OpenET/Batch action groups, internal Batch/Culvert with service-token compatibility, public read-only inspection, conservative maturity and PowerUser onboarding. PowerUser sanctions deferred.
 
 
 ### Seamless WEPPcloud Session Cookie Namespace Migration

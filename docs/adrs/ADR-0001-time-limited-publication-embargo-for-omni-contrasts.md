@@ -5,6 +5,8 @@ Date: 2026-05-22
 Review Date: 2027-02-22  
 Embargo Until: 2027-05-22  
 
+FA-01 amendment prepared 2026-10-01: [ADR-0080](ADR-0080-feature-access-governance-amendment.md) and the [feature access contract](../schemas/feature-access-governance-contract.md) add scoped group entitlement alongside the legacy Dev/Root audience. Implementation/checkpoint pending. The embargo dates and existing public-data restriction are retained; general public read-only feature views do not release contrast data.
+
 ## Context
 
 OMNI Scenarios and OMNI Contrasts support multi-scenario WEPPcloud workflows, but they serve different purposes.
@@ -30,7 +32,8 @@ OMNI Contrasts will be classified as `internal` with:
 This creates a 12-month publication-priority window for the originating project team while preserving OMNI Scenarios as usable scenario-orchestration infrastructure.
 
 During the embargo period, OMNI Contrasts must not be exposed as a usable
-general public WEPPcloud capability. Access is limited to Dev-authorized users.
+general public WEPPcloud capability. Access is limited to the legacy Dev/Root
+audience or explicitly approved members of the Omni Contrasts group under FA-01.
 The Mods menu may list Omni Contrasts for discoverability when unauthorized
 users receive only a disabled checkbox with `Not Authorized`; that listing must
 not render the control section, preflight navigation, dynamic section, or any
@@ -104,7 +107,10 @@ The feature registry should contain an `omni_contrasts` entry with `maturity: in
 
 OMNI Scenarios and OMNI Contrasts should be gated independently so that scenario orchestration remains available while contrast analysis is restricted.
 
-Disabled menu discoverability is not authorization. `min_role: dev` continues
-to govern enablement, dynamic loading, controls, preflight, and contrast data.
+Disabled menu discoverability is not authorization. Effective legacy Dev/Root
+or approved group entitlement governs enablement, dynamic loading, controls,
+preflight, and contrast data. Run access and action-specific checks remain
+additive. Public-project viewers without that entitlement do not receive
+contrast data while the public-embargo decision remains reserved.
 
 PATH CE release status must be checked against the OMNI Contrasts dependency before PATH CE is promoted beyond internal/restricted access.

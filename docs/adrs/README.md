@@ -48,6 +48,7 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0080`: [Feature Access Governance Amendment](ADR-0080-feature-access-governance-amendment.md) (Operator-directed amendment prepared; technical checkpoint pending, 2026-10-01)
 - `ADR-0079`: [Ratify Feature Maturity and Release Governance](ADR-0079-feature-maturity-release-governance-ratification.md) (Accepted, 2026-10-01)
 - `ADR-0001`: [Time-Limited Publication Embargo for OMNI Contrasts](ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) (Accepted, 2026-05-22)
 - `ADR-0002`: [Require ADRs for Parameterization Changes](ADR-0002-parameterization-change-adr-requirement.md) (Accepted, 2026-05-22)

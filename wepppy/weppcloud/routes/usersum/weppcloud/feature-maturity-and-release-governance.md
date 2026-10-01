@@ -3,6 +3,7 @@
 Status: Ratified\
 Effective date: 2026-10-01\
 Ratification record: [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md)\
+Amendment: [FA-01 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01; implementation pending\
 Applies to: WEPPcloud user-facing features, run-page modules, launchable configs, and major analysis workflows  
 Related implementation: `wepppy/weppcloud/feature_registry/`
 
@@ -248,19 +249,23 @@ The feature/config registry is the authoritative source for user-facing maturity
 
 Routes and templates should not duplicate maturity or visibility rules.
 
-### Policy 2: Visible means usable
+### Policy 2: Separate public inspection from permission to act
 
-If a feature is shown to a user, the user should be able to use it.
+Public projects should expose their feature views and existing results for read-only inspection, including internal features whose actions remain restricted. A public view must not initialize missing feature state, acquire external data, submit jobs, or mutate the project. Absent results should be shown as not yet available.
 
-If a config is shown to a user, the user should be able to launch it.
+Users without action authorization may inspect these views but must not activate, configure, execute, retry, delete, or otherwise mutate the feature through the UI or a direct endpoint. Being public does not grant a project or feature action permission. Existing run access, readonly state, capability, backend and service boundaries remain additive.
 
-The normal exception is a read-only existing project/run state, where controls may be shown but disabled with a clear reason.
+Existing publication-embargo restrictions remain an explicit exception pending a separate decision on public exposure of embargoed outputs. [ADR-0001](../../../../../docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) currently restricts Omni Contrasts data even on a public project. Its disabled name-only discoverability is permitted; it does not release the results.
 
-WEPPcloud should avoid tease-only controls.
+Launch and action controls should be usable when offered as actions, or clearly disabled with a reason. Read-only inspection should show useful existing project information rather than only an unavailable feature name. Config launch permission remains distinct from informational config visibility.
+
+The [feature access contract](../../../../../docs/schemas/feature-access-governance-contract.md) defines the read/action distinction and the current implementation scope.
 
 ### Policy 3: Use the least optimistic accurate maturity label
 
 Maintainers should choose the least optimistic maturity label supported by current evidence.
+
+Automatic metadata overrides must not promote Experimental functionality to Preview without an explicit evidence-based promotion. The use of multiple OFEs alone is not promotion evidence. Internal restrictions and Deprecated lifecycle status must not be erased by a generic Preview override.
 
 Do not classify a feature as stable if material questions remain about:
 
@@ -432,36 +437,13 @@ Escalation outcomes must be durable and auditable (ADR, issue, or work package),
 
 ## Governance Roles, Responsibilities, and Scope
 
-This section defines governance roles used for release and internal-access decisions.
+### Access Maintainer
 
-Roles are functional and may be held by one or more qualified people. One person may hold multiple roles if role-specific rationale is documented in the decision record.
+One authorized maintainer may approve or remove scoped group membership. The maintainer records who receives access, the group and effective scope, the reason, who performed the change, and when. Group-scope changes receive the same auditable treatment.
 
-### Org Administrator Reviewer
+The maintainer considers fairness, scientific limitations, publication-priority commitments, API/compute/storage limits and support burden. These considerations do not require separate reviewer roles, two approvals, or two attestations by one person. Consultation is appropriate when needed, but a mandatory reviewer queue is not part of the access workflow.
 
-The Org Administrator Reviewer evaluates:
-
-- fairness and consistency of access decisions,
-- process compliance and record completeness,
-- scope minimization and review/expiration controls,
-- policy fit for embargo and collaboration pathway rules.
-
-### Technical-Science Reviewer
-
-The Technical-Science Reviewer evaluates:
-
-- maturity-state compatibility of requested use,
-- scientific-risk and interpretation-risk profile,
-- known-limitation and warning implications,
-- whether requested use conflicts with unresolved technical-science concerns.
-
-### Operational Maintainer Reviewer
-
-The Operational Maintainer Reviewer evaluates:
-
-- compute and storage burden,
-- API/service dependency risk,
-- supportability and reliability constraints,
-- operational blast radius of the requested access.
+This replaces the earlier Org Administrator, Technical-Science and Operational Maintainer dual-role approval requirement. The reason is limited staffing: the required control is one attributable decision with bounded access and durable history. Technical-science and release/business responsibilities in Policy 14 remain distinct; this change does not give a sponsor control of scientific claims.
 
 ### Sponsor Role
 
@@ -546,7 +528,7 @@ These roles should not be used merely to give a collaborator access to one inter
 
 If a user needs one restricted feature but does not need broad development/admin access, the policy preference is feature-scoped internal access.
 
-Internal feature authorization uses the governance roles defined in `Governance Roles, Responsibilities, and Scope`.
+Internal feature authorization uses scoped groups administered by an authorized Access Maintainer. OpenET and Batch Runner actions use separate feature-specific groups, each initially containing only the requesting project maintainer's account, because of API and computational limits respectively. Group membership is the authorization mechanism; neither a hard-coded account check nor broad Admin/Dev/Root membership substitutes for it.
 
 ## PowerUser Onboarding Procedure
 
@@ -569,7 +551,7 @@ Before requesting PowerUser access, the user must acknowledge concise onboarding
 
 Suggested text:
 
-> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating results as appropriate for your use case; and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not provide access to internal, publication-embargoed, or restricted features unless that access is separately granted.
+> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating results as appropriate for your use case; and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not authorize internal actions or private or publication-embargoed feature data unless separately granted; public read-only views follow the sharing policy.
 
 ### PowerUser Request
 
@@ -586,7 +568,11 @@ Approval may be denied or deferred when:
 
 - user does not respond yes to both questions.
 
-PowerUser status does not grant access to internal or publication-embargoed features.
+PowerUser status does not grant internal action permission or access to private or publication-embargoed feature data. Public read-only inspection follows Policy 2.
+
+### Current PowerUser Implementation Scope
+
+Initial onboarding, versioned acknowledgment, automatic approval after two affirmative answers, and idempotent repeat submission are in scope. PowerUser suspension, reapplication after removal, and permanent revocation are deferred. They are not prerequisites for this increment; no new sanctions, reinstatement flows or denial criteria are introduced. Existing administrative role controls remain, without a promise of durable suspension enforcement against future self-service requests. Scoped internal-group membership removal and token revocation remain separate.
 
 ## Internal Collaborator Pathway
 
@@ -618,13 +604,7 @@ Access may be denied, deferred, or narrowed when the requested use conflicts wit
 
 ### Internal Access Request
 
-Internal access requires role-based review. A web form may collect the request, but approval should be made by authorized reviewer roles.
-
-Review minimums by internal reason:
-
-- `compute` or `api_constrained`: Org Administrator Reviewer plus Operational Maintainer Reviewer.
-- `beta` or `publication_embargo`: Org Administrator Reviewer plus Technical-Science Reviewer.
-- any request with flagged scientific-risk concerns: Technical-Science Reviewer is required even if the internal reason is operational.
+Internal action access requires one authorized maintainer's recorded group membership decision. A web request form is optional; a maintainer may directly add a named person for a documented reason. Scientific or operational consultation does not create an additional mandatory approval stage.
 
 The stored request record should minimize PII. Normally it should include only:
 
@@ -635,7 +615,9 @@ The stored request record should minimize PII. Normally it should include only:
 - short purpose statement;
 - sponsor or project contact, if applicable;
 - decision: approved, denied, deferred, or narrowed;
-- approving person or group;
+- acting maintainer;
+- group and effective feature/action scope;
+- decision and membership-change timestamps;
 - access scope;
 - review or expiration date;
 - accepted onboarding/training version.
@@ -664,10 +646,10 @@ Internal Collaborator access may be approved when:
 - the user accepts the relevant onboarding text;
 - the access can be scoped narrowly enough to avoid unnecessary exposure;
 - compute, storage, support, and scientific-risk burdens are acceptable;
-- any active publication embargo or originating-team priority window is respected.
-- the required reviewer roles for the request class have approved and recorded rationale.
+- any active publication embargo or originating-team priority window is respected;
+- an authorized maintainer has recorded the membership decision and reason.
 
-PowerUser status alone does not grant access to internal or publication-embargoed features.
+PowerUser status alone does not grant internal action permission or access to private or publication-embargoed feature data. Public read-only inspection follows Policy 2.
 
 ### Publication-Embargoed Features
 
@@ -696,7 +678,7 @@ Failure to follow agreed consultation expectations may affect future access, but
 
 ### Internal Collaborator Onboarding
 
-Before access is granted, the user should accept concise onboarding text.
+Before group-based internal action access is exercised, the user should accept concise onboarding text. Membership may be recorded first, with the acknowledgment completed on first use. This is not a second approval. Public read-only inspection does not require internal-collaborator onboarding.
 
 Suggested text:
 
@@ -730,7 +712,7 @@ Expired access should be removed, renewed with rationale, or converted to a diff
 
 ### Relationship to Registry
 
-The registry defines feature maturity and runtime visibility. The current registry supports maturity states, internal reasons, embargo dates, and role gates. Future implementation should support feature-scoped internal access when policy requires narrower access than broad Dev/Admin roles provide.
+The registry defines maturity, restrictions and the groups authorizing each feature; account records define group membership and its audit history. Public read-only visibility and action permission are separate. The current runtime still uses coarse role gates; the group-based implementation is pending under FA-01.
 
 ## Access Records
 
@@ -743,7 +725,7 @@ The record should include:
 - requested feature/config,
 - maturity state at time of request,
 - internal reason,
-- approving roles and reviewer identities,
+- acting maintainer identity, group, action, and decision/change timestamps,
 - authority claim and approval scope,
 - authorizing principal or delegated authority source,
 - rationale for approval or denial,
@@ -807,12 +789,14 @@ Implementation should follow this policy.
 The current registry may use coarse role gates as an MVP enforcement mechanism, but the governance target is:
 
 - PowerUser access can be requested through a web-facing application,
-- Internal Feature Access requires role-based review,
-- dual-role review is enforced for `beta`/`publication_embargo` and other science-sensitive access requests,
+- Internal Feature Access uses single-maintainer, auditable group membership decisions,
+- public read-only feature views are separate from action permissions, with the existing embargo exception retained,
 - internal approvals are feature-scoped where practical,
 - approvals and denials create auditable records,
 - publication-embargoed access is explicitly documented,
 - broad Dev/Admin roles are not used as a substitute for narrow collaborator access.
+
+Batch Runner and Culvert Runner remain internal workflows. PowerUser status alone does not authorize their actions or private grouped data. Culvert's authorized long-lived service integration and its separate batch-scoped browse token must be reconciled explicitly; adding human groups is not permission to invalidate that integration. OpenET and Batch Runner action groups initially admit only the designated maintainer.
 
 If the current user model cannot represent a fair policy decision, the user model should be extended rather than weakening the policy.
 ## Decision Records
@@ -989,6 +973,8 @@ The project maintainer ratified this policy effective 2026-10-01 after reporting
 [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md) records the authority path, rationale, and review date. Subsequent feedback may be considered through the amendment process below.
 
 ### Amendments
+
+FA-01 records the operator-directed amendment dated 2026-10-01 in [ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md). It replaces dual-role access review, separates public inspection from actions, and narrows the current implementation scope. Implementation and the technical contract checkpoint remain pending; ratification does not establish runtime conformance.
 
 This policy should be updated when the project’s release process changes.
 

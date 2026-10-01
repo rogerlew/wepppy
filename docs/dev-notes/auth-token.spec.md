@@ -46,9 +46,12 @@ following environment variables:
 - Authorization: use server-side run ownership and role checks; do not embed full run lists.
 - Role policy:
   - Minting is restricted to callers with at least one role in `Admin`, `PowerUser`, `Dev`, `Root`.
-  - Browse group routes (`/culverts/{uuid}/...`, `/batch/{batch_name}/...`) require
-    user tokens to include at least one role in `admin`, `poweruser`, `dev`, `root`
-    (case-insensitive match).
+  - FA-01 amendment (implementation/checkpoint pending): private grouped
+    `/culverts/{uuid}/...` and `/batch/{batch_name}/...` reads require current
+    server-side membership in the corresponding workflow group under
+    [feature access governance](../schemas/feature-access-governance-contract.md).
+    Broad role claims and JWT `groups` are insufficient. Existing public Batch
+    reads and token validation remain unchanged.
 
 ### Service token
 - `token_class=service`
@@ -69,11 +72,21 @@ following environment variables:
   - `jti` MUST be present (revocation checks are mandatory).
 - Access contract:
   - Bearer usage: `Authorization: Bearer <browse_token>`.
-  - Culvert browse/download also accepts privileged `user` tokens (`Admin`, `PowerUser`, `Dev`, `Root`) for WEPPcloud admin workflows.
+  - FA-01 human Culvert browse/download requires current `culvert_runner`
+    membership for private grouped data; technical role claims alone do not
+    satisfy this check. Implementation/checkpoint pending.
   - Browse: `/weppcloud/culverts/{batch_uuid}/browse/...`
   - Download: `/weppcloud/culverts/{batch_uuid}/download/{subpath}`
   - Batch archive path (current MVP): `/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
   - Cross-batch use (`runs` scope mismatch) MUST return `403`.
+
+FA-01 preserves the authorized long-lived submitting Culvert integration JWT
+separately from this returned browse token. Register its verified subject,
+existing operations and credential identity without retaining the bearer secret.
+No human group check is imposed on that service identity; human group assignment
+does not delegate its credential. The browse token remains seven-day,
+batch-scoped and subject to existing revocation checks. This amendment does not
+change deployed integration scopes, token TTLs, polling modes or signing keys.
 
 ### Session token (anonymous runs)
 - `token_class=session`

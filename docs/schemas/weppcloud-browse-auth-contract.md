@@ -3,6 +3,13 @@
 > **See also:** `docs/schemas/weppcloud-session-contract.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Normative Status
+
+FA-01 amendment prepared 2026-10-01; implementation/checkpoint pending. The
+[feature access contract](feature-access-governance-contract.md) governs
+public inspection, the retained embargo exception and group-based private
+Batch/Culvert access. It adds no anonymous Culvert root and does not change
+token signature/audience/scope, root-only path or CSRF requirements.
+
 - This document is normative and authoritative for browse-route auth behavior.
 - Requirement keywords `MUST`, `MUST NOT`, `SHOULD`, and `MAY` are interpreted per RFC 2119.
 - If implementation and this contract diverge, implementation MUST be corrected or this document MUST be updated in the same change set.
@@ -22,15 +29,24 @@
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/*` | Allowed only for public runs and non-root-only paths | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/dtale/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/files/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
-| `/weppcloud/culverts/{uuid}/browse|download|gdalinfo|dtale/*` | Not allowed | `user`, `service` | `download` accepts privileged `user` tokens (`Admin|PowerUser|Dev|Root`); `service` tokens must include `service_groups=culverts`. |
+| `/weppcloud/culverts/{uuid}/browse|download|gdalinfo|dtale/*` | Not allowed | `user`, `service` | Human private access requires current `culvert_runner` group membership; batch-scoped service credentials retain existing scope/group checks. |
 | `/weppcloud/batch/{batch_name}/browse|download|gdalinfo|dtale/*` | Allowed only when base run is public and path is non-root-only | `session`, `user`, `service` | `session` claims may be scoped to batch base run alias (`batch;;{batch_name};;_base`). |
 
 ## Group Route Identifier Rules
-- Grouped routes (`/batch/*`, `/culverts/*`) MUST authorize against an identifier claim.
+- Grouped routes (`/batch/*`, `/culverts/*`) MUST authorize the requested identifier:
+  service/session tokens use their bounded resource claims; user tokens resolve
+  current server-side workflow-group membership for private grouped roots.
 - For culvert routes, identifier is `uuid`.
 - For batch routes, identifier is `batch_name`, with alias support for `batch;;{batch_name};;_base` when token class is `session`.
 - Service tokens MUST include run scope claims (`runs` or `runid`).
-- User tokens on grouped routes MUST include at least one privileged role: `Admin`, `PowerUser`, `Dev`, or `Root`.
+- Private Batch user access requires the `batch_runner` group; private Culvert
+  user access requires `culvert_runner`. PowerUser/Admin/Dev/Root claims alone
+  are insufficient. Do not embed a full run list in user tokens or use JWT
+  `groups` as durable authorization. Preserve the existing public Batch base-run
+  read exception. Membership does not authorize unrelated private ordinary runs.
+- Public non-embargoed project feature results follow FA-01's inspect policy;
+  action routes and artifact generation retain separate authorization. Generic
+  file/query/archive paths must not bypass the existing contrast-data embargo.
 
 ## Re-Auth Redirect Rules
 - For run routes using HTML navigation, 401 responses SHOULD redirect to `/weppcloud/runs/{runid}/?next=<target>`.

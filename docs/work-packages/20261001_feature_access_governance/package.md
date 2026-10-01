@@ -1,0 +1,60 @@
+# Feature access governance
+
+Status: Open, 2026-10-01; amendment and implementation plan prepared, runtime work not started.
+
+Timezone: UTC
+
+## Overview
+
+Align WEPPcloud with the operator-directed feature governance amendment: let users inspect public projects read-only, provide PowerUser self-service, and let one maintainer administer internal feature groups with reasons and timestamps. OpenET and Batch each begin with a group containing only the designated maintainer. Reconcile human Culvert access while preserving its authorized service integration.
+
+The starting implementation revision is `45a39a8337d37c7f7d30087ff4d23c03610072b3`. The [assessment](../../dev-notes/feature-maturity-governance-implementation-assessment.md) retains the source inventory and 275-test baseline. The [canonical contract](../../schemas/feature-access-governance-contract.md) owns intended behavior; this package is an execution record.
+
+## Scope
+
+Include public inspection/action separation, auditable groups and membership, versioned onboarding, automatic PowerUser approval, current server-side group checks, conservative multi-OFE maturity, internal endpoint/data parity, additive database migration and workflow acceptance. Amend affected user/developer/operator documentation together. Preserve the existing embargo exception until explicitly changed.
+
+Exclude PowerUser suspension, reapplication and permanent revocation; new identity providers/services/queues; model formulas/defaults; blanket role hierarchy changes; new anonymous Culvert roots; automatic release of embargoed results; credential rotation/TTL changes; and production deployment during the current documentation task. A multi-role review queue is explicitly excluded from access administration.
+
+## Complexity budget
+
+Reuse Flask-Security, SQLAlchemy/Alembic, the existing account database, registry, JWT/CSRF/response helpers and UI patterns. Permit groups, memberships, access-event history and onboarding-acceptance records in that database, one shared access module and bounded profile/admin UI endpoints. No new external dependency or infrastructure is permitted.
+
+Test ordinary request-time membership queries first. Escalate only after retained evidence shows they miss actual acceptance conditions. Group management must stay a simple add/remove-with-reason operation; technical implementation reviews are not additional operational reviewers.
+
+## Implementation fidelity and evidence
+
+Target faithful wiring into the real profile, public run, feature actions, API and data paths. A standalone group model/helper does not complete the implementation. Preserve legacy role paths where FA-01 says so; intentionally replace them for group-only features. Validate both source behavior and generated output under the actual service identities before any rollout claim.
+
+## Generated artifact validation gate
+
+Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a public read creates no missing controller state. Test embargoed artifacts through direct, query and archive paths as well as the named report.
+
+Highest current completion claim: diagnosed; amendment/plan prepared. No implementation, deployment or live access cutover is claimed.
+
+## Security and correctness gates
+
+Security impact: high (privilege assignment, group enforcement, JWT/session identity, public data and restricted actions). Dedicated independent security and correctness review artifacts are required before runtime closeout. The initial [review gate record](artifacts/2026-10-01_review_gates.md) records pending evidence; it is not a pass or reviewer sign-off.
+
+Follow `docs/standards/contract-first-change-standard.md`: resolve the complete surface matrix, obtain two independent read-only contract reviews and disposition findings, then record the standalone ancestor commit before runtime changes. No reviewer may approve their own amendment. This engineering gate remains separate from the user-directed single-maintainer membership workflow.
+
+## Success criteria
+
+- The canonical contract and each affected shared/domain contract agree on reads, actions and public embargo handling.
+- A normal authenticated user completes the two-question PowerUser flow with atomic, versioned evidence and no internal action grant.
+- A maintainer adds/removes a named group member with a reason; history survives removal and changed memberships affect subsequent admissions even with old JWTs.
+- OpenET and Batch enforce their separate groups with only the designated account initially admitted; broad roles cannot execute either feature without membership.
+- Public non-embargoed feature views are readable and side-effect-free; unauthorized direct actions are denied.
+- Culvert submit/retry/finalize/poll/cancel/browse/download retain the explicitly inventoried integration behavior and resource boundaries.
+- The conservative override preserves Experimental/Internal/Deprecated labels.
+- Meaningful database, endpoint, browser, accessibility and artifact evidence passes; independent medium/high findings are closed.
+
+## Dependencies and gates
+
+Milestone zero must resolve canonical account identity, inventoried Culvert credentials without secrets, public-project writer/anonymous-creator authority, exact protected data surfaces and partial-bundle behavior. The unanswered proposal to release public embargoed results is excluded: existing restriction stays in force. PowerUser sanctions are not a dependency.
+
+Parameterization change: no. ADR-0080 records governance, not numerical parameter changes. RQ graph checks apply only if implementation proves queue wiring changes necessary; none is planned.
+
+## Deliverables and next action
+
+Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). Complete milestone zero before runtime work. The current requested deliverable ends at the prepared reconciled amendment and implementation plan; later execution/deployment evidence remains explicit.

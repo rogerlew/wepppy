@@ -18,6 +18,14 @@ Validated user tokens and browser identities continue through existing active-us
 
 ## Interfaces
 
+FA-01 [feature access governance](feature-access-governance-contract.md) separates
+informational inspection from launch authorization; implementation/checkpoint
+pending. This does not add internal presets or change anonymous creation
+defaults. Before a restricted preset is introduced, both its launch UI and
+creation API must enforce its effective entitlement. Existing named presets,
+Builder locale/capability ownership and creation-token rules remain unchanged.
+
+
 For anonymous visitors with false, server-rendered `/interfaces/` omits creation forms/buttons, creation context-menu actions, CAPTCHA prompts, and creation-only CAPTCHA scripts. It remains readable and includes a sign-in link. Logged-in visitors retain role-authorized launch actions without CAPTCHA. True retains current UI behavior. Information and feature maturity visibility remain governed by the feature registry; this access policy is an additional launch gate, never a grant of role permission. Stale pages cannot bypass API enforcement.
 
 ## Compatibility and Rationale

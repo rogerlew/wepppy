@@ -28,6 +28,18 @@ Route ownership and freeze artifacts:
   - `tools/check_route_contract_checklist.py`
 
 ## Auth Model
+
+FA-01 amendment prepared 2026-10-01, implementation/checkpoint pending:
+[feature access governance](feature-access-governance-contract.md) adds
+current server-side group authorization to registered internal-feature
+operations. OpenET and Batch actions require their feature groups even for
+Admin/Dev/Root. Initially those groups contain only the designated maintainer.
+Human Culvert workflow admission uses its group plus applicable operation/resource
+checks; the existing authorized service integration keeps its credential/scope
+path. User/session principals are resolved to canonical account IDs; stale JWT
+group claims are not authoritative. Run access and required operation scopes
+remain additive, and public read permission does not authorize mutation.
+
 Accepted token classes follow `docs/dev-notes/auth-token.spec.md`:
 - `user`
 - `session`

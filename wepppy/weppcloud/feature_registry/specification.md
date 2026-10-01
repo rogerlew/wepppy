@@ -3,6 +3,8 @@
 Status: Draft v1-mvp (2026-05-22)  
 Scope: User-facing WEPPcloud metadata for both run features and interface configs.
 
+FA-01 amendment prepared 2026-10-01: [feature access contract](../../../docs/schemas/feature-access-governance-contract.md). Group access, public inspection/action separation and conservative multi-OFE maturity are specified below; implementation and the independent-review ancestor checkpoint are pending. Existing code/tests describe the earlier MVP until that checkpoint is implemented.
+
 ## Purpose
 
 Define one authority boundary for lifecycle labels, visibility policy, and user-facing availability so WEPPcloud does not duplicate this logic across routes and templates.
@@ -14,14 +16,17 @@ This specification covers two registries in one subsystem:
 
 ## UX Policy (Non-Negotiable)
 
-- Visible means usable unless a feature entry explicitly sets `menu_min_role`
-  below `min_role` to provide discoverable-but-disabled menu visibility.
-- If a feature is shown, the user can toggle it unless the checkbox is disabled
-  with a reason directly below its label.
+- Public projects expose existing feature views/results read-only to viewers
+  without action permission, subject to the explicit publication-embargo
+  exception in FA-01 and ADR-0001. Rendering must not initialize optional state.
+- Action controls require the feature's effective role/group entitlement and
+  project write authority; otherwise disable/omit them with a clear reason.
+- `menu_min_role` may provide disabled name discovery; it is not read or action
+  authorization and does not release embargoed results.
 - A caller below `min_role` receives the exact disabled reason
   `Not Authorized`.
 - If a config is shown, user can launch it.
-- Only exception: project `readonly` state on existing run surfaces.
+- Project `readonly` independently disables mutations for every feature group.
 - Do not show tease-only controls that user cannot use.
 
 ## Canonical Authority
@@ -52,10 +57,14 @@ locale/capability authority separately.
 - `menu_min_role`: optional `user | poweruser | dev | admin | root`; defaults
   to `min_role` and may only broaden disabled menu discoverability
 - `requires_backend`: `any | wbt | topaz`
+- Feature `access_group`: optional stable account-group key.
+- Feature `access_mode`: `role_or_group | group_only` when a group is declared.
 
 `internal_reason` must be present only when `maturity=internal`.
 `embargo_until` is required only when `internal_reason=publication_embargo`.
 `min_role` must be `dev` when `maturity=internal`.
+For FA-01, this is retained legacy metadata, not a bypass of `group_only`.
+Current account-group membership is evaluated separately from the static loader.
 An internal beta is represented by `maturity=internal`,
 `internal_reason=beta`, and `min_role=dev`; `beta` is not a maturity value.
 
@@ -67,7 +76,7 @@ Classification rules for maintainers/implementers:
 
 - Choose the least-optimistic maturity label supported by current evidence.
 - Do not classify as `stable` if regional transferability, validation coverage, or operational support is still materially unresolved.
-- If a feature is visible in WEPPcloud UI, it must be usable (except project `readonly` state).
+- Public feature inspection and action permission are separate under FA-01.
 
 ## Feature Registry MVP Schema
 
@@ -85,6 +94,10 @@ Required fields per feature entry:
 
 Optional fields:
 
+- `access_group` and `access_mode`: FA-01 internal-feature action policy. Initial
+  group keys match the feature IDs. OpenET, Batch and human Culvert access use
+  `group_only`; Omni Contrasts, PATH-CE and AgFields use `role_or_group`.
+  Omission preserves legacy role behavior outside this changed inventory.
 - `nav_label`: run-page navigation label when different from `label`
 - `section_id`: section anchor id for async section rendering and nav wiring
 - `section_class`: section wrapper class (defaults to `wc-stack`)
@@ -132,16 +145,25 @@ Per-override schema:
 
 ## Runtime Semantics
 
-Default feature visibility/usability requires all:
+Feature action availability requires all:
 
-- caller role is at least `min_role`
+- effective feature entitlement: current group membership for `group_only`,
+  legacy `min_role` audience or current membership for `role_or_group`, and
+  legacy role audience when no group policy is declared
+- project write authority (public read access alone is insufficient)
 - backend matches `requires_backend` (or it is `any`)
 - all `requires_features` are active for the run
 
+Public read-only feature sections follow FA-01 independently of the action
+audience. Retained readable results do not disappear merely because current
+backend/prerequisites prevent execution. Embargoed reads require effective
+feature entitlement plus run access. Group-only OpenET/Batch actions have no
+Admin/Dev/Root override. Account-store errors never fall back to broader roles.
+
 An entry with explicit `menu_min_role` uses discoverable menu semantics:
 
-- a caller at or above `menu_min_role` sees the menu option;
-- a caller below `min_role` sees a disabled checkbox with `Not Authorized`;
+- a caller with effective action entitlement or at or above `menu_min_role` sees the menu option; public read-only sections remain separately discoverable;
+- a caller without effective action entitlement sees a disabled checkbox with `Not Authorized`, regardless of broad role;
 - an authorized caller missing `requires_features` sees a disabled unchecked
   checkbox with `Enable <feature labels> first`;
 - when prerequisites become active, the checkbox becomes enabled without being
@@ -151,9 +173,10 @@ An entry with explicit `menu_min_role` uses discoverable menu semantics:
 
 `requires_features` is an enable-time guard and never auto-enables a feature.
 Only `enable_dependencies` may add another feature to the persisted mod list.
-Run-page sections and preflight navigation require the feature's own persisted
-id plus its authorization policy; a prerequisite's state cannot substitute for
-that id.
+Run-page sections require the feature's own state and the applicable inspection
+policy; a prerequisite's state cannot substitute for that id. Action/preflight
+navigation additionally reflects action permission. Missing optional state
+must render safely without creating controllers or starting jobs.
 
 Config visibility/selectability requires all:
 
@@ -169,12 +192,16 @@ Backend matching policy for configs:
 Config attribute overrides are applied after YAML validation, from
 `config_registry.yaml` `overrides` in file order.
 
-- Rule precedence is `effective runtime override > declared YAML maturity`.
+- General precedence is `effective runtime override > declared YAML maturity`,
+  subject to the conservative `multi-ofe-is-preview` rule: declared Stable or
+  Preview becomes/remains Preview; Experimental, Internal and Deprecated remain
+  unchanged. A representation flag cannot promote or remove restrictions.
 - Missing/null/absent matched config attributes do not trigger a rule.
 - Boolean override matching is strict (`true|false|yes|no|on|off|1|0`); invalid tokens fail validation.
 
-If conditions fail, hide the entry from user-facing launch/toggle surfaces
-unless explicit `menu_min_role` discoverability applies.
+If action conditions fail, suppress or disable the launch/toggle action with a
+reason; public inspect-only views remain governed by FA-01. Explicit
+`menu_min_role` name discovery remains permitted, including the embargo case.
 
 Registry validation/load failures are treated as fatal for page render in MVP
 (surface returns exception response rather than partial render).
@@ -190,7 +217,7 @@ this rule.
 
 When a feature is visible:
 
-- enable toggle by default
+- enable its toggle only when action authorization and prerequisites pass
 - if project is `readonly`, disable with explicit readonly reason
 
 Registry file order is authoritative for display order in MVP.
@@ -212,13 +239,16 @@ not feature removal or disabling; other feature visibility rules are unchanged.
 - `internal_reason` is non-null only when `maturity=internal`.
 - `embargo_until` must be null unless `internal_reason=publication_embargo`, and must be an ISO date (`YYYY-MM-DD`) when set.
 - `min_role` must be `dev` when `maturity=internal`.
+- FA-01 group metadata is accepted only for explicitly registered internal
+  features. Require a non-empty `access_group` with `access_mode`; reject an
+  unknown mode. Resolve membership at request time, not in schema validation.
 - `menu_min_role`, when present, must be a valid role whose authorized audience
   is a superset of the `min_role` audience. Role names are not a linear rank:
   `dev` authorizes Dev/Root while `admin` authorizes Admin/Root. Validation must
   compare those concrete audiences, so neither can broaden the other. The field
   changes menu discoverability only and never grants enable or dynamic-section
   authorization.
-- For a `publication_embargo` feature, `min_role` also governs every action or
+- For a `publication_embargo` feature, effective role/group entitlement governs every action or
   data entry point registered by that feature's accepted domain/remediation
   contract. Menu discoverability never satisfies this server authorization.
 - `adr_reference` (when present) must be repo-relative, remain under `docs/adrs/`, reference a `.md` file, and reference an existing file.
@@ -233,7 +263,7 @@ not feature removal or disabling; other feature visibility rules are unchanged.
 - `project_bp.py` uses `feature_registry` for labels and feature-allow checks.
 - `run_0_bp.py` uses `feature_registry` for feature visibility decisions.
 - Publication-embargo action/data routes registered by an accepted domain or
-  remediation contract enforce the same `min_role` audience in addition to
+  remediation contract enforce the same effective role/group entitlement in addition to
   every applicable/additive JWT scope, run-access, CAP, session, and CSRF
   boundary named by that contract.
 - `_run_header_fixed.htm` uses registry-derived mod option lists, maturity labels, and role gating.
@@ -308,11 +338,13 @@ overrides:
       internal_reason: null
 ```
 
-## Explicit Non-Goals (MVP)
+## Explicit Non-Goals
 
 - No separate `enable_roles` field.
 - No large metadata taxonomy in v1.
-- No auth model redesign.
+- FA-01 adds bounded account-group records and shared access evaluation, not a
+  new identity service, arbitrary policy language or generalized role hierarchy.
+- No PowerUser suspension, reapplication or permanent-revocation workflow.
 
 ## Test Expectations
 
