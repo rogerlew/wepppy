@@ -6,9 +6,10 @@ import json
 from datetime import datetime, timezone
 
 from redis.exceptions import WatchError
-from rq import Queue, Worker
+from rq import Queue, Worker, worker_registration
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
+from rq.suspension import WORKERS_SUSPENDED
 
 from wepppy.rq.job_id import new_rq_job_id
 
@@ -67,12 +68,42 @@ def safe_job_details(job_id, job=None):
     return result
 
 
+def _has_available_worker(queue, identity):
+    worker_keys = list(worker_registration.get_keys(queue=queue))
+    if not worker_keys:
+        return False
+    with queue.connection.pipeline(transaction=True) as pipeline:
+        pipeline.exists(WORKERS_SUSPENDED)
+        for key in worker_keys:
+            pipeline.hmget(key, "state", "queues", "run_catalog_configuration", "death")
+            pipeline.ttl(key)
+        observed = pipeline.execute()
+    if observed[0]:
+        return False
+    expected = {"protocol": 1, "database": identity, "write_mode": "catalog"}
+    for fields, ttl in zip(observed[1::2], observed[2::2]):
+        state, queues, configuration, death = fields
+        if ttl <= 0 or death is not None or state not in ("idle", b"idle"):
+            continue
+        try:
+            if isinstance(queues, bytes):
+                queues = queues.decode("utf-8")
+            configuration = json.loads(configuration) if configuration else None
+        except (ValueError, TypeError, UnicodeError):
+            continue
+        if isinstance(queues, str) and queue.name in queues.split(",") and configuration == expected:
+            return True
+    return False
+
+
 def enqueue_sweep(queue, *, timeout=3600, result_ttl=86400):
     from wepppy.weppcloud.run_catalog.adapter import Settings
     settings = Settings.from_environ()
     if settings.commit_mode != "postgres" or settings.write_mode != "catalog":
         raise ValueError("Catalog sweep requires catalog write mode")
     identity = deployment_identity()
+    if not _has_available_worker(queue, identity):
+        return False
     key = "run-catalog:admission:" + identity
     with queue.connection.pipeline() as pipeline:
         try:

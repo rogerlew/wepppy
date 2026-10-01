@@ -29,7 +29,9 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 
 ## Progress
 
-- [ ] (2026-10-01 UTC) Worker-gated sweep admission: operator confirmed live-idle meaning and checkpoint commit; two draft reviews passed and canonical section 6.4 is amended. Standalone ancestor and implementation validation pending; no deployment authorized.
+- [x] (2026-10-01 UTC) Worker admission checkpoint `79de4341fa2b2b6db3fd6441468f28dd3d2c3db5` committed after operator confirmation and two independent promotion reviews.
+- [x] (2026-10-01 UTC) Passive live-idle admission implemented; 50 focused real-Redis/catalog/scheduler tests and both implementation reviews pass. Full sanity reached 5,725 passes before a batch-worker containment failure outside the changed path; that case passes alone. No full-suite pass or deployment claimed.
+- [x] (2026-10-01 UTC) Final affected-subsystem selection passed 1,858 tests without skips. Graph, docs and exception gates pass; operator authorized the work-tree implementation/evidence commit. No deployment was performed.
 
 - [x] (2026-10-01 UTC) Operator authorized startup-fix commit/redeploy and a default-off environment-controlled sweep switch. Forest's enabled setting moves to its gitignored environment; no global enablement or new service.
 - [x] (2026-10-01 05:47 UTC) Forest1 repair `2f61fb1e5` passed two canonical deployments; migration and profiled worker update completed. Four actual-environment origin probes passed; scheduled shadow covers 200 registrations, with all source and seven-account reader comparisons matching. Reads remain legacy pending authenticated browser/workflow witnesses.
@@ -63,6 +65,13 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 
 
 ## Surprises & Discoveries
+
+Worker availability cannot be read safely from cached RQ objects alone: a
+retained death hash can still have positive TTL and stale idle state. Use a
+transactional passive snapshot, including global suspension. Test containers
+lack `redis-server`; admission tests reuse the existing isolated-RQ fixture
+against a dedicated host Unix-socket Redis in the ignored pytest cache, with no
+TCP listener/persistence. This exercises real Redis without suspending live RQ.
 
 Forest1 has no usable dev-agent credentials and retains OAuth-only login. Internal
 reader parity can be verified without impersonating a session but cannot replace
@@ -147,6 +156,17 @@ handoff stops before forest deployment; no M5 proof or package closure is claime
 
 
 ## Outcomes & Retrospective
+
+Admission follow-up: approved checkpoint `79de4341f` precedes the runtime patch.
+The local implementation skips when no live idle compatible worker is observed
+or RQ is suspended, preserving SQL dirty work and the one-sweep coalescing guard.
+Focused tests and two independent implementation reviews pass. Runtime changes
+are included in the operator-authorized implementation commit and remain
+undeployed. Full sanity reached 5,725 passes before an
+unchanged batch-worker test hit pre-existing child-process containment; its
+isolated rerun passes. No full-suite pass is claimed.
+The final catalog/tools/microservice regression selection passed 1,858 cases
+without skips. Dedicated test Redis servers are stopped at handoff.
 
 Latest forest1 outcome: uniform repaired candidate, successful two-deploy rehearsal,
 healthy 200-registration shadow, explicit legacy-read hold. Startup coupling is

@@ -100,8 +100,16 @@ New operator request: gate sweep enqueue on batch-worker availability. Draft
 checkpoint: [admission decision](artifacts/2026-10-01_sweep_admission_contract_decision.md).
 Live-idle interpretation and checkpoint commit authority were confirmed by the
 operator. Both independent draft reviews pass; the approved delta is promoted
-into canonical section 6.4. Record the standalone ancestor before runtime edits.
+into canonical section 6.4. Standalone ancestor: `79de4341fa2b2b6db3fd6441468f28dd3d2c3db5`.
+Runtime implementation and 50-case disposable-Redis/catalog/scheduler validation
+pass, as do both independent implementation reviews and the final 1,858-case
+affected-subsystem selection (no skips). Full sanity passed 5,725
+cases before a batch-worker test hit pre-existing child-process containment;
+that unchanged case passes alone. No full-suite pass is claimed.
+See [implementation evidence](artifacts/2026-10-01_sweep_admission_implementation.md).
 Existing shadow deployment is unchanged; deployment is not authorized here.
+The operator authorized the implementation/evidence commit on 2026-10-01;
+this change set records that handoff. Deployment remains pending.
 
 Forest1 now runs `2f61fb1e5`, migration `d30c91a7b802`, catalog writes and enabled
 sweeps, with legacy reads deliberately retained. Both canonical repair/shadow

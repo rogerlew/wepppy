@@ -704,7 +704,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_sweep",
-    "source_lineno": 93,
+    "source_lineno": 124,
     "source_module": "wepppy/rq/run_catalog_rq.py"
   },
   {

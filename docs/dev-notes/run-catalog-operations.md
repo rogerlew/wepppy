@@ -75,7 +75,7 @@ modification mirror before the new schema exists. A library/offline environment
 defaults to disabled integration. Do not enable postgres reads with timestamp-only
 writes. Catalog reads do not activate the scheduler.
 
-Approved admission change (implementation/deployment pending): each tick will
+Worker-availability admission (implemented; deployment pending): each tick will
 enqueue only with a live, idle, compatible batch worker and no global RQ
 suspension. Worker checks are passive and cannot reserve the execution slot;
 the existing atomic guard still limits outstanding sweeps to one per deployment.

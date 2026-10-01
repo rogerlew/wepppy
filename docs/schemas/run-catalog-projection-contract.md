@@ -329,8 +329,8 @@ job every 15 seconds while a model occupies the worker. Database sweep locks
 still guard manual and multi-scheduler execution. Queue wait counts toward the
 60-second objective; capacity failure blocks promotion, not a silent new queue.
 
-Worker-availability admission amendment (operator approved 2026-10-01;
-implementation conformance pending): enqueue only when global RQ dequeue is
+Worker-availability admission amendment (operator approved 2026-10-01):
+enqueue only when global RQ dequeue is
 not suspended and at least one live, idle worker subscribed to the destination
 batch queue advertises matching catalog protocol, database identity and catalog
 write mode. Observe membership, state, configuration, death marker and positive
