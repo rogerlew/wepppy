@@ -2,8 +2,10 @@
 
 The [canonical contract](../schemas/run-catalog-projection-contract.md) governs
 this feature. Candidate implementation passed isolated validation. **Do not deploy or
-activate from this document alone.** The operator now authorizes forest steps
-1–5 through gated read cutover; host promotion remains pending observation.
+activate from this document alone.** Forest steps 1–5 are complete; the operator
+now authorizes forest1 application deployment without a 48-hour nonproduction
+wait. Controlled checks remain required; unobserved elapsed recovery is not
+claimed. Wepp1 deployment is not authorized by this request.
 Host order is forest → forest1 application → wepp1.
 
 ## What users see after explicit cutover
@@ -27,6 +29,11 @@ No observer means no deployment import or I/O. Call
 the library default remains disabled. Successful NoDb replacement notifies even
 if later ancillary work fails. Observer failures cannot undo saved files and
 produce bounded logs with PID/source/time and process failure count.
+
+RQ-engine must initialize from ASGI lifespan startup, not package import:
+browse/download reuse its authentication helpers without PostgreSQL secrets.
+Do not grant those read services database credentials to repair an import-time
+initialization failure. Producer startup still fails on invalid configuration.
 
 The deployment adapter validates modes/secrets/driver without connecting at
 startup. It reuses fork-safe pools, preserves last-modified timestamps for all
@@ -58,7 +65,12 @@ WEPPCLOUD_RUN_CATALOG_WRITE_MODE=timestamp_only
 WEPPCLOUD_RUN_CATALOG_READ_MODE=legacy
 ```
 
-The `run_catalog_sweep` schedule remains disabled. These defaults preserve the
+The `run_catalog` schedule defaults to disabled through
+`WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED=false`. After consumer admission, set this
+host-local Compose variable to `true` and recreate the scheduler to load it.
+Set it to `false` and recreate the scheduler to stop new periodic dispatches;
+already queued jobs retain their normal lifecycle. Invalid boolean strings fail
+startup rather than silently enabling work. These defaults preserve the
 modification mirror before the new schema exists. A library/offline environment
 defaults to disabled integration. Do not enable postgres reads with timestamp-only
 writes. Catalog reads do not activate the scheduler.
@@ -86,6 +98,11 @@ logs for per-process notification counts and `project_commit_mirror_completed`
 elapsed time. Protect operator output; it is not a public API.
 
 ## Mandatory stage run sheet
+
+The operator waived fixed 48-hour waits on single-operator forest/forest1:
+waiting without representative traffic does not establish production capacity.
+This supersedes nonproduction elapsed-window requirements below, not the
+correctness, live consumer proof or separate production-authorization gates.
 
 Maintain a sheet naming host/preset, candidate revision, modes, Alembic head,
 all producer and eligible consumer identities, mounts/groups/umask, evidence
@@ -128,16 +145,17 @@ Machine `technical_ready=true` and exit zero are **not release authorization**;
 6. **Host promotion:** retain >=100 authenticated sequential requests per surface
    plus concurrent readers, browser/TTFB/payload/cache state,
    notification overhead, queue impact, full 24-hour reconciliation and >=48
-   healthy hours. Forest1 additionally requires two no-argument canonical
+   healthy hours on production; the nonproduction elapsed-wait waiver above
+   applies to forest/forest1. Forest1 additionally requires two no-argument canonical
    deployments and existing login/CAPTCHA/RQ/DEVAL/rollback checks. Only then
-   promote to the next host. Tests are not a substitute for these elapsed windows.
+   promote to the next host. Tests do not establish unmeasured recovery windows.
 
 Forest uses its actual single-account project scope and controlled traffic;
 an unavailable 805-run dataset is not its acceptance gate. Keep isolated scale
 evidence separate. Validate representative host scale at the first stage with
 that dataset, before wepp1 read cutover if unavailable earlier. This avoids
 inventing forest load evidence without waiving correctness, worker proof,
-reconciliation or the 48-hour observation window.
+reconciliation. The later nonproduction elapsed-wait waiver is recorded above.
 
 Restart, candidate/configuration/mount changes or eligible membership changes
 invalidate affected witnesses. Revalidate before resuming admission. Old

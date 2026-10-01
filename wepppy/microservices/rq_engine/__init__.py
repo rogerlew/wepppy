@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import logging
+from contextlib import asynccontextmanager
 
 import redis
 from fastapi import FastAPI, Request
@@ -61,9 +62,16 @@ from .watershed_routes import router as watershed_router
 from .wepp_routes import router as wepp_router
 from .ash_routes import router as ash_router
 
-app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
-from wepppy.nodb.persistence_events import initialize_project_commits
-initialize_project_commits()
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    from wepppy.nodb.persistence_events import initialize_project_commits
+
+    initialize_project_commits()
+    yield
+
+
+app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0", lifespan=_lifespan)
 install_correlation_log_record_factory()
 install_rq_auth_actor_hook()
 validate_session_cookie_profile()

@@ -130,6 +130,7 @@ def test_fork_archive_worker_topology_is_single_process_and_host_scoped() -> Non
     assert all("docker.sock" not in str(volume) for volume in wepp3_worker["volumes"])
     assert wepp3_worker["secrets"] == [
         "redis_password",
+        "postgres_password",
         {
             "source": "discord_bot_token",
             "target": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",

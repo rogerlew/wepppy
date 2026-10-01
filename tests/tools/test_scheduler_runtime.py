@@ -12,6 +12,37 @@ from wepppy.tools import scheduler
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("value, expected", [(True, True), (False, False), ("true", True), (" FALSE ", False)])
+def test_boolean_task_values(value, expected):
+    assert scheduler._as_bool(value, name="catalog.enabled") is expected
+
+
+@pytest.mark.parametrize("value", [None, 0, 1, "yes", "", "invalid"])
+def test_invalid_boolean_task_values(value):
+    with pytest.raises(ValueError, match="must be a boolean"):
+        scheduler._as_bool(value, name="catalog.enabled")
+
+
+@pytest.mark.parametrize("value, expected", [(None, False), ("", False), ("true", True), ("false", False), (" TRUE ", True)])
+def test_catalog_schedule_environment_switch(monkeypatch, value, expected):
+    variable = "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED"
+    monkeypatch.delenv(variable, raising=False)
+    if value is not None:
+        monkeypatch.setenv(variable, value)
+    config = scheduler._load_config(str(Path(__file__).resolve().parents[2] / "docker/scheduled-tasks.yml"))
+    specs = scheduler._normalize_tasks(config["tasks"], config)
+    assert next(spec for spec in specs if spec.name == "run_catalog").enabled is expected
+
+
+def test_boolean_environment_invalid_or_missing(monkeypatch):
+    monkeypatch.delenv("CATALOG_TEST_ENABLED", raising=False)
+    with pytest.raises(ValueError, match="no value is set"):
+        scheduler._as_bool("${CATALOG_TEST_ENABLED}", name="catalog.enabled")
+    monkeypatch.setenv("CATALOG_TEST_ENABLED", "invalid")
+    with pytest.raises(ValueError, match="must be a boolean"):
+        scheduler._as_bool("${CATALOG_TEST_ENABLED:-false}", name="catalog.enabled")
+
+
 class _RecordingQueue:
     def __init__(self, name: str, connection: object) -> None:
         self.name = name

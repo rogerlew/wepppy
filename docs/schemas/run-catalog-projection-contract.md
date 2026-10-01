@@ -176,7 +176,11 @@ successful file save. The deliberate boundary logs context and increments
 failure telemetry; no silent broad catch or retries while holding NoDb locks.
 
 Explicitly initialize the adapter in Flask, rq-engine, worker process startup,
-scheduler jobs, and deployed maintenance entry points. Maintenance exposes
+scheduler jobs, and deployed maintenance entry points. Use rq-engine's ASGI
+lifespan startup, not package import, for its initialization.
+Importing shared rq-engine authentication helpers from browse/download must
+not initialize the deployment adapter or require PostgreSQL credentials.
+Maintenance exposes
 deployment/standalone mode without importing the web app. Flask-only coverage
 does not constitute wired completion.
 
@@ -493,7 +497,7 @@ Separate persistence integration, projection maintenance, and read selection:
   default `timestamp_only`. The adapter preserves the existing modification
   mirror before the additive schema exists; `catalog` requires the migration.
 - `WEPPCLOUD_RUN_CATALOG_READ_MODE=legacy|postgres`; staging default `legacy`.
-- Explicit scheduler task enablement; a read flag never silently starts work.
+- Explicit scheduler task enablement through `WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED=true|false`, default `false`; a read flag never silently starts work. The baked schedule resolves this variable at scheduler startup, accepts only boolean values or case-insensitive `true`/`false` strings, and rejects malformed values. Recreate the scheduler after changing its environment. This permits host-local activation without rebuilding or enabling other hosts.
 
 Separate static startup validation from live promotion readiness. Startup
 rejects unknown modes, missing required adapter/secret configuration, and
@@ -684,6 +688,16 @@ Notifications, reconciliation, and diagnostics are permanent mechanisms.
 
 ### 11.1 Common procedure and promotion gate
 
+Operator amendment (2026-10-01 UTC): forest and forest1 are single-operator
+validation environments. A mandatory 48-hour wait adds no representative user
+load evidence there, so it is not a prerequisite for nonproduction deployment
+or promotion. The operator explicitly authorized forest1 deployment after the
+forest cutover checks. Controlled correctness, reconciliation, worker-origin,
+browser and deployment checks remain required; elapsed recovery evidence not
+yet observed must remain marked unmeasured. This amendment supersedes the
+nonproduction waiting clauses below, not production freshness targets or the
+need for separate wepp1 deployment authorization.
+
 Record target hostname, git/image revision, installed `wctl` preset, effective
 Compose topology, database identity without secrets, writers, run roots,
 UID/GID/groups/umask, and shared storage/queue boundaries. Host-order rollout
@@ -691,7 +705,7 @@ does not authorize changes to unrelated companion stacks.
 
 Deploy additive code with legacy reads and timestamp-only writes. Run schema
 migration using the existing Flask-Migrate entry point inside the candidate
-app container (`wctl exec -T weppcloud flask db upgrade` through its preset),
+app container (`wctl exec -T weppcloud flask --app wepppy.weppcloud.app db upgrade` through its preset),
 then enable catalog writes/sweeps. Verify the container actually contains the
 migration and record its Alembic head. If the target requires a different
 candidate staging boundary, record the canonical command in its run sheet;

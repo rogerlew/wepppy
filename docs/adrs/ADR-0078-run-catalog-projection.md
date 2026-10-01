@@ -63,7 +63,7 @@ than becoming undocumented implementation defaults.
 | Adapter connection / pool wait | 1 second / 250 ms | Bound save-path connection pressure |
 | Adapter SQL lock / statement timeouts | 250 ms / 1 second | Avoid mirror work monopolizing a file-save lock |
 | Adapter inline retries | 0 | Committed files remain authoritative; reconciliation repairs misses |
-| Per-stage healthy observation | >=48 hours and a full reconciliation cycle | Exercise sustained workload and offline repair before promotion |
+| Production healthy observation | >=48 hours and a full reconciliation cycle; fixed nonproduction waits waived | Exercise sustained production workload and offline repair; idle single-operator hosts cannot establish representative traffic |
 | Post-wepp1 retirement observation | 7 further healthy days | Preserve explicit read rollback while collecting production evidence |
 
 Targets also include p95 <=1 second/p99 <=2.5 seconds for catalog/map requests
@@ -72,6 +72,13 @@ release acceptance targets, not a claim the initial settings meet them. Forest
 capacity testing must validate or revise the values before promotion, retaining
 the measured workload, queue impact, NFS cost, and recovery time. Source outages
 are visible exceptions to healthy-infrastructure guarantees, not hidden success.
+
+Operator amendment, 2026-10-01 UTC: forest and forest1 each have one human
+operator. Proceed to forest1 without a fixed 48-hour nonproduction wait; retain
+controlled correctness and worker/database/browser checks and mark unobserved
+elapsed recovery as unmeasured. Representative scale belongs on the first host
+with that dataset, before wepp1 cutover if unavailable earlier. This changes
+rollout evidence requirements, not reconciliation intervals or freshness limits.
 
 ## Alternatives and consequences
 

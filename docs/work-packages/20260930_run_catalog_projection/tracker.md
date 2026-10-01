@@ -1,7 +1,7 @@
 # Run catalog projection tracker
 
 **Updated**: 2026-10-01 UTC
-**Status**: Forest steps 1–5 complete; PostgreSQL reads live; observation/promotion pending.
+**Status**: Forest1 switched to master; deployment failed startup/stability gate; affected read services restored, catalog inactive.
 
 Implementation evidence and current findings:
 [review disposition](artifacts/2026-09-30_implementation_review.md),
@@ -95,11 +95,32 @@ Do not treat the architecture endorsement as a completed independent review.
 
 ## Next handoff
 
+Branch switch was approved and completed with the feature branch preserved.
+The resumed rollout exposed catalog initialization during shared rq-engine
+auth imports, crashing browse/download without SQL secrets. Those two services
+were restored to the exact retained previous image; web/rq-engine remain staged
+with legacy reads. The tested ASGI-lifespan root fix is local and uncommitted;
+commit/redeploy and a separate production scheduler activation switch were
+approved by the operator. The switch defaults false and is loaded from the
+host-local scheduler environment. No migration, sweep activation or SQL cutover
+has yet occurred on forest1.
+
+The initial divergent-branch blocker is resolved by the approved switch to
+master, without discarding the feature branch. See
+[forest1 run sheet](artifacts/2026-10-01_forest1_deployment.md) for the later
+runtime gate failure and containment. No forest1 migration or cutover occurred.
+
+Operator waived the fixed nonproduction 48-hour wait and explicitly requested
+forest1 deployment. Both hosts have one human operator; controlled checks, not
+idle elapsed time, govern this transition. Production deployment remains
+separately gated and unauthorized. Record unmeasured recovery evidence rather
+than pretending the elapsed window passed.
+
 Forest steps 1–5 are complete. Web reads are postgres; producers use catalog
 writes; the existing scheduler admits 15-second sweeps. Forest-local schedule
-activation remains an intentionally uncommitted configuration change; do not
-ship it as a global default. The gitignored forest env retains mode settings.
+activation now belongs in the gitignored environment, not a global YAML edit.
+The gitignored forest env retains mode settings and the enabled sweep flag.
 Keep the two dev-agent smoke projects as deployment witnesses for observation.
-Complete remaining host acceptance, rollback rehearsal and >=48 healthy hours
-before promotion. Representative host-scale evidence belongs on the first
+Complete remaining host acceptance and rollback rehearsal; the operator waived
+fixed nonproduction waits. Representative host-scale evidence belongs on the first
 eligible stage, before wepp1 cutover if necessary. No other host was deployed.

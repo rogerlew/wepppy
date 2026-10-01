@@ -6,7 +6,7 @@ jitter_seconds: 300
 tasks:
   - name: run_catalog
     func: wepppy.rq.run_catalog_rq.sweep_run_catalog
-    enabled: false
+    enabled: "${WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED:-false}"
     interval_seconds: 15
     initial_delay_seconds: 0
     jitter_seconds: 0

@@ -101,6 +101,25 @@ def _as_int(value: Any, *, name: str) -> int:
         raise ValueError(f"{name} must be an integer") from exc
 
 
+def _as_bool(value: Any, *, name: str) -> bool:
+    if isinstance(value, str):
+        token_match = _ENV_TOKEN_RE.fullmatch(value.strip())
+        if token_match is not None:
+            env_name = token_match.group("name")
+            resolved_env = os.getenv(env_name)
+            if resolved_env is None or resolved_env.strip() == "":
+                value = token_match.group("default")
+                if value is None:
+                    raise ValueError(f"{name} references {env_name} but no value is set")
+            else:
+                value = resolved_env
+        if value.strip().lower() in ("true", "false"):
+            return value.strip().lower() == "true"
+    if isinstance(value, bool):
+        return value
+    raise ValueError(f"{name} must be a boolean (true or false)")
+
+
 def _normalize_tasks(raw: Iterable[Mapping[str, Any]], defaults: Mapping[str, Any]) -> list[TaskSpec]:
     specs: list[TaskSpec] = []
     for entry in raw:
@@ -116,7 +135,7 @@ def _normalize_tasks(raw: Iterable[Mapping[str, Any]], defaults: Mapping[str, An
         queue = entry.get("queue") or defaults.get("default_queue", "default")
         args = list(entry.get("args") or [])
         kwargs = dict(entry.get("kwargs") or {})
-        enabled = bool(entry.get("enabled", True))
+        enabled = _as_bool(entry.get("enabled", True), name=f"{name}.enabled")
         initial_delay_seconds = _as_int(
             entry.get("initial_delay_seconds", defaults.get("initial_delay_seconds", 0)),
             name=f"{name}.initial_delay_seconds",

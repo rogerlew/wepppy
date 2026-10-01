@@ -4,8 +4,8 @@
 This ExecPlan is a living document maintained under
 `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries,
 Decision Log, and Outcomes & Retrospective current together with this package's
-`tracker.md`. The current authorized task is forest deployment steps 1–5,
-through gated read cutover, without promotion to another host. No other active package
+`tracker.md`. The current authorized task is forest1 application deployment,
+following verified forest read cutover. Wepp1 is not authorized. No other active package
 is being executed here.
 
 
@@ -29,6 +29,8 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 
 ## Progress
 
+- [x] (2026-10-01 UTC) Operator authorized startup-fix commit/redeploy and a default-off environment-controlled sweep switch. Forest's enabled setting moves to its gitignored environment; no global enablement or new service.
+
 
 - [x] (2026-09-30 UTC) Profile production and retain the 169.56-second baseline.
 - [x] (2026-09-30 UTC) Record portable-project requirement and operator-endorsed architecture.
@@ -48,6 +50,7 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 - [x] M4 implementation: SQL-only routes, freshness UI, authenticated scope regression and isolated file-to-browser evidence.
 - [x] (2026-10-01 UTC) Independent bounded implementation and evidence-method reviews passed with all findings closed; requested pre-forest deployment hold reached.
 - [x] (2026-10-01 UTC) Operator authorized forest steps 1–5; candidate committed, additive migration applied, consumer origin proof passed, shadow compared and postgres reads activated with browser evidence.
+- [ ] Forest1 deployment authorized without fixed soak; backup/idle checks passed. After the divergent-branch guard stopped the first attempt, the operator explicitly authorized switching to existing master; canonical deployment resumed.
 - [ ] M5 prerequisite/acceptance: production-equivalent producer/consumer mounts, startup, real queue/model capacity, browser-map/network timing, and stage-specific operator evidence.
 - [ ] M5: Forest acceptance, full cycle, rollback, and observation.
 - [ ] M5: Forest1 production rehearsal, full cycle, rollback, and observation.
@@ -142,13 +145,13 @@ Forest now runs migration `d30c91a7b802`, catalog writes, scheduled sweeps and
 postgres reads. Live consumer origin/mount proof, source/SQL/HTTP parity and
 browser table/map checks passed. Three 100-request authenticated series on the
 actual 85-project scope passed, with p95 56–66 ms and concurrent checks.
-M5 complete capacity/rollback/elapsed observation remain mandatory.
+M5 capacity/rollback remain open; fixed nonproduction waits are operator-waived.
 Handoff evidence: `artifacts/2026-09-30_predeploy_validation.md`; operations and
 developer integration: `docs/dev-notes/run-catalog-operations.md`. Runtime candidate
 is committed as `3e6cbdcb9`; live evidence is in
 `artifacts/2026-10-01_forest_deployment.md`. Forest-local schedule activation is
-intentionally uncommitted; env flags are gitignored host configuration. No
-other host deployment, production acceptance or package closeout is claimed.
+gitignored host environment configuration. Forest1's failed deployment and
+containment are recorded separately; production acceptance and closeout are not claimed.
 
 
 ## Context and Orientation
@@ -371,3 +374,33 @@ actual forest projects and controlled traffic; retain isolated scale evidence
 separately and require representative host scale on the first eligible stage,
 before wepp1 cutover if unavailable earlier. The operator authorized steps 1–5;
 48-hour observation and full reconciliation still gate host promotion.
+Operator amendment (2026-10-01 UTC): deploy forest1 now. Fixed 48-hour waits on
+forest/forest1 are waived because both have one human operator and cannot
+establish representative production traffic by waiting. Retain controlled
+technical/deployment checks and label unobserved recovery windows honestly.
+This authorizes the forest1 application, not its forest companion or wepp1.
+Forest1 still checks out `feature/project-owned-config`; the canonical deploy
+fetched a non-descendant upstream and correctly stopped before build/restart.
+The existing master branch can preserve the feature branch, but switching
+requires explicit operator authority. Its profiled fork/archive worker also
+needs the documented separate activation because full deploy excludes it.
+
+The initial forest1 attempt stopped safely at a divergent feature branch.
+Preflight/backup passed and the operator then approved switching to existing
+master. See the forest1 deployment run sheet for the subsequent runtime failure
+and containment; the earlier branch blocker is resolved.
+Forest1's first master rollout exposed package-import coupling: browse/download
+import rq-engine auth, so module-level catalog initialization demanded secrets
+those services intentionally do not have. Move initialization to ASGI lifespan,
+not broader credential mounts. Read services were restored to the retained
+previous image after the deploy's stability gate failed. The production image
+also bakes a disabled sweep schedule with no host-local activation switch.
+
+The operator approved switching forest1 to existing master. The resumed deploy
+reached runtime but failed its stability gate on catalog-related browse/download
+import failures. Both read services were restored to their exact previous image;
+the canonical failure handler restored CAP and released its RQ fence. Catalog
+schema/activation remain untouched. The operator subsequently approved committing
+and redeploying the tested ASGI startup fix and a default-off host-local sweep
+switch. Focused startup/scheduler/topology tests passed 33 cases. This closes
+the activation-control gap without shipping a globally enabled schedule.
