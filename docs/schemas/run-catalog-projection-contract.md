@@ -329,6 +329,29 @@ job every 15 seconds while a model occupies the worker. Database sweep locks
 still guard manual and multi-scheduler execution. Queue wait counts toward the
 60-second objective; capacity failure blocks promotion, not a silent new queue.
 
+Worker-availability admission amendment (operator approved 2026-10-01;
+implementation conformance pending): enqueue only when global RQ dequeue is
+not suspended and at least one live, idle worker subscribed to the destination
+batch queue advertises matching catalog protocol, database identity and catalog
+write mode. Observe membership, state, configuration, death marker and positive
+worker-hash TTL from the same current registration in a consistent Redis
+snapshot; do not rely on cached Worker attributes. Reject missing, expired,
+non-expiring, dead, busy, suspended, unknown-state, wrong-queue or incompatible
+registrations. Observation must not heartbeat workers or extend their TTL.
+No qualifying worker means no new job and no admission-pointer change; SQL dirty
+state remains intact and the next ordinary scheduler tick retries. Redis errors
+remain observable through the existing scheduler failure/retry boundary.
+
+This is an availability hint, not a worker reservation or a replacement for
+every-consumer compatibility/origin proof. Worker death or model dispatch after
+observation can still leave one sweep waiting; retain atomic coalescing across
+queued, started, deferred and scheduled states, terminal recovery and restarts.
+Do not cancel existing work, change queue priorities or introduce a new queue.
+During multi-day saturation metadata may become stale and readiness may fail;
+do not promise the 60-second objective without capacity. Rationale: avoid new
+maintenance submissions when no batch execution slot is available, while the
+existing coalescing guard—not the racy availability observation—bounds backlog.
+
 Reserve at least one quarter of attempts for due reconciliation; unused slots
 can serve the other class. Dirty rows use next-attempt and oldest-dirty order.
 Deduplicate row IDs between the two candidate lists within a dispatch. A full

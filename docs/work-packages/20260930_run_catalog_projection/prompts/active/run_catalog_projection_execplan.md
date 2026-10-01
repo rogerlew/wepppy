@@ -29,6 +29,8 @@ with explicitly specified freshness behavior, not an unwired scaffold.
 
 ## Progress
 
+- [ ] (2026-10-01 UTC) Worker-gated sweep admission: operator confirmed live-idle meaning and checkpoint commit; two draft reviews passed and canonical section 6.4 is amended. Standalone ancestor and implementation validation pending; no deployment authorized.
+
 - [x] (2026-10-01 UTC) Operator authorized startup-fix commit/redeploy and a default-off environment-controlled sweep switch. Forest's enabled setting moves to its gitignored environment; no global enablement or new service.
 - [x] (2026-10-01 05:47 UTC) Forest1 repair `2f61fb1e5` passed two canonical deployments; migration and profiled worker update completed. Four actual-environment origin probes passed; scheduled shadow covers 200 registrations, with all source and seven-account reader comparisons matching. Reads remain legacy pending authenticated browser/workflow witnesses.
 - [x] (2026-10-01 05:59 UTC) Shared test environment isolation corrected; final observer/RQ/catalog/tools/microservice selection passed 3,060 tests with 29 skips. No additional runtime changes or full-suite pass claimed.
@@ -108,6 +110,11 @@ host static builds need repository virtualenv Python for Jinja2.
 
 
 ## Decision Log
+
+Approved admission amendment (2026-10-01 UTC): require a live idle compatible
+batch consumer before enqueue while retaining atomic one-sweep coalescing.
+Operator confirmed the idle interpretation and checkpoint commit permission.
+No deployment permission is implied. See `artifacts/2026-10-01_sweep_admission_contract_decision.md`.
 
 
 Decision (2026-09-30 UTC, operator): projects remain portable without PostgreSQL;

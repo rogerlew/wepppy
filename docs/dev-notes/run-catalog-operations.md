@@ -75,6 +75,15 @@ modification mirror before the new schema exists. A library/offline environment
 defaults to disabled integration. Do not enable postgres reads with timestamp-only
 writes. Catalog reads do not activate the scheduler.
 
+Approved admission change (implementation/deployment pending): each tick will
+enqueue only with a live, idle, compatible batch worker and no global RQ
+suspension. Worker checks are passive and cannot reserve the execution slot;
+the existing atomic guard still limits outstanding sweeps to one per deployment.
+No available worker means skip this tick, leave dirty SQL metadata pending and
+retry on the next tick. Sustained batch saturation can make catalog data stale;
+it does not create a maintenance job every 15 seconds. Do not bypass consumer
+origin/mount proof or clear existing jobs to activate this behavior.
+
 After separately authorized candidate staging and additive migration:
 
 ```bash

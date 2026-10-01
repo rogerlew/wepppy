@@ -96,6 +96,13 @@ Do not treat the architecture endorsement as a completed independent review.
 
 ## Next handoff
 
+New operator request: gate sweep enqueue on batch-worker availability. Draft
+checkpoint: [admission decision](artifacts/2026-10-01_sweep_admission_contract_decision.md).
+Live-idle interpretation and checkpoint commit authority were confirmed by the
+operator. Both independent draft reviews pass; the approved delta is promoted
+into canonical section 6.4. Record the standalone ancestor before runtime edits.
+Existing shadow deployment is unchanged; deployment is not authorized here.
+
 Forest1 now runs `2f61fb1e5`, migration `d30c91a7b802`, catalog writes and enabled
 sweeps, with legacy reads deliberately retained. Both canonical repair/shadow
 deployments passed; the profiled fork/archive worker was separately updated.
