@@ -3,7 +3,7 @@
 
 This ExecPlan is maintained under `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current. This plan is the active plan for the feature-access package only; it does not execute or close other active initiatives.
 
-The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. Runtime milestones below are future work: do not execute them before the required contract checkpoint and authority for implementation exist.
+The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator has now authorized milestone one. Milestones two through five remain future work.
 
 ## Purpose and outcome
 
@@ -16,6 +16,8 @@ The target is faithful integration into existing workflows, not a disconnected a
 
 ## Progress
 
+- [x] (2026-10-01) Milestone one complete: additive records/migration, shared decisions, PostgreSQL acceptance and independent reviews.
+
 
 - [x] (2026-10-01 20:47 UTC) Assessed revision `45a39a8337d37c7f7d30087ff4d23c03610072b3`; retained 275 passing baseline tests in the assessment.
 - [x] (2026-10-01 20:47 UTC) Recorded operator decisions and prepared FA-01 policy, canonical contract, ADR and shared-contract amendments.
@@ -27,13 +29,15 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01) Prepared bounded route/data/principal/transport matrix; expired configured Culvert token recorded as later live-acceptance dependency.
 - [x] (2026-10-01) Independent correctness/security reviews accepted the narrowed matrix after fixes; zero unresolved High/Medium findings, recorded in `artifacts/2026-10-01_m0_reviews.md`.
 - [x] (2026-10-01) Accepted standalone contract ancestor: `d3639f970669411e9c0f5bf8e80898645c947559`; M0 complete.
-- [ ] Implement additive account records, shared evaluator and direct persistence tests.
+- [x] (2026-10-01) Implemented additive account records/migration, shared evaluator and direct PostgreSQL persistence tests; final account/registry run passed 180 cases.
 - [ ] Implement single-maintainer group UI and initial memberships with real readback evidence.
 - [ ] Wire protected action/data admission and public inspection, including Culvert compatibility.
 - [ ] Implement conservative maturity and PowerUser onboarding after restricted-data gates are ready.
 - [ ] Complete real browser/model/artifact acceptance, independent reviews, and an operator-approved rollout plan.
 
 ## Surprises & Discoveries
+
+Milestone one: the run catalog already uses shared SQL metadata without constructing Flask, so the new account records follow that precedent. Database waits can cross an expiry boundary; admission uses PostgreSQL wall-clock time and grants sample UTC after row locks. The autouse test-secret fixture clears deployed password-file settings, so isolated PostgreSQL tests capture the configured URI before that fixture, as existing catalog tests do.
 
 
 The assessed role model is not linear: Dev does not imply Admin and Admin does not imply Dev. OpenET rendering allows Dev/Root while its execution endpoint requires Admin; Batch uses Admin gates despite Dev registry metadata. Test suites pass because these surfaces are exercised independently.
@@ -45,6 +49,8 @@ There is no persisted user group model even though profile token issuance has a 
 Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
+
+2026-10-01, milestone-one implementation: use one additive migration after actual head `d30c91a7b802`, initialize only six group definitions, and keep membership initialization separate. Root-checked membership writes own a transaction and lock the subject account row; events snapshot feature IDs/access modes and retain identifiers without cascading deletion. Operational downgrade refuses to drop audit history; rollback disables consumers.
 
 
 2026-10-01, operator: use separate public inspection and action permission. Preserve the unanswered embargo exception rather than infer permission to disclose. A publication date does not certify model readiness or automatically change maturity.
@@ -63,8 +69,10 @@ Source investigation found no durable anonymous creator proof, but the operator 
 
 ## Outcomes & Retrospective
 
+Milestone-one implementation: four account models, definition-only additive migration after `d30c91a7b802`, live membership store with atomic retained events, explicit shared decisions and required six-feature metadata are implemented. Independent correctness/security reviews closed three Medium findings (dependency error propagation, expiry after waits, omitted metadata role fallback). The final focused account/registry suite passed 180 cases; the full Python suite passed (10,149 passed, 126 skipped). It started before the final metadata guard; the final guard is covered by the 180-case rerun. All three new modules passed stubtest, and stub/doc/link/whitespace checks passed. No routes/UI, shared schema, maintainer memberships or credentials were changed.
 
-Milestone-zero outcome: bounded source, transport, identity and deployed credential evidence are prepared. Final narrowed-scope reviews passed after fixes; accepted ancestor `d3639f970669411e9c0f5bf8e80898645c947559` closes milestone zero. The existing expired Culvert credential prevents positive live integration acceptance until operator renewal; it does not justify new auth policy, token rotation or wider scope. Runtime files, accounts, memberships and credentials remain unchanged.
+
+Milestone-zero outcome: bounded source, transport, identity and deployed credential evidence are prepared. Final narrowed-scope reviews passed after fixes; accepted ancestor `d3639f970669411e9c0f5bf8e80898645c947559` closes milestone zero. The existing expired Culvert credential prevents positive live integration acceptance until operator renewal; it does not justify new auth policy, token rotation or wider scope. At milestone zero, runtime files, accounts, memberships and credentials remained unchanged.
 
 ## Context and orientation
 
@@ -87,7 +95,7 @@ Freeze feature-only principal provenance and legacy handling, exact Profile/admi
 
 The canonical query owner is `wepppy/query_engine/README.md`; protected polling projection belongs in `docs/schemas/rq-response-contract.md`. Include synthetic contrast/PATH-CE result allow/deny cases for single/batch/recursive job-info while preserving lifecycle/queue and ordinary Culvert polling.
 
-Reconcile all affected canonical contracts and record the operator clarification and read-only production evidence in the checkpoint. Keep the unrelated PowerUser TTL-control OR-versus-ALL mismatch separate. Obtain two independent read-only reviews of the narrowed matrix, disposition medium/high findings and commit the accepted checkpoint as a standalone ancestor; record its SHA. The current authorization ends at milestone zero, with no runtime edits or deployment. Acceptance is the reviewed bounded matrix and committed ancestor, with the expired-credential limitation explicitly carried into implementation/rollout gates.
+Reconcile all affected canonical contracts and record the operator clarification and read-only production evidence in the checkpoint. Keep the unrelated PowerUser TTL-control OR-versus-ALL mismatch separate. Obtain two independent read-only reviews of the narrowed matrix, disposition medium/high findings and commit the accepted checkpoint as a standalone ancestor; record its SHA. The milestone-zero step included no runtime edits or deployment; the operator subsequently authorized milestone one. Acceptance is the reviewed bounded matrix and committed ancestor, with the expired-credential limitation explicitly carried into implementation/rollout gates.
 ## Milestone one: additive records and shared decisions
 
 
@@ -189,3 +197,7 @@ Retain checkpoint SHA, reviewed surface/state matrices, redacted identity invent
 Revision note, 2026-10-01: created for the operator-requested policy amendment and plan. Runtime milestones are deliberately gated on a reviewed ancestor, verified identities and the feature-only scope boundary; PowerUser sanctions remain excluded.
 
 Revision note, 2026-10-01 scope correction: removed the broader creator/writer proposal after explicit operator clarification; recorded deployment-specific account identity and the expired submit-only Culvert credential without changing it.
+
+Revision note, 2026-10-01: operator authorized milestone one. Reuse the existing framework-independent SQL metadata pattern, with account ORM models registered in app.py; validate in isolated PostgreSQL schemas before any shared deployment migration. Milestones two through five remain future work.
+
+Milestone-one handoff, 2026-10-01: implementation and validation are complete; the operator authorized committing this milestone. Both independent reviewers confirmed all findings closed. The package remains open and unwired; milestone two is the next implementation step.

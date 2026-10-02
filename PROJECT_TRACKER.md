@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Planning: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Independent prepared-plan reviews passed; milestone-zero matrix now records 516 route declarations, preserved anonymous behavior and verified account/client evidence. Final correctness/security reviews passed; accepted ancestor recorded in the package tracker; configured Culvert credential is expired and remains a later live-acceptance dependency.
+In progress: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Independent prepared-plan reviews passed; milestone-zero matrix now records 516 route declarations, preserved anonymous behavior and verified account/client evidence. Milestone one complete: account substrate/shared decisions, independent reviews and validation passed; configured Culvert credential is expired and remains a later live-acceptance dependency.
 
 Active (implementation): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
 — preserve portable NoDb projects while moving catalog reads off NFS; additive
@@ -265,7 +265,7 @@ Feedback mechanisms:
 
 ### Feature access governance
 
-**Status**: Milestone-zero design reviews passed; accepted ancestor recorded in package tracker. Runtime implementation not started.
+**Status**: Milestone one complete: account substrate/shared decisions implemented, independent reviews and validation passed. Route/UI wiring remains later work.
 **Link**: [Work package](docs/work-packages/20261001_feature_access_governance/package.md)
 **Scope**: Auditable single-maintainer groups, maintainer-only OpenET/Batch action groups, internal Batch/Culvert with service-token compatibility, public read-only inspection, conservative maturity and PowerUser onboarding. PowerUser sanctions deferred.
 

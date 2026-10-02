@@ -9,6 +9,9 @@ VALID_MATURITY = {"stable", "preview", "experimental", "deprecated", "internal"}
 VALID_INTERNAL_REASON = {"compute", "api_constrained", "beta", "publication_embargo"}
 VALID_MIN_ROLE = {"user", "poweruser", "dev", "admin", "root"}
 VALID_BACKEND = {"any", "wbt", "topaz"}
+REQUIRED_ACCESS_FEATURES = frozenset({
+    "openet_ts", "batch_runner", "culvert_runner", "omni_contrasts", "path_ce", "ag_fields",
+})
 
 ROLE_AUDIENCES = {
     "user": frozenset({"User", "PowerUser", "Dev", "Admin", "Root"}),
@@ -41,6 +44,8 @@ class FeatureSpec:
     nav_label: str
     enable_dependencies: tuple[str, ...]
     disable_blockers: tuple[str, ...]
+    access_group: str | None = None
+    access_mode: str | None = None
 
 
 @dataclass(frozen=True)
@@ -359,6 +364,16 @@ def validate_feature_registry_payload(
             f"{context}.disable_blockers",
         )
 
+        access_group = item.get("access_group")
+        access_mode = item.get("access_mode")
+        if feature_id in REQUIRED_ACCESS_FEATURES or access_group is not None or access_mode is not None:
+            access_group = _require_string(access_group, f"{context}.access_group")
+            access_mode = _require_enum(
+                access_mode, f"{context}.access_mode", {"role_or_group", "group_only"}
+            )
+            if maturity != "internal":
+                raise FeatureRegistryValidationError(f"{context}: group access requires internal maturity")
+
         entries.append(
             FeatureSpec(
                 id=feature_id,
@@ -377,6 +392,8 @@ def validate_feature_registry_payload(
                 nav_label=nav_label,
                 enable_dependencies=enable_dependencies,
                 disable_blockers=disable_blockers,
+                access_group=access_group,
+                access_mode=access_mode,
             )
         )
 

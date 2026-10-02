@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open, 2026-10-01; milestone-zero reviews passed; accepted ancestor recorded in tracker, runtime work not started.
+Status: Open, 2026-10-01; milestone one complete and independently reviewed; route/UI wiring not started.
 
 Timezone: UTC
 
@@ -30,7 +30,7 @@ Target faithful wiring into the real profile, public run, feature actions, API a
 
 Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a new inspect-only restricted-feature view creates no missing feature controller state. Test embargoed artifacts through direct, query and archive paths as well as the named report.
 
-Highest current completion claim: documentation checkpoint independently reviewed. No implementation, deployment or live access cutover is claimed.
+Highest current completion claim: milestone-one account substrate implemented and isolated-PostgreSQL validated; endpoint/UI behavior remains unwired. No implementation, deployment or live access cutover is claimed.
 
 ## Security and correctness gates
 
@@ -57,4 +57,6 @@ Parameterization change: no. ADR-0080 records governance, not numerical paramete
 
 ## Deliverables and next action
 
-Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). Complete milestone zero before runtime work. The current requested deliverable is milestone zero. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. Final independent reviews passed; [disposition](artifacts/2026-10-01_m0_reviews.md) and the tracker record acceptance and the ancestor commit.
+Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). Complete milestone zero before runtime work. The current requested deliverable is milestone one. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. Final independent reviews passed; [disposition](artifacts/2026-10-01_m0_reviews.md) and the tracker record acceptance and the ancestor commit.
+
+Milestone-one implementation and validation details: [account records](../../dev-notes/feature-access-records.md), [correctness review](artifacts/2026-10-01_m1_correctness_review.md), and [security review](artifacts/2026-10-01_m1_security_review.md). No shared schema, membership or credential mutation is included in this implementation step.

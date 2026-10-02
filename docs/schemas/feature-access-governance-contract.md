@@ -1,6 +1,6 @@
 # Feature access governance amendment
 
-Status: FA-01 reconciled amendment prepared 2026-10-01; independent milestone-zero correctness/security reviews passed after fixes. Accepted ancestor is recorded in the package tracker; implementation pending.
+Status: FA-01 reconciled amendment prepared 2026-10-01; independent milestone-zero correctness/security reviews passed after fixes. Accepted ancestor is recorded in the package tracker; milestone-one account substrate is implemented, route/UI enforcement remains pending.
 
 This document owns the FA-01 feature-access behavior and records the project maintainer's directions following the [implementation assessment](../dev-notes/feature-maturity-governance-implementation-assessment.md). The [governance policy](../../wepppy/weppcloud/routes/usersum/weppcloud/feature-maturity-and-release-governance.md), registry specification, ADR-0001 and auth contracts cross-link this bounded amendment. [ADR-0080](../adrs/ADR-0080-feature-access-governance-amendment.md) preserves its rationale. The [implementation plan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md) may not enter runtime milestones until the contract-first ancestor checkpoint exists. This document does not claim current runtime conformance.
 
@@ -167,7 +167,7 @@ A generic endpoint needs the additional feature check only for the requested pro
 
 ## Remaining implementation checkpoint
 
-The current task prepares documentation only. Runtime work requires the bounded restricted-feature surface/state matrix, deployment-specific resolution of `rogerlew@gmail.com`, and the redacted Culvert integration inventory. The operator has excluded a new public-run writer/anonymous-creator boundary. These are explicit milestone-zero inputs, not permission to invent identities or silently alter supported workflows.
+Runtime work follows the reviewed milestone-zero checkpoint and requires the bounded restricted-feature surface/state matrix, deployment-specific resolution of `rogerlew@gmail.com`, and the redacted Culvert integration inventory. The operator has excluded a new public-run writer/anonymous-creator boundary. These are explicit milestone-zero inputs, not permission to invent identities or silently alter supported workflows.
 
 Independent correctness and security reviews of the prepared plan and findings disposition are recorded in the [review artifact](../work-packages/20261001_feature_access_governance/artifacts/2026-10-01_contract_reviews.md). The completed milestone-zero matrix passed independent correctness/security review; see the [final disposition](../work-packages/20261001_feature_access_governance/artifacts/2026-10-01_m0_reviews.md). Record the accepted ancestor in the package tracker before runtime work. The operational single-maintainer group decision is distinct from repository engineering reviews. PowerUser suspension, reapplication and permanent revocation do not block this increment. The unanswered proposal to expose embargoed results remains excluded; the existing restriction is retained.
 
@@ -190,3 +190,13 @@ Stable endpoint errors: 400 `validation_error` for invalid body, fields, answers
 Repeated acceptance of the same version does not duplicate its acceptance record. A successful PowerUser request still ensures the role is currently assigned in the same transaction; `role_changed` reflects actual role presence, never merely an old acceptance row. Do not return `status: granted` if the role is absent. This adds no suspension/reinstatement state or durable revocation rule. Existing PowerUsers retain their role without fabricated legacy acceptance; an explicit current acceptance can be recorded without a second role grant. Repeated add with the same effective membership and metadata, or remove of an absent membership, returns `changed: false`. Adding with conflicting metadata to an active membership returns 409 `membership_conflict`; use an explicit reasoned remove/add to replace it. An expired membership may be re-granted by add with a future expiry or no expiry and a new audit event. A review date alone never expires membership. Past expiry on a new/re-granted membership is invalid. Remove accepts no add-only date fields. Membership and event changes remain one transaction.
 
 New endpoints do not mint Culvert integration credentials or add Culvert scopes to general profile tokens. The initial human Culvert operation path uses explicitly operator-issued user credentials with the existing operation scopes and current group membership, with the deployed submit-only service path recorded above. Public inspection requires neither these endpoints nor an internal acknowledgment.
+
+## Milestone-one implementation status
+
+The additive account models/migration, six registry access mappings and shared
+transactional store/evaluator are implemented under the accepted ancestor
+`d3639f970`. [Feature access records](../dev-notes/feature-access-records.md)
+documents trusted adapter inputs, transaction ownership, migration backup/readback
+and history-preserving rollback. This stage does not wire route authorization,
+initialize memberships, expose UI, assign PowerUser roles or deploy the migration.
+Subsequent milestones must still prove end-to-end conformance to this contract.

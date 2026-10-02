@@ -365,6 +365,28 @@ class User(db.Model, UserMixin):
     )
 
 
+# Register the same account metadata consumed by non-Flask feature decisions.
+from wepppy.weppcloud.utils.feature_access_schema import feature_access_tables
+
+_feature_access_tables = feature_access_tables(db.metadata)
+
+
+class FeatureAccessGroup(db.Model):
+    __table__ = _feature_access_tables[0]
+
+
+class FeatureAccessMembership(db.Model):
+    __table__ = _feature_access_tables[1]
+
+
+class FeatureAccessEvent(db.Model):
+    __table__ = _feature_access_tables[2]
+
+
+class OnboardingAcceptance(db.Model):
+    __table__ = _feature_access_tables[3]
+
+
 class UserPreferences(db.Model):
     __tablename__ = "user_preferences"
 

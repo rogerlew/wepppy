@@ -18,6 +18,8 @@ features:
     disable_blockers: []
 
   - id: openet_ts
+    access_group: openet_ts
+    access_mode: group_only
     label: OpenET Time Series
     nav_label: OpenET Time Series
     section_id: openet-ts
@@ -78,6 +80,8 @@ features:
       - omni_contrasts
 
   - id: omni_contrasts
+    access_group: omni_contrasts
+    access_mode: role_or_group
     label: Omni Contrasts
     nav_label: Omni Contrasts
     section_id: omni-contrasts
@@ -180,6 +184,8 @@ features:
     disable_blockers: []
 
   - id: path_ce
+    access_group: path_ce
+    access_mode: role_or_group
     label: Path CE
     nav_label: PATH Cost-Effective
     section_id: path-cost-effective
@@ -227,6 +233,8 @@ features:
     disable_blockers: []
 
   - id: culvert_runner
+    access_group: culvert_runner
+    access_mode: group_only
     label: Culvert Runner
     nav_label: Culvert Runner
     section_id: culvert-runner
@@ -242,6 +250,8 @@ features:
     disable_blockers: []
 
   - id: batch_runner
+    access_group: batch_runner
+    access_mode: group_only
     label: Batch Runner
     nav_label: Batch Runner
     section_id: batch-runner
@@ -257,6 +267,8 @@ features:
     disable_blockers: []
 
   - id: ag_fields
+    access_group: ag_fields
+    access_mode: role_or_group
     label: Agricultural Fields
     nav_label: Agricultural Fields
     section_id: ag-fields
