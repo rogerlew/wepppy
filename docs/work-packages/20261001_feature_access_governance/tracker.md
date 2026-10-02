@@ -2,13 +2,19 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: FA-02 result-sharing amendment and M3 reconciliation. M3 is checkpointed at `458557219` but incomplete; M2 is `c19fefcc6`. Production rollout remains later work.
+Current phase: M3 complete locally at candidate `23c2f27fe`; M4 conservative maturity and PowerUser onboarding is next. Production rollout remains later work.
 
 The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit is `102c81066` and runtime sharing reconciliation is implemented.
 
-FA-02 review confirmed S04/S08 private Batch/Culvert escape paths independently of contrast sharing. The retained canary now shows S04 external reads blocked and S08 anonymous private-table reads denied with HTTP 403. Public D-Tale and declared query data remain readable. Independent bounded correctness/security reviews pass with zero unresolved findings; broader M3 service/browser acceptance remains open.
+FA-02 review confirmed S04/S08 private Batch/Culvert escape paths independently of contrast sharing. The retained canary now shows S04 external reads blocked and S08 anonymous private-table reads denied with HTTP 403. Public D-Tale and declared query data remain readable. Independent bounded and final correctness/security reviews pass with zero unresolved findings. Exact-candidate service/browser acceptance is complete.
 
-The [interim security review](artifacts/2026-10-02_m3_security_review.md) assessed FA-01 and was **NOT PASSED**. Its historical two open High findings and eight applied fixes are reassessed in the FA-02 checkpoint; this policy change is not a claim of technical closure or a passing final review. The reconciled affected microservice/WEPPcloud scope passed **3,325 of 3,326** tests; the sole pre-existing run-catalog latency threshold failure passed both parameterizations in isolation. Independent focused correctness ran **84 passed**. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. Full repository regression, private-resource remediation and production-equivalent browser/service acceptance remain pending.
+The [interim security review](artifacts/2026-10-02_m3_security_review.md) assessed FA-01 and was **NOT PASSED**. Its historical findings were remediated and independently closed under FA-02. The [final reviews](artifacts/2026-10-02_m3_final_reviews.md) report zero unresolved High, Medium or Low findings for candidate `23c2f27fe`. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. The exact-candidate [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md) passed through the real local Caddy and service boundaries.
+
+The final full Python regression passed **10,246 tests with 126 skipped and 12
+subtests passed in 2,668.41 seconds (44:28)**. A deterministic collection-order
+failure was traced to the signed-token test patching `redis.Redis` after
+`rq_engine.auth` had captured the original constructor. Patching that captured
+test boundary closed the isolation defect; production code was unchanged.
 
 ## Progress
 
@@ -26,10 +32,17 @@ The [interim security review](artifacts/2026-10-02_m3_security_review.md) assess
 - [x] Complete broad Python regression: 10,198 passed, 126 skipped; finalize milestone-two handoff.
 - [x] Reconcile FA-02 shared-result visibility and close S04/S08 private-resource containment with independent reviews.
 - [x] Complete stable affected microservice/query/WEPPcloud regression: 3,468 passed, 2 skipped.
-- [ ] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
+- [x] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
 - [ ] Milestones four and five remain future work.
 
 ## Decision log
+
+2026-10-02: The live human-token subject is the positive numeric account ID used
+by account/group adapters. Browse, D-Tale and Query Engine receive the existing
+Postgres secret and retain Redis startup ordering; Query Engine separately
+receives the existing WEPP verification secret for browser tokens. Private
+D-Tale launch redirects are constructed only for the verified dataset using
+D-Tale's double-quoting convention. No credential or trust class was added.
 
 2026-10-01: One maintainer records group membership person/scope/reason/actor/time. Separate OpenET/Batch groups initially contain only the designated account. No broad technical-role bypass. PowerUser sanctions remain deferred.
 
@@ -45,7 +58,7 @@ Accepted checkpoint revision: `d3639f970669411e9c0f5bf8e80898645c947559`. Final 
 
 ## Next milestone and operational dependency
 
-Next is milestone three: wire restricted feature action/data admission and public read-only views across the frozen matrix. Milestone-two implementation and validation are complete; the operator authorized committing this milestone. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
+Next is milestone four: implement the conservative maturity rule and bounded PowerUser self-service after M3 established grouped private-data boundaries. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
 
 ## Milestone zero validation
 
@@ -80,7 +93,9 @@ closed the grouped cancellation-context regression. No new concrete sharing
 reconciliation findings remain. S04/S08 containment is now implemented and the
 retained synthetic canaries are denied. The [private-resource correctness review](artifacts/2026-10-02_private_resource_correctness_review.md)
 closed PRC01–PRC10, and the [private-resource security review](artifacts/2026-10-02_private_resource_security_review.md)
-closed all bounded findings; each reports zero unresolved findings. Broader M3
-service/browser acceptance remains separately tracked in the validation record.
-The stable affected microservice/query/WEPPcloud regression passed **3,468**
-cases with **2 skipped**; full-repository regression remains a separate gate.
+closed all bounded findings; each reports zero unresolved findings. The exact
+candidate [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md)
+and [final reviews](artifacts/2026-10-02_m3_final_reviews.md) close the remaining
+M3 runtime gates. The stable affected microservice/query/WEPPcloud regression
+passed **3,468 cases with 2 skipped**. The full repository passed **10,246 tests
+with 126 skipped and 12 subtests passed**.

@@ -77,9 +77,10 @@ async function query(context, computedColumns = undefined) {
   );
 }
 
-const browser = await chromium.launch({ headless: true });
+let browser;
 let removed = false;
 try {
+  browser = await chromium.launch({ headless: true });
   const anonymous = await browser.newContext({ extraHTTPHeaders: proxyHeaders });
   const deniedLaunch = await anonymous.request.get(`${base}/weppcloud/batch/m3-private-acceptance/dtale/acceptance.csv`, { maxRedirects: 0 });
   results.privateAnonymousLaunch = deniedLaunch.status();
@@ -154,7 +155,7 @@ try {
   await member.close();
 } finally {
   if (removed) membership('add');
-  await browser.close();
+  if (browser) await browser.close();
   dockerPython(`
 from pathlib import Path
 import shutil

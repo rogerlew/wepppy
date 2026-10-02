@@ -1,7 +1,8 @@
 # FA-02 runtime reconciliation and validation
 
-Contract ancestor: `102c81066`. Implementation checkpoint being reconciled:
-`458557219`. This evidence covers result sharing, not M3 completion or deployment.
+Contract ancestor: `102c81066`. Initial implementation checkpoint:
+`458557219`. This evidence covers the FA-02 reconciliation slice; later M3
+closeout is linked below and does not claim deployment.
 
 ## Implemented behavior
 
@@ -82,11 +83,16 @@ with 2 benchmark skips. Compose rendering for development, HPC development and
 production configurations passes. The retained exploit harness passes against
 actual production code. Independent [correctness](2026-10-02_private_resource_correctness_review.md)
 and [security](2026-10-02_private_resource_security_review.md) reviews pass with
-zero unresolved findings. Broader M3 regression/service-browser acceptance
-remains open. The final stable affected microservice/query/WEPPcloud suite passed
-**3,468 cases with 2 skipped**; this is not a full-repository or deployed-browser
-acceptance claim.
+zero unresolved findings. The final stable affected
+microservice/query/WEPPcloud suite passed
+**3,468 cases with 2 skipped**. The later exact-candidate
+[service/browser acceptance](2026-10-02_m3_service_browser_acceptance.md) and
+[final independent reviews](2026-10-02_m3_final_reviews.md) close the local M3
+runtime gates; the full-repository result is recorded there. Production was not
+changed. The final full repository run passed **10,246 tests with 126 skipped
+and 12 subtests passed** in 2,668.41 seconds (44:28).
 
-FA-02 did not waive either private-resource defect. M3 acceptance, dependent
-self-promotion and rollout remain on hold until independent remediation review
-and service/browser acceptance establish the private-resource contract.
+FA-02 did not waive either private-resource defect. The subsequent independent
+remediation reviews and exact-candidate service/browser acceptance established
+the private-resource contract for local M3 completion. Self-promotion belongs to
+M4, and rollout remains separately gated.

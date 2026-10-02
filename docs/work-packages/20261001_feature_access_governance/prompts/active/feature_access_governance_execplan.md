@@ -16,7 +16,7 @@ The target is faithful integration into existing workflows, not a disconnected a
 
 ## Progress
 
-- [ ] (2026-10-02 UTC) Authorized milestone three in progress: shared principal adapters, restricted action/data wiring, read-only views, regression and independent review.
+- [x] (2026-10-02 UTC) Milestone three complete locally at candidate `23c2f27fe`: shared principal adapters, restricted action/data wiring, read-only views, regression and independent review.
 - [x] (2026-10-02 UTC) Added live identity/group adapters and initial direct action, grouped delivery, catalog, export and recursive polling enforcement. Isolated PostgreSQL plus signed OpenET route admission proves acknowledgment and old-token removal before mutations.
 - [x] Operator resolved the sharing policy: internal/embargo restricts feature operation; permitted users may share outputs broadly. Fork classification/refusal is no longer required for a result embargo.
 - [x] Prepare FA-02 canonical amendments and independent reviews; all contract findings independently closed, documentation/links/whitespace checks passed.
@@ -28,7 +28,7 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] Remediate S08 with per-dataset visibility metadata and scoped downstream admission while retaining anonymous public D-Tale; retained anonymous canary denied.
 - [x] Obtain independent correctness/security disposition of S04/S08 containment; PRC01–PRC10 and PRS-01–PRS-04 closed with zero unresolved findings.
 - [x] Complete the stable affected microservice/query/WEPPcloud regression: 3,468 passed, 2 skipped.
-- [ ] Complete full-repository regression and M3 private-resource service/browser acceptance. M3 is not complete or ready to deploy.
+- [x] Complete full-repository regression (10,246 passed, 126 skipped, 12 subtests passed) and M3 private-resource service/browser acceptance against the exact candidate revision; production remains unchanged.
 
 - [x] (2026-10-02 UTC) Milestone-two account UI, acknowledgment and atomic initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass.
 - [x] (2026-10-02 UTC) Local shared database backed up, test-restored, migrated and initialized for the verified sole maintainer; production unchanged.
@@ -49,7 +49,7 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01) Accepted standalone contract ancestor: `d3639f970669411e9c0f5bf8e80898645c947559`; M0 complete.
 - [x] (2026-10-01) Implemented additive account records/migration, shared evaluator and direct PostgreSQL persistence tests; final account/registry run passed 180 cases.
 - [x] Implement single-maintainer group UI and local initial memberships with real readback evidence.
-- [ ] Wire protected action/data admission and public inspection, including Culvert compatibility.
+- [x] Wire protected action/data admission and public inspection, preserving the inventoried Culvert credential contract and recording its expired deployed credential as a rollout dependency.
 - [ ] Implement conservative maturity and PowerUser onboarding after restricted-action and private grouped-resource gates are ready.
 - [ ] Complete real browser/model/artifact acceptance, independent reviews, and an operator-approved rollout plan.
 
@@ -76,6 +76,25 @@ derivative propagation, cleanup/ID reuse and uploaded-overlay provenance. This
 preserves authorized private maps and anonymous public tables without a universal
 D-Tale login.
 
+Production-equivalent M3 acceptance exposed three integration gaps hidden by
+mocked boundaries. The shared UI token issuer used Flask-Security's opaque
+`fs_uniquifier` as `sub`, while the trusted principal adapter requires the
+numeric account ID. Browse and Query Engine did not receive all existing
+database/token secrets needed by their newly wired live checks. Finally, a
+clean private-only D-Tale process could not use upstream `build_main_url()`
+before setting its capability cookie because the guarded key list was correctly
+empty. The exact candidate now uses numeric user subjects, explicit
+Redis/Postgres startup dependencies and required existing secrets, and a
+verified/double-quoted private dataset redirect.
+
+The full-suite gate also exposed a test-isolation defect rather than a runtime
+authorization failure. `rq_engine.auth` captures its Redis constructor at import
+time, before the session Redis stub is installed during full collection. The M1
+signed-token test patched the module attribute but not that captured constructor,
+so its fork-preparation check contacted real Redis and failed authentication.
+The test now replaces the captured constructor explicitly; the all-collection
+reproduction and complete suite pass without changing production behavior.
+
 Milestone two: a stale Flask-Security session can fall through to token authentication; session presence alone is insufficient. The adapter verifies resolved session provenance and identity binding. Inactive pre-grants need effective status read inside the write transaction. Axe identified two low-contrast navigation links, fixed by existing button styles. A `public`-only backup omits `pg_trgm`; test restore caught missing Usersum index operators, and an archive explicitly including the extension restored successfully. The web module uses qualified Flask imports so stubtest does not inspect context-bound proxies.
 
 Milestone one: the run catalog already uses shared SQL metadata without constructing Flask, so the new account records follow that precedent. Database waits can cross an expiry boundary; admission uses PostgreSQL wall-clock time and grants sample UTC after row locks. The autouse test-secret fixture clears deployed password-file settings, so isolated PostgreSQL tests capture the configured URI before that fixture, as existing catalog tests do.
@@ -90,6 +109,16 @@ There is no persisted user group model even though profile token issuance has a 
 Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
+
+2026-10-02 UTC, M3 service acceptance: user JWT `sub` is the positive numeric
+account ID used by the live account principal adapter; `fs_uniquifier` remains a
+session identity and is not an authorization subject. Browse, D-Tale and Query
+Engine mount the existing Postgres secret and retain Redis startup ordering;
+Query Engine also mounts the existing WEPP verification secret for its
+browser-facing routes while MCP signing remains separate. A private D-Tale
+launch constructs only the already-verified dataset main path using D-Tale's
+own quoting after signed-ticket and live-capability checks. No new secret,
+service or trust class is introduced.
 
 2026-10-02 UTC, S04 implementation: replace generated filesystem table
 functions with opaque registered source relations carried in `QueryPlan`.
@@ -144,21 +173,31 @@ viewer TTL is an upper bound and requires relaunch after expiry.
 
 ## Outcomes & Retrospective
 
-M3 remains incomplete. FA-02 shared-result reconciliation is committed as
-`5d4f199e6` against reviewed standalone contract ancestor `102c81066`. The
-affected microservice/WEPPcloud scope passed 3,325 of 3,326 cases; the sole
-run-catalog timing threshold passed in isolation. S04/S08 private-resource
-remediation is implemented; the retained exploit harness reports both private
-canaries blocked. Focused query/browse/D-Tale/auth regression passes 387 cases
-with 2 benchmark skips. Independent correctness and security reviews close all
-bounded S04/S08 findings. Broader M3 service/browser acceptance remains open.
-Existing M1/M2 passes do not establish M3 acceptance.
-The final stable affected microservice/query/WEPPcloud suite passes 3,468 cases
-with 2 skips; this is not a full-repository or deployed-browser claim.
-No production activation, shared membership change, credential renewal or
-dependency upgrade occurred.
+M3 is complete locally at runtime candidate `23c2f27fe`; its service dependency
+and numeric-subject checkpoint is `03fc3eae6`. FA-02 shared-result
+reconciliation is committed as `5d4f199e6` against reviewed standalone contract
+ancestor `102c81066`. The final stable affected microservice/query/WEPPcloud
+suite passed 3,468 cases with 2 skips. Frontend lint and all 112 Jest suites /
+919 tests passed; Compose rendering, test-stub checks and broad-exception
+enforcement passed. The final full Python suite passed 10,246 tests with 126
+skipped and 12 subtests passed in 2,668.41 seconds (44:28).
 
-The [interim M3 security review](../../artifacts/2026-10-02_m3_security_review.md) remains NOT PASSED. Retained bounded results: account/action/session/query/run-view regression 684 passed/2 skipped; delivery/export 224 passed; artifact/alias/failure cases 16 passed; control rendering 198 passed; frontend 112 suites/919 tests plus lint passed. Suites overlap. Final independent acceptance, full regression and actual service/browser validation remain open.
+The [service/browser acceptance](../../artifacts/2026-10-02_m3_service_browser_acceptance.md)
+exercised the exact candidate through Caddy with production service processes,
+identities, mounts, Redis and PostgreSQL. It proved private D-Tale admission,
+immediate membership revocation/restoration, anonymous public-table continuity,
+declared Query Engine reads and denial of undeclared external sources. Synthetic
+fixtures were removed and the designated account remained the sole active Batch
+member. The [final correctness and security reviews](../../artifacts/2026-10-02_m3_final_reviews.md)
+report zero unresolved High, Medium or Low findings. The historical
+[interim M3 security review](../../artifacts/2026-10-02_m3_security_review.md)
+is superseded for the final candidate by that review record.
+
+The full-repository regression result is recorded in the acceptance artifact
+and tracker. No production activation, credential renewal or dependency upgrade
+occurred. The deployed Culvert credential remains expired, so renewal and a
+positive live compatibility run are rollout gates rather than M3 source gaps.
+Milestone four is next.
 
 Milestone two: Root management/history, own Profile status and versioned acknowledgment, strict session/CSRF mutations, and the atomic sole-maintainer initializer are implemented. PostgreSQL acceptance passed 75 cases; final route regressions passed 73. Full-app browser acceptance passed with real sessions/database, evaluator denied/denied/allowed/denied transitions, retained events, keyboard/error focus and zero axe violations. Both independent reviews have zero unresolved findings. Local migration/initialization readback shows two memberships, two audit events, zero acceptances and unchanged legacy counts. Frontend lint and 112 Jest suites/919 tests pass; store/web stubtest and stub checks pass. Broad Python regression passed: 10,198 passed, 126 skipped in 2,535.69 seconds; final qualified-import/export cleanup also passed the 73-case route rerun and web stubtest. See [M2 acceptance](../../artifacts/2026-10-01_m2_acceptance.md); M3 enforcement and production rollout remain future work.
 
@@ -215,7 +254,7 @@ Acceptance is a real browser/database round trip: Root adds a named collaborator
 
 ## Milestone three: wire actions, data and public read-only views
 
-M3 checkpoint `458557219` implements part of FA-01 and remains incomplete. Execute the [FA-02 contract checkpoint](../../artifacts/2026-10-02_fa02_sharing_checkpoint.md) before further runtime edits. It supersedes contrast/PATH-CE read restrictions in the historical M0 matrix, not the entire action or private-resource inventory. Preserve the previous review as a record of its assessed policy.
+M3 began at checkpoint `458557219`; FA-02 was then reconciled through the [contract checkpoint](../../artifacts/2026-10-02_fa02_sharing_checkpoint.md), and the completed runtime candidate is `23c2f27fe`. FA-02 supersedes contrast/PATH-CE read restrictions in the historical M0 matrix, not the entire action or private-resource inventory. Preserve the previous review as a record of its assessed policy.
 
 Keep current group checks on OpenET/Batch/human Culvert actions and legacy Dev/Root-or-group checks on Omni Contrasts/PATH-CE/AgFields actions. Keep current identity/provenance, acknowledgment, resource scopes, readonly, backend, scientific capability, CSRF and service-integration checks. Private Batch/Culvert reads still follow the existing workflow and resource scope, including old human-derived tokens; public Batch reads remain available. Ordinary anonymous creation/modeling/session behavior is unchanged.
 
@@ -292,7 +331,7 @@ Revision note, 2026-10-01: created for the operator-requested policy amendment a
 
 Revision note, 2026-10-01 scope correction: removed the broader creator/writer proposal after explicit operator clarification; recorded deployment-specific account identity and the expired submit-only Culvert credential without changing it.
 
-Revision note, 2026-10-01: operator authorized milestone one. Reuse the existing framework-independent SQL metadata pattern, with account ORM models registered in app.py; validate in isolated PostgreSQL schemas before any shared deployment migration. Milestones two through five remain future work.
+Revision note, 2026-10-01: operator authorized milestone one. Reuse the existing framework-independent SQL metadata pattern, with account ORM models registered in app.py; validate in isolated PostgreSQL schemas before any shared deployment migration. Milestones two through five were future work at that checkpoint.
 
 Milestone-one handoff, 2026-10-01: implementation and validation are complete; the operator authorized committing this milestone. Both independent reviewers confirmed all findings closed. The package remains open and unwired; milestone two is the next implementation step.
 
@@ -301,10 +340,10 @@ Milestone-two handoff, 2026-10-02 UTC: implementation, focused/browser/database 
 
 2026-10-02 implementation update: recorded FA-02 ancestor `102c81066`; removing feature-result classification, projection and inherited contrast gates. PATH-CE consumes retained contrasts without executing them, so its own action gate suffices. Private-resource findings and acceptance remain open.
 
-2026-10-02 validation update: sharing reconciliation passed bounded independent
-correctness/security review after correcting cancellation task/tree coverage,
-batch identifier context, missing optional Omni report state and PATH UI wording.
-Synthetic query and D-Tale canaries reproduce actual private-resource disclosure;
-their retained post-fix run now blocks both canaries. See
-`artifacts/2026-10-02_fa02_runtime_validation.md` for evolving review and broader
-regression/browser evidence. These fixes do not close M3 or authorize rollout.
+2026-10-02 milestone-three handoff: sharing reconciliation and private-resource
+containment passed bounded and final independent correctness/security review.
+The exact-candidate service/browser run exercised live revocation through the
+production processes and blocked both retained private canaries while preserving
+public anonymous viewing. See `artifacts/2026-10-02_m3_service_browser_acceptance.md`
+and `artifacts/2026-10-02_m3_final_reviews.md`. This closes local M3; it does not
+authorize production rollout. Milestone four remains next.

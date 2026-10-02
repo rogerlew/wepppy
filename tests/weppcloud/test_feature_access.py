@@ -90,6 +90,11 @@ def test_openet_signed_token_live_membership_admission(database, store, monkeypa
     auth_tokens.get_jwt_config.cache_clear()
     monkeypatch.setattr(identity, 'account_engine', lambda: database)
     monkeypatch.setattr(auth, '_check_revocation', lambda jti: None)
+    monkeypatch.setattr(
+        auth,
+        '_AUTH_REDIS_CLIENT',
+        lambda **_kwargs: SimpleNamespace(hget=lambda *_args: None, close=lambda: None),
+    )
     monkeypatch.setattr(auth.Ron, 'ispublic', staticmethod(lambda wd: True))
     monkeypatch.setattr(auth, 'get_run_owners_lazy', lambda runid: [])
     for module in (auth, route, helpers):
@@ -130,7 +135,8 @@ def test_openet_signed_token_live_membership_admission(database, store, monkeypa
         assert accepted.status_code == 200 and accepted.json()['job_id'] == 'admitted-job'
         assert mutations == ['timestamp', 'enqueue']
         change(store, operation='remove')
-        assert submit(old_token).status_code == 403
+        removed = submit(old_token)
+        assert removed.status_code == 403, removed.text
         assert mutations == ['timestamp', 'enqueue']
 
 
