@@ -51,6 +51,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from dtale import global_state
 from dtale.app import build_app, initialize_process_props
+from dtale.utils import get_url_quote
 import dtale.views as dtale_views
 from dtale.views import DtaleData, build_dtypes_state, startup
 from plotly import graph_objs as go
@@ -1493,7 +1494,14 @@ def private_dataset_access(ticket: str):
     session_token = _access_serializer(launch=False).dumps(
         {"scope": scope, "capability": capability_id}
     )
-    target = DtaleData(data_id, DTALE_BASE_URL, is_proxy=IS_PROXY, app_root=APP_ROOT).build_main_url()
+    # DtaleData.build_main_url() consults the guarded global key listing.  The
+    # launch response sets the capability cookie, so that listing is still
+    # intentionally empty for a private-only process at this point.  Build the
+    # verified dataset route directly using D-Tale's own quoting convention.
+    quote = get_url_quote()
+    quoted_data_id = quote(quote(data_id, safe=""))
+    target_root = APP_ROOT if IS_PROXY else DTALE_BASE_URL
+    target = f"{target_root}/dtale/main/{quoted_data_id}"
     if IS_PROXY and not target.startswith("/"):
         target = f"/{target}"
     response = redirect(target, code=303)

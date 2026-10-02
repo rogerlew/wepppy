@@ -673,6 +673,7 @@ def test_private_dtale_requires_launch_capability_while_public_data_remains_anon
         follow_redirects=False,
     )
     assert launch.status_code == 303
+    assert launch.headers["Location"] == f"/weppcloud/dtale/main/{private_id}"
     assert "HttpOnly" in launch.headers["Set-Cookie"]
     private_grid = authorized.get(
         f"/dtale/data/{private_id}",
