@@ -5,7 +5,7 @@ Date: 2026-05-22
 Review Date: 2027-02-22  
 Embargo Until: 2027-05-22  
 
-FA-01 amendment prepared 2026-10-01: [ADR-0080](ADR-0080-feature-access-governance-amendment.md) and the [feature access contract](../schemas/feature-access-governance-contract.md) add scoped group entitlement alongside the legacy Dev/Root audience. Implementation/checkpoint pending. The embargo dates and existing public-data restriction are retained; general public read-only feature views do not release contrast data.
+FA-01/FA-02 amendments: [ADR-0080](ADR-0080-feature-access-governance-amendment.md) and the [feature access contract](../schemas/feature-access-governance-contract.md) add scoped groups alongside the legacy Dev/Root action audience. On 2026-10-02 UTC the maintainer clarified that permitted users may share results broadly. This supersedes the earlier public-data restriction while retaining the feature-operation embargo and its dates. FA-02 technical checkpoint and runtime reconciliation are pending.
 
 ## Context
 
@@ -31,24 +31,24 @@ OMNI Contrasts will be classified as `internal` with:
 
 This creates a 12-month publication-priority window for the originating project team while preserving OMNI Scenarios as usable scenario-orchestration infrastructure.
 
-During the embargo period, OMNI Contrasts must not be exposed as a usable
-general public WEPPcloud capability. Access is limited to the legacy Dev/Root
-audience or explicitly approved members of the Omni Contrasts group under FA-01.
-The Mods menu may list Omni Contrasts for discoverability when unauthorized
-users receive only a disabled checkbox with `Not Authorized`; that listing must
-not render the control section, preflight navigation, dynamic section, or any
-contrast data or action.
+During the embargo period, operation of OMNI Contrasts is limited to the legacy
+Dev/Root audience or explicitly approved members of the Omni Contrasts group.
+Other users may inspect retained results under normal project/resource sharing
+rules, including anonymously where the existing endpoint permits public reads.
+They receive disabled action controls with `Not Authorized`; read-only sections,
+reports and shared contrast data remain visible. Sharing does not authorize
+enablement, configuration or execution. A result copy carries no inherited embargo.
 
 ## PATH CE Dependency Rule
 
 OMNI Contrasts are a dependency for PATH CE.
 
-If PATH CE is moved from `beta`, `internal`, or otherwise restricted status to any maturity state greater than `internal`, then OMNI Contrasts must also be moved from `internal`, unless PATH CE is refactored so that it no longer depends on OMNI Contrasts.
+If PATH CE is released for broader execution, any operation that activates or executes OMNI Contrasts must still satisfy the dependency's action admission. Broader execution cannot bypass the embargo by invoking contrasts indirectly. Merely reading retained contrast outputs or sharing PATH CE results is not execution of the dependency and does not require promotion of OMNI Contrasts.
 
 In practical terms:
 
-- PATH CE cannot be made publicly visible or broadly usable while depending on an internal-only OMNI Contrasts feature.
-- If PATH CE becomes `experimental`, `preview`, or `stable`, then OMNI Contrasts must be promoted to a compatible maturity state or the dependency must be removed.
+- PATH CE cannot become broadly executable if that execution invokes internal-only OMNI Contrasts without the corresponding entitlement. Public visibility of retained PATH CE results is permitted.
+- If PATH CE becomes `experimental`, `preview`, or `stable`, then an execution dependency on OMNI Contrasts must have compatible action admission or be removed. Reading retained contrast results is not execution of that dependency.
 - This follows the WEPPcloud registry policy that visible functionality must be usable.
 
 ## Rationale
@@ -83,9 +83,9 @@ Rejected. Informal memory is not sufficient for release governance. The feature 
 
 ## Consequences
 
-OMNI Contrasts will not be generally usable during the embargo period. Its name
-may be visible only as the disabled Mods-menu discoverability entry described
-above.
+OMNI Contrasts will not be generally executable during the embargo period.
+Permitted users may share their results more broadly; public retained-result
+views and disabled action controls make that distinction visible.
 
 Users who need ordinary multi-scenario orchestration can continue to use OMNI Scenarios.
 
@@ -107,10 +107,11 @@ The feature registry should contain an `omni_contrasts` entry with `maturity: in
 
 OMNI Scenarios and OMNI Contrasts should be gated independently so that scenario orchestration remains available while contrast analysis is restricted.
 
-Disabled menu discoverability is not authorization. Effective legacy Dev/Root
-or approved group entitlement governs enablement, dynamic loading, controls,
-preflight, and contrast data. Run access and action-specific checks remain
-additive. Public-project viewers without that entitlement do not receive
-contrast data while the public-embargo decision remains reserved.
+Disabled menu discoverability is not action authorization. Effective legacy
+Dev/Root or approved group entitlement governs enablement, configuration and
+execution. Run access and action-specific checks remain additive. Dynamic
+read-only sections and retained contrast data follow resource read permission.
+The earlier result-embargo interpretation is superseded: it prevented permitted
+users from sharing results and exceeded the intended restriction on feature use.
 
 PATH CE release status must be checked against the OMNI Contrasts dependency before PATH CE is promoted beyond internal/restricted access.

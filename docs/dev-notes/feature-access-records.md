@@ -47,9 +47,12 @@ expiry/revocation, supported token class, scope and resource binding, then suppl
 through the endpoint's authoritative identity path; integration feature authority
 must come from operator registration. A service token class alone confers none.
 
-Non-embargoed inspection returns the existing read decision without a membership
-lookup. Private workflow roots require their own read entitlement; contrast-derived
-PATH-CE reads set `consumes_contrasts` and require contrast read entitlement.
+FA-02 target: retained-result inspection returns the existing resource read
+decision without a feature-action membership lookup, including contrast/PATH-CE
+outputs. Private workflow roots retain their separately specified read scope.
+The current `consumes_contrasts` read dependency is superseded: require contrast
+action entitlement only when the composed operation actually activates or
+executes contrasts, not merely when it reads existing contrast inputs.
 Actions also enforce readonly/backend/prerequisites. Group-based actions require
 the current server-owned internal statement version; legacy Dev/Root paths do
 not acquire that requirement. No account is auto-enrolled in a dependency group.
@@ -101,7 +104,7 @@ roles from the shared account database. Protected human admissions then read
 current group membership and acknowledgment. Signed origin metadata on issued
 session, admin delegation and MCP credentials records identity, not entitlement.
 Account/configuration failures produce explicit unavailable responses; ordinary
-non-embargoed public inspection does not need an account lookup.
+public retained-result inspection must not need a feature-account lookup.
 
 `wepppy/weppcloud/utils/feature_access_integrations.json` is the operator-owned
 Culvert registration: exact service subject, audience, token class and service
@@ -110,13 +113,15 @@ These checks supplement normal signature, expiry, revocation, scopes and resourc
 claims. Editing this registration does not renew the expired deployment token.
 
 Restricted controls use the shared decisions, with disabled action fieldsets and
-retained non-embargoed views. Disabling a restricted mod still requires entitlement
+retained views. FA-02 requires removing the checkpoint's feature-derived read filters while retaining action gates. Disabling a restricted mod still requires entitlement
 and honors readonly state, but does not require the backend/prerequisites needed
 to enable or execute that feature. Newly exposed optional-state GETs are
 observational. Existing anonymous ordinary workflows remain in scope for regression.
 
-M3 is not ready for rollout: contrast-child fork lineage, SQL-expression file
-access and downstream cached D-Tale admission remain unresolved. See the active
+M3 is not ready for rollout. FA-02 removes the need for a contrast-child lineage
+marker and contrast-only SQL/D-Tale read enforcement. Reassess SQL expressions
+and cached D-Tale delivery for actual private-resource/containment violations;
+public result sharing is intended. No DuckDB upgrade is authorized by FA-02. See the active
 [ExecPlan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md)
 for decisions, review disposition and remaining acceptance. Do not enable
 PowerUser self-service based on the initial route wiring alone.
@@ -135,8 +140,9 @@ The inventory identifies inactive accounts, expired records and inactive groups.
 An inactive account can have a recorded pre-grant, but its effective `member`
 response is false. Current membership is not a promise of action admission:
 acknowledgment, existing resource permissions and feature requirements still
-apply. PATH-CE work using contrast data also needs separate Omni Contrasts
-entitlement. The page explains this; it never creates a dependency grant.
+apply. The current UI describes a separate Omni Contrasts entitlement for PATH-CE
+inputs. FA-02 reconciliation must narrow that guidance to operations that actually
+activate or execute contrasts; merely reading retained inputs needs no such grant. The page explains this; it never creates a dependency grant.
 History is paged in descending event order with **Older decisions** and includes
 historical actor/subject IDs, scope, reason and UTC dates.
 

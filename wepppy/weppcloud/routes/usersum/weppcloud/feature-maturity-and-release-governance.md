@@ -3,7 +3,7 @@
 Status: Ratified\
 Effective date: 2026-10-01\
 Ratification record: [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md)\
-Amendment: [FA-01 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01; implementation pending\
+Amendments: [FA-01 and FA-02 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01 and 2026-10-02 UTC; FA-02 implementation pending\
 Applies to: WEPPcloud user-facing features, run-page modules, launchable configs, and major analysis workflows  
 Related implementation: `wepppy/weppcloud/feature_registry/`
 
@@ -251,11 +251,11 @@ Routes and templates should not duplicate maturity or visibility rules.
 
 ### Policy 2: Separate public inspection from permission to act
 
-Public projects should expose existing non-embargoed views/results of limited-access features to users who lack those features' action permission. Those features are read-only for that viewer: no activation, configuration, acquisition, execution, retry, deletion or other restricted-feature mutation through UI or direct endpoints. Their inspect-only views must not initialize the restricted feature or produce new protected results.
+Public projects should expose existing views/results of limited-access features, including Omni Contrasts and derived PATH-CE results, to users who lack those features' action permission. Those features are read-only for that viewer: no activation, configuration, acquisition, execution, retry, deletion or other restricted-feature mutation through UI or direct endpoints. Their inspect-only views must not initialize the restricted feature or execute new restricted analysis.
 
 Anonymous project creation and existing anonymous functionality remain unaffected. This is a feature-level access rule, not a project-wide read-only policy or a new owner/creator credential requirement. Existing ordinary project authorization and explicit project readonly, capability, backend and service boundaries remain as they are. Publicity does not grant internal-feature entitlement.
 
-Existing publication-embargo restrictions remain an explicit exception pending a separate decision on public exposure of embargoed outputs. [ADR-0001](../../../../../docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) currently restricts Omni Contrasts data even on a public project. Its disabled name-only discoverability is permitted; it does not release the results.
+FA-02 clarification, 2026-10-02 UTC: internal and publication-embargo status restrict who may operate a feature. Permitted users may share their results more broadly, including through public projects. Recipients need the normal resource read permission, not the originating feature group. Sharing retained results, reports, tables, exports or forks does not grant permission to activate, configure or execute the restricted feature. Private resources and sensitive files retain their existing access controls. [ADR-0001](../../../../../docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) is amended accordingly; no inherited result embargo or additional D-Tale login requirement is introduced.
 
 Launch and action controls should be usable when offered as actions, or clearly disabled with a reason. Read-only inspection should show useful existing project information rather than only an unavailable feature name. Config launch permission remains distinct from informational config visibility.
 
@@ -500,7 +500,7 @@ PowerUser access may be appropriate for:
 - users participating in structured testing of preview workflows,
 - users who need access to features with higher compute or support burden.
 
-PowerUser status does not grant access to publication-embargoed internal features unless separately approved.
+PowerUser status does not grant operation of publication-embargoed internal features unless separately approved. Inspection of shared results follows Policy 2.
 
 #### Internal Feature Access
 
@@ -551,7 +551,7 @@ Before requesting PowerUser access, the user must acknowledge concise onboarding
 
 Suggested text:
 
-> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating results as appropriate for your use case; and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not authorize internal actions or private or publication-embargoed feature data unless separately granted; public read-only views follow the sharing policy.
+> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating results as appropriate for your use case; and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not authorize internal actions or access to private resources unless separately granted; public read-only views follow the sharing policy.
 
 ### PowerUser Request
 
@@ -568,7 +568,7 @@ Approval may be denied or deferred when:
 
 - user does not respond yes to both questions.
 
-PowerUser status does not grant internal action permission or access to private or publication-embargoed feature data. Public read-only inspection follows Policy 2.
+PowerUser status does not grant internal action permission or access to private resources. Public read-only inspection follows Policy 2.
 
 ### Current PowerUser Implementation Scope
 
@@ -649,7 +649,7 @@ Internal Collaborator access may be approved when:
 - any active publication embargo or originating-team priority window is respected;
 - an authorized maintainer has recorded the membership decision and reason.
 
-PowerUser status alone does not grant internal action permission or access to private or publication-embargoed feature data. Public read-only inspection follows Policy 2.
+PowerUser status alone does not grant internal action permission or access to private resources. Public read-only inspection follows Policy 2.
 
 ### Publication-Embargoed Features
 
@@ -660,7 +660,7 @@ For features marked `internal_reason: publication_embargo`, access should normal
 - approved users working on dependent workflows;
 - sponsored collaborators explicitly approved for the embargoed feature.
 
-A publication embargo governs access to the feature during the embargo period. It should not be framed as a retroactive right to approve, block, or censor publications.
+A publication embargo governs operation of the feature during the embargo period. It does not impose a separate read restriction on outputs generated by permitted users or a retroactive right to approve, block, or censor publications. Those users may share results more broadly under the ordinary resource-sharing rules.
 
 If access is granted during an embargo, the access record should state the approved purpose and whether outputs are intended for development, testing, validation, internal analysis, agency review, or publication-scale use.
 
@@ -684,7 +684,7 @@ Suggested text:
 
 > Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed functionality. Access is granted only for the approved feature, purpose, and time period. Outputs may be incomplete, unstable, or unsuitable for publication or management decisions without additional review. You are responsible for documenting versions, inputs, assumptions, limitations, and maturity status. If results appear anomalous or scientifically important, notify the WEPPcloud project contact before public release when practical. Internal access does not imply authorship rights, publication approval, or access to unrelated features. Authorship and acknowledgment should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, technical, or interpretive contributions.
 
-The current statement version is `internal-2026-10-01`. Profile presents this statement and records the signed-in user's acknowledgment. It shows the user's own group memberships, pending acknowledgment and expiration; membership and acknowledgment do not replace project permissions or feature requirements. Root maintainers reach group decisions and retained history from Profile or User Management. PATH-CE work using contrast data still needs separate Omni Contrasts access. These account controls are delivered in milestone two; feature endpoint enforcement and broader rollout remain subsequent implementation gates.
+The current statement version is `internal-2026-10-01`. Profile presents this statement and records the signed-in user's acknowledgment. It shows the user's own group memberships, pending acknowledgment and expiration; membership and acknowledgment do not replace project permissions or feature requirements. Root maintainers reach group decisions and retained history from Profile or User Management. PATH-CE operations that activate or execute Omni Contrasts still need the separate contrast action permission. Reading retained contrast inputs does not. These account controls are delivered in milestone two; feature endpoint enforcement and broader rollout remain subsequent implementation gates.
 
 ### Authorship and Acknowledgment
 
@@ -792,7 +792,7 @@ The current registry may use coarse role gates as an MVP enforcement mechanism, 
 
 - PowerUser access can be requested through a web-facing application,
 - Internal Feature Access uses single-maintainer, auditable group membership decisions,
-- public read-only feature views are separate from action permissions, with the existing embargo exception retained,
+- public read-only feature views and shared results are separate from action permissions, including for publication-embargoed features,
 - internal approvals are feature-scoped where practical,
 - approvals and denials create auditable records,
 - publication-embargoed access is explicitly documented,

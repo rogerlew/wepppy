@@ -172,11 +172,15 @@ Queries are **stateless** and **ephemeral**:
 
 ### Security Model
 
-**Primary Routes** (No JWT):
-- All runs are publicly accessible via their `runid` and `config`
-- No write operations are exposed
-- Queries are sandboxed to the run directory (no filesystem traversal)
-- DuckDB connections are isolated and cannot access other runs
+**Primary Routes** (ordinary anonymous query behavior):
+- Ordinary public query access remains available; private Batch/Culvert roots
+  require their existing workflow/resource admission.
+- Query requests use separate DuckDB connections. Connection isolation alone
+  does not constrain SQL-expression file reads: the M3 review identified an
+  effective-source containment gap. Cross-resource privacy must be reassessed;
+  this document does not claim that gap is fixed.
+- Existing activation/cache behavior remains; FA-02 adds no general read-only
+  or authenticated-only query policy.
 
 **MCP Routes** (JWT Authentication):
 - Bearer tokens map to user identities and run allow-lists
@@ -184,7 +188,7 @@ Queries are **stateless** and **ephemeral**:
 - Revocation checks enforce denylisted `jti` values
 - Audit logs track query execution per user
 
-FA-01 amendment (specified; implementation pending): [feature access governance](../../docs/schemas/feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery) applies the retained contrast/PATH-CE embargo to web and MCP catalog entries, referenced query datasets and returned structured data. Omit only protected catalog entries for callers lacking read entitlement; reject queries referencing protected inputs before execution and project mixed structured data. Ordinary anonymous query/catalog access and existing activation/cache behavior remain unchanged. This amendment does not change token scopes, run checks or sandboxing.
+FA-02 amendment (specified; implementation pending): [feature access governance](../../docs/schemas/feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery) permits inspection and querying of shared contrast/PATH-CE results without feature-action entitlement. Keep their catalog entries and result fields readable under normal resource-sharing rules. Preserve private grouped-resource checks, token scopes, ordinary anonymous query/catalog access and activation/cache behavior. SQL expression access outside authorized resource boundaries remains a separate containment issue; FA-02 does not waive it or authorize a dependency upgrade. The current M3 checkpoint still contains feature-derived read gates that must be removed after the reviewed contract checkpoint.
 
 ### Data Sources
 

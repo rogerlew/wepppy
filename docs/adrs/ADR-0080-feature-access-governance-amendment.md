@@ -12,7 +12,7 @@ The [ratified policy](../../wepppy/weppcloud/routes/usersum/weppcloud/feature-ma
 
 ## Decision
 
-FA-01, the [feature access contract](../schemas/feature-access-governance-contract.md), separates public-project inspection from feature actions. Limited-access feature state/results are inspectable without granting restricted actions; ordinary anonymous creation and functionality remain unchanged. No global writer gate or anonymous creator credential is introduced; the current Omni Contrasts embargo restriction remains an explicit exception because its public release has not been authorized.
+FA-01, the [feature access contract](../schemas/feature-access-governance-contract.md), separates public-project inspection from feature actions. Limited-access feature state/results are inspectable without granting restricted actions; ordinary anonymous creation and functionality remain unchanged. No global writer gate or anonymous creator credential is introduced. FA-02 (2026-10-02 UTC) explicitly permits permitted users to share results broadly: internal/publication-embargo status restricts feature operation, not inspection or redistribution of retained outputs. Existing resource privacy and sensitive-file protections remain.
 
 One authorized maintainer administers scoped groups with recorded person, group, effective scope, reason, actor and timestamps. This replaces dual-reviewer requirements, including two attestations by one person. Group changes retain history. Internal onboarding acknowledgment remains separate from the single administrative decision.
 
@@ -26,7 +26,7 @@ Maturity remains conservative: the multi-OFE override may make Stable/Preview co
 
 The decision venue is the 2026-10-01 user-agent conversation. The authorizing principal is the requesting project maintainer; Codex records the documentation. The maintainer explicitly selected single-person group administration, account-only initial OpenET/Batch membership enforced through groups, conservative maturity and the PowerUser lifecycle exclusions, and requested the reconciled amendment and implementation plan.
 
-The maintainer has not explicitly answered the embargoed-public-results question. Preserving ADR-0001's existing restriction is continuity, not an inference of consent to release results. The operator subsequently identified `rogerlew@gmail.com` on every deployment and `/workdir/Culvert_web_app` on wepp2, and clarified that read-only applies only to limited features for users lacking access. The broader anonymous creator/writer proposal was rejected as outside scope. Account IDs are resolved per deployment; existing credential expiry remains enforced.
+The initial FA-01 checkpoint retained the unanswered result-embargo exception. The maintainer subsequently resolved it: the purpose is to prevent unauthorized feature use, while permitted users may share their results more broadly. FA-02 supersedes the old read restriction, without making private resources public or granting feature-action permission to recipients. The operator subsequently identified `rogerlew@gmail.com` on every deployment and `/workdir/Culvert_web_app` on wepp2, and clarified that read-only applies only to limited features for users lacking access. The broader anonymous creator/writer proposal was rejected as outside scope. Account IDs are resolved per deployment; existing credential expiry remains enforced.
 
 ## Rationale and alternatives
 
@@ -34,7 +34,7 @@ Public inspection supports understanding and reproduction without granting API/c
 
 Two-reviewer access administration was rejected because the project lacks the staffing. Broad Dev/Admin assignment was rejected because it grants unrelated powers. JWT group claims alone were rejected because their validity could outlast membership removal. A new authorization service, queue or identity provider is unnecessary; the existing database and authentication stack can represent the bounded change.
 
-Self-service before grouped-data reconciliation was rejected because PowerUser currently admits broader Batch/Culvert reads. Automatic embargo release was not authorized. PowerUser sanctions and reinstatement were explicitly deferred rather than becoming prerequisites for useful onboarding.
+Self-service before grouped-data reconciliation was rejected because PowerUser currently admits broader Batch/Culvert reads. A separate result embargo was rejected in FA-02 because it obstructs permitted result sharing. The time-limited restriction on feature operation remains. PowerUser sanctions and reinstatement were explicitly deferred rather than becoming prerequisites for useful onboarding.
 
 ## Consequences and compatibility
 
@@ -44,4 +44,4 @@ The [work package](../work-packages/20261001_feature_access_governance/package.m
 
 ## Review and recovery
 
-Review the implementation evidence at each milestone and the policy on 2027-04-01. Resolve any later public-embargo decision by updating both the policy and ADR-0001. Preserve audit records through rollback; disable new admissions rather than restoring a broad-role bypass. No existing credential is rotated or revoked by this ADR.
+Review the implementation evidence at each milestone and the policy on 2027-04-01. FA-02 updates both the policy and ADR-0001; its reviewed contract checkpoint must precede removal of M3's superseded read gates. Preserve audit records through rollback; disable new admissions rather than restoring a broad-role bypass. No existing credential is rotated or revoked by this ADR.

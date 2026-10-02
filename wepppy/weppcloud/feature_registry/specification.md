@@ -17,12 +17,13 @@ This specification covers two registries in one subsystem:
 ## UX Policy (Non-Negotiable)
 
 - Public projects expose existing feature views/results read-only to viewers
-  without action permission, subject to the explicit publication-embargo
-  exception in FA-01 and ADR-0001. New inspect-only restricted-feature views must not initialize that feature.
+  without action permission, including publication-embargoed features under
+  FA-02. Retained-result sharing follows resource visibility; it does not grant
+  feature-action permission. New inspect-only views must not initialize that feature.
 - Action controls require the feature's effective role/group entitlement and
   existing operation/run authorization; otherwise disable/omit them with a clear reason. FA-01 adds no general owner/writer gate and preserves anonymous functionality.
 - `menu_min_role` may provide disabled name discovery; it is not read or action
-  authorization and does not release embargoed results.
+  authorization. Retained-result inspection follows resource sharing independently.
 - A caller without effective feature entitlement receives the exact disabled
   reason `Not Authorized`; a group grant can satisfy entitlement below `min_role`.
 - Informational config cards may be shown without launch authority; launch
@@ -158,8 +159,9 @@ Feature action availability requires all:
 
 Public read-only feature sections follow FA-01 independently of the action
 audience. Retained readable results do not disappear merely because current
-backend/prerequisites prevent execution. Embargoed reads require effective
-feature entitlement plus run access. Group-only OpenET/Batch actions have no
+backend/prerequisites prevent execution. FA-02 retained-result reads require
+normal resource access, not the originating feature entitlement. Private workflow
+reads retain their separate scope. Group-only OpenET/Batch actions have no
 Admin/Dev/Root override. Account-store errors never fall back to broader roles.
 
 An entry with explicit `menu_min_role` uses discoverable menu semantics:
@@ -250,9 +252,10 @@ not feature removal or disabling; other feature visibility rules are unchanged.
   compare those concrete audiences, so neither can broaden the other. The field
   changes menu discoverability only and never grants enable or dynamic-section
   authorization.
-- For a `publication_embargo` feature, effective role/group entitlement governs every action or
-  data entry point registered by that feature's accepted domain/remediation
-  contract. Menu discoverability never satisfies this server authorization.
+- For a `publication_embargo` feature, effective role/group entitlement governs
+  activation, configuration and execution at every registered action entry point.
+  Retained-result reads follow project/resource access, without a feature-group
+  read gate. Menu discoverability never satisfies action authorization.
 - `adr_reference` (when present) must be repo-relative, remain under `docs/adrs/`, reference a `.md` file, and reference an existing file.
 - feature `requires_features` and `enable_dependencies` entries must reference known run-mod ids (registry feature ids or `internal_prerequisites`).
 - feature `section_template` must be repo-relative, remain under `wepppy/weppcloud/templates/`, and reference an existing file.
@@ -264,10 +267,10 @@ not feature removal or disabling; other feature visibility rules are unchanged.
 
 - `project_bp.py` uses `feature_registry` for labels and feature-allow checks.
 - `run_0_bp.py` uses `feature_registry` for feature visibility decisions.
-- Publication-embargo action/data routes registered by an accepted domain or
-  remediation contract enforce the same effective role/group entitlement in addition to
-  every applicable/additive JWT scope, run-access, CAP, session, and CSRF
-  boundary named by that contract.
+- Publication-embargo action routes enforce effective role/group entitlement
+  in addition to applicable JWT scope, run-access, CAP, session and CSRF checks.
+  Retained data, read-only sections and reports require normal resource read
+  permission; no additional feature entitlement is required by the embargo.
 - `_run_header_fixed.htm` uses registry-derived mod option lists, maturity labels, and role gating.
 - `runs0_pure.htm` section/nav layout remains template-defined in MVP; visibility and maturity metadata are registry-driven via `run_0_bp.py` context.
 - `weppcloud_site.py` computes role-aware config visibility and maturity labels from `config_registry`.

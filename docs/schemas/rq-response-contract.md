@@ -205,26 +205,26 @@ Landuse first-class route notes (2026-04-24):
     a terminal failed descendant's same sanitized error after no descendant
     remains active.
 
-### FA-01 protected job results (specified; implementation pending)
+<a id="fa-01-protected-job-results-specified-implementation-pending"></a>
 
-[FA-01](feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery)
-preserves the existing polling auth mode and lifecycle/status/progress/queue
-fields. It adds a conditional read projection for embargoed contrast/PATH-CE
-data in single job-info, batch job-info and every recursive child node.
-For callers lacking the retained contrast read entitlement, a wholly protected
-`result` becomes `null`; mixed results retain only explicitly classified
-non-protected fields. Selected/treatment hillslopes, costs, sediment-reduction
-values and other protected solver outputs must not leak through descriptions,
-metadata or errors. Entitled callers retain the existing result shape.
-Ordinary job results and Culvert client polling remain unchanged; no global
-authenticated-polling requirement or new token scope is introduced.
+### FA-02 shared job results (specified; implementation pending)
 
-Implementation acceptance must exercise synthetic PATH-CE/contrast results
-through GET single, POST batch and recursive child job-info for both entitled
-and unentitled callers, including open polling, mixed trees and protected
-auxiliary fields. Confirm lifecycle/queue fields and ordinary Culvert responses
-remain usable and unchanged. This amendment is a contract target, not a claim
-that current polling already projects those results.
+[FA-02](feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery)
+supersedes the contrast/PATH-CE-only result projection introduced by FA-01.
+Internal/publication-embargo status controls feature operation, not sharing of
+retained results. Preserve the existing polling admission mode and complete
+result, lifecycle, status, progress and queue shapes in single, batch and
+recursive job-info. Lack or removal of feature-action membership does not by
+itself null results or redact contrast values, metadata or descriptions.
+Existing error sanitization and sensitive/private-resource protections remain;
+no new authenticated-polling requirement or token scope is introduced.
+
+Acceptance covers shared contrast/PATH-CE results through single, batch and
+recursive job-info, mixed ordinary trees and missing/expired child jobs.
+Unauthorized restricted job submission/retry/cancellation must still fail before
+mutation. Culvert client polling retains its existing response behavior. M3
+checkpoint `458557219` contains the superseded projection; runtime reconciliation
+requires the FA-02 contract checkpoint and is not yet claimed complete.
 
 ## Job cancellation
 

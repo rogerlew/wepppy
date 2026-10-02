@@ -6,7 +6,7 @@
 
 FA-01 amendment prepared 2026-10-01; implementation/checkpoint pending. The
 [feature access contract](feature-access-governance-contract.md) governs
-public inspection, the retained embargo exception and group-based private
+public result sharing under FA-02 and group-based private
 Batch/Culvert access. It adds no anonymous Culvert root and does not change
 token signature/audience/scope, root-only path or CSRF requirements.
 
@@ -51,9 +51,13 @@ token signature/audience/scope, root-only path or CSRF requirements.
   are insufficient. Do not embed a full run list in user tokens or use JWT
   `groups` as durable authorization. Preserve the existing public Batch base-run
   read exception. Membership does not authorize unrelated private ordinary runs.
-- Public non-embargoed project feature results follow FA-01's inspect policy;
-  action routes and artifact generation retain separate authorization. Generic
-  file/query/archive paths must not bypass the existing contrast-data embargo.
+- Public project feature results, including contrasts and derived PATH-CE data,
+  follow FA-02 sharing: no feature-group read gate or inherited output embargo.
+  Generic browse/download/query/archive and D-Tale delivery retain normal
+  resource, sensitive-path, token and containment checks. Formatting/packaging
+  retained results is sharing; invoking restricted analysis requires action
+  entitlement. Existing anonymous endpoint policy remains; no universal D-Tale
+  login requirement is introduced.
 
 ## Re-Auth Redirect Rules
 - For run routes using HTML navigation, 401 responses SHOULD redirect to `/weppcloud/runs/{runid}/?next=<target>`.

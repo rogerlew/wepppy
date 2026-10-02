@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open, 2026-10-01; milestone one complete and independently reviewed; route/UI wiring not started.
+Status: Open; M1/M2 complete, M3 checkpoint `458557219` incomplete. FA-02 result-sharing contract reconciliation in progress, 2026-10-02 UTC.
 
 Timezone: UTC
 
@@ -12,9 +12,9 @@ The starting implementation revision is `45a39a8337d37c7f7d30087ff4d23c03610072b
 
 ## Scope
 
-Include public inspection/action separation, auditable groups and membership, versioned onboarding, automatic PowerUser approval, current server-side group checks, conservative multi-OFE maturity, internal endpoint/data parity, additive database migration and workflow acceptance. Amend affected user/developer/operator documentation together. Preserve the existing embargo exception until explicitly changed.
+Include public inspection/action separation, auditable groups and membership, versioned onboarding, automatic PowerUser approval, current server-side group checks, conservative multi-OFE maturity, internal endpoint/data parity, additive database migration and workflow acceptance. Amend affected user/developer/operator documentation together. FA-02 explicitly permits sharing results from permitted use; the embargo restricts feature operation only. Preserve private-resource and sensitive-file controls.
 
-Preserve ordinary anonymous creation and functionality. Exclude new global writer gates, creator credentials and legacy ownerless-run recovery. Exclude PowerUser suspension, reapplication and permanent revocation; new identity providers/services/queues; model formulas/defaults; blanket role hierarchy changes; new anonymous Culvert roots; automatic release of embargoed results; credential rotation/TTL changes; and production deployment during the current documentation task. A multi-role review queue is explicitly excluded from access administration.
+Preserve ordinary anonymous creation and functionality. Exclude new global writer gates, creator credentials and legacy ownerless-run recovery. Exclude PowerUser suspension, reapplication and permanent revocation; new identity providers/services/queues; model formulas/defaults; blanket role hierarchy changes; new anonymous Culvert roots; automatic public release of private resources; credential rotation/TTL changes; and production deployment during the current documentation task. A multi-role review queue is explicitly excluded from access administration.
 
 ## Complexity budget
 
@@ -28,7 +28,7 @@ Target faithful wiring into the real profile, public run, feature actions, API a
 
 ## Generated artifact validation gate
 
-Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a new inspect-only restricted-feature view creates no missing feature controller state. Test embargoed artifacts through direct, query and archive paths as well as the named report.
+Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a new inspect-only restricted-feature view creates no missing feature controller state. Test shared retained contrast/PATH-CE results through direct, query and archive paths as well as named reports; test actual private-resource denial separately.
 
 Highest current completion claim: milestone-two account UI, acknowledgment and initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass. Full regression (10,198 passed, 126 skipped) and audited local initialization are complete. Protected feature endpoint wiring and production access cutover remain later milestones.
 
@@ -44,14 +44,14 @@ Follow `docs/standards/contract-first-change-standard.md`: resolve the complete 
 - A normal authenticated user completes the two-question PowerUser flow with atomic, versioned evidence and no internal action grant.
 - A maintainer adds/removes a named group member with a reason; history survives removal and changed memberships affect subsequent admissions even with old JWTs.
 - OpenET and Batch enforce their separate groups with only the designated account initially admitted; broad roles cannot execute either feature without membership.
-- Public non-embargoed feature views are readable and side-effect-free; unauthorized direct actions are denied.
+- Public retained feature views are readable without restricted execution or feature initialization; unauthorized restricted actions are denied.
 - Culvert submit/retry/finalize/poll/cancel/browse/download retain the explicitly inventoried integration behavior and resource boundaries.
 - The conservative override preserves Experimental/Internal/Deprecated labels.
 - Meaningful database, endpoint, browser, accessibility and artifact evidence passes; independent medium/high findings are closed.
 
 ## Dependencies and gates
 
-Milestone zero records per-deployment account identity, non-secret Culvert metadata, the feature-only scope, exact protected data surfaces and mixed-bundle behavior. Read-only verification found the configured Culvert token expired; operator renewal and positive integration evidence are later rollout prerequisites. The unanswered proposal to release public embargoed results is excluded: existing restriction stays in force. PowerUser sanctions are not a dependency.
+Milestone zero records per-deployment account identity, non-secret Culvert metadata, the feature-only scope, exact protected data surfaces and mixed-bundle behavior. Read-only verification found the configured Culvert token expired; operator renewal and positive integration evidence are later rollout prerequisites. FA-02 resolves the formerly reserved result-sharing question and supersedes M0's feature-derived data embargo; retained results may be shared under normal resource rules. PowerUser sanctions are not a dependency.
 
 Parameterization change: no. ADR-0080 records governance, not numerical parameter changes. RQ graph checks apply only if implementation proves queue wiring changes necessary; none is planned.
 
