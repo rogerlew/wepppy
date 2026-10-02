@@ -684,6 +684,8 @@ Suggested text:
 
 > Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed functionality. Access is granted only for the approved feature, purpose, and time period. Outputs may be incomplete, unstable, or unsuitable for publication or management decisions without additional review. You are responsible for documenting versions, inputs, assumptions, limitations, and maturity status. If results appear anomalous or scientifically important, notify the WEPPcloud project contact before public release when practical. Internal access does not imply authorship rights, publication approval, or access to unrelated features. Authorship and acknowledgment should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, technical, or interpretive contributions.
 
+The current statement version is `internal-2026-10-01`. Profile presents this statement and records the signed-in user's acknowledgment. It shows the user's own group memberships, pending acknowledgment and expiration; membership and acknowledgment do not replace project permissions or feature requirements. Root maintainers reach group decisions and retained history from Profile or User Management. PATH-CE work using contrast data still needs separate Omni Contrasts access. These account controls are delivered in milestone two; feature endpoint enforcement and broader rollout remain subsequent implementation gates.
+
 ### Authorship and Acknowledgment
 
 Internal access does not create an automatic coauthorship requirement.

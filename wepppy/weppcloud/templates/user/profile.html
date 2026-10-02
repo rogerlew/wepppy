@@ -110,6 +110,7 @@ User Profile
     Browser state reset is available from the
     <a href="{{ url_for('weppcloud_site.diagnostics') }}">WEPPcloud Diagnostics page</a>.
   </p>
+  {% if internal_access is defined %}{% include "user/_internal_access.html" %}{% endif %}
   {% if can_mint_profile_token %}
   <section
     class="wc-profile-token"
@@ -319,4 +320,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
   {% endif %}
 
+{% endblock %}
+
+{% block script_extras %}
+{{ super() }}
+<script src="{{ static_url('js/feature_access.js') }}" defer></script>
 {% endblock %}

@@ -1,5 +1,6 @@
 """Admin-related routes blueprint extracted from app.py."""
 import html
+import click
 from glob import glob
 
 from os.path import exists as _exists
@@ -8,6 +9,8 @@ from os.path import split as _split
 
 from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import error_factory, get_wd, handle_with_exception_factory
+
+from wepppy.weppcloud.utils import feature_access_web
 
 from ._common import *  # noqa: F401,F403
 
@@ -116,3 +119,50 @@ def task_usermod():
 
     db.session.commit()
     return success_factory()
+
+
+@admin_bp.route('/admin/feature-access', strict_slashes=False)
+@feature_access_web.access_errors
+@login_required
+@roles_required('Root')
+def feature_access():
+    before = request.args.get('before')
+    if before is not None and (len(before) > 10 or not before.isascii()
+                               or not before.isdigit() or not 0 < int(before) <= 2147483647):
+        raise feature_access_web.FeatureAccessValidationError("Invalid history cursor.")
+    inventory = feature_access_web.access_store().administration(before_event_id=int(before) if before else None)
+    from wepppy.weppcloud.app import User
+    accounts = User.query.order_by(User.email).all()
+    return render_template('user/feature_access.html', user=current_user, access=inventory,
+                           account_options=[('', 'Select a person')] + [
+                               (u.id, f'{u.email} ({u.id})' + (' — inactive' if not u.active else '')) for u in accounts],
+                           group_options=[('', 'Select a group')] + [
+                               (g.key, f'{g.label} ({g.key})') for g in inventory['groups'] if g.active],
+                           account_names={u.id: u.email for u in accounts},
+                           features=feature_access_web.load_feature_registry())
+
+
+@admin_bp.route('/admin/feature-access/memberships', methods=['POST'])
+@feature_access_web.access_boundary(root=True)
+def feature_access_memberships():
+    return feature_access_web.membership_change()
+
+
+@admin_bp.cli.command('initialize-feature-access')
+@click.option('--email', required=True, help='Designated active Root account in this deployment.')
+@click.option('--reason', required=True, help='Recorded purpose and reason for continuing access.')
+def initialize_feature_access(email, reason):
+    """After backup/migration, initialize only the sole OpenET/Batch maintainer."""
+    from wepppy.weppcloud.app import User
+    if email != 'rogerlew@gmail.com':
+        raise click.ClickException('Initial maintainer must be the policy-designated email.')
+    account = User.query.filter(User.email == email).one_or_none()
+    if account is None or not account.active or not account.has_role('Root'):
+        raise click.ClickException('Expected one active designated Root account in this deployment.')
+    try:
+        changed = feature_access_web.access_store().initialize_maintainer(
+            account.id, features=feature_access_web.load_feature_registry(), reason=reason,
+        )
+    except (feature_access_web.FeatureAccessValidationError, PermissionError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f'Account {account.id}: {changed}. Membership events retained; no acknowledgment fabricated.')

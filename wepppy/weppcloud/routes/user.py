@@ -28,6 +28,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
+from wepppy.weppcloud.utils import feature_access_web
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils import run_ttl
 from wepppy.weppcloud.user_preferences import (
@@ -491,6 +492,7 @@ def profile():
             'user/profile.html',
             user=current_user,
             can_mint_profile_token=_can_mint_profile_user_token(role_names),
+            internal_access=feature_access_web.profile_access(),
         )
     except Exception:
         logger.exception("user.profile failed")
@@ -1010,3 +1012,9 @@ def runs_map_data():
     except Exception:
         logger.exception("user.runs_map_data failed")
         return exception_factory()
+
+
+@user_bp.route('/profile/internal-access/acknowledge', methods=['POST'])
+@feature_access_web.access_boundary()
+def internal_access_acknowledge():
+    return feature_access_web.acknowledge_internal()

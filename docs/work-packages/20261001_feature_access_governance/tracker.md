@@ -2,7 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: milestone one complete; account substrate/shared decisions implemented and validated, not wired to routes or deployed.
+Current phase: milestone two complete, including full regression, focused/browser acceptance, independent reviews and audited local initialization. Milestone one is committed as `62ce1af3f`. Protected feature endpoint wiring and production rollout remain later work.
 
 ## Progress
 
@@ -15,7 +15,10 @@ Current phase: milestone one complete; account substrate/shared decisions implem
 - [x] Completed final narrowed-checkpoint security/correctness reviews and findings disposition; zero unresolved High/Medium findings.
 - [x] Committed standalone accepted checkpoint `d3639f970669411e9c0f5bf8e80898645c947559`.
 - [x] Completed authorized milestone one implementation, validation and independent reviews.
-- [ ] Milestones two through five remain future work.
+- [x] Implement milestone-two group administration/acknowledgment and complete focused/browser acceptance and independent reviews.
+- [x] Back up/test-restore, migrate and initialize the local development database; retain sole-maintainer audit readback.
+- [x] Complete broad Python regression: 10,198 passed, 126 skipped; finalize milestone-two handoff.
+- [ ] Milestones three through five remain future work.
 
 ## Decision log
 
@@ -33,7 +36,7 @@ Accepted checkpoint revision: `d3639f970669411e9c0f5bf8e80898645c947559`. Final 
 
 ## Next milestone and operational dependency
 
-Milestone one is complete. Next is milestone two: simple group administration and internal acknowledgment. Initial maintainer memberships still require per-deployment identity verification and an audited, explicitly authorized operation; no shared database migration or membership initialization was performed in milestone one. The expired configured Culvert credential must be renewed under separate operator authority before claiming successful live integration acceptance or rollout; implementation tests cannot substitute for that evidence.
+Next is milestone three: wire restricted feature action/data admission and public read-only views across the frozen matrix. Milestone-two implementation and validation are complete; the operator authorized committing this milestone. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
 
 ## Milestone zero validation
 
@@ -45,6 +48,15 @@ Four account models and migration `e7a1c9d204bf` follow existing head `d30c91a7b
 
 Validation completed: initial focused registry/route run **293 passed**; post-review PostgreSQL suite **26 passed**; final account/registry run including missing/null metadata cases **180 passed**. All three new modules pass stubtest; test-stub, documentation/link and whitespace checks pass. Broad-exception enforcement passed for tracked changes, and direct AST inspection found no broad catches in new modules. Observe-only quality report ran without radon; generated root reports were restored after retaining output in `/tmp`.
 
-[Correctness review](artifacts/2026-10-01_m1_correctness_review.md) and [security review](artifacts/2026-10-01_m1_security_review.md) passed with zero unresolved High/Medium findings. Three Medium issues were corrected and independently confirmed. The broad `wctl run-pytest tests --maxfail=1` run passed: **10,149 passed, 126 skipped, 4,011 warnings in 2,477.03 seconds**. It started before the final metadata guard; the final source of that guard is covered by the 180-case rerun. No shared account schema or memberships have been changed; PostgreSQL test schemas were isolated and cleaned up.
+[Correctness review](artifacts/2026-10-01_m1_correctness_review.md) and [security review](artifacts/2026-10-01_m1_security_review.md) passed with zero unresolved High/Medium findings. Three Medium issues were corrected and independently confirmed. The broad `wctl run-pytest tests --maxfail=1` run passed: **10,149 passed, 126 skipped, 4,011 warnings in 2,477.03 seconds**. It started before the final metadata guard; the final source of that guard is covered by the 180-case rerun. At milestone-one handoff, no shared account schema or memberships had been changed; PostgreSQL test schemas were isolated and cleaned up.
 
 The operator authorized committing the completed milestone-one implementation and validation records. The package stays open for milestones two through five; no PowerUser self-service, route enforcement or live Culvert compatibility pass is implied.
+
+
+## Milestone two implementation and validation
+
+[Acceptance and local initialization](artifacts/2026-10-01_m2_acceptance.md) retains the full-app browser observations/screenshots, real database evidence and backup/restore details. Focused PostgreSQL tests: **75 passed**. Final route/usermod/Profile regression: **73 passed**. Browser workflow: **1 passed**, zero axe violations. Frontend: **112 suites / 919 tests passed**, standard and explicit new-script lint pass. Store/web stubtest and test-stub guard pass. Broad Python suite: **10,198 passed, 126 skipped, 4,010 warnings in 2,535.69 seconds (42:15)**. The final qualified-import/export cleanup is also covered by the 73-case route rerun and web stubtest. Documentation/link/whitespace checks and exact statement/policy readback pass.
+
+[Correctness review](artifacts/2026-10-01_m2_correctness_review.md) and [security review](artifacts/2026-10-01_m2_security_review.md) confirmed all findings closed. Fixes cover initial Profile rendering, contrast dependency guidance, inactive-account effective status, stale-session token fallback and authentication-error correlation. No unresolved High/Medium/Low findings remain in this bounded milestone.
+
+Local development is now at `e7a1c9d204bf`, with sole maintainer ID 1 in OpenET and Batch; [readback](artifacts/2026-10-01_m2_local_readback.json) confirms two audit events, no acceptances and unchanged account/role/run counts. Backup restore was tested before migration; production was not touched, no service was restarted, and runtime feature enforcement remains M3. User acknowledgment must be completed by the user; the initializer does not accept it on anyone's behalf.

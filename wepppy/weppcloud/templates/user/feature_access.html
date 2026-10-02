@@ -1,0 +1,64 @@
+{% extends "base_pure.htm" %}
+{% import "controls/_pure_macros.html" as ui %}
+{% block title %}Feature access{% endblock %}
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
+{% block body %}
+<section class="wc-stack wc-table-page">
+  <header class="wc-stack">
+    <h1>Feature access</h1>
+    <p>Assign one person's access to a feature group. Each change records your identity, reason and UTC time. Group access also requires the person's acknowledgment on Profile before actions.</p>
+    <p class="wc-button-row"><a class="pure-button pure-button-secondary" href="{{ url_for('user.profile') }}">Profile</a> <a class="pure-button pure-button-secondary" href="{{ url_for('admin.usermod') }}">User management</a></p>
+  </header>
+  <section class="wc-panel wc-stack" aria-labelledby="decision-heading">
+    <h2 id="decision-heading">Record a membership decision</h2>
+    <p>PATH-CE work that uses contrast data also requires Omni Contrasts access through its own group or preserved Dev/Root access. Record each group decision separately.</p>
+    <form class="pure-form pure-form-stacked" action="{{ url_for('admin.feature_access_memberships') }}" method="post" data-feature-access-form="membership">
+      {{ ui.select_field('user_id', 'Person (account ID)', account_options, attrs={'required': true}) }}
+      {{ ui.select_field('group_key', 'Feature group', group_options, attrs={'required': true}) }}
+      {{ ui.select_field('operation', 'Decision', [('add', 'Add membership'), ('remove', 'Remove membership')], selected='add') }}
+      {{ ui.textarea_field('reason', 'Reason (required)', attrs={'required': true}, help='Document the approved purpose and any consultation or continuing-access expectations.') }}
+      <fieldset data-access-dates>
+        <legend>Optional dates for adding membership</legend>
+        {{ ui.text_field('review_at', 'Review date (UTC)', placeholder='2027-01-01T00:00:00Z', help='Review dates are reminders; they do not end access.') }}
+        {{ ui.text_field('expires_at', 'Expiration (UTC)', placeholder='2027-01-01T00:00:00Z', help='Access ends at this time. Leave blank for continuing access and document the reason above.') }}
+      </fieldset>
+      <p class="wc-alert" data-access-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
+      <button type="submit" class="pure-button pure-button-primary">Save membership decision</button>
+      <a href="{{ url_for('admin.feature_access') }}" data-access-refresh hidden>Refresh membership and history</a>
+      <noscript><p>JavaScript is required to save membership decisions.</p></noscript>
+    </form>
+  </section>
+  <section class="wc-panel wc-stack" aria-labelledby="groups-heading">
+    <h2 id="groups-heading">Groups and current membership records</h2>
+    {% for group in access.groups %}
+    <h3>{{ group.label }} — {{ group.key }}{% if not group.active %} (inactive){% endif %}</h3>
+    <p>Feature scope: {% for feature in features if feature.access_group == group.key %}{{ feature.label }} ({{ 'group membership required' if feature.access_mode == 'group_only' else 'group membership or existing Dev/Root access' }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--striped wc-table--compact">
+        <caption>Membership records for {{ group.label }} (UTC)</caption>
+        <thead><tr><th scope="col">Person</th><th scope="col">Status</th><th scope="col">Added</th><th scope="col">Review</th><th scope="col">Expires</th></tr></thead>
+        <tbody>{% for member in access.memberships if member.group_key == group.key %}
+          <tr><td>{{ account_names.get(member.user_id, 'Deleted account') }} ({{ member.user_id }})</td><td>{{ 'Inactive account' if not member.account_active else ('Current' if member.unexpired and group.active else 'Expired or inactive group') }}</td><td>{{ member.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ member.review_at.strftime('%Y-%m-%d %H:%M:%S') if member.review_at else '—' }}</td><td>{{ member.expires_at.strftime('%Y-%m-%d %H:%M:%S') if member.expires_at else 'No expiration' }}</td></tr>
+          {% else %}<tr><td colspan="5">No memberships.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </section>
+  <section class="wc-panel wc-stack" aria-labelledby="history-heading">
+    <h2 id="history-heading">Decision history</h2>
+    <p>Most recent first. Historical account IDs and feature scope remain after an account or group is deleted.</p>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--striped wc-table--compact">
+        <caption>Retained membership events (UTC)</caption>
+        <thead><tr><th scope="col">Event / time</th><th scope="col">Maintainer</th><th scope="col">Person</th><th scope="col">Group / recorded scope</th><th scope="col">Decision / reason</th><th scope="col">Review / expires</th></tr></thead>
+        <tbody>{% for event in access.events %}
+          <tr><td>{{ event.id }} / {{ event.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ account_names.get(event.actor_id, 'Deleted account') }} ({{ event.actor_id }})</td><td>{{ account_names.get(event.user_id, 'Deleted account') }} ({{ event.user_id }})</td><td>{{ event.group_key }} / {% for scope in event.feature_scope %}{{ scope.feature_id }} ({{ 'group membership required' if scope.access_mode == 'group_only' else 'group membership or existing Dev/Root access' }}){% if not loop.last %}, {% endif %}{% endfor %}</td><td>{{ event.action }} / {{ event.reason }}</td><td>{{ event.review_at.strftime('%Y-%m-%d %H:%M:%S') if event.review_at else '—' }} / {{ event.expires_at.strftime('%Y-%m-%d %H:%M:%S') if event.expires_at else '—' }}</td></tr>
+          {% else %}<tr><td colspan="6">No decisions on this page.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% if access.older_than %}<a href="{{ url_for('admin.feature_access', before=access.older_than) }}">Older decisions</a>{% endif %}
+    {% if request.args.get('before') %}<a href="{{ url_for('admin.feature_access') }}">Latest decisions</a>{% endif %}
+  </section>
+</section>
+{% endblock %}
+{% block script_extras %}<script src="{{ static_url('js/feature_access.js') }}" defer></script>{% endblock %}

@@ -3,7 +3,7 @@
 
 This ExecPlan is maintained under `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current. This plan is the active plan for the feature-access package only; it does not execute or close other active initiatives.
 
-The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator has now authorized milestone one. Milestones two through five remain future work.
+The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator authorized milestone one (committed as `62ce1af3f`) and now milestone two. Milestones three through five remain future work.
 
 ## Purpose and outcome
 
@@ -15,6 +15,10 @@ OpenET and Batch have separate groups, initially containing only the requesting 
 The target is faithful integration into existing workflows, not a disconnected authorization scaffold. A new model/helper is implemented but not wired until real render, execution, data and identity paths consume it. Closeout requires actual database and generated-output evidence, not only mocked tests or a successful job state.
 
 ## Progress
+
+- [x] (2026-10-02 UTC) Milestone-two account UI, acknowledgment and atomic initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass.
+- [x] (2026-10-02 UTC) Local shared database backed up, test-restored, migrated and initialized for the verified sole maintainer; production unchanged.
+- [x] (2026-10-02 UTC) Full Python regression: 10,198 passed, 126 skipped; milestone-two validation and handoff complete.
 
 - [x] (2026-10-01) Milestone one complete: additive records/migration, shared decisions, PostgreSQL acceptance and independent reviews.
 
@@ -30,12 +34,14 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01) Independent correctness/security reviews accepted the narrowed matrix after fixes; zero unresolved High/Medium findings, recorded in `artifacts/2026-10-01_m0_reviews.md`.
 - [x] (2026-10-01) Accepted standalone contract ancestor: `d3639f970669411e9c0f5bf8e80898645c947559`; M0 complete.
 - [x] (2026-10-01) Implemented additive account records/migration, shared evaluator and direct PostgreSQL persistence tests; final account/registry run passed 180 cases.
-- [ ] Implement single-maintainer group UI and initial memberships with real readback evidence.
+- [x] Implement single-maintainer group UI and local initial memberships with real readback evidence.
 - [ ] Wire protected action/data admission and public inspection, including Culvert compatibility.
 - [ ] Implement conservative maturity and PowerUser onboarding after restricted-data gates are ready.
 - [ ] Complete real browser/model/artifact acceptance, independent reviews, and an operator-approved rollout plan.
 
 ## Surprises & Discoveries
+
+Milestone two: a stale Flask-Security session can fall through to token authentication; session presence alone is insufficient. The adapter verifies resolved session provenance and identity binding. Inactive pre-grants need effective status read inside the write transaction. Axe identified two low-contrast navigation links, fixed by existing button styles. A `public`-only backup omits `pg_trgm`; test restore caught missing Usersum index operators, and an archive explicitly including the extension restored successfully. The web module uses qualified Flask imports so stubtest does not inspect context-bound proxies.
 
 Milestone one: the run catalog already uses shared SQL metadata without constructing Flask, so the new account records follow that precedent. Database waits can cross an expiry boundary; admission uses PostgreSQL wall-clock time and grants sample UTC after row locks. The autouse test-secret fixture clears deployed password-file settings, so isolated PostgreSQL tests capture the configured URI before that fixture, as existing catalog tests do.
 
@@ -49,6 +55,10 @@ There is no persisted user group model even though profile token issuance has a 
 Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
+
+2026-10-02 UTC, milestone two: publish the policy's unchanged internal onboarding text as `internal-2026-10-01`; use existing Pure forms/tables and explicit read errors. Record inactive-account pre-grants without effective entitlement. Both initial groups and events share a transaction, and initialization refuses conflicting decisions. Apply the accepted migration and audited initial memberships to local development after verified restore/readback; do not restart services or alter production. Group-based acknowledgment remains a personal action, not fabricated by initialization.
+
+2026-10-01, milestone two compatibility plan: add session/CSRF-protected administration and current-user acknowledgment without changing role assignment, ordinary project behavior, or protected feature endpoints. Reuse User Management tables, Preferences Pure form macros and inline status patterns. Validate real PostgreSQL transactions, browser rendering and evaluator transitions in isolated schemas; production migration/initialization remains a rollout operation with backup/readback, not an implicit deployment.
 
 2026-10-01, milestone-one implementation: use one additive migration after actual head `d30c91a7b802`, initialize only six group definitions, and keep membership initialization separate. Root-checked membership writes own a transaction and lock the subject account row; events snapshot feature IDs/access modes and retain identifiers without cascading deletion. Operational downgrade refuses to drop audit history; rollback disables consumers.
 
@@ -68,6 +78,8 @@ Source investigation found no durable anonymous creator proof, but the operator 
 2026-10-01, operator clarification: only limited-access features become read-only for unentitled users. Ordinary anonymous behavior stays unchanged; earlier writer/creator proposals are withdrawn. The designated account is rogerlew@gmail.com, resolved per deployment; Culvert client is on wepp2.
 
 ## Outcomes & Retrospective
+
+Milestone two: Root management/history, own Profile status and versioned acknowledgment, strict session/CSRF mutations, and the atomic sole-maintainer initializer are implemented. PostgreSQL acceptance passed 75 cases; final route regressions passed 73. Full-app browser acceptance passed with real sessions/database, evaluator denied/denied/allowed/denied transitions, retained events, keyboard/error focus and zero axe violations. Both independent reviews have zero unresolved findings. Local migration/initialization readback shows two memberships, two audit events, zero acceptances and unchanged legacy counts. Frontend lint and 112 Jest suites/919 tests pass; store/web stubtest and stub checks pass. Broad Python regression passed: 10,198 passed, 126 skipped in 2,535.69 seconds; final qualified-import/export cleanup also passed the 73-case route rerun and web stubtest. See [M2 acceptance](../../artifacts/2026-10-01_m2_acceptance.md); M3 enforcement and production rollout remain future work.
 
 Milestone-one implementation: four account models, definition-only additive migration after `d30c91a7b802`, live membership store with atomic retained events, explicit shared decisions and required six-feature metadata are implemented. Independent correctness/security reviews closed three Medium findings (dependency error propagation, expiry after waits, omitted metadata role fallback). The final focused account/registry suite passed 180 cases; the full Python suite passed (10,149 passed, 126 skipped). It started before the final metadata guard; the final guard is covered by the 180-case rerun. All three new modules passed stubtest, and stub/doc/link/whitespace checks passed. No routes/UI, shared schema, maintainer memberships or credentials were changed.
 
@@ -178,7 +190,7 @@ Add dedicated evaluator, real database, Profile/group route and public-view test
     wctl run-npm test
     wctl check-test-stubs
 
-Run affected stubtest modules if public Python surfaces/stubs change. Rebuild controllers with the nearest AGENTS instructions if controller sources change. Run `wctl check-rq-graph` and inspect live job trees only if enqueue wiring changes; no such topology change is planned. Do not rerun the broad suite for this documentation-only preparation.
+Run affected stubtest modules if public Python surfaces/stubs change. Rebuild controllers with the nearest AGENTS instructions if controller sources change. Run `wctl check-rq-graph` and inspect live job trees only if enqueue wiring changes; no such topology change is planned. The original documentation-only preparation did not require the broad suite; authorized runtime milestones use the implementation gates above.
 
 ## Interfaces and dependencies
 
@@ -201,3 +213,6 @@ Revision note, 2026-10-01 scope correction: removed the broader creator/writer p
 Revision note, 2026-10-01: operator authorized milestone one. Reuse the existing framework-independent SQL metadata pattern, with account ORM models registered in app.py; validate in isolated PostgreSQL schemas before any shared deployment migration. Milestones two through five remain future work.
 
 Milestone-one handoff, 2026-10-01: implementation and validation are complete; the operator authorized committing this milestone. Both independent reviewers confirmed all findings closed. The package remains open and unwired; milestone two is the next implementation step.
+
+
+Milestone-two handoff, 2026-10-02 UTC: implementation, focused/browser/database gates, independent reviews and broad Python regression are complete. Local initialization is verified after backup restore; production is unchanged. The operator authorized committing the completed milestone. Milestone three is the next implementation step.

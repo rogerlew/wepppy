@@ -171,9 +171,9 @@ Runtime work follows the reviewed milestone-zero checkpoint and requires the bou
 
 Independent correctness and security reviews of the prepared plan and findings disposition are recorded in the [review artifact](../work-packages/20261001_feature_access_governance/artifacts/2026-10-01_contract_reviews.md). The completed milestone-zero matrix passed independent correctness/security review; see the [final disposition](../work-packages/20261001_feature_access_governance/artifacts/2026-10-01_m0_reviews.md). Record the accepted ancestor in the package tracker before runtime work. The operational single-maintainer group decision is distinct from repository engineering reviews. PowerUser suspension, reapplication and permanent revocation do not block this increment. The unanswered proposal to expose embargoed results remains excluded; the existing restriction is retained.
 
-## Proposed FA-01 web transport checkpoint
+## FA-01 web transport checkpoint
 
-These routes are the milestone-zero reviewed transport target; no endpoint is implemented by this amendment. Paths are Flask-relative; external requests use the configured site prefix, normally `/weppcloud`. Retain the existing `/profile` and Root administration authentication behavior. New mutation endpoints require authenticated session cookies, standard CSRF validation and `application/json`; they do not accept bearer-token authentication as a substitute for the browser boundary.
+These routes are the milestone-zero reviewed transport target. Milestone two implements group administration and internal acknowledgment; PowerUser self-service remains gated on later milestones. Paths are Flask-relative; external requests use the configured site prefix, normally `/weppcloud`. Retain the existing `/profile` and Root administration authentication behavior. New mutation endpoints require authenticated session cookies, standard CSRF validation and `application/json`; they do not accept bearer-token authentication as a substitute for the browser boundary.
 
 | Method / path | Request | Successful response |
 | --- | --- | --- |
@@ -197,6 +197,20 @@ The additive account models/migration, six registry access mappings and shared
 transactional store/evaluator are implemented under the accepted ancestor
 `d3639f970`. [Feature access records](../dev-notes/feature-access-records.md)
 documents trusted adapter inputs, transaction ownership, migration backup/readback
-and history-preserving rollback. This stage does not wire route authorization,
-initialize memberships, expose UI, assign PowerUser roles or deploy the migration.
+and history-preserving rollback. Milestone one did not wire route authorization, initialize memberships, expose
+UI, assign PowerUser roles or deploy the migration.
 Subsequent milestones must still prove end-to-end conformance to this contract.
+
+
+## Milestone-two implementation status
+
+Root group administration and current-user Profile acknowledgment implement the
+transport above. The statement version is `internal-2026-10-01`, using the
+policy's Internal Collaborator Onboarding text without adding a second approval.
+Membership and its effective status are committed/read in one transaction;
+inactive-account pre-grants remain ineffective. The explicit initializer resolves
+the designated email per deployment and atomically records both sole-maintainer
+groups, refusing conflicting existing decisions. See the
+[operator and developer guide](../dev-notes/feature-access-records.md#group-administration-and-profile).
+Feature action/data endpoint enforcement remains milestone three; neither this
+UI nor acknowledgment enables general PowerUser onboarding or certifies rollout.

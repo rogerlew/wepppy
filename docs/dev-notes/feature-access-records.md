@@ -1,10 +1,10 @@
 # Feature access account records
 
-Milestone one implements the FA-01 account substrate and shared evaluator.
-It does not wire routes, change current authorization, expose self-service,
-initialize maintainer memberships, or deploy a migration. The normative owner is
-[FA-01](../schemas/feature-access-governance-contract.md); later milestones wire
-its restricted actions, protected data and user interfaces.
+Milestones one and two implement the FA-01 account substrate, shared evaluator,
+Root group administration and Profile acknowledgment. Protected feature endpoint
+wiring remains milestone three; PowerUser self-service remains milestone four.
+The normative owner is [FA-01](../schemas/feature-access-governance-contract.md).
+Production rollout and service-token compatibility still need their later gates.
 
 ## Records and transaction ownership
 
@@ -32,8 +32,8 @@ are historical snapshots without cascading account/group foreign keys. The
 store exposes no event update/delete operation.
 
 The internal-acceptance primitive takes the server-owned statement version and
-verified current-user ID; routes must validate the affirmative answer and bind
-the current user before calling it. PowerUser role assignment and automatic
+verified current-user ID; the web adapter validates the affirmative answer and binds
+the authenticated browser-session user before calling it. PowerUser role assignment and automatic
 approval are still milestone four; no PowerUser acceptance/grant API is exposed
 by this stage.
 
@@ -93,3 +93,93 @@ It covers empty/legacy account upgrades, model/migration metadata parity,
 constraints, concurrent duplicates, injected audit failure rollback, retention,
 expiry, current membership, acknowledgment and evaluator allow/deny boundaries.
 No production or shared account schema is migrated by this suite.
+
+## Group administration and Profile
+
+Root users reach **Feature groups and decision history** from User Management
+or **Manage feature groups and decision history** from Profile. Select a person,
+feature group and add/remove decision; supply the purpose and reason. For adds,
+review and expiration accept UTC ISO timestamps (for example
+`2027-01-01T00:00:00Z`) or blank for no date. Document continuing access in the
+reason if both dates are blank. Removal records a new event and retains history;
+it does not edit roles, cancel jobs or remove the acknowledgment.
+
+The inventory identifies inactive accounts, expired records and inactive groups.
+An inactive account can have a recorded pre-grant, but its effective `member`
+response is false. Current membership is not a promise of action admission:
+acknowledgment, existing resource permissions and feature requirements still
+apply. PATH-CE work using contrast data also needs separate Omni Contrasts
+entitlement. The page explains this; it never creates a dependency grant.
+History is paged in descending event order with **Older decisions** and includes
+historical actor/subject IDs, scope, reason and UTC dates.
+
+Profile shows only the current person's memberships and current acknowledgment.
+It presents the policy's Internal Collaborator Onboarding text as version
+`internal-2026-10-01`. Change the version when the statement changes and retain
+historical acceptance rows. Checking the statement and submitting records acceptance
+for the current account only. No other person's audit reasons are exposed.
+A persistence failure displays a reference ID and explicit unavailable status
+without disabling ordinary Profile functions. Existing Dev/Root operational
+paths do not acquire an acknowledgment requirement; group-only features do.
+
+The two mutation endpoints accept strict JSON under normal CSRF protection.
+`feature_access_web.py` verifies Flask-Security's resolved `session` provenance
+and its binding to the cookie's user ID. A stale session plus a valid token is
+not sufficient. Errors sanitize persistence details and log an `error_id`.
+Mutation responses compute effective membership before transaction commit, so a
+failed read rolls back and cannot report an error after saving the decision.
+
+## Explicit maintainer initialization
+
+After an authorized deployment's verified backup and additive migration, run:
+
+```bash
+wctl exec -T weppcloud flask --app wepppy.weppcloud.app admin initialize-feature-access \
+  --email rogerlew@gmail.com \
+  --reason "Initial sole-maintainer access: OpenET API limits and Batch computational limits; continuing access pending an explicit maintainer decision."
+```
+
+The command resolves the exact email in the current database and requires an
+active Root account. Both OpenET and Batch memberships and their scope/reason
+snapshots commit in one transaction. Repeating the same initialization is a
+no-op. Existing other members or dated grants cause an explicit conflict rather
+than pruning someone or silently renewing a grant. This command never changes
+roles, fabricates acknowledgment, or initializes other feature memberships.
+
+Backup validation must include a restore, not just a dump header. A dump scoped
+to the `public` schema also needs the installed `pg_trgm` extension to restore
+Usersum search indexes; include it explicitly or use the normal full-database
+backup. Restore into a disposable database, read back the Alembic revision and
+account/role/run counts, then remove only that disposable database. Keep dumps
+outside git with restrictive permissions.
+
+## Browser acceptance harness
+
+`tests/weppcloud/feature_access_browser_server.py` runs the complete app on HTTPS
+port 8902 in a fresh PostgreSQL schema, with real models, Redis sessions and CSRF.
+It initializes fixture maintainer memberships and writes disposable browser
+cookies to ignored `docker/secrets/m2-browser.json` (0600). It adds only a
+read-only, current-user evaluator probe for the test. It does not exercise model
+execution or substitute for milestone-three feature endpoint wiring. Sessions
+are provisioned using the documented local test-cookie path; password/CAP login
+is outside this acceptance test.
+
+Start the helper:
+
+```bash
+wctl exec -T weppcloud python tests/weppcloud/feature_access_browser_server.py
+```
+
+Then run the
+opt-in `tests/smoke/feature-access.spec.js` via `wctl run-npm test:playwright`, with
+`FEATURE_ACCESS_BROWSER=1`, `SMOKE_BASE_URL` pointing to that container's HTTPS
+port, the existing `PLAYWRIGHT_BROWSERS_PATH`, and optionally
+`FEATURE_ACCESS_EVIDENCE_DIR`. The test covers keyboard submission/error focus,
+real grant/acknowledgment/removal, shared-evaluator transitions, retained history
+and axe scans. Send SIGTERM to this specific helper process afterward; it removes
+its cookies, known Redis sessions and test schema. It never migrates the shared
+account schema.
+
+`wctl run-pytest tests/weppcloud/routes/test_feature_access_routes.py` covers
+real PostgreSQL and Flask-Security/CSRF route behavior, strict payloads, token
+fallback rejection, privacy, effective inactive status and atomic initialization.

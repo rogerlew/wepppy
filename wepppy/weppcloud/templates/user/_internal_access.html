@@ -1,0 +1,31 @@
+{% import "controls/_pure_macros.html" as ui %}
+<section aria-labelledby="internal-access-heading" class="wc-stack">
+  <h2 id="internal-access-heading">Internal feature access</h2>
+  {% if user.has_role('Root') %}<p><a href="{{ url_for('admin.feature_access') }}">Manage feature groups and decision history</a></p>{% endif %}
+  {% if internal_access.error_id %}
+    <p class="wc-alert wc-alert--warning" role="status">Feature access status is temporarily unavailable. Reload to retry. Reference: {{ internal_access.error_id }}</p>
+  {% else %}
+    <p>Membership applies only to the listed feature. It does not grant technical roles or access to unrelated features. Project permissions and feature availability still apply.</p>
+    <ul>{% for member in internal_access.memberships %}
+      <li>{{ member.label }}:
+        {% if not member.active %}group inactive{% elif not member.unexpired %}membership expired{% elif internal_access.acknowledged %}membership current; acknowledgment complete{% else %}membership current; actions await acknowledgment{% endif %}.
+        {% if member.key == "path_ce" %}Work using contrast data also requires separate Omni Contrasts access.{% endif %}
+        {% if member.review_at %}Review: {{ member.review_at }}.{% endif %}
+        {% if member.expires_at %}Expires: {{ member.expires_at }}.{% endif %}
+      </li>
+      {% else %}<li>No feature group memberships.</li>{% endfor %}</ul>
+    <p>Existing Dev/Root operational access does not require this acknowledgment. Group-only features still require membership.</p>
+    <h3>Internal access statement</h3>
+    <p>{{ internal_access.statement }}</p>
+    <p>Version: {{ internal_access.version }}</p>
+    {% if internal_access.acknowledged %}<p role="status">You have accepted this version.</p>{% else %}
+    <form class="pure-form pure-form-stacked" action="{{ url_for('user.internal_access_acknowledge') }}" method="post" data-feature-access-form="acknowledgment" data-statement-version="{{ internal_access.version }}">
+      {{ ui.checkbox_field('accepts_training', 'I have read and understand the internal access statement.', attrs={'required': true}) }}
+      <p class="wc-alert" data-access-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
+      <button type="submit" class="pure-button pure-button-primary">Accept internal access statement</button>
+      <a href="{{ url_for('user.profile') }}" data-access-refresh hidden>Refresh access status</a>
+      <noscript><p>JavaScript is required to record acknowledgment.</p></noscript>
+    </form>
+    {% endif %}
+  {% endif %}
+</section>
