@@ -105,6 +105,19 @@ def project_client(
     )
     monkeypatch.setattr(project_module, "Watershed", WatershedStub)
 
+    # Unit controller fixtures retain the real evaluator; PostgreSQL identity and
+    # membership transactions are covered by test_feature_access.py.
+    from wepppy.weppcloud.utils import feature_access_flask as feature_web
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext
+    current_user_stub.groups = set()
+    monkeypatch.setattr(feature_web, "current_principal", lambda: VerifiedPrincipal("human", 1, frozenset(current_user_stub.roles)))
+    monkeypatch.setattr(feature_web._FlaskStore, "membership", lambda self, user_id, group_key, **kwargs: (group_key in current_user_stub.groups, True))
+    monkeypatch.setattr(feature_web, "resource_context", lambda wd=None, **kwargs: FeatureResourceContext(
+        existing_access_allowed=True, backend="wbt", readonly=RonStub.getInstance(str(run_dir)).readonly,
+        enabled_features=frozenset(RonStub.getInstance(str(run_dir)).mods),
+        check_capabilities=kwargs.get("check_capabilities", True),
+        internal_statement_version="internal-2026-10-01"))
+
     dispatched: Dict[str, Any] = {}
     dispatched["current_user"] = current_user_stub
 
@@ -411,7 +424,7 @@ def test_set_mod_enables_features_export_module(project_client):
     assert "features_export" in controller.mods
 
 
-def test_set_mod_openet_requires_dev(project_client):
+def test_set_mod_openet_requires_membership(project_client):
     client, RonStub, dispatched, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)
     assert controller.mods == []
@@ -421,16 +434,16 @@ def test_set_mod_openet_requires_dev(project_client):
         json={"mod": "openet_ts", "enabled": True},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 403
     payload = response.get_json()
-    assert "restricted to Dev users" in payload["error"]["message"]
+    assert "feature_membership_required" in payload["error"]["message"]
     assert controller.mods == []
     assert dispatched["current_user"].roles == set()
 
 
-def test_set_mod_openet_allows_dev(project_client) -> None:
+def test_set_mod_openet_allows_acknowledged_member(project_client) -> None:
     client, RonStub, dispatched, run_dir, _ = project_client
-    dispatched["current_user"].roles = {"Dev"}
+    dispatched["current_user"].groups = {"openet_ts"}
 
     controller = RonStub.getInstance(run_dir)
     assert controller.mods == []
@@ -447,7 +460,7 @@ def test_set_mod_openet_allows_dev(project_client) -> None:
     assert "openet_ts" in controller.mods
 
 
-def test_set_mod_openet_allows_root(project_client) -> None:
+def test_set_mod_openet_denies_root_without_membership(project_client) -> None:
     client, RonStub, dispatched, run_dir, _ = project_client
     dispatched["current_user"].roles = {"Root"}
 
@@ -459,11 +472,8 @@ def test_set_mod_openet_allows_root(project_client) -> None:
         json={"mod": "openet_ts", "enabled": True},
     )
 
-    assert response.status_code == 200
-    payload = response.get_json()
-    assert payload["Content"]["mod"] == "openet_ts"
-    assert payload["Content"]["enabled"] is True
-    assert "openet_ts" in controller.mods
+    assert response.status_code == 403
+    assert controller.mods == []
 
 
 def test_enabling_omni_does_not_enable_omni_contrasts(project_client) -> None:
@@ -497,7 +507,7 @@ def test_omni_contrasts_mutation_denied_below_dev(
     )
 
     payload = response.get_json()
-    assert "restricted to Dev users" in payload["error"]["message"]
+    assert "feature_membership_required" in payload["error"]["message"]
     assert controller.mods == ["omni", "treatments"]
 
 
@@ -533,7 +543,8 @@ def test_omni_contrasts_requires_omni_scenarios(project_client) -> None:
         json={"mod": "omni_contrasts", "enabled": True},
     )
 
-    assert "requires Omni Scenarios" in response.get_json()["error"]["message"]
+    assert response.status_code == 403
+    assert "prerequisite_required" in response.get_json()["error"]["message"]
     assert controller.mods == []
 
 

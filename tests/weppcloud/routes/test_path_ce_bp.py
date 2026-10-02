@@ -69,6 +69,13 @@ def path_ce_client(
     run_dir = tmp_path / RUN_ID
     run_dir.mkdir()
 
+    from wepppy.weppcloud.utils import feature_access_flask as feature_web
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext
+    monkeypatch.setattr(feature_web, "current_principal", lambda: VerifiedPrincipal("human", 1, frozenset({"Root"})))
+    monkeypatch.setattr(feature_web, "resource_context", lambda *args, **kwargs: FeatureResourceContext(
+        existing_access_allowed=True, backend="wbt", enabled_features=frozenset({"omni"}),
+        consumes_contrasts=kwargs.get("consumes_contrasts", False)))
+
     context = SimpleNamespace(active_root=run_dir)
 
     monkeypatch.setattr(path_ce_module, "load_run_context", lambda runid, cfg: context)

@@ -21,6 +21,7 @@ from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     BrowseAuthError,
     authorize_run_request,
+    require_data_access,
     handle_auth_error,
 )
 from wepppy.microservices.browse.security import (
@@ -356,6 +357,10 @@ async def archive_download(request: Request) -> Response:
 
     try:
         archive = await asyncio.to_thread(_resolve_archive, runid, archive_subpath)
+        try:
+            require_data_access(auth_context, archive.path, inspect_bundle=True)
+        except BrowseAuthError as exc:
+            raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
         byte_range = _parse_range_header(request.headers.get("Range"), archive.size_bytes)
     except RangeNotSatisfiable as exc:
         headers = {

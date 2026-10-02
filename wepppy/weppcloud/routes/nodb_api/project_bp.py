@@ -5,6 +5,7 @@ from subprocess import PIPE, Popen
 import os
 import traceback
 import redis
+from werkzeug.exceptions import HTTPException
 from rq import Queue
 from wepppy.nodb.single_input_policy import require_feature_allowed
 from wepppy.config.redis_settings import (
@@ -29,7 +30,7 @@ from wepppy.rq.submission_recovery import (
 
 from wepppy.weppcloud.utils.helpers import (
     success_factory, error_factory, exception_factory,
-    get_run_owners_lazy, get_user_models, authorize, 
+    get_run_owners_lazy, get_user_models, authorize,
     authorize_and_handle_with_exception_factory, run_lifecycle_mutation
 ) 
 from wepppy.weppcloud.feature_registry.runtime import (
@@ -38,6 +39,8 @@ from wepppy.weppcloud.feature_registry.runtime import (
     user_meets_min_role,
 )
 
+
+from wepppy.weppcloud.utils.feature_access_flask import require_feature
 
 project_bp = Blueprint('project', __name__)
 
@@ -238,6 +241,9 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     spec = _feature_spec(mod_name)
     if spec is None:
         raise ValueError(f"Unknown module '{mod_name}'.")
+
+    if spec.access_group:
+        require_feature(mod_name, wd=str(load_run_context(runid, config).active_root), check_capabilities=enabled)
 
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, rq_submission_lock(
         redis_conn,
@@ -732,11 +738,16 @@ def task_set_mod(runid, config):
         return error_factory('enabled must be boolean')
 
     mod_key = str(mod_name).strip()
-    if not _feature_role_enabled(mod_key):
+    spec = _feature_spec(mod_key)
+    if spec is not None and spec.access_group:
+        require_feature(mod_key, wd=str(load_run_context(runid, config).active_root), check_capabilities=False)
+    elif not _feature_role_enabled(mod_key):
         return error_factory(_feature_role_restriction_message(mod_key))
 
     try:
         state = set_project_mod_state(runid, config, mod_key, bool(enabled))
+    except HTTPException:
+        raise
     except ValueError as exc:
         return error_factory(str(exc))
     except Exception:  # broad-except: boundary contract

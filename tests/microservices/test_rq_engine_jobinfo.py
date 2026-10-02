@@ -354,11 +354,12 @@ def _issue_rq_token(
     *,
     scopes: list[str] | None = None,
     extra_claims: dict[str, object] | None = None,
+    subject: str = "tester",
 ) -> str:
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
     auth_tokens.get_jwt_config.cache_clear()
     payload = auth_tokens.issue_token(
-        "tester",
+        subject,
         scopes=scopes or ["rq:status"],
         audience="rq-engine",
         extra_claims={"jti": "test-jti", **(extra_claims or {})},
@@ -522,6 +523,8 @@ def test_canceljob_accepts_culvert_submit_scope(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
     token = _issue_rq_token(
         monkeypatch,
+        subject="culvert-batch-submit-90d",
+        extra_claims={"token_class": "service", "service_groups": ["culverts"]},
         scopes=["culvert:batch:submit"],
     )
 
@@ -553,6 +556,8 @@ def test_canceljob_accepts_dual_scope_culvert_token_without_run_claims(
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
     token = _issue_rq_token(
         monkeypatch,
+        subject="culvert-batch-submit-90d",
+        extra_claims={"token_class": "service", "service_groups": ["culverts"]},
         scopes=["rq:status", "culvert:batch:submit"],
     )
     monkeypatch.setattr(

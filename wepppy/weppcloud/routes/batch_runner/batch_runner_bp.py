@@ -27,13 +27,19 @@ batch_runner_bp = Blueprint(
 )
 
 def _batch_roles_required(*roles: str):
-    """Allow temporary auth bypass for batch routes via config."""
+    """Workflow group admission; technical roles are not an exemption."""
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if current_app.config.get("BATCH_RUNNER_SKIP_AUTH", False):
-                return func(*args, **kwargs)
-            return roles_required(*roles)(func)(*args, **kwargs)
+            from wepppy.weppcloud.utils.feature_access_flask import require_feature
+            from wepppy.nodb.base import NoDbBase
+            from wepppy.weppcloud.utils.helpers import get_wd
+            inspection = func.__name__ in {"view_batch", "gl_dashboard_batch", "runstate"}
+            batch_name = kwargs.get("batch_name")
+            public = inspection and batch_name and NoDbBase.ispublic(get_wd(f"batch;;{batch_name};;_base"))
+            if not public:
+                require_feature("batch_runner", operation="inspect" if inspection else "act", protected_read=True)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -261,25 +267,30 @@ def view_batch(batch_name: str):
     base_runid = f"batch;;{batch_name};;_base"
     base_config = batch_runner.base_config
     batch_runner_state = _build_batch_runner_snapshot(batch_runner)
+    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+    batch_action_allowed = feature_decision("batch_runner").allowed
     ron = RonViewModel.getInstanceFromRunID(base_runid)
     roles = [
         str(getattr(role, "name", role)).strip()
         for role in (getattr(current_user, "roles", None) or [])
         if str(getattr(role, "name", role)).strip()
     ]
-    token_payload = auth_tokens.issue_token(
-        _current_user_subject(),
-        scopes=["rq:enqueue"],
-        audience="rq-engine",
-        extra_claims={
-            "roles": roles,
-            "token_class": "user",
-            "email": getattr(current_user, "email", None),
-        },
-    )
+    token_payload = {"token": None}
+    if batch_action_allowed:
+        token_payload = auth_tokens.issue_token(
+            _current_user_subject(),
+            scopes=["rq:enqueue"],
+            audience="rq-engine",
+            extra_claims={
+                "roles": roles,
+                "token_class": "user",
+                "email": getattr(current_user, "email", None),
+            },
+        )
 
     context: Dict[str, Any] = {
         "feature_enabled": feature_enabled,
+        "batch_action_allowed": batch_action_allowed,
         "batch_name": batch_name,
         "base_config": base_config,
         "ron": ron,

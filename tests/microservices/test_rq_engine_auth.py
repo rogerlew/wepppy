@@ -369,7 +369,7 @@ def test_authorize_user_claims_rejects_private_batch_run_without_owners(
         )
 
     assert exc_info.value.status_code == 403
-    assert exc_info.value.code == "forbidden"
+    assert exc_info.value.code == "human_identity_required"
 
 
 def test_authorize_user_claims_allows_public_batch_run_without_owners(

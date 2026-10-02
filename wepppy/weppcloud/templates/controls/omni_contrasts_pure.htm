@@ -1,3 +1,8 @@
+{% set feature_readonly = feature_actions is defined and not feature_actions["omni_contrasts"].allowed %}
+{% if feature_readonly %}
+<p class="wc-text-muted">Read-only access. {{ feature_actions["omni_contrasts"].reason | replace("_", " ") | capitalize }}. Review your internal access on your Profile.</p>
+<fieldset disabled aria-label="Read-only feature controls">
+{% endif %}
 {# Doc: controllers_js/README.md — Omni Controller Reference (2024 helper migration) #}
 {% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
@@ -391,3 +396,5 @@
   </div>
 
 {% endcall %}
+
+{% if feature_readonly %}</fieldset>{% endif %}

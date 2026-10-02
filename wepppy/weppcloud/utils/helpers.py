@@ -775,6 +775,29 @@ def success_factory(kwds: Any | None = None) -> Response:
 
 
 def authorize(runid: str, config: str, require_owner: bool = False) -> None:
+    """Preserve project access, adding only restricted workflow admission."""
+    _authorize_existing(runid, config, require_owner)
+    from flask import request
+    from wepppy.nodb.base import NoDbBase
+    from .feature_access_runtime import workflow_features
+    from .feature_access_flask import require_feature
+    from .feature_access_data import protected_source
+    operation = "act" if request.method not in {"GET", "HEAD", "OPTIONS"} or "/tasks/" in request.path else "inspect"
+    features = list(workflow_features(runid))
+    if "omni_contrasts" not in features:
+        active_root = get_wd(runid)
+        pup = request.args.get("pup") if ";;" not in runid else None
+        candidate = _join(get_wd(runid, prefer_active=False), "_pups", pup) if pup else active_root
+        if protected_source(candidate):
+            features.append("omni_contrasts")
+    for feature in features:
+        if operation == "inspect" and feature == "batch_runner" and NoDbBase.ispublic(get_wd(_strip_omni_suffix_runid(runid))):
+            continue
+        context_runid = _strip_omni_suffix_runid(runid) if feature == "omni_contrasts" else runid
+        require_feature(feature, wd=get_wd(context_runid, prefer_active=False), operation=operation, protected_read=True)
+
+
+def _authorize_existing(runid: str, config: str, require_owner: bool = False) -> None:
     """Validate that the current user can access a run's resources.
 
     Args:
@@ -824,6 +847,10 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
         if owners and current_user in owners:
             return
         if Ron.ispublic(wd):
+            return
+        if not owners:
+            from .feature_access_flask import require_feature
+            require_feature("batch_runner", operation="inspect", protected_read=True)
             return
         abort(403)
 

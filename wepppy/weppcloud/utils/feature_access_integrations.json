@@ -1,0 +1,8 @@
+{
+  "culvert-web-app": {
+    "subjects": ["culvert-batch-submit-90d"],
+    "audience": "rq-engine",
+    "service_group": "culverts",
+    "token_classes": ["service"]
+  }
+}

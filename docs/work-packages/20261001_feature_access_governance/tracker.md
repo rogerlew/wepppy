@@ -2,7 +2,11 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: milestone two complete, including full regression, focused/browser acceptance, independent reviews and audited local initialization. Milestone one is committed as `62ce1af3f`. Protected feature endpoint wiring and production rollout remain later work.
+Current phase: milestone three authorized and in progress. Milestone two is committed as `c19fefcc6`; its regression, browser acceptance, independent reviews and local initialization are complete. Production rollout remains later work.
+
+M3 is checkpointed but incomplete. Direct admission, grouped delivery, protected artifacts, query roots, public read-only views and polling projection are being tested. A real signed JWT with isolated PostgreSQL membership passed the OpenET acknowledgment/removal admission test. Outstanding security work includes downstream D-Tale cached access and arbitrary file reads in query expressions. Operator decisions remain pending for durable contrast-child fork classification and evaluating a DuckDB upgrade (installed 1.1.1 has no per-file allowlist). No full M3 regression or browser/service acceptance claim is made.
+
+The [interim security review](artifacts/2026-10-02_m3_security_review.md) is **NOT PASSED**: two High findings remain open; eight source fixes await final independent acceptance confirmation. Latest bounded runs: **684 passed, 2 skipped** for account/action/session/query/run-view regression; **224 passed** for delivery/export cases; **16 passed** for artifact, alias and failure-boundary cases. Some suites overlap; these are not additive coverage totals. Control rendering: **198 passed**. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. Full M3 regression and production-equivalent browser/service acceptance remain pending.
 
 ## Progress
 
@@ -18,7 +22,8 @@ Current phase: milestone two complete, including full regression, focused/browse
 - [x] Implement milestone-two group administration/acknowledgment and complete focused/browser acceptance and independent reviews.
 - [x] Back up/test-restore, migrate and initialize the local development database; retain sole-maintainer audit readback.
 - [x] Complete broad Python regression: 10,198 passed, 126 skipped; finalize milestone-two handoff.
-- [ ] Milestones three through five remain future work.
+- [ ] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
+- [ ] Milestones four and five remain future work.
 
 ## Decision log
 

@@ -21,7 +21,12 @@
     subtitle="Upload resources, validate run IDs, and orchestrate batch tasks."
   ) %}{% endcall %}
 
+  {% if not batch_action_allowed %}
+  <p class="wc-text-muted">Read-only access. Batch actions require current group access and internal acknowledgment.</p>
+  <fieldset disabled aria-label="Read-only Batch controls">
+  {% endif %}
   {% include 'batch_runner_pure.htm' %}
+  {% if not batch_action_allowed %}</fieldset>{% endif %}
 {% endcall %}
 {% endblock %}
 

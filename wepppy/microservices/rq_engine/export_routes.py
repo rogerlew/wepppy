@@ -21,6 +21,8 @@ from wepppy.nodb.mods.features_export import (
     FeaturesExportValidationError,
     parse_profile_text,
     prepare_export_submission,
+    load_layer_catalog,
+    resolve_export_plan,
 )
 from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
 from wepppy.nodb.mods.features_export.service import (
@@ -44,6 +46,8 @@ from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
+from .feature_access import require_feature_access
+from wepppy.weppcloud.utils.feature_access_data import protected_export, contains_protected, protected_source
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import (
@@ -59,6 +63,13 @@ router = APIRouter()
 EXPORT_SCOPES = ["rq:export"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 _DOWNLOAD_FILENAME_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _require_export_access(claims, payload):
+    # Resolve aliases/families before preparation can inspect feature state.
+    plan = resolve_export_plan(payload, load_layer_catalog())
+    if protected_export(plan.to_mapping()):
+        require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -77,16 +88,20 @@ def _require_file(path: Path, *, label: str) -> Path:
     return path
 
 
-def _resolve_export_wd(runid: str, request: Request) -> str:
+def _resolve_export_wd(runid: str, request: Request, *, claims=None) -> str:
     run_root = Path(get_wd(runid, prefer_active=False)).resolve()
     if not run_root.is_dir():
         raise FileNotFoundError(f"Run '{runid}' not found")
 
     if ";;" in runid:
+        if protected_source(run_root):
+            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
         return str(run_root)
 
     pup_relpath = request.query_params.get("pup")
     if not pup_relpath:
+        if protected_source(run_root):
+            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
         return str(run_root)
 
     pups_root = (run_root / "_pups").resolve()
@@ -102,6 +117,8 @@ def _resolve_export_wd(runid: str, request: Request) -> str:
     if not candidate.is_dir():
         raise FileNotFoundError(f"Unknown pup project: {pup_relpath}")
 
+    if protected_source(candidate):
+        require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
     return str(candidate)
 
 
@@ -149,13 +166,14 @@ def _is_public_run_for_download(runid: str) -> bool:
         return False
 
 
-def _authorize_download_or_public(request: Request, *, runid: str) -> None:
+def _authorize_download_or_public(request: Request, *, runid: str):
     auth_header = request.headers.get("Authorization")
     if not auth_header and _is_public_run_for_download(runid):
         return
 
     claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
-    authorize_run_access(claims, runid)
+    authorize_run_access(claims, runid, operation="inspect")
+    return claims
 
 
 async def _parse_features_export_submit_payload(request: Request) -> tuple[dict[str, object] | None, JSONResponse | None]:
@@ -411,10 +429,12 @@ async def export_ermit(runid: str, config: str, request: Request):
     try:
         from wepppy.export import create_ermit_input
 
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         fn = await _run_sync(create_ermit_input, wd)
         file_path = _require_file(Path(fn), label="ERMiT export")
         return FileResponse(path=file_path, filename=file_path.name)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -453,7 +473,7 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         job_id = await _run_sync(
             lambda: _enqueue_ermit_export_job(runid=runid, config=config, wd=wd)
         )
@@ -470,6 +490,8 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
             },
             status_code=202,
         )
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except FileNotFoundError as exc:
@@ -502,7 +524,7 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
 )
 async def export_ermit_download(runid: str, config: str, job_id: str, request: Request):
     try:
-        _authorize_download_or_public(request, runid=runid)
+        claims = _authorize_download_or_public(request, runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -510,7 +532,7 @@ async def export_ermit_download(runid: str, config: str, job_id: str, request: R
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         job_info = await _run_sync(get_wepppy_rq_job_info, job_id)
         status = str(job_info.get("status") or "")
         if status == "not_found":
@@ -545,6 +567,8 @@ async def export_ermit_download(runid: str, config: str, job_id: str, request: R
             lambda: _resolve_ermit_job_artifact_path(wd, job_result)
         )
         return FileResponse(path=artifact_path, filename=artifact_path.name)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -583,7 +607,7 @@ async def export_geopackage(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         _result, artifact_path = await _run_sync(
             lambda: _execute_features_export_profile(
                 runid=runid,
@@ -595,6 +619,8 @@ async def export_geopackage(runid: str, config: str, request: Request):
         )
         _require_file(artifact_path, label="GeoPackage export")
         return FileResponse(path=artifact_path, filename=artifact_path.name)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -633,7 +659,7 @@ async def export_geodatabase(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
 
         try:
             artifact_path, _artifact_relpath = await _run_sync(
@@ -661,6 +687,8 @@ async def export_geodatabase(runid: str, config: str, request: Request):
 
         _require_file(artifact_path, label="Geodatabase export")
         return FileResponse(path=artifact_path, filename=artifact_path.name)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -716,7 +744,7 @@ async def export_prep_details(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         _result, artifact_path = await _run_sync(
             lambda: _execute_features_export_profile(
                 runid=runid,
@@ -735,6 +763,8 @@ async def export_prep_details(runid: str, config: str, request: Request):
             path=archive_file,
             filename=f"{runid}_prep_details.zip",
         )
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -781,6 +811,7 @@ async def export_features_submit(runid: str, config: str, request: Request):
     assert payload is not None
 
     try:
+        _require_export_access(claims, payload)
         wd = get_wd(runid)
         job_id, _cache_hit = await _run_sync(
             lambda: _enqueue_features_export_job(
@@ -799,6 +830,8 @@ async def export_features_submit(runid: str, config: str, request: Request):
             },
             status_code=202,
         )
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except FeaturesExportValidationError as exc:
@@ -856,6 +889,7 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
 
     try:
         request_payload = parse_profile_text(profile_text)
+        _require_export_access(claims, request_payload)
         wd = get_wd(runid)
         submission = await _run_sync(lambda: prepare_export_submission(wd, request_payload))
         return JSONResponse(
@@ -864,6 +898,8 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
             },
             status_code=200,
         )
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FeaturesExportProfileError as exc:
         return validation_error_response(
             [
@@ -914,7 +950,7 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
 )
 async def export_features_download(runid: str, config: str, job_id: str, request: Request):
     try:
-        _authorize_download_or_public(request, runid=runid)
+        claims = _authorize_download_or_public(request, runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -962,7 +998,11 @@ async def export_features_download(runid: str, config: str, job_id: str, request
             )
         )
         resolved_path = Path(artifact_path)
+        if contains_protected(artifact_path):
+            require_feature_access(claims or {}, "omni_contrasts", operation="inspect", protected_read=True)
         return FileResponse(path=resolved_path, filename=resolved_path.name)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FeaturesExportServiceError as exc:
         return error_response(
             str(exc),
@@ -1002,7 +1042,7 @@ async def export_features_download(runid: str, config: str, job_id: str, request
 )
 async def export_features_published_download(runid: str, config: str, profile: str, request: Request):
     try:
-        _authorize_download_or_public(request, runid=runid)
+        claims = _authorize_download_or_public(request, runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -1010,17 +1050,21 @@ async def export_features_published_download(runid: str, config: str, profile: s
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request)
+        wd = _resolve_export_wd(runid, request, claims=claims)
         artifact_path, _artifact_relpath = await _run_sync(
             lambda: resolve_published_artifact_path(
                 wd,
                 profile=profile,
             )
         )
+        if contains_protected(artifact_path):
+            require_feature_access(claims or {}, "omni_contrasts", operation="inspect", protected_read=True)
         return FileResponse(
             path=artifact_path,
             filename=_published_download_filename(runid, profile),
         )
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except FeaturesExportServiceError as exc:
         return error_response(
             str(exc),

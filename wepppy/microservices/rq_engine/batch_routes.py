@@ -15,7 +15,8 @@ from wepppy.rq.batch_rq import delete_batch_rq, reconcile_deferred_batch_jobs, r
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 
-from .auth import AuthError, require_jwt, require_roles
+from .feature_access import require_feature_access
+from .auth import AuthError, require_jwt
 from .responses import error_response, error_response_with_traceback, validation_error_response
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def _format_active_jobs_detail(active_jobs: list[str]) -> str:
 def run_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=["rq:enqueue"])
-        require_roles(claims, ["admin"])
+        require_feature_access(claims, "batch_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -127,7 +128,7 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
 def delete_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=["rq:enqueue"])
-        require_roles(claims, ["admin"])
+        require_feature_access(claims, "batch_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:

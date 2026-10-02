@@ -29,6 +29,18 @@ def load_secure_browse(monkeypatch):
         import wepppy.microservices.browse.browse as browse_mod
         import wepppy.microservices._gdalinfo as gdalinfo_mod
 
+        from wepppy.weppcloud.utils import feature_access_identity as identity
+        from wepppy.weppcloud.utils import feature_access_runtime as feature_runtime
+        from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+        # This file tests delivery/auth composition. Account 7 is a current
+        # acknowledged member; other human IDs have no workflow membership.
+        monkeypatch.setattr(identity, "account_principal", lambda user_id, **kwargs:
+                            VerifiedPrincipal("human", user_id) if user_id else VerifiedPrincipal())
+        class Store:
+            def membership(self, user_id, group_key, **kwargs):
+                return user_id == 7, user_id == 7
+        monkeypatch.setattr(feature_runtime, "feature_store", Store)
+
         importlib.reload(download_mod)
         importlib.reload(dtale_mod)
         importlib.reload(files_api_mod)
@@ -57,9 +69,11 @@ def _issue_service_token(
     runs: list[str] | None = None,
     service_groups: list[str] | None = None,
 ) -> str:
-    extra_claims = None
+    extra_claims = {"feature_access_principal": {"version": 1, "kind": "human", "id": 7}}
     if service_groups is not None:
-        extra_claims = {"service_groups": service_groups}
+        extra_claims["service_groups"] = service_groups
+        if "culverts" in service_groups:
+            extra_claims["feature_access_principal"] = {"version": 1, "kind": "integration", "id": "culvert-web-app"}
     return _issue_token(
         token_class="service",
         runs=runs if runs is not None else [runid],
@@ -1586,11 +1600,11 @@ def test_group_user_token_without_privileged_role_is_forbidden(
         )
 
     assert response.status_code == 403
-    assert "User token requires Admin, PowerUser, Dev, or Root role" in response.text
+    assert "feature membership required" in response.text
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
-def test_group_user_token_with_privileged_role_is_allowed(
+def test_group_user_token_with_privileged_role_without_membership_is_denied(
     tmp_path: Path,
     load_secure_browse,
     base: str,
@@ -1615,10 +1629,10 @@ def test_group_user_token_with_privileged_role_is_allowed(
             follow_redirects=False,
         )
 
-    assert response.status_code == 200
+    assert response.status_code == 403
 
 
-def test_culvert_download_allows_user_token_with_privileged_role(
+def test_culvert_download_allows_user_token_with_membership(
     tmp_path: Path,
     load_secure_browse,
 ) -> None:
@@ -1630,8 +1644,8 @@ def test_culvert_download_allows_user_token_with_privileged_role(
     app = browse.create_app()
     token = _issue_token(
         token_class="user",
-        roles=["PowerUser"],
-        subject="42",
+        roles=["User"],
+        subject="7",
     )
 
     with TestClient(app) as client:
@@ -1669,7 +1683,7 @@ def test_culvert_download_rejects_user_token_without_privileged_role(
         )
 
     assert response.status_code == 403
-    assert "User token requires Admin, PowerUser, Dev, or Root role" in response.text
+    assert "feature membership required" in response.text
 
 
 def test_culvert_download_requires_service_group_claim(
@@ -1814,7 +1828,7 @@ def test_group_routes_use_bearer_when_cookie_token_revoked(
         token_class="service",
         runs=[identifier],
         roles=["User"],
-        extra_claims={"jti": "ok-bearer-jti"},
+        extra_claims={"jti": "ok-bearer-jti", "feature_access_principal": {"version": 1, "kind": "human", "id": 7}},
     )
 
     with TestClient(app) as client:
@@ -2276,6 +2290,7 @@ def test_culvert_group_routes_reject_session_token_class(
 def test_batch_group_routes_accept_session_token_scoped_to_base_run(
     tmp_path: Path,
     load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     identifier = "group-session-allowed"
     group_root_root = tmp_path / "batch"
@@ -2283,12 +2298,15 @@ def test_batch_group_routes_accept_session_token_scoped_to_base_run(
 
     browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", BATCH_RUNNER_ROOT=str(group_root_root))
     app = browse.create_app()
+    from wepppy.microservices.rq_engine import auth as rq_auth
+    monkeypatch.setattr(rq_auth, "require_session_marker", lambda claims, runid: None)
     base_runid = f"batch;;{identifier};;_base"
     token = _issue_token(
         token_class="session",
         runs=[base_runid],
         subject="sid-123",
-        extra_claims={"runid": base_runid, "session_id": "sid-123"},
+        extra_claims={"runid": base_runid, "session_id": "sid-123",
+                      "feature_access_principal": {"version": 1, "kind": "human", "id": 7}},
     )
 
     with TestClient(app) as client:

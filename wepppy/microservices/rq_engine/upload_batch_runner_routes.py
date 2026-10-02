@@ -17,7 +17,8 @@ from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap, sbs_map_sanity_check
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
-from .auth import AuthError, require_jwt, require_roles
+from .feature_access import require_feature_access
+from .auth import AuthError, require_jwt
 from .responses import error_response
 from .upload_helpers import UploadError, save_upload_file
 
@@ -137,7 +138,7 @@ def _safe_unlink(path: str) -> None:
 async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_UPLOAD_SCOPES)
-        require_roles(claims, ["Admin"])
+        require_feature_access(claims, "batch_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -273,7 +274,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
 async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_UPLOAD_SCOPES)
-        require_roles(claims, ["Admin"])
+        require_feature_access(claims, "batch_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:

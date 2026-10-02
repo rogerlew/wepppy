@@ -8,6 +8,12 @@ from wepppy.microservices.rq_engine import batch_routes
 
 pytestmark = pytest.mark.microservice
 
+@pytest.fixture(autouse=True)
+def feature_accounts(monkeypatch):
+    from tests.factories.feature_access import stub_feature_accounts
+    stub_feature_accounts(monkeypatch)
+
+
 
 class _DummyLock:
     def acquire(self, **kwargs) -> bool:
@@ -20,11 +26,11 @@ class _DummyLock:
         return True
 
 
-def test_run_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_batch_requires_membership(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["User"]},
+        lambda request, required_scopes=None: {"sub": "3", "roles": ["User"]},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -32,14 +38,14 @@ def test_run_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 403
     payload = response.json()
-    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["code"] == "feature_membership_required"
 
 
 def test_run_batch_missing_batch_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes.BatchRunner,
@@ -59,7 +65,7 @@ def test_run_batch_invalid_name_returns_400(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -101,7 +107,7 @@ def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes.BatchRunner,
@@ -129,7 +135,7 @@ def test_run_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes.BatchRunner,
@@ -165,11 +171,11 @@ def test_run_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "Active jobs" in payload["error"]["details"]
 
 
-def test_delete_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_delete_batch_requires_membership(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["User"]},
+        lambda request, required_scopes=None: {"sub": "3", "roles": ["User"]},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -177,14 +183,14 @@ def test_delete_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> No
 
     assert response.status_code == 403
     payload = response.json()
-    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["code"] == "feature_membership_required"
 
 
 def test_delete_batch_invalid_name_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -200,7 +206,7 @@ def test_delete_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes,
@@ -257,7 +263,7 @@ def test_delete_batch_missing_batch_still_enqueues_job(monkeypatch: pytest.Monke
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes,
@@ -311,7 +317,7 @@ def test_delete_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(
         batch_routes,
@@ -368,7 +374,7 @@ def test_batch_actual_producers_apply_deferred_and_active_contract(
             events.append(("enqueue", kwargs["job_id"]))
             return type("Job", (), {"id": kwargs["job_id"]})()
 
-    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"roles": ["Admin"]})
+    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"sub": "2", "roles": ["Admin"]})
     monkeypatch.setattr(batch_routes.BatchRunner, "getInstanceFromBatchName", lambda _name: Runner())
     monkeypatch.setattr(batch_routes.redis, "Redis", lambda **_kwargs: Redis())
     monkeypatch.setattr(batch_routes, "Queue", Queue)
@@ -420,7 +426,7 @@ def test_batch_actual_producer_failure_postconditions(
                 raise batch_routes.redis.RedisError("enqueue failed")
             return type("Job", (), {"id": kwargs["job_id"]})()
 
-    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"roles": ["Admin"]})
+    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"sub": "2", "roles": ["Admin"]})
     monkeypatch.setattr(batch_routes.BatchRunner, "getInstanceFromBatchName", lambda _name: Runner())
     monkeypatch.setattr(batch_routes.redis, "Redis", lambda **_kwargs: Redis())
     monkeypatch.setattr(batch_routes, "Queue", Queue)

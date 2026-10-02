@@ -15,7 +15,8 @@ from wepppy.rq.project_rq import fetch_and_analyze_openet_ts_rq
 from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from .auth import AuthError, authorize_run_access, require_jwt, require_roles
+from .feature_access import require_feature_access
+from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
@@ -32,7 +33,7 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
     "/runs/{runid}/{config}/acquire-openet-ts",
     summary="Enqueue OpenET time-series acquisition",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue`, Admin role, and run access via "
+        "Requires JWT Bearer scope `rq:enqueue`, current OpenET membership, and run access via "
         "`authorize_run_access`. "
         "Asynchronously enqueues OpenET acquisition/analysis for the run."
     ),
@@ -47,7 +48,7 @@ async def acquire_openet_ts(runid: str, config: str, request: Request) -> JSONRe
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
-        require_roles(claims, ["admin"])
+        require_feature_access(claims, "openet_ts", runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract

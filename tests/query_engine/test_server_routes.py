@@ -93,7 +93,7 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
 
     class DummyCatalog:
         def __init__(self) -> None:
-            entry = SimpleNamespace(path="datasets/example.parquet")
+            entry = SimpleNamespace(path="datasets/example.parquet", fs_path=None)
             self._entries: List[Any] = [entry]
 
         def entries(self) -> List[Any]:
@@ -247,7 +247,7 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
 
     class DummyCatalog:
         def entries(self):
-            return [SimpleNamespace(path="test.parquet")]
+            return [SimpleNamespace(path="test.parquet", fs_path=None)]
 
         def has(self, rel_path: str) -> bool:
             return True

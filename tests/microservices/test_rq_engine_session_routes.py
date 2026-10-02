@@ -254,7 +254,7 @@ def test_session_payload_rejects_pickled_non_mapping(monkeypatch: pytest.MonkeyP
 
 def test_session_token_issues_with_bearer(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     token = _issue_token(monkeypatch, runs=["run-1"])
@@ -281,7 +281,7 @@ def test_session_token_uses_grouped_cookie_key_and_safe_path_for_grouped_runid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     grouped_runid = "upset-reckoning;;omni;;undisturbed"
@@ -306,7 +306,7 @@ def test_session_token_uses_grouped_cookie_key_and_safe_path_for_grouped_runid(
 
 def test_session_token_rejects_wrong_run(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     token = _issue_token(monkeypatch, runs=["run-2"])
@@ -326,7 +326,7 @@ def test_session_token_cookie_sets_secure_for_forwarded_https(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     token = _issue_token(monkeypatch, runs=["run-1"])
@@ -345,7 +345,7 @@ def test_session_token_cookie_secure_can_be_disabled_with_env_override(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setenv("WEPP_AUTH_SESSION_COOKIE_SECURE", "false")
 
@@ -1001,7 +1001,7 @@ def test_session_token_bearer_path_ignores_cross_origin_headers(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     token = _issue_token(monkeypatch, runs=["run-1"])

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root
+
 import asyncio
 import os
 import json
@@ -607,6 +609,7 @@ async def run_info(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -615,7 +618,7 @@ async def run_info(request: StarletteRequest) -> Response:
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
-    catalog_entries = context.catalog.entries()
+    catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
     runid_str = str(run_path)
     slug = runid_param.strip("/") or runid_param
     schema_path = str(request.app.url_path_for("run_schema", runid=slug))
@@ -647,6 +650,7 @@ async def run_schema(request: StarletteRequest) -> Response:
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -657,7 +661,7 @@ async def run_schema(request: StarletteRequest) -> Response:
 
     data = {
         "runid": str(run_path),
-        "entries": [asdict(entry) for entry in context.catalog.entries()],
+        "entries": [asdict(entry) for entry in visible_entries(request, context.base_dir, context.catalog.entries())],
     }
     return JSONResponse(data)
 
@@ -693,6 +697,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 
     try:
         run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
     except FileNotFoundError:
         return PlainTextResponse(f"Run '{runid_param}' not found", status_code=404)
 
@@ -702,7 +707,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 
     try:
         context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
-        catalog_entries = context.catalog.entries()
+        catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
         if catalog_entries:
             # Use first parquet file, skip JSON/other metadata files
             for entry in catalog_entries:
@@ -806,6 +811,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
 
     try:
         run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -837,6 +843,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
             status_code=422,
         )
 
+    require_datasets(request, context.base_dir, [spec.path for spec in payload.dataset_specs], entries=context.catalog.entries())
     missing = [spec.path for spec in payload.dataset_specs if not context.catalog.has(spec.path)]
     if missing:
         message = f"Dataset(s) not found: {', '.join(missing)}"
@@ -914,6 +921,7 @@ async def activate_run(request: StarletteRequest) -> Response:
 
     try:
         run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -926,6 +934,8 @@ async def activate_run(request: StarletteRequest) -> Response:
         LOGGER.exception("Activation failed for %s", run_path)
         return JSONResponse({"error": f"Activation failed: {exc}", "stacktrace": stacktrace}, status_code=500)
 
+    catalog = dict(catalog)
+    catalog["files"] = visible_entries(request, run_path, catalog.get("files", []))
     return JSONResponse(catalog)
 
 

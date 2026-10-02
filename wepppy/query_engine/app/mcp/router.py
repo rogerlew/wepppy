@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root
+
 import json
 import logging
 import os
@@ -536,6 +538,7 @@ def _resolve_run_entry(request: Request, runid: str) -> tuple[Path, dict[str, An
     """
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         raise
 
@@ -692,6 +695,7 @@ async def get_catalog(request: Request) -> JSONResponse:
 
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
@@ -718,6 +722,7 @@ async def get_catalog(request: Request) -> JSONResponse:
     except ValueError as exc:
         return _error_response(400, "invalid_request", str(exc))
 
+    raw_entries = visible_entries(request, run_path, raw_entries)
     filtered_entries = _filter_catalog_entries(raw_entries)
     filtered_total = len(filtered_entries)
 
@@ -808,6 +813,7 @@ async def validate_query(request: Request) -> JSONResponse:
 
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
@@ -828,6 +834,7 @@ async def validate_query(request: Request) -> JSONResponse:
     except QueryValidationException as exc:
         return _error_response(exc.status_code, exc.code, exc.detail, exc.meta)
 
+    require_datasets(request, run_path, [spec.path for spec in query_request.dataset_specs], entries=raw_entries)
     data = {
         "type": "query_validation",
         "attributes": {
@@ -871,6 +878,7 @@ async def execute_query(request: Request) -> JSONResponse:
 
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
@@ -891,6 +899,7 @@ async def execute_query(request: Request) -> JSONResponse:
     except QueryValidationException as exc:
         return _error_response(exc.status_code, exc.code, exc.detail, exc.meta)
 
+    require_datasets(request, run_path, [spec.path for spec in query_request.dataset_specs], entries=raw_entries)
     execution_meta: dict[str, Any] = {"dry_run": dry_run}
 
     if dry_run:
@@ -921,6 +930,7 @@ async def execute_query(request: Request) -> JSONResponse:
         LOGGER.warning("Failed to resolve run context for %s", runid, exc_info=True)
         return _error_response(500, "context_unavailable", f"Unable to resolve run context: {exc}")
 
+    require_datasets(request, context.base_dir, [spec.path for spec in query_request.dataset_specs], entries=context.catalog.entries())
     started = time.perf_counter()
 
     try:
@@ -988,6 +998,7 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
 
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
@@ -1076,6 +1087,7 @@ async def get_prompt_template(request: Request) -> JSONResponse:
 
     try:
         run_path = resolve_run_path(runid)
+        require_root(request, run_path)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
@@ -1087,6 +1099,7 @@ async def get_prompt_template(request: Request) -> JSONResponse:
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raw_entries, generated_at = [], None
 
+    raw_entries = visible_entries(request, run_path, raw_entries)
     schema_summary = _build_schema_summary(raw_entries)
     default_payload = _build_default_payload(raw_entries)
     sample_payload_json = json.dumps(default_payload, indent=2)
@@ -1143,7 +1156,12 @@ def create_mcp_app() -> Starlette:
         Route("/runs/{runid:str}/queries/execute", execute_query, methods=["POST"], name="mcp_execute_query"),
     ]
 
-    app = Starlette(debug=False, routes=routes)
+    from starlette.exceptions import HTTPException
+
+    async def feature_http_error(request, exc):
+        return _error_response(exc.status_code, "feature_access_denied", str(exc.detail))
+
+    app = Starlette(debug=False, routes=routes, exception_handlers={HTTPException: feature_http_error})
     config = get_auth_config()
     app.add_middleware(MCPAuthMiddleware, config=config, path_prefix="")
 

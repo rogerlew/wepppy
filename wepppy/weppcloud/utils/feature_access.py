@@ -35,6 +35,8 @@ class FeatureResourceContext:
     requires_read_entitlement: bool = False
     consumes_contrasts: bool = False
     internal_statement_version: str | None = None
+    # Removal of retained legacy state need not satisfy enable/run capability.
+    check_capabilities: bool = True
 
 
 @dataclass(frozen=True)
@@ -104,9 +106,9 @@ def evaluate_feature_access(principal: VerifiedPrincipal, feature: FeatureSpec,
     if operation == "act":
         if context.readonly:
             return FeatureAccessDecision(False, "readonly")
-        if feature.requires_backend != "any" and feature.requires_backend != context.backend:
+        if context.check_capabilities and feature.requires_backend != "any" and feature.requires_backend != context.backend:
             return FeatureAccessDecision(False, "backend_required")
-        if not set(feature.requires_features).issubset(context.enabled_features):
+        if context.check_capabilities and not set(feature.requires_features).issubset(context.enabled_features):
             return FeatureAccessDecision(False, "prerequisite_required")
     # Omitted group metadata preserves ordinary role/anonymous behavior.
     if feature.access_mode is None and feature.min_role == "user":

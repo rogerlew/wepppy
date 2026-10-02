@@ -59,6 +59,7 @@ from wepppy.rq.ag_fields_rq import (
 )
 from wepppy.weppcloud.utils.helpers import get_wd
 
+from .feature_access import require_feature_access
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
@@ -121,7 +122,9 @@ class AgFieldsJobConflict(RuntimeError):
 def _authorize(request: Request, runid: str, scopes: Sequence[str]) -> Response | None:
     try:
         claims = require_jwt(request, required_scopes=list(scopes))
-        authorize_run_access(claims, runid)
+        authorize_run_access(claims, runid, operation="act" if "rq:enqueue" in scopes else "inspect")
+        if "rq:enqueue" in scopes:
+            require_feature_access(claims, "ag_fields", runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: authentication boundary contract
@@ -492,10 +495,12 @@ def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, s
     return job_ids, active_job_ids
 
 
-def _state_snapshot(wd: str) -> dict[str, Any]:
-    ag_fields = AgFields.getInstance(wd)
+def _state_snapshot(wd: str, *, reconcile: bool = True) -> dict[str, Any]:
+    ag_fields = AgFields.tryGetInstance(wd)
+    if ag_fields is None:
+        return {"status": "uninitialized"}
     watershed_integrations = ag_fields.get_watershed_integration_states()
-    if any(
+    if reconcile and any(
         (
             str(state["status"]) == "running"
             or str(state["status"]).startswith("running:")
@@ -847,7 +852,9 @@ async def plant_file_inventory(runid: str, config: str, request: Request) -> JSO
     if auth_error is not None:
         return auth_error
     try:
-        return JSONResponse(AgFields.getInstance(get_wd(runid)).get_plant_file_inventory())
+        controller = AgFields.tryGetInstance(get_wd(runid))
+        return JSONResponse(controller.get_plant_file_inventory() if controller is not None else
+                            {"files": [], "valid_files": [], "invalid_files": []})
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields inventory read failed", extra={"runid": runid, "config": config})
         return error_response("Could not read plant file inventory", status_code=500)
@@ -918,7 +925,11 @@ async def get_rotation_mapping(runid: str, config: str, request: Request) -> JSO
     if auth_error is not None:
         return auth_error
     try:
-        ag_fields = AgFields.getInstance(get_wd(runid))
+        ag_fields = AgFields.tryGetInstance(get_wd(runid))
+        if ag_fields is None:
+            return JSONResponse({"rows": [], "unique_crops": [], "unused_mappings": [],
+                                 "plant_files": {"files": [], "valid_files": [], "invalid_files": []},
+                                 "management_options": []})
         results = ag_fields.validate_rotation_lookup()
         return JSONResponse(
             {
@@ -1014,9 +1025,8 @@ async def management_options(runid: str, config: str, request: Request) -> JSONR
     if auth_error is not None:
         return auth_error
     try:
-        return JSONResponse(
-            {"management_options": AgFields.getInstance(get_wd(runid)).get_weppcloud_management_options()}
-        )
+        controller = AgFields.tryGetInstance(get_wd(runid))
+        return JSONResponse({"management_options": controller.get_weppcloud_management_options() if controller is not None else []})
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields management options failed", extra={"runid": runid, "config": config})
         return error_response("Could not read management options", status_code=500)
@@ -1264,7 +1274,10 @@ async def subfields_overlay(runid: str, config: str, request: Request) -> Respon
     if auth_error is not None:
         return auth_error
     try:
-        path = Path(AgFields.getInstance(get_wd(runid)).sub_fields_wgs_geojson)
+        controller = AgFields.tryGetInstance(get_wd(runid))
+        if controller is None:
+            return error_response("Sub-fields overlay is not available.", status_code=404)
+        path = Path(controller.sub_fields_wgs_geojson)
         if not path.is_file():
             return error_response("Sub-fields overlay is not available.", status_code=404)
         return FileResponse(path, media_type="application/geo+json", filename="sub-fields.geojson")
@@ -1292,7 +1305,7 @@ async def state(runid: str, config: str, request: Request) -> JSONResponse:
     if auth_error is not None:
         return auth_error
     try:
-        return JSONResponse(_state_snapshot(get_wd(runid)))
+        return JSONResponse(_state_snapshot(get_wd(runid), reconcile=False))
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields state read failed", extra={"runid": runid, "config": config})
         return error_response("Could not read AgFields state", status_code=500)

@@ -283,11 +283,14 @@ def _feature_role_display(min_role: str) -> str:
 
 
 def _feature_role_enabled(mod_name: str, *, playwright_load_all: bool) -> bool:
-    if bool(playwright_load_all):
-        return True
     spec = _feature_spec(mod_name)
     if spec is None:
         return False
+    if spec.access_group:
+        from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+        return feature_decision(mod_name, operation="inspect").allowed
+    if bool(playwright_load_all):
+        return True
     return user_meets_min_role(current_user, spec.min_role)
 
 
@@ -971,6 +974,9 @@ def _build_features_export_catalog_payload(
     if wd and not scenarios and not contrasts and not swat_catalog:
         scenarios, contrasts = _discover_features_export_omni_selectors(wd)
         swat_catalog = _discover_features_export_swat_catalog(wd)
+    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+    if not feature_decision("omni_contrasts", operation="inspect").allowed:
+        contrasts = []
 
     try:
         catalog = load_layer_catalog()
@@ -1290,6 +1296,9 @@ def _build_virtual_prep_wepp_gpkg_gdb_profile(
 
 def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_epsg: int | None) -> dict:
     scenarios, contrasts = _discover_features_export_omni_selectors(wd)
+    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+    if not feature_decision("omni_contrasts", operation="inspect").allowed:
+        contrasts = []
     swat_catalog = _discover_features_export_swat_catalog(wd)
     discovery_payload = _build_features_export_discovery_payload(
         wd,
@@ -1611,7 +1620,10 @@ def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: lis
 
     owners = get_run_owners_lazy(auth_runid)
     if not owners:
-        return not auth_runid.startswith("batch;;")
+        if auth_runid.startswith("batch;;"):
+            from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+            return feature_decision("batch_runner", operation="inspect", protected_read=True).allowed
+        return True
 
     effective_user_id = user_id if user_id is not None else fallback_user_id
     if effective_user_id is None:
@@ -1682,8 +1694,18 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str, require_ro
     if not _session_user_authorized_for_run(runid, user_id, roles):
         return False
 
+    from wepppy.weppcloud.utils.feature_access_runtime import workflow_features
+    from wepppy.weppcloud.utils.feature_access_flask import require_feature
+    for feature in workflow_features(runid):
+        if feature == "batch_runner" and Ron.ispublic(get_wd(_authorization_runid(runid))):
+            continue
+        require_feature(feature, operation="inspect", protected_read=True)
+    from wepppy.weppcloud.utils.feature_access_identity import principal_claim
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+    origin = principal_claim(VerifiedPrincipal("human", user_id) if user_id is not None else VerifiedPrincipal())
     extra_claims: dict[str, object] = {
         "token_class": "session",
+        "feature_access_principal": origin,
         "session_id": session_id,
         "runid": runid,
         "config": config,
@@ -2308,9 +2330,12 @@ def _build_runs0_context(runid, config, playwright_load_all):
     bootstrap_is_anonymous = not bool(getattr(run_record, "owner_id", None)) if run_record else True
     
     omni_has_ran_scenarios = bool(omni and omni.has_ran_scenarios)
-    omni_has_ran_contrasts = bool(omni and omni.has_ran_contrasts)
+    omni_has_ran_contrasts = bool(show_omni_contrasts and omni and omni.has_ran_contrasts)
 
     feature_registry_entries = load_feature_registry()
+    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+    feature_actions = {entry.id: feature_decision(entry.id, wd=wd)
+                       for entry in feature_registry_entries if entry.access_group}
     mod_visibility = {entry.id: False for entry in feature_registry_entries}
     mod_visibility.update(
         {
@@ -2341,6 +2366,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         is_wbt=rusle_backend_supported,
         include_all=bool(playwright_load_all),
         excluded_features=EXCLUDED_FEATURES if single_input_uploads else frozenset(),
+        feature_decisions=feature_actions,
     )
     maturity_definition_href = (
         url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md')
@@ -2431,7 +2457,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY,
         show_rap_ts=show_rap_ts,
         show_openet_ts=show_openet_ts,
-        openet_admin_enabled=openet_role_enabled,
+        openet_admin_enabled=feature_actions["openet_ts"].allowed,
+        feature_actions=feature_actions,
         show_treatments=show_treatments,
         show_ash=show_ash,
         show_omni=show_omni,

@@ -23,6 +23,8 @@ from wepppy.rq.jobinfo_payloads import extract_job_ids
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
+from .feature_results import project_job_results, protected_job
+from .feature_access import require_feature_access
 from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
@@ -124,7 +126,12 @@ def _audit_polling_request(
 def _authorize_polling_request(request: Request) -> Mapping[str, Any] | None:
     mode = _poll_auth_mode()
     if mode == "open":
-        return None
+        if not request.headers.get("Authorization"):
+            return None
+        try:
+            return require_jwt(request, required_scopes=[POLL_SCOPE])
+        except AuthError:
+            return None
 
     has_authorization = bool((request.headers.get("Authorization") or "").strip())
     if mode == "token_optional" and not has_authorization:
@@ -361,7 +368,7 @@ def jobinfo(job_id: str, request: Request):
             success=True,
             reason="ok",
         )
-        return payload
+        return project_job_results(payload, claims)
     except Exception:
         logger.exception("rq-engine jobinfo failed")
         _audit_polling_request(
@@ -429,7 +436,7 @@ async def jobinfo_batch(request: Request):
             success=True,
             reason="ok",
         )
-        return {"jobs": job_info_map, "job_ids": ordered_ids}
+        return {"jobs": {key: project_job_results(value, claims) for key, value in job_info_map.items()}, "job_ids": ordered_ids}
     except Exception:
         logger.exception("rq-engine batch jobinfo failed")
         _audit_polling_request(
@@ -494,7 +501,7 @@ def canceljob(job_id: str, request: Request):
         runid = job_info.get("runid")
         is_culvert_job = bool(job_info.get("culvert_batch_uuid"))
         if is_culvert_job and "culvert:batch:submit" in accepted_scopes:
-            pass
+            require_feature_access(claims, "culvert_runner")
         elif "rq:status" in accepted_scopes:
             if runid:
                 authorize_run_access(claims, runid)
@@ -505,6 +512,9 @@ def canceljob(job_id: str, request: Request):
                 code="forbidden",
             )
 
+        if protected_job(job_info):
+            require_feature_access(claims, "path_ce" if "path" in str(job_info.get("description")) else "omni_contrasts",
+                                   runid=runid, consumes_contrasts=True)
         payload = cancel_jobs(
             job_id,
             allow_started_fork_archive=_is_admin_or_root(claims),

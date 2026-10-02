@@ -1,3 +1,8 @@
+{% set feature_readonly = feature_actions is defined and not feature_actions["openet_ts"].allowed %}
+{% if feature_readonly %}
+<p class="wc-text-muted">Read-only access. {{ feature_actions["openet_ts"].reason | replace("_", " ") | capitalize }}. Review your internal access on your Profile.</p>
+<fieldset disabled aria-label="Read-only feature controls">
+{% endif %}
 {# Doc: controllers_js/README.md — OpenET Time Series Controller Reference #}
 {% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
@@ -37,3 +42,5 @@
     {{ ui.job_hint("hint_build_openet_ts", extra_class="wc-field__help") }}
   </section>
 {% endcall %}
+
+{% if feature_readonly %}</fieldset>{% endif %}

@@ -17,7 +17,10 @@ def batch_create_client(monkeypatch: pytest.MonkeyPatch):
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["BATCH_RUNNER_ENABLED"] = True
-    app.config["BATCH_RUNNER_SKIP_AUTH"] = True
+    from wepppy.weppcloud.utils import feature_access_flask as feature_web
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+    monkeypatch.setattr(feature_web, "current_principal", lambda: VerifiedPrincipal("human", 2))
+    monkeypatch.setattr(feature_web._FlaskStore, "membership", lambda *args, **kwargs: (True, True))
     app.register_blueprint(batch_runner_module.batch_runner_bp)
 
     captured: dict[str, object] = {}

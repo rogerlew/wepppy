@@ -200,7 +200,8 @@ def _authorize_user_claims(claims: Mapping[str, Any], runid: str) -> None:
 
     if not owners:
         if auth_runid.startswith("batch;;"):
-            raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
+            from .feature_access import require_feature_access
+            require_feature_access(claims, "batch_runner", operation="inspect", protected_read=True)
         return
 
     token_sub = str(claims.get("sub") or "").strip()
@@ -290,6 +291,7 @@ def authorize_run_access(
     runid: str,
     *,
     allow_fork_preparing: bool = False,
+    operation: str = "act",
 ) -> None:
     if not runid:
         return
@@ -303,11 +305,15 @@ def authorize_run_access(
         )
     if normalized_token_class == "session":
         require_session_marker(claims, runid)
+        from .feature_access import require_workflow_access
+        require_workflow_access(claims, runid, operation=operation)
         if not allow_fork_preparing:
             _reject_fork_preparing_run(runid)
         return
     if normalized_token_class == "user":
         _authorize_user_claims(claims, runid)
+        from .feature_access import require_workflow_access
+        require_workflow_access(claims, runid, operation=operation)
         if not allow_fork_preparing:
             _reject_fork_preparing_run(runid)
         return
@@ -317,6 +323,8 @@ def authorize_run_access(
         raise AuthError("Token missing run scope", status_code=403, code="forbidden")
     if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
+    from .feature_access import require_workflow_access
+    require_workflow_access(claims, runid, operation=operation)
     if not allow_fork_preparing:
         _reject_fork_preparing_run(runid)
 

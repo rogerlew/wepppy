@@ -16,7 +16,7 @@ pytestmark = pytest.mark.microservice
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(export_routes, "require_jwt", lambda request, required_scopes=None: {})
-    monkeypatch.setattr(export_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(export_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 class _AttrShapedError(RuntimeError):

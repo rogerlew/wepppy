@@ -53,6 +53,8 @@ from wepppy.rq.wepp_rq import (
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
+from .feature_access import require_feature_access
+from wepppy.weppcloud.utils.feature_access_data import contains_protected
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
@@ -781,6 +783,8 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
 
     try:
         wd = get_wd(runid)
+        if contains_protected(wd):
+            require_feature_access(claims or {}, "omni_contrasts", operation="inspect", protected_read=True)
         if not _exists(wd):
             return error_response(
                 f"Error forking project, run_id={runid} does not exist",
@@ -1418,6 +1422,8 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        if contains_protected(get_wd(runid)):
+            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -1548,6 +1554,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
         if not os.path.exists(archive_path):
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
+        if contains_protected(archive_path):
+            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
         prep = RedisPrep.getInstance(wd)
         if _archive_job_in_progress(prep):
             return error_response(
@@ -1589,6 +1597,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             logger.warning("Status publish failed after restore enqueue for %s", runid, exc_info=True)
 
         return JSONResponse({"job_id": job.id})
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
     except ArchiveAdmissionUnavailable:

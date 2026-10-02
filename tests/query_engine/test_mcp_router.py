@@ -926,7 +926,7 @@ def test_execute_query_dry_run(monkeypatch, tmp_path):
         return SimpleNamespace(records=[], schema=None, row_count=0, formatted=None, sql=None)
 
     monkeypatch.setattr(router, "run_query", fake_run_query)
-    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
+    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace(base_dir=tmp_path / runid, catalog=SimpleNamespace(entries=lambda: [])))
 
     client = TestClient(app)
     token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
@@ -975,7 +975,7 @@ def test_execute_query_success(monkeypatch, tmp_path):
             sql="SELECT soil_loss FROM foo",
         ),
     )
-    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
+    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace(base_dir=tmp_path / runid, catalog=SimpleNamespace(entries=lambda: [])))
 
     client = TestClient(app)
     token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
@@ -1074,7 +1074,7 @@ def test_execute_query_run_query_runtime_error_returns_500(monkeypatch, tmp_path
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import router, auth
 
-    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
+    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace(base_dir=tmp_path / runid, catalog=SimpleNamespace(entries=lambda: [])))
     monkeypatch.setattr(router, "run_query", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
 
     client = TestClient(app)

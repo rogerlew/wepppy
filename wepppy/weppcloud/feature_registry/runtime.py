@@ -195,6 +195,7 @@ def build_header_mod_options(
     is_wbt: bool,
     include_all: bool = False,
     excluded_features: frozenset[str] = frozenset(),
+    feature_decisions: Mapping[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     options: list[dict[str, Any]] = []
     registry = feature_registry_by_id()
@@ -202,7 +203,8 @@ def build_header_mod_options(
         # Standalone workflows have no run-level controls to toggle.
         if entry.id in excluded_features or entry.id in {"culvert_runner", "batch_runner"}:
             continue
-        authorized = include_all or user_meets_min_role(user, entry.min_role)
+        decision = feature_decisions.get(entry.id) if feature_decisions is not None else None
+        authorized = decision.allowed if decision is not None else (include_all or user_meets_min_role(user, entry.min_role))
         backend_available = include_all or backend_matches_requirement(
             entry.requires_backend,
             is_wbt=is_wbt,
@@ -212,7 +214,9 @@ def build_header_mod_options(
             for feature_id in entry.requires_features
             if feature_id not in active_mods
         ]
-        if include_all:
+        if entry.access_group and feature_decisions is not None:
+            visible = True
+        elif include_all:
             visible = True
         elif entry.menu_min_role is not None:
             visible = (
@@ -225,7 +229,7 @@ def build_header_mod_options(
             continue
 
         active = entry.id in active_mods
-        toggle_enabled = include_all or (
+        toggle_enabled = (include_all and decision is None) or (
             authorized
             and backend_available
             and (active or not missing_prerequisites)
@@ -233,7 +237,7 @@ def build_header_mod_options(
         disabled_reason = None
         if not toggle_enabled:
             if not authorized:
-                disabled_reason = "Not Authorized"
+                disabled_reason = decision.reason.replace("_", " ") if decision is not None else "Not Authorized"
             elif missing_prerequisites:
                 labels = [
                     registry[feature_id].label

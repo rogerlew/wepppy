@@ -680,6 +680,7 @@ def mint_run_token(runid: str, config: str):
                 'roles': role_names,
                 'groups': group_names,
                 'service_groups': ['admin-run-token'],
+                'feature_access_principal': {'version': 1, 'kind': 'human', 'id': user_id},
             },
         )
         claims = result.get('claims', {})

@@ -112,7 +112,7 @@ def _require_bootstrap_claims(request: Request, *, required_scope: str) -> Mappi
 def _authorize_bootstrap_request(request: Request, *, runid: str, required_scope: str) -> Mapping[str, Any]:
     try:
         claims = _require_bootstrap_claims(request, required_scope=required_scope)
-        authorize_run_access(claims, runid)
+        authorize_run_access(claims, runid, operation="inspect" if required_scope == BOOTSTRAP_READ_SCOPE else "act")
         return claims
     except AuthError:
         raise

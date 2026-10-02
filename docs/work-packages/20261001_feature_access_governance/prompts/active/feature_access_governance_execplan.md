@@ -3,7 +3,7 @@
 
 This ExecPlan is maintained under `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current. This plan is the active plan for the feature-access package only; it does not execute or close other active initiatives.
 
-The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator authorized milestone one (committed as `62ce1af3f`) and now milestone two. Milestones three through five remain future work.
+The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator authorized milestone one (committed as `62ce1af3f`) milestone two (committed as `c19fefcc6`) and now milestone three. Milestones four and five remain future work.
 
 ## Purpose and outcome
 
@@ -15,6 +15,10 @@ OpenET and Batch have separate groups, initially containing only the requesting 
 The target is faithful integration into existing workflows, not a disconnected authorization scaffold. A new model/helper is implemented but not wired until real render, execution, data and identity paths consume it. Closeout requires actual database and generated-output evidence, not only mocked tests or a successful job state.
 
 ## Progress
+
+- [ ] (2026-10-02 UTC) Authorized milestone three in progress: shared principal adapters, restricted action/data wiring, read-only views, regression and independent review.
+- [x] (2026-10-02 UTC) Added live identity/group adapters and initial direct action, grouped delivery, catalog, export and recursive polling enforcement. Isolated PostgreSQL plus signed OpenET route admission proves acknowledgment and old-token removal before mutations.
+- [ ] Close M3 review gaps: durable contrast-child fork classification (operator decision pending), arbitrary SQL file access (DuckDB upgrade evaluation decision pending), downstream cached D-Tale admission, and remaining regression/browser/service acceptance. The operator authorized a checkpoint commit; M3 is not complete or ready to deploy.
 
 - [x] (2026-10-02 UTC) Milestone-two account UI, acknowledgment and atomic initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass.
 - [x] (2026-10-02 UTC) Local shared database backed up, test-restored, migrated and initialized for the verified sole maintainer; production unchanged.
@@ -41,6 +45,8 @@ The target is faithful integration into existing workflows, not a disconnected a
 
 ## Surprises & Discoveries
 
+Milestone three: checking declared query datasets does not constrain file reads inside SQL expressions. Installed DuckDB 1.1.1 rejects `allowed_paths`; disabling external access also prevents ordinary prebound Parquet views from scanning. No dependency was changed. D-Tale's launch guard does not protect its separately served cached datasets; the existing in-process service needs a live downstream admission design and service/browser acceptance. Contrast-child forks lose their protected path and lack durable archive-surviving lineage; FA-01 currently forbids a new artifact schema. These are unresolved implementation requirements, not rollout exceptions.
+
 Milestone two: a stale Flask-Security session can fall through to token authentication; session presence alone is insufficient. The adapter verifies resolved session provenance and identity binding. Inactive pre-grants need effective status read inside the write transaction. Axe identified two low-contrast navigation links, fixed by existing button styles. A `public`-only backup omits `pg_trgm`; test restore caught missing Usersum index operators, and an archive explicitly including the extension restored successfully. The web module uses qualified Flask imports so stubtest does not inspect context-bound proxies.
 
 Milestone one: the run catalog already uses shared SQL metadata without constructing Flask, so the new account records follow that precedent. Database waits can cross an expiry boundary; admission uses PostgreSQL wall-clock time and grants sample UTC after row locks. The autouse test-secret fixture clears deployed password-file settings, so isolated PostgreSQL tests capture the configured URI before that fixture, as existing catalog tests do.
@@ -55,6 +61,10 @@ There is no persisted user group model even though profile token issuance has a 
 Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
+
+2026-10-02 UTC, M3 review disposition in progress: preserve legacy `?pup=` classification, classify effective catalog filesystem sources and raw mixed catalog/ZIP representations, and project propagated child errors without breaking missing-job children. Resolve membership from current account records, never from broad JWT roles. Keep the fork marker/refusal choice and dependency evaluation pending explicit operator answers; do not interpret a generic continuation as either decision.
+
+2026-10-02 UTC, milestone-three compatibility plan: preserve ordinary anonymous workflows and existing scopes, token lifetimes, run authorization and job topology. Add signed origin metadata only at trusted issuers; read current account/group state for protected admissions. Wire finite artifact classification before self-service onboarding. Validate denied requests before writes/enqueues and retained public views without optional NoDb initialization. No account/data migration, production activation or credential renewal is included.
 
 2026-10-02 UTC, milestone two: publish the policy's unchanged internal onboarding text as `internal-2026-10-01`; use existing Pure forms/tables and explicit read errors. Record inactive-account pre-grants without effective entitlement. Both initial groups and events share a transaction, and initialization refuses conflicting decisions. Apply the accepted migration and audited initial memberships to local development after verified restore/readback; do not restart services or alter production. Group-based acknowledgment remains a personal action, not fabricated by initialization.
 
@@ -78,6 +88,10 @@ Source investigation found no durable anonymous creator proof, but the operator 
 2026-10-01, operator clarification: only limited-access features become read-only for unentitled users. Ordinary anonymous behavior stays unchanged; earlier writer/creator proposals are withdrawn. The designated account is rogerlew@gmail.com, resolved per deployment; Culvert client is on wepp2.
 
 ## Outcomes & Retrospective
+
+M3 remains incomplete; the operator authorized a checkpoint commit of the current work. Focused runs have verified direct route admission and ordinary query/delivery regressions, but interim security review identified additional consumers and expression-level file reads. Existing M1/M2 passes do not establish M3 acceptance. No production activation, shared membership change, credential renewal or dependency upgrade occurred.
+
+The [interim M3 security review](../../artifacts/2026-10-02_m3_security_review.md) remains NOT PASSED. Retained bounded results: account/action/session/query/run-view regression 684 passed/2 skipped; delivery/export 224 passed; artifact/alias/failure cases 16 passed; control rendering 198 passed; frontend 112 suites/919 tests plus lint passed. Suites overlap. Final independent acceptance, full regression and actual service/browser validation remain open.
 
 Milestone two: Root management/history, own Profile status and versioned acknowledgment, strict session/CSRF mutations, and the atomic sole-maintainer initializer are implemented. PostgreSQL acceptance passed 75 cases; final route regressions passed 73. Full-app browser acceptance passed with real sessions/database, evaluator denied/denied/allowed/denied transitions, retained events, keyboard/error focus and zero axe violations. Both independent reviews have zero unresolved findings. Local migration/initialization readback shows two memberships, two audit events, zero acceptances and unchanged legacy counts. Frontend lint and 112 Jest suites/919 tests pass; store/web stubtest and stub checks pass. Broad Python regression passed: 10,198 passed, 126 skipped in 2,535.69 seconds; final qualified-import/export cleanup also passed the 73-case route rerun and web stubtest. See [M2 acceptance](../../artifacts/2026-10-01_m2_acceptance.md); M3 enforcement and production rollout remain future work.
 

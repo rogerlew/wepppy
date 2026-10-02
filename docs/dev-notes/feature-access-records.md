@@ -94,6 +94,33 @@ constraints, concurrent duplicates, injected audit failure rollback, retention,
 expiry, current membership, acknowledgment and evaluator allow/deny boundaries.
 No production or shared account schema is migrated by this suite.
 
+## Milestone-three integration in progress
+
+The M3 checkpoint adapters resolve active human accounts and current operational
+roles from the shared account database. Protected human admissions then read
+current group membership and acknowledgment. Signed origin metadata on issued
+session, admin delegation and MCP credentials records identity, not entitlement.
+Account/configuration failures produce explicit unavailable responses; ordinary
+non-embargoed public inspection does not need an account lookup.
+
+`wepppy/weppcloud/utils/feature_access_integrations.json` is the operator-owned
+Culvert registration: exact service subject, audience, token class and service
+group. Its returned browse credential carries the signed integration origin.
+These checks supplement normal signature, expiry, revocation, scopes and resource
+claims. Editing this registration does not renew the expired deployment token.
+
+Restricted controls use the shared decisions, with disabled action fieldsets and
+retained non-embargoed views. Disabling a restricted mod still requires entitlement
+and honors readonly state, but does not require the backend/prerequisites needed
+to enable or execute that feature. Newly exposed optional-state GETs are
+observational. Existing anonymous ordinary workflows remain in scope for regression.
+
+M3 is not ready for rollout: contrast-child fork lineage, SQL-expression file
+access and downstream cached D-Tale admission remain unresolved. See the active
+[ExecPlan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md)
+for decisions, review disposition and remaining acceptance. Do not enable
+PowerUser self-service based on the initial route wiring alone.
+
 ## Group administration and Profile
 
 Root users reach **Feature groups and decision history** from User Management

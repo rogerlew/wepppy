@@ -860,6 +860,10 @@ def download_features_export_published(runid: str, config: str, profile: str):
             wd,
             profile=profile,
         )
+        from wepppy.weppcloud.utils.feature_access_data import contains_protected
+        from wepppy.weppcloud.utils.feature_access_flask import require_feature
+        if contains_protected(artifact_path):
+            require_feature("omni_contrasts", operation="inspect")
         filename = _published_export_download_filename(runid, profile)
         return send_file(
             str(artifact_path),

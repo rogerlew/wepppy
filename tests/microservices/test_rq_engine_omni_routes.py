@@ -12,6 +12,12 @@ from wepppy.runtime_paths.errors import NoDirError
 
 pytestmark = pytest.mark.microservice
 
+@pytest.fixture(autouse=True)
+def feature_accounts(monkeypatch):
+    from tests.factories.feature_access import stub_feature_accounts
+    stub_feature_accounts(monkeypatch)
+
+
 
 @pytest.fixture(autouse=True)
 def legacy_project_policy(monkeypatch):
@@ -24,7 +30,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         omni_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Dev"]},
+        lambda request, required_scopes=None: {"sub": "3", "roles": ["Dev"]},
     )
     monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
 
@@ -59,7 +65,7 @@ def test_contrast_routes_enforce_role_before_domain_behavior(
     monkeypatch.setattr(
         omni_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": roles},
+        lambda request, required_scopes=None: {"sub": "3", "roles": roles},
     )
     monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
 
@@ -75,7 +81,7 @@ def test_contrast_routes_enforce_role_before_domain_behavior(
     assert response.status_code == expected_status
     assert entered["value"] is (expected_status == 200)
     if expected_status == 403:
-        assert response.json()["error"]["code"] == "forbidden"
+        assert response.json()["error"]["code"] == "feature_membership_required"
 
 
 @pytest.mark.parametrize("path,domain_name", _CONTRAST_AUTH_CASES)
@@ -102,7 +108,7 @@ def test_contrast_routes_preserve_jwt_scope_and_run_access_denials(
         monkeypatch.setattr(
             omni_routes,
             "require_jwt",
-            lambda request, required_scopes=None: {"roles": ["Root"]},
+            lambda request, required_scopes=None: {"sub": "3", "roles": ["Root"]},
         )
 
         def _deny_run_access(claims, runid):

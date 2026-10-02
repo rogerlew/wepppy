@@ -37,7 +37,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str 
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": token_class, "scope": scope},
     )
-    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 def _assert_canonical_error(payload: dict[str, Any], *, code: str | None = None) -> None:
@@ -165,13 +165,13 @@ def test_orchestration_routes_reject_run_access_and_do_not_load_state(
     monkeypatch.setattr(
         orchestration_read_routes,
         "authorize_run_access",
-        lambda claims, runid: (_ for _ in ()).throw(
+        lambda claims, runid, **kwargs: (_ for _ in ()).throw(
             orchestration_read_routes.AuthError("run access denied", status_code=403, code="forbidden")
         ),
     )
     load_calls = {"count": 0}
 
-    def _never_load(runid: str, config: str) -> dict[str, Any]:
+    def _never_load(runid: str, config: str, **kwargs) -> dict[str, Any]:
         load_calls["count"] += 1
         return _sample_runtime_state()
 
@@ -191,7 +191,7 @@ def test_orchestration_routes_accept_supported_scopes(
     scope: str,
 ) -> None:
     _stub_auth(monkeypatch, scope)
-    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config: _sample_runtime_state())
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config, **kwargs: _sample_runtime_state())
 
     with TestClient(rq_engine.app) as client:
         pipeline_response = client.get(PIPELINE_PATH)
@@ -203,7 +203,7 @@ def test_orchestration_routes_accept_supported_scopes(
 
 def test_pipeline_payload_contract_and_invalidation_lineage(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config: _sample_runtime_state())
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config, **kwargs: _sample_runtime_state())
 
     with TestClient(rq_engine.app) as client:
         response = client.get(PIPELINE_PATH)
@@ -256,7 +256,7 @@ def test_pipeline_payload_contract_and_invalidation_lineage(monkeypatch: pytest.
 
 def test_readiness_payload_has_join_safe_blocker_links(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config: _sample_runtime_state())
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config, **kwargs: _sample_runtime_state())
 
     with TestClient(rq_engine.app) as client:
         response = client.get(READINESS_PATH)
@@ -285,7 +285,7 @@ def test_readiness_payload_has_join_safe_blocker_links(monkeypatch: pytest.Monke
 
 def test_readiness_next_actionable_steps_are_deterministic(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config: _sample_runtime_state())
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config, **kwargs: _sample_runtime_state())
 
     with TestClient(rq_engine.app) as client:
         first = client.get(READINESS_PATH).json()
@@ -302,7 +302,7 @@ def test_readiness_next_actionable_steps_are_deterministic_for_baseline(
     monkeypatch.setattr(
         orchestration_read_routes,
         "_load_runtime_state",
-        lambda runid, config: _sample_baseline_runtime_state(),
+        lambda runid, config, **kwargs: _sample_baseline_runtime_state(),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -316,7 +316,7 @@ def test_readiness_next_actionable_steps_are_deterministic_for_baseline(
 def test_orchestration_routes_return_404_for_unknown_run(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
 
-    def _missing(runid: str, config: str) -> dict[str, Any]:
+    def _missing(runid: str, config: str, **kwargs) -> dict[str, Any]:
         raise FileNotFoundError("missing run")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _missing)
@@ -334,7 +334,7 @@ def test_orchestration_routes_return_404_for_unknown_run(monkeypatch: pytest.Mon
 def test_orchestration_routes_return_404_for_config_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
 
-    def _mismatch(runid: str, config: str) -> dict[str, Any]:
+    def _mismatch(runid: str, config: str, **kwargs) -> dict[str, Any]:
         raise orchestration_read_routes.RunConfigMismatchError("run config mismatch")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _mismatch)
@@ -352,7 +352,7 @@ def test_orchestration_routes_return_404_for_config_mismatch(monkeypatch: pytest
 def test_orchestration_routes_return_500_for_unexpected_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
 
-    def _bad_state(runid: str, config: str) -> dict[str, Any]:
+    def _bad_state(runid: str, config: str, **kwargs) -> dict[str, Any]:
         raise ValueError("malformed state")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _bad_state)
@@ -461,7 +461,7 @@ def test_failed_last_attempt_redacts_raw_exception_text(monkeypatch: pytest.Monk
     runtime["step_job"]["build-climate"][
         "exc_info"
     ] = "Traceback (most recent call last):\nRuntimeError: sensitive internal details"
-    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config: runtime)
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", lambda runid, config, **kwargs: runtime)
 
     with TestClient(rq_engine.app) as client:
         response = client.get(PIPELINE_PATH)
@@ -562,7 +562,7 @@ def test_readiness_updated_at_and_etag_are_stable_when_timeline_is_empty(
     calls = {"count": 0}
     fallback_updated_at = "2026-04-10T10:00:00Z"
 
-    def _runtime(runid: str, config: str) -> dict[str, Any]:
+    def _runtime(runid: str, config: str, **kwargs) -> dict[str, Any]:
         calls["count"] += 1
         if calls["count"] == 1:
             return _sample_empty_timeline_runtime_state("2026-04-10T10:00:00Z")
@@ -595,7 +595,7 @@ def test_orchestration_routes_internal_failures_return_canonical_500(
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
 
-    def _boom(runid: str, config: str) -> dict[str, Any]:
+    def _boom(runid: str, config: str, **kwargs) -> dict[str, Any]:
         raise RuntimeError("boom")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _boom)
@@ -615,7 +615,7 @@ def test_orchestration_routes_return_diagnostic_409_for_invalid_capability_autho
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
 
-    def _invalid(runid: str, config: str) -> dict[str, Any]:
+    def _invalid(runid: str, config: str, **kwargs) -> dict[str, Any]:
         raise orchestration_read_routes.CapabilityAuthorityInvalidError("partial graph")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _invalid)
@@ -655,7 +655,7 @@ def test_pipeline_and_readiness_report_only_stored_model_capabilities(
     monkeypatch.setattr(
         orchestration_read_routes,
         "_load_runtime_state",
-        lambda runid, config: deepcopy(runtime),
+        lambda runid, config, **kwargs: deepcopy(runtime),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -709,7 +709,7 @@ def test_legacy_live_domain_graph_is_published_without_model_authority(
     monkeypatch.setattr(
         orchestration_read_routes,
         "_load_runtime_state",
-        lambda runid, config: deepcopy(runtime),
+        lambda runid, config, **kwargs: deepcopy(runtime),
     )
     with TestClient(rq_engine.app) as client:
         pipeline = client.get(PIPELINE_PATH).json()
@@ -804,7 +804,7 @@ def test_schema_v1_compatibility_pipeline_preserves_present_axes_without_registr
     monkeypatch.setattr(
         orchestration_read_routes,
         "_load_runtime_state",
-        lambda runid, config: deepcopy(runtime),
+        lambda runid, config, **kwargs: deepcopy(runtime),
     )
 
     with TestClient(rq_engine.app) as client:

@@ -12,6 +12,12 @@ from wepppy.nodb.base import NoDbAlreadyLockedError
 
 pytestmark = pytest.mark.microservice
 
+@pytest.fixture(autouse=True)
+def feature_accounts(monkeypatch):
+    from tests.factories.feature_access import stub_feature_accounts
+    stub_feature_accounts(monkeypatch)
+
+
 
 class DummyBatchRunner:
     def __init__(self, wd: Path) -> None:
@@ -76,7 +82,7 @@ def test_upload_geojson_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -108,7 +114,7 @@ def test_upload_geojson_rejects_oversize_payload(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -143,7 +149,7 @@ def test_upload_geojson_rejects_invalid_extension(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -174,7 +180,7 @@ def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -214,7 +220,7 @@ def test_upload_sbs_map_retries_grouped_update_after_lock_clear(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -269,7 +275,7 @@ def test_upload_sbs_map_rejects_oversize_payload(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -304,7 +310,7 @@ def test_upload_sbs_map_rejects_invalid_extension(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -332,7 +338,7 @@ def test_upload_geojson_load_error_redacts_traceback(
     monkeypatch.setattr(
         upload_batch_runner_routes,
         "require_jwt",
-        lambda request, required_scopes=None: {"roles": ["Admin"]},
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(
@@ -359,7 +365,7 @@ def test_upload_geojson_load_error_redacts_traceback(
 @pytest.mark.parametrize("operation", ["sbs_map_sanity_check", "SoilBurnSeverityMap"])
 def test_upload_sbs_native_failure_is_not_published(monkeypatch, tmp_path, operation):
     runner = DummyBatchRunner(tmp_path)
-    monkeypatch.setattr(upload_batch_runner_routes, "require_jwt", lambda *args, **kwargs: {"roles": ["Admin"]})
+    monkeypatch.setattr(upload_batch_runner_routes, "require_jwt", lambda *args, **kwargs: {"sub": "2", "roles": ["Admin"]})
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
     monkeypatch.setattr(upload_batch_runner_routes.BatchRunner, "getInstanceFromBatchName", lambda name: runner)
     monkeypatch.setattr(upload_batch_runner_routes, "sbs_map_sanity_check", lambda path: (0, ""))

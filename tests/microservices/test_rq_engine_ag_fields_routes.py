@@ -152,16 +152,19 @@ class DummyAgFields:
 
 @pytest.fixture
 def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    from tests.factories.feature_access import stub_feature_accounts
+    stub_feature_accounts(monkeypatch)
     controller = DummyAgFields(tmp_path)
     auth_calls: list[tuple[object, str]] = []
-    monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {"scopes": required_scopes})
+    monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {"sub": "2", "scopes": required_scopes})
     monkeypatch.setattr(
         ag_fields_routes,
         "authorize_run_access",
-        lambda claims, runid: auth_calls.append((claims, runid)),
+        lambda claims, runid, **kwargs: auth_calls.append((claims, runid)),
     )
     monkeypatch.setattr(ag_fields_routes, "get_wd", lambda runid: str(tmp_path))
     monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda wd: controller)
+    monkeypatch.setattr(ag_fields_routes.AgFields, "tryGetInstance", lambda wd: controller)
     monkeypatch.setattr(ag_fields_routes.RedisPrep, "tryGetInstance", lambda wd: None)
     return controller, auth_calls
 
@@ -194,7 +197,7 @@ def test_every_agfields_route_authorizes_run_access(
     calls: list[str] = []
     monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {})
 
-    def _deny(_claims, runid: str) -> None:
+    def _deny(_claims, runid: str, **kwargs) -> None:
         calls.append(runid)
         raise AuthError("denied", status_code=403, code="forbidden")
 

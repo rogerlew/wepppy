@@ -142,7 +142,9 @@ def gl_dashboard(runid: str, config: str):
     # Check for omni scenarios (skip when viewing omni child runs).
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
     omni_scenarios = None if is_omni_child else _get_omni_scenarios(wd)
-    omni_contrasts = None if is_omni_child else _get_omni_contrasts(wd)
+    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+    can_read_contrasts = feature_decision("omni_contrasts", operation="inspect").allowed
+    omni_contrasts = _get_omni_contrasts(wd) if not is_omni_child and can_read_contrasts else None
 
     # Get map extent/center/zoom from Ron if available
     map_extent = None

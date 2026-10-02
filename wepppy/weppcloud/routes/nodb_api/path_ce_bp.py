@@ -27,6 +27,7 @@ from wepppy.rq.submission_recovery import (
 from wepppy.rq.path_ce_rq import TIMEOUT, run_path_cost_effective_rq
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, run_lifecycle_mutation
 from .project_bp import set_project_mod_state
+from wepppy.weppcloud.utils.feature_access_flask import require_feature, feature_decision
 
 path_ce_bp = Blueprint("path_ce", __name__)
 
@@ -77,12 +78,13 @@ def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
 
 @path_ce_bp.route(
     "/runs/<string:runid>/<config>/tasks/path_cost_effective_enable",
-    methods=["GET"],
+    methods=["POST"],
 )
 @authorize_and_handle_with_exception_factory
 @run_lifecycle_mutation
 def enable_path_cost_effective(runid: str, config: str):
     authorize(runid, config)
+    require_feature("path_ce", wd=str(load_run_context(runid, config).active_root))
     try:
         state = set_project_mod_state(runid, config, "path_ce", True)
         if not state.get("changed", False):
@@ -130,10 +132,8 @@ def _active_path_ce_job_id(wd: str, redis_conn: "redis.Redis") -> Optional[str]:
 def get_path_cost_effective_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    if single_input_uploads_enabled(Ron.getInstance(wd)):
-        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
-    controller = _ensure_controller(wd, f"{config}.cfg")
-    return jsonify({"config": controller.config})
+    controller = PathCostEffective.tryGetInstance(wd)
+    return jsonify({"config": controller.config if controller is not None else {}})
 
 
 @path_ce_bp.route(
@@ -144,6 +144,7 @@ def get_path_cost_effective_config(runid: str, config: str) -> Response:
 def update_path_cost_effective_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    require_feature("path_ce", wd=wd)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = _ensure_controller(wd, f"{config}.cfg")
@@ -164,8 +165,6 @@ def update_path_cost_effective_config(runid: str, config: str) -> Response:
 def get_path_cost_effective_status(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    if single_input_uploads_enabled(Ron.getInstance(wd)):
-        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     controller = PathCostEffective.tryGetInstance(wd)
     if controller is None:
         return jsonify(
@@ -176,6 +175,9 @@ def get_path_cost_effective_status(runid: str, config: str) -> Response:
                 "precondition_errors": [],
             }
         )
+    if not feature_decision("omni_contrasts", wd=wd, operation="inspect").allowed:
+        return jsonify({"status": controller.status, "progress": controller.progress,
+                        "status_message": "Restricted results.", "precondition_errors": []})
     return jsonify(
         {
             "status": controller.status,
@@ -194,8 +196,7 @@ def get_path_cost_effective_status(runid: str, config: str) -> Response:
 def get_path_cost_effective_results(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    if single_input_uploads_enabled(Ron.getInstance(wd)):
-        return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
+    require_feature("omni_contrasts", wd=wd, operation="inspect")
     controller = PathCostEffective.tryGetInstance(wd)
     if controller is None:
         return jsonify({"results": {}})
@@ -210,6 +211,7 @@ def get_path_cost_effective_results(runid: str, config: str) -> Response:
 def run_path_cost_effective(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    require_feature("path_ce", wd=wd, consumes_contrasts=True)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)

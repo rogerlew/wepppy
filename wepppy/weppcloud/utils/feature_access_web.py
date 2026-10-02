@@ -17,7 +17,7 @@ __all__ = [
     "profile_access", "membership_change", "acknowledge_internal",
 ]
 
-INTERNAL_STATEMENT_VERSION = "internal-2026-10-01"
+from .feature_access_identity import INTERNAL_STATEMENT_VERSION
 INTERNAL_STATEMENT = (
     "Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed "
     "functionality. Access is granted only for the approved feature, purpose, and time period. Outputs "

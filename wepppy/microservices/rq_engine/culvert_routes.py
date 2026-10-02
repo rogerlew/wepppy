@@ -45,6 +45,8 @@ from wepppy.rq.submission_recovery import (
 )
 from wepppy.weppcloud.utils import auth_tokens
 
+from .feature_access import require_feature_access
+from wepppy.weppcloud.utils.feature_access_identity import principal_claim
 from .auth import AuthError, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, validation_error_response
@@ -206,7 +208,7 @@ def _enqueue_culvert_job(
             return str(job.id)
 
 
-def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
+def _mint_culvert_browse_token(batch_uuid: str, *, subject: str, principal) -> dict[str, Any]:
     """Mint a batch-scoped browse token for /weppcloud/culverts/{uuid}/browse/*."""
     # Keep the minted token audience in lock-step with what downstream services validate.
     audience = (os.getenv("RQ_ENGINE_JWT_AUDIENCE") or "rq-engine").strip() or "rq-engine"
@@ -218,6 +220,7 @@ def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, An
         extra_claims={
             "token_class": "service",
             "service_groups": ["culverts"],
+            "feature_access_principal": principal_claim(principal),
             "jti": uuid.uuid4().hex,
         },
     )
@@ -243,6 +246,7 @@ def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, An
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
     try:
         submitter_claims = require_jwt(request, required_scopes=["culvert:batch:submit"])
+        principal = require_feature_access(submitter_claims, "culvert_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -345,6 +349,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         browse_token_payload = _mint_culvert_browse_token(
             culvert_batch_uuid,
             subject=str(submitter_claims.get("sub") or "culvert-batch"),
+        principal=principal,
         )
         browse_claims = browse_token_payload.get("claims", {}) or {}
         return JSONResponse(
@@ -398,6 +403,7 @@ async def culverts_retry_run(
     """Retry a single culvert run within an existing batch."""
     try:
         submitter_claims = require_jwt(request, required_scopes=["culvert:batch:retry"])
+        principal = require_feature_access(submitter_claims, "culvert_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -471,6 +477,7 @@ async def culverts_retry_run(
     browse_token_payload = _mint_culvert_browse_token(
         batch_uuid,
         subject=str(submitter_claims.get("sub") or "culvert-batch"),
+        principal=principal,
     )
     browse_claims = browse_token_payload.get("claims", {}) or {}
     return JSONResponse(
@@ -506,6 +513,7 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
     """Enqueue finalizer for an existing culvert batch."""
     try:
         submitter_claims = require_jwt(request, required_scopes=["culvert:batch:retry"])
+        principal = require_feature_access(submitter_claims, "culvert_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -532,6 +540,7 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
     browse_token_payload = _mint_culvert_browse_token(
         batch_uuid,
         subject=str(submitter_claims.get("sub") or "culvert-batch"),
+        principal=principal,
     )
     browse_claims = browse_token_payload.get("claims", {}) or {}
     return JSONResponse(

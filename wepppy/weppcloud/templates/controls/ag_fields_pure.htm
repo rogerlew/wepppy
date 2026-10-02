@@ -1,3 +1,8 @@
+{% set feature_readonly = feature_actions is defined and not feature_actions["ag_fields"].allowed %}
+{% if feature_readonly %}
+<p class="wc-text-muted">Read-only access. {{ feature_actions["ag_fields"].reason | replace("_", " ") | capitalize }}. Review your internal access on your Profile.</p>
+<fieldset disabled aria-label="Read-only feature controls">
+{% endif %}
 {% import "controls/_pure_macros.html" as ui with context %}
 
 {% set ag_fields_description %}
@@ -470,3 +475,5 @@
   </div>
 </div>
 {% endif %}
+
+{% if feature_readonly %}</fieldset>{% endif %}

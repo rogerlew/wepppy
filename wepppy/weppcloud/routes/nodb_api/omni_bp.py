@@ -253,9 +253,8 @@ def query_omni_contrasts_report(runid, config):
             status_code=exc.code or 403,
             code="forbidden",
         )
-    contrast_spec = feature_registry_by_id()["omni_contrasts"]
-    if not user_meets_min_role(current_user, contrast_spec.min_role):
-        return error_factory("Not Authorized", status_code=403, code="forbidden")
+    from wepppy.weppcloud.utils.feature_access_flask import require_feature
+    require_feature("omni_contrasts", wd=get_wd(runid), operation="inspect")
 
     try:
         wd = get_wd(runid)

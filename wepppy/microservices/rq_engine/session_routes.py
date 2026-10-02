@@ -610,7 +610,16 @@ def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: Seq
 
     owners = get_run_owners_lazy(auth_runid)
     if not owners:
-        return not auth_runid.startswith("batch;;")
+        if auth_runid.startswith("batch;;"):
+            from .feature_access import require_feature_access
+            try:
+                require_feature_access({"token_class": "user", "sub": str(user_id or "")},
+                                       "batch_runner", operation="inspect", protected_read=True)
+            except AuthError as exc:
+                if exc.status_code == 403:
+                    return False
+                raise
+        return True
 
     if user_id is None:
         return False
@@ -1006,7 +1015,7 @@ async def issue_session_token(runid: str, config: str, request: Request) -> JSON
         claims = _resolve_bearer_claims(request)
         auth_mode = "bearer_jwt" if claims is not None else "session_cookie_same_origin"
         if claims is not None:
-            authorize_run_access(claims, runid)
+            authorize_run_access(claims, runid, operation="inspect")
             _ensure_identifier_claim(claims, runid)
             session_id = _session_id_from_claims(claims)
             user_id, roles = _identity_from_claims(claims)
@@ -1034,6 +1043,17 @@ async def issue_session_token(runid: str, config: str, request: Request) -> JSON
                     anonymous_public_fallback = True
                 else:
                     raise
+
+        from .feature_access import verified_principal, require_workflow_access
+        from wepppy.weppcloud.utils.feature_access_identity import principal_claim
+        from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+        if claims is not None:
+            origin = principal_claim(verified_principal(claims))
+        else:
+            origin = principal_claim(VerifiedPrincipal("human", user_id) if user_id is not None else VerifiedPrincipal())
+        # The existing cookie owner/role check is not a private workflow grant.
+        origin_claims = {"token_class": "session", "feature_access_principal": origin}
+        require_workflow_access(origin_claims, runid, operation="inspect")
 
         request_payload = await _parse_optional_json_payload(request)
         expected_run_state_revision = _extract_expected_run_state_revision(request, request_payload)
@@ -1076,6 +1096,7 @@ async def issue_session_token(runid: str, config: str, request: Request) -> JSON
 
         extra_claims: dict[str, Any] = {
             "token_class": "session",
+            "feature_access_principal": origin,
             "session_id": session_id,
             "runid": runid,
             "config": config,

@@ -75,6 +75,112 @@ def count(engine, table):
         return connection.scalar(sa.select(sa.func.count()).select_from(table))
 
 
+def test_openet_signed_token_live_membership_admission(database, store, monkeypatch, tmp_path):
+    """Real JWT and SQL admission; only scientific state and job execution are bounded."""
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+    from fastapi.testclient import TestClient
+    import wepppy.microservices.rq_engine as rq_engine
+    from wepppy.microservices.rq_engine import auth, feature_access, openet_ts_routes as route
+    from wepppy.weppcloud.utils import auth_tokens, feature_access_identity as identity
+    from wepppy.weppcloud.utils.feature_access_identity import INTERNAL_STATEMENT_VERSION
+    from wepppy.weppcloud.utils import helpers
+
+    monkeypatch.setenv('WEPP_AUTH_JWT_SECRET', 'isolated-feature-route-test')
+    auth_tokens.get_jwt_config.cache_clear()
+    monkeypatch.setattr(identity, 'account_engine', lambda: database)
+    monkeypatch.setattr(auth, '_check_revocation', lambda jti: None)
+    monkeypatch.setattr(auth.Ron, 'ispublic', staticmethod(lambda wd: True))
+    monkeypatch.setattr(auth, 'get_run_owners_lazy', lambda runid: [])
+    for module in (auth, route, helpers):
+        monkeypatch.setattr(module, 'get_wd', lambda runid, **kwargs: str(tmp_path))
+    monkeypatch.setattr(feature_access, 'resource_context', lambda *args, **kwargs: FeatureResourceContext(
+        existing_access_allowed=True, backend='wbt', internal_statement_version=INTERNAL_STATEMENT_VERSION))
+    mutations = []
+    prep = SimpleNamespace(remove_timestamp=lambda task: mutations.append('timestamp'))
+    monkeypatch.setattr(route.RedisPrep, 'getInstance', lambda wd: prep)
+    monkeypatch.setattr(route.redis, 'Redis', lambda **kwargs: nullcontext(object()))
+    monkeypatch.setattr(route, 'Queue', lambda **kwargs: object())
+
+    def enqueue(*args, **kwargs):
+        mutations.append('enqueue')
+        return SimpleNamespace(id='admitted-job')
+
+    monkeypatch.setattr(route, 'enqueue_tracked_rq_job', enqueue)
+
+    def token(user_id, scopes=('rq:enqueue',)):
+        return auth_tokens.issue_token(str(user_id), scopes=list(scopes), audience='rq-engine',
+                                       extra_claims={'token_class': 'user'})['token']
+
+    old_token = token(2)
+    with TestClient(rq_engine.app) as client:
+        def submit(credential):
+            return client.post('/api/runs/public-run/cfg/acquire-openet-ts', json={},
+                               headers={'Authorization': 'Bearer ' + credential})
+
+        assert submit(token(1)).status_code == 403  # Root is not an OpenET grant.
+        assert submit(old_token).status_code == 403
+        change(store)
+        assert submit(old_token).json()['error']['code'] == 'internal_acknowledgment_required'
+        assert mutations == []
+        store.acknowledge_internal(2, INTERNAL_STATEMENT_VERSION)
+        assert submit(token(2, scopes=('rq:status',))).status_code == 403
+        assert mutations == []
+        accepted = submit(old_token)
+        assert accepted.status_code == 200 and accepted.json()['job_id'] == 'admitted-job'
+        assert mutations == ['timestamp', 'enqueue']
+        change(store, operation='remove')
+        assert submit(old_token).status_code == 403
+        assert mutations == ['timestamp', 'enqueue']
+
+
+@pytest.mark.parametrize('claims', [
+    {'token_class': 'user', 'sub': '2'},
+    {'token_class': 'service', 'sub': 'admin-run-token:2', 'service_groups': ['admin-run-token']},
+    {'token_class': 'session', 'sub': 'sid', 'feature_access_principal': {'version': 1, 'kind': 'human', 'id': 2}},
+])
+def test_verified_origin_uses_live_group_and_account(database, store, claims):
+    from wepppy.weppcloud.utils.feature_access_identity import principal_from_verified_claims
+    from wepppy.weppcloud.utils.feature_access_runtime import decide, resource_context
+    context = resource_context(protected_read=True)
+    principal = principal_from_verified_claims(claims, engine=database)
+    assert principal.user_id == 2
+    assert not decide(principal, 'batch_runner', 'inspect', context, store=store).allowed
+    change(store, group_key='batch_runner')
+    assert decide(principal, 'batch_runner', 'inspect', context, store=store).allowed
+    change(store, operation='remove', group_key='batch_runner')
+    assert not decide(principal_from_verified_claims(claims, engine=database),
+                      'batch_runner', 'inspect', context, store=store).allowed
+    with database.begin() as connection:
+        connection.execute(users.update().where(users.c.id == 2).values(active=False))
+    assert principal_from_verified_claims(claims, engine=database).kind == 'anonymous'
+
+
+@pytest.mark.parametrize('claims', [
+    {'token_class': 'session', 'sub': '2', 'user_id': 2},
+    {'token_class': 'service', 'sub': '2', 'roles': ['Root']},
+    {'token_class': 'service', 'sub': 'admin-run-token:2'},
+    {'token_class': 'mcp', 'sub': '2'},
+    {'token_class': 'session', 'feature_access_principal': {'version': 2, 'kind': 'human', 'id': 2}},
+    {'token_class': 'service', 'sub': 'culvert-batch-submit-90d', 'aud': 'other', 'service_groups': ['culverts']},
+])
+def test_unknown_credential_provenance_never_infers_human(database, claims):
+    from wepppy.weppcloud.utils.feature_access_identity import principal_from_verified_claims
+    assert principal_from_verified_claims(claims, engine=database).kind == 'anonymous'
+
+
+def test_registered_integration_and_derivative_origin():
+    from wepppy.weppcloud.utils.feature_access_identity import principal_claim, principal_from_verified_claims
+    claims = {'token_class': 'service', 'sub': 'culvert-batch-submit-90d',
+              'aud': 'rq-engine', 'service_groups': ['culverts']}
+    principal = principal_from_verified_claims(claims)
+    assert principal.integration_features == frozenset({'culvert_runner'})
+    derivative = {'token_class': 'session', 'sub': 'sid', 'feature_access_principal': principal_claim(principal)}
+    assert principal_from_verified_claims(derivative) == principal
+    claims['sub'] = 'unregistered-service'
+    assert principal_from_verified_claims(claims).kind == 'anonymous'
+
+
 def test_migration_head_schema_seed_and_legacy_preservation(database, store):
     scripts = ScriptDirectory(str(Path(__file__).parents[2] / 'wepppy/weppcloud/migrations'))
     assert scripts.get_heads() == [MIGRATION.revision]

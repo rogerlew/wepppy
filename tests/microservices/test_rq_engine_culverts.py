@@ -202,10 +202,10 @@ def _issue_culvert_token(
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
     auth_tokens.get_jwt_config.cache_clear()
     payload = auth_tokens.issue_token(
-        "culvert-tester",
+        "culvert-batch-submit-90d",
         scopes=scopes or ["culvert:batch:submit"],
         audience="rq-engine",
-        extra_claims={"jti": "test-jti"},
+        extra_claims={"jti": "test-jti", "token_class": "service", "service_groups": ["culverts"]},
     )
     return payload["token"]
 

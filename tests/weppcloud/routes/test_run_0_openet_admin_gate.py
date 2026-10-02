@@ -33,8 +33,21 @@ class _BrokenAshRon(SimpleNamespace):
 
 
 @pytest.fixture()
-def run0_module():
-    return importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
+def run0_module(monkeypatch):
+    module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
+    from flask import has_request_context
+    from werkzeug.local import LocalProxy
+    from wepppy.weppcloud.utils import feature_access_flask as feature_web
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+    def principal():
+        user = module.current_user
+        if isinstance(user, LocalProxy) and not has_request_context():
+            return VerifiedPrincipal()
+        roles = frozenset(role for role in ("Root", "Dev", "Admin", "PowerUser") if user and user.has_role(role))
+        return VerifiedPrincipal("human", 1, roles)
+    monkeypatch.setattr(feature_web, "current_principal", principal)
+    monkeypatch.setattr(feature_web._FlaskStore, "membership", lambda *args, **kwargs: (False, False))
+    return module
 
 
 @pytest.fixture()
@@ -1306,6 +1319,7 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
     run0_module,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(run0_module, "current_user", _RoleUser({"Dev"}))
     monkeypatch.setattr(
         run0_module,
         "_discover_features_export_omni_selectors",
