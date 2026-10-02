@@ -18,21 +18,13 @@ def issue_user_rq_engine_token(
     if getattr(user, "is_anonymous", False):
         return None
 
-    subject = None
-    if hasattr(user, "get_id"):
-        subject = user.get_id()
-    if not subject:
-        subject = getattr(user, "id", None)
-    if not subject:
-        subject = getattr(user, "email", None)
-    if not subject:
-        raise RuntimeError("Unable to resolve user subject for rq-engine token")
-    try:
-        user_id = int(getattr(user, "id"))
-    except (TypeError, ValueError) as exc:
-        raise RuntimeError("Unable to resolve numeric user ID for rq-engine token") from exc
-    if user_id <= 0:
+    user_id = getattr(user, "id", None)
+    if type(user_id) is not int or user_id <= 0:
         raise RuntimeError("Unable to resolve numeric user ID for rq-engine token")
+    # The verified feature-access adapter resolves user-token principals from
+    # ``sub``.  Flask-Security's get_id() returns an fs_uniquifier, which is a
+    # session identifier rather than the canonical account identity.
+    subject = str(user_id)
 
     roles = [
         str(getattr(role, "name", role)).strip()

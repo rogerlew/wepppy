@@ -200,7 +200,7 @@ def test_issue_rq_engine_token_uses_expected_claims(monkeypatch: pytest.MonkeyPa
     token = weppcloud_site_module._issue_rq_engine_token()
 
     assert token == "issued-token"
-    assert captured["subject"] == "opaque-security-subject"
+    assert captured["subject"] == "42"
     kwargs = captured["kwargs"]
     assert kwargs["scopes"] == ["rq:enqueue", "rq:status", "rq:export"]
     assert kwargs["audience"] == "rq-engine"

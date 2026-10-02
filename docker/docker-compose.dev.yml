@@ -269,12 +269,14 @@ services:
     container_name: wepppy-browse
     secrets:
       - redis_password
+      - postgres_password
       - wepp_auth_jwt_secrets
       - dtale_internal_token
     environment:
       <<: *wepppy-env
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     ulimits:
       nofile:
         soft: 1000000
@@ -296,6 +298,11 @@ services:
       - wepppy.microservices.browse:app
     ports:
       - "9009:9009"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   download:
     <<: *wepppy-service
@@ -478,12 +485,16 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - postgres_password
+      - wepp_auth_jwt_secrets
       - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
       EXTERNAL_HOST: ${EXTERNAL_HOST}
       EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       WEPP_MCP_JWT_SECRET_FILE: /run/secrets/wepp_mcp_jwt_secret
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     command:
       - uvicorn
       - wepppy.query_engine.app.server:create_app
@@ -494,6 +505,11 @@ services:
       - "8041"
     ports:
       - "8041:8041"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   shape-converter:
     <<: *wepppy-service

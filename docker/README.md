@@ -363,8 +363,10 @@ cookies. `DTALE_PRIVATE_LAUNCH_TTL_SECONDS` defaults to 60 seconds and
 `DTALE_PRIVATE_ACCESS_TTL_SECONDS` defaults to 3600 seconds. Changing the secret
 invalidates outstanding private viewer sessions; public D-Tale tables do not use
 these capabilities. Private viewers recheck current authorization on each
-request, so the D-Tale service also mounts the existing Redis and Postgres
-secrets for revocation/session and feature-group membership reads.
+request. Browse, D-Tale, and Query Engine therefore mount the existing Redis
+and Postgres secrets for revocation/session and live feature-group membership
+reads. Query Engine also mounts the existing WEPP JWT verification secret for
+its browser-facing protected routes; its MCP signing secret remains separate.
 
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
