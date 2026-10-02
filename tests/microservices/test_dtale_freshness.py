@@ -1,4 +1,5 @@
 """Actual D-Tale readers and Flask grid responses on disposable sources."""
+import base64
 import importlib
 import json
 import os
@@ -16,8 +17,9 @@ pytestmark = pytest.mark.microservice
 def dtale_service(tmp_path, monkeypatch):
     module = importlib.import_module("wepppy.webservices.dtale.dtale")
     previous = set(module.DATASETS)
+    (tmp_path / "PUBLIC").touch()
     monkeypatch.setattr(module, "DTALE_INTERNAL_TOKEN", "freshness-test-token")
-    monkeypatch.setattr(module, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(module, "get_wd", lambda runid, **_kwargs: str(tmp_path))
     # Table generation tests isolate optional NoDb map discovery; map state is
     # exercised directly below with the real parser and upstream registry.
     monkeypatch.setattr(module, "_ensure_geojson_assets", lambda *args: None)
@@ -30,7 +32,7 @@ def dtale_service(tmp_path, monkeypatch):
 
 def _load(module, root, path="data.parquet", **payload):
     return module.app.test_client().post("/internal/load", json={
-        "runid": root.name, "config": "test", "path": path, **payload,
+        "runid": root.name, "config": "test", "path": path, "resource_public": True, **payload,
     }, headers={"X-DTALE-TOKEN": "freshness-test-token"})
 
 
@@ -45,6 +47,149 @@ def _rewrite(path, frame):
     frame.to_parquet(path, index=False)
     assert path.stat().st_size == before.st_size
     os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+
+
+def test_public_to_private_transition_guards_global_geojson_overlay(
+    tmp_path,
+    monkeypatch,
+    dtale_service,
+):
+    module = dtale_service
+    if module.dtale_custom_geojson is None:
+        pytest.skip("D-Tale custom GeoJSON support unavailable")
+    data_id = "visibility-transition-dataset"
+    geojson_key = "visibility-transition-overlay"
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(module, "get_wd", lambda _runid, **_kwargs: str(tmp_path))
+    module.DATASETS[data_id] = module.DatasetMeta(
+        path=tmp_path / "data.csv",
+        fingerprint="fingerprint",
+        name="transition",
+        last_loaded=0.0,
+        runid="transition-run",
+        config="default",
+        resource_public=True,
+    )
+    module.MAP_CHOICES[data_id] = [("Transition map", geojson_key, "id")]
+    module.REGISTERED_GEOJSON[geojson_key] = "fingerprint"
+    module.dtale_custom_geojson.CUSTOM_GEOJSON.append(
+        {"key": geojson_key, "type": "FeatureCollection", "data": {}}
+    )
+    assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is not None
+
+    (tmp_path / "PUBLIC").unlink()
+
+    assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is None
+    assert geojson_key in module.REGISTERED_GEOJSON
+    module.DATASET_ACCESS_SCOPES[data_id] = frozenset({data_id})
+    monkeypatch.setattr(module, "_has_scope_access", lambda scope: scope == data_id)
+    with module.app.test_request_context("/dtale/charts/private"):
+        assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is not None
+
+    module.global_state.cleanup(data_id)
+    assert data_id not in module.MAP_CHOICES
+    assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is None
+
+
+def test_shared_geojson_key_requires_every_associated_dataset_visible(
+    tmp_path,
+    monkeypatch,
+    dtale_service,
+):
+    module = dtale_service
+    if module.dtale_custom_geojson is None:
+        pytest.skip("D-Tale custom GeoJSON support unavailable")
+    public_id = "shared-overlay-public"
+    private_id = "shared-overlay-private"
+    geojson_key = "shared-run-subcatchments"
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(module, "get_wd", lambda _runid, **_kwargs: str(tmp_path))
+    for data_id, resource_public in ((public_id, True), (private_id, False)):
+        module.DATASETS[data_id] = module.DatasetMeta(
+            path=tmp_path / f"{data_id}.csv",
+            fingerprint="fingerprint",
+            name=data_id,
+            last_loaded=0.0,
+            runid="shared-run",
+            config="default",
+            resource_public=resource_public,
+        )
+        module.MAP_CHOICES[data_id] = [("Shared map", geojson_key, "id")]
+    module.DATASET_ACCESS_SCOPES[private_id] = frozenset({private_id})
+    module.REGISTERED_GEOJSON[geojson_key] = "fingerprint"
+    module.dtale_custom_geojson.CUSTOM_GEOJSON.append(
+        {"key": geojson_key, "type": "FeatureCollection", "data": {}}
+    )
+
+    assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is None
+    monkeypatch.setattr(module, "_has_scope_access", lambda scope: scope == private_id)
+    with module.app.test_request_context("/dtale/charts/private"):
+        assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is not None
+
+
+def test_private_viewer_geojson_upload_inherits_capability_scope(
+    monkeypatch,
+    dtale_service,
+):
+    module = dtale_service
+    if module.dtale_custom_geojson is None:
+        pytest.skip("D-Tale custom GeoJSON support unavailable")
+    private_a = "private-upload-scope-a"
+    private_b = "private-upload-scope-b"
+    module.DATASET_ACCESS_SCOPES[private_a] = frozenset({private_a})
+    module.DATASET_ACCESS_SCOPES[private_b] = frozenset({private_b})
+    active_scope = {"value": private_a}
+    monkeypatch.setattr(
+        module,
+        "_has_scope_access",
+        lambda scope: scope == active_scope["value"],
+    )
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"id": "1"},
+                "geometry": {"type": "Point", "coordinates": [0, 0]},
+            }
+        ],
+    }
+    encoded = base64.b64encode(json.dumps(geojson).encode()).decode()
+    with module.app.test_request_context("/dtale/dash/upload"):
+        geojson_key = module.dtale_custom_geojson.load_geojson(
+            f"data:application/json;base64,{encoded}",
+            "private-upload.json",
+        )
+        assert module.GEOJSON_ACCESS_SCOPES[geojson_key] == frozenset({private_a})
+        assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is not None
+
+    active_scope["value"] = private_b
+    with module.app.test_request_context("/dtale/dash/upload"):
+        second_key = module.dtale_custom_geojson.load_geojson(
+            f"data:application/json;base64,{encoded}",
+            "private-upload.json",
+        )
+        assert second_key != geojson_key
+        assert module.GEOJSON_ACCESS_SCOPES[second_key] == frozenset({private_b})
+        assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is None
+        assert module.dtale_custom_geojson.get_custom_geojson(second_key) is not None
+
+    active_scope["value"] = private_a
+    with module.app.test_request_context("/dtale/dash/upload"):
+        assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is not None
+        assert module.dtale_custom_geojson.get_custom_geojson(second_key) is None
+
+    assert module.dtale_custom_geojson.get_custom_geojson(geojson_key) is None
+    dependent_key = "multi-scope-dependent-upload"
+    module.dtale_custom_geojson.CUSTOM_GEOJSON.append(
+        {"key": dependent_key, "type": "FeatureCollection", "data": {}}
+    )
+    module.GEOJSON_ACCESS_SCOPES[dependent_key] = frozenset({private_a, private_b})
+    module.global_state.cleanup(private_a)
+    assert dependent_key not in module.GEOJSON_ACCESS_SCOPES
+    assert module.dtale_custom_geojson.get_custom_geojson(dependent_key) is None
+    module._remove_geojson_asset(geojson_key)
+    module._remove_geojson_asset(second_key)
 
 
 def test_eager_csv_restored_metadata_refreshes_and_touch_reuses(tmp_path, dtale_service):

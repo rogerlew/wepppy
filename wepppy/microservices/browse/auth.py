@@ -303,6 +303,11 @@ def _run_is_public(runid: str) -> bool:
     return NoDbBase.ispublic(wd)
 
 
+def run_is_public(runid: str) -> bool:
+    """Return current public visibility for a run's authorization root."""
+    return _run_is_public(runid)
+
+
 def _require_identifier_claim(
     claims: Mapping[str, Any],
     identifier: str,
@@ -567,6 +572,7 @@ __all__ = [
     "handle_auth_error",
     "is_root_only_path",
     "request_prefers_navigation",
+    "run_is_public",
     "resolve_bearer_context",
     "resolve_auth_context",
     "site_prefix",

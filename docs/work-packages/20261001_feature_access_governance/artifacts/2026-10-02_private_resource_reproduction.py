@@ -1,8 +1,8 @@
-"""Disposable S04/S08 reproductions; print booleans, never inspect real run data.
+"""Disposable S04/S08 regression probes; print booleans, never inspect real run data.
 
 Run: wctl exec -T weppcloud python <repository-relative path to this file>
-A private_canary_read=true result demonstrates an unresolved privacy defect.
-This is adverse evidence, not a passing acceptance test.
+Expected after containment: both records report ``private_canary_read=false``;
+S04 reports ``external_read=blocked`` and S08 reports HTTP 403.
 """
 import importlib
 import json
@@ -13,6 +13,7 @@ from types import SimpleNamespace
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import duckdb
 
 from wepppy.query_engine.app.feature_access import require_datasets
 from wepppy.query_engine.catalog import CatalogEntry, DatasetCatalog
@@ -39,10 +40,15 @@ def main():
         query = QueryRequest(datasets=[entry.path], computed_columns=[{
             "alias": "leak", "sql": f"(SELECT value FROM read_parquet('{source}'))",
         }])
-        result = run_query(context, query)
-        print(json.dumps({"finding": "S04", "declared_dataset_admission": "allowed",
-                          "private_canary_read": any(row.get("leak") == "synthetic-private-canary"
-                                                     for row in result.records)}))
+        try:
+            result = run_query(context, query)
+        except duckdb.PermissionException:
+            print(json.dumps({"finding": "S04", "declared_dataset_admission": "allowed",
+                              "private_canary_read": False, "external_read": "blocked"}))
+        else:
+            print(json.dumps({"finding": "S04", "declared_dataset_admission": "allowed",
+                              "private_canary_read": any(row.get("leak") == "synthetic-private-canary"
+                                                         for row in result.records)}))
 
         module = importlib.import_module("wepppy.webservices.dtale.dtale")
         module.DTALE_INTERNAL_TOKEN = "disposable-proof-token"
@@ -51,6 +57,12 @@ def main():
         (private / "data.csv").write_text("value\nsynthetic-private-canary\n")
         loaded = module.app.test_client().post("/internal/load", json={
             "runid": "private", "config": "batch", "path": "data.csv",
+            "resource_public": False,
+            "access_claims": {
+                "token_class": "user", "sub": "reproduction-user",
+                "jti": "reproduction-token", "exp": 4_102_444_800,
+            },
+            "feature_id": "batch_runner",
         }, headers={"X-DTALE-TOKEN": "disposable-proof-token"})
         assert loaded.status_code == 200, loaded.status_code
         data_id = loaded.json["data_id"]

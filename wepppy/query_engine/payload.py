@@ -604,9 +604,20 @@ class QueryRequest:
 
 
 @dataclass
+class QuerySource:
+    """Trusted catalog source registered into an isolated DuckDB connection."""
+
+    relation_name: str
+    path: str
+    spatial: bool = False
+    geometry_alias: str = "geom"
+
+
+@dataclass
 class QueryPlan:
     """Executable DuckDB plan derived from a QueryRequest."""
 
     sql: str
     params: list[object]
     requires_spatial: bool = False
+    sources: list[QuerySource] = field(default_factory=list)

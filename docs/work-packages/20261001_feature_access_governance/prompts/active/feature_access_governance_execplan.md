@@ -23,7 +23,12 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] Commit standalone FA-02 checkpoint `102c81066` before runtime edits.
 - [x] Reconcile FA-02 shared reads, remove feature-derived file/result classification and ancestry gates, preserve action/private checks; independent bounded review findings closed.
 - [x] Reproduce S04/S08 on disposable synthetic private files; both remain real private-resource defects.
-- [ ] Complete full regression and M3 private-resource remediation/service acceptance. M3 is not complete or ready to deploy.
+- [x] Commit reviewed FA-02 sharing reconciliation as `5d4f199e6`.
+- [x] (2026-10-02 UTC) Remediate S04 by binding only admitted catalog sources into DuckDB and disabling external access before caller expressions execute; retained private-file canary denied.
+- [x] Remediate S08 with per-dataset visibility metadata and scoped downstream admission while retaining anonymous public D-Tale; retained anonymous canary denied.
+- [x] Obtain independent correctness/security disposition of S04/S08 containment; PRC01–PRC10 and PRS-01–PRS-04 closed with zero unresolved findings.
+- [x] Complete the stable affected microservice/query/WEPPcloud regression: 3,468 passed, 2 skipped.
+- [ ] Complete full-repository regression and M3 private-resource service/browser acceptance. M3 is not complete or ready to deploy.
 
 - [x] (2026-10-02 UTC) Milestone-two account UI, acknowledgment and atomic initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass.
 - [x] (2026-10-02 UTC) Local shared database backed up, test-restored, migrated and initialized for the verified sole maintainer; production unchanged.
@@ -52,6 +57,25 @@ The target is faithful integration into existing workflows, not a disconnected a
 
 Historical M3 discovery under FA-01 (reassess under FA-02): checking declared query datasets does not constrain file reads inside SQL expressions. Installed DuckDB 1.1.1 rejects `allowed_paths`; disabling external access also prevents ordinary prebound Parquet views from scanning. No dependency was changed. D-Tale's launch guard does not protect its separately served cached datasets; the existing in-process service needs a live downstream admission design and service/browser acceptance. Contrast-child forks lose their protected path and lack durable archive-surviving lineage; FA-01 currently forbids a new artifact schema. FA-02 removes the feature-derived result embargo and therefore the fork-lineage requirement. SQL/D-Tale access to genuinely private resources still requires reassessment; do not retain contrast-only mitigations or declare actual privacy defects fixed by changing policy.
 
+S04 containment prototype: DuckDB 1.1.1 can query a registered
+`pyarrow.dataset.Dataset` after `enable_external_access=false`, while a direct
+`read_parquet('/private/path')` fails with `PermissionException`. This preserves
+lazy Arrow scanning of admitted Parquet sources and closes expression-level file
+access without parsing away legitimate scalar subqueries. Spatial sources need
+a trusted `pyogrio.read_arrow` adapter because DuckDB external access is disabled
+before caller SQL; its GeoArrow metadata must be converted to ordinary WKB and
+wrapped with `ST_GeomFromWKB`.
+
+S08 uses the existing D-Tale internal secret for a 60-second launch ticket and
+one-hour viewer cookie, while the existing Redis and Postgres secrets support
+live revocation/session and group-membership checks. Viewer identity belongs to
+each opaque capability rather than shared dataset metadata. Upstream D-Tale
+stores tables and GeoJSON in process-global registries and reuses numeric derived
+IDs, so the integration guards lookup/list, structured merge references,
+derivative propagation, cleanup/ID reuse and uploaded-overlay provenance. This
+preserves authorized private maps and anonymous public tables without a universal
+D-Tale login.
+
 Milestone two: a stale Flask-Security session can fall through to token authentication; session presence alone is insufficient. The adapter verifies resolved session provenance and identity binding. Inactive pre-grants need effective status read inside the write transaction. Axe identified two low-contrast navigation links, fixed by existing button styles. A `public`-only backup omits `pg_trgm`; test restore caught missing Usersum index operators, and an archive explicitly including the extension restored successfully. The web module uses qualified Flask imports so stubtest does not inspect context-bound proxies.
 
 Milestone one: the run catalog already uses shared SQL metadata without constructing Flask, so the new account records follow that precedent. Database waits can cross an expiry boundary; admission uses PostgreSQL wall-clock time and grants sample UTC after row locks. The autouse test-secret fixture clears deployed password-file settings, so isolated PostgreSQL tests capture the configured URI before that fixture, as existing catalog tests do.
@@ -66,6 +90,30 @@ There is no persisted user group model even though profile token issuance has a 
 Source investigation found no durable anonymous creator proof, but the operator explicitly rejected a new public-writer/creator boundary: only limited-feature access changes. Preserve anonymous creation and functionality. Account identity is deployment-specific (local 1, production 12 for the designated email). Culvert's configured submit-only token signature matches production but expired September 1; do not rotate or bypass expiry as part of governance implementation.
 
 ## Decision Log
+
+2026-10-02 UTC, S04 implementation: replace generated filesystem table
+functions with opaque registered source relations carried in `QueryPlan`.
+Resolve and authorize exact catalog paths before execution, register Parquet as
+lazy Arrow datasets and supported vector files as trusted Arrow/WKB sources,
+then disable DuckDB autoload/autoinstall and all external access before executing
+the generated statement. Reject `ST_Transform` in caller SQL because PROJ reads
+`+nadgrids` paths outside DuckDB's external-access switch. Preserve ordinary SQL
+expressions and scalar subqueries over registered relations. No DuckDB upgrade,
+new dependency or service topology is introduced.
+
+2026-10-02 UTC, S08 implementation: trusted browse admission sends the current
+resource-public bit to the existing authenticated D-Tale loader. Fail closed
+when the field is absent. Public datasets keep their current anonymous viewer
+behavior. Private datasets use capabilities signed by the already-shared
+internal token, are hidden from name/enumeration access, and propagate scope to
+derived IDs. Each capability retains its own verified principal, rechecks JWT or
+session expiry/revocation and current run/group authorization on every request,
+and is removed on expiry or dataset discard. Retain private map support behind
+the same live viewer capability by filtering D-Tale's process-global GeoJSON
+lookup/list boundary, including public-to-private transitions. Mount the existing
+Postgres secret in D-Tale so current group membership can be evaluated;
+the existing Redis secret supports token/session revocation checks. The one-hour
+viewer TTL is an upper bound and requires relaunch after expiry.
 
 2026-10-02 UTC, FA-02: the operator clarified that internal/embargo status prevents unauthorized feature use, while permitted users may share results broadly. Amend canonical policy/ADRs and consumer contracts before code. Retire feature-only result classification, copied-output embargo, contrast selectors/report read gates and polling redaction. Preserve restricted actions, private project/grouped-resource boundaries and sensitive files. Reading existing contrast inputs does not require permission to execute contrasts; invoking that dependency does. The earlier fork and DuckDB questions are superseded insofar as they sought to enforce a result embargo. No dependency upgrade or universal D-Tale login requirement is authorized.
 
@@ -96,7 +144,19 @@ Source investigation found no durable anonymous creator proof, but the operator 
 
 ## Outcomes & Retrospective
 
-M3 remains incomplete at checkpoint `458557219`. FA-02 now supersedes the feature-derived read restrictions in that checkpoint; shared-read reconciliation is implemented against reviewed standalone contract ancestor `102c81066`. Focused runs have verified direct route admission and ordinary query/delivery regressions, but interim security review identified additional consumers and expression-level file reads. Existing M1/M2 passes do not establish M3 acceptance. No production activation, shared membership change, credential renewal or dependency upgrade occurred.
+M3 remains incomplete. FA-02 shared-result reconciliation is committed as
+`5d4f199e6` against reviewed standalone contract ancestor `102c81066`. The
+affected microservice/WEPPcloud scope passed 3,325 of 3,326 cases; the sole
+run-catalog timing threshold passed in isolation. S04/S08 private-resource
+remediation is implemented; the retained exploit harness reports both private
+canaries blocked. Focused query/browse/D-Tale/auth regression passes 387 cases
+with 2 benchmark skips. Independent correctness and security reviews close all
+bounded S04/S08 findings. Broader M3 service/browser acceptance remains open.
+Existing M1/M2 passes do not establish M3 acceptance.
+The final stable affected microservice/query/WEPPcloud suite passes 3,468 cases
+with 2 skips; this is not a full-repository or deployed-browser claim.
+No production activation, shared membership change, credential renewal or
+dependency upgrade occurred.
 
 The [interim M3 security review](../../artifacts/2026-10-02_m3_security_review.md) remains NOT PASSED. Retained bounded results: account/action/session/query/run-view regression 684 passed/2 skipped; delivery/export 224 passed; artifact/alias/failure cases 16 passed; control rendering 198 passed; frontend 112 suites/919 tests plus lint passed. Suites overlap. Final independent acceptance, full regression and actual service/browser validation remain open.
 
@@ -245,5 +305,6 @@ Milestone-two handoff, 2026-10-02 UTC: implementation, focused/browser/database 
 correctness/security review after correcting cancellation task/tree coverage,
 batch identifier context, missing optional Omni report state and PATH UI wording.
 Synthetic query and D-Tale canaries reproduce actual private-resource disclosure;
-S04/S08 stay High. See `artifacts/2026-10-02_fa02_runtime_validation.md` for evolving
-full regression/browser evidence. These fixes do not close M3 or authorize rollout.
+their retained post-fix run now blocks both canaries. See
+`artifacts/2026-10-02_fa02_runtime_validation.md` for evolving review and broader
+regression/browser evidence. These fixes do not close M3 or authorize rollout.

@@ -9,7 +9,7 @@ from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.context import RunContext
 from wepppy.query_engine.executor import DuckDBExecutor
 from wepppy.query_engine.formatter import QueryResult, format_table
-from wepppy.query_engine.payload import DatasetSpec, JoinSpec, QueryPlan, QueryRequest
+from wepppy.query_engine.payload import DatasetSpec, JoinSpec, QueryPlan, QueryRequest, QuerySource
 
 
 _GEO_READ_EXTENSIONS = {".geojson", ".fgb", ".gpkg", ".shp"}
@@ -132,7 +132,29 @@ def _coerce_filter_value(value: object, column_type: str | None, *, operator: st
         raise ValueError(f"Unable to coerce filter value '{value}' to type '{column_type}'") from exc
 
 
-def _dataset_source_sql(root: Path, spec: DatasetSpec, catalog: DatasetCatalog) -> tuple[str, bool]:
+def _spatial_geometry_alias(spec: DatasetSpec, catalog: DatasetCatalog) -> str:
+    """Return the catalog's geometry column name for a spatial source."""
+    entry = catalog.get(spec.path)
+    schema = entry.schema if entry else None
+    fields = schema.get("fields") if isinstance(schema, dict) else None
+    if isinstance(fields, list):
+        for field in fields:
+            if not isinstance(field, dict):
+                continue
+            field_type = str(field.get("type", "")).upper()
+            name = field.get("name")
+            if "GEOMETRY" in field_type and isinstance(name, str) and name:
+                return name
+    return "geom"
+
+
+def _dataset_source_sql(
+    root: Path,
+    spec: DatasetSpec,
+    catalog: DatasetCatalog,
+    *,
+    relation_name: str,
+) -> tuple[str, QuerySource]:
     """Return the DuckDB FROM clause component for a dataset and note spatial needs.
 
     Args:
@@ -145,20 +167,30 @@ def _dataset_source_sql(root: Path, spec: DatasetSpec, catalog: DatasetCatalog) 
     entry = catalog.get(spec.path)
     fs_path = entry.fs_path if entry and entry.fs_path else spec.path
     dataset_path = _resolve_dataset_path(root, fs_path, spec.path)
-    source_path = dataset_path.as_posix()
-    escaped = _escape_sql_literal(source_path)
     suffix = dataset_path.suffix.lower()
+    requires_spatial = suffix in _GEO_READ_EXTENSIONS
+    geometry_alias = _spatial_geometry_alias(spec, catalog) if requires_spatial else "geom"
+    source = QuerySource(
+        relation_name=relation_name,
+        path=dataset_path.as_posix(),
+        spatial=requires_spatial,
+        geometry_alias=geometry_alias,
+    )
+    quoted_relation = _quote_identifier(relation_name)
 
-    if suffix in _GEO_READ_EXTENSIONS:
-        reader = f"ST_Read('{escaped}')"
-        requires_spatial = True
+    if requires_spatial:
+        geometry_wkb = _quote_identifier("__wepp_geometry_wkb")
+        reader = (
+            f"(SELECT * EXCLUDE ({geometry_wkb}), "
+            f"ST_GeomFromWKB({geometry_wkb}) AS {_quote_identifier(geometry_alias)} "
+            f"FROM {quoted_relation})"
+        )
     else:
-        reader = f"read_parquet('{escaped}')"
-        requires_spatial = False
+        reader = quoted_relation
 
     reader = _apply_identifier_aliases(reader, spec.path, catalog)
 
-    return f"{reader} AS {spec.alias}", requires_spatial
+    return f"{reader} AS {spec.alias}", source
 
 
 _SIMPLE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -261,7 +293,8 @@ def _build_join_clause(
     used_aliases: set[str],
     root: Path,
     catalog: DatasetCatalog,
-) -> tuple[str, str, bool]:
+    relation_name: str,
+) -> tuple[str, str, QuerySource]:
     """Build the SQL fragment for a JOIN clause and record spatial requirements.
 
     Args:
@@ -284,7 +317,12 @@ def _build_join_clause(
         raise ValueError(f"Join alias '{join_spec.right}' referenced multiple times in join list")
 
     right_spec = alias_to_spec[join_spec.right]
-    join_source, requires_spatial = _dataset_source_sql(root, right_spec, catalog)
+    join_source, source = _dataset_source_sql(
+        root,
+        right_spec,
+        catalog,
+        relation_name=relation_name,
+    )
     used_aliases.add(join_spec.right)
 
     conditions = [
@@ -293,7 +331,7 @@ def _build_join_clause(
     ]
     condition_sql = " AND ".join(conditions)
     join_clause = f"{join_spec.join_type} JOIN {join_source} ON {condition_sql}"
-    return join_clause, join_spec.right, requires_spatial
+    return join_clause, join_spec.right, source
 
 
 def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPlan:
@@ -322,16 +360,29 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
         raise FileNotFoundError(missing_paths[0])
 
     base_spec = dataset_specs[0]
-    from_clause, requires_spatial = _dataset_source_sql(catalog_root, base_spec, catalog)
+    from_clause, base_source = _dataset_source_sql(
+        catalog_root,
+        base_spec,
+        catalog,
+        relation_name="__wepp_source_0",
+    )
+    sources = [base_source]
+    requires_spatial = base_source.spatial
     used_aliases = {base_spec.alias}
 
     join_clauses: list[str] = []
-    for join_spec in payload.join_specs:
-        clause, _, join_requires_spatial = _build_join_clause(
-            join_spec, alias_to_spec, used_aliases, catalog_root, catalog
+    for source_index, join_spec in enumerate(payload.join_specs, start=1):
+        clause, _, source = _build_join_clause(
+            join_spec,
+            alias_to_spec,
+            used_aliases,
+            catalog_root,
+            catalog,
+            relation_name=f"__wepp_source_{source_index}",
         )
         join_clauses.append(clause)
-        requires_spatial = requires_spatial or join_requires_spatial
+        sources.append(source)
+        requires_spatial = requires_spatial or source.spatial
 
     if used_aliases != set(alias_to_spec):
         missing_aliases = sorted(set(alias_to_spec) - used_aliases)
@@ -422,7 +473,7 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
 
     if payload.limit:
         sql += f" LIMIT {payload.limit}"
-    return QueryPlan(sql=sql, params=[], requires_spatial=requires_spatial)
+    return QueryPlan(sql=sql, params=[], requires_spatial=requires_spatial, sources=sources)
 
 
 def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
@@ -437,7 +488,12 @@ def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
     """
     plan = build_query_plan(payload, run_context.catalog)
     executor = DuckDBExecutor(run_context.base_dir)
-    table = executor.execute(plan.sql, plan.params, use_spatial=plan.requires_spatial)
+    table = executor.execute(
+        plan.sql,
+        plan.params,
+        use_spatial=plan.requires_spatial,
+        sources=plan.sources,
+    )
     return format_table(
         table,
         include_schema=payload.include_schema,

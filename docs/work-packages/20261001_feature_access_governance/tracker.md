@@ -6,7 +6,7 @@ Current phase: FA-02 result-sharing amendment and M3 reconciliation. M3 is check
 
 The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit is `102c81066` and runtime sharing reconciliation is implemented.
 
-FA-02 review confirms that S04/S08 also have source-supported private Batch/Culvert escape paths, independently of contrast sharing. Retain those as High implementation findings pending bounded reproduction/remediation; accepting the sharing policy does not close them. Public contrast-only denial/filtering findings are superseded as detailed in the checkpoint.
+FA-02 review confirmed S04/S08 private Batch/Culvert escape paths independently of contrast sharing. The retained canary now shows S04 external reads blocked and S08 anonymous private-table reads denied with HTTP 403. Public D-Tale and declared query data remain readable. Independent bounded correctness/security reviews pass with zero unresolved findings; broader M3 service/browser acceptance remains open.
 
 The [interim security review](artifacts/2026-10-02_m3_security_review.md) assessed FA-01 and was **NOT PASSED**. Its historical two open High findings and eight applied fixes are reassessed in the FA-02 checkpoint; this policy change is not a claim of technical closure or a passing final review. The reconciled affected microservice/WEPPcloud scope passed **3,325 of 3,326** tests; the sole pre-existing run-catalog latency threshold failure passed both parameterizations in isolation. Independent focused correctness ran **84 passed**. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. Full repository regression, private-resource remediation and production-equivalent browser/service acceptance remain pending.
 
@@ -24,6 +24,8 @@ The [interim security review](artifacts/2026-10-02_m3_security_review.md) assess
 - [x] Implement milestone-two group administration/acknowledgment and complete focused/browser acceptance and independent reviews.
 - [x] Back up/test-restore, migrate and initialize the local development database; retain sole-maintainer audit readback.
 - [x] Complete broad Python regression: 10,198 passed, 126 skipped; finalize milestone-two handoff.
+- [x] Reconcile FA-02 shared-result visibility and close S04/S08 private-resource containment with independent reviews.
+- [x] Complete stable affected microservice/query/WEPPcloud regression: 3,468 passed, 2 skipped.
 - [ ] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
 - [ ] Milestones four and five remain future work.
 
@@ -75,6 +77,10 @@ sharing implementation, regression results and disposable private-resource
 reproductions. [Correctness review](artifacts/2026-10-02_fa02_runtime_correctness_review.md)
 closed three findings; [security review](artifacts/2026-10-02_fa02_runtime_security_review.md)
 closed the grouped cancellation-context regression. No new concrete sharing
-reconciliation findings remain. M3 remains incomplete: S04/S08 are reproduced
-private-resource defects, not contrast-sharing policy questions. Full regression
-and service acceptance remain separately tracked in the validation record.
+reconciliation findings remain. S04/S08 containment is now implemented and the
+retained synthetic canaries are denied. The [private-resource correctness review](artifacts/2026-10-02_private_resource_correctness_review.md)
+closed PRC01–PRC10, and the [private-resource security review](artifacts/2026-10-02_private_resource_security_review.md)
+closed all bounded findings; each reports zero unresolved findings. Broader M3
+service/browser acceptance remains separately tracked in the validation record.
+The stable affected microservice/query/WEPPcloud regression passed **3,468**
+cases with **2 skipped**; full-repository regression remains a separate gate.

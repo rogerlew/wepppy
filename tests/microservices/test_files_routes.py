@@ -785,6 +785,8 @@ def test_runs_routes_allow_symlink_to_parent_maps(tmp_path: Path, monkeypatch, l
         "runid": runid,
         "config": config,
         "path": "maps/table.csv",
+        "resource_public": False,
+        "access_claims": {"token_class": "user", "roles": ["User"], "sub": "1"},
     }
     assert captured["headers"] == {"X-DTALE-TOKEN": "internal-token"}
 
@@ -915,6 +917,9 @@ def test_culvert_routes_allow_symlink_to_parent_maps(tmp_path: Path, monkeypatch
         "runid": batch_uuid,
         "config": "culvert-batch",
         "path": "runs/1001/shared_maps/culvert.csv",
+        "resource_public": False,
+        "access_claims": {"token_class": "user", "roles": ["User"], "sub": "1"},
+        "feature_id": "culvert_runner",
     }
 
 
@@ -961,6 +966,9 @@ def test_batch_routes_allow_symlink_to_parent_maps(tmp_path: Path, monkeypatch, 
         "runid": batch_name,
         "config": "batch",
         "path": "runs/1001/shared_maps/batch.csv",
+        "resource_public": False,
+        "access_claims": {"token_class": "user", "roles": ["User"], "sub": "1"},
+        "feature_id": "batch_runner",
     }
 
 

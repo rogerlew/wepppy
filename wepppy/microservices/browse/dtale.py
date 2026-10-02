@@ -21,6 +21,7 @@ from wepppy.microservices.browse.auth import (
     authorize_group_request,
     authorize_run_request,
     handle_auth_error,
+    run_is_public,
 )
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_RECORDER,
@@ -33,6 +34,7 @@ from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.runtime_paths.fs import stat as nodir_stat
 from wepppy.runtime_paths.materialize import materialize_file
 from wepppy.runtime_paths.paths import parse_external_subpath
+from wepppy.nodb.base import NoDbBase
 
 _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
 _DTALE_INTERNAL_TOKEN = (get_secret('DTALE_INTERNAL_TOKEN') or '').strip()
@@ -248,6 +250,16 @@ def build_handlers(
             'config': config,
             'path': dtale_rel_path,
         }
+        if auth_mode == 'run':
+            payload['resource_public'] = NoDbBase.ispublic(wd)
+        elif group_public_runid:
+            payload['resource_public'] = run_is_public(group_public_runid)
+        else:
+            payload['resource_public'] = False
+        if not payload['resource_public']:
+            payload['access_claims'] = dict(auth_context.claims or {})
+            if auth_mode == 'group':
+                payload['feature_id'] = 'batch_runner' if group_public_runid else 'culvert_runner'
         raw_pqf = (request.query_params.get('pqf') or '').strip()
         if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.geoparquet', '.pq')):
             payload['pqf'] = raw_pqf

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import duckdb
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
@@ -512,8 +513,74 @@ def test_build_plan_for_geojson(tmp_path: Path) -> None:
     )
 
     plan = build_query_plan(payload, catalog)
-    assert "ST_Read" in plan.sql
+    assert "ST_Read" not in plan.sql
+    assert "ST_GeomFromWKB" in plan.sql
     assert plan.requires_spatial is True
+    assert [source.spatial for source in plan.sources] == [False, True]
+
+    result = run_query(
+        RunContext(runid="test", base_dir=tmp_path, scenario=None, catalog=catalog),
+        payload,
+    )
+    assert result.records == [
+        {"topaz_id": 1, "name": "Alpha", "geometry_json": '{"type":"Point","coordinates":[0.0,0.0]}'},
+        {"topaz_id": 2, "name": "Beta", "geometry_json": '{"type":"Point","coordinates":[1.0,1.0]}'},
+    ]
+
+    transform_payload = QueryRequest(
+        datasets=[{"path": geo_rel, "alias": "geo"}],
+        computed_columns=[
+            {
+                "alias": "transformed",
+                "sql": "ST_Transform(geo.geometry, '+proj=longlat +nadgrids=/tmp/private-grid', 'EPSG:4326')",
+            }
+        ],
+    )
+    with pytest.raises(ValueError, match="ST_Transform is unavailable"):
+        run_query(
+            RunContext(runid="test", base_dir=tmp_path, scenario=None, catalog=catalog),
+            transform_payload,
+        )
+
+    dynamic_transform_payload = QueryRequest(
+        datasets=[{"path": geo_rel, "alias": "geo"}],
+        computed_columns=[
+            {
+                "alias": "hidden_transform",
+                "sql": "(SELECT * FROM query('SELECT ST_Transform(ST_Point(0, 0), ''EPSG:4326'', ''EPSG:3857'')'))",
+            }
+        ],
+    )
+    with pytest.raises(ValueError, match="Dynamic SQL is unavailable"):
+        run_query(
+            RunContext(runid="test", base_dir=tmp_path, scenario=None, catalog=catalog),
+            dynamic_transform_payload,
+        )
+
+
+def test_run_query_blocks_undeclared_file_read_from_expression(tmp_path: Path) -> None:
+    rel = "datasets/public.parquet"
+    _write_parquet(tmp_path / rel, pa.table({"id": [1], "value": [7]}))
+    private_path = tmp_path.parent / "private.parquet"
+    _write_parquet(private_path, pa.table({"secret": ["private-canary"]}))
+    _write_catalog_entries(tmp_path, [rel])
+    catalog = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    payload = QueryRequest(
+        datasets=[{"path": rel, "alias": "public"}],
+        columns=["public.id"],
+        computed_columns=[
+            {
+                "alias": "stolen",
+                "sql": f"(SELECT secret FROM read_parquet('{private_path.as_posix()}') LIMIT 1)",
+            }
+        ],
+    )
+
+    with pytest.raises(duckdb.PermissionException, match="read_parquet files is disabled"):
+        run_query(
+            RunContext(runid="test", base_dir=tmp_path, scenario=None, catalog=catalog),
+            payload,
+        )
 
 
 def test_build_plan_with_computed_columns(tmp_path: Path) -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from typing import Any, Mapping, Sequence
 
 import redis
@@ -286,6 +287,17 @@ def require_session_marker(claims: Mapping[str, Any], runid: str) -> None:
     _check_session_marker(str(session_id), str(runid))
 
 
+def require_current_claims(claims: Mapping[str, Any]) -> None:
+    """Recheck expiry and revocation for previously verified JWT claims."""
+    expires_at = claims.get("exp")
+    if not isinstance(expires_at, (int, float)) or time.time() >= expires_at:
+        raise AuthError("Token has expired", status_code=401, code="unauthorized")
+    _check_revocation(str(claims.get("jti") or ""))
+    normalized_token_class = token_class(claims)
+    if normalized_token_class == "session":
+        _check_session_revocation(str(claims.get("session_id") or claims.get("sub") or ""))
+
+
 def authorize_run_access(
     claims: Mapping[str, Any],
     runid: str,
@@ -423,6 +435,7 @@ __all__ = [
     "require_token_class",
     "require_jwt",
     "require_roles",
+    "require_current_claims",
     "require_session_marker",
     "token_class",
 ]

@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open; M1/M2 complete, M3 checkpoint `458557219` incomplete. FA-02 result-sharing reconciliation implemented; private SQL/D-Tale findings remain open, 2026-10-02 UTC.
+Status: Open; M1/M2 complete. FA-02 result sharing is committed as `5d4f199e6`; private SQL/D-Tale containment is implemented, locally validated and independently reviewed with zero unresolved findings. Broader M3 service/browser acceptance remains open, 2026-10-02 UTC.
 
 Timezone: UTC
 
@@ -30,7 +30,12 @@ Target faithful wiring into the real profile, public run, feature actions, API a
 
 Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a new inspect-only restricted-feature view creates no missing feature controller state. Test shared retained contrast/PATH-CE results through direct, query and archive paths as well as named reports; test actual private-resource denial separately.
 
-Highest current completion claim: milestone-two account UI, acknowledgment and initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass. Full regression (10,198 passed, 126 skipped) and audited local initialization are complete. Protected feature endpoint wiring and production access cutover remain later milestones.
+Highest current completion claim: M1/M2 account records, group administration,
+acknowledgment and initialization are complete. M3 sharing reconciliation and
+private SQL/D-Tale containment are implemented; their bounded independent
+correctness/security reviews pass with zero unresolved findings. Production-
+equivalent service/browser acceptance, the remaining M3 closeout, PowerUser
+self-service and rollout are still open.
 
 ## Security and correctness gates
 
@@ -57,6 +62,6 @@ Parameterization change: no. ADR-0080 records governance, not numerical paramete
 
 ## Deliverables and next action
 
-Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). Complete milestone zero before runtime work. The current requested deliverable is milestone two. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. Final independent reviews passed; [disposition](artifacts/2026-10-01_m0_reviews.md) and the tracker record acceptance and the ancestor commit.
+Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). M3 remains the active milestone. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. The private-resource slice is recorded in its [correctness review](artifacts/2026-10-02_private_resource_correctness_review.md), [security review](artifacts/2026-10-02_private_resource_security_review.md), and [runtime validation](artifacts/2026-10-02_fa02_runtime_validation.md).
 
 Milestone-one implementation and validation details: [account records](../../dev-notes/feature-access-records.md), [correctness review](artifacts/2026-10-01_m1_correctness_review.md), and [security review](artifacts/2026-10-01_m1_security_review.md). No shared schema, membership or credential mutation is included in this implementation step.

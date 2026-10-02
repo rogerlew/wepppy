@@ -244,11 +244,13 @@ services:
     secrets:
       - redis_password
       - *discord-bot-token-secret
+      - postgres_password
       - dtale_internal_token
     environment:
       <<: *wepppy-env
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       BROWSE_PARQUET_FILTERS_ENABLED: "1"
     command:
       - gunicorn

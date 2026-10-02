@@ -290,6 +290,7 @@ services:
     container_name: wepppy-dtale
     secrets:
       - redis_password
+      - postgres_password
       - dtale_internal_token
     ulimits:
       nofile:
@@ -312,11 +313,14 @@ services:
       <<: *wepppy-env
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     ports:
       - "9010:9010"
     depends_on:
       redis:
         condition: service_started
+      postgres:
+        condition: service_healthy
 
   elevationquery:
     <<: *wepppy-service

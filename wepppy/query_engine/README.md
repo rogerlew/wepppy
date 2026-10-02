@@ -11,7 +11,7 @@ The WEPPcloud Query Engine is a **DuckDB-powered analytical service** that expos
 - **Multi-Dataset Joins**: Seamlessly join landuse, soils, climate, and model outputs across common keys (e.g., `TopazID`)
 - **Spatial Data Support**: Query GeoJSON, FlatGeobuf (`.fgb`), GeoPackage (`.gpkg`), and Shapefile formats alongside tabular data
 - **Aggregation & Transformation**: Compute summaries (SUM, AVG, COUNT, etc.), derive new columns, and reshape timeseries data for charting
-- **Safe Execution**: All queries run in isolated DuckDB connections with timeout enforcement and payload size limits
+- **Safe Execution**: Cataloged files are registered as trusted Arrow sources; caller expressions run after DuckDB external access and extension auto-loading are disabled
 
 ### What It Can't Do
 
@@ -20,6 +20,7 @@ The WEPPcloud Query Engine is a **DuckDB-powered analytical service** that expos
 - **No streaming**: Large result sets are truncated by `limit`; there is no cursor-based pagination or streaming API (yet)
 - **No cross-run queries**: Each query targets a single run directory; joins across different WEPPcloud runs are not supported
 - **No real-time updates**: Catalogs are generated during activation and do not automatically refresh when new files appear
+- **No `ST_Transform` expressions**: PROJ transformations can read external grid files outside DuckDB's filesystem switch, so the query API rejects this function
 
 ### Architecture Components
 

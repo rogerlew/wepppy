@@ -426,3 +426,44 @@ def test_sanitize_auth_actor_normalizes_supported_classes(claims, expected) -> N
 )
 def test_sanitize_auth_actor_rejects_malformed_claims(claims) -> None:
     assert auth._sanitize_auth_actor(claims) is None
+
+
+def test_require_current_claims_rechecks_jwt_expiry_and_revocation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    checked: list[str] = []
+    monkeypatch.setattr(auth.time, "time", lambda: 100.0)
+    monkeypatch.setattr(auth, "_check_revocation", checked.append)
+
+    auth.require_current_claims(
+        {"token_class": "user", "exp": 101.0, "jti": "active-token"}
+    )
+    assert checked == ["active-token"]
+
+    with pytest.raises(auth.AuthError) as expired:
+        auth.require_current_claims(
+            {"token_class": "user", "exp": 100.0, "jti": "expired-token"}
+        )
+    assert expired.value.status_code == 401
+
+
+def test_require_current_claims_rechecks_session_revocation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    checked_jtis: list[str] = []
+    checked_sessions: list[str] = []
+    monkeypatch.setattr(auth.time, "time", lambda: 100.0)
+    monkeypatch.setattr(auth, "_check_revocation", checked_jtis.append)
+    monkeypatch.setattr(auth, "_check_session_revocation", checked_sessions.append)
+
+    auth.require_current_claims(
+        {
+            "token_class": "session",
+            "exp": 101.0,
+            "jti": "session-token",
+            "session_id": "session-1",
+        }
+    )
+
+    assert checked_jtis == ["session-token"]
+    assert checked_sessions == ["session-1"]

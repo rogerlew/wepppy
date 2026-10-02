@@ -1216,11 +1216,11 @@ def test_private_dtale_uses_bearer_when_cookie_run_scope_mismatch(
         )
 
     assert response.status_code == 303
-    assert captured_dtale["json"] == {
-        "runid": runid,
-        "config": config,
-        "path": "table.csv",
-    }
+    assert {
+        key: captured_dtale["json"][key]
+        for key in ("runid", "config", "path", "resource_public")
+    } == {"runid": runid, "config": config, "path": "table.csv", "resource_public": False}
+    assert captured_dtale["json"]["access_claims"]["token_class"] == "service"
 
 
 def test_private_browse_session_token_runid_mismatch_is_forbidden(
@@ -1486,11 +1486,11 @@ def test_run_dtale_root_only_path_uses_bearer_when_cookie_lacks_root_role(
         )
 
     assert response.status_code == 303
-    assert captured_dtale["json"] == {
-        "runid": runid,
-        "config": config,
-        "path": subpath,
-    }
+    assert {
+        key: captured_dtale["json"][key]
+        for key in ("runid", "config", "path", "resource_public")
+    } == {"runid": runid, "config": config, "path": subpath, "resource_public": False}
+    assert captured_dtale["json"]["access_claims"]["roles"] == ["Root"]
 
 
 @pytest.mark.parametrize(
@@ -1967,11 +1967,13 @@ def test_group_dtale_uses_bearer_when_cookie_identifier_mismatch(
         )
 
     assert response.status_code == 303
-    assert captured_dtale["json"] == {
-        "runid": identifier,
-        "config": config_name,
-        "path": "runs/1001/table.csv",
-    }
+    assert captured_dtale["json"]["runid"] == identifier
+    assert captured_dtale["json"]["config"] == config_name
+    assert captured_dtale["json"]["path"] == "runs/1001/table.csv"
+    assert captured_dtale["json"]["resource_public"] is False
+    assert captured_dtale["json"]["feature_id"] == (
+        "culvert_runner" if base == "culverts" else "batch_runner"
+    )
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
@@ -2149,11 +2151,13 @@ def test_group_dtale_root_only_path_uses_bearer_when_cookie_lacks_root_role(
         )
 
     assert response.status_code == 303
-    assert captured_dtale["json"] == {
-        "runid": identifier,
-        "config": config_name,
-        "path": subpath,
-    }
+    assert captured_dtale["json"]["runid"] == identifier
+    assert captured_dtale["json"]["config"] == config_name
+    assert captured_dtale["json"]["path"] == subpath
+    assert captured_dtale["json"]["resource_public"] is False
+    assert captured_dtale["json"]["feature_id"] == (
+        "culvert_runner" if base == "culverts" else "batch_runner"
+    )
 
 
 @pytest.mark.parametrize(
@@ -2229,11 +2233,13 @@ def test_group_routes_accept_scoped_service_token(
     assert gdalinfo_response.status_code == 200
     assert gdalinfo_response.json()["driver"] == "GTiff"
     assert dtale_response.status_code == 303
-    assert captured_dtale["json"] == {
-        "runid": identifier,
-        "config": config_name,
-        "path": "runs/1001/table.csv",
-    }
+    assert captured_dtale["json"]["runid"] == identifier
+    assert captured_dtale["json"]["config"] == config_name
+    assert captured_dtale["json"]["path"] == "runs/1001/table.csv"
+    assert captured_dtale["json"]["resource_public"] is False
+    assert captured_dtale["json"]["feature_id"] == (
+        "culvert_runner" if base == "culverts" else "batch_runner"
+    )
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])

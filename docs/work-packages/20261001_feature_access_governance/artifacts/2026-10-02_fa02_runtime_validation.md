@@ -34,7 +34,7 @@ creating state. Anonymous creation and ordinary operation remain supported.
 - First full-suite attempts reached 857 and 900 passed (28 skipped) before old
   authorization test doubles rejected the existing `operation` keyword. After
   correcting those fixtures, the complete affected microservice/WEPPcloud scope
-  passed 3,325 of 3,326 tests. The sole failure was the pre-existing run-catalog
+  passed 3,325 of 3,326 tests. The sole failure was the preexisting run-catalog
   latency threshold (`68.6 ms` observed versus `50 ms`); both parameterizations
   passed when rerun in isolation. The authorization corrections also prove that
   Admin alone does not bypass the Batch group and that public Batch inspection
@@ -51,27 +51,42 @@ These runs overlap; counts are not additive. A complete Python-suite pass is
 still pending, and the unrelated timing test remains flaky under suite load. No
 production deployment or shared account mutation occurred.
 
-## Confirmed remaining private-resource defects
+## Private-resource remediation
 
 Both reproductions use disposable synthetic files inside the existing container,
 not real user data. The [reproduction script](2026-10-02_private_resource_reproduction.py)
 retains the exact paths through production code.
 
-- **S04, High:** public declared-dataset admission succeeds, then a computed SQL
-  scalar subquery reads a private Batch Parquet file omitted from the catalog.
-  Observed `private_canary_read=true`. Actual DuckDB 1.1.1 supports SQL JSON
-  serialization, but an AST-based containment strategy still needs a complete
-  compatibility/security design. `allowed_paths` is unavailable; blanket
-  external-access disable breaks supported Parquet scans. No upgrade or query
-  language change has been made.
-- **S08, High:** an internal authorized load registers a private Batch CSV, then a
-  fresh anonymous Flask client gets `/dtale/data/<id>` with HTTP 200 and the
-  synthetic value. Observed `private_canary_read=true`. Launch admission alone
-  cannot protect cached tables. A fix must cover downstream data, exports,
-  metadata, global dataset discovery and map assets while retaining ordinary
-  public anonymous D-Tale. No global login requirement or credential change has
-  been introduced.
+- **S04:** query plans now bind resolved catalog sources as opaque Arrow
+  relations. DuckDB extension auto-loading and external access are disabled
+  before caller expressions execute. Vector inputs use a trusted Arrow/WKB
+  adapter; `ST_Transform` is rejected because PROJ can read external grid paths.
+  The retained scalar-subquery canary now reports
+  `private_canary_read=false, external_read=blocked`.
+- **S08:** trusted browse admission labels every D-Tale load with current
+  resource visibility. Public cached tables keep anonymous downstream reads.
+  Private tables return a 60-second launch ticket that establishes a scoped,
+  HttpOnly viewer cookie bound to that viewer's verified claims; direct anonymous
+  data/export/name/enumeration paths are denied or filtered, and derived IDs
+  inherit scope. Every private request rechecks token/session expiry and
+  revocation plus current run or feature-group authorization. Capability state is
+  pruned on expiry and dataset discard. Private overlays remain available to an
+  authorized viewer, while D-Tale's global GeoJSON lookup/list boundary applies
+  the same capability and observes public-to-private marker changes. D-Tale
+  receives the existing Postgres secret for live membership reads and already
+  had the Redis secret used for revocation/session checks. The retained anonymous
+  canary now receives HTTP 403 and reports `private_canary_read=false`.
 
-FA-02 does not waive either private-resource defect. M3 acceptance, dependent
-self-promotion and rollout remain on hold until remediation and service/browser
-acceptance establish the existing private-resource contract.
+The combined focused query/browse/D-Tale/files/auth regression passed 387 cases
+with 2 benchmark skips. Compose rendering for development, HPC development and
+production configurations passes. The retained exploit harness passes against
+actual production code. Independent [correctness](2026-10-02_private_resource_correctness_review.md)
+and [security](2026-10-02_private_resource_security_review.md) reviews pass with
+zero unresolved findings. Broader M3 regression/service-browser acceptance
+remains open. The final stable affected microservice/query/WEPPcloud suite passed
+**3,468 cases with 2 skipped**; this is not a full-repository or deployed-browser
+acceptance claim.
+
+FA-02 did not waive either private-resource defect. M3 acceptance, dependent
+self-promotion and rollout remain on hold until independent remediation review
+and service/browser acceptance establish the private-resource contract.

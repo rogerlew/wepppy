@@ -1,6 +1,6 @@
 # Feature access governance amendment
 
-Status: FA-01 with operator-directed results-sharing amendment FA-02, 2026-10-02 UTC; FA-02 independent correctness/security contract reviews passed; standalone ancestor `102c81066`. FA-02 sharing reconciliation is implemented and independently reviewed; M3 remains incomplete because private-resource SQL/D-Tale findings and broader acceptance are open. M1/M2 are complete. No M3 closeout or deployment claim is made.
+Status: FA-01 with operator-directed results-sharing amendment FA-02, 2026-10-02 UTC; FA-02 independent correctness/security contract reviews passed; standalone ancestor `102c81066`. FA-02 sharing reconciliation is committed as `5d4f199e6`. Private-resource SQL/D-Tale remediations are implemented and locally validated, with independent review and broader M3 acceptance still open. M1/M2 are complete. No M3 closeout or deployment claim is made.
 
 This document owns the FA-01 feature-access behavior and records the project maintainer's directions following the [implementation assessment](../dev-notes/feature-maturity-governance-implementation-assessment.md). The [governance policy](../../wepppy/weppcloud/routes/usersum/weppcloud/feature-maturity-and-release-governance.md), registry specification, ADR-0001 and auth contracts cross-link this bounded amendment. [ADR-0080](../adrs/ADR-0080-feature-access-governance-amendment.md) preserves its rationale. The [implementation plan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md) may not enter runtime milestones until the contract-first ancestor checkpoint exists. This document does not claim current runtime conformance.
 
@@ -168,6 +168,20 @@ Open job polling preserves its existing admission mode and lifecycle/status/prog
 Generic action routes, including legacy and composite child aliases, must gate the restricted operation actually performed. Public retained views are observational: no optional feature initialization, external acquisition or new restricted scientific execution merely to inspect state. Existing ordinary query/cache/export behavior remains. Report rendering from retained outputs is permitted; executing restricted analysis behind a report or export endpoint requires action entitlement. Preserve current private Batch/Culvert workflow boundaries and the registered integration path.
 
 Reassess M3-S04 (arbitrary SQL file access) and M3-S08 (cached D-Tale access) against actual resource privacy and containment. Public contrast-result sharing is expected behavior, not an exploit. Access to another private resource or credentials remains a separate defect; this amendment neither waives it nor authorizes a DuckDB upgrade or a new service-authentication design.
+
+S04 containment binds only resolved catalog sources into the query connection,
+then disables DuckDB external access and extension auto-loading before caller
+expressions execute. Vector sources enter through a trusted Arrow/WKB adapter.
+`ST_Transform` is excluded because PROJ can read grid paths outside DuckDB's
+filesystem setting. S08 containment labels every internal D-Tale load with the
+current resource visibility. Public datasets retain anonymous downstream views;
+private datasets require a short-lived launch ticket and scoped HttpOnly cookie,
+are omitted from global lookup/enumeration, and pass their scope to derived
+datasets. Private overlays may remain in D-Tale's process-global GeoJSON
+registry, but its lookup/list boundary requires the same live viewer capability
+and observes public-to-private visibility changes; anonymous/global lookup does
+not expose them. Each private request rechecks credential expiry/revocation and
+current run or feature-group authorization.
 
 ## Remaining implementation checkpoint
 

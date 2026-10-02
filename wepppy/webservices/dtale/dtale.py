@@ -22,8 +22,13 @@ etc.). The Flask app exposes two routes:
 * ``GET /health`` – liveness check returning ``{"status": "ok"}``
 * ``POST /internal/load`` – authenticated endpoint that loads a file into
   D-Tale and returns the dataset ID plus viewer URL
+* ``GET /dtale/access/<ticket>`` – short-lived private-resource launch that
+  establishes a scoped, HttpOnly viewer cookie
 
 Clients must supply ``X-DTALE-TOKEN`` when `DTALE_INTERNAL_TOKEN` is configured.
+The loader also requires its trusted caller to state `resource_public`. Private
+tables are hidden from anonymous grid, export, name, enumeration and derived
+dataset paths; public tables retain ordinary anonymous downstream access.
 """
 
 from __future__ import annotations
@@ -32,6 +37,7 @@ import hashlib
 import json
 import logging
 import os
+import secrets
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,7 +46,8 @@ from typing import Any, Callable, Iterable
 import duckdb
 import pandas as pd
 import pyarrow.parquet as pq
-from flask import abort, jsonify, request
+from flask import abort, g, has_request_context, jsonify, redirect, request
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from dtale import global_state
 from dtale.app import build_app, initialize_process_props
@@ -59,6 +66,7 @@ from wepppy.microservices.parquet_filters import (
     count_rows as count_filtered_parquet_rows,
 )
 from wepppy.nodb.core.watershed import Watershed
+from wepppy.nodb.base import NoDbBase
 
 try:
     from wepppy.nodb.mods.ag_fields.ag_fields import AgFields
@@ -109,6 +117,8 @@ MAX_ROWS = int(os.getenv("DTALE_MAX_ROWS", "0"))
 ALLOW_CELL_EDITS = os.getenv("DTALE_ALLOW_CELL_EDITS", "0").lower() in {"1", "true", "yes"}
 DTALE_THEME = os.getenv("DTALE_THEME", "light")
 BROWSE_PARQUET_FILTERS_ENABLED = os.getenv("BROWSE_PARQUET_FILTERS_ENABLED", "0").lower() in {"1", "true", "yes", "on"}
+DTALE_PRIVATE_ACCESS_TTL_SECONDS = int(os.getenv("DTALE_PRIVATE_ACCESS_TTL_SECONDS", "3600"))
+DTALE_PRIVATE_LAUNCH_TTL_SECONDS = int(os.getenv("DTALE_PRIVATE_LAUNCH_TTL_SECONDS", "60"))
 
 global_state.set_app_settings(
     {
@@ -126,13 +136,28 @@ class DatasetMeta:
     name: str
     last_loaded: float
     resolved_path: Path | None = None
+    runid: str = ""
+    config: str = ""
+    resource_public: bool = False
+
+
+@dataclass(frozen=True)
+class ViewerCapability:
+    scope: str
+    runid: str
+    claims: dict[str, Any]
+    feature_id: str | None
+    expires_at: float
 
 
 DATASETS: dict[str, DatasetMeta] = {}
+DATASET_ACCESS_SCOPES: dict[str, frozenset[str]] = {}
+VIEWER_CAPABILITIES: dict[str, ViewerCapability] = {}
 LAZY_PARQUET_DATASETS: dict[str, "LazyParquetDtaleInstance"] = {}
 REGISTERED_GEOJSON: dict[str, str] = {}
 MAP_DEFAULTS: dict[str, dict[str, object]] = {}
 MAP_CHOICES: dict[str, list[tuple[str, str, str | None]]] = {}
+GEOJSON_ACCESS_SCOPES: dict[str, frozenset[str]] = {}
 _IDENTIFIER_STRING_ALIASES: tuple[tuple[str, str], ...] = (
     ("wepp_id", "WeppID"),
     ("topaz_id", "TopazID"),
@@ -187,6 +212,210 @@ def _make_dataset_id(runid: str, config: str, rel_path: str) -> str:
     """Derive a short dataset identifier from run context and relative path."""
     raw = f"{runid}|{config}|{rel_path}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
+
+
+def _access_serializer(*, launch: bool) -> URLSafeTimedSerializer:
+    if not DTALE_INTERNAL_TOKEN:
+        abort(503, description="Private D-Tale access is not configured.")
+    salt = "weppcloud-dtale-private-launch-v1" if launch else "weppcloud-dtale-private-session-v1"
+    return URLSafeTimedSerializer(DTALE_INTERNAL_TOKEN, salt=salt)
+
+
+def _scope_cookie_name(scope: str) -> str:
+    digest = hashlib.sha256(scope.encode("utf-8")).hexdigest()[:16]
+    return f"wepp_dtale_private_{digest}"
+
+
+def _resource_is_public(runid: str, config: str) -> bool:
+    if config == "culvert-batch":
+        return False
+    authorization_runid = f"batch;;{runid};;_base" if config == "batch" else runid
+    try:
+        wd = get_wd(authorization_runid, prefer_active=False)
+    except (FileNotFoundError, OSError, RuntimeError, TypeError):
+        return False
+    return NoDbBase.ispublic(wd)
+
+
+def _effective_access_scopes(data_id: str) -> frozenset[str]:
+    scopes = DATASET_ACCESS_SCOPES.get(data_id, frozenset())
+    if scopes:
+        return scopes
+    meta = DATASETS.get(data_id)
+    if meta is not None and meta.resource_public and not _resource_is_public(meta.runid, meta.config):
+        scopes = frozenset({data_id})
+        DATASET_ACCESS_SCOPES[data_id] = scopes
+    return scopes
+
+
+def _cookie_path() -> str:
+    return f"{APP_ROOT or ''}/dtale" or "/dtale"
+
+
+def _has_scope_access(scope: str) -> bool:
+    token = request.cookies.get(_scope_cookie_name(scope), "")
+    if not token:
+        return False
+    try:
+        payload = _access_serializer(launch=False).loads(
+            token,
+            max_age=DTALE_PRIVATE_ACCESS_TTL_SECONDS,
+        )
+    except (BadSignature, SignatureExpired):
+        return False
+    if not isinstance(payload, dict) or payload.get("scope") != scope:
+        return False
+    capability_id = payload.get("capability")
+    if not isinstance(capability_id, str):
+        return False
+    return _reauthorize_private_scope(scope, capability_id)
+
+
+def _reauthorize_private_scope(scope: str, capability_id: str) -> bool:
+    capability = VIEWER_CAPABILITIES.get(capability_id)
+    if capability is None or capability.scope != scope:
+        return False
+    if time.time() >= capability.expires_at:
+        VIEWER_CAPABILITIES.pop(capability_id, None)
+        return False
+    try:
+        from wepppy.microservices.rq_engine.auth import require_current_claims
+
+        require_current_claims(capability.claims)
+        if capability.feature_id:
+            from wepppy.microservices.rq_engine.feature_access import require_feature_access
+
+            require_feature_access(
+                capability.claims,
+                capability.feature_id,
+                operation="inspect",
+                protected_read=True,
+            )
+        else:
+            from wepppy.microservices.rq_engine.auth import authorize_run_access
+
+            authorize_run_access(capability.claims, capability.runid, operation="inspect")
+    except Exception as exc:  # broad-except: boundary contract; authorization adapters expose service-specific errors
+        logger.info("Private D-Tale reauthorization denied for %s: %s", scope, exc)
+        return False
+    return True
+
+
+def _require_dataset_access(data_id: object) -> None:
+    if not has_request_context() or request.path.startswith("/internal/"):
+        return
+    scopes = _effective_access_scopes(str(data_id))
+    if scopes and not all(_has_scope_access(scope) for scope in scopes):
+        abort(403, description="Private D-Tale dataset access required.")
+
+
+def _request_private_scopes() -> frozenset[str]:
+    referenced: set[str] = set()
+    id_fields = {"dataid", "dataids", "leftdataid", "rightdataid", "sourceid"}
+
+    def collect(value: object, *, reference: bool = False) -> None:
+        known_data_ids = DATASET_ACCESS_SCOPES.keys() | DATASETS.keys()
+        if isinstance(value, str):
+            if reference and value in known_data_ids:
+                referenced.add(value)
+                return
+            try:
+                decoded = json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                decoded = None
+            if decoded is not None and decoded != value:
+                collect(decoded, reference=reference)
+            elif reference and "," in value:
+                for item in value.split(","):
+                    collect(item.strip(), reference=True)
+            return
+        if isinstance(value, dict):
+            for key, item in value.items():
+                normalized_key = str(key).replace("_", "").replace("-", "").lower()
+                collect(item, reference=normalized_key in id_fields)
+            return
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                collect(item, reference=reference)
+            return
+        if reference and isinstance(value, int) and not isinstance(value, bool):
+            normalized_value = str(value)
+            if normalized_value in known_data_ids:
+                referenced.add(normalized_value)
+
+    collect(request.view_args or {})
+    collect(request.args.to_dict(flat=False))
+    collect(request.form.to_dict(flat=False))
+    if request.is_json:
+        collect(request.get_json(silent=True))
+    if request.endpoint == "dtale.view_main_by_name":
+        data_name = (request.view_args or {}).get("data_name")
+        if data_name:
+            collect(_ORIGINAL_GLOBAL_STATE_GET_DATA_ID_BY_NAME(data_name))
+
+    scopes: set[str] = set()
+    for data_id in referenced:
+        _require_dataset_access(data_id)
+        scopes.update(DATASET_ACCESS_SCOPES.get(data_id, frozenset()))
+    return frozenset(scopes)
+
+
+_ORIGINAL_GLOBAL_STATE_ITEMS = getattr(global_state.items, "_wepppy_original", global_state.items)
+_ORIGINAL_GLOBAL_STATE_KEYS = getattr(global_state.keys, "_wepppy_original", global_state.keys)
+_ORIGINAL_GLOBAL_STATE_GET_DATA_ID_BY_NAME = getattr(
+    global_state.get_data_id_by_name,
+    "_wepppy_original",
+    global_state.get_data_id_by_name,
+)
+_ORIGINAL_GLOBAL_STATE_CLEANUP = getattr(
+    global_state.cleanup,
+    "_wepppy_original",
+    global_state.cleanup,
+)
+
+
+def _visible_data_id(data_id: object) -> bool:
+    scopes = _effective_access_scopes(str(data_id))
+    return not scopes or all(_has_scope_access(scope) for scope in scopes)
+
+
+def _guarded_global_items():
+    if not has_request_context() or request.path.startswith("/internal/"):
+        return _ORIGINAL_GLOBAL_STATE_ITEMS()
+    return [(key, value) for key, value in _ORIGINAL_GLOBAL_STATE_ITEMS() if _visible_data_id(key)]
+
+
+def _guarded_global_keys():
+    if not has_request_context() or request.path.startswith("/internal/"):
+        return _ORIGINAL_GLOBAL_STATE_KEYS()
+    return [key for key in _ORIGINAL_GLOBAL_STATE_KEYS() if _visible_data_id(key)]
+
+
+def _guarded_data_id_by_name(data_name: str):
+    data_id = _ORIGINAL_GLOBAL_STATE_GET_DATA_ID_BY_NAME(data_name)
+    if data_id is not None and not _visible_data_id(data_id):
+        return None
+    return data_id
+
+
+def _guarded_global_cleanup(data_id: object) -> None:
+    normalized_id = str(data_id)
+    _ORIGINAL_GLOBAL_STATE_CLEANUP(data_id)
+    _remove_dataset_geojson_provenance(normalized_id)
+    LAZY_PARQUET_DATASETS.pop(normalized_id, None)
+    DATASETS.pop(normalized_id, None)
+    DATASET_ACCESS_SCOPES.pop(normalized_id, None)
+    _prune_viewer_capabilities(scope=normalized_id)
+
+
+_guarded_global_items._wepppy_original = _ORIGINAL_GLOBAL_STATE_ITEMS
+_guarded_global_keys._wepppy_original = _ORIGINAL_GLOBAL_STATE_KEYS
+_guarded_data_id_by_name._wepppy_original = _ORIGINAL_GLOBAL_STATE_GET_DATA_ID_BY_NAME
+_guarded_global_cleanup._wepppy_original = _ORIGINAL_GLOBAL_STATE_CLEANUP
+global_state.items = _guarded_global_items
+global_state.keys = _guarded_global_keys
+global_state.get_data_id_by_name = _guarded_data_id_by_name
+global_state.cleanup = _guarded_global_cleanup
 
 
 def _resolve_target(runid: str, rel_path: str, *, config: str | None = None) -> tuple[Path, Path]:
@@ -415,6 +644,7 @@ def _register_geojson_asset(
 def _remove_geojson_asset(geojson_key: str) -> None:
     """Drop only the unavailable overlay and references to it."""
     REGISTERED_GEOJSON.pop(geojson_key, None)
+    GEOJSON_ACCESS_SCOPES.pop(geojson_key, None)
     if dtale_custom_geojson is not None:
         dtale_custom_geojson.CUSTOM_GEOJSON = [
             entry for entry in dtale_custom_geojson.CUSTOM_GEOJSON
@@ -439,6 +669,23 @@ def _remove_geojson_asset(geojson_key: str) -> None:
                         "loc_candidates": record.get("loc_candidates", ()),
                     }
                     break
+
+
+def _remove_dataset_geojson_provenance(data_id: str) -> None:
+    candidate_keys = {entry[1] for entry in MAP_CHOICES.pop(data_id, [])}
+    MAP_DEFAULTS.pop(data_id, None)
+    for geojson_key, scopes in list(GEOJSON_ACCESS_SCOPES.items()):
+        if data_id in scopes:
+            _remove_geojson_asset(geojson_key)
+            candidate_keys.discard(geojson_key)
+    referenced_keys = {
+        entry[1]
+        for choices in MAP_CHOICES.values()
+        for entry in choices
+    }
+    for geojson_key in candidate_keys - referenced_keys:
+        if geojson_key not in GEOJSON_ACCESS_SCOPES:
+            _remove_geojson_asset(geojson_key)
 
 
 def _ensure_geojson_assets(runid: str, wd: Path, data_id: str | None) -> None:
@@ -838,9 +1085,101 @@ def _discard_dataset(data_id: str) -> None:
     global_state.cleanup(data_id)
     LAZY_PARQUET_DATASETS.pop(data_id, None)
     DATASETS.pop(data_id, None)
+    DATASET_ACCESS_SCOPES.pop(data_id, None)
+    _prune_viewer_capabilities(scope=data_id)
+
+
+def _set_dataset_access_scopes(data_id: str, scopes: frozenset[str]) -> None:
+    if scopes:
+        DATASET_ACCESS_SCOPES[data_id] = scopes
+    else:
+        DATASET_ACCESS_SCOPES.pop(data_id, None)
+
+
+def _prune_viewer_capabilities(*, scope: str | None = None) -> None:
+    now = time.time()
+    for capability_id, capability in list(VIEWER_CAPABILITIES.items()):
+        if capability.expires_at <= now or capability.scope == scope:
+            VIEWER_CAPABILITIES.pop(capability_id, None)
 
 
 if dtale_custom_geojson is not None:
+    _ORIGINAL_GET_CUSTOM_GEOJSON = getattr(
+        dtale_custom_geojson.get_custom_geojson,
+        "_wepppy_original",
+        dtale_custom_geojson.get_custom_geojson,
+    )
+
+    def _geojson_resource_is_visible(geojson_key: str) -> bool:
+        explicit_scopes = GEOJSON_ACCESS_SCOPES.get(geojson_key, frozenset())
+        if explicit_scopes and (
+            not has_request_context()
+            or not all(_has_scope_access(scope) for scope in explicit_scopes)
+        ):
+            return False
+        associated_ids = {
+            data_id
+            for data_id, choices in MAP_CHOICES.items()
+            if any(entry[1] == geojson_key for entry in choices)
+        }
+        if not associated_ids:
+            return True
+        for data_id in associated_ids:
+            meta = DATASETS.get(data_id)
+            if meta is not None and meta.resource_public and _resource_is_public(meta.runid, meta.config):
+                continue
+            if not has_request_context() or meta is None or not _visible_data_id(data_id):
+                return False
+        return True
+
+    def _get_visible_custom_geojson(geojson_id=None):
+        if geojson_id is None:
+            return [
+                entry
+                for entry in dtale_custom_geojson.CUSTOM_GEOJSON
+                if _geojson_resource_is_visible(entry.get("key", ""))
+            ]
+        entry = _ORIGINAL_GET_CUSTOM_GEOJSON(geojson_id)
+        if entry is None or not _geojson_resource_is_visible(geojson_id):
+            return None
+        return entry
+
+    _get_visible_custom_geojson._wepppy_original = _ORIGINAL_GET_CUSTOM_GEOJSON
+    dtale_custom_geojson.get_custom_geojson = _get_visible_custom_geojson
+
+    def _add_uniquely_keyed_geojson(geojson_key, geojson):
+        suffix = 0
+        while _ORIGINAL_GET_CUSTOM_GEOJSON(f"{geojson_key}{suffix or ''}"):
+            suffix += 1
+        unique_key = f"{geojson_key}{suffix + 1 if suffix else ''}"
+        geojson["key"] = unique_key
+        dtale_custom_geojson.CUSTOM_GEOJSON.append(geojson)
+        return unique_key
+
+    dtale_custom_geojson.add_custom_geojson = _add_uniquely_keyed_geojson
+
+    _ORIGINAL_LOAD_GEOJSON = getattr(
+        dtale_custom_geojson.load_geojson,
+        "_wepppy_original",
+        dtale_custom_geojson.load_geojson,
+    )
+
+    def _load_scoped_geojson(contents, filename):
+        geojson_key = _ORIGINAL_LOAD_GEOJSON(contents, filename)
+        if geojson_key and has_request_context():
+            private_scopes = {
+                scope
+                for scopes in DATASET_ACCESS_SCOPES.values()
+                for scope in scopes
+                if _has_scope_access(scope)
+            }
+            if private_scopes:
+                GEOJSON_ACCESS_SCOPES[geojson_key] = frozenset(private_scopes)
+        return geojson_key
+
+    _load_scoped_geojson._wepppy_original = _ORIGINAL_LOAD_GEOJSON
+    dtale_custom_geojson.load_geojson = _load_scoped_geojson
+
     from dtale.dash_application.layout import layout as dtale_layout
 
     if not getattr(dtale_layout.charts_layout, "_wepppy_patched", False):
@@ -893,7 +1232,7 @@ if dtale_custom_geojson is not None:
             elif active_id:
                 relevant_keys = [
                     entry.get("key", "")
-                    for entry in dtale_custom_geojson.CUSTOM_GEOJSON
+                    for entry in dtale_custom_geojson.get_custom_geojson()
                     if entry.get("key", "").startswith(f"{active_id}-")
                 ]
 
@@ -907,7 +1246,7 @@ if dtale_custom_geojson is not None:
                         _update_dropdown(children)
                 if dtale_dcc is not None and isinstance(node, dtale_dcc.Dropdown):
                     if node.id == "geojson-dropdown":
-                        entries = dtale_custom_geojson.CUSTOM_GEOJSON
+                        entries = dtale_custom_geojson.get_custom_geojson()
                         if relevant_keys:
                             entries = [entry for entry in entries if entry.get("key") in relevant_keys]
                         node.options = [
@@ -1111,6 +1450,65 @@ def health():
     return jsonify({"status": "ok"})
 
 
+@app.before_request
+def _authorize_private_dataset_request():
+    if request.path == "/health" or request.path.startswith("/internal/") or request.path.startswith("/dtale/access/"):
+        return None
+    g.dtale_existing_ids = set(_ORIGINAL_GLOBAL_STATE_KEYS())
+    g.dtale_private_scopes = _request_private_scopes()
+    return None
+
+
+@app.after_request
+def _propagate_private_dataset_scope(response):
+    existing = getattr(g, "dtale_existing_ids", None)
+    scopes = getattr(g, "dtale_private_scopes", frozenset())
+    if existing is not None and scopes:
+        for data_id in set(_ORIGINAL_GLOBAL_STATE_KEYS()) - existing:
+            DATASET_ACCESS_SCOPES[str(data_id)] = frozenset(scopes)
+    return response
+
+
+@app.get("/dtale/access/<ticket>")
+def private_dataset_access(ticket: str):
+    try:
+        payload = _access_serializer(launch=True).loads(
+            ticket,
+            max_age=DTALE_PRIVATE_LAUNCH_TTL_SECONDS,
+        )
+    except SignatureExpired:
+        abort(410, description="Private D-Tale launch expired; reopen it from browse.")
+    except BadSignature:
+        abort(403, description="Invalid private D-Tale launch.")
+    if not isinstance(payload, dict):
+        abort(403, description="Invalid private D-Tale launch.")
+    data_id = str(payload.get("data_id") or "")
+    scope = str(payload.get("scope") or "")
+    capability_id = str(payload.get("capability") or "")
+    if not data_id or scope not in DATASET_ACCESS_SCOPES.get(data_id, frozenset()):
+        abort(403, description="Private D-Tale dataset is unavailable.")
+    if not capability_id or not _reauthorize_private_scope(scope, capability_id):
+        abort(403, description="Private D-Tale authorization is no longer valid.")
+
+    session_token = _access_serializer(launch=False).dumps(
+        {"scope": scope, "capability": capability_id}
+    )
+    target = DtaleData(data_id, DTALE_BASE_URL, is_proxy=IS_PROXY, app_root=APP_ROOT).build_main_url()
+    if IS_PROXY and not target.startswith("/"):
+        target = f"/{target}"
+    response = redirect(target, code=303)
+    response.set_cookie(
+        _scope_cookie_name(scope),
+        session_token,
+        max_age=DTALE_PRIVATE_ACCESS_TTL_SECONDS,
+        secure=request.headers.get("X-Forwarded-Proto", request.scheme).lower() == "https",
+        httponly=True,
+        samesite="Lax",
+        path=_cookie_path(),
+    )
+    return response
+
+
 def _verify_token() -> None:
     """Abort requests when the ``X-DTALE-TOKEN`` does not match configuration."""
     if not DTALE_INTERNAL_TOKEN:
@@ -1120,11 +1518,38 @@ def _verify_token() -> None:
         abort(403, description="Forbidden.")
 
 
-def _build_instance_response(data_id: str, instance: DtaleData, meta: DatasetMeta):
+def _build_instance_response(
+    data_id: str,
+    instance: DtaleData,
+    meta: DatasetMeta,
+    *,
+    access_claims: dict[str, Any] | None = None,
+    feature_id: str | None = None,
+):
     """Serialize a D-Tale instance into the JSON envelope expected by clients."""
     url = instance.build_main_url()
     if IS_PROXY and not url.startswith("/"):
         url = f"/{url}"
+    scopes = _effective_access_scopes(data_id)
+    if scopes:
+        if len(scopes) != 1:
+            abort(500, description="Unexpected private D-Tale scope composition.")
+        scope = next(iter(scopes))
+        if access_claims is None:
+            abort(500, description="Private D-Tale authorization is unavailable.")
+        _prune_viewer_capabilities()
+        capability_id = secrets.token_urlsafe(24)
+        VIEWER_CAPABILITIES[capability_id] = ViewerCapability(
+            scope=scope,
+            runid=meta.runid,
+            claims=dict(access_claims),
+            feature_id=feature_id,
+            expires_at=time.time() + DTALE_PRIVATE_ACCESS_TTL_SECONDS,
+        )
+        ticket = _access_serializer(launch=True).dumps(
+            {"data_id": data_id, "scope": scope, "capability": capability_id}
+        )
+        url = f"{APP_ROOT or ''}/dtale/access/{ticket}"
     return jsonify(
         {
             "data_id": data_id,
@@ -1148,9 +1573,20 @@ def load_into_dtale():
     config = (payload.get("config") or "").strip()
     rel_path = payload.get("path", "").strip()
     raw_pqf_value = payload.get("pqf")
+    resource_public = payload.get("resource_public", False)
+    access_claims = payload.get("access_claims")
+    feature_id = payload.get("feature_id")
 
     if not runid or not rel_path:
         abort(400, description="Both runid and path are required.")
+    if not isinstance(resource_public, bool):
+        abort(400, description="resource_public must be a boolean.")
+    if resource_public and not _resource_is_public(runid, config):
+        abort(409, description="Resource visibility changed; reopen from browse.")
+    if not resource_public and not isinstance(access_claims, dict):
+        abort(400, description="Private D-Tale loads require verified access claims.")
+    if feature_id is not None and feature_id not in {"batch_runner", "culvert_runner"}:
+        abort(400, description="Invalid private D-Tale feature scope.")
 
     if raw_pqf_value is None:
         raw_pqf = None
@@ -1185,6 +1621,9 @@ def load_into_dtale():
 
     fingerprint = _fingerprint(target)
     data_id = _make_dataset_id(runid, config, dataset_scope)
+    if not resource_public and not DTALE_INTERNAL_TOKEN:
+        abort(503, description="Private D-Tale access is not configured.")
+    desired_access_scopes = frozenset() if resource_public else frozenset({data_id})
     display_name = f"{runid}/{config}/{rel_path}" if config else f"{runid}/{rel_path}"
     if parquet_filter_active:
         filter_label = hashlib.sha1(raw_pqf.encode("utf-8")).hexdigest()[:8] if raw_pqf else "unknown"
@@ -1217,8 +1656,18 @@ def load_into_dtale():
     if reuse_ready:
         logger.debug("Reusing cached D-Tale dataset %s for %s", data_id, target)
         meta.last_loaded = time.time()
+        meta.runid = runid
+        meta.config = config
+        meta.resource_public = resource_public
+        _set_dataset_access_scopes(data_id, desired_access_scopes)
         instance = DtaleData(data_id, DTALE_BASE_URL, is_proxy=IS_PROXY, app_root=APP_ROOT)
-        return _build_instance_response(data_id, instance, meta)
+        return _build_instance_response(
+            data_id,
+            instance,
+            meta,
+            access_claims=access_claims,
+            feature_id=feature_id,
+        )
 
     is_parquet_target = _is_parquet_path(target)
     if is_parquet_target:
@@ -1263,7 +1712,11 @@ def load_into_dtale():
             name=display_name,
             last_loaded=time.time(),
             resolved_path=resolved_target,
+            runid=runid,
+            config=config,
+            resource_public=resource_public,
         )
+        _set_dataset_access_scopes(data_id, desired_access_scopes)
 
         logger.info(
             "Registered lazy parquet %s in D-Tale (rows=%d, cols=%d, data_id=%s)",
@@ -1273,7 +1726,13 @@ def load_into_dtale():
             data_id,
         )
 
-        return _build_instance_response(data_id, instance, DATASETS[data_id])
+        return _build_instance_response(
+            data_id,
+            instance,
+            DATASETS[data_id],
+            access_claims=access_claims,
+            feature_id=feature_id,
+        )
 
     try:
         df = _load_dataframe(target)
@@ -1295,7 +1754,7 @@ def load_into_dtale():
 
     try:
         instance = _initialize_dtale_dataset(data_id, display_name, df)
-    except Exception:  # Third-party initialization boundary: remove partially registered state, then propagate.
+    except Exception:  # broad-except: boundary contract; clean third-party partial state, then propagate
         logger.exception("Failed to initialize D-Tale dataset %s", data_id)
         _discard_dataset(data_id)
         raise
@@ -1306,7 +1765,11 @@ def load_into_dtale():
         name=display_name,
         last_loaded=time.time(),
         resolved_path=resolved_target,
+        runid=runid,
+        config=config,
+        resource_public=resource_public,
     )
+    _set_dataset_access_scopes(data_id, desired_access_scopes)
 
     logger.info(
         "Loaded %s into D-Tale (rows=%d, cols=%d, data_id=%s)",
@@ -1316,7 +1779,13 @@ def load_into_dtale():
         data_id,
     )
 
-    return _build_instance_response(data_id, instance, DATASETS[data_id])
+    return _build_instance_response(
+        data_id,
+        instance,
+        DATASETS[data_id],
+        access_claims=access_claims,
+        feature_id=feature_id,
+    )
 
 
 __all__ = ["app"]

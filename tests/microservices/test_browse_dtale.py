@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from werkzeug.exceptions import HTTPException
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
 pytestmark = pytest.mark.microservice
@@ -56,13 +57,24 @@ def load_dtale_service(monkeypatch):
     return _loader
 
 
-@pytest.mark.parametrize("extension", [".parquet", ".geoparquet"])
-def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse, extension: str):
+@pytest.mark.parametrize(
+    ("extension", "resource_public"),
+    [(".parquet", False), (".geoparquet", True)],
+)
+def test_dtale_open_redirect(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+    extension: str,
+    resource_public: bool,
+):
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
     data_dir = tmp_path / "wepp" / "output"
     data_dir.mkdir(parents=True)
     data_path = data_dir / f"output{extension}"
     df.to_parquet(data_path)
+    if resource_public:
+        (tmp_path / "PUBLIC").touch()
 
     browse = load_browse(
         DTALE_SERVICE_URL="http://dtale-service",
@@ -117,11 +129,19 @@ def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse, extension
     assert response.status_code == 303
     assert response.headers["location"] == "/weppcloud/dtale/main/abc123"
     assert captured["url"] == "http://dtale-service/internal/load"
-    assert captured["json"] == {
+    expected_payload = {
         "runid": "run-1",
         "config": "default",
         "path": f"wepp/output/output{extension}",
+        "resource_public": resource_public,
     }
+    if not resource_public:
+        expected_payload["access_claims"] = {
+            "token_class": "service",
+            "roles": ["Root"],
+            "sub": "1",
+        }
+    assert captured["json"] == expected_payload
     assert captured["headers"]["X-DTALE-TOKEN"] == "secret-token"
     assert touched["path"].endswith(f"wepp/output/output{extension}")
 
@@ -176,7 +196,8 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
     if not hasattr(module, "get_wd") and hasattr(module, "dtale"):
         target_module = module.dtale
 
-    monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(target_module, "get_wd", lambda runid, **_kwargs: str(tmp_path))
     monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
     monkeypatch.setattr(target_module, "_load_dataframe", lambda path: df.copy())
 
@@ -218,7 +239,12 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
     with app.test_client() as client:
         first = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.csv"},
+            json={
+                "runid": "run-1",
+                "config": "default",
+                "path": "landuse/landuse.csv",
+                "resource_public": True,
+            },
         )
         assert first.status_code == 200
         assert init_calls["count"] == 1
@@ -227,7 +253,12 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
 
         second = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.csv"},
+            json={
+                "runid": "run-1",
+                "config": "default",
+                "path": "landuse/landuse.csv",
+                "resource_public": True,
+            },
         )
         assert second.status_code == 200
         assert init_calls["count"] == 2
@@ -451,7 +482,8 @@ def test_dtale_loader_registers_lazy_parquet_and_serves_grid_rows(
     data_path = tmp_path / "table.parquet"
     df.to_parquet(data_path, index=False)
 
-    monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(target_module, "get_wd", lambda runid, **_kwargs: str(tmp_path))
     monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
 
     def _fail_eager_load(path):
@@ -464,7 +496,12 @@ def test_dtale_loader_registers_lazy_parquet_and_serves_grid_rows(
     with app.test_client() as client:
         load_response = client.post(
             "/internal/load",
-            json={"runid": "run-lazy", "config": "default", "path": "table.parquet"},
+            json={
+                "runid": "run-lazy",
+                "config": "default",
+                "path": "table.parquet",
+                "resource_public": True,
+            },
         )
         assert load_response.status_code == 200
         data_id = load_response.get_json()["data_id"]
@@ -503,6 +540,235 @@ def test_dtale_loader_registers_lazy_parquet_and_serves_grid_rows(
     assert export_response.status_code == 501
 
 
+def test_private_dtale_requires_launch_capability_while_public_data_remains_anonymous(
+    tmp_path: Path,
+    monkeypatch,
+    load_dtale_service,
+):
+    module = load_dtale_service(
+        DTALE_INTERNAL_TOKEN="private-test-token",
+        SITE_PREFIX="/weppcloud",
+        HOST="127.0.0.1",
+        PORT="9010",
+    )
+    target_module = module if hasattr(module, "get_wd") else module.dtale
+    monkeypatch.setattr(target_module, "DTALE_INTERNAL_TOKEN", "private-test-token")
+    import wepppy.microservices.rq_engine.auth as rq_auth
+
+    revoked_subjects: set[str] = set()
+
+    def require_current_claims(claims):
+        if claims["sub"] in revoked_subjects:
+            raise rq_auth.AuthError("revoked", status_code=403, code="forbidden")
+
+    monkeypatch.setattr(rq_auth, "require_current_claims", require_current_claims)
+    monkeypatch.setattr(rq_auth, "authorize_run_access", lambda *_args, **_kwargs: None)
+    member_a_claims = {
+        "token_class": "user",
+        "sub": "member-a",
+        "jti": "member-a-token",
+        "exp": 4_102_444_800,
+    }
+    member_b_claims = {
+        "token_class": "user",
+        "sub": "member-b",
+        "jti": "member-b-token",
+        "exp": 4_102_444_800,
+    }
+    pd.DataFrame({"value": ["private-canary"]}).to_csv(tmp_path / "private.csv", index=False)
+    pd.DataFrame({"value": ["public-value"]}).to_csv(tmp_path / "public.csv", index=False)
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(target_module, "get_wd", lambda _runid, **_kwargs: str(tmp_path))
+    monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
+
+    app = target_module.app
+    headers = {"X-DTALE-TOKEN": "private-test-token"}
+    private_load = app.test_client().post(
+        "/internal/load",
+        json={
+            "runid": "private-run",
+            "config": "default",
+            "path": "private.csv",
+            "resource_public": False,
+            "access_claims": member_a_claims,
+        },
+        headers=headers,
+    )
+    public_load = app.test_client().post(
+        "/internal/load",
+        json={
+            "runid": "public-run",
+            "config": "default",
+            "path": "public.csv",
+            "resource_public": True,
+        },
+        headers=headers,
+    )
+    assert private_load.status_code == 200
+    assert public_load.status_code == 200
+    private_id = private_load.get_json()["data_id"]
+    public_id = public_load.get_json()["data_id"]
+
+    anonymous = app.test_client()
+    denied = anonymous.get(
+        f"/dtale/data/{private_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    public_grid = anonymous.get(
+        f"/dtale/data/{public_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    assert denied.status_code == 403
+    assert "private-canary" not in denied.get_data(as_text=True)
+    assert public_grid.status_code == 200
+    assert "public-value" in public_grid.get_data(as_text=True)
+    (tmp_path / "PUBLIC").unlink()
+    newly_private_public_grid = app.test_client().get(
+        f"/dtale/data/{public_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    assert newly_private_public_grid.status_code == 403
+    assert "public-value" not in newly_private_public_grid.get_data(as_text=True)
+    (tmp_path / "PUBLIC").touch()
+    reopened_public = app.test_client().post(
+        "/internal/load",
+        json={
+            "runid": "public-run",
+            "config": "default",
+            "path": "public.csv",
+            "resource_public": True,
+        },
+        headers=headers,
+    )
+    assert reopened_public.status_code == 200
+    escaped_id = f"\\u{ord(private_id[0]):04x}{private_id[1:]}"
+    encoded_references = [
+        json.dumps({"data_id": private_id}),
+        f'{{"data_id":"{escaped_id}"}}',
+    ]
+    for encoded_reference in encoded_references:
+        with app.test_request_context(
+            "/dtale/merge",
+            query_string={"payload": encoded_reference},
+        ):
+            with pytest.raises(HTTPException) as denied_serialized:
+                target_module._request_private_scopes()
+            assert getattr(denied_serialized.value, "code", None) == 403
+            assert private_id not in target_module._guarded_global_keys()
+            assert public_id in target_module._guarded_global_keys()
+
+    target_module.DATASET_ACCESS_SCOPES["1"] = frozenset({private_id})
+    with app.test_request_context(
+        f"/dtale/data/{public_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    ):
+        assert target_module._request_private_scopes() == frozenset()
+    target_module.global_state.cleanup("1")
+    assert "1" not in target_module.DATASET_ACCESS_SCOPES
+
+    launch_path = private_load.get_json()["url"].removeprefix("/weppcloud")
+    authorized = app.test_client()
+    launch = authorized.get(
+        launch_path,
+        follow_redirects=False,
+    )
+    assert launch.status_code == 303
+    assert "HttpOnly" in launch.headers["Set-Cookie"]
+    private_grid = authorized.get(
+        f"/dtale/data/{private_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    assert private_grid.status_code == 200
+    assert "private-canary" in private_grid.get_data(as_text=True)
+
+    target_module._initialize_dtale_dataset(
+        "1",
+        "private numeric source",
+        pd.DataFrame({"value": ["private-numeric-canary"]}),
+    )
+    target_module.DATASET_ACCESS_SCOPES["1"] = frozenset({private_id})
+    merge_payload = {
+        "action": "stack",
+        "config": json.dumps({"ignoreIndex": True}),
+        "datasets": json.dumps(
+            [{"dataId": 1, "columns": None, "index": []}]
+        )
+    }
+    anonymous_merge = app.test_client().post("/dtale/merge", json=merge_payload)
+    assert anonymous_merge.status_code == 403
+    authorized_merge = authorized.post("/dtale/merge", json=merge_payload)
+    assert authorized_merge.status_code == 200
+    derived_id = str(authorized_merge.get_json()["data_id"])
+    assert target_module.DATASET_ACCESS_SCOPES[derived_id] == frozenset({private_id})
+    anonymous_derived = app.test_client().get(
+        f"/dtale/data/{derived_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    assert anonymous_derived.status_code == 403
+    assert "private-numeric-canary" not in anonymous_derived.get_data(as_text=True)
+    target_module.global_state.cleanup(derived_id)
+    target_module.global_state.cleanup("1")
+
+    secure_launch = app.test_client().get(
+        launch_path,
+        headers={"X-Forwarded-Proto": "https"},
+        follow_redirects=False,
+    )
+    assert "Secure" in secure_launch.headers["Set-Cookie"]
+
+    member_b_load = app.test_client().post(
+        "/internal/load",
+        json={
+            "runid": "private-run",
+            "config": "default",
+            "path": "private.csv",
+            "resource_public": False,
+            "access_claims": member_b_claims,
+        },
+        headers=headers,
+    )
+    member_b = app.test_client()
+    assert member_b.get(
+        member_b_load.get_json()["url"].removeprefix("/weppcloud"),
+        follow_redirects=False,
+    ).status_code == 303
+    revoked_subjects.add("member-a")
+    assert authorized.get(
+        f"/dtale/data/{private_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    ).status_code == 403
+    assert member_b.get(
+        f"/dtale/data/{private_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    ).status_code == 200
+
+    pd.DataFrame({"value": ["refreshed-private-canary"]}).to_csv(
+        tmp_path / "private.csv",
+        index=False,
+    )
+    refreshed = app.test_client().post(
+        "/internal/load",
+        json={
+            "runid": "private-run",
+            "config": "default",
+            "path": "private.csv",
+            "resource_public": False,
+            "access_claims": member_b_claims,
+        },
+        headers=headers,
+    )
+    assert refreshed.status_code == 200
+    refreshed_denied = app.test_client().get(
+        f"/dtale/data/{private_id}",
+        query_string={"ids": json.dumps(["0-1"])},
+    )
+    assert refreshed_denied.status_code == 403
+    assert "refreshed-private-canary" not in refreshed_denied.get_data(as_text=True)
+
+    target_module._discard_dataset(private_id)
+    target_module._discard_dataset(public_id)
+
+
 def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     tmp_path: Path,
     monkeypatch,
@@ -521,7 +787,8 @@ def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     data_path = tmp_path / "table.parquet"
     df.to_parquet(data_path, index=False)
 
-    monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
+    (tmp_path / "PUBLIC").touch()
+    monkeypatch.setattr(target_module, "get_wd", lambda runid, **_kwargs: str(tmp_path))
     monkeypatch.setattr(target_module, "BROWSE_PARQUET_FILTERS_ENABLED", True)
     monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
 
@@ -537,11 +804,23 @@ def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     with app.test_client() as client:
         first = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "table.parquet", "pqf": payload_a},
+            json={
+                "runid": "run-1",
+                "config": "default",
+                "path": "table.parquet",
+                "pqf": payload_a,
+                "resource_public": True,
+            },
         )
         second = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "table.parquet", "pqf": payload_b},
+            json={
+                "runid": "run-1",
+                "config": "default",
+                "path": "table.parquet",
+                "pqf": payload_b,
+                "resource_public": True,
+            },
         )
 
     assert first.status_code == 200

@@ -358,6 +358,14 @@ printf '%s\n' "your-climate-engine-key" > docker/secrets/climate_engine_api_key
 chmod 600 docker/secrets/*
 ```
 
+The D-Tale internal secret also signs private launch tickets and scoped viewer
+cookies. `DTALE_PRIVATE_LAUNCH_TTL_SECONDS` defaults to 60 seconds and
+`DTALE_PRIVATE_ACCESS_TTL_SECONDS` defaults to 3600 seconds. Changing the secret
+invalidates outstanding private viewer sessions; public D-Tale tables do not use
+these capabilities. Private viewers recheck current authorization on each
+request, so the D-Tale service also mounts the existing Redis and Postgres
+secrets for revocation/session and feature-group membership reads.
+
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
 ## wctl (weppcloud control)
