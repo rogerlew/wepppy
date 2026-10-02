@@ -100,7 +100,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch, *, claims: dict | None = None) -
         "require_jwt",
         lambda request, required_scopes=None: resolved_claims,
     )
-    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: None)
 
 
@@ -242,7 +242,7 @@ def test_bootstrap_enable_scope_only_token_works(monkeypatch: pytest.MonkeyPatch
     token = _issue_rq_token(monkeypatch, scopes=[bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE])
     headers = {"Authorization": f"Bearer {token}"}
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda _jti: None)
-    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(
         bootstrap_routes,
         "enable_bootstrap_operation",
@@ -347,7 +347,7 @@ def test_bootstrap_enable_maps_auth_runtime_error_to_canonical_payload(
         "require_jwt",
         lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("auth backend unavailable")),
     )
-    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/enable")
@@ -373,7 +373,7 @@ def test_bootstrap_noprep_endpoints_map_auth_runtime_error_to_canonical_payload(
         "require_jwt",
         lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("auth backend unavailable")),
     )
-    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(endpoint, json={})

@@ -21,7 +21,6 @@ from wepppy.microservices.browse.auth import (
     authorize_group_request,
     authorize_run_request,
     handle_auth_error,
-    require_data_access,
 )
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_RECORDER,
@@ -148,11 +147,6 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
         allow_recorder=allow_recorder,
     )
 
-    try:
-        require_data_access(auth_context, Path(wd) / subpath)
-        require_data_access(auth_context, target_path)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
     command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
@@ -196,11 +190,6 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
         allow_recorder=allow_recorder,
     )
 
-    try:
-        require_data_access(auth_context, Path(wd) / subpath)
-        require_data_access(auth_context, target_path)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
     command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
@@ -248,11 +237,6 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
         allow_recorder=allow_recorder,
     )
 
-    try:
-        require_data_access(auth_context, Path(wd) / subpath)
-        require_data_access(auth_context, target_path)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
     command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)

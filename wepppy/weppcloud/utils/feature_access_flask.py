@@ -16,13 +16,15 @@ def current_principal():
 
 
 def feature_decision(feature_id, *, wd=None, operation="act", protected_read=False,
-                     consumes_contrasts=False, check_capabilities=True):
+                     check_capabilities=True):
     from .feature_access import FeatureAccessDecision
-    from .feature_access_store import FeatureAccessStore
-    context = resource_context(wd, protected_read=protected_read, consumes_contrasts=consumes_contrasts,
-                               check_capabilities=check_capabilities)
+    context = resource_context(
+        wd,
+        protected_read=protected_read,
+        check_capabilities=check_capabilities,
+    )
     # Anonymous/public inspection has no account dependency.
-    if operation == "inspect" and not protected_read and not consumes_contrasts and feature_id != "omni_contrasts":
+    if operation == "inspect" and not protected_read:
         return decide(VerifiedPrincipal(), feature_id, operation, context)
     try:
         return decide(current_principal(), feature_id, operation, context,

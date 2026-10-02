@@ -3,7 +3,7 @@
 Status: Ratified\
 Effective date: 2026-10-01\
 Ratification record: [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md)\
-Amendments: [FA-01 and FA-02 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01 and 2026-10-02 UTC; FA-02 implementation pending\
+Amendments: [FA-01 and FA-02 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01 and 2026-10-02 UTC; FA-02 sharing reconciliation implemented, M3 private-resource remediation pending\
 Applies to: WEPPcloud user-facing features, run-page modules, launchable configs, and major analysis workflows  
 Related implementation: `wepppy/weppcloud/feature_registry/`
 

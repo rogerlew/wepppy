@@ -776,7 +776,6 @@ async def html_dir_list(
     page_entries_override: list[tuple] | None = None,
     total_items_override: int | None = None,
     using_manifest_override: bool | None = None,
-    entry_allowed=None,
 ):
     _padding = " "
     s = []
@@ -832,8 +831,6 @@ async def html_dir_list(
             href = f"{href}?{urlencode(query_params)}"
         return f'<a href="{href}" class="browse-sort-link">{display}{pad}</a>'
 
-    if entry_allowed is not None:
-        page_entries = [entry for entry in page_entries if entry_allowed(os.path.join(_dir, entry[0]))]
 
     name_col_width = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
     date_col_width = max(len(_format_mtime_ns(0)), 16)

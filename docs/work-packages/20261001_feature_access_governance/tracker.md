@@ -4,11 +4,11 @@ Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
 Current phase: FA-02 result-sharing amendment and M3 reconciliation. M3 is checkpointed at `458557219` but incomplete; M2 is `c19fefcc6`. Production rollout remains later work.
 
-The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit and runtime reconciliation are pending.
+The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit is `102c81066` and runtime sharing reconciliation is implemented.
 
 FA-02 review confirms that S04/S08 also have source-supported private Batch/Culvert escape paths, independently of contrast sharing. Retain those as High implementation findings pending bounded reproduction/remediation; accepting the sharing policy does not close them. Public contrast-only denial/filtering findings are superseded as detailed in the checkpoint.
 
-The [interim security review](artifacts/2026-10-02_m3_security_review.md) assessed FA-01 and was **NOT PASSED**. Its historical two open High findings and eight applied fixes are reassessed in the FA-02 checkpoint; this policy change is not a claim of technical closure or a passing final review. Latest bounded runs: **684 passed, 2 skipped** for account/action/session/query/run-view regression; **224 passed** for delivery/export cases; **16 passed** for artifact, alias and failure-boundary cases. Some suites overlap; these are not additive coverage totals. Control rendering: **198 passed**. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. Full M3 regression and production-equivalent browser/service acceptance remain pending.
+The [interim security review](artifacts/2026-10-02_m3_security_review.md) assessed FA-01 and was **NOT PASSED**. Its historical two open High findings and eight applied fixes are reassessed in the FA-02 checkpoint; this policy change is not a claim of technical closure or a passing final review. The reconciled affected microservice/WEPPcloud scope passed **3,325 of 3,326** tests; the sole pre-existing run-catalog latency threshold failure passed both parameterizations in isolation. Independent focused correctness ran **84 passed**. Frontend lint passed and **112 suites / 919 tests passed**. Test-stub, syntax, whitespace and scoped documentation checks passed. Full repository regression, private-resource remediation and production-equivalent browser/service acceptance remain pending.
 
 ## Progress
 
@@ -67,3 +67,14 @@ The operator authorized committing the completed milestone-one implementation an
 [Correctness review](artifacts/2026-10-01_m2_correctness_review.md) and [security review](artifacts/2026-10-01_m2_security_review.md) confirmed all findings closed. Fixes cover initial Profile rendering, contrast dependency guidance, inactive-account effective status, stale-session token fallback and authentication-error correlation. No unresolved High/Medium/Low findings remain in this bounded milestone.
 
 Local development is now at `e7a1c9d204bf`, with sole maintainer ID 1 in OpenET and Batch; [readback](artifacts/2026-10-01_m2_local_readback.json) confirms two audit events, no acceptances and unchanged account/role/run counts. Backup restore was tested before migration; production was not touched, no service was restarted, and runtime feature enforcement remains M3. User acknowledgment must be completed by the user; the initializer does not accept it on anyone's behalf.
+
+## FA-02 runtime reconciliation, 2026-10-02
+
+[Runtime validation](artifacts/2026-10-02_fa02_runtime_validation.md) records the
+sharing implementation, regression results and disposable private-resource
+reproductions. [Correctness review](artifacts/2026-10-02_fa02_runtime_correctness_review.md)
+closed three findings; [security review](artifacts/2026-10-02_fa02_runtime_security_review.md)
+closed the grouped cancellation-context regression. No new concrete sharing
+reconciliation findings remain. M3 remains incomplete: S04/S08 are reproduced
+private-resource defects, not contrast-sharing policy questions. Full regression
+and service acceptance remain separately tracked in the validation record.

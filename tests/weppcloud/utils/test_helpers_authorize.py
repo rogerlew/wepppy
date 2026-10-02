@@ -71,12 +71,11 @@ def test_authorize_rejects_private_batch_runids_for_non_admin(monkeypatch: pytes
 
     monkeypatch.setattr(app_module, "get_run_owners", lambda *_args, **_kwargs: [])
 
-    class RonStub:
-        @staticmethod
-        def ispublic(_wd: str) -> bool:
-            return False
-
-    monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
+    monkeypatch.setattr("wepppy.nodb.base.NoDbBase.ispublic", lambda _wd: False)
+    monkeypatch.setattr(
+        "wepppy.weppcloud.utils.feature_access_flask.require_feature",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(Forbidden()),
+    )
 
     with app.test_request_context("/"):
         with pytest.raises(Forbidden):
@@ -110,19 +109,20 @@ def test_authorize_allows_public_batch_runs_for_anonymous_user(monkeypatch: pyte
             return True
 
     monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
+    monkeypatch.setattr("wepppy.nodb.base.NoDbBase.ispublic", lambda _wd: True)
 
     with app.test_request_context("/"):
         helpers.authorize("batch;;spring-2025;;run-001", "cfg")
 
-    assert wd_calls == ["batch;;spring-2025;;run-001"]
+    assert wd_calls == ["batch;;spring-2025;;run-001", "batch;;spring-2025;;run-001"]
 
 
-def test_authorize_allows_batch_runids_for_admin(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_authorize_requires_batch_group_for_admin(monkeypatch: pytest.MonkeyPatch) -> None:
     app = Flask(__name__)
     app.login_manager = SimpleNamespace()
 
     monkeypatch.setattr(flask_login, "current_user", DummyUser(roles={"Admin"}))
-    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: pytest.fail("get_wd should not be called"))
+    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: "/tmp/private-batch")
     import wepppy.weppcloud.app as app_module
 
     monkeypatch.setattr(
@@ -131,8 +131,20 @@ def test_authorize_allows_batch_runids_for_admin(monkeypatch: pytest.MonkeyPatch
         lambda *_args, **_kwargs: pytest.fail("get_run_owners should not be called"),
     )
 
+    monkeypatch.setattr("wepppy.nodb.base.NoDbBase.ispublic", lambda _wd: False)
+    feature_checks: list[tuple[str, str]] = []
+
+    def deny_feature(feature: str, **kwargs: object) -> None:
+        feature_checks.append((feature, str(kwargs["operation"])))
+        raise Forbidden()
+
+    monkeypatch.setattr("wepppy.weppcloud.utils.feature_access_flask.require_feature", deny_feature)
+
     with app.test_request_context("/"):
-        helpers.authorize("batch;;spring-2025;;run-001;;omni;;treated", "cfg")
+        with pytest.raises(Forbidden):
+            helpers.authorize("batch;;spring-2025;;run-001;;omni;;treated", "cfg")
+
+    assert feature_checks == [("batch_runner", "inspect")]
 
 
 def test_authorize_rejects_when_login_manager_missing(monkeypatch: pytest.MonkeyPatch) -> None:

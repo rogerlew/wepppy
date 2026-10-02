@@ -162,8 +162,8 @@ def _stub_controller_state_auth(monkeypatch: pytest.MonkeyPatch, scope: str) -> 
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": "service", "scope": scope},
     )
-    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
-    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
+    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 @pytest.mark.parametrize("scope", ("rq:status", "rq:read"))
@@ -203,7 +203,7 @@ def test_status_scope_stays_outside_mutation_scope_boundary(monkeypatch: pytest.
 
 def test_session_token_includes_read_scope(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
 
     token = _issue_token(monkeypatch, scopes=["rq:status"], runs=[RUNID])
@@ -222,7 +222,7 @@ def test_session_token_includes_read_scope(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_session_token_rejects_stale_run_state_precondition(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setattr(session_routes, "_load_run_state_revision", lambda runid, config: "runstate:run-1:current")
 
@@ -245,7 +245,7 @@ def test_session_token_rejects_stale_run_state_precondition(monkeypatch: pytest.
 
 def test_session_token_rejects_stale_run_state_from_request_body(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setattr(session_routes, "_load_run_state_revision", lambda runid, config: "runstate:run-1:current")
 
@@ -266,7 +266,7 @@ def test_session_token_rejects_stale_run_state_from_request_body(monkeypatch: py
 
 def test_session_token_precondition_header_takes_precedence_over_body(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setattr(session_routes, "_load_run_state_revision", lambda runid, config: "runstate:run-1:current")
 
@@ -287,7 +287,7 @@ def test_session_token_precondition_header_takes_precedence_over_body(monkeypatc
 
 def test_session_token_malformed_json_returns_validation_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -312,7 +312,7 @@ def test_session_token_idempotency_key_length_limit_returns_validation_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -335,7 +335,7 @@ def test_session_token_idempotency_key_length_limit_returns_validation_error(
 
 def test_session_token_rejects_non_object_json_body(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -360,7 +360,7 @@ def test_session_token_rejects_non_json_body_when_idempotency_key_present(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -382,7 +382,7 @@ def test_session_token_rejects_non_json_body_when_idempotency_key_present(
 
 def test_session_token_rejects_duplicate_idempotent_replay(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -412,7 +412,7 @@ def test_session_token_rejects_duplicate_idempotent_replay(monkeypatch: pytest.M
 
 def test_session_token_rejects_idempotency_payload_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     _install_memory_redis(monkeypatch)
 
@@ -483,7 +483,7 @@ def test_issue_session_token_descriptor_matches_runtime_auth_concurrency_policie
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": "service", "scope": "rq:read"},
     )
-    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_schema_runtime())
 
     with TestClient(rq_engine.app) as client:
@@ -519,7 +519,7 @@ def test_issue_session_token_descriptor_uses_env_overridden_idempotency_ttl(
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": "service", "scope": "rq:read"},
     )
-    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_schema_runtime())
 
     with TestClient(rq_engine.app) as client:
@@ -535,7 +535,7 @@ def test_session_token_precondition_invalid_grouped_runid_returns_not_found(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
-    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setattr(
         schema_defaults_routes,

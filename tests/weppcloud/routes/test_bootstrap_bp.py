@@ -113,7 +113,11 @@ def _stub_rq_auth(monkeypatch: pytest.MonkeyPatch, *, scope: str) -> None:
             "scope": scope,
         },
     )
-    monkeypatch.setattr(rq_bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        rq_bootstrap_routes,
+        "authorize_run_access",
+        lambda claims, runid, **kwargs: None,
+    )
 
 
 def test_verify_token_success(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:

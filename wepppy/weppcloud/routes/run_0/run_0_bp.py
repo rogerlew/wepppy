@@ -974,9 +974,6 @@ def _build_features_export_catalog_payload(
     if wd and not scenarios and not contrasts and not swat_catalog:
         scenarios, contrasts = _discover_features_export_omni_selectors(wd)
         swat_catalog = _discover_features_export_swat_catalog(wd)
-    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
-    if not feature_decision("omni_contrasts", operation="inspect").allowed:
-        contrasts = []
 
     try:
         catalog = load_layer_catalog()
@@ -1296,9 +1293,6 @@ def _build_virtual_prep_wepp_gpkg_gdb_profile(
 
 def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_epsg: int | None) -> dict:
     scenarios, contrasts = _discover_features_export_omni_selectors(wd)
-    from wepppy.weppcloud.utils.feature_access_flask import feature_decision
-    if not feature_decision("omni_contrasts", operation="inspect").allowed:
-        contrasts = []
     swat_catalog = _discover_features_export_swat_catalog(wd)
     discovery_payload = _build_features_export_discovery_payload(
         wd,

@@ -20,7 +20,7 @@ pytestmark = pytest.mark.microservice
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(export_routes, "require_jwt", lambda request, required_scopes=None: {})
-    monkeypatch.setattr(export_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(export_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "features-job-1") -> dict[str, object]:
@@ -526,7 +526,7 @@ def test_features_export_download_auth_403_payload(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(
         export_routes,
         "authorize_run_access",
-        lambda claims, runid: (_ for _ in ()).throw(
+        lambda claims, runid, **kwargs: (_ for _ in ()).throw(
             export_routes.AuthError("Token not authorized for run", status_code=403, code="forbidden")
         ),
     )

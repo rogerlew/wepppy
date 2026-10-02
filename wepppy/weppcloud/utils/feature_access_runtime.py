@@ -12,10 +12,9 @@ from .feature_access_identity import INTERNAL_STATEMENT_VERSION, FeatureIdentity
 logger = logging.getLogger(__name__)
 
 
-def resource_context(wd=None, *, protected_read=False, consumes_contrasts=False, check_capabilities=True):
+def resource_context(wd=None, *, protected_read=False, check_capabilities=True):
     context = FeatureResourceContext(
         existing_access_allowed=True, requires_read_entitlement=protected_read,
-        consumes_contrasts=consumes_contrasts,
         internal_statement_version=INTERNAL_STATEMENT_VERSION,
         check_capabilities=check_capabilities,
     )
@@ -35,11 +34,10 @@ def decide(principal, feature_id, operation, context, *, store=None):
     try:
         features = feature_registry_by_id()
         feature = features[feature_id]
-        # Public non-embargoed inspection does not require a database engine.
+        # Public inspection does not require a database engine.
         return evaluate_feature_access(
             principal, feature, operation, context,
             store if store is not None else _LazyStore(),
-            contrast_feature=features["omni_contrasts"],
         )
     except (FeatureRegistryValidationError, FeatureIdentityConfigurationError):
         logger.exception("Feature registry unavailable during admission")
@@ -66,6 +64,4 @@ def workflow_features(runid):
         features.append("batch_runner")
     if len(parts) >= 3 and parts[0] == "culvert":
         features.append("culvert_runner")
-    if len(parts) >= 3 and parts[-2] == "omni-contrast":
-        features.append("omni_contrasts")
     return tuple(features)

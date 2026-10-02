@@ -5,7 +5,6 @@ from pathlib import Path
 from starlette.exceptions import HTTPException
 
 from wepppy.microservices.browse import auth as browse_auth
-from wepppy.weppcloud.utils.feature_access_data import protected_source
 
 
 def require_root(request, base_dir):
@@ -41,22 +40,8 @@ def require_root(request, base_dir):
                 # MCP middleware and route guards verify their own audience,
                 # scopes and resource binding before this additional admission.
                 require_feature_access(principal.claims, feature, operation="inspect", protected_read=True)
-        if protected_source(resolved):
-            browse_auth.require_data_access(_context(request), resolved)
     except (browse_auth.BrowseAuthError, AuthError) as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
-
-
-def _context(request):
-    principal = getattr(request.state, "mcp_principal", None)
-    if principal is not None:
-        return browse_auth.AuthContext(principal.claims, principal.claims.get("token_class"), frozenset())
-    try:
-        return browse_auth.resolve_auth_context(request, runid=request.path_params.get("runid", ""), config="")
-    except browse_auth.BrowseAuthError:
-        # Optional identity cannot alter ordinary public queries. A protected
-        # request without verified identity still fails its entitlement check.
-        return browse_auth.AuthContext(None, None, frozenset())
 
 
 def _entry_sources(base_dir, entry):
@@ -72,20 +57,10 @@ def require_datasets(request, base_dir, paths, *, entries=()):
     sources = [source for path in paths for source in _entry_sources(base_dir, by_path.get(path, {"path": path}))]
     for source in sources:
         require_root(request, source)
-    protected = [path for path in sources if protected_source(path)]
-    if not protected:
-        return
-    context = _context(request)
-    try:
-        for path in protected:
-            browse_auth.require_data_access(context, path)
-    except browse_auth.BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
 
 def visible_entries(request, base_dir, entries):
     require_root(request, base_dir)
-    context = None
     visible = []
     for entry in entries:
         sources = _entry_sources(base_dir, entry)
@@ -96,14 +71,5 @@ def visible_entries(request, base_dir, entries):
             if exc.status_code not in (401, 403):
                 raise
             continue
-        protected = [source for source in sources if protected_source(source)]
-        if protected:
-            if context is None:
-                context = _context(request)
-            try:
-                for source in protected:
-                    browse_auth.require_data_access(context, source)
-            except browse_auth.BrowseAuthError:
-                continue
         visible.append(entry)
     return visible

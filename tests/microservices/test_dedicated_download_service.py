@@ -274,3 +274,27 @@ def test_archive_download_logs_range_completion_without_full_path_or_token(
     assert "pytest-download" in messages
     assert str(run_root) not in messages
     assert "Authorization" not in messages
+
+
+def test_public_contrast_bundle_returns_original_archive_bytes(tmp_path, load_download):
+    from io import BytesIO
+    import zipfile
+
+    runid = "shared-feature-results"
+    root = tmp_path / runid
+    _make_public(root)
+    stream = BytesIO()
+    with zipfile.ZipFile(stream, "w") as archive:
+        archive.writestr("omni/contrasts.out.parquet", b"retained contrast result")
+        archive.writestr("path_ce/results.json", '{"total_cost":9000}')
+        archive.writestr("_query_engine/catalog.json", '{"files":[{"path":"omni/contrasts.out.parquet"}]}')
+    original = stream.getvalue()
+    _write_archive(root, payload=original)
+    module = load_download({runid: root}, SITE_PREFIX="/weppcloud")
+    with TestClient(module.create_app()) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/cfg/download/archives/result.zip")
+    assert response.status_code == 200
+    assert response.content == original
+    with zipfile.ZipFile(BytesIO(response.content)) as archive:
+        assert archive.read("omni/contrasts.out.parquet") == b"retained contrast result"
+        assert archive.read("path_ce/results.json") == b'{"total_cost":9000}'

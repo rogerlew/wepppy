@@ -31,9 +31,8 @@ class FeatureResourceContext:
     readonly: bool = False
     backend: str = "any"
     enabled_features: frozenset[str] = frozenset()
-    # Private grouped roots and embargoed/derived results require entitlement.
+    # Private grouped resources require live workflow membership for reads.
     requires_read_entitlement: bool = False
-    consumes_contrasts: bool = False
     internal_statement_version: str | None = None
     # Removal of retained legacy state need not satisfy enable/run capability.
     check_capabilities: bool = True
@@ -88,7 +87,7 @@ def _entitlement(principal, feature, operation, context, store):
 
 def evaluate_feature_access(principal: VerifiedPrincipal, feature: FeatureSpec,
                             operation: str, context: FeatureResourceContext,
-                            store, *, contrast_feature: FeatureSpec | None = None):
+                            store):
     """Conjoin feature admission with the endpoint's existing resource decision."""
     if operation not in {"inspect", "act"}:
         return FeatureAccessDecision(False, "invalid_operation")
@@ -96,12 +95,7 @@ def evaluate_feature_access(principal: VerifiedPrincipal, feature: FeatureSpec,
         return FeatureAccessDecision(False, "existing_access_denied")
     if not _valid_access_configuration(feature):
         return FeatureAccessDecision(False, "feature_access_configuration_error")
-    protected_read = context.requires_read_entitlement or feature.id == "omni_contrasts"
-    if operation == "inspect" and not protected_read:
-        if context.consumes_contrasts:
-            if contrast_feature is None or contrast_feature.id != "omni_contrasts":
-                return FeatureAccessDecision(False, "contrast_configuration_required")
-            return _entitlement(principal, contrast_feature, "inspect", context, store)
+    if operation == "inspect" and not context.requires_read_entitlement:
         return FeatureAccessDecision(True, "allowed", "existing_read")
     if operation == "act":
         if context.readonly:
@@ -115,14 +109,4 @@ def evaluate_feature_access(principal: VerifiedPrincipal, feature: FeatureSpec,
         decision = FeatureAccessDecision(True, "allowed", "legacy_role")
     else:
         decision = _entitlement(principal, feature, operation, context, store)
-    if not decision.allowed:
-        return decision
-    if context.consumes_contrasts:
-        if contrast_feature is None or contrast_feature.id != "omni_contrasts":
-            return FeatureAccessDecision(False, "contrast_configuration_required")
-        contrast = _entitlement(principal, contrast_feature, "inspect", context, store)
-        if not contrast.allowed:
-            if contrast.reason in {"feature_access_unavailable", "feature_access_configuration_error"}:
-                return contrast
-            return FeatureAccessDecision(False, "contrast_entitlement_required")
     return decision

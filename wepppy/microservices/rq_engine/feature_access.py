@@ -41,11 +41,11 @@ def verified_principal(claims):
 
 
 def require_feature_access(claims, feature_id, *, runid=None, operation="act",
-                           protected_read=False, consumes_contrasts=False):
+                           protected_read=False):
     from wepppy.weppcloud.utils.helpers import get_wd
     context = resource_context(get_wd(runid) if runid is not None else None,
-                               protected_read=protected_read, consumes_contrasts=consumes_contrasts)
-    public_inspection = operation == "inspect" and not protected_read and not consumes_contrasts and feature_id != "omni_contrasts"
+                               protected_read=protected_read)
+    public_inspection = operation == "inspect" and not protected_read
     principal = VerifiedPrincipal() if public_inspection else verified_principal(claims)
     decision = decide(principal, feature_id, operation, context)
     if not decision.allowed:
@@ -61,7 +61,5 @@ def require_workflow_access(claims, runid, *, operation):
     for feature_id in workflow_features(runid):
         if operation == "inspect" and feature_id == "batch_runner" and NoDbBase.ispublic(get_wd(runid)):
             continue
-        from .auth import _authorization_runid
-        context_runid = _authorization_runid(runid) if feature_id == "omni_contrasts" else runid
-        require_feature_access(claims, feature_id, runid=context_runid, operation=operation,
+        require_feature_access(claims, feature_id, runid=runid, operation=operation,
                                protected_read=True)

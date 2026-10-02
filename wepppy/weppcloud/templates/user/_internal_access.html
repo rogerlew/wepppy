@@ -9,7 +9,7 @@
     <ul>{% for member in internal_access.memberships %}
       <li>{{ member.label }}:
         {% if not member.active %}group inactive{% elif not member.unexpired %}membership expired{% elif internal_access.acknowledged %}membership current; acknowledgment complete{% else %}membership current; actions await acknowledgment{% endif %}.
-        {% if member.key == "path_ce" %}Work using contrast data also requires separate Omni Contrasts access.{% endif %}
+        {% if member.key == "path_ce" %}Reading retained contrasts needs no additional grant. Executing contrasts requires separate Omni Contrasts access.{% endif %}
         {% if member.review_at %}Review: {{ member.review_at }}.{% endif %}
         {% if member.expires_at %}Expires: {{ member.expires_at }}.{% endif %}
       </li>

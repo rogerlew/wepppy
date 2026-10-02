@@ -26,7 +26,6 @@ from wepppy.microservices.browse.auth import (
     USER_SERVICE_TOKEN_CLASSES,
     BrowseAuthError,
     authorize_group_request,
-    require_data_access,
     authorize_run_request,
     browse_jwt_cookie_name,
     handle_auth_error,
@@ -334,7 +333,6 @@ async def aria2c_spec(request: Request) -> PlainTextResponse:
         wd,
         base_url,
         auth_context.is_root,
-        auth_context,
     )
     spec_content = "\n".join(file_specs)
     return PlainTextResponse(spec_content)
@@ -459,10 +457,6 @@ async def download_with_subpath(request: Request) -> Response:
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
-    try:
-        require_data_access(auth_context, dir_path, inspect_bundle=True)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
@@ -498,10 +492,6 @@ async def download_culvert_with_subpath(request: Request) -> Response:
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
-    try:
-        require_data_access(auth_context, dir_path, inspect_bundle=True)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
@@ -540,10 +530,6 @@ async def download_batch_with_subpath(request: Request) -> Response:
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
-    try:
-        require_data_access(auth_context, dir_path, inspect_bundle=True)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
@@ -755,7 +741,7 @@ def _assert_target_within_allowed_roots(
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
 
-def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool, auth_context=None) -> list[str]:
+def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[str]:
     for root in _NODIR_ROOTS:
         if _is_mixed_nodir_root(wd, root):
             raise HTTPException(
@@ -777,12 +763,6 @@ def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool, auth_conte
             if os.path.basename(relative_path) in _RETIRED_NODIR_ARCHIVE_FILES:
                 continue
             if is_root_only_path(relative_path) and not allow_recorder:
-                continue
-            from .auth import AuthContext
-            try:
-                require_data_access(auth_context or AuthContext(None, None, frozenset()), file_path,
-                                    inspect_bundle=True)
-            except BrowseAuthError:
                 continue
             violation = validate_raw_subpath(relative_path)
             if (

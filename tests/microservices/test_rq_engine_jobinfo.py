@@ -794,3 +794,74 @@ def test_canceljob_auth_unexpected_exception_returns_401_with_traceback(
     assert payload["error"]["message"] == "Failed to authorize request"
     assert "Traceback" in payload["error"]["details"]
     assert "RuntimeError: boom" in payload["error"]["details"]
+
+
+@pytest.mark.parametrize("batch", [False, True])
+def test_public_job_results_keep_retained_feature_data_and_missing_children(monkeypatch, batch):
+    payload = {"job_id": "sharing-test", "status": "finished", "result": {"contrasts": [123]},
+               "children": {"0": [None, {"job_id": "path-child", "description": "run_path_cost_effective_rq(run)",
+                                         "result": {"total_cost": 9000}, "exc_info": "retained diagnostic"}]}}
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: payload)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", lambda job_ids: {"sharing-test": payload})
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/jobinfo", json={"job_ids": ["sharing-test"]}) if batch else client.get("/api/jobinfo/sharing-test")
+    assert response.status_code == 200
+    actual = response.json()["jobs"]["sharing-test"] if batch else response.json()
+    assert actual == payload
+
+
+@pytest.mark.parametrize("task", ["fetch_and_analyze_openet_ts_rq", "run_ag_fields_wepp_rq",
+                                   "run_path_cost_effective_rq", "run_omni_contrasts_rq"])
+@pytest.mark.parametrize("nested", [False, True])
+def test_cancellation_denies_restricted_descendants_before_any_stop(monkeypatch, task, nested):
+    restricted = {"job_id": "restricted", "runid": "run", "description": f"{task}(run)", "status": "started"}
+    payload = {"job_id": "root", "runid": "run", "status": "finished", "children": {"0": [None, restricted]}} if nested else restricted
+    monkeypatch.setattr(job_routes, "_authorize_cancel_request", lambda request: ({}, {"rq:status"}))
+    monkeypatch.setattr(job_routes, "authorize_run_access", lambda *args, **kwargs: None)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: payload)
+
+    def deny(*args, **kwargs):
+        raise rq_auth.AuthError("Feature membership required", status_code=403, code="feature_membership_required")
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Cancellation must not begin before feature admission")
+
+    monkeypatch.setattr(job_routes, "require_feature_access", deny)
+    monkeypatch.setattr(job_routes, "cancel_jobs", unexpected)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/canceljob/root")
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "feature_membership_required"
+
+
+@pytest.mark.parametrize("feature,task,identifier", [
+    ("culvert_runner", "run_culvert_batch_rq", "00000000-0000-0000-0000-000000000001"),
+    ("culvert_runner", "run_culvert_batch_finalize_rq", "00000000-0000-0000-0000-000000000001"),
+    ("batch_runner", "run_batch_rq", "named-batch"),
+    ("batch_runner", "_final_batch_complete_rq", "named-batch"),
+])
+def test_workflow_cancellation_does_not_treat_batch_identifier_as_run(monkeypatch, feature, task, identifier):
+    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
+    from wepppy.microservices.rq_engine import feature_access
+    from tests.factories.feature_access import stub_feature_accounts
+    stub_feature_accounts(monkeypatch)
+    principal = (VerifiedPrincipal("integration", integration_features=frozenset({"culvert_runner"}))
+                 if feature == "culvert_runner" else VerifiedPrincipal("human", 2))
+    monkeypatch.setattr(feature_access, "verified_principal", lambda claims: principal)
+    original_context = feature_access.resource_context
+
+    def context(wd=None, **kwargs):
+        assert wd is None, "A batch identifier must not be resolved as a Ron project"
+        return original_context(wd, **kwargs)
+
+    monkeypatch.setattr(feature_access, "resource_context", context)
+    monkeypatch.setattr(job_routes, "_authorize_cancel_request", lambda request: ({}, {"culvert:batch:submit", "rq:status"}))
+    monkeypatch.setattr(job_routes, "authorize_run_access", lambda *args, **kwargs: None)
+    node = {"job_id": "job", "runid": identifier, "description": f"{task}({identifier})", "status": "started"}
+    if feature == "culvert_runner":
+        node["culvert_batch_uuid"] = identifier
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: node)
+    monkeypatch.setattr(job_routes, "cancel_jobs", lambda *args, **kwargs: {"status": "ok"})
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/canceljob/job")
+    assert response.status_code == 200

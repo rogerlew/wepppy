@@ -21,8 +21,6 @@ from wepppy.nodb.mods.features_export import (
     FeaturesExportValidationError,
     parse_profile_text,
     prepare_export_submission,
-    load_layer_catalog,
-    resolve_export_plan,
 )
 from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
 from wepppy.nodb.mods.features_export.service import (
@@ -46,8 +44,6 @@ from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from .feature_access import require_feature_access
-from wepppy.weppcloud.utils.feature_access_data import protected_export, contains_protected, protected_source
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import (
@@ -65,11 +61,6 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 _DOWNLOAD_FILENAME_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 
 
-def _require_export_access(claims, payload):
-    # Resolve aliases/families before preparation can inspect feature state.
-    plan = resolve_export_plan(payload, load_layer_catalog())
-    if protected_export(plan.to_mapping()):
-        require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -88,20 +79,16 @@ def _require_file(path: Path, *, label: str) -> Path:
     return path
 
 
-def _resolve_export_wd(runid: str, request: Request, *, claims=None) -> str:
+def _resolve_export_wd(runid: str, request: Request) -> str:
     run_root = Path(get_wd(runid, prefer_active=False)).resolve()
     if not run_root.is_dir():
         raise FileNotFoundError(f"Run '{runid}' not found")
 
     if ";;" in runid:
-        if protected_source(run_root):
-            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
         return str(run_root)
 
     pup_relpath = request.query_params.get("pup")
     if not pup_relpath:
-        if protected_source(run_root):
-            require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
         return str(run_root)
 
     pups_root = (run_root / "_pups").resolve()
@@ -117,8 +104,6 @@ def _resolve_export_wd(runid: str, request: Request, *, claims=None) -> str:
     if not candidate.is_dir():
         raise FileNotFoundError(f"Unknown pup project: {pup_relpath}")
 
-    if protected_source(candidate):
-        require_feature_access(claims, "omni_contrasts", operation="inspect", protected_read=True)
     return str(candidate)
 
 
@@ -429,7 +414,7 @@ async def export_ermit(runid: str, config: str, request: Request):
     try:
         from wepppy.export import create_ermit_input
 
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         fn = await _run_sync(create_ermit_input, wd)
         file_path = _require_file(Path(fn), label="ERMiT export")
         return FileResponse(path=file_path, filename=file_path.name)
@@ -473,7 +458,7 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         job_id = await _run_sync(
             lambda: _enqueue_ermit_export_job(runid=runid, config=config, wd=wd)
         )
@@ -532,7 +517,7 @@ async def export_ermit_download(runid: str, config: str, job_id: str, request: R
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         job_info = await _run_sync(get_wepppy_rq_job_info, job_id)
         status = str(job_info.get("status") or "")
         if status == "not_found":
@@ -607,7 +592,7 @@ async def export_geopackage(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         _result, artifact_path = await _run_sync(
             lambda: _execute_features_export_profile(
                 runid=runid,
@@ -659,7 +644,7 @@ async def export_geodatabase(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
 
         try:
             artifact_path, _artifact_relpath = await _run_sync(
@@ -744,7 +729,7 @@ async def export_prep_details(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         _result, artifact_path = await _run_sync(
             lambda: _execute_features_export_profile(
                 runid=runid,
@@ -811,7 +796,6 @@ async def export_features_submit(runid: str, config: str, request: Request):
     assert payload is not None
 
     try:
-        _require_export_access(claims, payload)
         wd = get_wd(runid)
         job_id, _cache_hit = await _run_sync(
             lambda: _enqueue_features_export_job(
@@ -889,7 +873,6 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
 
     try:
         request_payload = parse_profile_text(profile_text)
-        _require_export_access(claims, request_payload)
         wd = get_wd(runid)
         submission = await _run_sync(lambda: prepare_export_submission(wd, request_payload))
         return JSONResponse(
@@ -998,8 +981,6 @@ async def export_features_download(runid: str, config: str, job_id: str, request
             )
         )
         resolved_path = Path(artifact_path)
-        if contains_protected(artifact_path):
-            require_feature_access(claims or {}, "omni_contrasts", operation="inspect", protected_read=True)
         return FileResponse(path=resolved_path, filename=resolved_path.name)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
@@ -1050,15 +1031,13 @@ async def export_features_published_download(runid: str, config: str, profile: s
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        wd = _resolve_export_wd(runid, request, claims=claims)
+        wd = _resolve_export_wd(runid, request)
         artifact_path, _artifact_relpath = await _run_sync(
             lambda: resolve_published_artifact_path(
                 wd,
                 profile=profile,
             )
         )
-        if contains_protected(artifact_path):
-            require_feature_access(claims or {}, "omni_contrasts", operation="inspect", protected_read=True)
         return FileResponse(
             path=artifact_path,
             filename=_published_download_filename(runid, profile),

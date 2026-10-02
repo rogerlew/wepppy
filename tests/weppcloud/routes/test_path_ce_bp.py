@@ -73,8 +73,7 @@ def path_ce_client(
     from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext
     monkeypatch.setattr(feature_web, "current_principal", lambda: VerifiedPrincipal("human", 1, frozenset({"Root"})))
     monkeypatch.setattr(feature_web, "resource_context", lambda *args, **kwargs: FeatureResourceContext(
-        existing_access_allowed=True, backend="wbt", enabled_features=frozenset({"omni"}),
-        consumes_contrasts=kwargs.get("consumes_contrasts", False)))
+        existing_access_allowed=True, backend="wbt", enabled_features=frozenset({"omni"})))
 
     context = SimpleNamespace(active_root=run_dir)
 

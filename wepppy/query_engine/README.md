@@ -188,7 +188,7 @@ Queries are **stateless** and **ephemeral**:
 - Revocation checks enforce denylisted `jti` values
 - Audit logs track query execution per user
 
-FA-02 amendment (specified; implementation pending): [feature access governance](../../docs/schemas/feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery) permits inspection and querying of shared contrast/PATH-CE results without feature-action entitlement. Keep their catalog entries and result fields readable under normal resource-sharing rules. Preserve private grouped-resource checks, token scopes, ordinary anonymous query/catalog access and activation/cache behavior. SQL expression access outside authorized resource boundaries remains a separate containment issue; FA-02 does not waive it or authorize a dependency upgrade. The current M3 checkpoint still contains feature-derived read gates that must be removed after the reviewed contract checkpoint.
+FA-02 amendment: [feature access governance](../../docs/schemas/feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery) permits inspection and querying of shared contrast/PATH-CE results without feature-action entitlement. Keep their catalog entries and result fields readable under normal resource-sharing rules. Preserve private grouped-resource checks, token scopes, ordinary anonymous query/catalog access and activation/cache behavior. SQL expression access outside authorized resource boundaries remains a separate containment issue; FA-02 does not waive it or authorize a dependency upgrade. Runtime reconciliation removes feature-derived read gates. Synthetic private-file reads through SQL expressions remain a confirmed M3 blocker.
 
 ### Data Sources
 

@@ -21,8 +21,6 @@ from wepppy.microservices.browse.auth import (
     USER_SERVICE_TOKEN_CLASSES,
     BrowseAuthError,
     authorize_run_request,
-    require_data_access,
-    visible_data,
 )
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_HIDDEN,
@@ -631,8 +629,6 @@ async def _files_list_response(
 
     payload_entries = []
     for entry in entries:
-        if auth_context is not None and not visible_data(auth_context, os.path.join(abs_path, entry[0])):
-            continue
         name, is_dir, _mtime_display, hr_value, is_symlink, _sym_target, symlink_is_dir = entry
         nodir_root = _allowlisted_nodir_root(name)
         if (

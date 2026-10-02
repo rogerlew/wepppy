@@ -562,7 +562,6 @@ async def _render_directory_response(
         page_entries_override=page_entries_override,
         total_items_override=total_items_override,
         using_manifest_override=using_manifest_override,
-        entry_allowed=getattr(request, "feature_entry_allowed", None),
     )
 
     redirect_response, total_pages = _normalize_page_or_redirect(

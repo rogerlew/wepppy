@@ -207,7 +207,7 @@ Landuse first-class route notes (2026-04-24):
 
 <a id="fa-01-protected-job-results-specified-implementation-pending"></a>
 
-### FA-02 shared job results (specified; implementation pending)
+### FA-02 shared job results
 
 [FA-02](feature-access-governance-contract.md#protected-data-classification-and-mixed-delivery)
 supersedes the contrast/PATH-CE-only result projection introduced by FA-01.
@@ -222,9 +222,10 @@ no new authenticated-polling requirement or token scope is introduced.
 Acceptance covers shared contrast/PATH-CE results through single, batch and
 recursive job-info, mixed ordinary trees and missing/expired child jobs.
 Unauthorized restricted job submission/retry/cancellation must still fail before
-mutation. Culvert client polling retains its existing response behavior. M3
-checkpoint `458557219` contains the superseded projection; runtime reconciliation
-requires the FA-02 contract checkpoint and is not yet claimed complete.
+mutation. Culvert client polling retains its existing response behavior. The
+projection from M3 checkpoint `458557219` has been removed after standalone
+FA-02 contract checkpoint `102c81066`. This does not claim complete M3
+acceptance; separately documented private-resource findings remain open.
 
 ## Job cancellation
 

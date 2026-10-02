@@ -240,10 +240,7 @@ def query_omni_scenarios_report(runid, config):
 @requires_cap(gate_reason="Complete verification to view Omni reports.")
 def query_omni_contrasts_report(runid, config):
     from werkzeug.exceptions import HTTPException
-    from wepppy.weppcloud.feature_registry.runtime import (
-        feature_registry_by_id,
-        user_meets_min_role,
-    )
+
 
     try:
         authorize(runid, config)
@@ -253,14 +250,15 @@ def query_omni_contrasts_report(runid, config):
             status_code=exc.code or 403,
             code="forbidden",
         )
-    from wepppy.weppcloud.utils.feature_access_flask import require_feature
-    require_feature("omni_contrasts", wd=get_wd(runid), operation="inspect")
 
     try:
         wd = get_wd(runid)
         if single_input_uploads_enabled(Ron.getInstance(wd)):
             return jsonify({"error": {"message": "omni is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
-        omni = Omni.getInstance(wd)
+        omni = Omni.tryGetInstance(wd)
+        if omni is None:
+            return error_factory("Omni contrast results have not been generated.",
+                                 status_code=404, code="results_unavailable")
         selection_mode = (omni.contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"

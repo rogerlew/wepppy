@@ -20,7 +20,10 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-02 UTC) Added live identity/group adapters and initial direct action, grouped delivery, catalog, export and recursive polling enforcement. Isolated PostgreSQL plus signed OpenET route admission proves acknowledgment and old-token removal before mutations.
 - [x] Operator resolved the sharing policy: internal/embargo restricts feature operation; permitted users may share outputs broadly. Fork classification/refusal is no longer required for a result embargo.
 - [x] Prepare FA-02 canonical amendments and independent reviews; all contract findings independently closed, documentation/links/whitespace checks passed.
-- [ ] Commit the standalone FA-02 checkpoint, then remove superseded M3 read gates while preserving action/private-resource checks. Reassess SQL/D-Tale findings against actual privacy/containment and complete regression/browser/service acceptance. M3 is not complete or ready to deploy.
+- [x] Commit standalone FA-02 checkpoint `102c81066` before runtime edits.
+- [x] Reconcile FA-02 shared reads, remove feature-derived file/result classification and ancestry gates, preserve action/private checks; independent bounded review findings closed.
+- [x] Reproduce S04/S08 on disposable synthetic private files; both remain real private-resource defects.
+- [ ] Complete full regression and M3 private-resource remediation/service acceptance. M3 is not complete or ready to deploy.
 
 - [x] (2026-10-02 UTC) Milestone-two account UI, acknowledgment and atomic initializer implemented; focused PostgreSQL/browser acceptance and independent reviews pass.
 - [x] (2026-10-02 UTC) Local shared database backed up, test-restored, migrated and initialized for the verified sole maintainer; production unchanged.
@@ -93,7 +96,7 @@ Source investigation found no durable anonymous creator proof, but the operator 
 
 ## Outcomes & Retrospective
 
-M3 remains incomplete at checkpoint `458557219`. FA-02 now supersedes the feature-derived read restrictions in that checkpoint; runtime reconciliation awaits the reviewed standalone contract ancestor. Focused runs have verified direct route admission and ordinary query/delivery regressions, but interim security review identified additional consumers and expression-level file reads. Existing M1/M2 passes do not establish M3 acceptance. No production activation, shared membership change, credential renewal or dependency upgrade occurred.
+M3 remains incomplete at checkpoint `458557219`. FA-02 now supersedes the feature-derived read restrictions in that checkpoint; shared-read reconciliation is implemented against reviewed standalone contract ancestor `102c81066`. Focused runs have verified direct route admission and ordinary query/delivery regressions, but interim security review identified additional consumers and expression-level file reads. Existing M1/M2 passes do not establish M3 acceptance. No production activation, shared membership change, credential renewal or dependency upgrade occurred.
 
 The [interim M3 security review](../../artifacts/2026-10-02_m3_security_review.md) remains NOT PASSED. Retained bounded results: account/action/session/query/run-view regression 684 passed/2 skipped; delivery/export 224 passed; artifact/alias/failure cases 16 passed; control rendering 198 passed; frontend 112 suites/919 tests plus lint passed. Suites overlap. Final independent acceptance, full regression and actual service/browser validation remain open.
 
@@ -235,3 +238,12 @@ Milestone-one handoff, 2026-10-01: implementation and validation are complete; t
 
 
 Milestone-two handoff, 2026-10-02 UTC: implementation, focused/browser/database gates, independent reviews and broad Python regression are complete. Local initialization is verified after backup restore; production is unchanged. The operator authorized committing the completed milestone. Milestone three is the next implementation step.
+
+2026-10-02 implementation update: recorded FA-02 ancestor `102c81066`; removing feature-result classification, projection and inherited contrast gates. PATH-CE consumes retained contrasts without executing them, so its own action gate suffices. Private-resource findings and acceptance remain open.
+
+2026-10-02 validation update: sharing reconciliation passed bounded independent
+correctness/security review after correcting cancellation task/tree coverage,
+batch identifier context, missing optional Omni report state and PATH UI wording.
+Synthetic query and D-Tale canaries reproduce actual private-resource disclosure;
+S04/S08 stay High. See `artifacts/2026-10-02_fa02_runtime_validation.md` for evolving
+full regression/browser evidence. These fixes do not close M3 or authorize rollout.

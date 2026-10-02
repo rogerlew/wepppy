@@ -25,6 +25,5 @@ def stub_feature_accounts(monkeypatch, *, members=frozenset({2})):
     monkeypatch.setattr(adapter, "resource_context", lambda *args, **kwargs: FeatureResourceContext(
         existing_access_allowed=True, backend="wbt", enabled_features=frozenset({"omni"}),
         requires_read_entitlement=kwargs.get("protected_read", False),
-        consumes_contrasts=kwargs.get("consumes_contrasts", False),
         internal_statement_version="internal-2026-10-01"))
     monkeypatch.setattr(runtime, "feature_store", Store)

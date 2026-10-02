@@ -31,7 +31,7 @@ def _stub_schema_auth(monkeypatch: pytest.MonkeyPatch, scope: str = "rq:status")
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": "service", "scope": scope},
     )
-    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 def _stub_orchestration_auth(monkeypatch: pytest.MonkeyPatch, scope: str = "rq:status") -> None:
@@ -40,7 +40,7 @@ def _stub_orchestration_auth(monkeypatch: pytest.MonkeyPatch, scope: str = "rq:s
         "require_jwt",
         lambda request: {"sub": "svc", "token_class": "service", "scope": scope},
     )
-    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
 
 def _sample_schema_runtime() -> schema_defaults_routes.RuntimeState:

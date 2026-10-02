@@ -73,39 +73,10 @@ class BrowseAuthError(Exception):
         self.code = code
 
 
-def contrast_decision(context):
-    from wepppy.microservices.rq_engine.feature_access import verified_principal
-    from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
-    from wepppy.weppcloud.utils.feature_access_runtime import decide, resource_context
-    principal = verified_principal(context.claims) if context.claims is not None else VerifiedPrincipal()
-    return decide(principal, "omni_contrasts", "inspect", resource_context(protected_read=True))
 
 
-def require_data_access(context, path, *, inspect_bundle=False):
-    from wepppy.weppcloud.utils.feature_access_data import protected_source, protected_bundle
-    from wepppy.weppcloud.utils.feature_access_runtime import decision_status
-    try:
-        protected = protected_source(path) or (inspect_bundle and os.path.isfile(path) and protected_bundle(path))
-    except RuntimeError as exc:
-        # pathlib raises RuntimeError for symlink cycles on supported Python.
-        raise BrowseAuthError("Invalid resolved data path.", status_code=403, code="forbidden_path") from exc
-    if not protected:
-        return
-    try:
-        decision = contrast_decision(context)
-    except RqAuthError as exc:
-        raise BrowseAuthError(exc.message, status_code=exc.status_code, code=exc.code) from exc
-    if not decision.allowed:
-        raise BrowseAuthError("Contrast data requires entitlement.", status_code=decision_status(decision), code=decision.reason)
 
 
-def visible_data(context, path):
-    """Filter protected catalog entries while ordinary listings stay available."""
-    try:
-        require_data_access(context, path)
-        return True
-    except BrowseAuthError:
-        return False
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -391,7 +362,6 @@ def authorize_run_request(
                 and not root_only
                 and _run_is_public(runid)
             ):
-                require_data_access(context, os.path.join(get_wd(runid), subpath))
                 return context
             raise BrowseAuthError("Authentication required")
 
@@ -420,7 +390,6 @@ def authorize_run_request(
                 status_code=403,
                 code="forbidden",
             )
-        require_data_access(context, os.path.join(get_wd(runid), subpath))
         return context
 
     context = resolve_auth_context(request, runid=runid, config=config)

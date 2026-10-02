@@ -293,7 +293,7 @@ def decision(store, feature='openet_ts', operation='act', principal=None, **ctx)
                    internal_statement_version='v1')
     context.update(ctx)
     return evaluate_feature_access(principal or VerifiedPrincipal('human', 2), BY_ID[feature], operation,
-                                   FeatureResourceContext(**context), store, contrast_feature=BY_ID['omni_contrasts'])
+                                   FeatureResourceContext(**context), store)
 
 
 def test_group_only_no_root_bypass_and_current_membership(store):
@@ -320,9 +320,10 @@ def test_path_dependency_backend_and_prerequisites(store):
     change(store, group_key='path_ce')
     store.acknowledge_internal(2, 'v1')
     assert decision(store, 'path_ce', backend='topaz').reason == 'backend_required'
-    assert decision(store, 'path_ce', consumes_contrasts=True).reason == 'contrast_entitlement_required'
+    assert decision(store, 'path_ce').allowed
+    assert not decision(store, 'omni_contrasts').allowed
     change(store, group_key='omni_contrasts')
-    assert decision(store, 'path_ce', consumes_contrasts=True).allowed
+    assert decision(store, 'path_ce').allowed
     assert decision(store, 'omni_contrasts', enabled_features=frozenset()).reason == 'prerequisite_required'
     assert decision(store, 'omni_contrasts').allowed
 
@@ -333,7 +334,7 @@ def test_inspection_ordinary_and_legacy_noninterference(store):
     assert decision(None, principal=anonymous, operation='inspect').allowed
     assert decision(None, 'rap_ts', principal=anonymous).allowed
     assert not decision(store, principal=anonymous).allowed
-    assert not decision(store, 'omni_contrasts', 'inspect', principal=anonymous).allowed
+    assert decision(None, 'omni_contrasts', 'inspect', principal=anonymous).allowed
     assert not decision(store, 'batch_runner', 'inspect', principal=anonymous, requires_read_entitlement=True).allowed
     for role in ('Dev', 'Root'):
         assert decision(store, 'ag_fields', principal=VerifiedPrincipal('human', 1, frozenset({role}))).allowed
@@ -373,34 +374,22 @@ def test_registry_fields_and_validation():
             validate_feature_registry_payload(bad, registry_dir=root)
 
 
-def test_path_inspection_of_derived_data_needs_only_contrast_entitlement(store):
-    assert not decision(store, 'path_ce', 'inspect', consumes_contrasts=True).allowed
-    change(store, group_key='omni_contrasts')
-    assert decision(store, 'path_ce', 'inspect', consumes_contrasts=True).allowed
-    assert not decision(store, 'path_ce', consumes_contrasts=True).allowed
+def test_path_results_are_shared_without_action_entitlement(store):
+    assert decision(None, 'path_ce', 'inspect', principal=VerifiedPrincipal()).allowed
+    assert not decision(store, 'path_ce').allowed
 
 
-def test_dependency_database_failure_is_unavailable(database, store, monkeypatch):
+def test_path_execution_does_not_query_contrast_membership(store, monkeypatch):
     change(store, group_key='path_ce')
     store.acknowledge_internal(2, 'v1')
     original = store.membership
 
-    def lose_database_between_decisions(user_id, group_key, **kwargs):
-        if group_key == 'omni_contrasts':
-            with database.begin() as connection:
-                memberships.drop(connection)
+    def only_path(user_id, group_key, **kwargs):
+        assert group_key == 'path_ce'
         return original(user_id, group_key, **kwargs)
 
-    monkeypatch.setattr(store, 'membership', lose_database_between_decisions)
-    assert decision(store, 'path_ce', consumes_contrasts=True).reason == 'feature_access_unavailable'
-
-
-def test_dependency_missing_group_is_configuration_error(database, store):
-    change(store, group_key='path_ce')
-    store.acknowledge_internal(2, 'v1')
-    with database.begin() as connection:
-        connection.execute(groups.delete().where(groups.c.key == 'omni_contrasts'))
-    assert decision(store, 'path_ce', consumes_contrasts=True).reason == 'feature_access_configuration_error'
+    monkeypatch.setattr(store, 'membership', only_path)
+    assert decision(store, 'path_ce').allowed
 
 
 def test_grant_expiry_revalidated_after_row_lock(database, store, monkeypatch):
@@ -455,12 +444,6 @@ def test_governed_features_cannot_omit_access_metadata(feature_id, explicit_null
         assert result.reason == 'feature_access_configuration_error'
 
 
-def test_malformed_contrast_dependency_cannot_fall_back_to_role():
-    malformed = replace(BY_ID['omni_contrasts'], access_group=None, access_mode=None)
-    for operation in ('inspect', 'act'):
-        result = evaluate_feature_access(
-            VerifiedPrincipal('human', 1, frozenset({'Dev'})), BY_ID['path_ce'], operation,
-            FeatureResourceContext(existing_access_allowed=True, backend='wbt', consumes_contrasts=True),
-            None, contrast_feature=malformed,
-        )
-        assert result.reason == 'feature_access_configuration_error'
+def test_shared_contrast_results_preserve_existing_resource_denial():
+    assert not decision(None, 'omni_contrasts', 'inspect', principal=VerifiedPrincipal(),
+                        existing_access_allowed=False).allowed

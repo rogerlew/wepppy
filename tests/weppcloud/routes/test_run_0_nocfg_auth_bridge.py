@@ -320,6 +320,13 @@ def test_set_run_session_jwt_cookie_sets_batch_compat_cookie_for_group_routes(
     monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
     monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
     monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+    monkeypatch.setattr(module, "get_wd", lambda *_args, **_kwargs: "/tmp/private-batch")
+    monkeypatch.setattr(module, "Ron", type("RonStub", (), {"ispublic": staticmethod(lambda _wd: False)}))
+    feature_checks: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        "wepppy.weppcloud.utils.feature_access_flask.require_feature",
+        lambda feature, **kwargs: feature_checks.append((feature, kwargs["operation"])),
+    )
 
     with app.test_request_context(f"/runs/{batch_runid}/", headers={"X-Forwarded-Proto": "https"}):
         response = app.make_response(("ok", 200))
@@ -338,6 +345,7 @@ def test_set_run_session_jwt_cookie_sets_batch_compat_cookie_for_group_routes(
         and "Path=/weppcloud;" in header
         for header in cookie_headers
     )
+    assert feature_checks == [("batch_runner", "inspect")]
 
 
 def test_set_run_session_jwt_cookie_uses_current_user_fallback_when_session_identity_missing(

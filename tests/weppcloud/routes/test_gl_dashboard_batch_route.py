@@ -31,12 +31,15 @@ class _FeatureStub:
 
 @pytest.fixture()
 def batch_gl_dashboard_client(monkeypatch: pytest.MonkeyPatch):
+    from wepppy.weppcloud.utils import feature_access_flask
+
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["BATCH_RUNNER_ENABLED"] = True
     app.config["BATCH_RUNNER_SKIP_AUTH"] = True
     app.config["GL_DASHBOARD_BATCH_ENABLED"] = "true"
     app.register_blueprint(batch_runner_module.batch_runner_bp)
+    monkeypatch.setattr(feature_access_flask, "require_feature", lambda *args, **kwargs: None)
 
     class DummyBatchRunner:
         base_config = "cfg"

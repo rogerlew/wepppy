@@ -747,7 +747,7 @@ def _normalize_config_token(value: str) -> str:
     return text
 
 
-def _load_runtime_state(runid: str, config: str, *, claims=None) -> dict[str, Any]:
+def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
     wd = get_wd(runid)
     if not Path(wd).is_dir():
         raise FileNotFoundError(f"Unknown run '{runid}'")
@@ -829,8 +829,7 @@ def _load_runtime_state(runid: str, config: str, *, claims=None) -> dict[str, An
     unique_job_ids = sorted({job_id for job_id in step_job_id.values() if job_id})
     if unique_job_ids:
         raw = get_wepppy_rq_jobs_info(unique_job_ids)
-        from .feature_results import project_job_results
-        job_info_by_id = {str(job_id): project_job_results(info, claims) for job_id, info in raw.items()}
+        job_info_by_id = {str(job_id): info for job_id, info in raw.items()}
 
     step_job: dict[str, dict[str, Any]] = {}
     for step_id, job_id in step_job_id.items():
@@ -1578,7 +1577,7 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
 )
 def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = _require_orchestration_claims(request, runid)
+        _require_orchestration_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -1586,7 +1585,7 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        runtime = _load_runtime_state(runid, config, claims=claims)
+        runtime = _load_runtime_state(runid, config)
     except FileNotFoundError:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
@@ -1626,7 +1625,7 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
 )
 def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = _require_orchestration_claims(request, runid)
+        _require_orchestration_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -1634,7 +1633,7 @@ def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        runtime = _load_runtime_state(runid, config, claims=claims)
+        runtime = _load_runtime_state(runid, config)
     except FileNotFoundError:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:

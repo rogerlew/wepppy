@@ -47,12 +47,12 @@ expiry/revocation, supported token class, scope and resource binding, then suppl
 through the endpoint's authoritative identity path; integration feature authority
 must come from operator registration. A service token class alone confers none.
 
-FA-02 target: retained-result inspection returns the existing resource read
+FA-02 behavior: retained-result inspection returns the existing resource read
 decision without a feature-action membership lookup, including contrast/PATH-CE
 outputs. Private workflow roots retain their separately specified read scope.
-The current `consumes_contrasts` read dependency is superseded: require contrast
-action entitlement only when the composed operation actually activates or
-executes contrasts, not merely when it reads existing contrast inputs.
+The former `consumes_contrasts` read dependency is removed. Contrast action
+entitlement applies only when a composed operation actually activates or executes
+contrasts, not merely when it reads existing contrast inputs.
 Actions also enforce readonly/backend/prerequisites. Group-based actions require
 the current server-owned internal statement version; legacy Dev/Root paths do
 not acquire that requirement. No account is auto-enrolled in a dependency group.
@@ -113,14 +113,14 @@ These checks supplement normal signature, expiry, revocation, scopes and resourc
 claims. Editing this registration does not renew the expired deployment token.
 
 Restricted controls use the shared decisions, with disabled action fieldsets and
-retained views. FA-02 requires removing the checkpoint's feature-derived read filters while retaining action gates. Disabling a restricted mod still requires entitlement
+retained views. FA-02 removes feature-derived read filters while retaining action gates. Disabling a restricted mod still requires entitlement
 and honors readonly state, but does not require the backend/prerequisites needed
 to enable or execute that feature. Newly exposed optional-state GETs are
 observational. Existing anonymous ordinary workflows remain in scope for regression.
 
 M3 is not ready for rollout. FA-02 removes the need for a contrast-child lineage
-marker and contrast-only SQL/D-Tale read enforcement. Reassess SQL expressions
-and cached D-Tale delivery for actual private-resource/containment violations;
+marker and contrast-only SQL/D-Tale read enforcement. Synthetic reproductions confirm private-resource violations in SQL expressions
+and cached D-Tale delivery;
 public result sharing is intended. No DuckDB upgrade is authorized by FA-02. See the active
 [ExecPlan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md)
 for decisions, review disposition and remaining acceptance. Do not enable

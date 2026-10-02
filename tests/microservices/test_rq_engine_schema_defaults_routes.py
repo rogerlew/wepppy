@@ -1125,7 +1125,11 @@ def test_readiness_ready_operations_are_discoverable_in_run_endpoints(
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
     monkeypatch.setattr(orchestration_read_routes, "require_jwt", lambda request: {"scope": "rq:status"})
-    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "authorize_run_access",
+        lambda claims, runid, **kwargs: None,
+    )
     monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
     monkeypatch.setattr(
         orchestration_read_routes,

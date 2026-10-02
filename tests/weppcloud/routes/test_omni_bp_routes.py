@@ -77,14 +77,14 @@ class _OmniReportStub:
 @pytest.mark.parametrize(
     "roles,expected_status",
     [
-        (("User",), 403),
-        (("PowerUser",), 403),
-        (("Admin",), 403),
+        (("User",), 200),
+        (("PowerUser",), 200),
+        (("Admin",), 200),
         (("Dev",), 200),
         (("Root",), 200),
     ],
 )
-def test_contrast_report_enforces_role_before_data_read(
+def test_contrast_report_shares_retained_results_across_roles(
     omni_bp_client,
     monkeypatch: pytest.MonkeyPatch,
     roles: tuple[str, ...],
@@ -101,7 +101,7 @@ def test_contrast_report_enforces_role_before_data_read(
         entered["value"] = True
         return _OmniReportStub()
 
-    monkeypatch.setattr(omni_bp_module.Omni, "getInstance", _get_omni)
+    monkeypatch.setattr(omni_bp_module.Omni, "tryGetInstance", _get_omni)
     monkeypatch.setattr(omni_bp_module.Watershed, "getInstance", lambda wd: object())
     monkeypatch.setattr(omni_bp_module, "render_template", lambda *args, **kwargs: "report")
 
@@ -136,7 +136,7 @@ def test_contrast_report_preserves_run_access_for_dev(
         entered["value"] = True
         return _OmniReportStub()
 
-    monkeypatch.setattr(omni_bp_module.Omni, "getInstance", _get_omni)
+    monkeypatch.setattr(omni_bp_module.Omni, "tryGetInstance", _get_omni)
 
     response = client.get(f"/runs/{RUN_ID}/{CFG}/report/omni_contrasts")
 
@@ -162,7 +162,7 @@ def test_contrast_report_preserves_cap_gate_before_data_read(
         entered["value"] = True
         return _OmniReportStub()
 
-    monkeypatch.setattr(omni_bp_module.Omni, "getInstance", _get_omni)
+    monkeypatch.setattr(omni_bp_module.Omni, "tryGetInstance", _get_omni)
 
     response = client.get(f"/runs/{RUN_ID}/{CFG}/report/omni_contrasts")
 
@@ -257,3 +257,11 @@ def test_single_input_project_rejects_excluded_mutation_before_hydration(omni_bp
     response = client.post(f"/runs/{RUN_ID}/{CFG}/api/omni/delete_scenarios", json={'scenarios': ['test']})
     assert response.status_code == 400
     assert response.get_json()["error"]["code"] == "unsupported_capability"
+
+
+def test_contrast_report_without_optional_state_is_unavailable(omni_bp_client, monkeypatch):
+    monkeypatch.setattr(cap_guard, "current_user", _RoleUser("User"))
+    monkeypatch.setattr(omni_bp_module.Omni, "tryGetInstance", lambda wd: None)
+    response = omni_bp_client.get(f"/runs/{RUN_ID}/{CFG}/report/omni_contrasts")
+    assert response.status_code == 404
+    assert response.json["error"]["code"] == "results_unavailable"

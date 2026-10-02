@@ -23,7 +23,7 @@ from wepppy.rq.jobinfo_payloads import extract_job_ids
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
-from .feature_results import project_job_results, protected_job
+from .feature_results import cancellation_nodes, restricted_job_feature
 from .feature_access import require_feature_access
 from .responses import error_response, error_response_with_traceback
 
@@ -368,7 +368,7 @@ def jobinfo(job_id: str, request: Request):
             success=True,
             reason="ok",
         )
-        return project_job_results(payload, claims)
+        return payload
     except Exception:
         logger.exception("rq-engine jobinfo failed")
         _audit_polling_request(
@@ -436,7 +436,7 @@ async def jobinfo_batch(request: Request):
             success=True,
             reason="ok",
         )
-        return {"jobs": {key: project_job_results(value, claims) for key, value in job_info_map.items()}, "job_ids": ordered_ids}
+        return {"jobs": job_info_map, "job_ids": ordered_ids}
     except Exception:
         logger.exception("rq-engine batch jobinfo failed")
         _audit_polling_request(
@@ -512,9 +512,15 @@ def canceljob(job_id: str, request: Request):
                 code="forbidden",
             )
 
-        if protected_job(job_info):
-            require_feature_access(claims, "path_ce" if "path" in str(job_info.get("description")) else "omni_contrasts",
-                                   runid=runid, consumes_contrasts=True)
+        # Check the complete tree before issuing any cancellation side effect.
+        for node in cancellation_nodes(job_info):
+            feature = restricted_job_feature(node)
+            if feature is not None:
+                context_runid = node.get("runid")
+                # Workflow dispatch/finalizer args identify a batch, not a Ron run.
+                if feature in {"batch_runner", "culvert_runner"} and ";;" not in str(context_runid):
+                    context_runid = None
+                require_feature_access(claims, feature, runid=context_runid)
         payload = cancel_jobs(
             job_id,
             allow_started_fork_archive=_is_admin_or_root(claims),

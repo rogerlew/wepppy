@@ -106,8 +106,6 @@ from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     USER_SERVICE_TOKEN_CLASSES,
     authorize_group_request,
-    require_data_access,
-    visible_data,
     authorize_run_request,
     handle_auth_error,
 )
@@ -1241,10 +1239,6 @@ async def _handle_schema_request(
             detail="Path not found.",
         )
 
-    try:
-        require_data_access(context, target_path)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     columns = await asyncio.to_thread(_read_parquet_schema, target_path)
     return JSONResponse(
         {
@@ -1297,12 +1291,7 @@ async def _handle_browse_request(
         )
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
-    try:
-        require_data_access(context, os.path.join(wd, subpath_value), inspect_bundle=True)
-    except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     flask_request = FlaskRequestAdapter(request)
-    flask_request.feature_entry_allowed = lambda path: visible_data(context, path)
     result = await _browse_tree_helper(
         runid,
         subpath_value,

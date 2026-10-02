@@ -11,7 +11,7 @@
   </header>
   <section class="wc-panel wc-stack" aria-labelledby="decision-heading">
     <h2 id="decision-heading">Record a membership decision</h2>
-    <p>PATH-CE work that uses contrast data also requires Omni Contrasts access through its own group or preserved Dev/Root access. Record each group decision separately.</p>
+    <p>Reading retained contrast results needs no Omni Contrasts grant. An operation that executes contrasts requires separate Omni Contrasts access. Record each group decision separately.</p>
     <form class="pure-form pure-form-stacked" action="{{ url_for('admin.feature_access_memberships') }}" method="post" data-feature-access-form="membership">
       {{ ui.select_field('user_id', 'Person (account ID)', account_options, attrs={'required': true}) }}
       {{ ui.select_field('group_key', 'Feature group', group_options, attrs={'required': true}) }}

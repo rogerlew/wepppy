@@ -21,7 +21,6 @@ from wepppy.microservices.browse.auth import (
     authorize_group_request,
     authorize_run_request,
     handle_auth_error,
-    require_data_access,
 )
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_RECORDER,
@@ -178,10 +177,6 @@ def build_handlers(
 
         wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
 
-        try:
-            require_data_access(auth_context, Path(wd) / logical_rel_path)
-        except BrowseAuthError as exc:
-            raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
         # Enforce mixed/invalid/locked precedence before boundary-specific handling.
         try:

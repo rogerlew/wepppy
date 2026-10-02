@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open; M1/M2 complete, M3 checkpoint `458557219` incomplete. FA-02 result-sharing contract reconciliation in progress, 2026-10-02 UTC.
+Status: Open; M1/M2 complete, M3 checkpoint `458557219` incomplete. FA-02 result-sharing reconciliation implemented; private SQL/D-Tale findings remain open, 2026-10-02 UTC.
 
 Timezone: UTC
 

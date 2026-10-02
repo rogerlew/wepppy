@@ -469,14 +469,14 @@ def test_view_mod_section_openet_allows_dev(
 @pytest.mark.parametrize(
     ("roles", "allowed"),
     [
-        (set(), False),
-        ({"PowerUser"}, False),
-        ({"Admin"}, False),
+        (set(), True),
+        ({"PowerUser"}, True),
+        ({"Admin"}, True),
         ({"Dev"}, True),
         ({"Root"}, True),
     ],
 )
-def test_view_mod_section_omni_contrasts_enforces_full_role_matrix(
+def test_view_mod_section_omni_contrasts_shares_readonly_views(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,
     roles: set[str],

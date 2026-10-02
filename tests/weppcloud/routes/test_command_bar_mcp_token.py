@@ -28,6 +28,7 @@ def command_bar_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         lambda runid, config: SimpleNamespace(active_root=str(tmp_path)),
     )
     user = SimpleNamespace(
+        id=1,
         get_id=lambda: "user-1",
         email="user@example.com",
         is_authenticated=True,
@@ -84,7 +85,10 @@ def test_query_engine_mcp_instructions_do_not_persist_token(command_bar_client) 
     ]
     assert issue_token_calls[0]["runs"] == ["run-1"]
     assert issue_token_calls[0]["audience"] == ["query-engine"]
-    assert issue_token_calls[0]["extra_claims"] == {"token_class": "mcp"}
+    assert issue_token_calls[0]["extra_claims"] == {
+        "token_class": "mcp",
+        "feature_access_principal": {"version": 1, "kind": "human", "id": 1},
+    }
 
 
 def test_get_directory_locks_returns_runtime_lock_statuses(command_bar_client, monkeypatch: pytest.MonkeyPatch) -> None:
