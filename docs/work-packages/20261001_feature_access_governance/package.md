@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open; M1/M2/M3 complete locally. M4/M5 and production rollout remain open, 2026-10-02 UTC.
+Status: Open; M1/M2/M3 complete locally. M4 implementation and bounded acceptance complete; final M5 review/rollout preparation remains open, 2026-10-02 UTC.
 
 Timezone: UTC
 
@@ -35,8 +35,8 @@ acknowledgment and initialization are complete. M3 sharing reconciliation,
 restricted action/data admission and private SQL/D-Tale containment are complete
 locally at candidate `23c2f27fe`. Production-equivalent local service/browser
 acceptance and final independent correctness/security reviews pass with zero
-unresolved findings. PowerUser self-service, conservative maturity and production
-rollout remain open.
+unresolved findings. M4 adds locally validated PowerUser self-service and the
+conservative multi-OFE maturity ceiling. Production rollout remains open.
 
 ## Security and correctness gates
 
@@ -63,6 +63,6 @@ Parameterization change: no. ADR-0080 records governance, not numerical paramete
 
 ## Deliverables and next action
 
-Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). M4 is the active milestone. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. M3 closeout is recorded in the [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md) and [final reviews](artifacts/2026-10-02_m3_final_reviews.md).
+Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). M5 final review and rollout preparation are next. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. M3 closeout is recorded in the [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md) and [final reviews](artifacts/2026-10-02_m3_final_reviews.md). M4 evidence is in the [onboarding and maturity acceptance](artifacts/2026-10-02_m4_acceptance.md).
 
 Milestone-one implementation and validation details: [account records](../../dev-notes/feature-access-records.md), [correctness review](artifacts/2026-10-01_m1_correctness_review.md), and [security review](artifacts/2026-10-01_m1_security_review.md). No shared schema, membership or credential mutation is included in this implementation step.

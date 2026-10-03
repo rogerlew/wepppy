@@ -31,6 +31,25 @@ test('feature groups: real session, database, acknowledgment and removal', async
     await user.goto(`${baseURL}/profile`);
     await expect(user.getByText('No feature group memberships.')).toBeVisible();
     expect((await (await user.request.get(`${baseURL}/test-feature-access-decision`)).json()).allowed).toBe(false);
+    await expect(user.getByRole('heading', { name: 'PowerUser access' })).toBeVisible();
+    await user.getByRole('checkbox', { name: 'Do you need PowerUser access?' }).check();
+    await user.getByRole('checkbox', { name: 'I have read and understand the PowerUser training statement.' }).check();
+    const promoted = user.waitForResponse(r => r.url().endsWith('/profile/poweruser') && r.status() === 200);
+    await user.getByRole('button', { name: 'Request PowerUser access' }).click();
+    expect((await (await promoted).json()).result).toMatchObject({ status: 'granted', role_changed: true });
+    await user.getByRole('link', { name: 'Refresh access status' }).first().click();
+    await expect(user.getByText('PowerUser access is active.')).toBeVisible();
+    expect((await (await user.request.get(`${baseURL}/test-poweruser-workflow`)).json()).allowed).toBe(true);
+    await user.getByRole('button', { name: 'Mint JWT Token' }).click();
+    await expect(user.locator('[data-profile-token-field="token"]')).not.toHaveValue('');
+    const token = await user.locator('[data-profile-token-field="token"]').inputValue();
+    const privateBatch = await user.request.get(`${baseURL}/test-private-batch-token`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    expect(privateBatch.status()).toBe(403);
+    expect((await privateBatch.json()).allowed).toBe(false);
+    await user.locator('[data-profile-token-field="token"]').evaluate(field => { field.value = ''; });
+    await scan(user, 'profile-poweruser');
     await root.goto(`${baseURL}/admin/feature-access`);
     await expect(root.getByRole('heading', { name: 'Feature access', exact: true })).toBeVisible();
     await root.getByLabel('Person (account ID)').focus();
@@ -82,7 +101,8 @@ test('feature groups: real session, database, acknowledgment and removal', async
       fs.writeFileSync(path.join(evidence, 'roundtrip.json'), JSON.stringify({
         fullApp: true, database: 'isolated PostgreSQL schema', sessions: 'real Flask-Security/Redis',
         csrf: 'standard middleware', evaluatorTransitions: [false, false, true, false],
-        auditHistoryRetained: true, keyboardSubmission: true, errorFocus: true, axeViolations: 0
+        auditHistoryRetained: true, keyboardSubmission: true, errorFocus: true, axeViolations: 0,
+        poweruserOnboarding: true, freshPoweruserTokenPrivateBatchDenied: true
       }, null, 2));
     }
   } finally {

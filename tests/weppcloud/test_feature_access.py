@@ -240,6 +240,83 @@ def test_membership_atomicity_history_and_acknowledgment(database, store):
     assert count(database, acceptances) == 1
 
 
+def test_poweruser_approval_is_atomic_idempotent_and_preserves_roles(database, store):
+    result = store.approve_poweruser(3, 'poweruser-test-v1', 'automatic-test-rule')
+    assert result == {
+        'status': 'granted',
+        'role_changed': True,
+        'acceptance_changed': True,
+        'statement_version': 'poweruser-test-v1',
+    }
+    repeated = store.approve_poweruser(3, 'poweruser-test-v1', 'automatic-test-rule')
+    assert repeated == {
+        'status': 'granted',
+        'role_changed': False,
+        'acceptance_changed': False,
+        'statement_version': 'poweruser-test-v1',
+    }
+    with database.connect() as connection:
+        assert connection.execute(sa.select(roles.c.name).select_from(
+            roles.join(roles_users, roles.c.id == roles_users.c.role_id)
+        ).where(roles_users.c.user_id == 3)).scalars().all() == ['PowerUser']
+        record = connection.execute(sa.select(acceptances).where(
+            acceptances.c.user_id == 3,
+            acceptances.c.statement_kind == 'poweruser',
+        )).mappings().one()
+    assert record.statement_version == 'poweruser-test-v1'
+    assert record.decision_rule == 'automatic-test-rule'
+    assert record.approved_at is not None
+
+
+def test_poweruser_acceptance_failure_rolls_back_role(database, store):
+    with database.begin() as connection:
+        connection.execute(sa.text(
+            "ALTER TABLE onboarding_acceptance ADD CONSTRAINT reject_poweruser_test "
+            "CHECK (statement_kind != 'poweruser')"
+        ))
+    with pytest.raises(IntegrityError):
+        store.approve_poweruser(3, 'poweruser-test-v1', 'automatic-test-rule')
+    with database.connect() as connection:
+        assert connection.execute(sa.select(roles_users.c.user_id).select_from(
+            roles_users.join(roles, roles.c.id == roles_users.c.role_id)
+        ).where(roles_users.c.user_id == 3, roles.c.name == 'PowerUser')).first() is None
+        assert connection.scalar(sa.select(sa.func.count()).select_from(acceptances)) == 0
+
+
+def test_fresh_poweruser_token_cannot_read_private_batch(database, store, monkeypatch):
+    from wepppy.weppcloud.utils import auth_tokens
+    from wepppy.weppcloud.utils.feature_access_identity import principal_from_verified_claims
+    from wepppy.weppcloud.utils.feature_access_runtime import decide, resource_context
+
+    monkeypatch.setenv('WEPP_AUTH_JWT_SECRET', 'isolated-poweruser-onboarding-test')
+    monkeypatch.setenv('WEPP_AUTH_JWT_ALGORITHMS', 'HS256')
+    auth_tokens.get_jwt_config.cache_clear()
+    store.approve_poweruser(3, 'poweruser-test-v1', 'automatic-test-rule')
+    issued = auth_tokens.issue_token(
+        '3',
+        scopes=['runs:read', 'rq:enqueue'],
+        audience=['rq-engine', 'query-engine'],
+        extra_claims={
+            'token_class': 'user',
+            'roles': ['PowerUser'],
+            'groups': [],
+        },
+    )
+    claims = auth_tokens.decode_token(issued['token'], audience='rq-engine')
+    principal = principal_from_verified_claims(claims, engine=database)
+
+    decision = decide(
+        principal,
+        'batch_runner',
+        'inspect',
+        resource_context(protected_read=True),
+        store=store,
+    )
+    assert principal.roles == frozenset({'PowerUser'})
+    assert not decision.allowed
+    assert decision.reason == 'feature_membership_required'
+
+
 def test_event_failure_rolls_back_grant(database, store):
     with database.begin() as connection:
         connection.execute(sa.text("ALTER TABLE feature_access_event ADD CONSTRAINT injected_failure CHECK (reason != 'fail')"))

@@ -2,7 +2,8 @@
 (function () {
     "use strict";
     document.querySelectorAll("[data-feature-access-form]").forEach(function (form) {
-        var membership = form.dataset.featureAccessForm === "membership";
+        var formKind = form.dataset.featureAccessForm;
+        var membership = formKind === "membership";
         var operation = form.elements.namedItem("operation");
         var dates = form.querySelector("[data-access-dates]");
         var status = form.querySelector("[data-access-status]");
@@ -33,6 +34,12 @@
                     payload.review_at = data.get("review_at").trim() || null;
                     payload.expires_at = data.get("expires_at").trim() || null;
                 }
+            } else if (formKind === "poweruser") {
+                payload = {
+                    needs_poweruser: form.elements.namedItem("needs_poweruser").checked,
+                    accepts_training: form.elements.namedItem("accepts_training").checked,
+                    statement_version: form.dataset.statementVersion
+                };
             } else {
                 payload = { accepts_training: form.elements.namedItem("accepts_training").checked,
                     statement_version: form.dataset.statementVersion };

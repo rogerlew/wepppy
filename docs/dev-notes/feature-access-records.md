@@ -192,8 +192,10 @@ outside git with restrictive permissions.
 port 8902 in a fresh PostgreSQL schema, with real models, Redis sessions and CSRF.
 It initializes fixture maintainer memberships and writes disposable browser
 cookies to ignored `docker/secrets/m2-browser.json` (0600). It adds only a
-read-only, current-user evaluator probe for the test. It does not exercise model
-execution or substitute for milestone-three feature endpoint wiring. Sessions
+read-only, current-user evaluator probes for the test. The browser path covers
+PowerUser onboarding, token minting and denial of private Batch access as well
+as feature-group acknowledgment/removal. It does not exercise model execution
+or substitute for production workflow acceptance. Sessions
 are provisioned using the documented local test-cookie path; password/CAP login
 is outside this acceptance test.
 
@@ -208,8 +210,9 @@ opt-in `tests/smoke/feature-access.spec.js` via `wctl run-npm test:playwright`, 
 `FEATURE_ACCESS_BROWSER=1`, `SMOKE_BASE_URL` pointing to that container's HTTPS
 port, the existing `PLAYWRIGHT_BROWSERS_PATH`, and optionally
 `FEATURE_ACCESS_EVIDENCE_DIR`. The test covers keyboard submission/error focus,
-real grant/acknowledgment/removal, shared-evaluator transitions, retained history
-and axe scans. Send SIGTERM to this specific helper process afterward; it removes
+real PowerUser approval, token isolation, grant/acknowledgment/removal,
+shared-evaluator transitions, retained history and axe scans. Send SIGTERM to
+the helper's Python process afterward; it removes
 its cookies, known Redis sessions and test schema. It never migrates the shared
 account schema.
 

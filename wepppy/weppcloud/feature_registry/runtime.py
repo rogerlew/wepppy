@@ -96,6 +96,13 @@ def _apply_config_attribute_overrides(
         )
         if match_value is not rule.match_cfg_bool:
             continue
+        if (
+            rule.id == "multi-ofe-is-preview"
+            and effective.maturity not in {"stable", "preview"}
+        ):
+            # Multiple OFEs describe representation, not scientific readiness.
+            # Preserve experimental, internal, and deprecated declarations.
+            continue
         effective = replace(
             effective,
             maturity=rule.set_maturity,

@@ -3,7 +3,7 @@
 Status: Draft v1-mvp (2026-05-22)  
 Scope: User-facing WEPPcloud metadata for both run features and interface configs.
 
-FA-01 amendment prepared 2026-10-01: [feature access contract](../../../docs/schemas/feature-access-governance-contract.md). The independent-review checkpoint is `d3639f970`. Milestone one implements `access_group`/`access_mode` validation and the six feature mappings. Both fields are required for those six features, including when both are omitted or explicitly null; omission remains valid outside that inventory. Shared account/evaluator support is described in [feature access records](../../../docs/dev-notes/feature-access-records.md). Route/UI wiring and conservative multi-OFE behavior remain later milestones; legacy runtime consumers retain their existing decisions until wired.
+FA-01 amendment prepared 2026-10-01: [feature access contract](../../../docs/schemas/feature-access-governance-contract.md). The independent-review checkpoint is `d3639f970`. Milestones one through three implement the six group mappings and their action/private-resource consumers. Milestone four implements the conservative multi-OFE rule and PowerUser onboarding. Both access fields are required for the six governed features, including when both are omitted or explicitly null; omission remains valid outside that inventory. Shared account/evaluator support is described in [feature access records](../../../docs/dev-notes/feature-access-records.md).
 
 ## Purpose
 

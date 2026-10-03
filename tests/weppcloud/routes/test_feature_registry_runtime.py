@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import configparser
 import copy
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -237,9 +238,14 @@ def test_config_registry_by_id_has_maturity_metadata() -> None:
     assert reveg.maturity == "experimental"
 
 
-def test_multi_ofe_configs_are_forced_to_preview_maturity() -> None:
+def test_multi_ofe_configs_use_conservative_preview_ceiling() -> None:
     configs = config_registry_by_id()
     repo_root = Path(__file__).resolve().parents[3]
+    registry_path = repo_root / "wepppy/weppcloud/feature_registry/config_registry.yaml"
+    declarations = {
+        item["id"]: item["maturity"]
+        for item in yaml.safe_load(registry_path.read_text(encoding="utf-8"))["configs"]
+    }
 
     multi_ofe_ids: set[str] = set()
     for entry in configs.values():
@@ -255,13 +261,46 @@ def test_multi_ofe_configs_are_forced_to_preview_maturity() -> None:
             continue
         if normalized in configparser.ConfigParser.BOOLEAN_STATES and configparser.ConfigParser.BOOLEAN_STATES[normalized]:
             multi_ofe_ids.add(entry.id)
-            assert entry.maturity == "preview"
+            expected = "preview" if declarations[entry.id] in {"stable", "preview"} else declarations[entry.id]
+            assert entry.maturity == expected
             assert parser.getint("watershed", "mofe_max_ofes") == 5
 
     assert "reveg-mofe" in multi_ofe_ids
     assert "reveg-10m-mofe" in multi_ofe_ids
     assert "disturbed9002-wbt-mofe" in multi_ofe_ids
     assert "canada-wbt-mofe" in multi_ofe_ids
+    assert configs["reveg-mofe"].maturity == "experimental"
+    assert configs["reveg-10m-mofe"].maturity == "experimental"
+
+
+@pytest.mark.parametrize(
+    "declared,expected",
+    [
+        ("stable", "preview"),
+        ("preview", "preview"),
+        ("experimental", "experimental"),
+        ("internal", "internal"),
+        ("deprecated", "deprecated"),
+    ],
+)
+def test_multi_ofe_override_preserves_non_release_states(declared: str, expected: str) -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "config_registry.yaml").read_text(encoding="utf-8"))
+    spec = validate_config_registry_payload(payload, registry_dir=registry_dir)
+    base = next(entry for entry in spec.configs if entry.id == "reveg-mofe")
+    entry = replace(
+        base,
+        maturity=declared,
+        internal_reason="compute" if declared == "internal" else None,
+    )
+
+    effective = registry_runtime._apply_config_attribute_overrides(
+        entry,
+        overrides=spec.overrides,
+    )
+
+    assert effective.maturity == expected
+    assert effective.internal_reason == ("compute" if declared == "internal" else None)
 
 
 def test_all_mofe_configuration_files_declare_the_five_ofe_cap() -> None:

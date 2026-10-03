@@ -14,15 +14,27 @@ from flask_wtf.csrf import CSRFError, CSRFProtect, generate_csrf
 from wepppy.weppcloud.configuration import _build_postgres_uri
 from wepppy.weppcloud.feature_registry import load_feature_registry
 from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext, evaluate_feature_access
-from wepppy.weppcloud.utils.feature_access_schema import feature_access_tables, memberships, events, acceptances
+from wepppy.weppcloud.utils.feature_access_schema import (
+    acceptances,
+    events,
+    feature_access_tables,
+    memberships,
+    roles,
+    roles_users,
+)
 from wepppy.weppcloud.utils.feature_access_store import FeatureAccessStore
-from wepppy.weppcloud.utils.feature_access_web import INTERNAL_STATEMENT_VERSION
+from wepppy.weppcloud.utils.feature_access_web import (
+    INTERNAL_STATEMENT_VERSION,
+    POWERUSER_DECISION_RULE,
+    POWERUSER_STATEMENT_VERSION,
+)
 
 pytestmark = [pytest.mark.routes, pytest.mark.integration]
 URI = _build_postgres_uri()
 TEMPLATES = Path(__file__).resolve().parents[3] / 'wepppy/weppcloud/templates'
 ADMIN_URL = '/admin/feature-access/memberships'
 ACK_URL = '/profile/internal-access/acknowledge'
+POWERUSER_URL = '/profile/poweruser'
 FEATURES = load_feature_registry()
 
 
@@ -104,9 +116,12 @@ def access_client(monkeypatch):
     with app.app_context():
         db.create_all()
         role = datastore.create_role(name='Root')
+        poweruser_role = datastore.create_role(name='PowerUser')
+        user_role = datastore.create_role(name='User')
         for n in [1, 2, 3]:
             datastore.create_user(id=n, email='rogerlew@gmail.com' if n == 1 else f'user{n}@example.test',
-                                  fs_uniquifier=uuid4().hex, roles=[role] if n == 1 else [])
+                                  fs_uniquifier=uuid4().hex,
+                                  roles=[role] if n == 1 else [user_role])
         db.session.commit()
         engine = db.engine
         store = FeatureAccessStore(engine)
@@ -220,6 +235,121 @@ def test_acknowledgment_is_own_and_profile_is_private(access_client):
         assert connection.execute(sa.select(acceptances.c.user_id)).scalars().all() == [2]
     login(access_client, 3)
     assert 'You have accepted this version.' not in access_client[1].get('/profile').text
+
+
+def test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent(access_client):
+    login(access_client, 2)
+    profile = access_client[1].get('/profile')
+    assert profile.status_code == 200
+    assert 'Do you need PowerUser access?' in profile.text
+    payload = {
+        'needs_poweruser': True,
+        'accepts_training': True,
+        'statement_version': POWERUSER_STATEMENT_VERSION,
+    }
+    first = post(access_client, POWERUSER_URL, payload)
+    assert first.status_code == 200
+    assert first.json['result'] == {
+        'status': 'granted',
+        'role_changed': True,
+        'statement_version': POWERUSER_STATEMENT_VERSION,
+    }
+    repeated = post(access_client, POWERUSER_URL, payload)
+    assert repeated.status_code == 200
+    assert repeated.json['result']['role_changed'] is False
+    with access_client[2].connect() as connection:
+        role_names = set(connection.execute(sa.select(roles.c.name).select_from(
+            roles.join(roles_users, roles.c.id == roles_users.c.role_id)
+        ).where(roles_users.c.user_id == 2)).scalars())
+        records = connection.execute(sa.select(acceptances).where(
+            acceptances.c.user_id == 2,
+            acceptances.c.statement_kind == 'poweruser',
+        )).mappings().all()
+    assert role_names == {'User', 'PowerUser'}
+    assert len(records) == 1
+    assert records[0].statement_version == POWERUSER_STATEMENT_VERSION
+    assert records[0].decision_rule == POWERUSER_DECISION_RULE
+    assert records[0].approved_at is not None
+    assert 'PowerUser access is active.' in access_client[1].get('/profile').text
+
+
+@pytest.mark.parametrize('patch,code', [
+    ({'needs_poweruser': False}, 400),
+    ({'needs_poweruser': 'true'}, 400),
+    ({'accepts_training': False}, 400),
+    ({'accepts_training': 'true'}, 400),
+    ({'statement_version': None}, 400),
+    ({'statement_version': 'old'}, 409),
+    ({'user_id': 3}, 400),
+    ({'role': 'Root'}, 400),
+    ({'decision_rule': 'manual'}, 400),
+])
+def test_invalid_poweruser_onboarding_cannot_grant(access_client, patch, code):
+    login(access_client, 2)
+    payload = {
+        'needs_poweruser': True,
+        'accepts_training': True,
+        'statement_version': POWERUSER_STATEMENT_VERSION,
+    }
+    response = post(access_client, POWERUSER_URL, payload | patch)
+    assert response.status_code == code
+    with access_client[2].connect() as connection:
+        has_poweruser = connection.execute(sa.select(roles_users.c.user_id).select_from(
+            roles_users.join(roles, roles_users.c.role_id == roles.c.id)
+        ).where(roles_users.c.user_id == 2, roles.c.name == 'PowerUser')).first()
+        poweruser_acceptances = connection.scalar(sa.select(sa.func.count()).select_from(
+            acceptances
+        ).where(acceptances.c.statement_kind == 'poweruser'))
+    assert has_poweruser is None
+    assert poweruser_acceptances == 0
+
+
+def test_poweruser_onboarding_requires_every_server_owned_field(access_client):
+    login(access_client, 2)
+    complete = {
+        'needs_poweruser': True,
+        'accepts_training': True,
+        'statement_version': POWERUSER_STATEMENT_VERSION,
+    }
+    for missing in complete:
+        response = post(
+            access_client,
+            POWERUSER_URL,
+            {key: value for key, value in complete.items() if key != missing},
+        )
+        assert response.status_code == 400
+    with access_client[2].connect() as connection:
+        assert connection.execute(sa.select(roles_users.c.user_id).select_from(
+            roles_users.join(roles, roles_users.c.role_id == roles.c.id)
+        ).where(roles_users.c.user_id == 2, roles.c.name == 'PowerUser')).first() is None
+
+
+def test_legacy_poweruser_is_preserved_without_fabricated_acceptance(access_client):
+    with access_client[2].begin() as connection:
+        role_id = connection.scalar(sa.select(roles.c.id).where(roles.c.name == 'PowerUser'))
+        connection.execute(roles_users.insert().values(user_id=2, role_id=role_id))
+    login(access_client, 2)
+    profile = access_client[1].get('/profile')
+    assert profile.status_code == 200
+    assert 'PowerUser access is active.' in profile.text
+    assert 'predates the current self-service statement' in profile.text
+    with access_client[2].connect() as connection:
+        assert connection.scalar(sa.select(sa.func.count()).select_from(acceptances)) == 0
+
+
+def test_missing_poweruser_role_is_unavailable_without_partial_acceptance(access_client):
+    with access_client[2].begin() as connection:
+        connection.execute(roles.delete().where(roles.c.name == 'PowerUser'))
+    login(access_client, 2)
+    response = post(access_client, POWERUSER_URL, {
+        'needs_poweruser': True,
+        'accepts_training': True,
+        'statement_version': POWERUSER_STATEMENT_VERSION,
+    })
+    assert response.status_code == 503
+    assert response.json['error']['code'] == 'feature_access_unavailable'
+    with access_client[2].connect() as connection:
+        assert connection.scalar(sa.select(sa.func.count()).select_from(acceptances)) == 0
 
 
 def test_database_failure_is_correlated_and_rolls_back(access_client, caplog):

@@ -50,7 +50,8 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] (2026-10-01) Implemented additive account records/migration, shared evaluator and direct PostgreSQL persistence tests; final account/registry run passed 180 cases.
 - [x] Implement single-maintainer group UI and local initial memberships with real readback evidence.
 - [x] Wire protected action/data admission and public inspection, preserving the inventoried Culvert credential contract and recording its expired deployed credential as a rollout dependency.
-- [ ] Implement conservative maturity and PowerUser onboarding after restricted-action and private grouped-resource gates are ready.
+- [x] (2026-10-02 UTC) Implement conservative multi-OFE maturity and atomic, current-user PowerUser onboarding after M3 private boundaries; isolated browser/token acceptance passes.
+- [x] (2026-10-02 UTC) Complete M4 focused/frontend/full regression: 275 focused tests; 112 Jest suites / 919 tests; full repository 10,267 passed with 126 skipped.
 - [ ] Complete real browser/model/artifact acceptance, independent reviews, and an operator-approved rollout plan.
 
 ## Surprises & Discoveries
@@ -149,6 +150,13 @@ viewer TTL is an upper bound and requires relaunch after expiry.
 2026-10-02 UTC, M3 review disposition in progress: preserve legacy `?pup=` classification, classify effective catalog filesystem sources and raw mixed catalog/ZIP representations, and project propagated child errors without breaking missing-job children. Resolve membership from current account records, never from broad JWT roles. Keep the fork marker/refusal choice and dependency evaluation pending explicit operator answers; do not interpret a generic continuation as either decision.
 
 2026-10-02 UTC, milestone-three compatibility plan: preserve ordinary anonymous workflows and existing scopes, token lifetimes, run authorization and job topology. Add signed origin metadata only at trusted issuers; read current account/group state for protected admissions. Wire finite artifact classification before self-service onboarding. Validate denied requests before writes/enqueues and retained public views without optional NoDb initialization. No account/data migration, production activation or credential renewal is included.
+
+2026-10-02 UTC, milestone four: treat the existing `multi-ofe-is-preview` rule
+as a Preview ceiling rather than a universal replacement. Publish the policy's
+PowerUser statement as `poweruser-2026-10-01`; bind approval to the current
+active session account and server-owned PowerUser role/rule. Existing
+PowerUsers retain their role without fabricated acceptance. No sanctions state,
+internal membership, scope expansion, migration or deployment is included.
 
 2026-10-02 UTC, milestone two: publish the policy's unchanged internal onboarding text as `internal-2026-10-01`; use existing Pure forms/tables and explicit read errors. Record inactive-account pre-grants without effective entitlement. Both initial groups and events share a transaction, and initialization refuses conflicting decisions. Apply the accepted migration and audited initial memberships to local development after verified restore/readback; do not restart services or alter production. Group-based acknowledgment remains a personal action, not fabricated by initialization.
 
@@ -338,6 +346,21 @@ Milestone-one handoff, 2026-10-01: implementation and validation are complete; t
 
 Milestone-two handoff, 2026-10-02 UTC: implementation, focused/browser/database gates, independent reviews and broad Python regression are complete. Local initialization is verified after backup restore; production is unchanged. The operator authorized committing the completed milestone. Milestone three is the next implementation step.
 
+Milestone-four implementation, 2026-10-02 UTC: the conservative maturity
+ceiling and PowerUser Profile flow are implemented. Real PostgreSQL transport
+tests prove atomic/idempotent role plus acceptance writes, strict current-user
+payloads and rollback. The isolated full-app browser promoted an ordinary user,
+minted a fresh token and confirmed private Batch remained denied with zero axe
+violations. Production is unchanged; M5 final review and rollout preparation
+remain open.
+
+Milestone-four validation, 2026-10-02 UTC: final focused tests passed 275 cases;
+the isolated browser passed with zero axe violations and token-free retained
+evidence; frontend passed 112 suites / 919 tests. The full repository passed
+10,267 tests with 126 skipped in 46:34. A first broad attempt encountered one
+unrelated retained NoDb lock after 3,608 passes; its exact parameter passed in
+isolation and the full rerun passed without recurrence. M4 is complete locally.
+
 2026-10-02 implementation update: recorded FA-02 ancestor `102c81066`; removing feature-result classification, projection and inherited contrast gates. PATH-CE consumes retained contrasts without executing them, so its own action gate suffices. Private-resource findings and acceptance remain open.
 
 2026-10-02 milestone-three handoff: sharing reconciliation and private-resource
@@ -346,4 +369,4 @@ The exact-candidate service/browser run exercised live revocation through the
 production processes and blocked both retained private canaries while preserving
 public anonymous viewing. See `artifacts/2026-10-02_m3_service_browser_acceptance.md`
 and `artifacts/2026-10-02_m3_final_reviews.md`. This closes local M3; it does not
-authorize production rollout. Milestone four remains next.
+authorize production rollout. Milestone five remains next.

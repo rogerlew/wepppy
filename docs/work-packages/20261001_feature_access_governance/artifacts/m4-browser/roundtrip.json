@@ -1,0 +1,18 @@
+{
+  "fullApp": true,
+  "database": "isolated PostgreSQL schema",
+  "sessions": "real Flask-Security/Redis",
+  "csrf": "standard middleware",
+  "evaluatorTransitions": [
+    false,
+    false,
+    true,
+    false
+  ],
+  "auditHistoryRetained": true,
+  "keyboardSubmission": true,
+  "errorFocus": true,
+  "axeViolations": 0,
+  "poweruserOnboarding": true,
+  "freshPoweruserTokenPrivateBatchDenied": true
+}

@@ -16,6 +16,10 @@ class FeatureAccessConflict(FeatureAccessValidationError):
     """An active membership already has different metadata."""
 
 
+class FeatureAccessUnavailableError(RuntimeError):
+    """Required account authorization configuration is unavailable."""
+
+
 def utc_now():
     return datetime.now(timezone.utc)
 
@@ -174,6 +178,52 @@ class FeatureAccessStore:
             ]).returning(acceptances.c.id))
             return result.scalar_one_or_none() is not None
 
+    def approve_poweruser(self, user_id, statement_version, decision_rule):
+        """Record an explicit acceptance and ensure PowerUser in one transaction."""
+        _identifier(user_id)
+        if not isinstance(statement_version, str) or not statement_version.strip():
+            raise FeatureAccessValidationError("Statement version is required")
+        if not isinstance(decision_rule, str) or not decision_rule.strip():
+            raise FeatureAccessValidationError("Decision rule is required")
+        with self.engine.begin() as connection:
+            user = connection.execute(sa.select(users.c.id).where(
+                users.c.id == user_id, users.c.active.is_(True),
+            ).with_for_update()).first()
+            if user is None:
+                raise FeatureAccessValidationError("Unknown or inactive user")
+            role_id = connection.execute(sa.select(roles.c.id).where(
+                roles.c.name == "PowerUser",
+            )).scalar_one_or_none()
+            if role_id is None:
+                raise FeatureAccessUnavailableError("PowerUser role is not configured")
+            role_exists = connection.execute(sa.select(roles_users.c.user_id).where(
+                roles_users.c.user_id == user_id,
+                roles_users.c.role_id == role_id,
+            )).first() is not None
+            if not role_exists:
+                connection.execute(roles_users.insert().values(
+                    user_id=user_id,
+                    role_id=role_id,
+                ))
+            now = utc_now()
+            acceptance = connection.execute(insert(acceptances).values(
+                user_id=user_id,
+                statement_kind="poweruser",
+                statement_version=statement_version,
+                decision_rule=decision_rule.strip(),
+                approved_at=now,
+            ).on_conflict_do_nothing(index_elements=[
+                acceptances.c.user_id,
+                acceptances.c.statement_kind,
+                acceptances.c.statement_version,
+            ]).returning(acceptances.c.id)).scalar_one_or_none()
+            return {
+                "status": "granted",
+                "role_changed": not role_exists,
+                "acceptance_changed": acceptance is not None,
+                "statement_version": statement_version,
+            }
+
     def initialize_maintainer(self, user_id, *, features, reason):
         """Explicit deployment operation: sole OpenET/Batch member, one transaction.
 
@@ -200,7 +250,7 @@ class FeatureAccessStore:
                 operation="add", reason=reason, features=features,
             ) for key in keys}
 
-    def account_status(self, user_id, statement_version):
+    def account_status(self, user_id, statement_version, *, poweruser_statement_version=None):
         """Own membership status only; no event reasons or other account data."""
         _identifier(user_id)
         with self.engine.connect() as connection:
@@ -216,7 +266,22 @@ class FeatureAccessStore:
             ).select_from(memberships.join(groups)).where(
                 memberships.c.user_id == user_id,
             ).order_by(groups.c.key)).mappings().all()
-        return {"acknowledged": acknowledged, "memberships": rows}
+            poweruser = None
+            if poweruser_statement_version is not None:
+                poweruser = {
+                    "has_role": connection.execute(sa.select(roles_users.c.user_id).select_from(
+                        roles_users.join(roles, roles_users.c.role_id == roles.c.id)
+                    ).where(
+                        roles_users.c.user_id == user_id,
+                        roles.c.name == "PowerUser",
+                    )).first() is not None,
+                    "accepted": connection.execute(sa.select(acceptances.c.id).where(
+                        acceptances.c.user_id == user_id,
+                        acceptances.c.statement_kind == "poweruser",
+                        acceptances.c.statement_version == poweruser_statement_version,
+                    )).first() is not None,
+                }
+        return {"acknowledged": acknowledged, "memberships": rows, "poweruser": poweruser}
 
     def administration(self, *, before_event_id=None):
         """Root adapter's inventory; page retained history without dropping old events."""

@@ -9,12 +9,18 @@ from flask_security.utils import get_request_attr
 from sqlalchemy.exc import SQLAlchemyError
 
 from wepppy.weppcloud.feature_registry import FeatureRegistryValidationError, load_feature_registry
-from .feature_access_store import FeatureAccessConflict, FeatureAccessStore, FeatureAccessValidationError
+from .feature_access_store import (
+    FeatureAccessConflict,
+    FeatureAccessStore,
+    FeatureAccessUnavailableError,
+    FeatureAccessValidationError,
+)
 
 __all__ = [
-    "INTERNAL_STATEMENT_VERSION", "INTERNAL_STATEMENT", "access_store", "access_error",
+    "INTERNAL_STATEMENT_VERSION", "INTERNAL_STATEMENT", "POWERUSER_STATEMENT_VERSION",
+    "POWERUSER_STATEMENT", "access_store", "access_error",
     "access_unavailable", "access_errors", "access_boundary", "json_fields", "utc_timestamp",
-    "profile_access", "membership_change", "acknowledge_internal",
+    "profile_access", "membership_change", "acknowledge_internal", "approve_poweruser",
 ]
 
 from .feature_access_identity import INTERNAL_STATEMENT_VERSION
@@ -28,6 +34,21 @@ INTERNAL_STATEMENT = (
     "rights, publication approval, or access to unrelated features. Authorship and acknowledgment "
     "should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, "
     "technical, or interpretive contributions."
+)
+POWERUSER_STATEMENT_VERSION = "poweruser-2026-10-01"
+POWERUSER_DECISION_RULE = "automatic-two-affirmative-answers-v1"
+POWERUSER_STATEMENT = (
+    "PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used "
+    "model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs "
+    "are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, "
+    "parameterization, model structure, and watershed/domain suitability. You are responsible for "
+    "reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating "
+    "results as appropriate for your use case; and documenting versions, inputs, and limitations when results "
+    "are shared or published. Preview or experimental functionality may change, produce unexpected results, "
+    "or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect "
+    "system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not authorize "
+    "internal actions or access to private resources unless separately granted; public read-only views follow "
+    "the sharing policy."
 )
 
 
@@ -61,7 +82,7 @@ def access_errors(view):
             return access_error("validation_error", str(exc), 400)
         except PermissionError:
             return access_error("forbidden", "Root access is required.", 403)
-        except (SQLAlchemyError, FeatureRegistryValidationError):
+        except (SQLAlchemyError, FeatureRegistryValidationError, FeatureAccessUnavailableError):
             return access_unavailable()
     return wrapped
 
@@ -112,9 +133,18 @@ def utc_timestamp(value):
 
 def profile_access():
     """Keep ordinary Profile usable, with an explicit unavailable subsection on DB failure."""
-    result = {"version": INTERNAL_STATEMENT_VERSION, "statement": INTERNAL_STATEMENT}
+    result = {
+        "version": INTERNAL_STATEMENT_VERSION,
+        "statement": INTERNAL_STATEMENT,
+        "poweruser_version": POWERUSER_STATEMENT_VERSION,
+        "poweruser_statement": POWERUSER_STATEMENT,
+    }
     try:
-        result.update(access_store().account_status(flask_security.current_user.id, INTERNAL_STATEMENT_VERSION))
+        result.update(access_store().account_status(
+            flask_security.current_user.id,
+            INTERNAL_STATEMENT_VERSION,
+            poweruser_statement_version=POWERUSER_STATEMENT_VERSION,
+        ))
     except SQLAlchemyError:
         error_id = uuid4().hex
         flask.current_app.logger.exception("Profile feature access unavailable error_id=%s", error_id)
@@ -150,4 +180,29 @@ def acknowledge_internal():
     changed = access_store().acknowledge_internal(flask_security.current_user.id, INTERNAL_STATEMENT_VERSION)
     return flask.jsonify(message="Internal access statement accepted.", result={
         "statement_kind": "internal", "statement_version": INTERNAL_STATEMENT_VERSION, "changed": changed,
+    })
+
+
+def approve_poweruser():
+    payload = json_fields({"needs_poweruser", "accepts_training", "statement_version"})
+    if payload["needs_poweruser"] is not True or payload["accepts_training"] is not True:
+        raise FeatureAccessValidationError("Answer yes to both PowerUser onboarding questions.")
+    if not isinstance(payload["statement_version"], str):
+        raise FeatureAccessValidationError("Statement version must be a string.")
+    if payload["statement_version"] != POWERUSER_STATEMENT_VERSION:
+        return access_error(
+            "statement_version_conflict",
+            "The statement has changed. Reload Profile and read it again.",
+            409,
+        )
+    result = access_store().approve_poweruser(
+        flask_security.current_user.id,
+        POWERUSER_STATEMENT_VERSION,
+        POWERUSER_DECISION_RULE,
+    )
+    message = "PowerUser access granted." if result["role_changed"] else "PowerUser access is already approved."
+    return flask.jsonify(message=message, result={
+        "status": result["status"],
+        "role_changed": result["role_changed"],
+        "statement_version": result["statement_version"],
     })

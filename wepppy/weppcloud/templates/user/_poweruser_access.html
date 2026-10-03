@@ -1,0 +1,26 @@
+{% import "controls/_pure_macros.html" as ui %}
+<section aria-labelledby="poweruser-access-heading" class="wc-stack">
+  <h2 id="poweruser-access-heading">PowerUser access</h2>
+  {% if internal_access.error_id %}
+    <p class="wc-alert wc-alert--warning" role="status">PowerUser status is temporarily unavailable. Reload to retry. Reference: {{ internal_access.error_id }}</p>
+  {% elif internal_access.poweruser.has_role %}
+    <p role="status">PowerUser access is active.</p>
+    {% if internal_access.poweruser.accepted %}
+      <p>You have accepted the current PowerUser training statement ({{ internal_access.poweruser_version }}).</p>
+    {% else %}
+      <p>Your access predates the current self-service statement; no acceptance of this version is recorded.</p>
+    {% endif %}
+    <p>PowerUser access does not authorize internal feature actions or private Batch/Culvert data.</p>
+  {% else %}
+    <p>{{ internal_access.poweruser_statement }}</p>
+    <p>Version: {{ internal_access.poweruser_version }}</p>
+    <form class="pure-form pure-form-stacked" action="{{ url_for('user.poweruser_onboarding') }}" method="post" data-feature-access-form="poweruser" data-statement-version="{{ internal_access.poweruser_version }}">
+      {{ ui.checkbox_field('needs_poweruser', 'Do you need PowerUser access?', attrs={'required': true}) }}
+      {{ ui.checkbox_field('accepts_training', 'I have read and understand the PowerUser training statement.', attrs={'required': true}) }}
+      <p class="wc-alert" data-access-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
+      <button type="submit" class="pure-button pure-button-primary">Request PowerUser access</button>
+      <a href="{{ url_for('user.profile') }}" data-access-refresh hidden>Refresh access status</a>
+      <noscript><p>JavaScript is required to submit PowerUser onboarding.</p></noscript>
+    </form>
+  {% endif %}
+</section>

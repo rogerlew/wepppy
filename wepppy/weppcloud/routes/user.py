@@ -1019,3 +1019,9 @@ def runs_map_data():
 @feature_access_web.access_boundary()
 def internal_access_acknowledge():
     return feature_access_web.acknowledge_internal()
+
+
+@user_bp.route('/profile/poweruser', methods=['POST'])
+@feature_access_web.access_boundary()
+def poweruser_onboarding():
+    return feature_access_web.approve_poweruser()

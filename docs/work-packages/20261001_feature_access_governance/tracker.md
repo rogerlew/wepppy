@@ -2,7 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: M3 complete locally at candidate `23c2f27fe`; M4 conservative maturity and PowerUser onboarding is next. Production rollout remains later work.
+Current phase: M4 conservative maturity and PowerUser onboarding are complete locally with focused database/browser acceptance and a passing full regression. M5 final review/rollout preparation remains. Production is unchanged.
 
 The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit is `102c81066` and runtime sharing reconciliation is implemented.
 
@@ -33,7 +33,9 @@ test boundary closed the isolation defect; production code was unchanged.
 - [x] Reconcile FA-02 shared-result visibility and close S04/S08 private-resource containment with independent reviews.
 - [x] Complete stable affected microservice/query/WEPPcloud regression: 3,468 passed, 2 skipped.
 - [x] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
-- [ ] Milestones four and five remain future work.
+- [x] Implement milestone four conservative maturity and PowerUser onboarding with real PostgreSQL/browser/token acceptance.
+- [x] Complete milestone-four full regression: 10,267 passed, 126 skipped; frontend 112 suites / 919 tests passed.
+- [ ] Milestone five final review and rollout preparation remain future work.
 
 ## Decision log
 
@@ -58,7 +60,7 @@ Accepted checkpoint revision: `d3639f970669411e9c0f5bf8e80898645c947559`. Final 
 
 ## Next milestone and operational dependency
 
-Next is milestone four: implement the conservative maturity rule and bounded PowerUser self-service after M3 established grouped private-data boundaries. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
+Next is milestone five: complete final implementation reviews and prepare the operator-approved rollout plan. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
 
 ## Milestone zero validation
 
@@ -99,3 +101,20 @@ and [final reviews](artifacts/2026-10-02_m3_final_reviews.md) close the remainin
 M3 runtime gates. The stable affected microservice/query/WEPPcloud regression
 passed **3,468 cases with 2 skipped**. The full repository passed **10,246 tests
 with 126 skipped and 12 subtests passed**.
+
+## Milestone four implementation and validation
+
+[M4 acceptance](artifacts/2026-10-02_m4_acceptance.md) records the conservative
+multi-OFE ceiling and atomic current-user PowerUser workflow. The final focused
+registry/Profile/account run passed **275 tests**. The isolated full-app browser
+passed **1 test**, with real role assignment, profile-token minting, private
+Batch denial and zero axe violations; retained screenshots contain no token.
+Frontend lint passed and **112 suites / 919 tests** passed. The final full
+repository regression passed **10,267 tests, 126 skipped, 4,013 warnings in
+2,794.19 seconds (46:34)**. A transient unrelated NoDb lock failure from the
+first attempt passed in isolation and did not recur in the complete rerun.
+
+No schema migration, shared membership, token scope/lifetime, queue topology,
+service credential or production state changed. PowerUser suspension,
+reinstatement and permanent revocation remain outside scope. M5 final reviews
+and rollout preparation are next.

@@ -27,7 +27,7 @@ def main():
     secret_file = Path('/workdir/wepppy/docker/secrets/m2-browser.json')
     sessions = []
     try:
-        from flask import jsonify, session
+        from flask import jsonify, request, session
         from flask_security import current_user, login_required
         from flask_security.utils import login_user
         from wepppy.weppcloud.app import app, db, user_datastore
@@ -35,6 +35,9 @@ def main():
         from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext, evaluate_feature_access
         from wepppy.weppcloud.utils.feature_access_store import FeatureAccessStore
         from wepppy.weppcloud.utils.feature_access_web import INTERNAL_STATEMENT_VERSION
+        from wepppy.weppcloud.utils import auth_tokens
+        from wepppy.weppcloud.utils.feature_access_identity import principal_from_verified_claims
+        from wepppy.weppcloud.utils.feature_access_runtime import decide, resource_context
         from werkzeug.serving import make_server
         features = load_feature_registry()
         app.config['SERVER_NAME'] = None
@@ -43,8 +46,10 @@ def main():
         with app.app_context():
             db.create_all()
             root = user_datastore.create_role(name='Root')
+            user_role = user_datastore.create_role(name='User')
+            user_datastore.create_role(name='PowerUser')
             accounts = [user_datastore.create_user(
-                email=email, active=True, roles=[root] if index == 0 else [],
+                email=email, active=True, roles=[root] if index == 0 else [user_role],
                 first_name='Browser', last_name='Acceptance',
             ) for index, email in enumerate(['rogerlew@gmail.com', 'collaborator@example.test'])]
             db.session.commit()
@@ -81,6 +86,28 @@ def main():
                                        internal_statement_version=INTERNAL_STATEMENT_VERSION), store,
             )
             return jsonify(allowed=result.allowed, reason=result.reason)
+
+        @app.get('/test-poweruser-workflow')
+        @login_required
+        def poweruser_workflow():
+            allowed = current_user.has_role('PowerUser')
+            return jsonify(allowed=allowed), 200 if allowed else 403
+
+        @app.get('/test-private-batch-token')
+        def private_batch_token():
+            header = str(request.headers.get('Authorization') or '')
+            if not header.startswith('Bearer '):
+                return jsonify(allowed=False, reason='missing_token'), 401
+            claims = auth_tokens.decode_token(header[7:], audience='rq-engine')
+            principal = principal_from_verified_claims(claims, engine=db.engine)
+            result = decide(
+                principal,
+                'batch_runner',
+                'inspect',
+                resource_context(protected_read=True),
+                store=store,
+            )
+            return jsonify(allowed=result.allowed, reason=result.reason), 200 if result.allowed else 403
 
         def stop(_signal, _frame):
             raise SystemExit(0)

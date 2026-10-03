@@ -1,6 +1,6 @@
 # Feature access governance amendment
 
-Status: FA-01 with operator-directed results-sharing amendment FA-02, 2026-10-02 UTC; FA-02 independent correctness/security contract reviews passed; standalone ancestor `102c81066`. FA-02 sharing reconciliation is committed as `5d4f199e6`. Private-resource SQL/D-Tale remediations are implemented and locally validated, with independent review and broader M3 acceptance still open. M1/M2 are complete. No M3 closeout or deployment claim is made.
+Status: FA-01 with operator-directed results-sharing amendment FA-02, 2026-10-02 UTC; FA-02 independent correctness/security contract reviews passed; standalone ancestor `102c81066`. M1/M2/M3 are complete locally. M4 conservative maturity and PowerUser onboarding are implemented and locally validated. No deployment claim is made.
 
 This document owns the FA-01 feature-access behavior and records the project maintainer's directions following the [implementation assessment](../dev-notes/feature-maturity-governance-implementation-assessment.md). The [governance policy](../../wepppy/weppcloud/routes/usersum/weppcloud/feature-maturity-and-release-governance.md), registry specification, ADR-0001 and auth contracts cross-link this bounded amendment. [ADR-0080](../adrs/ADR-0080-feature-access-governance-amendment.md) preserves its rationale. The [implementation plan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md) may not enter runtime milestones until the contract-first ancestor checkpoint exists. This document does not claim current runtime conformance.
 
@@ -232,3 +232,21 @@ groups, refusing conflicting existing decisions. See the
 [operator and developer guide](../dev-notes/feature-access-records.md#group-administration-and-profile).
 Feature action/data endpoint enforcement remains milestone three; neither this
 UI nor acknowledgment enables general PowerUser onboarding or certifies rollout.
+
+## Milestone-four implementation status
+
+The runtime treats `multi-ofe-is-preview` as a Preview ceiling: declared Stable
+or Preview configurations are Preview, while Experimental, Internal and
+Deprecated declarations remain unchanged. Real loader readback keeps
+`reveg-mofe` and `reveg-10m-mofe` Experimental without changing either
+scientific configuration.
+
+Profile presents the policy text as `poweruser-2026-10-01` and submits only the
+two required affirmative answers plus that version to the authenticated,
+CSRF-protected `/profile/poweruser` endpoint. The server owns the account,
+PowerUser role and `automatic-two-affirmative-answers-v1` decision rule. It
+locks the current active account and commits the versioned acceptance,
+automatic approval time and role association together. Repeats are idempotent,
+unrelated roles remain, and an existing PowerUser receives no fabricated
+historical acceptance. Self-service adds no internal group membership or
+private Batch/Culvert access.
