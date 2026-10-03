@@ -1,6 +1,6 @@
 # Feature access governance
 
-Status: Open; M1/M2/M3 complete locally. M4 implementation and bounded acceptance complete; final M5 review/rollout preparation remains open, 2026-10-02 UTC.
+Status: Complete at the authorized forest development boundary; production rollout remains separately authorized, 2026-10-03 UTC.
 
 Timezone: UTC
 
@@ -30,17 +30,16 @@ Target faithful wiring into the real profile, public run, feature actions, API a
 
 Applicable: yes, because access spans model execution, generated reports and artifact delivery. Trace an authorized request through persisted membership and project state, prepared model inputs, queue/job identity, fresh output and the read-only public result. Exercise actual database commits/readback and at least one real internal workflow. Verify a denied direct action creates no mutation/job and a new inspect-only restricted-feature view creates no missing feature controller state. Test shared retained contrast/PATH-CE results through direct, query and archive paths as well as named reports; test actual private-resource denial separately.
 
-Highest current completion claim: M1/M2 account records, group administration,
-acknowledgment and initialization are complete. M3 sharing reconciliation,
-restricted action/data admission and private SQL/D-Tale containment are complete
-locally at candidate `23c2f27fe`. Production-equivalent local service/browser
-acceptance and final independent correctness/security reviews pass with zero
-unresolved findings. M4 adds locally validated PowerUser self-service and the
-conservative multi-OFE maturity ceiling. Production rollout remains open.
+Highest current completion claim: milestones one through five are implemented
+and environment validated in forest. Acceptance covers persisted group state,
+restricted action/data admission, private SQL/D-Tale containment, PowerUser
+self-service, a real Omni generated-output workflow, public read-only sharing,
+archive/restore integrity, and disposable database restore. Production rollout
+remains open.
 
 ## Security and correctness gates
 
-Security impact: high (privilege assignment, group enforcement, JWT/session identity, public data and restricted actions). Dedicated independent security and correctness review artifacts are required before runtime closeout. The [review gate record](artifacts/2026-10-01_review_gates.md) links independent prepared-plan reviews and confirmed fixes. Milestone-zero correctness/security reviews passed with no unresolved High/Medium findings; implementation evidence remains pending.
+Security impact: high (privilege assignment, group enforcement, JWT/session identity, public data and restricted actions). Dedicated independent security and correctness review artifacts are required before runtime closeout. The [review gate record](artifacts/2026-10-01_review_gates.md) links independent prepared-plan reviews and confirmed fixes. Milestone-zero through milestone-five review and implementation evidence is retained under `artifacts/`; the final forest candidate has no unresolved High or Medium findings.
 
 Follow `docs/standards/contract-first-change-standard.md`: resolve the complete surface matrix, obtain two independent read-only contract reviews and disposition findings, then record the standalone ancestor commit before runtime changes. No reviewer may approve their own amendment. This engineering gate remains separate from the user-directed single-maintainer membership workflow.
 
@@ -61,8 +60,8 @@ Milestone zero records per-deployment account identity, non-secret Culvert metad
 
 Parameterization change: no. ADR-0080 records governance, not numerical parameter changes. RQ graph checks apply only if implementation proves queue wiring changes necessary; none is planned.
 
-## Deliverables and next action
+## Deliverables and rollout boundary
 
-Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). M5 final review and rollout preparation are next. Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md); operator inputs and deployed identity investigation are resolved. M3 closeout is recorded in the [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md) and [final reviews](artifacts/2026-10-02_m3_final_reviews.md). M4 evidence is in the [onboarding and maturity acceptance](artifacts/2026-10-02_m4_acceptance.md).
+Use the [active ExecPlan](prompts/active/feature_access_governance_execplan.md), [tracker](tracker.md), [contract decision](artifacts/2026-10-01_contract_decision.md) and [surface inventory](artifacts/2026-10-01_surface_inventory.md). Source investigation and bounded review evidence are in [the M0 record](artifacts/2026-10-01_milestone_zero.md). M3 closeout is recorded in the [service/browser acceptance](artifacts/2026-10-02_m3_service_browser_acceptance.md) and [final reviews](artifacts/2026-10-02_m3_final_reviews.md). M4 evidence is in the [onboarding and maturity acceptance](artifacts/2026-10-02_m4_acceptance.md). M5 evidence is in the [forest acceptance](artifacts/2026-10-03_m5_forest_acceptance.md). Production remains outside the authorized deployment boundary.
 
 Milestone-one implementation and validation details: [account records](../../dev-notes/feature-access-records.md), [correctness review](artifacts/2026-10-01_m1_correctness_review.md), and [security review](artifacts/2026-10-01_m1_security_review.md). No shared schema, membership or credential mutation is included in this implementation step.

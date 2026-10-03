@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import os
 import secrets
 import shutil
@@ -7,11 +8,11 @@ import stat
 import threading
 import time
 from collections import deque
+from contextlib import ExitStack
 from dataclasses import dataclass
 from glob import glob
 import json
 from subprocess import PIPE, Popen
-import tempfile
 from typing import Any, Callable, TextIO
 
 
@@ -688,27 +689,191 @@ def _require_regular_fork_root_nodb(path: str) -> None:
 
 
 def _atomic_write_fork_text(path: str, text: str) -> None:
-    """Publish one rewritten fork file without exposing partial JSON."""
-    source_stat = os.stat(path)
+    """Publish one regular file without following a swapped final entry."""
     parent = os.path.dirname(path)
-    fd, temp_path = tempfile.mkstemp(prefix=f".{os.path.basename(path)}.", dir=parent)
+    root_fd = _open_fork_dir(parent)
     try:
-        os.fchmod(fd, source_stat.st_mode & 0o7777)
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+        dir_fd, name, original_text, identity, mode = _open_fork_nodb_for_rewrite(
+            root_fd,
+            parent,
+            path,
+        )
+        try:
+            rewrite = _ForkNodbRewrite(
+                path=path,
+                dir_fd=dir_fd,
+                name=name,
+                original_text=original_text,
+                rewritten_text=text,
+                identity_normalized=None,
+                source_identity=identity,
+                source_mode=mode,
+            )
+            _atomic_write_bound_fork_nodb(
+                rewrite,
+                text,
+                expected_identity=identity,
+            )
+        finally:
+            os.close(dir_fd)
+    finally:
+        os.close(root_fd)
+
+
+@dataclass
+class _ForkNodbRewrite:
+    path: str
+    dir_fd: int
+    name: str
+    original_text: str
+    rewritten_text: str
+    identity_normalized: str | None
+    source_identity: tuple[int, int]
+    source_mode: int
+    published_identity: tuple[int, int] | None = None
+
+
+def _open_fork_nodb_for_rewrite(
+    root_fd: int,
+    root_path: str,
+    path: str,
+) -> tuple[int, str, str, tuple[int, int], int]:
+    """Open one copied NoDb through no-follow directory descriptors."""
+    relpath = os.path.relpath(path, root_path)
+    parts = tuple(part for part in relpath.split(os.sep) if part)
+    if (
+        not parts
+        or any(not _valid_omni_child_name(part) for part in parts)
+        or relpath.startswith(f"..{os.sep}")
+    ):
+        raise ValueError(f"Invalid forked NoDb path: {path}")
+
+    if len(parts) == 1:
+        parent_fd = os.dup(root_fd)
+        opened: list[int] = []
+    else:
+        parent_fd, opened = _open_fork_chain(root_fd, parts[:-1])
+        for fd in opened[:-1]:
+            os.close(fd)
+    name = parts[-1]
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    succeeded = False
+    try:
+        file_fd = os.open(name, flags, dir_fd=parent_fd)
+        try:
+            entry = os.fstat(file_fd)
+            if not stat.S_ISREG(entry.st_mode):
+                raise ValueError(
+                    f"Forked NoDb path must be a regular non-symlink file: {path}"
+                )
+            with os.fdopen(file_fd, encoding="utf-8") as stream:
+                file_fd = -1
+                original_text = stream.read()
+        finally:
+            if file_fd >= 0:
+                os.close(file_fd)
+        succeeded = True
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            raise ValueError(
+                f"Forked NoDb path must be a regular non-symlink file: {path}"
+            ) from exc
+        raise
+    finally:
+        if not succeeded:
+            os.close(parent_fd)
+    return (
+        parent_fd,
+        name,
+        original_text,
+        (entry.st_dev, entry.st_ino),
+        entry.st_mode,
+    )
+
+
+def _read_bound_fork_nodb(
+    rewrite: _ForkNodbRewrite,
+    *,
+    expected_identity: tuple[int, int],
+) -> str:
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    file_fd = os.open(rewrite.name, flags, dir_fd=rewrite.dir_fd)
+    try:
+        entry = os.fstat(file_fd)
+        if (
+            not stat.S_ISREG(entry.st_mode)
+            or (entry.st_dev, entry.st_ino) != expected_identity
+        ):
+            raise RuntimeError(f"Forked NoDb identity changed after preflight: {rewrite.path}")
+        with os.fdopen(file_fd, encoding="utf-8") as stream:
+            file_fd = -1
+            return stream.read()
+    finally:
+        if file_fd >= 0:
+            os.close(file_fd)
+
+
+def _atomic_write_bound_fork_nodb(
+    rewrite: _ForkNodbRewrite,
+    text: str,
+    *,
+    expected_identity: tuple[int, int],
+) -> tuple[int, int]:
+    """Replace one preflighted NoDb without following swapped path entries."""
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    current_fd = os.open(rewrite.name, flags, dir_fd=rewrite.dir_fd)
+    try:
+        current = os.fstat(current_fd)
+        if (
+            not stat.S_ISREG(current.st_mode)
+            or (current.st_dev, current.st_ino) != expected_identity
+        ):
+            raise RuntimeError(f"Forked NoDb identity changed before publish: {rewrite.path}")
+    finally:
+        os.close(current_fd)
+
+    temp_name = f".{rewrite.name}.tmp-{secrets.token_hex(12)}"
+    temp_fd = os.open(
+        temp_name,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+        rewrite.source_mode & 0o7777,
+        dir_fd=rewrite.dir_fd,
+    )
+    try:
+        with os.fdopen(temp_fd, "w", encoding="utf-8") as stream:
+            temp_fd = -1
             stream.write(text)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temp_path, path)
-    except OSError:
+            temp_entry = os.fstat(stream.fileno())
+        current = os.stat(rewrite.name, dir_fd=rewrite.dir_fd, follow_symlinks=False)
+        if (
+            not stat.S_ISREG(current.st_mode)
+            or (current.st_dev, current.st_ino) != expected_identity
+        ):
+            raise RuntimeError(f"Forked NoDb identity changed before replace: {rewrite.path}")
+        os.replace(
+            temp_name,
+            rewrite.name,
+            src_dir_fd=rewrite.dir_fd,
+            dst_dir_fd=rewrite.dir_fd,
+        )
+        rewrite.published_identity = (temp_entry.st_dev, temp_entry.st_ino)
+        os.fsync(rewrite.dir_fd)
+        return rewrite.published_identity
+    finally:
+        if temp_fd >= 0:
+            os.close(temp_fd)
         try:
-            os.close(fd)
-        except OSError:
-            pass
-        try:
-            os.unlink(temp_path)
+            os.unlink(temp_name, dir_fd=rewrite.dir_fd)
         except FileNotFoundError:
             pass
-        raise
 
 
 def _batch_name_from_runid(runid: str, *, context: str) -> str | None:
@@ -809,29 +974,146 @@ def _remove_copied_batch_run_metadata(new_wd: str, source_runid: str) -> bool:
 
 
 def _rollback_fork_nodb_rewrites(
-    written: list[tuple[str, str, str]],
+    written: list[_ForkNodbRewrite],
 ) -> None:
-    """Restore already-published root rewrites unless another writer intervened."""
+    """Restore already-published fork rewrites unless another writer intervened."""
     conflicts: list[str] = []
-    for path, original_text, rewritten_text in reversed(written):
-        try:
-            with open(path, encoding="utf-8") as stream:
-                current_text = stream.read()
-        except OSError as exc:
-            conflicts.append(f"{path}: cannot verify rollback target ({exc})")
-            continue
-        if current_text != rewritten_text:
-            conflicts.append(f"{path}: changed after fork rewrite")
+    for rewrite in reversed(written):
+        published_identity = rewrite.published_identity
+        if published_identity is None:
+            conflicts.append(f"{rewrite.path}: published identity is missing")
             continue
         try:
-            _atomic_write_fork_text(path, original_text)
-        except OSError as exc:
-            conflicts.append(f"{path}: restore failed ({exc})")
+            current_text = _read_bound_fork_nodb(
+                rewrite,
+                expected_identity=published_identity,
+            )
+        except (OSError, RuntimeError) as exc:
+            conflicts.append(
+                f"{rewrite.path}: cannot verify rollback target ({exc})"
+            )
+            continue
+        if current_text != rewrite.rewritten_text:
+            conflicts.append(f"{rewrite.path}: changed after fork rewrite")
+            continue
+        try:
+            _atomic_write_bound_fork_nodb(
+                rewrite,
+                rewrite.original_text,
+                expected_identity=published_identity,
+            )
+        except (OSError, RuntimeError) as exc:
+            conflicts.append(f"{rewrite.path}: restore failed ({exc})")
 
     if conflicts:
         raise RuntimeError(
-            "Fork root rollback requires manual recovery: " + "; ".join(conflicts)
+            "Fork NoDb rollback requires manual recovery: " + "; ".join(conflicts)
         )
+
+
+def _fork_omni_child_nodbs(new_wd: str) -> list[str]:
+    """Return regular copied Omni child NoDb files without following links."""
+    paths: list[str] = []
+    omni_root = os.path.join(new_wd, "_pups", "omni")
+    for collection in _OMNI_FIXED_LINK_ROLES:
+        collection_root = os.path.join(omni_root, collection)
+        if not os.path.isdir(collection_root) or os.path.islink(collection_root):
+            continue
+        for root, dirs, files in os.walk(collection_root, followlinks=False):
+            dirs[:] = sorted(
+                name
+                for name in dirs
+                if not os.path.islink(os.path.join(root, name))
+            )
+            for name in sorted(files):
+                if not name.endswith(".nodb"):
+                    continue
+                path = os.path.join(root, name)
+                entry = os.lstat(path)
+                if stat.S_ISLNK(entry.st_mode):
+                    continue
+                if not stat.S_ISREG(entry.st_mode):
+                    raise ValueError(
+                        "Forked Omni child NoDb path must be a regular file or "
+                        f"symlink: {path}"
+                    )
+                paths.append(path)
+    return sorted(paths)
+
+
+def _rebase_fork_nodb_text(
+    text: str,
+    *,
+    source_wd: str,
+    destination_wd: str,
+    source_runid: str,
+    destination_runid: str,
+) -> str:
+    """Rebase copied NoDb paths and legacy run-root aliases."""
+    rewritten = text.replace(source_wd, destination_wd).replace(
+        source_runid, destination_runid
+    )
+    for source_prefix, destination_prefix in (
+        ("/geodata/wc1/runs/", "/wc1/runs/"),
+        ("/geodata/weppcloud_runs/", "/wc1/runs/"),
+    ):
+        rewritten = rewritten.replace(source_prefix, destination_prefix)
+    return rewritten
+
+
+def _preflight_fork_nodb_rewrites(
+    new_wd: str,
+    root_nodbs: list[str],
+    child_nodbs: list[str],
+    *,
+    source_wd: str,
+    source_runid: str,
+    destination_runid: str,
+) -> tuple[ExitStack, list[_ForkNodbRewrite], set[str], int]:
+    """Bind every copied NoDb to no-follow descriptors before publication."""
+    plan: list[_ForkNodbRewrite] = []
+    observed_batch_names: set[str] = set()
+    normalized_identity_count = 0
+    with ExitStack() as stack:
+        root_fd = _open_fork_dir(new_wd)
+        stack.callback(os.close, root_fd)
+        for path in (*root_nodbs, *child_nodbs):
+            parent_fd, name, original_text, identity, mode = (
+                _open_fork_nodb_for_rewrite(root_fd, new_wd, path)
+            )
+            stack.callback(os.close, parent_fd)
+            rewritten_text = _rebase_fork_nodb_text(
+                original_text,
+                source_wd=source_wd,
+                destination_wd=new_wd,
+                source_runid=source_runid,
+                destination_runid=destination_runid,
+            )
+            normalized_batch_name = None
+            if path in root_nodbs:
+                rewritten_text, normalized_batch_name = (
+                    _normalize_interactive_fork_nodb_identity(
+                        rewritten_text,
+                        path=path,
+                    )
+                )
+                if normalized_batch_name is not None:
+                    normalized_identity_count += 1
+                    observed_batch_names.add(normalized_batch_name)
+            plan.append(
+                _ForkNodbRewrite(
+                    path=path,
+                    dir_fd=parent_fd,
+                    name=name,
+                    original_text=original_text,
+                    rewritten_text=rewritten_text,
+                    identity_normalized=normalized_batch_name,
+                    source_identity=identity,
+                    source_mode=mode,
+                )
+            )
+        retained_stack = stack.pop_all()
+    return retained_stack, plan, observed_batch_names, normalized_identity_count
 
 
 def _clear_reports_cache(
@@ -1204,79 +1486,81 @@ def prepare_fork_run(
 
     publish_status(status_channel, "rsync successful. Setting wd in .nodbs...\n")
 
-    nodbs = sorted(glob(os.path.join(new_wd, "*.nodb")))
-    rewrite_plan: list[tuple[str, str, str, str | None]] = []
-    observed_batch_names: set[str] = set()
+    root_nodbs = sorted(glob(os.path.join(new_wd, "*.nodb")))
+    child_nodbs = _fork_omni_child_nodbs(new_wd)
+    for fn in (*root_nodbs, *child_nodbs):
+        publish_status(status_channel, f"  {fn}")
+
+    rewrite_stack, rewrite_plan, observed_batch_names, normalized_identity_count = (
+        _preflight_fork_nodb_rewrites(
+            new_wd,
+            root_nodbs,
+            child_nodbs,
+            source_wd=wd,
+            source_runid=runid,
+            destination_runid=new_runid,
+        )
+    )
     source_batch_name = _batch_name_from_runid(runid, context="fork source")
     if source_batch_name is not None:
         observed_batch_names.add(source_batch_name)
-    normalized_identity_count = 0
-    for fn in nodbs:
-        publish_status(status_channel, f"  {fn}")
-        _require_regular_fork_root_nodb(fn)
-        with open(fn, encoding="utf-8") as fp:
-            original_text = fp.read()
-
-        rewritten_text = original_text.replace(wd, new_wd).replace(runid, new_runid)
-
-        # Normalize legacy path patterns to canonical /wc1/runs/ format
-        # This handles cases where source nodb files contain old paths.
-        for src_pattern, dst_pattern in [
-            ("/geodata/wc1/runs/", "/wc1/runs/"),
-            ("/geodata/weppcloud_runs/", "/wc1/runs/"),
-        ]:
-            rewritten_text = rewritten_text.replace(src_pattern, dst_pattern)
-
-        rewritten_text, normalized_batch_name = _normalize_interactive_fork_nodb_identity(
-            rewritten_text,
-            path=fn,
-        )
-        if normalized_batch_name is not None:
-            normalized_identity_count += 1
-            observed_batch_names.add(normalized_batch_name)
-        rewrite_plan.append(
-            (fn, original_text, rewritten_text, normalized_batch_name)
-        )
-
-    metadata_plan = _copied_batch_run_metadata_plan(new_wd, runid)
-    if metadata_plan is not None:
-        observed_batch_names.add(metadata_plan[2])
-    if len(observed_batch_names) > 1:
-        raise ValueError(
-            "Conflicting batch names across fork source state: "
-            f"{sorted(observed_batch_names)!r}"
-        )
-    written: list[tuple[str, str, str]] = []
     try:
-        for fn, original_text, rewritten_text, _identity_normalized in rewrite_plan:
-            with open(fn, encoding="utf-8") as stream:
-                if stream.read() != original_text:
-                    raise RuntimeError(
-                        f"Forked root NoDb changed after preflight: {fn}"
-                    )
-            _atomic_write_fork_text(fn, rewritten_text)
-            written.append((fn, original_text, rewritten_text))
-
+        metadata_plan = _copied_batch_run_metadata_plan(new_wd, runid)
         if metadata_plan is not None:
-            metadata_path, original_metadata, _metadata_batch_name = metadata_plan
-            with open(metadata_path, encoding="utf-8") as stream:
-                if stream.read() != original_metadata:
-                    raise RuntimeError(
-                        "Copied run metadata changed after fork preflight: "
-                        f"{metadata_path}"
-                    )
-            os.unlink(metadata_path)
-    except (OSError, RuntimeError) as exc:
+            observed_batch_names.add(metadata_plan[2])
+        if len(observed_batch_names) > 1:
+            raise ValueError(
+                "Conflicting batch names across fork source state: "
+                f"{sorted(observed_batch_names)!r}"
+            )
+        written: list[_ForkNodbRewrite] = []
         try:
-            _rollback_fork_nodb_rewrites(written)
-        except RuntimeError as rollback_exc:
-            raise RuntimeError(f"{exc}; {rollback_exc}") from rollback_exc
-        raise
+            for rewrite in rewrite_plan:
+                if _read_bound_fork_nodb(
+                    rewrite,
+                    expected_identity=rewrite.source_identity,
+                ) != rewrite.original_text:
+                    raise RuntimeError(
+                        f"Forked NoDb changed after preflight: {rewrite.path}"
+                    )
+                try:
+                    rewrite.published_identity = _atomic_write_bound_fork_nodb(
+                        rewrite,
+                        rewrite.rewritten_text,
+                        expected_identity=rewrite.source_identity,
+                    )
+                except (OSError, RuntimeError):
+                    if rewrite.published_identity is not None:
+                        written.append(rewrite)
+                    raise
+                written.append(rewrite)
+
+            if metadata_plan is not None:
+                metadata_path, original_metadata, _metadata_batch_name = metadata_plan
+                with open(metadata_path, encoding="utf-8") as stream:
+                    if stream.read() != original_metadata:
+                        raise RuntimeError(
+                            "Copied run metadata changed after preflight: "
+                            f"{metadata_path}"
+                        )
+                os.unlink(metadata_path)
+        except (OSError, RuntimeError) as exc:
+            try:
+                _rollback_fork_nodb_rewrites(written)
+            except RuntimeError as rollback_exc:
+                raise RuntimeError(f"{exc}; {rollback_exc}") from rollback_exc
+            raise
+    finally:
+        rewrite_stack.close()
 
     publish_status(status_channel, "Setting wd in .nodbs... done.\n")
     publish_status(
         status_channel,
         f"Normalized grouped-run identity in {normalized_identity_count} root .nodb files.\n",
+    )
+    publish_status(
+        status_channel,
+        f"Rebased paths in {len(child_nodbs)} Omni child .nodb files.\n",
     )
 
     if metadata_plan is not None:

@@ -1727,7 +1727,7 @@ def test_clear_query_engine_catalog_cache_reports_missing_artifacts(tmp_path: Pa
     assert "No query engine catalog cache artifacts to clear.\n" in published
 
 
-def test_prepare_fork_run_normalizes_batch_identity_without_touching_pups(
+def test_prepare_fork_run_normalizes_root_identity_and_rebases_omni_children(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -1755,9 +1755,13 @@ def test_prepare_fork_run_normalizes_batch_identity_without_touching_pups(
         )
 
     _write_controller(source_wd / "ash.nodb", wd=source_wd)
-    child_path = source_wd / "_pups" / "omni" / "scenario" / "ash.nodb"
+    child_path = (
+        source_wd / "_pups" / "omni" / "scenarios" / "example" / "ash.nodb"
+    )
     _write_controller(child_path, wd=child_path.parent)
-    child_before = child_path.read_bytes()
+    child_payload = json.loads(child_path.read_text(encoding="utf-8"))
+    child_payload["py/state"]["_parent_wd"] = str(source_wd)
+    child_path.write_text(json.dumps(child_payload), encoding="utf-8")
     (source_wd / "run_metadata.json").write_text(
         json.dumps(
             {
@@ -1805,10 +1809,42 @@ def test_prepare_fork_run_normalizes_batch_identity_without_touching_pups(
     assert root_state["_group_name"] is None
     assert root_state["wd"] == str(target_wd)
     assert root_state["preserved"] == {"value": 42}
-    assert (target_wd / "_pups" / "omni" / "scenario" / "ash.nodb").read_bytes() == child_before
+    copied_child = json.loads(
+        (
+            target_wd
+            / "_pups"
+            / "omni"
+            / "scenarios"
+            / "example"
+            / "ash.nodb"
+        ).read_text(encoding="utf-8")
+    )["py/state"]
+    assert copied_child["wd"] == str(
+        target_wd / "_pups" / "omni" / "scenarios" / "example"
+    )
+    assert copied_child["_parent_wd"] == str(target_wd)
+    assert copied_child["_run_group"] == "batch"
+    assert copied_child["_group_name"] == "example-batch"
     assert not (target_wd / "run_metadata.json").exists()
     assert "Normalized grouped-run identity in 1 root .nodb files.\n" in published
+    assert "Rebased paths in 1 Omni child .nodb files.\n" in published
     assert "Removed copied batch run_metadata.json.\n" in published
+
+
+def test_fork_omni_child_nodbs_skips_symlinks(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    child = tmp_path / "_pups" / "omni" / "scenarios" / "example"
+    child.mkdir(parents=True)
+    regular = child / "ron.nodb"
+    regular.write_text("{}", encoding="utf-8")
+    external = tmp_path / "external.nodb"
+    external.write_text("{}", encoding="utf-8")
+    (child / "external.nodb").symlink_to(external)
+
+    assert fork_helpers._fork_omni_child_nodbs(str(tmp_path)) == [str(regular)]
 
 
 def test_non_batch_fork_keeps_non_batch_run_metadata(tmp_path: Path) -> None:
@@ -1957,7 +1993,7 @@ def test_atomic_fork_write_preserves_original_on_replace_failure(
     target.write_text('{"original": true}', encoding="utf-8")
     original = target.read_bytes()
 
-    def _fail_replace(_source: str, _target: str) -> None:
+    def _fail_replace(_source: str, _target: str, **_kwargs: object) -> None:
         raise OSError("simulated replace failure")
 
     monkeypatch.setattr(fork_helpers.os, "replace", _fail_replace)
@@ -2055,6 +2091,72 @@ def _prepare_identity_fork(
             "LC_ALL": "C.UTF-8",
         },
     )
+
+
+def test_prepare_fork_run_rejects_child_file_to_symlink_swap(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source"
+    target_wd = tmp_path / "target"
+    source_wd.mkdir()
+    root = source_wd / "ron.nodb"
+    root.write_text(
+        json.dumps({"py/state": {"wd": str(source_wd)}}),
+        encoding="utf-8",
+    )
+    child = source_wd / "_pups" / "omni" / "scenarios" / "example" / "ron.nodb"
+    child.parent.mkdir(parents=True)
+    child.write_text(
+        json.dumps({"py/state": {"wd": str(child.parent), "_parent_wd": str(source_wd)}}),
+        encoding="utf-8",
+    )
+    external = tmp_path / "external.nodb"
+    external.write_text('{"external_marker": true}', encoding="utf-8")
+
+    def _fake_rsync(**kwargs) -> None:
+        shutil.copytree(
+            Path(kwargs["run_left"].rstrip("/")),
+            Path(kwargs["cmd"][-1].rstrip("/")),
+        )
+
+    real_read = fork_helpers._read_bound_fork_nodb
+    swapped = False
+
+    def _swap_before_bound_read(rewrite, *, expected_identity):
+        nonlocal swapped
+        if not swapped and rewrite.path.endswith(
+            os.path.join("scenarios", "example", "ron.nodb")
+        ):
+            swapped = True
+            os.unlink(rewrite.path)
+            os.symlink(external, rewrite.path)
+        return real_read(rewrite, expected_identity=expected_identity)
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+    monkeypatch.setattr(
+        fork_helpers,
+        "_read_bound_fork_nodb",
+        _swap_before_bound_read,
+    )
+
+    with pytest.raises(OSError):
+        _prepare_identity_fork(
+            fork_helpers=fork_helpers,
+            source_wd=source_wd,
+            target_wd=target_wd,
+        )
+
+    assert external.read_text(encoding="utf-8") == '{"external_marker": true}'
+    assert json.loads((target_wd / "ron.nodb").read_text(encoding="utf-8")) == json.loads(
+        root.read_text(encoding="utf-8")
+    )
+    assert (
+        target_wd / "_pups" / "omni" / "scenarios" / "example" / "ron.nodb"
+    ).is_symlink()
 
 
 def test_prepare_fork_run_preflights_all_roots_before_first_write(
@@ -2160,7 +2262,7 @@ def test_prepare_fork_run_rejects_cross_file_batch_name_disagreement(
     } == source_bytes
 
 
-def test_prepare_fork_run_rolls_back_earlier_root_after_write_failure(
+def test_prepare_fork_run_rolls_back_root_and_child_after_write_failure(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -2186,27 +2288,44 @@ def test_prepare_fork_run_rolls_back_earlier_root_after_write_failure(
         )
         source_bytes[filename] = path.read_bytes()
 
+    for child_name in ("a-child.nodb", "z-child.nodb"):
+        path = source_wd / "_pups" / "omni" / "scenarios" / "example" / child_name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"py/state": {"wd": str(path.parent), "_parent_wd": str(source_wd)}}),
+            encoding="utf-8",
+        )
+        source_bytes[str(path.relative_to(source_wd))] = path.read_bytes()
+
     def _fake_rsync(**kwargs) -> None:
         shutil.copytree(
             Path(kwargs["run_left"].rstrip("/")),
             Path(kwargs["cmd"][-1].rstrip("/")),
         )
 
-    real_atomic_write = fork_helpers._atomic_write_fork_text
+    real_atomic_write = fork_helpers._atomic_write_bound_fork_nodb
     calls = 0
 
-    def _fail_second_write(path: str, text: str) -> None:
+    def _fail_fourth_write(rewrite, text: str, *, expected_identity):
         nonlocal calls
         calls += 1
-        if calls == 2:
-            raise OSError("simulated second write failure")
-        real_atomic_write(path, text)
+        if calls == 4:
+            raise OSError("simulated fourth write failure")
+        return real_atomic_write(
+            rewrite,
+            text,
+            expected_identity=expected_identity,
+        )
 
     monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
     monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
-    monkeypatch.setattr(fork_helpers, "_atomic_write_fork_text", _fail_second_write)
+    monkeypatch.setattr(
+        fork_helpers,
+        "_atomic_write_bound_fork_nodb",
+        _fail_fourth_write,
+    )
 
-    with pytest.raises(OSError, match="simulated second write failure"):
+    with pytest.raises(OSError, match="simulated fourth write failure"):
         _prepare_identity_fork(
             fork_helpers=fork_helpers,
             source_wd=source_wd,
@@ -2217,6 +2336,52 @@ def test_prepare_fork_run_rolls_back_earlier_root_after_write_failure(
         filename: (target_wd / filename).read_bytes()
         for filename in source_bytes
     } == source_bytes
+
+
+def test_prepare_fork_run_rolls_back_after_post_replace_fsync_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source"
+    target_wd = tmp_path / "target"
+    source_wd.mkdir()
+    source_nodb = source_wd / "ron.nodb"
+    source_nodb.write_text(
+        json.dumps({"py/state": {"wd": str(source_wd)}}),
+        encoding="utf-8",
+    )
+    source_bytes = source_nodb.read_bytes()
+
+    def _fake_rsync(**kwargs) -> None:
+        shutil.copytree(
+            Path(kwargs["run_left"].rstrip("/")),
+            Path(kwargs["cmd"][-1].rstrip("/")),
+        )
+
+    real_fsync = fork_helpers.os.fsync
+    failed = False
+
+    def _fail_first_directory_fsync(fd: int) -> None:
+        nonlocal failed
+        if not failed and stat.S_ISDIR(os.fstat(fd).st_mode):
+            failed = True
+            raise OSError("simulated post-replace fsync failure")
+        real_fsync(fd)
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+    monkeypatch.setattr(fork_helpers.os, "fsync", _fail_first_directory_fsync)
+
+    with pytest.raises(OSError, match="simulated post-replace fsync failure"):
+        _prepare_identity_fork(
+            fork_helpers=fork_helpers,
+            source_wd=source_wd,
+            target_wd=target_wd,
+        )
+
+    assert (target_wd / "ron.nodb").read_bytes() == source_bytes
 
 
 def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(

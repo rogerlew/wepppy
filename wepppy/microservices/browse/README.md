@@ -110,7 +110,7 @@ The dedicated service preserves the canonical browse authorization and path-boun
 - Canonical policy: [`docs/schemas/weppcloud-browse-auth-contract.md`](../../../docs/schemas/weppcloud-browse-auth-contract.md).
 - Run routes (`/runs/...`) support public-run anonymous browse for non-sensitive paths.
 - Group routes (`/batch/...`, `/culverts/...`) enforce token-based auth and claim scoping.
-- Culvert downloads (`/weppcloud/culverts/{uuid}/download/*`) allow privileged user tokens (`Admin`, `PowerUser`, `Dev`, `Root`) and culvert-scoped service tokens (`service_groups` includes `culverts`).
+- Culvert downloads (`/weppcloud/culverts/{uuid}/download/*`) require current human `culvert_runner` group access or the registered Culvert integration's batch-bound browse credential. Broad human roles do not substitute for group membership; normal token signature, expiry, revocation, scope, and resource binding still apply.
 - Batch browse re-auth uses a bridge redirect via `/weppcloud/runs/batch;;<batch_name>;;_base/?next=...` to mint browse session cookies for browser flows.
 - Root-only paths (`_logs`, exception logs) require `Root` role on all route families.
 

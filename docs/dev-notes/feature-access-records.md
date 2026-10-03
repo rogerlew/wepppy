@@ -1,8 +1,8 @@
 # Feature access account records
 
-Milestones one and two implement the FA-01 account substrate, shared evaluator,
-Root group administration and Profile acknowledgment. Protected feature endpoint
-wiring remains milestone three; PowerUser self-service remains milestone four.
+Milestones one through four implement the FA-01 account substrate, shared
+evaluator, Root group administration, Profile acknowledgment, protected feature
+endpoint wiring, private-resource containment, and PowerUser self-service.
 The normative owner is [FA-01](../schemas/feature-access-governance-contract.md).
 Production rollout and service-token compatibility still need their later gates.
 
@@ -97,7 +97,7 @@ constraints, concurrent duplicates, injected audit failure rollback, retention,
 expiry, current membership, acknowledgment and evaluator allow/deny boundaries.
 No production or shared account schema is migrated by this suite.
 
-## Milestone-three integration in progress
+## Milestone-three integration
 
 The M3 checkpoint adapters resolve active human accounts and current operational
 roles from the shared account database. Protected human admissions then read
@@ -118,13 +118,12 @@ and honors readonly state, but does not require the backend/prerequisites needed
 to enable or execute that feature. Newly exposed optional-state GETs are
 observational. Existing anonymous ordinary workflows remain in scope for regression.
 
-M3 is not ready for rollout. FA-02 removes the need for a contrast-child lineage
-marker and contrast-only SQL/D-Tale read enforcement. Synthetic reproductions confirm private-resource violations in SQL expressions
-and cached D-Tale delivery;
-public result sharing is intended. No DuckDB upgrade is authorized by FA-02. See the active
+FA-02 removed the need for a contrast-child lineage marker and contrast-only
+SQL/D-Tale read enforcement. The retained service/browser canary confirms that
+private SQL-expression and cached D-Tale resources are denied while public
+result sharing remains available. No DuckDB upgrade was required. See the active
 [ExecPlan](../work-packages/20261001_feature_access_governance/prompts/active/feature_access_governance_execplan.md)
-for decisions, review disposition and remaining acceptance. Do not enable
-PowerUser self-service based on the initial route wiring alone.
+for rollout evidence and remaining environment gates.
 
 ## Group administration and Profile
 

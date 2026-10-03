@@ -5,14 +5,14 @@
 The batch runner feature now lives as a proof-of-concept that stitches together existing NoDb primitives with a thin blueprint and controller shell. The goal is to stand up the end-to-end shape of the workflow before hardening it, with an emphasis on reusing the `_base` project controls and keeping the mental model familiar to power users. The UI now uses the Pure templates (`manage_pure.htm`, `batch_runner_pure.htm`); the legacy Bootstrap pages were removed.
 
 ## Intent
-- Give admins a sandbox for preparing a canonical `_base` project and cloning it across many watersheds.
+- Give authorized Batch Runner collaborators a sandbox for preparing a canonical `_base` project and cloning it across many watersheds.
 - Lean on existing controllers, templates, and NoDb singletons so the batch runner feels like "run_0 at scale" rather than a new subsystem.
 - Favor rapid validation of the core flow (create → manage → geojson ingest → template preview) over polish or security gates during this phase.
 
 ## Key Components
 
 ### `batch_runner_bp`
-- `/batch/create/` is gated by `roles_required("Admin")` and the `BATCH_RUNNER_ENABLED` flag. It collects a batch name and base config, then calls `_create_batch_project()`.
+- `/batch/create/` is gated by current `batch_runner` group membership, the versioned internal acknowledgment, and the `BATCH_RUNNER_ENABLED` flag. Technical roles do not bypass the group check. It collects a batch name and base config, then calls `_create_batch_project()`.
 - `_create_batch_project()` resolves the batch root (`get_batch_root_dir()`), creates `<batch_name>/`, and instantiates `BatchRunner`, which immediately bootstraps `_base/` using the selected config.
 - `/batch/_/<batch_name>/` resolves `BatchRunner.getInstanceFromBatchName()`, reaches into the `_base/` directory, and hydrates the same NoDb singletons that the run-0 blueprint exposes (Ron, Landuse, Soils, Watershed, Omni, etc.). The manage view renders `manage_pure.htm` which includes `batch_runner_pure.htm`.
 - `/validate-template` replays the stored `WatershedCollection`, runs template evaluation, and persists the results on the `BatchRunner` instance before returning a JSON payload to the UI.
@@ -46,7 +46,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - Per-watershed runs will inherit the same prefix once cloning logic lands, ensuring logs, redis channels, and HTTP routes can reuse established patterns.
 
 ## Request Lifecycle (Current PoC)
-1. **Create** – Admin loads `/batch/create/`, submits a batch name and base config. The server validates inputs, scaffolds the workspace, and redirects to the manage view.
+1. **Create** – An authorized Batch Runner collaborator loads `/batch/create/`, submits a batch name and base config. The server validates inputs, scaffolds the workspace, and redirects to the manage view.
 2. **Manage** – `/batch/_/<batch_name>/` renders the standard controls for the `_base` project plus batch-specific bootstrap context (run directives, resources, and RQ job hints).
 3. **GeoJSON Intake** – Uploads flow through rq-engine (`/rq-engine/api/batch/_/<batch_name>/upload-geojson`), which stores the file under `resources/` and persists metadata via `BatchRunner.register_geojson()`.
 4. **Template Preview** – Template validation rebuilds the `WatershedCollection`, generates prospective run IDs, records the summary (`_runid_template_state`), and returns duplicates/errors for UI display.
@@ -56,7 +56,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - Progress reporting is intentionally coarse (run ID plus emoji state per task); per-run failure details surface in the status stream and `runs/<runid>/run_metadata.json`.
 - Runstate depends on `RedisPrep` status for each run directory and marks missing runs as retry-eligible. RAP/OpenET/WATAR timestamps are required only when the corresponding optional NoDb files exist.
 - Existing leaves do not resync Ash settings from `_base`; operators must enable **Remove existing files** after changing Ash inputs. Climate resync does invalidate `run_watar` because WATAR consumes WEPP results derived from climate.
-- Minimal input hardening: feature flag + admin check exist, but file validation stops at GeoJSON semantics.
+- Input admission uses the feature flag and current group/acknowledgment check; file validation stops at GeoJSON semantics.
 
 ## Next Steps (guided)
 - [ ] Decide whether to clear stored `rq_job_ids` after completion.

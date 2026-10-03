@@ -3,7 +3,7 @@
 Status: Ratified\
 Effective date: 2026-10-01\
 Ratification record: [ADR-0079](../../../../../docs/adrs/ADR-0079-feature-maturity-release-governance-ratification.md)\
-Amendments: [FA-01 and FA-02 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01 and 2026-10-02 UTC; FA-02 sharing reconciliation implemented, M3 private-resource remediation pending\
+Amendments: [FA-01 and FA-02 / ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md), 2026-10-01 and 2026-10-02 UTC; FA-02 sharing reconciliation and M3 private-resource remediation implemented\
 Applies to: WEPPcloud user-facing features, run-page modules, launchable configs, and major analysis workflows  
 Related implementation: `wepppy/weppcloud/feature_registry/`
 
@@ -684,7 +684,7 @@ Suggested text:
 
 > Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed functionality. Access is granted only for the approved feature, purpose, and time period. Outputs may be incomplete, unstable, or unsuitable for publication or management decisions without additional review. You are responsible for documenting versions, inputs, assumptions, limitations, and maturity status. If results appear anomalous or scientifically important, notify the WEPPcloud project contact before public release when practical. Internal access does not imply authorship rights, publication approval, or access to unrelated features. Authorship and acknowledgment should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, technical, or interpretive contributions.
 
-The current statement version is `internal-2026-10-01`. Profile presents this statement and records the signed-in user's acknowledgment. It shows the user's own group memberships, pending acknowledgment and expiration; membership and acknowledgment do not replace project permissions or feature requirements. Root maintainers reach group decisions and retained history from Profile or User Management. PATH-CE operations that activate or execute Omni Contrasts still need the separate contrast action permission. Reading retained contrast inputs does not. These account controls are delivered in milestone two; feature endpoint enforcement and broader rollout remain subsequent implementation gates.
+The current statement version is `internal-2026-10-01`. Profile presents this statement and records the signed-in user's acknowledgment. It shows the user's own group memberships, pending acknowledgment and expiration; membership and acknowledgment do not replace project permissions or feature requirements. Root maintainers reach group decisions and retained history from Profile or User Management. PATH-CE operations that activate or execute Omni Contrasts still need the separate contrast action permission. Reading retained contrast inputs does not. These controls and feature endpoint enforcement are implemented and environment validated in forest; production rollout remains separate.
 
 ### Authorship and Acknowledgment
 
@@ -714,7 +714,7 @@ Expired access should be removed, renewed with rationale, or converted to a diff
 
 ### Relationship to Registry
 
-The registry defines maturity, restrictions and the groups authorizing each feature; account records define group membership and its audit history. Public read-only visibility and action permission are separate. The current runtime still uses coarse role gates; the group-based implementation is pending under FA-01.
+The registry defines maturity, restrictions and the groups authorizing each feature; account records define group membership and its audit history. Public read-only visibility and action permission are separate. The runtime enforces current group membership for group-only features and preserves the declared legacy-role paths for role-or-group features.
 
 ## Access Records
 
@@ -976,7 +976,7 @@ The project maintainer ratified this policy effective 2026-10-01 after reporting
 
 ### Amendments
 
-FA-01 records the operator-directed amendment dated 2026-10-01 in [ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md). It replaces dual-role access review, separates public inspection from actions, and narrows the current implementation scope. Implementation and the technical contract checkpoint remain pending; ratification does not establish runtime conformance.
+FA-01 records the operator-directed amendment dated 2026-10-01 in [ADR-0080](../../../../../docs/adrs/ADR-0080-feature-access-governance-amendment.md). It replaces dual-role access review, separates public inspection from actions, and narrows the current implementation scope. FA-02 further permits normal sharing of retained results while keeping feature actions restricted. The technical contract checkpoint and milestones one through five are complete in the forest development environment; production conformance requires a separately authorized rollout.
 
 This policy should be updated when the project’s release process changes.
 

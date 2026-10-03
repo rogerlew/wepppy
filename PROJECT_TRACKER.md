@@ -7,7 +7,7 @@
 
 ## Purpose
 
-In progress: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — FA-01 policy reconciliation and implementation plan prepared; group access, public read-only views and PowerUser onboarding. Independent prepared-plan reviews passed; milestone-zero matrix now records 516 route declarations, preserved anonymous behavior and verified account/client evidence. Milestone two complete: account UI/acknowledgment, independent reviews, browser acceptance, audited local initialization and full regression (10,198 passed, 126 skipped). Milestone three remains incomplete. FA-02 sharing reconciliation is implemented and reviewed against ancestor `102c81066`; synthetic private SQL/D-Tale disclosure findings remain open. Configured Culvert credential is expired and remains a later live-acceptance dependency.
+Environment validated: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — milestones zero through five are complete in forest, including auditable groups, public read-only sharing, PowerUser onboarding, private-resource containment, real generated-output acceptance, archive/restore integrity, disposable database restore and staged consumer-before-web deployment. Production remains unchanged. Positive Culvert compatibility still depends on separately renewing its expired credential; OpenET and Batch remain limited to the designated account and require that account's personal acknowledgment before use.
 
 Active (implementation): [Run catalog PostgreSQL projection](docs/work-packages/20260930_run_catalog_projection/package.md)
 — preserve portable NoDb projects while moving catalog reads off NFS; additive
@@ -265,7 +265,7 @@ Feedback mechanisms:
 
 ### Feature access governance
 
-**Status**: Milestone two complete: account UI/acknowledgment, focused/browser acceptance, independent reviews, audited local initialization and full regression (10,198 passed, 126 skipped). Restricted feature endpoint wiring is milestone three; production rollout remains later work.
+**Status**: Milestone five complete and environment validated in forest. Production rollout remains separately authorized work.
 **Link**: [Work package](docs/work-packages/20261001_feature_access_governance/package.md)
 **Scope**: Auditable single-maintainer groups, maintainer-only OpenET/Batch action groups, internal Batch/Culvert with service-token compatibility, public read-only inspection, conservative maturity and PowerUser onboarding. PowerUser sanctions deferred.
 

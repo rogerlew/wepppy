@@ -3,7 +3,7 @@
 
 This ExecPlan is maintained under `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current. This plan is the active plan for the feature-access package only; it does not execute or close other active initiatives.
 
-The operator requested the amendment and plan, then authorized committing review fixes and executing milestone zero. Review fixes were committed as `36f35b6f0`; milestone-zero source investigation is recorded in `artifacts/2026-10-01_milestone_zero.md`. The accepted ancestor is recorded below, and the operator authorized milestone one (committed as `62ce1af3f`) milestone two (committed as `c19fefcc6`) and now milestone three. Milestones four and five remain future work.
+The operator requested the amendment and plan and authorized milestones zero through five. Milestone five is complete in the forest development environment: the final candidate passed generated-output, public-sharing, archive/restore, database-restore and staged-service acceptance. Production remains unchanged and requires separate authorization.
 
 ## Purpose and outcome
 
@@ -52,7 +52,8 @@ The target is faithful integration into existing workflows, not a disconnected a
 - [x] Wire protected action/data admission and public inspection, preserving the inventoried Culvert credential contract and recording its expired deployed credential as a rollout dependency.
 - [x] (2026-10-02 UTC) Implement conservative multi-OFE maturity and atomic, current-user PowerUser onboarding after M3 private boundaries; isolated browser/token acceptance passes.
 - [x] (2026-10-02 UTC) Complete M4 focused/frontend/full regression: 275 focused tests; 112 Jest suites / 919 tests; full repository 10,267 passed with 126 skipped.
-- [ ] Complete real browser/model/artifact acceptance, independent reviews, and an operator-approved rollout plan.
+- [x] (2026-10-03 UTC) Complete real model/artifact/browser acceptance, disposable database restore, independent reviews and a staged forest rollout; production remains unchanged.
+- [x] (2026-10-03 UTC) Complete the repository-wide Python gate: one stale test-only NoDb lock failed the first attempt, the exact case passed alone, dead-owner keys were removed, and the clean rerun exited zero.
 
 ## Surprises & Discoveries
 
@@ -179,7 +180,29 @@ internal membership, scope expansion, migration or deployment is included.
 
 2026-10-01, operator clarification: only limited-access features become read-only for unentitled users. Ordinary anonymous behavior stays unchanged; earlier writer/creator proposals are withdrawn. The designated account is rogerlew@gmail.com, resolved per deployment; Culvert client is on wepp2.
 
+2026-10-03 UTC, milestone five: forest is the authorized deployment boundary.
+Deploy affected consumers and confirm their readiness before starting WEPPcloud.
+The emergency rollback boundary is to stop WEPPcloud, preserving the additive
+schema, audit history and the private-consumer containment floor. A fork copies
+regular nested Omni NoDb files only through retained no-follow descriptors and
+binds each preflight/read/publication/rollback to device/inode identity.
+
 ## Outcomes & Retrospective
+
+M5 is complete at the authorized forest boundary. The final candidate ran a
+real Omni contrast workflow, rendered generated reports, preserved anonymous
+CAP-gated public reads while denying anonymous execution, and retained byte
+identical contrast artifacts across archive/restore. A current backup restored
+into a disposable database with migration, group, membership and audit
+readback. Review-driven fork hardening binds nested NoDb reads, publications
+and rollback to retained no-follow directory descriptors and file identity.
+The final staged deployment waited for RQ Engine and the fork/archive worker
+before starting WEPPcloud, then passed a fresh fork and no-queue-mutation denial
+canary. Production and the expired Culvert credential were unchanged.
+The complete Python regression also passed on a clean rerun after removal of two
+stale test-only lock keys owned by the same dead test process. The PTY summary
+was truncated, so the milestone records the successful exit without inventing a
+numerical total.
 
 M3 is complete locally at runtime candidate `23c2f27fe`; its service dependency
 and numeric-subject checkpoint is `03fc3eae6`. FA-02 shared-result
@@ -205,7 +228,8 @@ The full-repository regression result is recorded in the acceptance artifact
 and tracker. No production activation, credential renewal or dependency upgrade
 occurred. The deployed Culvert credential remains expired, so renewal and a
 positive live compatibility run are rollout gates rather than M3 source gaps.
-Milestone four is next.
+Milestones four and five subsequently completed in forest; production remains
+separately authorized.
 
 Milestone two: Root management/history, own Profile status and versioned acknowledgment, strict session/CSRF mutations, and the atomic sole-maintainer initializer are implemented. PostgreSQL acceptance passed 75 cases; final route regressions passed 73. Full-app browser acceptance passed with real sessions/database, evaluator denied/denied/allowed/denied transitions, retained events, keyboard/error focus and zero axe violations. Both independent reviews have zero unresolved findings. Local migration/initialization readback shows two memberships, two audit events, zero acceptances and unchanged legacy counts. Frontend lint and 112 Jest suites/919 tests pass; store/web stubtest and stub checks pass. Broad Python regression passed: 10,198 passed, 126 skipped in 2,535.69 seconds; final qualified-import/export cleanup also passed the 73-case route rerun and web stubtest. See [M2 acceptance](../../artifacts/2026-10-01_m2_acceptance.md); M3 enforcement and production rollout remain future work.
 
@@ -351,8 +375,7 @@ ceiling and PowerUser Profile flow are implemented. Real PostgreSQL transport
 tests prove atomic/idempotent role plus acceptance writes, strict current-user
 payloads and rollback. The isolated full-app browser promoted an ordinary user,
 minted a fresh token and confirmed private Batch remained denied with zero axe
-violations. Production is unchanged; M5 final review and rollout preparation
-remain open.
+violations. Production is unchanged. M5 later completed in forest.
 
 Milestone-four validation, 2026-10-02 UTC: final focused tests passed 275 cases;
 the isolated browser passed with zero axe violations and token-free retained
@@ -370,3 +393,12 @@ production processes and blocked both retained private canaries while preserving
 public anonymous viewing. See `artifacts/2026-10-02_m3_service_browser_acceptance.md`
 and `artifacts/2026-10-02_m3_final_reviews.md`. This closes local M3; it does not
 authorize production rollout. Milestone five remains next.
+
+Milestone-five handoff, 2026-10-03 UTC: the final candidate is deployed and
+environment validated in forest. The real workflow produced and rendered fresh
+Omni contrast outputs, preserved public read-only access and denied anonymous
+execution without queue mutation. Archive/restore hashes matched, the current
+backup restored into a disposable database with migration/group/audit readback,
+and the final descriptor-bound fork candidate passed a consumer-before-web
+stage and post-stage fork/denial canary. Production and the expired Culvert
+credential were not changed.

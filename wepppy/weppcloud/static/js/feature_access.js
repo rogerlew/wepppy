@@ -55,10 +55,18 @@
                         "X-CSRFToken": csrf ? csrf.content : "" },
                     body: JSON.stringify(payload)
                 });
-                var body = await response.json();
+                var body = null;
+                try {
+                    body = await response.json();
+                } catch {
+                    body = null;
+                }
                 if (!response.ok) {
-                    throw new Error((body.error && body.error.message ? body.error.message : "Unable to save. Reload and retry.") +
-                        (body.error_id ? " Reference: " + body.error_id : ""));
+                    throw new Error((body && body.error && body.error.message ? body.error.message : "Unable to save. Reload and retry.") +
+                        (body && body.error_id ? " Reference: " + body.error_id : ""));
+                }
+                if (!body || typeof body.message !== "string" || !body.message.trim()) {
+                    throw new Error("Unable to save. Reload and retry.");
                 }
                 status.className = "wc-alert wc-alert--success";
                 status.textContent = body.message;

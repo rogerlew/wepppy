@@ -2,7 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-01 20:47 UTC.
 
-Current phase: M4 conservative maturity and PowerUser onboarding are complete locally with focused database/browser acceptance and a passing full regression. M5 final review/rollout preparation remains. Production is unchanged.
+Current phase: M5 is complete in the forest development environment. The final candidate has staged consumer-before-web deployment, real generated-output and public-sharing acceptance, archive/restore integrity, disposable database restore, and independent review. Production is unchanged.
 
 The operator clarified that internal/embargo status restricts feature operation, while permitted users may share results more broadly. [FA-02 checkpoint](artifacts/2026-10-02_fa02_sharing_checkpoint.md) amends canonical authority and defines removal of the checkpoint's feature-derived read gates. Fork lineage/refusal and a DuckDB upgrade solely to enforce a result embargo are no longer decisions needed for M3. SQL/D-Tale findings must be reassessed for actual private-resource/containment violations. Existing private grouped-resource and action controls remain. FA-02 independent correctness/security contract reviews passed with all findings closed; ancestor commit is `102c81066` and runtime sharing reconciliation is implemented.
 
@@ -35,7 +35,7 @@ test boundary closed the isolation defect; production code was unchanged.
 - [x] Execute milestone three: protected action/data admission, trusted credential provenance and public inspection.
 - [x] Implement milestone four conservative maturity and PowerUser onboarding with real PostgreSQL/browser/token acceptance.
 - [x] Complete milestone-four full regression: 10,267 passed, 126 skipped; frontend 112 suites / 919 tests passed.
-- [ ] Milestone five final review and rollout preparation remain future work.
+- [x] Complete milestone five forest rollout, real workflow/artifact acceptance, backup restore/readback and final independent review.
 
 ## Decision log
 
@@ -58,9 +58,9 @@ D-Tale's double-quoting convention. No credential or trust class was added.
 
 Accepted checkpoint revision: `d3639f970669411e9c0f5bf8e80898645c947559`. Final review record: [independent M0 disposition](artifacts/2026-10-01_m0_reviews.md). Milestone zero made no runtime, account, membership, token or deployment mutation. Read-only operations used local account DB, wepp1 account DB/rq-engine validator, and wepp2 Culvert worker/configuration; secret values were not retained.
 
-## Next milestone and operational dependency
+## Rollout boundary and operational dependency
 
-Next is milestone five: complete final implementation reviews and prepare the operator-approved rollout plan. Local OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
+Forest is deployed and environment validated. OpenET/Batch groups contain only the verified designated account, with retained events and no fabricated acknowledgment. Production migration/initialization and service activation remain separately authorized rollout work. The expired Culvert credential still needs separately authorized renewal before positive live compatibility acceptance; it was not modified.
 
 ## Milestone zero validation
 
@@ -116,5 +116,18 @@ first attempt passed in isolation and did not recur in the complete rerun.
 
 No schema migration, shared membership, token scope/lifetime, queue topology,
 service credential or production state changed. PowerUser suspension,
-reinstatement and permanent revocation remain outside scope. M5 final reviews
-and rollout preparation are next.
+reinstatement and permanent revocation remain outside scope.
+
+## Milestone five implementation and validation
+
+[Forest acceptance](artifacts/2026-10-03_m5_forest_acceptance.md) records the
+staged consumer-before-web deployment, a real Omni execution, generated reports,
+public read-only browser access, denied anonymous mutation, archive/restore byte
+integrity, and disposable PostgreSQL restore/readback. The fork path rebases
+nested Omni controllers through root-anchored, no-follow descriptors with
+identity-bound publication and rollback. The focused fork suite passed 107
+tests; frontend lint and **113 suites / 922 tests** passed. The final review and
+broad Python result are retained in the M5 artifacts. The first broad attempt
+encountered one unrelated stale test-only NoDb lock; the exact case passed alone,
+the two dead-owner lock keys were removed, and the clean complete rerun exited
+zero. Its PTY summary was truncated, so no numerical pass total is inferred.
