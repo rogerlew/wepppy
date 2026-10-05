@@ -1,8 +1,10 @@
-# WEPP Binary Lifecycle
+# WEPP and CLIGEN Binary Lifecycle
 
 ## Scope
 
-Lifecycle policy for vendored watershed/hillslope binaries in `wepp_runner/bin`.
+Lifecycle policy for vendored watershed/hillslope binaries in `wepp_runner/bin`
+and the Linux CLIGEN 5.3.2 executable in
+`wepppy/climates/cligen/bin/cligen532`.
 
 ## Canonical Build Environment
 
@@ -58,6 +60,48 @@ setting `WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK=1`.
 Legacy static binaries (`ldd` reports `not a dynamic executable`) are permitted for
 backward compatibility, but all dynamically linked binaries are enforced against the
 full provenance policy.
+
+## CLIGEN 5.3.2 Release Pair
+
+CLIGEN source releases are built in `/home/workdir/jimf-cligen532` with:
+
+    RELEASE_LABEL=<reviewed-label> \
+      COMPILER=/usr/bin/gfortran \
+      tools/build_cligen_release.sh
+
+That command builds in a disposable directory and creates
+`release/linux/gfortran/cligen532` plus the adjacent `cligen532.json`. The
+`cligen-binary-provenance-v1` sidecar records the binary SHA-256 and size,
+CLIGEN version, source commit and tree, canonical source-file manifest,
+compiler identity, flags, build time, and ELF metadata. The source build
+rejects dirty `.f`, `.inc`, and makefile inputs.
+
+From `/workdir/wepppy`, validate and install the pair with:
+
+    python3 tools/vendor_cligen_release.py \
+      --source-root /home/workdir/jimf-cligen532 \
+      --expect-source-commit <full-commit> \
+      --expect-release-label <reviewed-label>
+
+The vendor tool requires the source checkout to match its remote-default
+branch, validates every source-manifest entry, checks the system compiler and
+ELF interpreter, stages both files, and installs modes `0755` and `0644`.
+Separate files cannot be replaced in one atomic filesystem operation. The tool
+therefore validates before replacement, restores both prior files after a
+caught failure, and relies on strict runtime verification to reject any mixed
+pair left by an external interruption.
+
+Every packaged `cligen532` launch requires the adjacent sidecar and verifies
+the binary digest, size, optimized role, clean-source claim, source identities,
+and canonical manifest digest before process creation. The run-local CLIGEN log
+records the CLIGEN version, release label, binary and sidecar digests, source
+commit/tree/manifest digest, and `binary_identity_status=verified`. Historical
+`cligen43`, `cligen52`, and `cligen53` executables remain runnable without
+sidecars but are explicitly logged as `legacy_unverified`.
+
+The JSON hashes provide integrity and connect the binary to claimed source
+bytes. They do not authenticate the publisher. Publisher authentication needs
+a separately governed and verified signature over the sidecar.
 
 ## Withdrawn Releases
 

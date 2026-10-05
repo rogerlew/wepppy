@@ -1,0 +1,121 @@
+{
+  "binary": {
+    "cligen_version": "5.32300",
+    "elf_build_id": "4bf72391f216cff091d151700e711c97e7f0d1f4",
+    "elf_interpreter": "/lib64/ld-linux-x86-64.so.2",
+    "format": "ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=4bf72391f216cff091d151700e711c97e7f0d1f4, for GNU/Linux 3.2.0, not stripped",
+    "name": "cligen532",
+    "role": "optimized",
+    "sha256": "119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc",
+    "size_bytes": 152632
+  },
+  "build": {
+    "built_utc": "2026-10-05T16:48:23Z",
+    "command": "tools/build_cligen_release.sh",
+    "compile_flags": [
+      "-c",
+      "-O3",
+      "-march=x86-64",
+      "-funroll-loops",
+      "-fno-math-errno",
+      "-fno-trapping-math",
+      "-fno-signaling-nans",
+      "-ffinite-math-only",
+      "-fno-protect-parens",
+      "-fno-stack-protector"
+    ],
+    "compiler_path": "/usr/bin/x86_64-linux-gnu-gfortran-13",
+    "compiler_sha256": "142861efc95f49e33705852027dae8c2e5382fd1155fcec6116ef973f25d8f84",
+    "compiler_version": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "link_flags": [],
+    "machine": "x86_64",
+    "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39"
+  },
+  "release_label": "5.323-k10.1",
+  "schema": "cligen-binary-provenance-v1",
+  "source": {
+    "commit": "f7f337b026dc2eee18e098a3c5de72cd0c601a2e",
+    "dirty": false,
+    "dirty_entries": [],
+    "files": [
+      {
+        "path": "cligen532/cbk1.inc",
+        "sha256": "1b7b259e719e0edf9fbe59174a779bf8a48db2a6774357fd7bbc45aafc328256",
+        "size_bytes": 1354
+      },
+      {
+        "path": "cligen532/cbk3.inc",
+        "sha256": "4e2d9f27ea2b5e9995470bffde3fb6d7388bbdc5fdc1e9d11d79950923c00a05",
+        "size_bytes": 907
+      },
+      {
+        "path": "cligen532/cbk4.inc",
+        "sha256": "2739a3e82f1867f739313806ff242a1a26f92e9b031888ff1253c9d11fde435b",
+        "size_bytes": 1226
+      },
+      {
+        "path": "cligen532/cbk5.inc",
+        "sha256": "def46eed9fac58d123c3ddf8dc345c99ac1b6de743eedd4da334aae0470f1424",
+        "size_bytes": 1997
+      },
+      {
+        "path": "cligen532/cbk7.inc",
+        "sha256": "e45752d5ee3f61ece6e6f9580ca2474a52bbc31fc87e68ec34de7206eaf2b21d",
+        "size_bytes": 4909
+      },
+      {
+        "path": "cligen532/cbk9.inc",
+        "sha256": "48489630d2dc4a75fed14bfdd4c22b7bcb90163792fd46ef3593a541ecafe2d3",
+        "size_bytes": 1615
+      },
+      {
+        "path": "cligen532/ccl1.inc",
+        "sha256": "b7bc3c8119340341a0a1782da4b70dd8be2590fa843d5e361b2aa551df90f2d6",
+        "size_bytes": 592
+      },
+      {
+        "path": "cligen532/cinterp.inc",
+        "sha256": "eb219556accb54c00320c210c56ee44cdd02f3a1442f28933cd51c5fc0d97701",
+        "size_bytes": 2462
+      },
+      {
+        "path": "cligen532/cligen.f",
+        "sha256": "35232eb8cc1849a398a417702bb2570e3bd6f73ec274d1c5f0436990aee708ae",
+        "size_bytes": 255034
+      },
+      {
+        "path": "cligen532/command6.inc",
+        "sha256": "883187cfd4bcba58edf30bef2dc6f19fedc767c2fcc7022dc2cf56cb7f79c3a0",
+        "size_bytes": 1170
+      },
+      {
+        "path": "cligen532/crandom.inc",
+        "sha256": "37d25b3ab552c9f165190a61abd48da0657152b77fe8c9c6111c0c0cfbde4f4c",
+        "size_bytes": 2334
+      },
+      {
+        "path": "cligen532/crandom3.inc",
+        "sha256": "8f2ce2ee56f9e3f9f0c287b8d04967581c49d394be7de14f5156a00de4657770",
+        "size_bytes": 2741
+      },
+      {
+        "path": "cligen532/csumr.inc",
+        "sha256": "69afdb830cd03f97d6253c72e53a20b0e01cc5d59f94b65bfa5239bb7c80f273",
+        "size_bytes": 382
+      },
+      {
+        "path": "cligen532/ctap2.inc",
+        "sha256": "bf3354bce8e4c19abc36036051acb880a8b4458b606d2fef15fa7f6d1c0418fa",
+        "size_bytes": 841
+      },
+      {
+        "path": "cligen532/makefile",
+        "sha256": "13cbf86c919dfe8eec4954b4f9b64c3d25a8c36750ef77122cf5622c5d378c8d",
+        "size_bytes": 1448
+      }
+    ],
+    "git_tree": "4c36befb5343d859c24dd7e1380a56f7d19e471d",
+    "manifest_sha256": "aac223c11d84370a3ed0a9e473e48a30cfd97900dd6c30444d4199e2a2952916",
+    "repository": "https://github.com/rogerlew/jimf-cligen532"
+  }
+}

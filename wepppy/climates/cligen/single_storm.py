@@ -15,6 +15,7 @@ from wepppy.climates.cligen import (
     ClimateFile,
     _bin_dir,
 )
+from wepppy.climates.cligen.binary_provenance import write_cligen_binary_identity
 
 __all__ = ["SingleStormResult", "build_single_storm_cli"]
 
@@ -207,8 +208,11 @@ def _run_cligen(
         cmd = [str(Path(_bin_dir) / "cligen532"), f"-i{par_fn}"]
 
     log_path = tmpdir / "cligen.log"
-    with clinp_path.open("rb") as clinp, log_path.open("wb") as log_fp:
+    with clinp_path.open("rb") as clinp, log_path.open("w", encoding="utf-8") as log_fp:
         try:
+            write_cligen_binary_identity(
+                log_fp, runner="single_storm", binary_path=cmd[0]
+            )
             subprocess.run(
                 cmd,
                 stdin=clinp,

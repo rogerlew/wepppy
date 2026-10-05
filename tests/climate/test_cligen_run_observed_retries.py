@@ -93,6 +93,13 @@ def _make_cligen(tmp_path, monkeypatch):
     bin_dir.mkdir()
     (bin_dir / "cligen532").write_text("#!/bin/sh\n", encoding="ascii")
     monkeypatch.setattr(cligen_module, "_bin_dir", str(bin_dir))
+    monkeypatch.setattr(
+        cligen_module,
+        "write_cligen_binary_identity",
+        lambda log_fp, **_kwargs: log_fp.write(
+            "[run_observed] binary_identity binary_identity_status=verified\n"
+        ),
+    )
 
     (tmp_path / "or354811.par").write_text("par\n", encoding="ascii")
     (tmp_path / "observed.prn").write_text("prn\n", encoding="ascii")
@@ -255,6 +262,8 @@ def test_run_observed_retries_timeout_and_logs_flake(monkeypatch, tmp_path):
     assert wait_timeouts == [20, 2, 20]
 
     log_text = (tmp_path / "cligen_observed.log").read_text(encoding="ascii")
+    assert log_text.startswith("[run_observed] binary_identity")
+    assert "binary_identity_status=verified" in log_text
     assert "timeout=20s timeout_retries=3" in log_text
     assert "retrying after timeout" in log_text
     assert "flake_detected timeout_attempts=1 success_attempt=2/4" in log_text

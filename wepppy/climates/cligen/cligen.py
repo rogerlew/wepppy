@@ -45,6 +45,7 @@ from wepppy.all_your_base import isfloat, clamp
 
 from wepppy.all_your_base.geo.webclients import elevationquery
 from wepppy.all_your_base.geo import haversine
+from wepppy.climates.cligen.binary_provenance import write_cligen_binary_identity
 
 from wepppy.climates.metquery_client import (
     get_prism_monthly_tmin,
@@ -1766,6 +1767,9 @@ class StationMeta:
         
         # run cligen
         _log = open("cligen.log", "w")
+        write_cligen_binary_identity(
+            _log, runner="build_ghcn_daily_climate", binary_path=cmd[0]
+        )
         p = Popen(cmd, stdin=PIPE, stdout=_log, stderr=_log)
         p.wait()
         _log.close()
@@ -2254,6 +2258,9 @@ class Cligen:
 
         _clinp = open(_clinp_path)
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
+        write_cligen_binary_identity(
+            _log, runner="run_multiple_year", binary_path=cmd[0]
+        )
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait(timeout=5)
         _clinp.close()
@@ -2406,6 +2413,9 @@ class Cligen:
         backoff_cap_seconds = 5.0
 
         try:
+            write_cligen_binary_identity(
+                _log, runner="run_observed", binary_path=cmd[0]
+            )
             _log.write(
                 f"cligen run_observed timeout={timeout}s timeout_retries={timeout_retries}\n"
             )
@@ -2542,6 +2552,10 @@ def _run_cligen_posix(
     env = os.environ.copy()
     env.setdefault("LC_ALL", "C")
     env.setdefault("LANG", "C")
+
+    write_cligen_binary_identity(
+        log_fp, runner="_run_cligen_posix", binary_path=cmd[0]
+    )
 
     with open(clinp_path, "r", encoding="utf-8", errors="replace") as fin:
         # start_new_session=True (3.11+) is the safer replacement for preexec_fn=os.setsid

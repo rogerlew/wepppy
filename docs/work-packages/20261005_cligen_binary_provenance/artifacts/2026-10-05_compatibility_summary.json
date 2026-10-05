@@ -1,0 +1,34 @@
+{
+  "baseline_wepppy_commit": "a2337a6eb",
+  "candidate_binary_sha256": "119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc",
+  "candidate_source_commit": "f7f337b026dc2eee18e098a3c5de72cd0c601a2e",
+  "cases": {
+    "default": {
+      "baseline_sha256": "3c7bbd35e26e3ca48e8dba681150efa34bd5d1d723b97c968c41160e66c9f419",
+      "byte_equal": true,
+      "candidate_sha256": "3c7bbd35e26e3ca48e8dba681150efa34bd5d1d723b97c968c41160e66c9f419",
+      "changed_records_by_field": {}
+    },
+    "r0": {
+      "baseline_sha256": "15975a61ddfd695a1afd8f612f8846255853478129e7fbf4591555aecba66434",
+      "byte_equal": true,
+      "candidate_sha256": "15975a61ddfd695a1afd8f612f8846255853478129e7fbf4591555aecba66434",
+      "changed_records_by_field": {}
+    },
+    "r12345": {
+      "baseline_sha256": "133d09856df3da71275384cedab38704510aa8a21224da1cdef596635c7481d6",
+      "byte_equal": false,
+      "candidate_sha256": "40f27faa500abc6f42b6b4ebc9fb07a22355540d8a0d8ea83e259f0b1060270a",
+      "changed_records_by_field": {
+        "time_to_peak": 341
+      }
+    }
+  },
+  "fixture": {
+    "mode": "type-6 observed",
+    "records": 366,
+    "station": "or354811.par",
+    "year": 1980
+  },
+  "release_label": "5.323-k10.1"
+}
