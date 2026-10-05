@@ -2,9 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-05 16:29 UTC.
 
-Current phase: assessment and work-package scaffold complete; implementation
-has not started. No binary or sidecar has been vendored and no runner behavior
-has changed.
+Current phase: complete and locally validated. Deployment is outside scope.
 
 ## Progress
 
@@ -17,16 +15,17 @@ has changed.
   new time-to-peak values from the corrected binary.
 - [x] (2026-10-05 16:29 UTC) Scaffolded package, tracker, correctness-review
   gate, and active ExecPlan.
-- [ ] Build and validate the clean CLIGEN release pair from source commit
-  `f7f337b026dc2eee18e098a3c5de72cd0c601a2e` or record an explicitly reviewed
-  successor commit.
-- [ ] Implement the WEPPpy validate-and-install automation.
-- [ ] Vendor the exact optimized binary and sidecar pair.
-- [ ] Implement shared runtime verification and identity logging across every
-  5.3.2 launch path while preserving legacy binary behavior.
-- [ ] Add and pass focused unit, tamper, launcher-log, real-binary, and semantic
-  compatibility tests.
-- [ ] Complete correctness review and documentation updates.
+- [x] (2026-10-05 16:48 UTC) Built and validated the clean CLIGEN release pair
+  from source commit `f7f337b026dc2eee18e098a3c5de72cd0c601a2e`.
+- [x] (2026-10-05 17:02 UTC) Implemented the WEPPpy validate-and-install
+  automation and vendored the exact optimized binary and sidecar pair.
+- [x] (2026-10-05 17:20 UTC) Implemented shared runtime verification and
+  identity logging across every 5.3.2 launch path while preserving legacy
+  binary behavior.
+- [x] (2026-10-05 17:40 UTC) Added and passed focused unit, tamper,
+  launcher-log, real-binary, and semantic compatibility tests.
+- [x] (2026-10-05 18:09 UTC) Completed correctness review and documentation
+  updates.
 
 ## Decisions
 
@@ -50,36 +49,45 @@ has changed.
 
 | Risk | Impact | Mitigation | Status |
 | --- | --- | --- | --- |
-| Binary and sidecar copied from different builds | High | One validate-and-install command; digest and size checks before staged fail-closed replacement | Open |
-| A launch path omits identity logging | High | Inventory five launcher families and add path-level tests | Open |
-| Positive `-r12345` output drift is mistaken for regression | High | Parse fields and compare against upstream retained contract evidence | Open |
-| Sidecar integrity is described as publisher authenticity | Medium | Explicit unsigned-boundary wording in logs/docs/review | Open |
-| Runtime hash cache becomes stale after in-place replacement | Medium | Key any cache by inode/size/mtime or hash per invocation; test replacement | Open |
-| Legacy CLIGEN versions are accidentally blocked | Medium | Strict policy only for basename `cligen532`; legacy status tests | Open |
+| Binary and sidecar copied from different builds | High | One validate-and-install command; digest and size checks before staged fail-closed replacement | Closed |
+| A launch path omits identity logging | High | Inventory five launcher families and add path-level tests | Closed |
+| Positive `-r12345` output drift is mistaken for regression | High | Parse fields and compare against upstream retained contract evidence | Closed |
+| Sidecar integrity is described as publisher authenticity | Medium | Explicit unsigned-boundary wording in logs/docs/review | Closed |
+| Runtime hash cache becomes stale after in-place replacement | Medium | Hash every invocation and test replacement | Closed |
+| Legacy CLIGEN versions are accidentally blocked | Medium | Strict policy only for basename `cligen532`; legacy status tests | Closed |
 
 ## Verification Checklist
 
-- [ ] Upstream clean-source release build and sidecar validation.
-- [ ] Candidate source commit and remote-default branch recorded.
-- [ ] Candidate and vendored SHA-256/size equality.
-- [ ] ELF interpreter and runtime dependency checks.
-- [ ] Valid-sidecar runtime unit test.
-- [ ] Missing/malformed/dirty/wrong-role/manifest-tampered/binary-tampered
+- [x] Upstream clean-source release build and sidecar validation.
+- [x] Candidate source commit and remote-default branch recorded.
+- [x] Candidate and vendored SHA-256/size equality.
+- [x] ELF interpreter and runtime dependency checks.
+- [x] Valid-sidecar runtime unit test.
+- [x] Missing/malformed/dirty/wrong-role/manifest-tampered/binary-tampered
       rejection tests.
-- [ ] Synthetic, observed, PRISM-modified, GHCN, and single-storm identity-log
+- [x] Synthetic, observed, PRISM-modified, GHCN, and single-storm identity-log
       coverage.
-- [ ] Default and `-r0` generated-output compatibility evidence.
-- [ ] Positive `-r12345` time-to-peak-only compatibility evidence for the
+- [x] Default and `-r0` generated-output compatibility evidence.
+- [x] Positive `-r12345` time-to-peak-only compatibility evidence for the
       corrected binary relative to the prior binary.
-- [ ] `wctl run-pytest` focused tests and real smoke.
-- [ ] `wctl doc-lint --path docs/work-packages/20261005_cligen_binary_provenance`.
-- [ ] `git diff --check` and documentation link checks.
-- [ ] Correctness review passed with no unresolved High/Medium findings.
+- [x] `wctl run-pytest` focused tests and real smoke.
+- [x] `wctl doc-lint --path docs/work-packages/20261005_cligen_binary_provenance`.
+- [x] `git diff --check` and documentation link checks.
+- [x] Correctness review passed with no unresolved High/Medium findings.
 
 ## Blocked
 
-None. The next action is to create a clean release pair; the existing upstream
-release binary is not the candidate and has no sidecar.
+None. The package is complete.
+
+## Notes - 2026-10-05 18:09 UTC
+
+Release `5.323-k10.1` uses binary SHA-256
+`119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc`
+and sidecar SHA-256
+`c2ce9caa4d4a82f368eea66bb3ea5b6ae2b833920b893d9d6deef974e2f6cf06`.
+The source release was published in commit `6d872f25`; WEPPpy implementation
+commit `a1747a6e1` vendors it. The full suite passed with `10288 passed, 126
+skipped`; focused final validation passed `32` tests and isolation checks.
 
 ## Notes - 2026-10-05 16:29 UTC
 

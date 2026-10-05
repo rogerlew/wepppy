@@ -7,9 +7,9 @@
 - **Date**: 2026-10-05
 - **Scope reviewed**: CLIGEN release pair, vendor tool, runtime verifier, five
   launcher families, focused tests, and generated-climate evidence
-- **Commit/branch context**: WEPPpy `master`, scaffold ancestor `a2337a6eb`;
-  final implementation commit recorded at closeout
-- **Canonical contracts**: `package.md` and the active ExecPlan
+- **Commit/branch context**: WEPPpy `master`, scaffold `a2337a6eb`,
+  implementation `a1747a6e1`
+- **Canonical contracts**: `package.md` and the completed ExecPlan
 - **Related QA/security artifacts**: Security artifact not required (`low` triage)
 
 ## User Outcome

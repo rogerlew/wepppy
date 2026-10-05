@@ -1,6 +1,6 @@
 # CLIGEN Binary Provenance and Runner Identity
 
-**Status**: Open - planning complete, implementation pending (2026-10-05)
+**Status**: Closed - implemented and locally validated (2026-10-05)
 **Timezone**: UTC
 
 ## Overview
@@ -11,15 +11,12 @@ record that identity before starting the process. The result must let an
 operator connect a generated climate to the exact executable, CLIGEN source
 commit, source-file manifest, compiler, and release label.
 
-The upstream source checkout is `/home/workdir/jimf-cligen532`. Its current
-committed head is `f7f337b026dc2eee18e098a3c5de72cd0c601a2e`, which contains the
-positive-`-rN` `k10` correction and the automated sidecar build. A clean
-post-commit release pair has not yet been produced: the existing upstream
-`release/linux/gfortran/cligen532` has SHA-256
-`3eda6d5d327977bcf677d6b399b6083487391c9c8637cc4ce31bb8bb435ce211`
-and has no adjacent JSON sidecar. WEPPpy's current vendored `cligen532` has
-SHA-256 `ca5d850a2e7ed8285969186b49fc495953a6aad67d10cd44eb84b447897c2c75`.
-Neither existing binary is the candidate release.
+The upstream source checkout is `/home/workdir/jimf-cligen532`. Source commit
+`f7f337b026dc2eee18e098a3c5de72cd0c601a2e` contains the positive-`-rN` `k10`
+correction and automated sidecar build. Release `5.323-k10.1` was built from
+that commit, published in source-repository commit `6d872f25`, and vendored in
+WEPPpy implementation commit `a1747a6e1`. Its executable SHA-256 is
+`119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc`.
 
 ## Objectives
 
@@ -105,25 +102,38 @@ before deployment is `locally validated`.
 
 ## Success Criteria
 
-- [ ] The source build is made from committed source inputs at the recorded
+- [x] The source build is made from committed source inputs at the recorded
       default-branch commit and produces adjacent optimized/backtrace sidecars.
-- [ ] The upstream validator passes for the optimized candidate with clean
+- [x] The upstream validator passes for the optimized candidate with clean
       source, `/usr/bin/gfortran`, role `optimized`, and ELF interpreter
       `/lib64/ld-linux-x86-64.so.2`.
-- [ ] WEPPpy contains matching `cligen532` and `cligen532.json` artifacts; the
+- [x] WEPPpy contains matching `cligen532` and `cligen532.json` artifacts; the
       vendored hash and size exactly match the sidecar and upstream release.
-- [ ] Every 5.3.2 launch path verifies the sidecar before process start and
+- [x] Every 5.3.2 launch path verifies the sidecar before process start and
       emits the same parseable identity fields to its durable run log.
-- [ ] Missing, malformed, dirty-source, wrong-role, source-manifest-tampered,
+- [x] Missing, malformed, dirty-source, wrong-role, source-manifest-tampered,
       and binary-tampered 5.3.2 states fail before CLIGEN execution with an
       actionable error.
-- [ ] Existing 4.3, 5.2, and 5.3 selections continue to run without sidecars
+- [x] Existing 4.3, 5.2, and 5.3 selections continue to run without sidecars
       and log a clearly marked legacy identity rather than a false verified
       claim.
-- [ ] Real default/`-r0` compatibility and positive-`-r12345` intentional
+- [x] Real default/`-r0` compatibility and positive-`-r12345` intentional
       change are demonstrated at the consumed `.cli` field boundary.
-- [ ] Focused tests, documentation lint, link checks, and patch hygiene pass.
-- [ ] The correctness review has no unresolved High or Medium findings.
+- [x] Focused tests, documentation lint, link checks, and patch hygiene pass.
+- [x] The correctness review has no unresolved High or Medium findings.
+
+## Closure
+
+The verified binary and sidecar are now an enforced runtime pair. All five
+launcher families write the same stable identity record before starting
+CLIGEN. The vendoring tool validates the recorded source commit and committed
+manifest bytes, stages both artifacts, and restores the prior pair after a
+caught replacement failure. The exact binary produced a parsed one-year
+climate, compatibility evidence bounds the positive-seed change to time to
+peak, and the full WEPPpy suite passed with `10288 passed, 126 skipped`.
+
+This closure is repository-local. Deployment and publisher signing remain
+outside this package.
 
 ## Risks and Stop Conditions
 

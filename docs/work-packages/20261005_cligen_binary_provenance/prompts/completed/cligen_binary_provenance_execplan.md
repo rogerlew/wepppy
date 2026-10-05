@@ -2,8 +2,12 @@
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
 
-This plan follows `docs/prompt_templates/codex_exec_plans.md` and is the active
-plan for `docs/work-packages/20261005_cligen_binary_provenance/`.
+This plan follows `docs/prompt_templates/codex_exec_plans.md` and is the
+completed plan for `docs/work-packages/20261005_cligen_binary_provenance/`.
+
+Completion outcome: implemented and locally validated in WEPPpy commit
+`a1747a6e1`; upstream release artifacts were published in source-repository
+commit `6d872f25`. Deployment remains outside this plan.
 
 ## Purpose / Big Picture
 
@@ -25,11 +29,16 @@ upstream positive-seed correction.
   runner call sites, compatibility impact, and repository governance.
 - [x] (2026-10-05 16:29Z) Created the package scaffold and recorded the initial
   design decisions.
-- [ ] Produce a clean, validated candidate binary and sidecar.
-- [ ] Add automated, staged and fail-closed pair vendoring to WEPPpy.
-- [ ] Vendor the optimized pair and record exact identities.
-- [ ] Implement strict 5.3.2 runtime verification and shared identity logging.
-- [ ] Add focused and real-boundary validation, complete reviews, and update
+- [x] (2026-10-05 16:48Z) Produced a clean, validated candidate binary and
+  sidecar.
+- [x] (2026-10-05 17:02Z) Added automated, staged and fail-closed pair
+  vendoring to WEPPpy.
+- [x] (2026-10-05 17:02Z) Vendored the optimized pair and recorded exact
+  identities.
+- [x] (2026-10-05 17:20Z) Implemented strict 5.3.2 runtime verification and
+  shared identity logging.
+- [x] (2026-10-05 18:09Z) Added focused and real-boundary validation, completed
+  reviews, and updated
   all living package records.
 
 ## Surprises & Discoveries
@@ -54,6 +63,18 @@ upstream positive-seed correction.
   Evidence: `wepppy/climates/cligen/cligen.py` assigns `randseed = 12345` and
   appends `-r<seed>`; the upstream validation shows positive seeds intentionally
   change only time to peak relative to the prior binary.
+
+- Observation: Importing the provenance helper through the CLIGEN package made
+  the host vendoring command depend on NumPy.
+  Evidence: the first real host invocation failed before validation; loading
+  the standalone module directly removed that unrelated dependency.
+
+- Observation: Publishing generated release artifacts advances repository HEAD
+  beyond the source commit recorded by the sidecar.
+  Evidence: post-publication source commit `6d872f25` follows recorded source
+  commit `f7f337b0`. The final tool verifies the recorded commit and tree
+  directly, hashes committed manifest bytes, and requires the recorded commit
+  to be an ancestor of both HEAD and the remote default branch.
 
 ## Decision Log
 
@@ -83,9 +104,21 @@ upstream positive-seed correction.
 
 ## Outcomes & Retrospective
 
-No implementation outcome yet. The assessment establishes that a new release
-pair must be built before vendoring and that positive-seed output validation is
-part of acceptance, not an optional follow-up.
+Release `5.323-k10.1` was built from clean source commit `f7f337b0` and vendored
+with binary SHA-256
+`119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc` and
+sidecar SHA-256
+`c2ce9caa4d4a82f368eea66bb3ea5b6ae2b833920b893d9d6deef974e2f6cf06`.
+All five launcher families now verify and log the pair before execution;
+legacy selectors retain an explicit `legacy_unverified` path.
+
+A real vendored-binary run generated and parsed a one-year climate. Default and
+`-r0` outputs remained byte-identical to the prior WEPPpy binary, while
+`-r12345` changed only time-to-peak fields as intended. Focused climate tests
+passed (`167 passed, 18 skipped`), the final provenance/retry slice passed
+(`32 passed`), isolation checks passed, and the full suite passed (`10288
+passed, 126 skipped`). The correctness review closed with no unresolved
+findings. No deployment or publisher-authentication claim is made.
 
 ## Context and Orientation
 
@@ -216,9 +249,10 @@ Run vendoring and validation from `/workdir/wepppy`:
     file wepppy/climates/cligen/bin/cligen532
     readelf -l wepppy/climates/cligen/bin/cligen532
 
-If source HEAD intentionally advances before execution, update the expected
-commit and Decision Log after reviewing the intervening diff; never silently
-drop the pin.
+The source checkout may contain a later release-publication commit. The
+expected commit always pins the sidecar's recorded source revision; the tool
+requires that revision to be an ancestor of both checkout HEAD and the remote
+default branch.
 
 Use canonical test wrappers from `/workdir/wepppy`:
 
@@ -288,3 +322,7 @@ and `.inp` formats do not change.
 
 Revision note (2026-10-05 16:29Z): Initial self-contained ExecPlan authored
 after source-tooling, artifact, runner-path, and compatibility assessment.
+
+Revision note (2026-10-05 18:09Z): Recorded completed implementation, exact
+release identities, post-publication source validation semantics, and all test
+and review outcomes before archiving the plan.
