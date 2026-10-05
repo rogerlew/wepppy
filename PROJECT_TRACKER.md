@@ -1,11 +1,16 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-01
-**Active Packages**: 42
+**Last Updated**: 2026-10-05
+**Active Packages**: 43
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active (planning complete): [CLIGEN binary provenance and runner identity](docs/work-packages/20261005_cligen_binary_provenance/package.md)
+— build and vendor the corrected CLIGEN 5.3.2 executable with its cryptographic
+sidecar, enforce the pair before execution, and record version, binary, sidecar,
+and source identities in every CLIGEN run log. No binary has been vendored yet.
 
 Environment validated: [Feature access governance](docs/work-packages/20261001_feature_access_governance/package.md) — milestones zero through five are complete in forest, including auditable groups, public read-only sharing, PowerUser onboarding, private-resource containment, real generated-output acceptance, archive/restore integrity, disposable database restore and staged consumer-before-web deployment. Production remains unchanged. Positive Culvert compatibility still depends on separately renewing its expired credential; OpenET and Batch remain limited to the designated account and require that account's personal acknowledgment before use.
 
