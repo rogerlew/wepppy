@@ -412,6 +412,7 @@ class Climate(NoDbBase):
                 self._climate_mode = ClimateMode.Undefined
             self._climate_spatialmode = ClimateSpatialMode.Single
             self._cligen_seed = None
+            self._cligen_seed_override = None
             self._observed_start_year = ''
             self._observed_end_year = ''
             self._future_start_year = ''
@@ -611,6 +612,22 @@ class Climate(NoDbBase):
     @property
     def cligen_db(self) -> str:
         return getattr(self, '_cligen_db', self.config_get_str('climate', 'cligen_db'))
+
+    @property
+    def cligen_seed(self) -> Optional[int]:
+        """Return the explicit CLIGEN seed override stored in durable state."""
+        value = getattr(self, '_cligen_seed_override', None)
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(
+                "cligen_seed durable state must be an integer from 0 through 99999 or null"
+            )
+        if not 0 <= value <= 99999:
+            raise ValueError(
+                "cligen_seed durable state must be between 0 and 99999"
+            )
+        return value
 
     @property
     def uses_tenerife_station_catalog(self) -> bool:
@@ -1353,7 +1370,7 @@ class Climate(NoDbBase):
                 self._cligen_seed = random.randint(0, 99999)
                 self.dump()
 
-            randseed = self._cligen_seed
+            randseed = self.cligen_seed
 
             cli_dir = os.path.abspath(self.cli_dir)
             watershed = self.watershed_instance
@@ -1370,6 +1387,7 @@ class Climate(NoDbBase):
             self.monthlies = prism_mod(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
                                      logger=self.logger, nwds_method='',
+                                     randseed=randseed,
                                      adjust_mx_pt5=self.adjust_mx_pt5)
 
     def _prism_revision(self, verbose: bool = False):
@@ -1460,7 +1478,7 @@ class Climate(NoDbBase):
 
             par_fn = stationMeta.par
             cligen = Cligen(stationMeta, wd=cli_dir)
-            cli_fn = cligen.run_multiple_year(years)
+            cli_fn = cligen.run_multiple_year(years, randseed=self.cligen_seed)
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             monthlies = climate.calc_monthlies()
@@ -1543,6 +1561,7 @@ class Climate(NoDbBase):
             build_future(
                 cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
                 adjust_mx_pt5=self.adjust_mx_pt5,
+                randseed=self.cligen_seed,
             )
             self.logger.info('    CMIP5/CLIGEN processing complete')
 
@@ -1600,6 +1619,7 @@ class Climate(NoDbBase):
                     output_dir=self.cli_dir,
                     filename_prefix=key,
                     version=self.cligen_db,
+                    randseed=self.cligen_seed,
                 )
 
                 storms.append(
@@ -1643,6 +1663,7 @@ class Climate(NoDbBase):
                 output_dir=self.cli_dir,
                 filename_prefix=climatestation,
                 version=self.cligen_db,
+                randseed=self.cligen_seed,
             )
 
             self.monthlies = result.monthlies

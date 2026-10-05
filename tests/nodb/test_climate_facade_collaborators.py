@@ -14,6 +14,11 @@ from wepppy.nodb.core.climate_multiple_build import ClimateMultipleBuildResult
 pytestmark = pytest.mark.unit
 
 
+@contextlib.contextmanager
+def _detached_locked(_self):
+    yield
+
+
 def _new_detached_climate(tmp_path: Path, logger_name: str) -> Climate:
     climate = Climate.__new__(Climate)
     climate.wd = str(tmp_path)
@@ -23,6 +28,7 @@ def _new_detached_climate(tmp_path: Path, logger_name: str) -> Climate:
     climate._observed_end_year = 2002
     climate._climatestation = "station-x"
     climate._cligen_db = "legacy"
+    climate._cligen_seed_override = None
     climate._adjust_mx_pt5 = False
     climate._silent_pass_observed_quality_guard = True
     climate._use_gridmet_wind_when_applicable = False
@@ -221,7 +227,7 @@ def test_gridmet_multiple_build_delegates_to_service(
             quality_guard_bypassed=False,
         )
 
-    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.locked = types.MethodType(_detached_locked, climate)
     climate.set_attrs = _set_attrs
     monkeypatch.setattr(climate_module._CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE, "build", _fake_build)
 
@@ -283,6 +289,7 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
         cli_fn: str,
         *,
         adjust_mx_pt5: bool,
+        randseed: int | None,
     ) -> None:
         captured["build_args"] = (
             ws_lng,
@@ -293,9 +300,10 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
             prn_fn,
             cli_fn,
             adjust_mx_pt5,
+            randseed,
         )
 
-    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.locked = types.MethodType(_detached_locked, climate)
     climate.set_attrs = _set_attrs
     monkeypatch.setattr(
         climate_module.Climate,
@@ -314,6 +322,7 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
     climate._silent_pass_observed_quality_guard = True
     climate._future_start_year = 2030
     climate._future_end_year = 2031
+    climate._cligen_seed_override = 24680
 
     monkeypatch.setattr(climate_module, "CligenStationsManager", _StationManager)
     monkeypatch.setattr(climate_module, "Cligen", _Cligen)
@@ -332,10 +341,118 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
         "ws.prn",
         "wepp.cli",
         True,
+        24680,
     )
     assert climate.par_fn == "station.par"
     assert climate.cli_fn == "wepp.cli"
     assert climate.monthlies == [3.0] * 12
+
+
+def test_vanilla_build_forwards_explicit_cligen_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.vanilla")
+    captured: dict[str, object] = {}
+
+    class _StationManager:
+        def __init__(self, *, version):
+            captured["version"] = version
+
+        def get_station_fromid(self, station):
+            captured["station"] = station
+            return types.SimpleNamespace(par="station.par")
+
+    class _Cligen:
+        def __init__(self, station, *, wd):
+            captured["wd"] = wd
+
+        def run_multiple_year(self, years, *, randseed=None):
+            captured["run"] = (years, randseed)
+            return "wepp.cli"
+
+    class _ClimateFile:
+        def __init__(self, path):
+            captured["path"] = path
+
+        def calc_monthlies(self):
+            return [1.0] * 12
+
+    climate.locked = types.MethodType(_detached_locked, climate)
+    climate.set_attrs = lambda attrs: None
+    climate._input_years = 30
+    climate._climatestation = "STA-1"
+    climate._cligen_seed_override = 24680
+    monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
+    monkeypatch.setattr(climate_module.Climate, "cligen_db", property(lambda _self: "legacy"))
+    monkeypatch.setattr(climate_module, "CligenStationsManager", _StationManager)
+    monkeypatch.setattr(climate_module, "Cligen", _Cligen)
+    monkeypatch.setattr(climate_module, "ClimateFile", _ClimateFile)
+
+    climate._build_climate_vanilla()
+
+    assert captured["run"] == (30, 24680)
+
+
+def test_prism_build_uses_override_and_not_generated_runtime_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.prism")
+    captured: dict[str, object] = {}
+    climate.locked = types.MethodType(_detached_locked, climate)
+    climate.set_attrs = lambda attrs: None
+    climate.dump = lambda: None
+    climate._input_years = 30
+    climate._climatestation = "STA-1"
+    climate._cligen_seed = None
+    climate._cligen_seed_override = 24680
+    monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
+    monkeypatch.setattr(
+        climate_module.Climate,
+        "watershed_instance",
+        property(lambda _self: types.SimpleNamespace(require_centroid=lambda: (-116.2, 43.6))),
+    )
+
+    def _prism_mod(**kwargs):
+        captured.update(kwargs)
+        return {"ppts": [1.0]}
+
+    monkeypatch.setattr(climate_module, "prism_mod", _prism_mod)
+
+    climate._build_climate_prism()
+
+    assert captured["randseed"] == 24680
+    assert climate._cligen_seed is not None
+
+
+def test_dormant_single_storm_helper_forwards_explicit_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.single_storm")
+    captured: dict[str, object] = {}
+    climate.locked = types.MethodType(_detached_locked, climate)
+    climate.set_attrs = lambda attrs: None
+    climate._climatestation = "STA-1"
+    climate._cligen_seed_override = 24680
+    climate._ss_storm_date = "4 15 01"
+    climate._ss_design_storm_amount_inches = 6.3
+    climate._ss_duration_of_storm_in_hours = 6.0
+    climate._ss_time_to_peak_intensity_pct = 40
+    climate._ss_max_intensity_inches_per_hour = 3.0
+    monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
+    monkeypatch.setattr(climate_module.Climate, "cligen_db", property(lambda _self: "legacy"))
+
+    def _build_single(*args, **kwargs):
+        captured.update(kwargs)
+        return types.SimpleNamespace(monthlies={}, par_fn="storm.par", cli_fn="storm.cli")
+
+    monkeypatch.setattr(climate_module, "build_single_storm_cli", _build_single)
+
+    climate._build_climate_single_storm()
+
+    assert captured["randseed"] == 24680
 
 
 def test_depnexrad_build_delegates_to_helper(

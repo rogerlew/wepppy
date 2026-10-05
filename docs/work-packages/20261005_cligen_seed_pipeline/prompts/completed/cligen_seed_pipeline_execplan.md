@@ -24,11 +24,18 @@ output.
   corrected the proposal to preserve effective defaults.
 - [x] (2026-10-05 19:43Z) Obtained exact operator approval after both reviewers
   confirmed the corrected contract.
-- [ ] Commit the standalone contract checkpoint.
-- [ ] Implement UI parsing/persistence and seed propagation.
-- [ ] Add focused tests across every boundary.
-- [ ] Validate generated output and deterministic replay on `canine-liar`.
-- [ ] Run broad gates, close reviews and package records, and archive this plan.
+- [x] (2026-10-05 19:47Z) Committed the standalone contract checkpoint as
+  `514a7da28`.
+- [x] (2026-10-05 20:00Z) Implemented UI parsing/persistence and seed
+  propagation.
+- [x] (2026-10-05 20:01Z) Added focused tests across every boundary; 464 focused
+  Python tests passed.
+- [x] (2026-10-05 20:10Z) Validated generated output and deterministic replay on
+  a normalized `canine-liar` fork.
+- [x] (2026-10-05 22:21Z) Completed broad gates and package records: 10,317
+  Python tests passed with 126 skipped; 923 Jest tests passed; frontend lint,
+  stubs, focused isolation, docs lint, usersum validation, RQ graph validation,
+  and patch hygiene passed. Archived this plan under `prompts/completed/`.
 
 ## Surprises & Discoveries
 
@@ -57,6 +64,13 @@ output.
   Evidence: a build may clear or replace hundreds of climate artifacts; the
   corrected plan uses a complete normalized disposable fork and manifests the
   source.
+
+- Observation: The supported fork route necessarily writes two source-side
+  orchestration records.
+  Evidence: `redisprep.dump` records the latest `rq:fork_rq` job and `rq.log`
+  appends completion. A second control fork kept the aggregate hash of every
+  other source file unchanged at
+  `2a90b08db58a98960d677cb0318e76806b78d3039df202afb6326993cdddee4a`.
 
 ## Decision Log
 
@@ -92,9 +106,20 @@ output.
 
 ## Outcomes & Retrospective
 
-No implementation outcome yet. The source trace establishes that the minimal
-change is optional-argument propagation through existing interfaces, with no
-new service, queue, or dependency.
+The optional override now crosses the existing UI, rq-engine, NoDb, snapshot,
+helper, and executable interfaces without a new service, queue, or dependency.
+The actual-project run proved persisted seed `24680`, exact `-r24680` argv,
+verified binary/sidecar identity, a parseable 365-row climate, and byte-identical
+output across two queued builds.
+
+Broad validation completed without unresolved findings. The canonical Python
+suite passed 10,317 tests with 126 skipped; the frontend suite passed 923 tests
+across 113 suites. Focused two-order and per-file isolation checks passed for
+all 14 changed Python test files. Stubs, frontend lint, docs lint, usersum
+contracts/index validation, and patch hygiene also passed. The implementation
+is locally validated. The regenerated RQ dependency artifacts retain 147
+semantic edges and update source line metadata only. Deployment was not part of
+this package.
 
 ## Context and Orientation
 
@@ -150,7 +175,8 @@ and replay the queued job metadata through `build_climate_rq`, reach
 `Climate.build`, and execute a short supported real CLIGEN build twice. Parse
 both fresh `.cli` files and compare bytes. Read the retained CLIGEN log to
 confirm the exact `-rN` consumer argument, then clean up only after re-verifying
-the unique fork identity and prove the source manifest is unchanged.
+the unique fork identity. Prove source model content is unchanged while allowing
+the canonical `redisprep.dump` and `rq.log` fork bookkeeping updates.
 
 Milestone 5 runs frontend lint/tests, focused and full Python gates, stubs,
 isolation, docs lint, and patch hygiene. Complete correctness review, update
@@ -199,8 +225,8 @@ through `fork_rq`, wait for its standard post-fork readiness checks, and confine
 all request/build mutation to that returned destination. After retaining compact
 evidence, clear NoDb caches and clean up only the destination whose unique run
 identity and resolved path were verified immediately beforehand. Require an
-exact original before/after manifest. Never delete or overwrite original
-`canine-liar` artifacts.
+exact before/after manifest excluding only the two canonical fork bookkeeping
+files. Never delete or overwrite original `canine-liar` model artifacts.
 
 ## Artifacts and Notes
 
@@ -233,3 +259,6 @@ Revision note (2026-10-05 19:01Z): Incorporated both independent contract
 reviews by separating explicit override state, preserving effective defaults,
 clarifying batch/single-storm/multiple-build scope, and moving project evidence
 to a complete normalized disposable fork.
+
+Revision note (2026-10-05 22:21Z): Recorded successful broad validation and
+actual-project acceptance, closed the work package, and archived the plan.

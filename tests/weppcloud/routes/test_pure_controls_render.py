@@ -766,6 +766,7 @@ def test_climate_template_renders_catalog_station_and_build_contract(
         precip_monthly_scale_factors=None,
         precip_scale_reference=None,
         precip_scale_factor_map=None,
+        cligen_seed=24680,
     )
     catalog = [
         {
@@ -800,6 +801,14 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'data-climate-action="build"' in rendered
     assert 'id="hint_build_climate"' in rendered
     assert 'id="climate_status_panel"' in rendered
+    assert 'id="cligen_seed"' in rendered
+    assert 'name="cligen_seed"' in rendered
+    assert 'value="24680"' in rendered
+
+    climate.uses_tenerife_station_catalog = True
+    tenerife_rendered = template.render(climate=climate, climate_catalog=catalog)
+    assert 'id="cligen_seed"' in tenerife_rendered
+    assert 'id="checkbox_use_gridmet_wind_when_applicable"' not in tenerife_rendered
 
 
 @pytest.mark.parametrize("initial_dataset", ["vanilla_cligen", "prism_stochastic"])

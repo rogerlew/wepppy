@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -50,6 +51,7 @@ def build_single_storm_cli(
     cliver: str | float = "5.3",
     version: str = "2015",
     timeout: float = 3.0,
+    randseed: int | None = None,
 ) -> SingleStormResult:
     """Generate a CLIGEN file describing a synthetic single storm."""
 
@@ -112,6 +114,7 @@ def build_single_storm_cli(
             par_fn=par_fn,
             clinp_path=clinp_path,
             timeout=timeout,
+            randseed=randseed,
         )
 
         tmp_cli_path = tmpdir / cli_fn
@@ -199,6 +202,7 @@ def _run_cligen(
     par_fn: str,
     clinp_path: Path,
     timeout: float,
+    randseed: int | None = None,
 ) -> None:
     if cliver == "4.3":
         cmd = [str(Path(_bin_dir) / "cligen43")]
@@ -207,12 +211,21 @@ def _run_cligen(
     else:
         cmd = [str(Path(_bin_dir) / "cligen532"), f"-i{par_fn}"]
 
+    if randseed is not None:
+        if isinstance(randseed, bool) or not isinstance(randseed, int):
+            raise ValueError("randseed must be an integer from 0 through 99999")
+        if not 0 <= randseed <= 99999:
+            raise ValueError("randseed must be between 0 and 99999")
+        cmd.append(f"-r{randseed}")
+
     log_path = tmpdir / "cligen.log"
     with clinp_path.open("rb") as clinp, log_path.open("w", encoding="utf-8") as log_fp:
         try:
             write_cligen_binary_identity(
                 log_fp, runner="single_storm", binary_path=cmd[0]
             )
+            log_fp.write(f"cmd: {shlex.join(cmd)}\n")
+            log_fp.flush()
             subprocess.run(
                 cmd,
                 stdin=clinp,

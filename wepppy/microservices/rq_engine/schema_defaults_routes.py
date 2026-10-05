@@ -467,6 +467,7 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "climate_mode_code": _enum_int(getattr(climate, "climate_mode", None)),
         "climate_mode": _enum_name(getattr(climate, "climate_mode", None)),
         "climate_catalog_id": str(getattr(climate, "catalog_id", "") or "").strip() or None,
+        "cligen_seed": getattr(climate, "cligen_seed", None),
         "climate_station_mode_code": _enum_int(getattr(climate, "climatestation_mode", None)),
         "climate_spatial_mode_code": _enum_int(getattr(climate, "climate_spatialmode", None)),
         "climate_has_station": bool(getattr(climate, "has_station", False)),
@@ -824,6 +825,7 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
             resolved_mode = climate_mode if climate_mode in available_modes else default_climate_mode
         defaults: dict[str, Any] = {
             "climate_mode": resolved_mode,
+            "cligen_seed": runtime.states.get("cligen_seed"),
         }
         if runtime.capability_graph is not None:
             graph = runtime.capability_graph
@@ -1106,6 +1108,13 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "maximum": 2099,
                     "constraint_mode": "static",
                     "required_if": _predicate("climate_mode", "eq", 3),
+                },
+                "cligen_seed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999,
+                    "required": False,
+                    "constraint_mode": "static",
                 },
             },
         }

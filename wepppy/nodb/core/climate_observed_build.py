@@ -105,6 +105,7 @@ def run_observed_daymet_build(climate, *, verbose=False, attrs=None, replace_exi
                 gridmet_wind=snapshot.use_gridmet_wind_when_applicable,
                 adjust_mx_pt5=snapshot.adjust_mx_pt5,
                 silent_pass_observed_quality_guard=snapshot.silent_pass_observed_quality_guard,
+                randseed=snapshot.cligen_seed,
             )
             monthlies = module.ClimateFile(str(Path(stage) / "wepp.cli")).calc_monthlies()
             bypassed = bool(getattr(cligen, "_last_observed_quality_guard_bypassed", False))
@@ -154,6 +155,7 @@ def run_observed_gridmet_build(climate, *, verbose=False, attrs=None) -> None:
             cligen, lng, lat, snapshot.observed_start_year, snapshot.observed_end_year,
             stage, "ws.prn", "wepp.cli", adjust_mx_pt5=snapshot.adjust_mx_pt5,
             silent_pass_observed_quality_guard=snapshot.silent_pass_observed_quality_guard,
+            randseed=snapshot.cligen_seed,
         )
         monthlies = module.ClimateFile(str(Path(stage) / "wepp.cli")).calc_monthlies()
         bypassed = bool(getattr(cligen, "_last_observed_quality_guard_bypassed", False))

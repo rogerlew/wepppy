@@ -55,6 +55,7 @@ class ClimateGridmetMultipleBuildService:
                 "silent_pass_observed_quality_guard",
                 True,
             )
+            randseed = climate.cligen_seed
         else:
             start_year = inputs.observed_start_year
             end_year = inputs.observed_end_year
@@ -63,6 +64,7 @@ class ClimateGridmetMultipleBuildService:
             climatestation = inputs.climatestation
             adjust_mx_pt5 = inputs.adjust_mx_pt5
             silent_pass_observed_quality_guard = inputs.silent_pass_observed_quality_guard
+            randseed = inputs.cligen_seed
         input_years = end_year - start_year + 1
 
         station_manager = CligenStationsManager(version=cligen_db)
@@ -124,6 +126,7 @@ class ClimateGridmetMultipleBuildService:
             ncpu=ncpu,
             adjust_mx_pt5=adjust_mx_pt5,
             silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            randseed=randseed,
         )
 
         climate_file = ClimateFile(_join(cli_dir, cli_fn))
@@ -365,6 +368,7 @@ class ClimateGridmetMultipleBuildService:
         ncpu: int,
         adjust_mx_pt5: bool | None = None,
         silent_pass_observed_quality_guard: bool | None = None,
+        randseed: int | None = None,
     ) -> tuple[dict[Any, str], dict[Any, str], str, bool]:
         if adjust_mx_pt5 is None:
             adjust_mx_pt5 = climate.adjust_mx_pt5
@@ -398,6 +402,7 @@ class ClimateGridmetMultipleBuildService:
                         _prn_fn,
                         adjust_mx_pt5=adjust_mx_pt5,
                         silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                        randseed=randseed,
                     )
                 )
 
@@ -420,6 +425,7 @@ class ClimateGridmetMultipleBuildService:
                     ws_prn_fn,
                     adjust_mx_pt5=adjust_mx_pt5,
                     silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                    randseed=randseed,
                 )
             )
 

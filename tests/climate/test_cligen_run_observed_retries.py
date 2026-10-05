@@ -253,10 +253,11 @@ def test_run_observed_retries_timeout_and_logs_flake(monkeypatch, tmp_path):
     monkeypatch.setattr(cligen_module.random, "uniform", lambda _a, _b: 0.25)
     monkeypatch.setattr(cligen_module.time, "sleep", lambda delay: sleep_calls.append(delay))
 
-    cligen.run_observed("observed.prn", cli_fn="observed.cli")
+    cligen.run_observed("observed.prn", cli_fn="observed.cli", randseed=24680)
 
     assert cli_path.read_text(encoding="ascii") == "complete\n"
     assert len(popen_calls) == 2
+    assert all(call[0][0].count("-r24680") == 1 for call in popen_calls)
     assert attempts == []
     assert sleep_calls == [0.75]
     assert wait_timeouts == [20, 2, 20]
@@ -265,6 +266,8 @@ def test_run_observed_retries_timeout_and_logs_flake(monkeypatch, tmp_path):
     assert log_text.startswith("[run_observed] binary_identity")
     assert "binary_identity_status=verified" in log_text
     assert "timeout=20s timeout_retries=3" in log_text
+    assert "cmd:" in log_text
+    assert log_text.count("-r24680") == 1
     assert "retrying after timeout" in log_text
     assert "flake_detected timeout_attempts=1 success_attempt=2/4" in log_text
 
@@ -300,6 +303,7 @@ def test_run_observed_exhausts_timeouts_and_removes_partial_cli(monkeypatch, tmp
     assert "attempts=2" in str(exc.value)
     assert not cli_path.exists()
     assert len(popen_calls) == 2
+    assert all(not any(arg.startswith("-r") for arg in call[0][0]) for call in popen_calls)
     assert attempts == []
     assert sleep_calls == [0.7]
 

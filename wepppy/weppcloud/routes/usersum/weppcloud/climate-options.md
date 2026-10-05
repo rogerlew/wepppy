@@ -399,7 +399,36 @@ Select an available observed DAYMET or GRIDMET dataset to enable this option; no
 
 ## Advanced Options
 
-Advanced options are visible for non-Tenerife station-catalog workflows.
+The CLIGEN seed is available for every station catalog, including Tenerife.
+The remaining advanced controls are visible only for non-Tenerife
+station-catalog workflows.
+
+## CLIGEN seed
+
+**Function**
+- Optionally sends an explicit integer random seed to CLIGEN. Valid values are
+  `0` through `99999`.
+
+**Purpose**
+- Reproduce the same CLIGEN random stream when the climate inputs, selected
+  station, CLIGEN binary, and seed are unchanged.
+
+**Recommended use cases**
+- Enter a seed when a stochastic climate must be repeatable across rebuilds or
+  when comparing scenarios that should use the same generated weather stream.
+- Leave the field blank to preserve WEPPcloud's established mode-specific
+  defaults. Plain stochastic and observed builds let CLIGEN choose its normal
+  default behavior; PRISM/E-OBS/AGDC modified builds retain their established
+  effective seed of `12345`.
+
+**Important behavior details**
+- The seed is stored with the project and is passed through queued climate
+  builds, batch clones, and supported spatial build paths.
+- A seed supports reproducibility, not secrecy or cryptographic security.
+  Changing the CLIGEN version, station parameters, observations, or other
+  climate inputs can still change the generated climate.
+- Clearing the field removes the explicit override and restores the default
+  behavior above.
 
 ## Use GRIDMET wind when applicable
 

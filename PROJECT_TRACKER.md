@@ -2,16 +2,16 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-05
-**Active Packages**: 43
+**Active Packages**: 42
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-Active (contract checkpoint): [CLIGEN seed UI-to-execution pipeline](docs/work-packages/20261005_cligen_seed_pipeline/package.md)
-— expose an optional advanced CLIGEN seed, persist it in `climate.nodb`, and
-carry explicit values through RQ replay and every Climate-owned CLIGEN path.
-Blank retains current defaults; focused and `canine-liar` generated-output
-evidence gate closure.
+Completed (code/local): [CLIGEN seed UI-to-execution pipeline](docs/work-packages/20261005_cligen_seed_pipeline/package.md)
+— optional advanced seeds persist in `climate.nodb` and reach every
+Climate-owned CLIGEN path while blank values preserve existing defaults.
+Normalized `canine-liar` generation and deterministic replay pass; 10,317
+Python and 923 frontend tests pass. Deployment remains separate.
 
 Completed (code/local): [CLIGEN binary provenance and runner identity](docs/work-packages/20261005_cligen_binary_provenance/package.md)
 — release `5.323-k10.1` is vendored as a verified binary/sidecar pair; all five

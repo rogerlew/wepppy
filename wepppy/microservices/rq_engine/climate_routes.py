@@ -61,6 +61,7 @@ _OBSERVED_YEAR_MIN = 1980
 _FUTURE_YEAR_MIN = 2006
 _FUTURE_YEAR_MAX = 2099
 _CLIMATE_FIELD_LABELS = {
+    "cligen_seed": "CLIGEN random seed",
     "observed_start_year": "Observed start year",
     "observed_end_year": "Observed end year",
     "future_start_year": "Future start year",
@@ -156,6 +157,15 @@ def _build_climate_validation_errors(
                     "Observed end year must be greater than or equal to observed start year "
                     f"(received {received_end} < {received_start})."
                 ),
+            )
+        ]
+
+    if message.startswith("cligen_seed "):
+        return [
+            _validation_issue(
+                field="cligen_seed",
+                code="invalid_seed",
+                message="CLIGEN random seed must be a whole number from 0 through 99999.",
             )
         ]
 

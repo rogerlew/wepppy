@@ -93,6 +93,17 @@ def _run_observed_quality_failure_markers(log_text: str) -> list[str]:
     return [marker for marker in _RUN_OBSERVED_QUALITY_FAILURE_MARKERS if marker in lowered]
 
 
+def _cligen_seed_argument(randseed: int | None) -> str | None:
+    """Return a bounded CLIGEN seed argv element without shell interpretation."""
+    if randseed is None:
+        return None
+    if isinstance(randseed, bool) or not isinstance(randseed, int):
+        raise ValueError("randseed must be an integer from 0 through 99999")
+    if not 0 <= randseed <= 99999:
+        raise ValueError("randseed must be between 0 and 99999")
+    return f"-r{randseed}"
+
+
 _rowfmt = lambda x: '\t'.join(['%0.2f' % v for v in x])
 
 
@@ -2194,6 +2205,7 @@ class Cligen:
         cli_fname: str = 'wepp.cli',
         localization: Tuple[float, float] | None = None,
         verbose: bool = False,
+        randseed: int | None = None,
     ) -> str:
         """Generate a synthetic multi-year `.cli` using the configured station.
 
@@ -2202,6 +2214,7 @@ class Cligen:
             cli_fname: Output filename relative to `wd`.
             localization: Optional `(lng, lat)` pair for PRISM localization.
             verbose: When True, log diagnostic prints to stdout.
+            randseed: Optional explicit CLIGEN seed in the range 0..99999.
 
         Returns:
             The name of the generated `.cli` file.
@@ -2248,6 +2261,10 @@ class Cligen:
         else:
             cmd = [self.cligen43]
 
+        seed_argument = _cligen_seed_argument(randseed)
+        if seed_argument is not None:
+            cmd.append(seed_argument)
+
         # change to working directory
         cli_dir = self.wd
 
@@ -2261,6 +2278,8 @@ class Cligen:
         write_cligen_binary_identity(
             _log, runner="run_multiple_year", binary_path=cmd[0]
         )
+        _log.write(f"cmd: {shlex.join(cmd)}\n")
+        _log.flush()
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait(timeout=5)
         _clinp.close()
@@ -2279,6 +2298,7 @@ class Cligen:
         silently_pass_quality_guard: bool = False,
         timeout: int = 20,
         timeout_retries: int = 3,
+        randseed: int | None = None,
     ) -> bool:
         """Replay observed `.prn` data to produce a `.cli`.
 
@@ -2295,6 +2315,7 @@ class Cligen:
                 to continue.
             timeout: Seconds to wait for each CLIGEN attempt.
             timeout_retries: Number of timeout-only retries before failing.
+            randseed: Optional explicit CLIGEN seed in the range 0..99999.
 
         Returns:
             ``True`` if quality-guard markers were detected and bypassed due to
@@ -2395,6 +2416,9 @@ class Cligen:
                "-O%s" % prn_fn,
                "-o%s" % cli_fn,
                "-t6", "-I2"]
+        seed_argument = _cligen_seed_argument(randseed)
+        if seed_argument is not None:
+            cmd.append(seed_argument)
 
         if verbose:
             print(cmd)
@@ -2419,6 +2443,8 @@ class Cligen:
             _log.write(
                 f"cligen run_observed timeout={timeout}s timeout_retries={timeout_retries}\n"
             )
+            _log.write(f"cmd: {shlex.join(cmd)}\n")
+            _log.flush()
             for attempt in range(1, total_attempts + 1):
                 if _exists(cli_path):
                     os.remove(cli_path)
@@ -2777,7 +2803,7 @@ def par_mod(
            
         if randseed is None:
             randseed = 12345
-        randseed = str(randseed)
+        seed_argument = _cligen_seed_argument(randseed)
 
         daily_ppts = []
         for i, (p, nwd) in enumerate(zip(prism_ppts, nwds)):
@@ -2851,8 +2877,8 @@ def par_mod(
         else:
             cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
 
-        if randseed is not None:
-            cmd.append('-r%s' % randseed)
+        if seed_argument is not None:
+            cmd.append(seed_argument)
 
 
         stdout_str, stderr_str = _run_cligen_posix(

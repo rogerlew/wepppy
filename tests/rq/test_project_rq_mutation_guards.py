@@ -1623,10 +1623,11 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
 
     class DummyClimate:
         def parse_inputs(self, payload) -> None:
+            self.cligen_seed = payload.get("cligen_seed")
             observed_calls.append(("parse_inputs", payload))
 
         def build(self) -> None:
-            observed_calls.append(("build", None))
+            observed_calls.append(("build", self.cligen_seed))
 
     def _get_climate(wd: str) -> DummyClimate:
         assert events == [("clear", "demo", "climate.nodb")]
@@ -1639,6 +1640,7 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
         "climate_mode": 9,
         "observed_start_year": "1985",
         "observed_end_year": "2024",
+        "cligen_seed": 24680,
         "metadata": {"source": "ui"},
     }
     monkeypatch.setattr(
@@ -1659,7 +1661,7 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
     assert parsed_payload == payload
     assert parsed_payload is not payload
     assert parsed_payload["metadata"] is not payload["metadata"]
-    assert observed_calls[1] == ("build", None)
+    assert observed_calls[1] == ("build", 24680)
 
 
 def test_build_climate_rq_warns_when_observed_start_year_is_emptied(

@@ -238,11 +238,14 @@ def test_single_storm_launcher_logs_verified_identity(tmp_path, monkeypatch):
         par_fn="station.par",
         clinp_path=clinp,
         timeout=2,
+        randseed=99999,
     )
 
     log_text = (tmp_path / "cligen.log").read_text(encoding="utf-8")
     assert "[single_storm] binary_identity" in log_text
     assert "binary_identity_status=verified" in log_text
+    assert "cmd:" in log_text
+    assert "-r99999" in log_text
 
 
 def test_install_release_pair_replaces_both_files_with_validated_pair(tmp_path):

@@ -217,7 +217,11 @@ def test_observed_gridmet_unrelated_rewrite_survives(controllers, monkeypatch):
         assert not climate.islocked()
         assert args[1:5] == (-116.5, 45.5, 2001, 2001)
         assert args[6:8] == ("ws.prn", "wepp.cli")
-        assert kwargs == {"adjust_mx_pt5": False, "silent_pass_observed_quality_guard": True}
+        assert kwargs == {
+            "adjust_mx_pt5": False,
+            "silent_pass_observed_quality_guard": True,
+            "randseed": None,
+        }
         _same_size_rewrite(climate, "_test_unrelated", "KEEP")
         Path(args[5], "wepp.cli").write_text("collected climate")
 

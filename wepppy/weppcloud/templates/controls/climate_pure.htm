@@ -467,8 +467,26 @@
        ) }}
   </section>
 
-  {% if not is_tenerife_station_catalog %}
   {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="climate_advanced_options") %}
+    {% set explicit_cligen_seed = climate.cligen_seed | default(None) %}
+    <section class="wc-stack">
+      {{ ui.text_field(
+           "cligen_seed",
+           "CLIGEN random seed",
+           value=explicit_cligen_seed if explicit_cligen_seed is not none else '',
+           help="Optional integer from 0 through 99999. Leave blank to preserve the current automatic behavior; use an explicit value to reproduce otherwise-identical CLIGEN runs.",
+           attrs={
+             "class": "disable-readonly",
+             "type": "number",
+             "inputmode": "numeric",
+             "min": "0",
+             "max": "99999",
+             "step": "1"
+           }
+         ) }}
+    </section>
+
+    {% if not is_tenerife_station_catalog %}
     <section class="wc-stack">
       {{ ui.checkbox_field(
            "checkbox_use_gridmet_wind_when_applicable",
@@ -585,8 +603,8 @@
            ) }}
       </div>
     </section>
+    {% endif %}
   {% endcall %}
-  {% endif %}
 
 {% call button_row() %}
     <button

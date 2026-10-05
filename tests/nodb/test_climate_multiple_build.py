@@ -105,6 +105,41 @@ def test_unrelated_same_size_rewrite_is_preserved_during_finalization(
     assert current.sub_cli_fns == {"ws": "generated.cli"}
 
 
+def test_cligen_seed_persists_and_reloads(climate_controller: Climate) -> None:
+    climate_controller.parse_inputs(
+        {"climate_mode": 0, "input_years": 1, "cligen_seed": "00123"}
+    )
+
+    current = Climate.load_detached(climate_controller.wd)
+
+    assert current.cligen_seed == 123
+    assert current._cligen_seed_override == 123
+
+
+def test_malformed_durable_cligen_seed_fails_snapshot_before_build(
+    climate_controller: Climate,
+) -> None:
+    climate_controller._cligen_seed_override = "123"
+
+    with pytest.raises(ValueError, match="cligen_seed durable state"):
+        capture_multiple_build_inputs(climate_controller)
+
+
+def test_changed_cligen_seed_supersedes_collected_outputs(
+    climate_controller: Climate,
+) -> None:
+    climate_controller._cligen_seed_override = 12345
+    with climate_controller.locked():
+        pass
+    snapshot = capture_multiple_build_inputs(climate_controller)
+    _same_size_rewrite(climate_controller, "_cligen_seed_override", 54321)
+
+    with pytest.raises(ClimateMultipleBuildSupersededError) as exc_info:
+        finalize_multiple_build(climate_controller, snapshot, _result())
+
+    assert "cligen_seed" in str(exc_info.value)
+
+
 @pytest.mark.parametrize("field_name,value", [("_climatestation", "station-y")])
 def test_relevant_same_size_rewrite_supersedes_collected_outputs(
     climate_controller: Climate,

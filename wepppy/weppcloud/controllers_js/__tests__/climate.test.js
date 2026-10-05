@@ -58,6 +58,7 @@ describe("Climate controller", () => {
                 </script>
                 <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="dataset_a" data-climate-field="catalog-id">
                 <input type="hidden" id="climate_mode" name="climate_mode" value="5" data-climate-field="mode">
+                <input type="number" id="cligen_seed" name="cligen_seed" value="" min="0" max="99999" step="1">
 
                 <div id="climate_dataset_section" data-climate-element="dataset">
                     <label class="wc-choice">
@@ -410,6 +411,37 @@ describe("Climate controller", () => {
         );
 
         serializeSpy.mockRestore();
+    });
+
+    test("build serializes explicit CLIGEN seed and preserves blank reset", async () => {
+        const seedInput = document.getElementById("cligen_seed");
+        seedInput.value = "24680";
+
+        document.getElementById("btn_build_climate").dispatchEvent(
+            new Event("click", { bubbles: true })
+        );
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenLastCalledWith(
+            "/rq-engine/api/runs/test/cfg/build-climate",
+            expect.objectContaining({ cligen_seed: "24680" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+
+        postJsonMock.mockClear();
+        seedInput.value = "";
+        document.getElementById("btn_build_climate").dispatchEvent(
+            new Event("click", { bubbles: true })
+        );
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenLastCalledWith(
+            "/rq-engine/api/runs/test/cfg/build-climate",
+            expect.objectContaining({ cligen_seed: "" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
     });
 
     test("poll failure pushes stacktrace and emits job error", async () => {

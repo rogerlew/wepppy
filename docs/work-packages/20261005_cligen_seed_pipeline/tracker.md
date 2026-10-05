@@ -2,7 +2,7 @@
 
 Timezone: UTC. Started: 2026-10-05 18:40 UTC.
 
-Current phase: contract checkpoint preparation. Implementation has not begun.
+Current phase: complete and locally validated.
 
 ## Progress
 
@@ -16,12 +16,19 @@ Current phase: contract checkpoint preparation. Implementation has not begun.
   reviews and dispositioned all design findings.
 - [x] (2026-10-05 19:43 UTC) Obtained exact operator approval after both
   reviewers confirmed the corrected contract.
-- [ ] Commit the required standalone contract checkpoint.
-- [ ] Implement UI and NoDb persistence behavior.
-- [ ] Wire explicit seeds through all applicable CLIGEN call sites.
-- [ ] Add focused frontend, route, NoDb, snapshot, and process-command tests.
-- [ ] Run actual-project `canine-liar` generated-output validation.
-- [ ] Run broad gates, close reviews, and archive the plan.
+- [x] (2026-10-05 19:47 UTC) Committed the required standalone contract
+  checkpoint as `514a7da28`.
+- [x] (2026-10-05 20:00 UTC) Implemented UI and NoDb persistence behavior.
+- [x] (2026-10-05 20:00 UTC) Wired explicit seeds through all applicable CLIGEN
+  call sites and retained path-specific automatic defaults.
+- [x] (2026-10-05 20:01 UTC) Added focused frontend, route, NoDb, snapshot, and
+  process-command tests; 464 focused Python tests passed.
+- [x] (2026-10-05 20:10 UTC) Completed actual-project `canine-liar`
+  generated-output validation through the authenticated fork and build queues.
+- [x] (2026-10-05 22:21 UTC) Completed broad gates: 10,317 Python tests passed,
+  126 skipped; 923 Jest tests passed across 113 suites; frontend lint, stubs,
+  focused test isolation, docs lint, usersum validation, RQ graph validation,
+  and patch hygiene passed. Closed the package and archived the plan.
 
 ## Decisions
 
@@ -41,34 +48,38 @@ Current phase: contract checkpoint preparation. Implementation has not begun.
 - **2026-10-05 19:43 UTC** - Omit Omni scenario and contrast data from the
   disposable test fork with `skip_omni_scenarios_contrasts=True`.
 - **2026-10-05 19:43 UTC** - Operator approved the exact corrected matrix.
+- **2026-10-05 20:10 UTC** - Treat `redisprep.dump` and `rq.log` updates as the
+  supported fork route's expected source bookkeeping boundary. A control fork
+  proved the aggregate hash of every other source file was unchanged.
 
 ## Risks
 
 | Risk | Impact | Mitigation | Status |
 | --- | --- | --- | --- |
-| Blank option changes historical output | High | Explicit absent/empty/default regression cases | Open |
-| One nested worker drops the seed | High | Adapter matrix and argv assertions | Open |
-| Concurrent seed edit publishes stale observed climate | High | Include override in the observed immutable build snapshot and reject stale finalization | Open |
-| Actual-project validation damages unrelated state | Medium | Mutate only a verified normalized `fork_rq` destination; compare exact source manifests | Open |
-| UI suggests publisher/security semantics | Low | Label strictly as random seed/reproducibility | Open |
+| Blank option changes historical output | High | Explicit absent/empty/default regression cases | Closed |
+| One nested worker drops the seed | High | Adapter matrix and argv assertions | Closed |
+| Concurrent seed edit publishes stale observed climate | High | Include override in the observed immutable build snapshot and reject stale finalization | Closed |
+| Actual-project validation damages unrelated state | Medium | Mutate only verified normalized `fork_rq` destinations; compare source model-content manifests | Closed |
+| UI suggests publisher/security semantics | Low | Label strictly as random seed/reproducibility | Closed |
 
 ## Verification Checklist
 
-- [ ] Canonical contract and checkpoint ancestry.
-- [ ] Pure template render and Jest payload serialization.
-- [ ] NoDb parse/reload and transactional rejection.
-- [ ] rq-engine payload/meta replay coverage.
-- [ ] Vanilla, modified, observed, future, interpolated, and dormant
+- [x] Canonical contract and checkpoint ancestry.
+- [x] Pure template render and Jest payload serialization.
+- [x] NoDb parse/reload and transactional rejection.
+- [x] rq-engine payload/meta replay coverage.
+- [x] Vanilla, modified, observed, future, interpolated, and dormant
       single-storm-helper argv.
-- [ ] Multiple-build seed supersession.
-- [ ] Real vendored-binary deterministic comparison.
-- [ ] `canine-liar` source manifest and normalized-fork artifact evidence.
-- [ ] Focused and full Python suites.
-- [ ] Frontend lint and full Jest suite.
-- [ ] Test stubs/isolation, docs lint, and `git diff --check`.
-- [ ] Correctness review with no unresolved High/Medium findings.
+- [x] Multiple-build seed supersession.
+- [x] Real vendored-binary deterministic comparison.
+- [x] `canine-liar` source manifest and normalized-fork artifact evidence.
+- [x] Focused and full Python suites (464 focused; 10,317 full-suite tests
+      passed, 126 skipped).
+- [x] Frontend lint and full Jest suite (113 suites, 923 tests).
+- [x] Test stubs/isolation, docs lint, usersum validation, and
+      `git diff --check`.
+- [x] Correctness review with no unresolved High/Medium findings.
 
 ## Blocked
 
-Independent review and exact operator approval are complete. Implementation is
-gated only on the standalone checkpoint commit.
+None.

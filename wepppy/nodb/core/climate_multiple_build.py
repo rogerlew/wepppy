@@ -48,6 +48,7 @@ class ClimateMultipleBuildInputs:
     adjust_mx_pt5: bool
     silent_pass_observed_quality_guard: bool
     use_gridmet_wind_when_applicable: bool
+    cligen_seed: int | None
     climate_mode: Any
     climate_spatialmode: Any
 
@@ -121,6 +122,7 @@ def capture_multiple_build_inputs(climate: "Climate") -> ClimateMultipleBuildInp
         use_gridmet_wind_when_applicable=bool(
             getattr(climate, "use_gridmet_wind_when_applicable", True)
         ),
+        cligen_seed=climate.cligen_seed,
         climate_mode=getattr(climate, "_climate_mode", None),
         climate_spatialmode=getattr(climate, "_climate_spatialmode", None),
     )

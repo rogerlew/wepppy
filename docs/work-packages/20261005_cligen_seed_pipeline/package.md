@@ -1,6 +1,6 @@
 # CLIGEN Seed UI-to-Execution Pipeline
 
-**Status**: Open - contract checkpoint in progress (2026-10-05)
+**Status**: Complete and locally validated (2026-10-05)
 **Timezone**: UTC
 
 ## Overview
@@ -98,26 +98,30 @@ parsed after the real build.
   successfully.
 - **Actual-project evidence**: a complete normalized fork of authorized local
   project `canine-liar`, created through `fork_rq` with
-  `skip_omni_scenarios_contrasts=True`; the original remains byte-identical.
+  `skip_omni_scenarios_contrasts=True`. Source climate/model content remains
+  byte-identical; the supported route may update only its documented
+  `redisprep.dump` and `rq.log` fork bookkeeping.
 - **Highest permitted claim**: locally validated; deployment remains separate.
 
 ## Success Criteria
 
-- [ ] Contract checkpoint is committed before implementation.
-- [ ] Advanced UI renders and serializes `cligen_seed` with clear automatic
+- [x] Contract checkpoint is committed before implementation.
+- [x] Advanced UI renders and serializes `cligen_seed` with clear automatic
       behavior and range guidance.
-- [ ] Valid explicit seed persists and reloads; omitted/empty/invalid states
+- [x] Valid explicit seed persists and reloads; omitted/empty/invalid states
       follow the canonical contract without partial mutation.
-- [ ] Every applicable Climate-to-CLIGEN call carries explicit seed unchanged.
-- [ ] Modified stochastic worker pools capture one override while holding the
+- [x] Every applicable Climate-to-CLIGEN call carries explicit seed unchanged.
+- [x] Modified stochastic worker pools capture one override while holding the
       build lock; observed collect/finalize paths reject stale finalization
       after an override change.
-- [ ] Frontend, route, NoDb, helper, and CLIGEN command tests pass.
-- [ ] A normalized `canine-liar` fork proves persisted intent, consumed argv, fresh
-      generated output, and deterministic repeatability, while an exact
-      before/after manifest proves the source project was not changed.
-- [ ] Full Python and frontend suites, docs lint, stubs, and patch hygiene pass.
-- [ ] Correctness review has no unresolved High or Medium findings.
+- [x] Frontend, route, NoDb, helper, and CLIGEN command tests pass.
+- [x] A normalized `canine-liar` fork proves persisted intent, consumed argv,
+      fresh generated output, and deterministic repeatability. A second control
+      fork proves all source content except canonical fork bookkeeping is
+      byte-identical.
+- [x] Full Python and frontend suites, docs lint, stubs, isolation, and patch
+      hygiene pass.
+- [x] Correctness review has no unresolved High or Medium findings.
 
 ## Risks and Stop Conditions
 

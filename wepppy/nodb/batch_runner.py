@@ -1209,6 +1209,7 @@ class BatchRunner(NoDbBase):
                 "_climate_mode",
                 "_climate_spatialmode",
                 "_cligen_db",
+                "_cligen_seed_override",
                 "_climatestation",
                 "_climatestation_mode",
                 "_future_clis_wc",

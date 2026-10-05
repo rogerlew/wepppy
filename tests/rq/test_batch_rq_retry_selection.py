@@ -440,6 +440,39 @@ def test_classify_batch_run_state_ignores_leaf_generated_cligen_seed(
     assert state["base_sync_changed_attributes"] == []
 
 
+def test_resync_copies_explicit_cligen_seed_override_but_preserves_runtime_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    run_dir = Path(runner.batch_runs_dir) / "seed-override"
+    run_dir.mkdir(parents=True)
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+
+    base_state = json.loads(base_climate.read_text(encoding="utf-8"))
+    base_state.update(_cligen_seed_override=24680, _cligen_seed=None)
+    base_climate.write_text(json.dumps(base_state), encoding="utf-8")
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    leaf_state.update(_cligen_seed_override=None, _cligen_seed=13579)
+    leaf_climate.write_text(json.dumps(leaf_state), encoding="utf-8")
+
+    result = runner.resync_base_project_attributes(
+        str(run_dir),
+        _FakeRedisPrep(str(run_dir)),
+        batch_runner_module.logging.getLogger("test.seed_override_resync"),
+    )
+
+    _document, synced = batch_runner_module._load_nodb_document(leaf_climate)
+    assert synced["_cligen_seed_override"] == 24680
+    assert synced["_cligen_seed"] == 13579
+    assert {
+        change["attribute"] for change in result["changed_attributes"]
+    } == {"_cligen_seed_override"}
+
+
 def test_classify_batch_run_state_accepts_runtime_resolved_climate_station(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

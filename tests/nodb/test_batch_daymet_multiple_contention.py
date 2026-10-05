@@ -98,8 +98,12 @@ def test_daymet_build_failure_retains_previous_and_attempted_artifacts(controlle
 
     def collect(*args, **kwargs):
         assert not climate.islocked()
-        assert kwargs == {"gridmet_wind": True, "adjust_mx_pt5": False,
-                          "silent_pass_observed_quality_guard": True}
+        assert kwargs == {
+            "gridmet_wind": True,
+            "adjust_mx_pt5": False,
+            "silent_pass_observed_quality_guard": True,
+            "randseed": None,
+        }
         Path(args[5], "wepp.cli").write_text("attempted climate")
         Path(args[5], "ws.prn").write_text("attempted source")
         if failure == "collection":

@@ -155,6 +155,36 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["errors"][0]["message"] == "Invalid climate field values."
 
 
+def test_build_climate_invalid_seed_returns_field_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+
+        def parse_inputs(self, payload) -> None:
+            raise ValueError("cligen_seed must be between 0 and 99999")
+
+    monkeypatch.setattr(climate_routes.Climate, "getInstance", lambda wd: DummyClimate())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={"cligen_seed": 100000},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["errors"] == [
+        {
+            "field": "cligen_seed",
+            "code": "invalid_seed",
+            "message": "CLIGEN random seed must be a whole number from 0 through 99999.",
+        }
+    ]
+
+
 @pytest.mark.parametrize(
     "profile_id",
     ("continental-us", "europe", "canada", "australia", "global-earth"),
@@ -532,6 +562,7 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
         "climate_catalog_id": "observed_daymet",
         "observed_start_year": "1985",
         "observed_end_year": "2024",
+        "cligen_seed": 24680,
     }
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/build-climate", json=request_payload)

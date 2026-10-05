@@ -86,6 +86,7 @@ class _ClimateStub:
         self.cligen_db = "legacy"
         self._input_years = 0
         self._cligen_seed = None
+        self._cligen_seed_override = None
         self.adjust_mx_pt5 = False
         self.silent_pass_observed_quality_guard = False
         self.use_gridmet_wind_when_applicable = False
@@ -100,6 +101,10 @@ class _ClimateStub:
         self.year_bounds_calls = 0
         self.quality_guard_bypass_published: list[bool] = []
         self.refresh_calls = 0
+
+    @property
+    def cligen_seed(self) -> int | None:
+        return self._cligen_seed_override
 
     @contextlib.contextmanager
     def locked(self):
@@ -154,8 +159,9 @@ class _ObservedDaymetCligenStub:
         cli_fn: str,
         adjust_mx_pt5: bool,
         silently_pass_quality_guard: bool,
+        randseed: int | None = None,
     ) -> bool:
-        _ = (adjust_mx_pt5, silently_pass_quality_guard)
+        _ = (adjust_mx_pt5, silently_pass_quality_guard, randseed)
         (self.cli_dir / cli_fn).write_text(
             "\n".join(
                 [
@@ -195,8 +201,9 @@ class _FullYearObservedCligenStub:
         cli_fn: str,
         adjust_mx_pt5: bool,
         silently_pass_quality_guard: bool,
+        randseed: int | None = None,
     ) -> bool:
-        _ = (adjust_mx_pt5, silently_pass_quality_guard)
+        _ = (adjust_mx_pt5, silently_pass_quality_guard, randseed)
         lines = [
             "5.32300",
             "   1   0   0",
@@ -643,7 +650,7 @@ class _ObservedRunCligenStub:
     def __init__(self, *, raises: Exception | None = None, bypassed: bool = False) -> None:
         self.raises = raises
         self.bypassed = bypassed
-        self.calls: list[tuple[str, str, bool, bool]] = []
+        self.calls: list[tuple[str, str, bool, bool, int | None]] = []
 
     def run_observed(
         self,
@@ -652,8 +659,11 @@ class _ObservedRunCligenStub:
         cli_fn: str,
         adjust_mx_pt5: bool,
         silently_pass_quality_guard: bool,
+        randseed: int | None = None,
     ) -> bool:
-        self.calls.append((prn_fn, cli_fn, adjust_mx_pt5, silently_pass_quality_guard))
+        self.calls.append(
+            (prn_fn, cli_fn, adjust_mx_pt5, silently_pass_quality_guard, randseed)
+        )
         if self.raises is not None:
             raise self.raises
         return self.bypassed
@@ -685,10 +695,11 @@ def test_run_observed_with_quality_guard_handling_passes_silent_flag_and_records
         "wepp.cli",
         adjust_mx_pt5=True,
         silent_pass_observed_quality_guard=True,
+        randseed=24680,
     )
 
     assert bypassed is True
-    assert cligen.calls == [("ws.prn", "wepp.cli", True, True)]
+    assert cligen.calls == [("ws.prn", "wepp.cli", True, True, 24680)]
     assert getattr(cligen, "_last_observed_quality_guard_bypassed") is True
 
 
@@ -788,8 +799,10 @@ def test_run_prism_revision_updates_catalog_and_sub_maps(
 
 def test_run_mod_build_sets_seed_and_single_outputs(tmp_path: Path) -> None:
     climate = _ClimateStub(tmp_path)
+    calls: list[dict[str, object]] = []
 
-    def _mod_function(**_kwargs):
+    def _mod_function(**kwargs):
+        calls.append(kwargs)
         return {"ppts": [1.0, 2.0, 3.0]}
 
     helper_module.run_mod_build(climate, _mod_function, attrs={"mode": "mod"})
@@ -800,6 +813,25 @@ def test_run_mod_build_sets_seed_and_single_outputs(tmp_path: Path) -> None:
     assert climate.par_fn == "station-x.par"
     assert climate.cli_fn == "station-x.cli"
     assert climate.monthlies == {"ppts": [1.0, 2.0, 3.0]}
+    assert calls[0]["randseed"] is None
+
+
+def test_run_mod_build_forwards_explicit_seed_instead_of_runtime_seed(
+    tmp_path: Path,
+) -> None:
+    climate = _ClimateStub(tmp_path)
+    climate._cligen_seed = 13579
+    climate._cligen_seed_override = 24680
+    calls: list[dict[str, object]] = []
+
+    def _mod_function(**kwargs):
+        calls.append(kwargs)
+        return {"ppts": [1.0]}
+
+    helper_module.run_mod_build(climate, _mod_function)
+
+    assert calls[0]["randseed"] == 24680
+    assert climate._cligen_seed == 13579
 
 
 def test_run_mod_build_assigns_multiple_outputs(
@@ -808,21 +840,24 @@ def test_run_mod_build_assigns_multiple_outputs(
 ) -> None:
     climate = _ClimateStub(tmp_path)
     climate._cligen_seed = 99
+    climate._cligen_seed_override = 24680
     climate.climate_spatialmode = 1  # ClimateSpatialMode.Multiple
+    captured_seeds: list[int | None] = []
 
     def _mod_function(**_kwargs):
         return {"ppts": [1.0]}
 
-    monkeypatch.setattr(
-        helper_module,
-        "_build_mod_multiple_climates",
-        lambda *_args, **_kwargs: ({"1": "x.par"}, {"1": "x.cli"}),
-    )
+    def _fake_multiple(*args, **_kwargs):
+        captured_seeds.append(args[-1])
+        return {"1": "x.par"}, {"1": "x.cli"}
+
+    monkeypatch.setattr(helper_module, "_build_mod_multiple_climates", _fake_multiple)
 
     helper_module.run_mod_build(climate, _mod_function)
 
     assert climate.sub_par_fns == {"1": "x.par"}
     assert climate.sub_cli_fns == {"1": "x.cli"}
+    assert captured_seeds == [24680]
 
 
 def test_wait_for_prism_revision_futures_cancels_all_on_error(

@@ -273,14 +273,16 @@ def _run_observed_with_quality_guard_handling(
     *,
     adjust_mx_pt5: bool,
     silent_pass_observed_quality_guard: bool,
+    randseed: int | None = None,
 ) -> bool:
     try:
         quality_guard_bypassed = bool(
             cligen.run_observed(
-            prn_fn,
-            cli_fn=cli_fn,
-            adjust_mx_pt5=adjust_mx_pt5,
-            silently_pass_quality_guard=silent_pass_observed_quality_guard,
+                prn_fn,
+                cli_fn=cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silently_pass_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
         )
         setattr(cligen, "_last_observed_quality_guard_bypassed", quality_guard_bypassed)
@@ -385,6 +387,7 @@ def build_observed_prism(
     gridmet_wind: bool = True,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> None:
     admission = GridMetAdmissionConfig.from_env() if gridmet_wind else None
     df = prism_retrieve_historical_timeseries(
@@ -401,6 +404,7 @@ def build_observed_prism(
                 cli_fn,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
             break
         except AssertionError:
@@ -443,6 +447,7 @@ def build_observed_daymet(
     gridmet_wind: bool = True,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> None:
     from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 
@@ -463,6 +468,7 @@ def build_observed_daymet(
                 cli_fn,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
             break
         except AssertionError:
@@ -505,6 +511,7 @@ def build_observed_daymet_interpolated(
     wind_dir: Optional[Any] = None,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> tuple[str, bool]:
     _parquet_fn = f"daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet"
     df = pd.read_parquet(_join(cli_dir, _parquet_fn))
@@ -519,6 +526,7 @@ def build_observed_daymet_interpolated(
                 cli_fn,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
             break
         except AssertionError:
@@ -562,6 +570,7 @@ def build_observed_snotel(
     gridmet_supplement: bool = True,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> None:
     admission = GridMetAdmissionConfig.from_env() if gridmet_supplement else None
     snotel_data_dir = "/workdir/wepppy/wepppy/climates/snotel/processed"
@@ -587,6 +596,7 @@ def build_observed_snotel(
         cli_fn,
         adjust_mx_pt5=adjust_mx_pt5,
         silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+        randseed=randseed,
     )
 
     cli_path = _join(cli_dir, cli_fn)
@@ -631,6 +641,7 @@ def build_observed_gridmet(
     cli_fn: str,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> None:
     admission = GridMetAdmissionConfig.from_env()
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year, admission=admission)
@@ -646,6 +657,7 @@ def build_observed_gridmet(
                 cli_fn,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
             break
         except AssertionError:
@@ -677,6 +689,7 @@ def build_observed_gridmet_interpolated(
     prn_fn: str,
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
+    randseed: int | None = None,
 ) -> tuple[str, bool]:
     _parquet_fn = f"gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet"
     df = pd.read_parquet(_join(cli_dir, _parquet_fn))
@@ -691,6 +704,7 @@ def build_observed_gridmet_interpolated(
                 cli_fn,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
             break
         except AssertionError:
@@ -726,6 +740,7 @@ def build_future(
     prn_fn: str,
     cli_fn: str,
     adjust_mx_pt5: bool = False,
+    randseed: int | None = None,
 ) -> None:
     df = retrieve_rcp85_timeseries(lng, lat, datetime(start_year, 1, 1), datetime(end_year, 12, 31))
     df_to_prn(df, _join(cli_dir, prn_fn), "pr(mm)", "tasmax(degc)", "tasmin(degc)")
@@ -735,6 +750,7 @@ def build_future(
         cli_fn,
         adjust_mx_pt5=adjust_mx_pt5,
         silent_pass_observed_quality_guard=False,
+        randseed=randseed,
     )
 
     cli_path = _join(cli_dir, cli_fn)
@@ -1151,6 +1167,7 @@ def _run_mod_single_climate(
     mod_function: Any,
     cli_dir: str,
     watershed: Any,
+    randseed: int | None,
 ) -> tuple[str, int]:
     climatestation = climate.climatestation
     years = climate._input_years
@@ -1166,6 +1183,7 @@ def _run_mod_single_climate(
         wd=cli_dir,
         logger=climate.logger,
         nwds_method="",
+        randseed=randseed,
     )
     return climatestation, years
 
@@ -1178,6 +1196,7 @@ def _submit_mod_build_futures(
     climatestation: str,
     years: int,
     cli_dir: str,
+    randseed: int | None,
 ) -> tuple[dict[Any, str], dict[str, str], dict[str, str]]:
     futures: dict[Any, str] = {}
     sub_par_fns: dict[str, str] = {}
@@ -1197,6 +1216,7 @@ def _submit_mod_build_futures(
             suffix=suffix,
             logger=None,
             nwds_method="",
+            randseed=randseed,
         )
 
         sub_par_fns[topaz_id] = f"{climatestation}{suffix}.par"
@@ -1240,6 +1260,7 @@ def _build_mod_multiple_climates(
     climatestation: str,
     years: int,
     cli_dir: str,
+    randseed: int | None,
 ) -> tuple[dict[str, str], dict[str, str]]:
     with climate.timed("  building climates for hillslopes"):
         with ProcessPoolExecutor(max_workers=NCPU) as executor:
@@ -1251,6 +1272,7 @@ def _build_mod_multiple_climates(
                 climatestation,
                 years,
                 cli_dir,
+                randseed,
             )
             _wait_for_mod_build_futures(climate, futures)
 
@@ -1268,10 +1290,13 @@ def run_mod_build(
     with climate.locked():
         climate.set_attrs(attrs)
         _ensure_cligen_seed(climate)
+        randseed = climate.cligen_seed
 
         cli_dir = os.path.abspath(climate.cli_dir)
         watershed = climate.watershed_instance
-        climatestation, years = _run_mod_single_climate(climate, mod_function, cli_dir, watershed)
+        climatestation, years = _run_mod_single_climate(
+            climate, mod_function, cli_dir, watershed, randseed
+        )
 
         from wepppy.nodb.core.climate import ClimateSpatialMode
 
@@ -1283,6 +1308,7 @@ def run_mod_build(
                 climatestation,
                 years,
                 cli_dir,
+                randseed,
             )
             climate.sub_par_fns = sub_par_fns
             climate.sub_cli_fns = sub_cli_fns
@@ -1386,6 +1412,7 @@ def _submit_daymet_futures(
     wind_dir: Optional[Any],
     adjust_mx_pt5: bool | None = None,
     silent_pass_observed_quality_guard: bool | None = None,
+    randseed: int | None = None,
 ) -> tuple[list[Any], dict[str, str], dict[str, str], str]:
     if adjust_mx_pt5 is None:
         adjust_mx_pt5 = climate.adjust_mx_pt5
@@ -1417,6 +1444,7 @@ def _submit_daymet_futures(
                 wind_dir=wind_dir,
                 adjust_mx_pt5=adjust_mx_pt5,
                 silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+                randseed=randseed,
             )
         )
         sub_par_fns[topaz_id] = prn_fn
@@ -1441,6 +1469,7 @@ def _submit_daymet_futures(
             wind_dir=wind_dir,
             adjust_mx_pt5=adjust_mx_pt5,
             silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            randseed=randseed,
         )
     )
 
@@ -1557,6 +1586,7 @@ def run_observed_daymet_multiple_build(
             wind_dir,
             adjust_mx_pt5=snapshot.adjust_mx_pt5,
             silent_pass_observed_quality_guard=snapshot.silent_pass_observed_quality_guard,
+            randseed=snapshot.cligen_seed,
         )
         any_quality_guard_bypassed = _wait_for_daymet_futures(climate, futures, executor)
 

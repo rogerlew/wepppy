@@ -36,7 +36,7 @@ class ClimateInputParsingService:
                 "_observed_start_year", "_observed_end_year", "_future_start_year",
                 "_future_end_year", "_ss_storm_date", "_ss_design_storm_amount_inches",
                 "_ss_duration_of_storm_in_hours", "_ss_max_intensity_inches_per_hour",
-                "_ss_time_to_peak_intensity_pct", "_ss_batch",
+                "_ss_time_to_peak_intensity_pct", "_ss_batch", "_cligen_seed_override",
             }
             snapshot = {
                 key: climate.__dict__[key]
@@ -141,6 +141,9 @@ class ClimateInputParsingService:
 
         climate._climate_daily_temp_ds = kwds.get("climate_daily_temp_ds", None)
 
+        if "cligen_seed" in kwds:
+            climate._cligen_seed_override = self._parse_cligen_seed(kwds["cligen_seed"])
+
         if kwds.get("precip_scaling_mode", None) is not None:
             climate._precip_scaling_mode = ClimatePrecipScalingMode(int(kwds["precip_scaling_mode"]))
 
@@ -167,6 +170,28 @@ class ClimateInputParsingService:
             climate._precip_scaling_reference = kwds["precip_scale_reference"]
 
         return climate_mode
+
+    @staticmethod
+    def _parse_cligen_seed(value: Any) -> int | None:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            raise ValueError("cligen_seed must be an integer from 0 through 99999")
+        if isinstance(value, int):
+            seed = value
+        elif isinstance(value, str):
+            normalized = value.strip()
+            if normalized == "":
+                return None
+            if not normalized.isascii() or not normalized.isdigit():
+                raise ValueError("cligen_seed must contain only ASCII digits")
+            seed = int(normalized)
+        else:
+            raise ValueError("cligen_seed must be an integer from 0 through 99999")
+
+        if not 0 <= seed <= 99999:
+            raise ValueError("cligen_seed must be between 0 and 99999")
+        return seed
 
     def _parse_mode_specific_inputs(
         self,

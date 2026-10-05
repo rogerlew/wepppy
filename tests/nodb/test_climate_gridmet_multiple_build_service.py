@@ -423,6 +423,7 @@ def test_gridmet_build_stages_station_before_cli_worker_pool(
         cli_dir=str(tmp_path),
         cligen_db="2015",
         climatestation="id1",
+        cligen_seed=None,
         _require_observed_year_bounds_for_build=lambda: (2026, 2026),
     )
 

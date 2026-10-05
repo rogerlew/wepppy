@@ -41,6 +41,7 @@
   - `Cligen.stage_station_parameter_file()` atomically finalizes the shared run-local `.par`. Multiple-interpolated orchestrators call it before starting CLIGEN workers so slow shared storage cannot expose a partial copy.
   - `Cligen.run_observed()` can optionally rescale `MX .5 P` using monthly means inferred from the `.prn` (see the `adjust_mx_pt5` section below). When enabled, it writes a dedicated adjusted `.par` and uses that file for the CLIGEN run.
   - `Cligen.run_observed()` also supports `silently_pass_quality_guard=True` for callers that need to keep generated `.cli` output even when the CLIGEN log contains known quality-failure markers.
+  - `Cligen.run_multiple_year()` and `Cligen.run_observed()` accept an optional `randseed` from `0` through `99999`. When omitted, the runner does not add a `-r` argument and preserves CLIGEN's existing default behavior. The executed command is recorded in the CLIGEN log for reproducibility.
   - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), optionally scale `MX .5 P` by the monthly precipitation ratio, rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.
 - **NullStation utility**
   - Provides a sentinel `StationMeta` when no catalog entry exists so calling code can still render UI elements without null checks.
@@ -82,6 +83,7 @@ This optional adjustment rescales `MX .5 P` to better match localized/observed m
 ## Single-Storm Builder (`single_storm.py`)
 - Replaces the legacy REST hop by invoking the bundled CLIGEN binaries directly.
 - `build_single_storm_cli()` writes `.par/.cli` files into a caller-provided directory, returning a `SingleStormResult` (paths + computed monthlies).
+- `build_single_storm_cli()` accepts the same optional `randseed` range and records the executed command in its CLIGEN log.
 - Input validation mirrors the legacy REST helper: storm dates accept `MM-DD-YYYY`, `MM/DD/YYYY`, or space-delimited tokens; peak intensity must be between 0–100%.
 
 ```python
@@ -126,7 +128,12 @@ print(result.monthlies)  # Calculated from the generated CLI (may be None on fai
    station = manager.get_closest_station((-117.0, 46.4))
 
    runner = Cligen(station=station, wd=str(wd), cliver="5.3.2")
-   runner.run_multiple_year(years=30, cli_fname="wepp.cli", localization=(-117.0, 46.4))
+   runner.run_multiple_year(
+       years=30,
+       cli_fname="wepp.cli",
+       localization=(-117.0, 46.4),
+       randseed=24680,
+   )
    ```
 
 2. **Convert daily observations into a `.prn` and run an observed simulation**
@@ -138,7 +145,11 @@ print(result.monthlies)  # Calculated from the generated CLI (may be None on fai
    df_to_prn(df, prn_fn="observed.prn", p_key="PRCP (mm)", tmax_key="TMAX (C)", tmin_key="TMIN (C)")
 
    runner = Cligen(station=station, wd=str(wd))
-   runner.run_observed(prn_fn="observed.prn", cli_fn="observed.cli")
+   runner.run_observed(
+       prn_fn="observed.prn",
+       cli_fn="observed.cli",
+       randseed=24680,
+   )
    ```
 
 3. **Export the station catalog to GeoJSON (used by tests/geojson_export_test.py)**

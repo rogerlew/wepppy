@@ -36,6 +36,7 @@ class _DummyClimate:
         self._observed_end_year = ""
         self._future_start_year = ""
         self._future_end_year = ""
+        self._cligen_seed_override = None
         self.configured_scale_map = None
 
     @property
@@ -113,6 +114,48 @@ def test_parse_inputs_config_read_failure_precedes_mutation() -> None:
         ClimateInputParsingService().parse_inputs(climate, payload)
     assert {key: value for key, value in vars(climate).items() if key != "events"} == before
     assert climate.events == ["lock-enter", "lock-exit"]
+
+
+@pytest.mark.parametrize(
+    ("submitted", "expected"),
+    [(0, 0), (99999, 99999), (" 00123 ", 123), ("", None), (None, None)],
+)
+def test_parse_inputs_normalizes_cligen_seed(submitted: object, expected: int | None) -> None:
+    climate = _DummyClimate()
+    payload = _payload()
+    payload.update(climate_mode=str(int(ClimateMode.Vanilla)), cligen_seed=submitted)
+
+    ClimateInputParsingService().parse_inputs(climate, payload)
+
+    assert climate._cligen_seed_override == expected
+
+
+def test_parse_inputs_omitted_cligen_seed_preserves_override() -> None:
+    climate = _DummyClimate()
+    climate._cligen_seed_override = 24680
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+
+    ClimateInputParsingService().parse_inputs(climate, payload)
+
+    assert climate._cligen_seed_override == 24680
+
+
+@pytest.mark.parametrize(
+    "submitted",
+    [True, False, 1.5, "1.5", "+1", "-1", "１２", "seed", -1, 100000],
+)
+def test_parse_inputs_rejects_invalid_cligen_seed_transactionally(submitted: object) -> None:
+    climate = _DummyClimate()
+    climate._cligen_seed_override = 24680
+    payload = _payload()
+    payload.update(climate_mode=str(int(ClimateMode.Vanilla)), cligen_seed=submitted)
+
+    with pytest.raises(ValueError, match="cligen_seed"):
+        ClimateInputParsingService().parse_inputs(climate, payload)
+
+    assert climate._cligen_seed_override == 24680
+    assert climate._climate_mode == ClimateMode.Undefined
 
 
 def test_parse_inputs_invalid_payload_does_not_persist_map_repair() -> None:
