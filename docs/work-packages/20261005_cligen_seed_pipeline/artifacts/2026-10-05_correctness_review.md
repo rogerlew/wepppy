@@ -21,7 +21,8 @@ saved value reached the native executable. Blank retains automatic behavior.
 | Legacy attribute absent | yes | Behave as automatic/`None` | Pending |
 | Field present but empty | yes | Persist `None`; retain path default | Pending |
 | Integer `0..99999` | yes | Persist and forward exactly | Pending |
-| Existing generated integer | yes | Render and reuse unless cleared | Pending |
+| Existing generated runtime integer | yes | Keep runtime-only; render blank override | Pending |
+| Malformed durable override | no | Fail before native execution | Pending |
 | Malformed or out of range | no | Transactional validation error | Pending |
 
 ## Generated Artifact Evidence Chain
@@ -33,7 +34,7 @@ saved value reached the native executable. Blank retains automatic behavior.
 | Generated intermediate | Exact CLIGEN input/command | Pending log readback | Pending |
 | Prepared/executable input | One `-rN` argv | Pending native boundary | Pending |
 | Execution output | Fresh parseable deterministic `.cli` | Pending comparison | Pending |
-| User-facing result | Climate build completes with retained log | Pending `canine-liar` evidence | Pending |
+| User-facing result | Climate build completes with retained log | Pending normalized `canine-liar` fork evidence | Pending |
 
 ## Review Checks
 
