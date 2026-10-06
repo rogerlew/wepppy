@@ -36,3 +36,22 @@ Runtime cleanup on timeout remains a known separate issue. No new dependencies,
 services, automatic retries or deployment are authorized by this change.
 Rollback restores enqueue defaults for new jobs; existing queued/failed jobs
 retain their saved timeout. Do not mutate those jobs as part of rollout.
+
+## WRT-02 Omni leaf scope amendment
+
+Accepted 2026-10-06 in this Codex/operator conversation. Participants were the
+operator and Codex; the operator requested that Omni scenarios and contrasts use
+the dynamic timeout, and Codex is the implementer. This amendment applies the
+unchanged WRT-01 options to newly submitted `run_omni_scenario_rq` and
+`run_omni_contrast_rq` leaves in the existing job-pool concurrency path. It does
+not change the coefficient, floor, rounding, metadata, or range. It is a
+workflow-scope application/default amendment: the covered Omni leaves change
+from fixed to workload-derived allowances using the accepted numeric policy.
+
+The rejected alternatives were a global Omni timeout increase, which would not
+track workload, and a new Omni overhead coefficient, for which no retained
+empirical fit exists. Coordinator, compile, finalizer, retry, cleanup and
+deployment behavior remain outside the amendment. If environment evidence shows
+that total Omni leaf overhead exceeds the unchanged budget, retain that evidence
+and authorize a separate parameterization decision rather than silently raising
+this allowance.

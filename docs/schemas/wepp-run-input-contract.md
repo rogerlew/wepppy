@@ -85,3 +85,39 @@ the policy. Deployment, retrying production jobs and subprocess cleanup changes
 are outside WRT-01. Validate actual serialized RQ job timeout/metadata and the
 unchanged dependency tree on a disposable development run, including no-prep
 source immutability.
+
+### Omni leaf application (WRT-02)
+
+Operator approved 2026-10-06. In the existing RQ job-pool concurrency path, new
+`run_omni_scenario_rq` and `run_omni_contrast_rq` leaf jobs use the unchanged
+WRT-01 options computed from the base project's normal Climate and Wepp
+controllers. Compute the options once after determining that at least one leaf
+of that type is required and before enqueueing the first such leaf. Apply the
+same options to every affected leaf in that coordinator invocation.
+
+Compute and validate before allocating an affected child id, writing affected
+child metadata to the parent job, saving that metadata, opening the RQ Redis
+connection or enqueueing an affected leaf. For contrast work this must also
+precede hillslope rerun. Existing NoDb freshness and stale-run cleanup used to
+determine the required contrast ids may occur first; workload failure must not
+leave a new executable artifact or partial RQ graph.
+
+Empty, absent and fully skipped scenario/contrast sets do not read unused
+workload. Invalid required continuous workload fails before any affected leaf is
+enqueued. Single-storm leaves retain the existing fixed base timeout and no
+`watershed_timeout` metadata. Scenario and contrast coordinator jobs, summary
+compilers, finalizers and all other jobs retain their current allowances.
+
+WRT-02 changes no coefficient, floor, rounding, metadata field, alarm range,
+queue, dependency, retry, cleanup, authorization, lock, model input, output or
+completion behavior. Existing queued, failed and completed jobs remain
+unchanged. Applying WRT-01 to a whole Omni leaf is a finite execution allowance,
+not a guarantee that scenario preparation and hillslope overhead will fit; any
+future coefficient or overhead amendment requires separate retained evidence and
+approval. Implementation conformance is pending the WRT-02 checkpoint.
+
+WRT-02 adds no fan-out or concurrency cap: existing authorized scenario and
+contrast selection, tracked-job conflicts, contrast batching and dependency
+serialization remain the aggregate resource controls. Validate actual
+serialized jobs and their `job_info` tree in a disposable real Redis queue, then
+remove and verify removal of every validation job and queue.

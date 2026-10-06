@@ -618,6 +618,23 @@ When resuming Kubernetes work:
 ## 🚧 In Progress
 
 
+### Omni Dynamic Timeout (WRT-02)
+
+**Started**: 2026-10-06 UTC
+
+**Priority/Security**: High / `high`
+
+**Link**: [docs/work-packages/20261006_omni_dynamic_timeout/](docs/work-packages/20261006_omni_dynamic_timeout/)
+
+**Scope**: Apply the unchanged WRT-01 years-by-hillslopes allowance and metadata
+to newly enqueued Omni scenario and contrast leaves. Preserve coordinator,
+compile, finalizer, queue, dependency, retry, model-input, and output behavior.
+
+**Status**: Contract checkpoint drafted; independent preimplementation reviews
+and standalone ancestor commit are next. Implementation, deployment, and the
+production rerun have not occurred.
+
+
 ### Batch and Culvert Climate Rehydration Hardening
 
 **Started**: 2026-09-05 UTC
