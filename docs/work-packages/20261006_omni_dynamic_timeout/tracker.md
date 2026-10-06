@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-10-06 16:42 UTC  
-**Current phase**: Contract checkpoint  
-**Last updated**: 2026-10-06 16:54 UTC  
-**Next milestone**: Standalone ancestor commit, then implementation  
+**Current phase**: Completed with validation exception
+**Last updated**: 2026-10-06 19:07 UTC
+**Next milestone**: Separately authorize wepp1 deployment and retry
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
 **Security artifact**: `artifacts/20261006_security_review.md`
@@ -17,19 +17,15 @@
 
 ### Ready / Backlog
 
-- [ ] Implement WRT-02 after the checkpoint ancestor exists.
-- [ ] Run focused, graph, broad, and documentation validation.
-- [ ] Obtain independent final correctness and security reviews.
-- [ ] Close and archive the package without claiming deployment.
+- None.
 
 ### In Progress
 
-- [ ] Create the standalone contract checkpoint ancestor commit.
+- None.
 
 ### Blocked
 
-- [ ] Implementation is blocked until the reviewed contract checkpoint is a
-  standalone ancestor commit.
+- None.
 
 ### Done
 
@@ -39,6 +35,16 @@
   (2026-10-06 16:37 UTC).
 - [x] Two independent contract reviews approved all dispositions with no
   blocking findings (2026-10-06 16:54 UTC).
+- [x] Contract checkpoint committed as `3c8c9c622` (2026-10-06 16:54 UTC).
+- [x] Implementation candidate committed as `adff42d6d`; focused suite reports
+  `97 passed` (2026-10-06 17:24 UTC).
+- [x] Graph, stubs, broad-exception, docs, and exact-candidate real-Redis gates
+  pass (2026-10-06 17:25 UTC).
+- [x] Independent final correctness and security gates pass with no unresolved
+  medium/high findings (2026-10-06 17:29 UTC).
+- [x] Functional broad coverage completed with an unrelated catalog-latency
+  exception retained; package closed without deployment claims
+  (2026-10-06 19:07 UTC).
 
 ## Timeline
 
@@ -49,6 +55,11 @@
   aggregate-resource, real-serialization, and precision gaps; all findings were
   dispositioned in the contract/package/plan for confirmation.
 - **2026-10-06 16:54 UTC** - Both reviewers approved the amended checkpoint.
+- **2026-10-06 17:24 UTC** - Implementation candidate committed.
+- **2026-10-06 17:29 UTC** - Independent final correctness and security gates
+  passed.
+- **2026-10-06 19:07 UTC** - Broad functional coverage reconciled; package
+  closed with the unrelated PostgreSQL latency exception retained.
 
 ## Decisions Log
 
@@ -74,19 +85,19 @@ and retry semantics remain unchanged.
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
 | Longer leaves consume workers longer | Medium | Medium | Retain finite WRT-01 alarm range and metadata | Open |
-| Invalid workload creates a partial graph | High | Low | Calculate once before the first affected leaf enqueue | Open |
+| Invalid workload creates a partial graph | High | Low | Calculate once before the first affected leaf enqueue | Mitigated |
 | Formula does not cover total Omni overhead | Medium | Medium | Record as acceptance risk; do not change coefficient without evidence | Open |
-| Existing fan-out occupies batch workers for longer | Medium | Medium | Preserve scenario/contrast sets, batch size, chaining, conflict checks, and inspect live graph | Open |
+| Existing fan-out occupies batch workers for longer | Medium | Medium | Preserve scenario/contrast sets, batch size, chaining, conflict checks, and inspect live graph | Accepted operational risk |
 | Existing jobs are silently mutated | High | Low | Apply only to newly enqueued jobs | Mitigated |
 
 ## Hardening Signal Log
 
 - **Baseline health signals**: affected production scenario failed at exactly
   43,200 seconds.
-- **Post-change health signals**: pending implementation and serialized-job
-  evidence.
-- **Danger signals observed**: WRT-01 is absent from deployed wepp1 and absent
-  from Omni leaf enqueue options on current source.
+- **Post-change health signals**: candidate-bound serialized leaves expose
+  50,400-second WRT-01 options and preserve fixed non-leaf jobs/dependencies.
+- **Danger signals observed**: WRT-01 remains absent from deployed wepp1. Its
+  prior absence from current Omni leaf enqueue options is fixed in the candidate.
 - **Temporary callus register**: none.
 - **Softening experiments**: not applicable.
 
@@ -94,43 +105,45 @@ and retry semantics remain unchanged.
 
 ### Code Quality
 
-- [ ] Focused pytest passes.
+- [x] Focused pytest passes.
 - [ ] Full `wctl run-pytest tests --maxfail=1` passes.
-- [ ] `wctl check-rq-graph` passes and catalog is current.
-- [ ] Changed broad-exception enforcement passes.
+- [x] Qualified broad result retained: 10,122 passes before unrelated latency
+  failure; isolated benchmark pass; 143-test functional continuation pass.
+- [x] `wctl check-rq-graph` passes and catalog is current.
+- [x] Changed broad-exception enforcement passes.
 
 ### Security
 
 - [x] Security impact and rationale recorded.
-- [ ] Dedicated security review passes.
-- [ ] No unresolved medium/high security findings remain.
+- [x] Dedicated security review passes.
+- [x] No unresolved medium/high security findings remain.
 
 ### Documentation
 
-- [ ] RQ README, contract, ADR, tracker, and package agree.
-- [ ] Package docs lint cleanly.
-- [ ] Active ExecPlan is archived with outcome.
+- [x] RQ README, contract, ADR, tracker, and package agree.
+- [x] Package docs lint cleanly.
+- [x] Active ExecPlan is archived with outcome.
 
 ### Testing
 
-- [ ] Scenario leaf serialized timeout/metadata verified.
-- [ ] Contrast leaf serialized timeout/metadata verified.
-- [ ] Single-storm fixed timeout verified.
-- [ ] Empty/skipped paths do not require unused workload.
-- [ ] Malformed required workload fails before affected leaf enqueue.
-- [ ] Dependency edges and fixed non-leaf allowances remain unchanged.
+- [x] Scenario leaf serialized timeout/metadata verified.
+- [x] Contrast leaf serialized timeout/metadata verified.
+- [x] Single-storm fixed timeout verified.
+- [x] Empty/skipped paths do not require unused workload.
+- [x] Malformed required workload fails before affected leaf enqueue.
+- [x] Dependency edges and fixed non-leaf allowances remain unchanged.
 
 ### Generated Artifacts
 
-- [ ] Existing controller workload is read through normal readers.
-- [ ] Actual RQ enqueue data is inspected, not inferred from status.
-- [ ] Disposable real-Redis jobs are inspected through `job_info` and removed.
-- [ ] Exact candidate revision is recorded.
-- [ ] Completion remains no stronger than locally validated.
+- [x] Existing controller workload is read through normal readers.
+- [x] Actual RQ enqueue data is inspected, not inferred from status.
+- [x] Disposable real-Redis jobs are inspected through `job_info` and removed.
+- [x] Exact candidate revision is recorded.
+- [x] Completion remains no stronger than locally validated.
 
 ### Deployment
 
-- [ ] Not in package scope; record wepp1 deployment and rerun as follow-up.
+- [x] Not in package scope; record wepp1 deployment and rerun as follow-up.
 
 ## Progress Notes
 
@@ -154,6 +167,33 @@ and retry semantics remain unchanged.
 - Commit the checkpoint before touching implementation files.
 
 **Test results**: Not started; implementation is intentionally gated.
+
+### 2026-10-06 19:07 UTC: Implementation and qualified closeout
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Committed WRT-02 as `adff42d6d`, retained exact-candidate real-Redis evidence,
+  and obtained independent correctness/security approval.
+- Completed focused, graph, stub, broad-exception, docs, and functional-tail
+  validation; archived the ExecPlan and closed the local package.
+
+**Blockers encountered**:
+
+- The broad suite did not pass cleanly because unrelated PostgreSQL catalog
+  latency benchmarks exceeded their 50 ms delta thresholds under multi-second
+  database variance. The original failure passed alone; the functional tail
+  passed with four latency benchmarks deselected.
+
+**Next steps**:
+
+- Separately authorize/deploy the candidate to wepp1, then retry and inspect the
+  named workload under the production gate.
+- Resolve or calibrate the catalog benchmark isolation outside WRT-02 scope.
+
+**Test results**: See `artifacts/validation.md` for exact commands and qualified
+broad-suite evidence.
 
 ## Watch List
 

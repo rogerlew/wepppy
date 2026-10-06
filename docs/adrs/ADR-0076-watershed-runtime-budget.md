@@ -47,6 +47,8 @@ unchanged WRT-01 options to newly submitted `run_omni_scenario_rq` and
 not change the coefficient, floor, rounding, metadata, or range. It is a
 workflow-scope application/default amendment: the covered Omni leaves change
 from fixed to workload-derived allowances using the accepted numeric policy.
+Implemented locally in `adff42d6d9e38f561d41cc681e89f3386ef888c0`;
+deployment remains separate.
 
 The rejected alternatives were a global Omni timeout increase, which would not
 track workload, and a new Omni overhead coefficient, for which no retained

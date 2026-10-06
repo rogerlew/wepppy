@@ -114,7 +114,9 @@ completion behavior. Existing queued, failed and completed jobs remain
 unchanged. Applying WRT-01 to a whole Omni leaf is a finite execution allowance,
 not a guarantee that scenario preparation and hillslope overhead will fit; any
 future coefficient or overhead amendment requires separate retained evidence and
-approval. Implementation conformance is pending the WRT-02 checkpoint.
+approval. Implementation conformance was locally validated in
+`adff42d6d9e38f561d41cc681e89f3386ef888c0`; deployment and production retry
+remain separate operator actions.
 
 WRT-02 adds no fan-out or concurrency cap: existing authorized scenario and
 contrast selection, tracked-job conflicts, contrast batching and dependency

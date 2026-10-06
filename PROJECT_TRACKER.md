@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-05
-**Active Packages**: 42
+**Last Updated**: 2026-10-06
+**Active Packages**: 41
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -616,23 +616,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
-
-### Omni Dynamic Timeout (WRT-02)
-
-**Started**: 2026-10-06 UTC
-
-**Priority/Security**: High / `high`
-
-**Link**: [docs/work-packages/20261006_omni_dynamic_timeout/](docs/work-packages/20261006_omni_dynamic_timeout/)
-
-**Scope**: Apply the unchanged WRT-01 years-by-hillslopes allowance and metadata
-to newly enqueued Omni scenario and contrast leaves. Preserve coordinator,
-compile, finalizer, queue, dependency, retry, model-input, and output behavior.
-
-**Status**: Contract checkpoint drafted; independent preimplementation reviews
-and standalone ancestor commit are next. Implementation, deployment, and the
-production rerun have not occurred.
 
 
 ### Batch and Culvert Climate Rehydration Hardening
@@ -1489,6 +1472,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Omni Dynamic Timeout (WRT-02)
+
+**Completed**: 2026-10-06 UTC
+
+**Priority/Security**: High / `high`
+
+**Link**:
+[docs/work-packages/20261006_omni_dynamic_timeout/](docs/work-packages/20261006_omni_dynamic_timeout/)
+
+**Outcome**: Candidate `adff42d6d` applies unchanged WRT-01 options to new Omni
+scenario and contrast leaves. Focused, graph, stub, Redis, and independent review
+gates pass. Broad functional coverage is complete with a retained unrelated
+PostgreSQL catalog-latency exception; deployment and production retry remain
+separate.
 
 ### Single User-Defined Landuse and Soils
 

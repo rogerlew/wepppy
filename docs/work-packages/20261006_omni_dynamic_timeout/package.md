@@ -1,6 +1,6 @@
 # Omni dynamic timeout
 
-**Status**: Open (2026-10-06)
+**Status**: Completed with validation exception (2026-10-06)
 **Timezone**: UTC
 **Owner**: Codex
 **Amendment**: WRT-02
@@ -84,7 +84,9 @@ changing its formula, queue topology, model inputs, or retry behavior.
 - **Actual-project/environment gate**: the named production failure is retained
   as diagnosis; exact-candidate production-equivalent execution is required
   before claiming environment validation.
-- **Highest completion claim currently supported**: diagnosed.
+- **Highest completion claim currently supported**: implemented and locally
+  validated; the broad suite has a documented unrelated catalog-latency
+  exception.
 
 ## Stakeholders
 
@@ -95,14 +97,18 @@ changing its formula, queue topology, model inputs, or retry behavior.
 
 ## Success Criteria
 
-- [ ] Contract checkpoint is independently reviewed and committed before code.
-- [ ] Scenario and contrast leaves use WRT-01 timeout and metadata.
-- [ ] Empty, skipped, single-storm, malformed, legacy, and populated states have
+- [x] Contract checkpoint is independently reviewed and committed before code.
+- [x] Scenario and contrast leaves use WRT-01 timeout and metadata.
+- [x] Empty, skipped, single-storm, malformed, legacy, and populated states have
   explicit behavior and focused evidence.
-- [ ] Dependency graph/catalog, focused tests, full Python suite, docs lint, and
-  broad-exception changed-file enforcement pass.
-- [ ] No unresolved medium/high correctness or security findings remain.
-- [ ] Package closes as locally validated, without claiming deployment or repair.
+- [x] Dependency graph/catalog, focused tests, docs lint, broad-exception
+  enforcement, and functional continuation pass.
+- [ ] The full Python suite passes cleanly. It stopped after 10,122 passes on an
+  unrelated PostgreSQL catalog latency threshold; the failing benchmark passed
+  alone, and the remaining functional slice passed with four latency benchmarks
+  deselected. See `artifacts/validation.md`.
+- [x] No unresolved medium/high correctness or security findings remain.
+- [x] Package closes as locally validated, without claiming deployment or repair.
 
 ## Parameterization ADR Gate
 
@@ -187,7 +193,13 @@ must remain visible in the deployment decision.
 
 ## Deliverables
 
-To be completed at closure.
+- Contract checkpoint `3c8c9c622ce722180c837e641b6d3bfbe9d67df3`.
+- Implementation candidate `adff42d6d9e38f561d41cc681e89f3386ef888c0`.
+- Focused state/admission regressions, generated RQ catalog, README, and stub.
+- Candidate-bound real-Redis serialization and cleanup evidence.
+- Independent correctness and security reviews with no unresolved medium/high
+  findings.
+- Qualified broad-suite evidence and the retained unrelated latency exception.
 
 ## Follow-up Work
 

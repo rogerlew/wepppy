@@ -1,0 +1,282 @@
+{
+  "queue": "wrt02-validation-01f7290fb3024b4094ef537790b84068",
+  "source_revision": "adff42d6d9e38f561d41cc681e89f3386ef888c0",
+  "uid": 1000,
+  "gid": 993,
+  "graphs_executed": false,
+  "cases": [
+    {
+      "workflow": "scenarios",
+      "jobs": [
+        {
+          "id": "91e02048-2779-45bc-8dbe-8fe8297331c1",
+          "func": "wepppy.rq.omni_rq.run_omni_scenarios_rq",
+          "timeout": 43200,
+          "meta": {
+            "jobs:0,scenario:undisturbed": "94ffa907-caa7-4d10-b685-6639d74082bd",
+            "jobs:1,scenario:uniform_low": "4ebd9b70-b684-4d26-9e5d-6c6602a650f4",
+            "jobs:2,func:_compile_hillslope_summaries_rq": "0707f300-39c7-4c72-ac15-939b2f052ecc",
+            "jobs:3,func:_finalize_omni_scenarios_rq": "c71c4ceb-ecd8-4ce7-93b6-1aaae5d3ef21"
+          },
+          "dependencies": []
+        },
+        {
+          "id": "94ffa907-caa7-4d10-b685-6639d74082bd",
+          "func": "wepppy.rq.omni_rq.run_omni_scenario_rq",
+          "timeout": 50400,
+          "meta": {
+            "watershed_timeout": {
+              "policy": "WRT-01",
+              "years": 500,
+              "hillslopes": 1908,
+              "seconds_per_hillslope_year": 0.05,
+              "timeout_seconds": 50400,
+              "workload_source": "controllers",
+              "wepp_bin": "wepp_dcc52a6"
+            }
+          },
+          "dependencies": []
+        },
+        {
+          "id": "4ebd9b70-b684-4d26-9e5d-6c6602a650f4",
+          "func": "wepppy.rq.omni_rq.run_omni_scenario_rq",
+          "timeout": 50400,
+          "meta": {
+            "watershed_timeout": {
+              "policy": "WRT-01",
+              "years": 500,
+              "hillslopes": 1908,
+              "seconds_per_hillslope_year": 0.05,
+              "timeout_seconds": 50400,
+              "workload_source": "controllers",
+              "wepp_bin": "wepp_dcc52a6"
+            }
+          },
+          "dependencies": [
+            "94ffa907-caa7-4d10-b685-6639d74082bd"
+          ]
+        },
+        {
+          "id": "0707f300-39c7-4c72-ac15-939b2f052ecc",
+          "func": "wepppy.rq.omni_rq._compile_hillslope_summaries_rq",
+          "timeout": 43200,
+          "meta": {},
+          "dependencies": [
+            "4ebd9b70-b684-4d26-9e5d-6c6602a650f4"
+          ]
+        },
+        {
+          "id": "c71c4ceb-ecd8-4ce7-93b6-1aaae5d3ef21",
+          "func": "wepppy.rq.omni_rq._finalize_omni_scenarios_rq",
+          "timeout": 43200,
+          "meta": {},
+          "dependencies": [
+            "0707f300-39c7-4c72-ac15-939b2f052ecc"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "91e02048-2779-45bc-8dbe-8fe8297331c1",
+        "runid": "wrt02-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.omni_rq.run_omni_scenarios_rq('wrt02-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "0": [
+            {
+              "job_id": "94ffa907-caa7-4d10-b685-6639d74082bd",
+              "runid": "wrt02-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq.run_omni_scenario_rq('wrt02-validation', {'type': 9})",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "1": [
+            {
+              "job_id": "4ebd9b70-b684-4d26-9e5d-6c6602a650f4",
+              "runid": "wrt02-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq.run_omni_scenario_rq('wrt02-validation', {'type': 1})",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "2": [
+            {
+              "job_id": "0707f300-39c7-4c72-ac15-939b2f052ecc",
+              "runid": "wrt02-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq._compile_hillslope_summaries_rq('wrt02-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "3": [
+            {
+              "job_id": "c71c4ceb-ecd8-4ce7-93b6-1aaae5d3ef21",
+              "runid": "wrt02-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq._finalize_omni_scenarios_rq('wrt02-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "workflow": "contrasts",
+      "jobs": [
+        {
+          "id": "76037942-39b4-49de-84b6-4024661acf32",
+          "func": "wepppy.rq.omni_rq.run_omni_contrasts_rq",
+          "timeout": 43200,
+          "meta": {
+            "jobs:contrast:1": "085f0bde-5d01-407a-9641-c49082f48da7",
+            "jobs:contrast:2": "e6e44e7d-d3ab-415f-a7b9-97565edbe9e9",
+            "jobs:finalize:_finalize_omni_contrasts_rq": "08887053-c808-47b0-96fc-0de44a468f46"
+          },
+          "dependencies": []
+        },
+        {
+          "id": "085f0bde-5d01-407a-9641-c49082f48da7",
+          "func": "wepppy.rq.omni_rq.run_omni_contrast_rq",
+          "timeout": 50400,
+          "meta": {
+            "watershed_timeout": {
+              "policy": "WRT-01",
+              "years": 500,
+              "hillslopes": 1908,
+              "seconds_per_hillslope_year": 0.05,
+              "timeout_seconds": 50400,
+              "workload_source": "controllers",
+              "wepp_bin": "wepp_dcc52a6"
+            }
+          },
+          "dependencies": []
+        },
+        {
+          "id": "e6e44e7d-d3ab-415f-a7b9-97565edbe9e9",
+          "func": "wepppy.rq.omni_rq.run_omni_contrast_rq",
+          "timeout": 50400,
+          "meta": {
+            "watershed_timeout": {
+              "policy": "WRT-01",
+              "years": 500,
+              "hillslopes": 1908,
+              "seconds_per_hillslope_year": 0.05,
+              "timeout_seconds": 50400,
+              "workload_source": "controllers",
+              "wepp_bin": "wepp_dcc52a6"
+            }
+          },
+          "dependencies": [
+            "085f0bde-5d01-407a-9641-c49082f48da7"
+          ]
+        },
+        {
+          "id": "08887053-c808-47b0-96fc-0de44a468f46",
+          "func": "wepppy.rq.omni_rq._finalize_omni_contrasts_rq",
+          "timeout": 43200,
+          "meta": {},
+          "dependencies": [
+            "e6e44e7d-d3ab-415f-a7b9-97565edbe9e9"
+          ]
+        }
+      ],
+      "job_info": {
+        "job_id": "76037942-39b4-49de-84b6-4024661acf32",
+        "runid": "wrt02-validation",
+        "status": "queued",
+        "result": null,
+        "started_at": null,
+        "ended_at": null,
+        "description": "wepppy.rq.omni_rq.run_omni_contrasts_rq('wrt02-validation')",
+        "elapsed_s": null,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "contrast": [
+            {
+              "job_id": "085f0bde-5d01-407a-9641-c49082f48da7",
+              "runid": "wrt02-validation",
+              "status": "queued",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq.run_omni_contrast_rq('wrt02-validation', 1)",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "e6e44e7d-d3ab-415f-a7b9-97565edbe9e9",
+              "runid": "wrt02-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq.run_omni_contrast_rq('wrt02-validation', 2)",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "finalize": [
+            {
+              "job_id": "08887053-c808-47b0-96fc-0de44a468f46",
+              "runid": "wrt02-validation",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.omni_rq._finalize_omni_contrasts_rq('wrt02-validation')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "cleanup_verified": true
+}

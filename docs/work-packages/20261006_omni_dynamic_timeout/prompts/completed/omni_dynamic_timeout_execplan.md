@@ -19,13 +19,20 @@ serialized RQ job. The package does not deploy or retry production work.
 - [x] (2026-10-06 16:42 UTC) Diagnose production failure and current source gap.
 - [x] (2026-10-06 16:42 UTC) Draft package, WRT-02 contract checkpoint, and ADR
   scope amendment.
-- [ ] Create the standalone checkpoint ancestor commit. Two independent reviews
-  returned five medium findings in total; all were dispositioned and both
-  reviewers approved the amended checkpoint at 2026-10-06 16:54 UTC.
-- [ ] Implement the smallest leaf-enqueue change and focused regressions.
-- [ ] Refresh/check RQ catalog and run focused and full validation.
-- [ ] Obtain independent final correctness and security review.
-- [ ] Close package and archive this plan with exact evidence and residual work.
+- [x] (2026-10-06 16:54 UTC) Create the standalone checkpoint ancestor commit.
+  Two independent reviews returned five medium findings in total; all were
+  dispositioned and both reviewers approved the amended checkpoint at
+  2026-10-06 16:54 UTC.
+- [x] (2026-10-06 17:24 UTC) Implement the smallest leaf-enqueue change and
+  focused regressions in `adff42d6d9e38f561d41cc681e89f3386ef888c0`.
+- [x] (2026-10-06 19:07 UTC) Refresh/check RQ catalog and run validation.
+  Focused, graph, stub, broad-exception, docs, candidate-bound Redis, and the
+  functional continuation pass. The full suite stopped after 10,122 passes on
+  an unrelated catalog latency benchmark; retain the qualification below.
+- [x] (2026-10-06 17:29 UTC) Obtain independent final correctness and security
+  review; both pass with no unresolved medium/high findings.
+- [x] (2026-10-06 19:07 UTC) Close package with exact evidence, qualified broad
+  gate, and deployment/retry explicitly outstanding.
 
 ## Surprises & Discoveries
 
@@ -38,6 +45,16 @@ serialized RQ job. The package does not deploy or retry production work.
 - The failed prepared workload used 500 years and 1,908 hillslopes. WRT-01 would
   provide 50,400 seconds (14 hours), but total scenario overhead is an acceptance
   risk because WRT-01 was fitted to watershed runtime.
+- Real Redis validation uses split proof: focused tests invoke the coordinators,
+  while the disposable harness manually serializes/fetches their expected graph.
+  This proves wiring plus serialization/topology, not leaf execution or model
+  output correctness.
+- The canonical full suite exposed an unrelated timing/isolation problem in
+  `test_run_catalog_postgres.py`: database operations took seconds against a
+  50 ms delta threshold. The initially failing benchmark passed alone, then
+  failed again after neighboring catalog tests; another latency benchmark also
+  failed. The remaining functional slice passed with four latency tests
+  deselected.
 
 ## Decision Log
 
@@ -50,10 +67,30 @@ serialized RQ job. The package does not deploy or retry production work.
   Empty and fully skipped workflows therefore retain their current behavior,
   while malformed required continuous workload cannot leave a partial leaf
   graph.
+- **2026-10-06 17:25 UTC**: Retain coordinator/leaf split proof rather than run
+  disposable model work. The user-requested change is RQ admission, and
+  production-equivalent leaf execution remains a separately gated post-deploy
+  acceptance step.
 
 ## Outcomes & Retrospective
 
-Implementation and validation are pending.
+WRT-02 is implemented in `adff42d6d9e38f561d41cc681e89f3386ef888c0`.
+New continuous Omni scenario and contrast leaves reuse exact WRT-01 options;
+single storms and non-leaf jobs retain the fixed allowance. Focused tests report
+97 passes, real Redis evidence records the candidate revision and verifies
+cleanup, and both independent final reviews pass with no unresolved medium/high
+findings.
+
+The broad gate is qualified rather than clean: `wctl run-pytest tests
+--maxfail=1` reached 10,122 passes and 126 skips before an unrelated PostgreSQL
+catalog latency assertion failed under multi-second database variance. That test
+passed alone. The unexecuted tail then reported 143 passes with four catalog
+latency benchmarks deselected. This does not implicate WRT-02, but it remains a
+test-isolation/performance issue and is not represented as a full-suite pass.
+
+No deployment or production retry occurred. The next operator action is a
+separately gated wepp1 deployment followed by queue, worker, timeout metadata,
+and generated-output review of the named run.
 
 ## Context and Orientation
 
@@ -63,7 +100,7 @@ pipelines consume this dictionary in `wepppy/rq/wepp_rq_pipeline.py`.
 `wepppy/rq/omni_rq.py` coordinates scenario and contrast workflows on the batch
 queue. `run_omni_scenarios_rq` enqueues `run_omni_scenario_rq` children;
 `run_omni_contrasts_rq` enqueues `run_omni_contrast_rq` children. The children
-perform watershed execution internally, but both enqueue sites currently pass
+perform watershed execution internally; before WRT-02 both enqueue sites passed
 the fixed module `TIMEOUT`.
 
 WRT-02 does not change dependency relationships. Scenario compile/finalize and
