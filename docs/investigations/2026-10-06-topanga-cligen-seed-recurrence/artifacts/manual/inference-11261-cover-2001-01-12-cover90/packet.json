@@ -1,0 +1,53 @@
+{
+  "event_id": "inference-11261-cover-2001-01-12-cover90",
+  "payload_sha256": "ee58073793499cfddef7ba92f771053674797fabcb053326bbba40b901ae36af",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 2.3616887574462453e-06,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 0.0,
+      "time_s": 20160.0
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 20160.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 2.3616887574462453e-06,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 1.046442985534668,
+    "calendar_year": 2001,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 2.3616887574462453e-06,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 12,
+    "ns": 1,
+    "ofe": 1,
+    "positive_excess_duration_s": 0.0,
+    "remax_pre_surplus_m_s": 3.180223728804776e-08,
+    "run_id": "inference-11261-cover90",
+    "runoff_post_reconciliation_m": 0.047611646354198456,
+    "runoff_pre_reconciliation_m": 0.0,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.047611646354198456,
+    "surplus_added_rate_m_s": 2.3616887574462453e-06,
+    "surplus_assignment_duration_s": 20160.0,
+    "surplus_assignment_mode": "storm",
+    "surplus_depth_m": 0.047611646354198456,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

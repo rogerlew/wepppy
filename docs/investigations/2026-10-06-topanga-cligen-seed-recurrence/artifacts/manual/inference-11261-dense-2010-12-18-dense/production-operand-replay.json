@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "partial_equilibrium",
+    "finite_result": true,
+    "qpstar": 0.48664370360562886,
+    "tc": null,
+    "tstar": 1.6163147178605952,
+    "vave_m_s": 0.00010463801773472962,
+    "vstar": 121.82303483378945,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": true,
+    "within_documented_vstar_domain": false
+  },
+  "event_id": "inference-11261-dense-2010-12-18-dense",
+  "operand_derivation": "positive-excess branch retains pre-surplus remax",
+  "packet_sha256": "8440aaac34b5ff7c34bfdd979918d6420515efc5465e3e8fa8c3ce0ac5fdd2d2",
+  "remax_supplied_m_s": 8.589345839027374e-07,
+  "replay": {
+    "appmth_peak_m_s": 5.092141873319633e-05,
+    "hdrive_final_routed_volume_fraction": 0.9509825110435486,
+    "hdrive_nq": 20,
+    "hdrive_nqt": 27,
+    "hdrive_peak_m_s": 5.139133281772956e-05
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "constant_or_out_of_domain",
+    "finite_result": true,
+    "qpstar": 1.0,
+    "tc": null,
+    "tstar": 0.041192130668261176,
+    "vave_m_s": 2.814762904281505e-06,
+    "vstar": 1.0000000137938376,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": false,
+    "within_documented_vstar_domain": false
+  },
+  "event_id": "inference-00007-ksat-1995-01-03-ksat35",
+  "operand_derivation": "IRS no-positive-excess branch assigns remax=s(1)=surpls/durre",
+  "packet_sha256": "89286eea2a28d0f3f90cbb2fe3bcb6f25177bfd96bb590c16e42939bc51f94fc",
+  "remax_supplied_m_s": 2.8147628654551227e-06,
+  "replay": {
+    "appmth_peak_m_s": 2.8147628654551227e-06,
+    "hdrive_final_routed_volume_fraction": 0.5259069800376892,
+    "hdrive_nq": 11,
+    "hdrive_nqt": 202,
+    "hdrive_peak_m_s": 2.8218446459504776e-06
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

@@ -1,0 +1,48 @@
+{
+  "event_id": "inference-11261-dense-2010-12-18-dense",
+  "harmonized_forcing_diagnostic": {
+    "appmth": {
+      "equation_branch": "partial_equilibrium",
+      "finite_result": true,
+      "qpstar": 0.48813581834691727,
+      "tc": null,
+      "tstar": 1.613019245196873,
+      "vave_m_s": 0.00010528079612842853,
+      "vstar": 0.9980495442403516,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": true
+    },
+    "appmth_peak_m_s": 5.1391318265814334e-05,
+    "forcing_integral_m": 0.03213011308359143,
+    "hdrive_final_routed_volume_fraction": 0.9528508186340332,
+    "hdrive_nq": 20,
+    "hdrive_nqt": 28,
+    "hdrive_peak_m_s": 5.139133281772956e-05,
+    "positive_support_duration_s": 305.1849365234375
+  },
+  "hdrive_stopping_condition": "95_percent_volume",
+  "legacy_input_replay": {
+    "appmth": {
+      "equation_branch": "partial_equilibrium",
+      "finite_result": true,
+      "qpstar": 0.48664370360562886,
+      "tc": null,
+      "tstar": 1.6163147178605952,
+      "vave_m_s": 0.00010463801773472962,
+      "vstar": 121.82303483378945,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": false
+    },
+    "appmth_peak_m_s": 5.092141873319633e-05,
+    "hdrive_final_routed_volume_fraction": 0.9509825110435486,
+    "hdrive_nq": 20,
+    "hdrive_nqt": 27,
+    "hdrive_peak_m_s": 5.139133281772956e-05
+  },
+  "packet_sha256": "8440aaac34b5ff7c34bfdd979918d6420515efc5465e3e8fa8c3ce0ac5fdd2d2",
+  "replay_process": "standalone_peak_replay_executable",
+  "schema_version": "1.0.0",
+  "selected_method_delta_m_s": 0.0
+}

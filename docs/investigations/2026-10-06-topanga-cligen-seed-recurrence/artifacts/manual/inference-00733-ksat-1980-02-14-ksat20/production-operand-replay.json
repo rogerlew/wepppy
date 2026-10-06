@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "constant_or_out_of_domain",
+    "finite_result": true,
+    "qpstar": 1.0,
+    "tc": null,
+    "tstar": 0.18844651239133606,
+    "vave_m_s": 1.3233603334432758e-05,
+    "vstar": 2.30293446961708,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": true,
+    "within_documented_vstar_domain": false
+  },
+  "event_id": "inference-00733-ksat-1980-02-14-ksat20",
+  "operand_derivation": "positive-excess branch retains pre-surplus remax",
+  "packet_sha256": "d10d4f8de637c361d8d9580d7e9e50deb0df23b796ccf9d4514d13810eed553c",
+  "remax_supplied_m_s": 5.746408987761242e-06,
+  "replay": {
+    "appmth_peak_m_s": 1.3233603567641694e-05,
+    "hdrive_final_routed_volume_fraction": 0.9533644914627075,
+    "hdrive_nq": 44,
+    "hdrive_nqt": 43,
+    "hdrive_peak_m_s": 1.5490200894419104e-05
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

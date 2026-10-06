@@ -1,0 +1,28 @@
+{
+  "architecture": "x86_64",
+  "build_id": "wepp-ea25ad79-gate21-observer",
+  "compiler": "GNU Fortran",
+  "compiler_version": "13.3.0",
+  "executable_sha256": "36f3560395676e6a4f96d4eff87e3a860e8c6172efd76fdcb8985d817d8a9047",
+  "floating_point_flags": [
+    "-ffpe-trap=invalid,zero,overflow",
+    "-finit-local-zero",
+    "-fno-align-commons"
+  ],
+  "input_tree_sha256": "5d829e7cac0638f08a73b4de2c2dd583f1055cee0562932e7ab8695a53627be2",
+  "instrumentation_patch_sha256": null,
+  "linker_libraries": [
+    "zlib"
+  ],
+  "optimization_flags": [
+    "-O2",
+    "-mcmodel=medium"
+  ],
+  "os": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "preprocessor_definitions": [],
+  "reproducibility_level": "internal",
+  "schema_version": "1.0.0",
+  "source_clean": true,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_repository": "wepp-in-the-woods/wepp-forest"
+}

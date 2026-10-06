@@ -1,0 +1,62 @@
+{
+  "cross_host_numeric_parity": {
+    "all_pair_classifications_identical": true,
+    "cluster_terminal_sha256": "d1627ef643f8c5f14035e891c7e1cc43e02c0147e4953412d124f41b4c6fb060",
+    "cover80": {
+      "observer_differences": {},
+      "water_max_abs": 7.000000000090267e-06
+    },
+    "cover90": {
+      "observer_differences": {},
+      "water_max_abs": 3.000000000419334e-06
+    },
+    "dense": {
+      "observer_differences": {},
+      "water_max_abs": 1.000000000139778e-06
+    },
+    "forest_terminal_sha256": "2919df8f3617fee0bfbc28fb5f797cf0c4f81369a6facb4318fea46117e84ef9",
+    "ksat20": {
+      "observer_differences": {
+        "added_rate_m_s": {
+          "max_abs": 2.2737367544323206e-13,
+          "rows": 1
+        },
+        "peak_m_s": {
+          "max_abs": 2.2737367544323206e-13,
+          "rows": 1
+        },
+        "postmax_m_s": {
+          "max_abs": 2.2737367544323206e-13,
+          "rows": 1
+        },
+        "runoff_post_m": {
+          "max_abs": 3.725290298461914e-09,
+          "rows": 1
+        },
+        "surdra_raw_m": {
+          "max_abs": 3.725290298461914e-09,
+          "rows": 1
+        },
+        "surdra_realized_m": {
+          "max_abs": 3.725290298461914e-09,
+          "rows": 1
+        }
+      },
+      "water_max_abs": 9.999999999621423e-06
+    },
+    "ksat35": {
+      "observer_differences": {
+        "surdra_raw_m": {
+          "max_abs": 1.862645149230957e-09,
+          "rows": 1
+        }
+      },
+      "water_max_abs": 0.0
+    }
+  },
+  "hbp_byte_parity": false,
+  "hbp_scope": "retained but not consumed; watershed routing excluded",
+  "historical_1986_peaks_equal": true,
+  "historical_peak_erosion_outputs_byte_equal": true,
+  "status": "pass"
+}

@@ -1,0 +1,25 @@
+{
+  "completed_inference_seeds": 100,
+  "distinct_semantic_storm_series": 100,
+  "event_pair_rows": 66910,
+  "failed_inference_seeds": 0,
+  "fixed_daily_fields_exact": true,
+  "independent_screen_counts_match": true,
+  "lossless_raw_files_verified": 4000,
+  "manual_replay_states": {
+    "pass": 15,
+    "unresolved": 5
+  },
+  "max_branch_replay_delta_m_s": 0.0,
+  "quality_warning_occurrences_by_variable": {
+    "Max. Temp.": 30,
+    "Precip. Amt.": 1273,
+    "Prob. of Precip": 13,
+    "Temp. Dew Pt.": 1298
+  },
+  "schema_version": 1,
+  "status": "pass",
+  "supplemental_branch_replay_states": {
+    "pass": 20
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "event_id": "inference-11261-cover-2001-01-12-cover80",
+  "payload_sha256": "0acf65c27a6d940a70a1f2e00c84ab66703f9e1075b808d22e366ee560887aea",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "time_s": 300.0
+    },
+    {
+      "point_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "time_s": 600.0
+    },
+    {
+      "point_ordinal": 4,
+      "rate_m_s": 1e-10,
+      "time_s": 900.0
+    },
+    {
+      "point_ordinal": 5,
+      "rate_m_s": 1e-10,
+      "time_s": 1200.0
+    },
+    {
+      "point_ordinal": 6,
+      "rate_m_s": 1e-10,
+      "time_s": 1500.0
+    },
+    {
+      "point_ordinal": 7,
+      "rate_m_s": 1e-10,
+      "time_s": 1800.0
+    },
+    {
+      "point_ordinal": 8,
+      "rate_m_s": 6.964940740772363e-05,
+      "time_s": 2016.0
+    },
+    {
+      "point_ordinal": 9,
+      "rate_m_s": 6.967214721953496e-05,
+      "time_s": 2100.0
+    },
+    {
+      "point_ordinal": 10,
+      "rate_m_s": 6.969426146952173e-05,
+      "time_s": 2400.0
+    },
+    {
+      "point_ordinal": 11,
+      "rate_m_s": 0.0,
+      "time_s": 2700.0
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 300.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    },
+    {
+      "end_s": 600.0,
+      "interval_ordinal": 2,
+      "rate_m_s": 0.0,
+      "start_s": 300.0
+    },
+    {
+      "end_s": 900.0,
+      "interval_ordinal": 3,
+      "rate_m_s": 0.0,
+      "start_s": 600.0
+    },
+    {
+      "end_s": 1200.0,
+      "interval_ordinal": 4,
+      "rate_m_s": 0.0,
+      "start_s": 900.0
+    },
+    {
+      "end_s": 1500.0,
+      "interval_ordinal": 5,
+      "rate_m_s": 0.0,
+      "start_s": 1200.0
+    },
+    {
+      "end_s": 1800.0,
+      "interval_ordinal": 6,
+      "rate_m_s": 0.0,
+      "start_s": 1500.0
+    },
+    {
+      "end_s": 2016.0,
+      "interval_ordinal": 7,
+      "rate_m_s": 0.0,
+      "start_s": 1800.0
+    },
+    {
+      "end_s": 2100.0,
+      "interval_ordinal": 8,
+      "rate_m_s": 5.391969466472801e-07,
+      "start_s": 2016.0
+    },
+    {
+      "end_s": 2400.0,
+      "interval_ordinal": 9,
+      "rate_m_s": 5.619367584586143e-07,
+      "start_s": 2100.0
+    },
+    {
+      "end_s": 2700.0,
+      "interval_ordinal": 10,
+      "rate_m_s": 5.840510084453854e-07,
+      "start_s": 2400.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 6.914172263350338e-05,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 1.0809539556503296,
+    "calendar_year": 2001,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 6.969425885472447e-05,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 12,
+    "ns": 10,
+    "ofe": 1,
+    "positive_excess_duration_s": 684.0,
+    "remax_pre_surplus_m_s": 5.840510084453854e-07,
+    "run_id": "inference-11261-cover80",
+    "runoff_post_reconciliation_m": 0.04729294031858444,
+    "runoff_pre_reconciliation_m": 2.155981565010734e-05,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.04727138578891754,
+    "surplus_added_rate_m_s": 6.911021046107635e-05,
+    "surplus_assignment_duration_s": 684.0,
+    "surplus_assignment_mode": "positive_excess",
+    "surplus_depth_m": 0.04727138206362724,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

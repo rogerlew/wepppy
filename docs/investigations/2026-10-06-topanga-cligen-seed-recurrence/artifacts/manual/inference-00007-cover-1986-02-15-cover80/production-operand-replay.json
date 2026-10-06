@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "constant_or_out_of_domain",
+    "finite_result": true,
+    "qpstar": 1.0,
+    "tc": null,
+    "tstar": 0.09948212638370404,
+    "vave_m_s": 2.740028389550821e-06,
+    "vstar": 1.0000000248108503,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": true,
+    "within_documented_vstar_domain": false
+  },
+  "event_id": "inference-00007-cover-1986-02-15-cover80",
+  "operand_derivation": "IRS no-positive-excess branch assigns remax=s(1)=surpls/durre",
+  "packet_sha256": "52882203011533dfe0ad6ac74230fcde9ac3bff2597be2df247193aaf37a905f",
+  "remax_supplied_m_s": 2.7400283215683885e-06,
+  "replay": {
+    "appmth_peak_m_s": 2.7400283215683885e-06,
+    "hdrive_final_routed_volume_fraction": 0.5594671368598938,
+    "hdrive_nq": 11,
+    "hdrive_nqt": 202,
+    "hdrive_peak_m_s": 2.740043555604643e-06
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

@@ -1,0 +1,53 @@
+{
+  "event_id": "inference-00007-dense-1986-02-15-dense",
+  "payload_sha256": "39bf8ba46185353875e48bec0574a01475874bf35eb166232d6d3639f7598911",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 2.780913291644538e-06,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 0.0,
+      "time_s": 15840.0
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 15840.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 2.780913291644538e-06,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 0.9900463223457336,
+    "calendar_year": 1986,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 2.780913291644538e-06,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 46,
+    "ns": 1,
+    "ofe": 1,
+    "positive_excess_duration_s": 0.0,
+    "remax_pre_surplus_m_s": 6.090666374802822e-06,
+    "run_id": "inference-00007-dense",
+    "runoff_post_reconciliation_m": 0.044049665331840515,
+    "runoff_pre_reconciliation_m": 0.0,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.044049665331840515,
+    "surplus_added_rate_m_s": 2.780913291644538e-06,
+    "surplus_assignment_duration_s": 15840.0,
+    "surplus_assignment_mode": "storm",
+    "surplus_depth_m": 0.044049665331840515,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

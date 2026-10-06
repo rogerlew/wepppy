@@ -1,0 +1,15 @@
+{
+  "policy": "allow only named fixed daily fields; exact daily parity required",
+  "reruns": [
+    {
+      "label": "inference-46045",
+      "raw_climate_identical_to_rejected_attempt": true
+    },
+    {
+      "label": "inference-53846",
+      "raw_climate_identical_to_rejected_attempt": true
+    }
+  ],
+  "retained_attempts": "/wc1/studies/topanga-seed-recurrence-20261006/attempts/inference-daily-quality-names",
+  "status": "pass"
+}

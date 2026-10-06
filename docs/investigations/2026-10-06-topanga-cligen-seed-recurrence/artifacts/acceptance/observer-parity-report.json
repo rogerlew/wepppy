@@ -1,0 +1,30 @@
+{
+  "lanes": {
+    "baseline-ksat20": {
+      "all_byte_equal": true,
+      "files": {
+        "H106.ebe.dat": "dae32142a04c6c2bf86274a3bc13110dedc14130cd0b0a859a2861ad3c4d2303",
+        "H106.element.dat": "b56a819cbf08b5e1a79a718fe7194c48c8eeadeeca9282b57821fb435951c37c",
+        "H106.hbp": "d859263ffa4783c1ae93f1711f53399121a233ca841f69a5131ab5ca42e18ee0",
+        "H106.loss.dat": "cc85882693c6f1e68a9b730c1ec5512b3c0917d2f7bc0f4641a243a463c06e9b",
+        "H106.plot.dat": "9c66e293091a18bb0026b468450c5a36731c1057a1854e0788761cd5b3966c04",
+        "H106.soil.dat": "083c8e8ac9e3e45f1b7b75b3a5c10054f07525b7cac3ee7172c3fc42fdacd5b4",
+        "H106.wat.dat": "eec95d5de271dcff96cfe19407efd5e21d0295fd9d57baa5734daec4e160772b"
+      }
+    },
+    "mutant-ksat35": {
+      "all_byte_equal": true,
+      "files": {
+        "H106.ebe.dat": "274fe919fa692884b06accd6bd4c72f85bcd96e70c5c19247e0205ddcd423de6",
+        "H106.element.dat": "9cbc8830994a4130c808e1f1af1af568a46257ba73ee7b9a7bbcd28ea1e2af03",
+        "H106.hbp": "db22906436e0121a967804c6544ae687a80f051af46f5b4ed397d454a8375539",
+        "H106.loss.dat": "88133e8a353b722e49577a9b2d8e8395f1a9527ddb02bdba409f3c7181f212f1",
+        "H106.plot.dat": "a97c071f89aee51172e34709722fbaeee8f30e07c102028f89c5e17516d9bf96",
+        "H106.soil.dat": "3ac1704e5e527712980270e9e6527d08ad95e09d6682cb9365742084404aa24d",
+        "H106.wat.dat": "cec7201620b7322687f5304a76931f2050303f99836c23f7796d0c828f4eccf8"
+      }
+    }
+  },
+  "observer_marker_present": true,
+  "schema_version": "1.0.0"
+}

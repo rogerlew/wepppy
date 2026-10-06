@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "quasi_equilibrium_b",
+    "finite_result": true,
+    "qpstar": 1.000000002357924,
+    "tc": 0.9999999926317479,
+    "tstar": 0.10177567830745185,
+    "vave_m_s": 2.7436692493431494e-06,
+    "vstar": 0.9999999974887237,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": true,
+    "within_documented_vstar_domain": true
+  },
+  "event_id": "inference-00007-dense-1986-02-15-cover90",
+  "operand_derivation": "IRS no-positive-excess branch assigns remax=s(1)=surpls/durre",
+  "packet_sha256": "ed09a1691a057505fecd13e61d87acbb04a5c4f467be1b59e4b5b4649f8832db",
+  "remax_supplied_m_s": 2.743669256233261e-06,
+  "replay": {
+    "appmth_peak_m_s": 2.743669256233261e-06,
+    "hdrive_final_routed_volume_fraction": 0.560824453830719,
+    "hdrive_nq": 11,
+    "hdrive_nqt": 202,
+    "hdrive_peak_m_s": 2.7436819891590858e-06
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

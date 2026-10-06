@@ -1,0 +1,48 @@
+{
+  "event_id": "inference-00733-ksat-1980-02-14-ksat35",
+  "harmonized_forcing_diagnostic": {
+    "appmth": {
+      "equation_branch": "quasi_equilibrium_b",
+      "finite_result": true,
+      "qpstar": 1.0051431109166011,
+      "tc": 0.9972824882818241,
+      "tstar": 0.40324563768070987,
+      "vave_m_s": 4.0390191942695995e-05,
+      "vstar": 0.9932610852945913,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": true
+    },
+    "appmth_peak_m_s": 4.059792263433337e-05,
+    "forcing_integral_m": 0.05977405248661682,
+    "hdrive_final_routed_volume_fraction": 0.9507085680961609,
+    "hdrive_nq": 41,
+    "hdrive_nqt": 42,
+    "hdrive_peak_m_s": 4.0663053368916735e-05,
+    "positive_support_duration_s": 1479.9150390625
+  },
+  "hdrive_stopping_condition": "95_percent_volume",
+  "legacy_input_replay": {
+    "appmth": {
+      "equation_branch": "constant_or_out_of_domain",
+      "finite_result": true,
+      "qpstar": 1.0,
+      "tc": null,
+      "tstar": 0.40616619833246914,
+      "vave_m_s": 3.9525236417702125e-05,
+      "vstar": 25.883599643661363,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": false
+    },
+    "appmth_peak_m_s": 3.9525235479231924e-05,
+    "hdrive_final_routed_volume_fraction": 0.9510850310325623,
+    "hdrive_nq": 41,
+    "hdrive_nqt": 40,
+    "hdrive_peak_m_s": 4.0663053368916735e-05
+  },
+  "packet_sha256": "566eb1cd0fbfbcbfeaafd21b7a7d88e0872313c12c4b23f334f7ad4103340e5b",
+  "replay_process": "standalone_peak_replay_executable",
+  "schema_version": "1.0.0",
+  "selected_method_delta_m_s": 0.0
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "date": "1980-02-14",
+    "label": "original",
+    "pair": "ksat",
+    "reason": "original"
+  },
+  {
+    "date": "1980-02-14",
+    "label": "inference-00733",
+    "pair": "ksat",
+    "reason": "persistent"
+  },
+  {
+    "date": "1980-02-14",
+    "label": "inference-00007",
+    "pair": "ksat",
+    "reason": "lost"
+  },
+  {
+    "date": "1986-02-15",
+    "label": "original",
+    "pair": "cover",
+    "reason": "original"
+  },
+  {
+    "date": "1986-02-15",
+    "label": "inference-00007",
+    "pair": "cover",
+    "reason": "lost"
+  },
+  {
+    "date": "1986-02-15",
+    "label": "original",
+    "pair": "dense",
+    "reason": "original"
+  },
+  {
+    "date": "1986-02-15",
+    "label": "inference-00007",
+    "pair": "dense",
+    "reason": "lost"
+  },
+  {
+    "date": "1995-01-03",
+    "label": "inference-00007",
+    "pair": "ksat",
+    "reason": "new-date"
+  },
+  {
+    "date": "2001-01-12",
+    "label": "inference-11261",
+    "pair": "cover",
+    "reason": "new-date"
+  },
+  {
+    "date": "2010-12-18",
+    "label": "inference-11261",
+    "pair": "dense",
+    "reason": "new-date"
+  }
+]

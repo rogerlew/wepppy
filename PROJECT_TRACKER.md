@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Completed: [Topanga CLIGEN seed recurrence](docs/work-packages/20261006_topanga_cligen_seed_recurrence/package.md)
+— validated pilot plus 100 random seeds on openwepp; original-date recurrence
+78% for Ksat and 0% for the 1986 cover/dense fixtures, with new flagged dates.
+
 Completed (code/local): [CLIGEN seed UI-to-execution pipeline](docs/work-packages/20261005_cligen_seed_pipeline/package.md)
 — optional advanced seeds persist in `climate.nodb` and reach every
 Climate-owned CLIGEN path while blank values preserve existing defaults.

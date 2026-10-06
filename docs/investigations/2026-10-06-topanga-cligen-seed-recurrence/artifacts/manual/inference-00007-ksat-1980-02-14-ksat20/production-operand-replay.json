@@ -1,0 +1,31 @@
+{
+  "appmth_diagnostics": {
+    "equation_branch": "quasi_equilibrium_b",
+    "finite_result": true,
+    "qpstar": 1.119141013925656,
+    "tc": 0.944543635602315,
+    "tstar": 0.20131075922396469,
+    "vave_m_s": 1.4559807934957827e-05,
+    "vstar": 0.8806626233893932,
+    "within_documented_qpstar_domain": true,
+    "within_documented_tstar_domain": true,
+    "within_documented_vstar_domain": true
+  },
+  "event_id": "inference-00007-ksat-1980-02-14-ksat20",
+  "operand_derivation": "positive-excess branch retains pre-surplus remax",
+  "packet_sha256": "fdbbebc9c5d90741ba39b2ac011f09af2b3650b91267d9650bab928524e96d84",
+  "remax_supplied_m_s": 1.6532787412870675e-05,
+  "replay": {
+    "appmth_peak_m_s": 1.629447979212273e-05,
+    "hdrive_final_routed_volume_fraction": 0.9515185356140137,
+    "hdrive_nq": 53,
+    "hdrive_nqt": 51,
+    "hdrive_peak_m_s": 2.1686475520255044e-05
+  },
+  "schema_version": 1,
+  "scope": "post-hoc source-checked single-OFE production operand replay; not harmonized forcing or a model repair",
+  "selected_method_delta_m_s": 0.0,
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
+  "source_reference": "src/irs.for:594-653 and 775-791",
+  "status": "pass"
+}

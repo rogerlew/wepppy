@@ -1,0 +1,383 @@
+{
+  "event_id": "inference-00733-ksat-1980-02-14-ksat35",
+  "payload_sha256": "566eb1cd0fbfbcbfeaafd21b7a7d88e0872313c12c4b23f334f7ad4103340e5b",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "time_s": 600.0
+    },
+    {
+      "point_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "time_s": 1200.0
+    },
+    {
+      "point_ordinal": 4,
+      "rate_m_s": 1e-10,
+      "time_s": 1800.0
+    },
+    {
+      "point_ordinal": 5,
+      "rate_m_s": 1e-10,
+      "time_s": 2400.0
+    },
+    {
+      "point_ordinal": 6,
+      "rate_m_s": 1e-10,
+      "time_s": 3000.0
+    },
+    {
+      "point_ordinal": 7,
+      "rate_m_s": 1e-10,
+      "time_s": 3600.0
+    },
+    {
+      "point_ordinal": 8,
+      "rate_m_s": 1e-10,
+      "time_s": 4200.0
+    },
+    {
+      "point_ordinal": 9,
+      "rate_m_s": 1e-10,
+      "time_s": 4800.0
+    },
+    {
+      "point_ordinal": 10,
+      "rate_m_s": 1e-10,
+      "time_s": 5400.0
+    },
+    {
+      "point_ordinal": 11,
+      "rate_m_s": 1e-10,
+      "time_s": 6000.0
+    },
+    {
+      "point_ordinal": 12,
+      "rate_m_s": 1e-10,
+      "time_s": 6600.0
+    },
+    {
+      "point_ordinal": 13,
+      "rate_m_s": 1e-10,
+      "time_s": 7200.0
+    },
+    {
+      "point_ordinal": 14,
+      "rate_m_s": 1e-10,
+      "time_s": 7800.0
+    },
+    {
+      "point_ordinal": 15,
+      "rate_m_s": 1e-10,
+      "time_s": 7898.3916015625
+    },
+    {
+      "point_ordinal": 16,
+      "rate_m_s": 1e-10,
+      "time_s": 8400.0
+    },
+    {
+      "point_ordinal": 17,
+      "rate_m_s": 1e-10,
+      "time_s": 9000.0
+    },
+    {
+      "point_ordinal": 18,
+      "rate_m_s": 1e-10,
+      "time_s": 9600.0
+    },
+    {
+      "point_ordinal": 19,
+      "rate_m_s": 1e-10,
+      "time_s": 10200.0
+    },
+    {
+      "point_ordinal": 20,
+      "rate_m_s": 1e-10,
+      "time_s": 10421.5546875
+    },
+    {
+      "point_ordinal": 21,
+      "rate_m_s": 1e-10,
+      "time_s": 10800.0
+    },
+    {
+      "point_ordinal": 22,
+      "rate_m_s": 1e-10,
+      "time_s": 11400.0
+    },
+    {
+      "point_ordinal": 23,
+      "rate_m_s": 1e-10,
+      "time_s": 11969.1533203125
+    },
+    {
+      "point_ordinal": 24,
+      "rate_m_s": 1e-10,
+      "time_s": 12600.0
+    },
+    {
+      "point_ordinal": 25,
+      "rate_m_s": 1e-10,
+      "time_s": 13088.5888671875
+    },
+    {
+      "point_ordinal": 26,
+      "rate_m_s": 1e-10,
+      "time_s": 13200.0
+    },
+    {
+      "point_ordinal": 27,
+      "rate_m_s": 1e-10,
+      "time_s": 13800.0
+    },
+    {
+      "point_ordinal": 28,
+      "rate_m_s": 4.0650307937539765e-05,
+      "time_s": 13966.1455078125
+    },
+    {
+      "point_ordinal": 29,
+      "rate_m_s": 4.066422468440578e-05,
+      "time_s": 14400.0
+    },
+    {
+      "point_ordinal": 30,
+      "rate_m_s": 4.01289228193491e-05,
+      "time_s": 14687.9990234375
+    },
+    {
+      "point_ordinal": 31,
+      "rate_m_s": 4.01398805252029e-05,
+      "time_s": 15000.0
+    },
+    {
+      "point_ordinal": 32,
+      "rate_m_s": 0.0,
+      "time_s": 15446.060546875
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 600.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    },
+    {
+      "end_s": 1200.0,
+      "interval_ordinal": 2,
+      "rate_m_s": 0.0,
+      "start_s": 600.0
+    },
+    {
+      "end_s": 1800.0,
+      "interval_ordinal": 3,
+      "rate_m_s": 0.0,
+      "start_s": 1200.0
+    },
+    {
+      "end_s": 2400.0,
+      "interval_ordinal": 4,
+      "rate_m_s": 0.0,
+      "start_s": 1800.0
+    },
+    {
+      "end_s": 3000.0,
+      "interval_ordinal": 5,
+      "rate_m_s": 0.0,
+      "start_s": 2400.0
+    },
+    {
+      "end_s": 3600.0,
+      "interval_ordinal": 6,
+      "rate_m_s": 0.0,
+      "start_s": 3000.0
+    },
+    {
+      "end_s": 4200.0,
+      "interval_ordinal": 7,
+      "rate_m_s": 0.0,
+      "start_s": 3600.0
+    },
+    {
+      "end_s": 4800.0,
+      "interval_ordinal": 8,
+      "rate_m_s": 0.0,
+      "start_s": 4200.0
+    },
+    {
+      "end_s": 5400.0,
+      "interval_ordinal": 9,
+      "rate_m_s": 0.0,
+      "start_s": 4800.0
+    },
+    {
+      "end_s": 6000.0,
+      "interval_ordinal": 10,
+      "rate_m_s": 0.0,
+      "start_s": 5400.0
+    },
+    {
+      "end_s": 6600.0,
+      "interval_ordinal": 11,
+      "rate_m_s": 0.0,
+      "start_s": 6000.0
+    },
+    {
+      "end_s": 7200.0,
+      "interval_ordinal": 12,
+      "rate_m_s": 0.0,
+      "start_s": 6600.0
+    },
+    {
+      "end_s": 7800.0,
+      "interval_ordinal": 13,
+      "rate_m_s": 0.0,
+      "start_s": 7200.0
+    },
+    {
+      "end_s": 7898.3916015625,
+      "interval_ordinal": 14,
+      "rate_m_s": 0.0,
+      "start_s": 7800.0
+    },
+    {
+      "end_s": 8400.0,
+      "interval_ordinal": 15,
+      "rate_m_s": 0.0,
+      "start_s": 7898.3916015625
+    },
+    {
+      "end_s": 9000.0,
+      "interval_ordinal": 16,
+      "rate_m_s": 0.0,
+      "start_s": 8400.0
+    },
+    {
+      "end_s": 9600.0,
+      "interval_ordinal": 17,
+      "rate_m_s": 0.0,
+      "start_s": 9000.0
+    },
+    {
+      "end_s": 10200.0,
+      "interval_ordinal": 18,
+      "rate_m_s": 0.0,
+      "start_s": 9600.0
+    },
+    {
+      "end_s": 10421.5546875,
+      "interval_ordinal": 19,
+      "rate_m_s": 0.0,
+      "start_s": 10200.0
+    },
+    {
+      "end_s": 10800.0,
+      "interval_ordinal": 20,
+      "rate_m_s": 0.0,
+      "start_s": 10421.5546875
+    },
+    {
+      "end_s": 11400.0,
+      "interval_ordinal": 21,
+      "rate_m_s": 0.0,
+      "start_s": 10800.0
+    },
+    {
+      "end_s": 11969.1533203125,
+      "interval_ordinal": 22,
+      "rate_m_s": 0.0,
+      "start_s": 11400.0
+    },
+    {
+      "end_s": 12600.0,
+      "interval_ordinal": 23,
+      "rate_m_s": 0.0,
+      "start_s": 11969.1533203125
+    },
+    {
+      "end_s": 13088.5888671875,
+      "interval_ordinal": 24,
+      "rate_m_s": 0.0,
+      "start_s": 12600.0
+    },
+    {
+      "end_s": 13200.0,
+      "interval_ordinal": 25,
+      "rate_m_s": 0.0,
+      "start_s": 13088.5888671875
+    },
+    {
+      "end_s": 13800.0,
+      "interval_ordinal": 26,
+      "rate_m_s": 0.0,
+      "start_s": 13200.0
+    },
+    {
+      "end_s": 13966.1455078125,
+      "interval_ordinal": 27,
+      "rate_m_s": 0.0,
+      "start_s": 13800.0
+    },
+    {
+      "end_s": 14400.0,
+      "interval_ordinal": 28,
+      "rate_m_s": 1.5131211057450855e-06,
+      "start_s": 13966.1455078125
+    },
+    {
+      "end_s": 14687.9990234375,
+      "interval_ordinal": 29,
+      "rate_m_s": 1.5270378526111017e-06,
+      "start_s": 14400.0
+    },
+    {
+      "end_s": 15000.0,
+      "interval_ordinal": 30,
+      "rate_m_s": 9.917359875544207e-07,
+      "start_s": 14687.9990234375
+    },
+    {
+      "end_s": 15446.060546875,
+      "interval_ordinal": 31,
+      "rate_m_s": 1.0026936934082187e-06,
+      "start_s": 15000.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 3.9525235479231924e-05,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 1.2023683786392212,
+    "calendar_year": 1980,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 4.066422479809262e-05,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 45,
+    "ns": 31,
+    "ofe": 1,
+    "positive_excess_duration_s": 1479.9140625,
+    "remax_pre_surplus_m_s": 1.5270378526111017e-06,
+    "run_id": "inference-00733-ksat35",
+    "runoff_post_reconciliation_m": 0.058493953198194504,
+    "runoff_pre_reconciliation_m": 0.0005742813227698207,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.05791967362165451,
+    "surplus_added_rate_m_s": 3.913718683179468e-05,
+    "surplus_assignment_duration_s": 1479.9140625,
+    "surplus_assignment_mode": "positive_excess",
+    "surplus_depth_m": 0.05791967362165451,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

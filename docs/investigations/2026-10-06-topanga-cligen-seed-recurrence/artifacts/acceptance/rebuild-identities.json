@@ -1,0 +1,14 @@
+{
+  "observer": {
+    "historical_hash": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f",
+    "rebuilt_hash": "36f3560395676e6a4f96d4eff87e3a860e8c6172efd76fdcb8985d817d8a9047",
+    "binary": "/home/workdir/topanga-seed-recurrence-20261006/source/src/wepp_hill",
+    "protocol_build_id": "wepp-ea25ad79-gate21-observer"
+  },
+  "replay": {
+    "historical_hash": "708bd3f6a27c078b7466c594ac5551cfd567f210ffa517754ff8afe8d8877709",
+    "rebuilt_hash": "3dcacd6c694ac4e233a18b79ffb0055a7e7a8cf12c94e72ac8dc8106129022b2",
+    "binary": "/home/workdir/topanga-seed-recurrence-20261006/peak_replay",
+    "protocol_build_id": "wepp-ea25ad79-gate21-replay"
+  }
+}
