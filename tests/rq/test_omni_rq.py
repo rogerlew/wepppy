@@ -32,6 +32,48 @@ def _child_job_stub(job_id: str) -> SimpleNamespace:
     )
 
 
+def test_omni_timeout_options_reuses_wrt01_controller_workload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wepp = SimpleNamespace(
+        wepp_bin="wepp_dcc52a6",
+        watershed_instance=SimpleNamespace(sub_n=1908),
+    )
+    climate = SimpleNamespace(is_single_storm=False, input_years=500)
+    monkeypatch.setattr(omni_rq.Wepp, "getInstance", lambda wd: wepp)
+    monkeypatch.setattr(omni_rq.Climate, "getInstance", lambda wd: climate)
+
+    assert omni_rq._omni_timeout_options("/wc1/runs/de/demo") == {
+        "timeout": 50_400,
+        "meta": {
+            "watershed_timeout": {
+                "policy": "WRT-01",
+                "years": 500,
+                "hillslopes": 1908,
+                "seconds_per_hillslope_year": 0.05,
+                "timeout_seconds": 50_400,
+                "workload_source": "controllers",
+                "wepp_bin": "wepp_dcc52a6",
+            }
+        },
+    }
+
+
+def test_omni_timeout_options_preserves_single_storm_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(omni_rq.Wepp, "getInstance", lambda wd: SimpleNamespace())
+    monkeypatch.setattr(
+        omni_rq.Climate,
+        "getInstance",
+        lambda wd: SimpleNamespace(is_single_storm=True),
+    )
+
+    assert omni_rq._omni_timeout_options("/wc1/runs/de/demo") == {
+        "timeout": omni_rq.TIMEOUT,
+    }
+
+
 @pytest.fixture()
 def omni_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     published = []
@@ -178,6 +220,12 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
     monkeypatch.setattr(omni_rq, "nodir_resolve", lambda wd, root, view="effective": None)
     monkeypatch.setattr(omni_rq, "_hash_file_sha1", lambda path: f"sha:{path}")
+    timeout_meta = {"policy": "WRT-01", "years": 500, "hillslopes": 1908}
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: {"timeout": 50_400, "meta": {"watershed_timeout": timeout_meta}},
+    )
 
     class _RedisCtx:
         def __init__(self, **kwargs):
@@ -199,7 +247,7 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, meta=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -207,6 +255,7 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
                     "args": args,
                     "kwargs": kwargs or {},
                     "timeout": timeout,
+                    "meta": meta,
                     "depends_on": depends_on,
                     "job": job,
                 }
@@ -273,20 +322,28 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     assert stage1["kwargs"]["dependency_target"] == "key:undisturbed"
     assert stage1["kwargs"]["dependency_path"] == "/dep/undisturbed/loss_pw0.txt"
     assert stage1["kwargs"]["signature"] == "sig:uniform_low"
+    assert stage1["timeout"] == 50_400
+    assert stage1["meta"] == {"watershed_timeout": timeout_meta}
 
     stage2 = enqueue_calls[1]
     assert stage2["func"] is omni_rq.run_omni_scenario_rq
     assert stage2["kwargs"]["dependency_target"] == "key:uniform_low"
     assert stage2["kwargs"]["dependency_path"] == "/dep/uniform_low/loss_pw0.txt"
     assert stage2["kwargs"]["signature"] == "sig:mulch"
+    assert stage2["timeout"] == 50_400
+    assert stage2["meta"] == {"watershed_timeout": timeout_meta}
     assert [job.id for job in stage2["depends_on"]] == [stage1["job"].id]
 
     compile_job = enqueue_calls[2]
     assert compile_job["func"] is omni_rq._compile_hillslope_summaries_rq
+    assert compile_job["timeout"] == omni_rq.TIMEOUT
+    assert compile_job["meta"] is None
     assert [job.id for job in compile_job["depends_on"]] == [stage2["job"].id]
 
     finalize_job = enqueue_calls[3]
     assert finalize_job["func"] is omni_rq._finalize_omni_scenarios_rq
+    assert finalize_job["timeout"] == omni_rq.TIMEOUT
+    assert finalize_job["meta"] is None
     assert finalize_job["depends_on"].id == compile_job["job"].id
 
     assert any(kind == "dependency_target" for kind, _ in omni.helper_calls)
@@ -295,6 +352,157 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     assert any(kind == "normalize_key" for kind, _ in omni.helper_calls)
     assert parent_job.saves == 4
     assert any("COMPLETED run_omni_scenarios_rq(demo)" in message for _, message in published)
+
+
+def test_run_omni_scenarios_rejects_timeout_workload_before_rq_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    parent_job = SimpleNamespace(id="job-invalid-scenario", meta={}, saves=0)
+    parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(omni_rq, "nodir_resolve", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_rq, "_hash_file_sha1", lambda path: "sha")
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: (_ for _ in ()).throw(ValueError("bad timeout workload")),
+    )
+    monkeypatch.setattr(
+        omni_rq.redis,
+        "Redis",
+        lambda **kwargs: (_ for _ in ()).throw(AssertionError("Redis opened")),
+    )
+
+    class OmniStub:
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.invalid-scenario-timeout")
+            self.use_rq_job_pool_concurrency = True
+            self.scenarios = [{"type": "uniform_low"}]
+            self.base_scenario = omni_rq.OmniScenario.Undisturbed
+            self.scenario_dependency_tree = {}
+            self.scenario_run_state = []
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            return cls(wd)
+
+        def _scenario_dependency_target(self, scenario_enum, scenario_payload):
+            return "undisturbed"
+
+        def _loss_pw0_path_for_scenario(self, scenario_name):
+            return "/dep/loss_pw0.txt"
+
+        def _scenario_signature(self, scenario_payload):
+            return "signature"
+
+        def _normalize_scenario_key(self, scenario_name):
+            return str(scenario_name)
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    with pytest.raises(ValueError, match="bad timeout workload"):
+        omni_rq.run_omni_scenarios_rq("demo")
+
+    assert parent_job.meta == {}
+    assert parent_job.saves == 0
+
+
+def test_run_omni_scenarios_fully_skipped_does_not_read_timeout_workload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    parent_job = SimpleNamespace(id="job-skipped-scenario", meta={}, saves=0)
+    parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(omni_rq, "nodir_resolve", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_rq, "clear_nodb_file_cache", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_rq, "_hash_file_sha1", lambda path: f"sha:{path}")
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: (_ for _ in ()).throw(AssertionError("unused timeout workload read")),
+    )
+
+    class _RedisCtx:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_rq.redis, "Redis", lambda **kwargs: _RedisCtx())
+    monkeypatch.setattr(omni_rq, "redis_connection_kwargs", lambda db: {"db": int(db)})
+    enqueue_calls: list[dict[str, object]] = []
+
+    class _QueueStub:
+        def __init__(self, name: str, connection=None) -> None:
+            assert name == "batch"
+
+        def enqueue_call(
+            self, func, args=(), kwargs=None, timeout=None, meta=None,
+            depends_on=None, job_id=None,
+        ):
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
+            enqueue_calls.append({
+                "func": func,
+                "timeout": timeout,
+                "meta": meta,
+                "depends_on": depends_on,
+                "job": job,
+            })
+            return job
+
+    monkeypatch.setattr(omni_rq, "Queue", _QueueStub)
+
+    class OmniStub:
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.skipped-scenario-timeout")
+            self.use_rq_job_pool_concurrency = True
+            self.scenarios = [{"type": "uniform_low"}]
+            self.base_scenario = omni_rq.OmniScenario.Undisturbed
+            self.scenario_dependency_tree = {
+                "uniform_low": {
+                    "dependency_sha1": "sha:/dep/undisturbed/loss_pw0.txt",
+                    "signature": "signature",
+                }
+            }
+            self.scenario_run_state = []
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            return cls(wd)
+
+        def _scenario_dependency_target(self, scenario_enum, scenario_payload):
+            return "undisturbed"
+
+        def _loss_pw0_path_for_scenario(self, scenario_name):
+            return "/dep/undisturbed/loss_pw0.txt"
+
+        def _scenario_signature(self, scenario_payload):
+            return "signature"
+
+        def _normalize_scenario_key(self, scenario_name):
+            return str(scenario_name)
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    result = omni_rq.run_omni_scenarios_rq("demo")
+
+    assert result.id == "child-2"
+    assert [call["func"] for call in enqueue_calls] == [
+        omni_rq._compile_hillslope_summaries_rq,
+        omni_rq._finalize_omni_scenarios_rq,
+    ]
+    assert all(call["timeout"] == omni_rq.TIMEOUT for call in enqueue_calls)
+    assert all(call["meta"] is None for call in enqueue_calls)
+    assert parent_job.saves == 2
 
 
 def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
@@ -503,6 +711,11 @@ def test_run_omni_contrasts_rq_clears_dependency_tree_when_no_contrasts(
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-61", meta={}, save=lambda: None))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: (_ for _ in ()).throw(AssertionError("unused timeout workload read")),
+    )
     call_order: list[str] = []
     monkeypatch.setattr(
         omni_rq,
@@ -605,6 +818,11 @@ def test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries(
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-62", meta={}, save=lambda: None))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: (_ for _ in ()).throw(AssertionError("unused timeout workload read")),
+    )
 
     class OmniStub:
         _instances: dict[str, "OmniStub"] = {}
@@ -695,6 +913,12 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
     parent_job.save = _save  # type: ignore[attr-defined]
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    timeout_meta = {"policy": "WRT-01", "years": 500, "hillslopes": 1908}
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: {"timeout": 50_400, "meta": {"watershed_timeout": timeout_meta}},
+    )
 
     class _RedisCtx:
         def __init__(self, **kwargs) -> None:
@@ -717,7 +941,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, meta=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -725,6 +949,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
                     "args": args,
                     "kwargs": kwargs or {},
                     "timeout": timeout,
+                    "meta": meta,
                     "depends_on": depends_on,
                     "job": job,
                 }
@@ -839,6 +1064,12 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
         expected_scenario_relpath += "/"
 
     assert result.id == "child-3"
+    assert [call["timeout"] for call in enqueue_calls] == [50_400, 50_400, omni_rq.TIMEOUT]
+    assert [call["meta"] for call in enqueue_calls] == [
+        {"watershed_timeout": timeout_meta},
+        {"watershed_timeout": timeout_meta},
+        None,
+    ]
     assert enqueue_calls[0]["depends_on"] is None
     second_batch_dependency = enqueue_calls[1]["depends_on"]
     assert isinstance(second_batch_dependency, Dependency)
@@ -883,6 +1114,12 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
     parent_job.save = _save  # type: ignore[attr-defined]
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    timeout_meta = {"policy": "WRT-01", "years": 500, "hillslopes": 1908}
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: {"timeout": 50_400, "meta": {"watershed_timeout": timeout_meta}},
+    )
 
     class _RedisCtx:
         def __init__(self, **kwargs) -> None:
@@ -904,7 +1141,7 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, meta=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -912,6 +1149,7 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
                     "args": args,
                     "kwargs": kwargs or {},
                     "timeout": timeout,
+                    "meta": meta,
                     "depends_on": depends_on,
                     "job": job,
                 }
@@ -982,7 +1220,79 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
 
     assert result.id == "child-2"
     assert len(enqueue_calls) == 2
+    assert enqueue_calls[0]["timeout"] == 50_400
+    assert enqueue_calls[0]["meta"] == {"watershed_timeout": timeout_meta}
+    assert enqueue_calls[1]["timeout"] == omni_rq.TIMEOUT
+    assert enqueue_calls[1]["meta"] is None
     assert not any("rerunning_hillslopes" in message for _, message in published)
+
+
+def test_run_omni_contrasts_rejects_timeout_workload_before_rerun_or_rq_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    parent_job = SimpleNamespace(id="job-invalid-contrast", meta={}, saves=0)
+    parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(omni_rq, "_recover_mixed_nodir_roots", lambda wd: ())
+    monkeypatch.setattr(
+        omni_rq,
+        "_omni_timeout_options",
+        lambda wd: (_ for _ in ()).throw(ValueError("bad timeout workload")),
+    )
+    rerun_calls: list[object] = []
+    monkeypatch.setattr(
+        omni_rq,
+        "_rerun_hillslopes_for_contrast_scenarios",
+        lambda *args, **kwargs: rerun_calls.append((args, kwargs)),
+    )
+    monkeypatch.setattr(
+        omni_rq.redis,
+        "Redis",
+        lambda **kwargs: (_ for _ in ()).throw(AssertionError("Redis opened")),
+    )
+
+    sidecar = tmp_path / "demo" / "sidecar.json"
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text("{}", encoding="ascii")
+
+    class OmniStub:
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.invalid-contrast-timeout")
+            self.contrast_names = ["undisturbed__to__mulch"]
+            self.contrast_dependency_tree = {}
+            self.contrast_batch_size = 1
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            return cls(wd)
+
+        def _contrast_landuse_skip_reason(self, *args, **kwargs):
+            return None
+
+        def _clean_contrast_run(self, contrast_id: int) -> None:
+            return None
+
+        def _contrast_sidecar_path(self, contrast_id: int) -> str:
+            return str(sidecar)
+
+        def _contrast_run_status(self, contrast_id: int, contrast_name: str) -> str:
+            return "needs_run"
+
+        def _clean_stale_contrast_runs(self, active_ids) -> None:
+            return None
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    with pytest.raises(ValueError, match="bad timeout workload"):
+        omni_rq.run_omni_contrasts_rq("demo")
+
+    assert rerun_calls == []
+    assert parent_job.meta == {}
+    assert parent_job.saves == 0
 
 
 def test_validate_contrast_hillslope_rerun_inputs_allows_base_cli_slp_relpaths(

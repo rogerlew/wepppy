@@ -41,6 +41,13 @@ failed jobs retain their stored timeout; automatic retry is not introduced.
 See [WRT-01](../../docs/schemas/wepp-run-input-contract.md#continuous-watershed-runtime-budget-wrt-01)
 and [ADR-0076](../../docs/adrs/ADR-0076-watershed-runtime-budget.md).
 
+The same WRT-01 options apply to newly enqueued continuous
+`run_omni_scenario_rq` and `run_omni_contrast_rq` leaves. Their coordinators
+compute the budget once before child metadata or queue mutation; contrast
+admission also precedes any hillslope rerun. Empty/skipped workflows do not read
+unused workload. Omni coordinators, compilers and finalizers retain their fixed
+allowances. See [WRT-02](../../docs/schemas/wepp-run-input-contract.md#omni-leaf-application-wrt-02).
+
 ## Module Guide
 | Module | Primary entry points | Responsibility |
 | --- | --- | --- |

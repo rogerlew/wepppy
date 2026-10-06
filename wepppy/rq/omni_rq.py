@@ -15,7 +15,7 @@ from rq import Queue, get_current_job
 from rq.job import Job
 
 from wepppy.nodb.single_input_policy import require_feature_allowed
-from wepppy.nodb.core import Ron
+from wepppy.nodb.core import Climate, Ron, Wepp
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -29,9 +29,9 @@ from wepppy.rq.job_dependencies import (
     release_deferred_job_if_ready as _release_deferred_job_if_ready,
 )
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.watershed_timeout import watershed_timeout_options
 
 from wepppy.nodb.base import clear_nodb_file_cache
-from wepppy.nodb.core import Wepp
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.omni.omni import (
     OMNI_REL_DIR,
@@ -59,6 +59,16 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+
+
+def _omni_timeout_options(wd: str) -> Dict[str, Any]:
+    """Return WRT-01 options for new Omni scenario and contrast leaves."""
+    return watershed_timeout_options(
+        Wepp.getInstance(wd),
+        Climate.getInstance(wd),
+        TIMEOUT,
+        prepared_inputs=False,
+    )
 
 
 def _recover_mixed_nodir_roots(
@@ -692,6 +702,10 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 dependency_tree.pop(scenario_name, None)
             omni.scenario_dependency_tree = dependency_tree
 
+        leaf_timeout_options = (
+            _omni_timeout_options(wd) if stage1_tasks or stage2_tasks else {}
+        )
+
         stage1_jobs: List[Job] = []
         stage2_jobs: List[Job] = []
 
@@ -711,7 +725,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                         'dependency_path': task['dependency_path'],
                         'signature': task['signature'],
                     },
-                    timeout=TIMEOUT,
+                    **leaf_timeout_options,
                     job_id=child_job_id,
                 )
                 stage1_jobs.append(child_job)
@@ -729,7 +743,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                         'dependency_path': task['dependency_path'],
                         'signature': task['signature'],
                     },
-                    timeout=TIMEOUT,
+                    **leaf_timeout_options,
                     depends_on=depends_on_stage2,
                     job_id=child_job_id,
                 )
@@ -869,6 +883,8 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
             return None
 
+        leaf_timeout_options = _omni_timeout_options(wd)
+
         _rerun_hillslopes_for_contrast_scenarios(
             omni,
             contrast_names=contrast_names,
@@ -895,7 +911,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                     child_job = q.enqueue_call(
                         func=run_omni_contrast_rq,
                         args=[runid, contrast_id],
-                        timeout=TIMEOUT,
+                        **leaf_timeout_options,
                         depends_on=depends_on_batch,
                         job_id=child_job_id,
                     )
