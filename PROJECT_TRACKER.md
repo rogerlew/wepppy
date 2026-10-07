@@ -17,6 +17,22 @@ Climate-owned CLIGEN path while blank values preserve existing defaults.
 Normalized `canine-liar` generation and deterministic replay pass; 10,317
 Python and 923 frontend tests pass. Deployment remains separate.
 
+Completed (research): [Original-build warming roughness comparison](docs/work-packages/20261006_warming_rrinit_legacy/package.md)
+— all 2,596 executions and artifact checks pass. Original-build roughness peak
+departures are larger; matched 10 cm yield is preserved. Candidate hydrograph
+integral/ledger deficit worsens (1.32% overall; 18.30% in a selected event window),
+so full hydrograph/release validation remains unresolved. No production changes.
+
+Completed (research): [Warming-championship rrinit sensitivity](docs/work-packages/20261006_warming_rrinit/package.md)
+— 2,596 model executions and observer-parity/input-isolation gates pass. Outlet
+peak/volume sensitivity is small for 10/17/60 cm; Figures 1–3 delivered. Separate
+~1.3% hydrograph-integral/volume-ledger discrepancy retained; original run unchanged.
+
+Completed (research): [Fixed-build surface-return mutation repeat](docs/work-packages/20261006_surface_return_mutation/package.md)
+— all 1,088 hand-to-mouth-drought Ksat/cover mutations and 280 full-history
+baselines pass; Figures 1–3 delivered with unchanged roughness/storage. Severe
+peak tails narrow, but twofold sensitivities remain; not a deployment claim.
+
 Completed (code/local): [CLIGEN binary provenance and runner identity](docs/work-packages/20261005_cligen_binary_provenance/package.md)
 — release `5.323-k10.1` is vendored as a verified binary/sidecar pair; all five
 launcher families log its exact binary, sidecar, version, release, and source

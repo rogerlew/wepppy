@@ -1,0 +1,58 @@
+{
+  "baseline_event_count": 329,
+  "smaller_event_count": 165,
+  "smaller_event_threshold_m3s": 3.331122880603662,
+  "selected_events": [
+    {
+      "baseline_peak_date": "1985-04-11",
+      "baseline_peak_m3s": 2.839813385335454,
+      "selection_max_abs_departure_pct_within_3days": 0.23255343275579987,
+      "window_min_departure_pct": [
+        -0.2325491347492048,
+        -0.23255343275579987
+      ],
+      "window_max_departure_pct": [
+        0.0,
+        0.0
+      ],
+      "window_volume_change_pct": [
+        -0.021859912406207993,
+        -0.02186031641679964
+      ]
+    },
+    {
+      "baseline_peak_date": "1984-05-25",
+      "baseline_peak_m3s": 3.071877201875585,
+      "selection_max_abs_departure_pct_within_3days": 0.2197916912768938,
+      "window_min_departure_pct": [
+        -0.2197889872743164,
+        -0.2197916912768938
+      ],
+      "window_max_departure_pct": [
+        0.0,
+        0.0
+      ],
+      "window_volume_change_pct": [
+        -0.023744700872596614,
+        -0.023744992997021264
+      ]
+    },
+    {
+      "baseline_peak_date": "1997-03-27",
+      "baseline_peak_m3s": 3.3196947913720245,
+      "selection_max_abs_departure_pct_within_3days": 0.1443637379215157,
+      "window_min_departure_pct": [
+        -0.144363737919595,
+        -0.1443637379215157
+      ],
+      "window_max_departure_pct": [
+        4.440892098500626e-12,
+        2.4868995751603507e-12
+      ],
+      "window_volume_change_pct": [
+        -0.012311784853358265,
+        -0.012311784855045804
+      ]
+    }
+  ]
+}

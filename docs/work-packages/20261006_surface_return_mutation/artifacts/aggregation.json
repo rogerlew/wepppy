@@ -1,0 +1,11 @@
+{
+  "baseline_only": 320,
+  "baselines": 280,
+  "eligible": 1088,
+  "event_ledger_sha256": "e2ace16c660aaa56ea9c135c25e7d8d7249e90d44bd2b07a9c80ab5e2ef0de5d",
+  "event_pair_rows": 225659,
+  "mutant_only": 297,
+  "paired_rows": 225042,
+  "sediment_ledger_sha256": "5cd22e8bdd7cd7cd448ad8c27b3c0e1e19eea06ef23485325727f9fcf72857c4",
+  "sediment_outer_rows": 225659
+}

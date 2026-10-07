@@ -1,0 +1,15 @@
+{
+  "authority": "terminal-inventory.csv plus aggregation.json and report-readback.json",
+  "baselines": 280,
+  "complete_model_runs": 1368,
+  "configured_years_per_run": 45,
+  "coordinator_disposition": "SIGINT after every model terminal and independent aggregation completed; no child model process remained. Coordinator was only draining per-completion progress-file fsync calls. progress.json is a retained incomplete acknowledgment count, not final run status.",
+  "eligible_mutations": 1088,
+  "excluded_mutations": 32,
+  "failed_model_runs": 0,
+  "max_peak_rounding_mm_h": 0.0005027267448554085,
+  "max_runoff_rounding_mm": 0.0005066728591884839,
+  "reconciled_utc": "2026-10-06T20:11:21.649348+00:00",
+  "report_readback_checks": 1368,
+  "status": "all_model_runs_complete_and_independently_reconciled"
+}

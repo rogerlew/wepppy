@@ -1,0 +1,8 @@
+{
+  "fixed_binary": "/workdir/wepp-forest-holdouts/20261006-surface-return.6SeF9A/candidate/src/wepp_hill",
+  "fixed_sha256": "440fcebbeb2c51c2da46e258a53dce7ad609b783551ee2f5a6b1e18b368b2307",
+  "observer_binary": "/workdir/hand-to-mouth-fixed-census-20261006-v2/observer-src/wepp_hill",
+  "observer_sha256": "81c8303677a5ba86f4a877651a3e31f89e385830452a954d63a8fdc66dd1bdd7",
+  "patch_sha256": "2d239805edf0b62bb3c4356993b985a4046c05695726aa7531191c5ec1f2dabc",
+  "source_irs_sha256": "f3a17ddf1b9eb43fcb355fe49d7880aa3e7e8290aa704a18ffd2e020b32a892d"
+}

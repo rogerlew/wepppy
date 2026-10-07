@@ -24,74 +24,38 @@
 \newcommand{\surdra}{\texttt{surdra}}
 
 \title{Small-Mutation Screening of WEPP Hillslope Peak Flow\\
-\large Methodology and Interim Topanga Results}
+\large Remediation Strategies and Validation Findings}
 \author{Roger Lew\thanks{University of Idaho; report prepared with agentic coauthor support from OpenAI Codex.}}
-\date{Version 0.1 --- August 9, 2026}
+\date{Version 0.2 --- October 6, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This report describes a controlled, full-history screening experiment designed
-to detect discontinuous responses in the Water Erosion Prediction Project
-(WEPP) hillslope peak-flow estimate. The experiment perturbed first-horizon
-saturated hydraulic conductivity by only $-1\%$ or $+1\%$, or changed paired
-interrill and rill cover by only $-0.01$ or $+0.01$. Each run changed one
-hillslope and one parameter family while holding the scenario, climate,
-topography, antecedent simulation history, and all other inputs fixed.
+The October update evaluates two responses to the surface-return timing defect:
+increasing initial random roughness and correcting return-water peak assignment.
+Roughness inflation can avoid the problematic positive-excess-duration coupling
+for some events, but changes physical model inputs and is not a general repair.
+An implemented, parameter-free candidate instead uses hourly return information
+when available and a 24-hour return rate otherwise. The repeated Topanga census
+reduces the fivefold peak-departure rate from 0.303\% to 0.108\%, without
+eliminating twofold sensitivity. A matched Cedar Creek watershed comparison
+preserves long-term water yield closely but reveals an unresolved routed
+hydrograph-volume discrepancy: the 10 cm candidate's whole-record shortfall
+increases from 0.463\% to 1.321\%, and a selected five-day deficit increases
+from 0.83\% to 18.30\%. The candidate is implemented and research-tested,
+not unconditionally validated for hydrograph use or approved for release.
 
-The Topanga census completed 1,088 eligible mutation trials across burned and
-unburned scenario strata. The combined event record contains 225,654 rows from
-the baseline and mutant runs, of which 225,036 could be matched directly.
-Preregistered screening rules flagged
-11,506 event rows (5.10\%) distributed across 1,027 trials. The result is
-strongly structured by parameter family: all 560 \Ksat{} trials contained at
-least one candidate event, and the \Ksat{} event-row candidate rate was 8.62\%,
-compared with 1.33\% for cover.
-
-Event runoff depth is highly stable under the small probes: only 451 of 218,985
-paired-positive runoff rows (0.21\%) lie outside a mutant-to-baseline ratio of
-0.5--2, and 98.3\% of \Ksat{} runoff responses have the expected inverse sign.
-Event sediment delivery is also mostly controlled: only 271 of 139,255
-paired-positive rows (0.195\%) lie outside 0.5--2. The retained sediment output
-is quantized to 0.1 kg/m, however, and substantial relative scatter remains at
-small magnitudes and within the central band.
-Peak flow is less stable. Of 199,086 plotted paired-positive peak rows, 989
-(0.50\%) lie
-outside a mutant-to-baseline ratio of 0.5--2, and 604 (0.30\%) lie outside
-0.2--5---an empirical rate of approximately one event row in 330. More than
-91\% of both tails are \Ksat{} mutations. Most extreme
-responses have the ordinary hydrologic sign---lower \Ksat{} raises peak flow
-and higher \Ksat{} lowers it---but their magnitude is disproportionate to a
-one-percent input change. Within the 0.5--2 band, the fraction of \Ksat{}
-responses having the opposite sign rises sharply with baseline peak magnitude.
-Excluding mixed infiltration-excess and surface-return events reduces that
-incongruent share at 30--100 mm/h from 24.1\% to 1.8\% unburned and from
-26.0\% to 1.9\% burned, concentrating the directional instability in the
-mixed-forcing population.
-
-Source forensics and an instrumented Hill 106 event identify one mechanism.
-Present WEPP assigns a daily soil-water surface return new subdaily timing by
-dividing it by the duration of intervals already having positive infiltration
-excess. This pathway was added in 2003--2004, after the 1995 peak-method
-evaluation, and was not subsequently documented or evaluated at population
-scale. It explains much, but not all, of the census tail.
-
-Topanga therefore supports a focused conclusion: very small local mutations
-are sufficient to reveal a structured, \Ksat-sensitive peak-flow response that
-cannot be characterized by smooth local sensitivity alone. At hillslope scale,
-the diagnostic peak-flow calculation demonstrably generates anomalous peaks of
-meaningful magnitude. The study does not yet estimate prevalence outside
-Topanga or directly establish downstream consequences. In production, rare
-hillslope-event anomalies contaminating aggregated extreme-value statistics is
-a plausible and important mechanism, but remains an inference to test at routed
-watershed scale. Additional sites should use the same small-mutation design
-before considering larger perturbations.
+The original August census and its methods are retained as historical evidence.
+The repeated study applies the same one-at-a-time $\pm1\%$ conductivity and
+$\pm0.01$ cover mutations across burned and unburned Topanga scenarios.
+These enriched-discovery experiments diagnose numerical sensitivity, not
+observed-flow accuracy or cross-site prevalence.
 \end{abstract}
 
 \section{Purpose and Status}
 
-WEPP reduces each modeled runoff event to quantities used by erosion and
+WEPP reduces each modelled runoff event to quantities used by erosion and
 routing calculations, including runoff volume and a peak runoff rate. A peak
 is a statement about subdaily timing: the same event volume can produce a low
 peak when spread over time or a high peak when compressed. Previous Topanga
@@ -106,11 +70,18 @@ one-at-a-time parameter perturbation? It is a screening census, not a
 calibration exercise and not a parameter uncertainty analysis. The perturbations
 are numerical probes chosen to interrogate continuity near each frozen baseline.
 
-This is an interim site report. Topanga is the first, enriched-discovery site
+The original census is an interim site study. Topanga is the first, enriched-discovery site
 in a planned multi-site audit. Additional rain- and snow-dominated sites remain
 future work. Their addition does not require expanding the mutation magnitude:
 the Topanga results show that the original small probes are already sensitive
 enough to expose the response of interest.
+
+The October assessment adds a repeated Topanga mutation census and a separate
+full-watershed Cedar Creek comparison. It does not convert the original
+enriched census into a cross-site prevalence estimate. In the historical
+sections, ``present WEPP'' refers to the unpatched implementation under study,
+not to the October candidate. The current remediation disposition is in
+Section~\ref{sec:remediation}; the August results remain explicitly historical.
 
 \section{Hydrologic and Implementation Background}
 
@@ -184,7 +155,7 @@ rainfall excess before routing, does not fully couple routing and recession
 infiltration in all cases, and expects more peak error for multipeaked
 hydrographs. It nevertheless states that surface hydrology should perform best
 for large events on one OFE, assuming correct parameters. Chapter 6 reports
-that runoff volume compared more favorably with observations than peak rate in
+that runoff volume compared more favourably with observations than peak rate in
 one drainage evaluation; peak validity remained undetermined because hydraulic
 roughness had not been measured \cite{savabi1995}. These statements support
 caution, but they do not describe the later surface-return timing problem.
@@ -373,7 +344,9 @@ validation. The experimental code was removed and WEPP-Forest was restored
 byte-for-byte to the diagnostic release; the failed feasibility evidence was
 retained in the closed work package \cite{forestpf01}.
 
-\section{Study Design}
+\input{remediation-assessment.tex}
+
+\section{Original August Census Study Design}
 
 \subsection{Scenario strata and experimental unit}
 
@@ -438,8 +411,8 @@ retain the antecedent soil-water histories produced by that sequence.
 The Omni unburned scenario links to the parent run's climate directory and
 climate state. Corresponding burned and unburned hillslope climate files are
 therefore byte-identical; scenario differences arise from soil and management
-parameterization, not different meteorological histories. Table~\ref{tab:weppcloud-parameters}
-summarizes the WEPPcloud settings most relevant to interpretation.
+parameterisation, not different meteorological histories. Table~\ref{tab:weppcloud-parameters}
+summarises the WEPPcloud settings most relevant to interpretation.
 
 \begin{table}[H]
   \centering
@@ -473,7 +446,7 @@ history. Only first-horizon \Ksat{} or the paired cover values changed.
 
 \subsection{Land-use and soil provenance}
 
-WEPPcloud built both strata on the same 30-m watershed discretization and the
+WEPPcloud built both strata on the same 30-m watershed discretisation and the
 same underlying SSURGO/gNATSGO 2025 soil geography. The dominant undisturbed
 land-use assignment is shrub/scrub on 131 of 140 hillslopes, with mixed forest
 on two and developed moderate-intensity management on seven. By mapped area,
@@ -507,7 +480,7 @@ high-severity, two undisturbed, and seven developed hillslope assignments.
 The source SSURGO horizon geometry and texture remain the basis of each soil
 file, while the disturbed-9002 builder supplies scenario-specific erodibility,
 effective conductivity, rooting, leaf-area, and cover-related parameters. All
-soil files were initialized at 0.75 saturation. The source run disabled the
+soil files were initialised at 0.75 saturation. The source run disabled the
 artificial terminal restrictive-layer conductivity (\texttt{kslast}=0.0).
 The present experiment does not compare alternative soil maps or burn-severity
 products: it holds each frozen soil file fixed except for the explicit
@@ -564,7 +537,7 @@ legacy calculation without changing its reported results.
 Every eligible trial executed the complete antecedent history for the target
 hillslope. The execution system validated the frozen plan and selection,
 executable and observer hashes, input snapshot, sole changed input, requested
-and realized mutation values, terminal identity, return code, trace hash, and
+and realised mutation values, terminal identity, return code, trace hash, and
 hillslope-pass hash. Each trial received an explicit complete, failed, or
 stopped disposition.
 
@@ -625,7 +598,7 @@ tracing.
 
 The magnitude scatter uses paired-positive rows satisfying baseline peak
 $\geq 10^{-7}$ m/s and mutant peak $>0$. Peaks are converted to mm/h.
-``Congruent'' and ``incongruent'' describe whether the sign of the modeled peak
+``Congruent'' and ``incongruent'' describe whether the sign of the modelled peak
 response agrees with the ordinary first-order expectation for surface runoff;
 they do not describe whether the size of that response is reasonable.
 
@@ -662,7 +635,7 @@ mutation matrix, and opacity shows directional agreement. Faint
 markers ($\alpha=0.2$) are congruent; dark markers ($\alpha=0.6$) are
 incongruent. Reference lines mark ratios of 1, 0.5 and 2, and 0.2 and 5.
 
-\section{Topanga Results}
+\section{Original August Topanga Results}
 
 \subsection{Complete execution and event inventory}
 
@@ -722,7 +695,7 @@ full history.
 \subsection{Event runoff remains tightly constrained}
 
 Figure~\ref{fig:runoff-scatter} compares mutant and baseline event runoff depth
-using the same scenario colors, mutation markers, ratio guides, and directional
+using the same scenario colours, mutation markers, ratio guides, and directional
 opacity rules as the peak-flow figure. The runoff population is more tightly
 concentrated around 1:1 over the full plotted range.
 
@@ -867,7 +840,7 @@ The separated panels show that the extreme branches occur in both strata. The
 twofold-tail rate is 0.393\% for unburned rows and 0.577\% for burned rows;
 the fivefold-tail rates are 0.280\% and 0.322\%, respectively. Burned conditions
 have the higher tail prevalence, but the unburned extreme population is not an
-overplotting artifact.
+overplotting artefact.
 
 The split-stratum figure also locates the \Ksat{} response clusters at
 different absolute peak magnitudes. Among directionally incongruent \Ksat{}
@@ -886,7 +859,7 @@ and 7,204 only in the burned stratum. For the unburned-only group, median
 baseline peaks are 72 mm/h unburned and 44 mm/h burned. For the burned-only
 group, they are 38 mm/h burned and 9 mm/h unburned. The response regime is not
 tied to one universal peak threshold. Soil, vegetation, cover, and
-burn-severity parameterization shift the modeled hydrologic state at which the
+burn-severity parameterisation shift the modelled hydrologic state at which the
 unstable peak response is expressed. These are descriptive event-row
 statistics; they do not identify the responsible state variable or solver
 boundary.
@@ -968,7 +941,7 @@ profile state.
 Figure~\ref{fig:filtered-scatter} repeats Figure~\ref{fig:scatter} after
 excluding pairs in which either the baseline or mutant uses forcing mode 1:
 surface return is added to intervals already having positive infiltration
-excess. In the census observer source, this branch requires realized surface
+excess. In the census observer source, this branch requires realised surface
 return (\texttt{surpls}) greater than $10^{-6}$ m and positive pre-addition
 rainfall-excess duration (\texttt{durre}). The filter therefore isolates the
 mixed Green--Ampt runoff and surface-return pathway implicated by the Hill 106
@@ -1049,7 +1022,7 @@ rows remain clustered within trials and years. A tighter diagonal demonstrates
 local response stability in the retained population, not agreement with
 observed peaks or proof that excluded events are physically invalid.
 
-\section{Interpretation}
+\section{Interpretation of the Original Census}
 
 \subsection{What the Topanga census establishes}
 
@@ -1064,7 +1037,7 @@ The result has six levels:
     population remains tightly constrained.
   \item \textbf{Sediment delivery is mostly controlled but not exact.} Only
     0.195\% of paired-positive sediment-delivery rows depart by more than
-    twofold, but low-magnitude quantization and central-band dispersion require
+    twofold, but low-magnitude quantisation and central-band dispersion require
     a factor-of-two sensitivity envelope for event-level interpretation.
   \item \textbf{The extreme peak population is parameter-specific.} More than
     91\% of the twofold and fivefold tails are \Ksat{} mutations.
@@ -1073,7 +1046,7 @@ The result has six levels:
     one-percent change sometimes produces a many-fold peak change. Within the
     central band, wrong-sign \Ksat{} responses become more frequent as baseline
     peak increases.
-  \item \textbf{Parameterization shifts the response regime.} Under identical
+  \item \textbf{Parameterisation shifts the response regime.} Under identical
     climate histories, incongruent \Ksat{} responses cluster near substantially
     higher baseline peaks in the unburned stratum than in the burned stratum.
     The instability is conditioned on scenario-specific hydrologic state, not
@@ -1088,7 +1061,7 @@ another discontinuity. The census does not prove that this exact sequence
 explains every tail event, but it shows why \Ksat{} is the family in which the
 extreme population should concentrate.
 
-The between-stratum displacement adds a key finding: parameterization does not
+The between-stratum displacement adds a key finding: parameterisation does not
 merely change runoff and peak magnitude; it changes when the local peak-response
 regime is entered. The known surface-return construction gives a plausible
 implementation pathway because soil and cover affect infiltration, profile
@@ -1169,8 +1142,8 @@ method and its performance guidance were not reevaluated at population scale.
 The Chapter 4 statement remained in the documentation even though the model
 around it had changed. In that sense, the documentation became stale: it
 continued to describe the scope and evidence of the 1995 peak calculation, not
-the behavior of the later surface-return implementation. Limited access to the
-source made that mismatch much harder for users to recognize.
+the behaviour of the later surface-return implementation. Limited access to the
+source made that mismatch much harder for users to recognise.
 
 The historical omission is understandable. The original developers evaluated
 the approximation using the theory, selected cases, data, and computing
@@ -1183,7 +1156,7 @@ invalidated the assumption that their original performance claim still applied.
 
 \subsection{Production-scale implication}
 
-The small tail fraction does not make an individual modeled peak dependable.
+The small tail fraction does not make an individual modelled peak dependable.
 The Topanga census found 604 paired-positive event rows outside the 0.2--5
 ratio band, an empirical rate of approximately one in 330. This is an
 event-row rate within an enriched-discovery site, not an independent-event
@@ -1262,7 +1235,7 @@ of chaparral, shrubs, grass, litter, roots, and vegetation growing in and near
 channels. These plants intercept rain and remove water from different depths
 and at different times of year. The undisturbed Omni scenario reduces much of
 that variation to one general representation. In other words, ``undisturbed''
-is the name of a modeled condition. It does not mean that the condition is
+is the name of a modelled condition. It does not mean that the condition is
 known more accurately.
 
 The 2020 water balance gives a reason to question that baseline
@@ -1292,7 +1265,7 @@ at Topanga the undisturbed result deserves at least as much scrutiny as the
 burned result. The central lesson is simple: the prefire scenario is a
 comparison case, not ground truth.
 
-\section{Limitations and Claim Boundary}
+\section{Original Census Limitations and Claim Boundary}
 
 \paragraph{What is established.}
 The documentation, source comparison, diagnostic execution, and census jointly
@@ -1335,7 +1308,7 @@ at the outlet also remain outside this census.
     prevalence.
   \item \textbf{Local hillslope scope.} Per-mutation watershed routing was
     intentionally removed after the pilot exposed unresolved off-path changes
-    and incompatible channel-volume authorities. No attenuation, synchronization,
+    and incompatible channel-volume authorities. No attenuation, synchronisation,
     or outlet-impact claim is made.
   \item \textbf{Positive-event magnitude figures.} The peak scatter excludes
     rows below the baseline peak floor or without a positive mutant peak. The
@@ -1346,14 +1319,14 @@ at the outlet also remain outside this census.
     candidate screen.
   \item \textbf{Sediment-output precision.} The retained event files report
     sediment delivery to 0.1 kg/m. Exact ties and low-magnitude relative noise
-    therefore include output quantization, not solely model response.
+    therefore include output quantisation, not solely model response.
   \item \textbf{Mechanisms not exhaustively adjudicated.} Hill 106 establishes
     implementation mechanisms that can produce discontinuity. The full tail
     population still requires trial-level grouping, adaptive bracketing, and
     frozen-event replay.
 \end{itemize}
 
-\section{Next Steps}
+\section{Cross-Site Replication Next Steps}
 
 \subsection{Additional sites}
 
@@ -1374,7 +1347,7 @@ enriched and blind portfolios. A shared small-probe design makes the site
 comparison interpretable; increasing mutation size at later sites would change
 the estimand.
 
-\section{Conclusion}
+\section{Original Census Conclusion}
 
 The Topanga census demonstrates why small-mutation screening is valuable. A
 large perturbation was not required to reveal the issue. Under $\pm1\%$ \Ksat{}
@@ -1383,7 +1356,7 @@ providing a clear ordinary-response reference. Event runoff is especially
 stable: 98.3\% of \Ksat{} runoff responses have the expected direction, and
 only 0.21\% of plotted runoff rows depart by more than twofold. Event sediment
 delivery is also mostly controlled: 99.805\% of paired-positive rows remain
-within a factor of two. Its low-magnitude values are quantized and noisy, and
+within a factor of two. Its low-magnitude values are quantised and noisy, and
 the visible central-band dispersion supports interpreting individual erosion
 outputs with an empirical factor-of-two sensitivity envelope rather than as
 precise event predictions.
@@ -1391,7 +1364,7 @@ precise event predictions.
 Against the stable runoff-volume response, a small but conspicuous peak-flow
 extreme population appears. It is overwhelmingly associated with \Ksat{},
 usually moves in the expected hydrologic direction, and is too large to
-summarize as ordinary local sensitivity to a one-percent change. The 604 rows
+summarise as ordinary local sensitivity to a one-percent change. The 604 rows
 outside the 0.2--5 band represent an empirical Topanga rate of approximately
 one in 330 paired-positive event rows. Thus, the peak calculation is sensible
 in aggregate but cannot be trusted without qualification for an arbitrary
@@ -1402,8 +1375,8 @@ hillslope scale.
 The burned--unburned separation supplies an additional key result. Because the
 two strata share the same climate sequence, the shift from an unburned \Ksat{}
 incongruence cluster near 74 mm/h to a burned cluster near 39 mm/h reflects the
-effect of soil, vegetation, cover, and burn-severity parameterization on the
-modeled hydrologic state. Parameterization changes not only runoff magnitude
+effect of soil, vegetation, cover, and burn-severity parameterisation on the
+modelled hydrologic state. Parameterisation changes not only runoff magnitude
 but the peak scale at which the unstable response regime is encountered. This
 state shift provides a credible link to previously observed burned--unburned
 peak inversions: scenario-specific events can enter the amplified peak regime
@@ -1433,6 +1406,26 @@ Topanga claim boundary, and mechanism-trace selected candidates. Until that
 work is complete, the report supports a local Topanga finding: WEPP hillslope
 peak flow contains a structured \Ksat-sensitive response whose magnitude and
 state dependence warrant implementation-level investigation.
+
+\section{Current Remediation Conclusion}
+
+Increasing \texttt{rrinit} is a parameter intervention that can mask one
+defective timing pathway, not a repair of it. Neither 17 cm nor 60 cm is a
+universal threshold or a justified replacement default. The implemented
+surface-return estimator is a more targeted response: it avoids compressing
+daily return into a potentially tiny positive-excess duration without adding
+user flags or altering roughness. Its repeated mutation results support a
+substantial reduction of the most extreme peak departures and high-rate
+directional instability, not elimination of all sensitivity.
+
+The watershed comparison supports nearly preserved long-term yield and shows
+that peaks can change substantially in either direction, including smaller
+events. It also exposes a larger routed-discharge/volume-ledger discrepancy
+with the candidate. Reconciling that discrepancy is the next release gate;
+lower peaks alone are not evidence of a more accurate hydrograph. Stakeholder
+disclosure should distinguish diagnosed defect, implemented candidate,
+completed research, unresolved validation, and any later deployment. No
+production deployment or external stakeholder notification is implied here.
 
 \section*{Evidence and Reproducibility}
 
@@ -1478,7 +1471,28 @@ The immutable event ledger is inventoried by the execution package's external
 evidence manifest. The report deliberately cites compact repository evidence
 rather than embedding the large Parquet ledger.
 
-\begin{thebibliography}{9}
+October evidence is retained in three immutable work packages, including
+methods, binary identities, input/output manifests, machine-readable summaries,
+plotting scripts, and validation reviews \cite{mutationredo,rrfixed,rrlegacy}.
+The revised Figures 1--3 are candidate-build mutation figures; the original
+August scatter plots are retained later with their original population and
+interpretation. Figure numbering is updated through LaTeX cross-references.
+
+\begingroup
+\small\raggedright
+\begin{thebibliography}{12}
+
+\bibitem{mutationredo}
+Surface-Return Mutation Repeat (2026).
+\path{docs/work-packages/20261006_surface_return_mutation/artifacts/results.md}.
+
+\bibitem{rrfixed}
+Warming-championship Initial Roughness Experiment (2026).
+\path{docs/work-packages/20261006_warming_rrinit/artifacts/results.md}.
+
+\bibitem{rrlegacy}
+Original WEPP Roughness Sensitivity and Surface Return Comparison (2026).
+\path{docs/work-packages/20261006_warming_rrinit_legacy/artifacts/results.md}.
 
 \bibitem{stone1995}
 Stone, J. J., Lane, L. J., and Shirley, E. D. (1995).
@@ -1522,5 +1536,6 @@ WEPP-Forest PF01 \surdra{} Kinematic-Wave Partitioning Work Package (2026).
 \path{/workdir/wepp-forest_260430_baseline/docs/work-packages/20260810-pf01-surdra-kinematic-wave-partitioning/}.
 
 \end{thebibliography}
+\endgroup
 
 \end{document}

@@ -1,0 +1,82 @@
+[
+  {
+    "path": "docs/work-packages/20261006_surface_return_mutation/artifacts/figure-1.png",
+    "bytes": 733722,
+    "sha256": "2aac8e65b6df6b13f6063520c36ddcc54cda338c7e9451e1b61de5c793840726"
+  },
+  {
+    "path": "docs/work-packages/20261006_surface_return_mutation/artifacts/figure-2.png",
+    "bytes": 596734,
+    "sha256": "70aacbe82ee6224d8f40de554e136597a6c22bd3dbc99265109f737d1efe7ee5"
+  },
+  {
+    "path": "docs/work-packages/20261006_surface_return_mutation/artifacts/figure-3.png",
+    "bytes": 844477,
+    "sha256": "da0a9d6270741f251fc04b9ba4396cbc776305938c46ec6820725cfa1ee183c4"
+  },
+  {
+    "path": "docs/work-packages/20261006_warming_rrinit_legacy/artifacts/comparison/figure-1-build-roughness.png",
+    "bytes": 231929,
+    "sha256": "78b6a3f2c5830cb96868bca06c0a4a92d5274f0734c2a0f15ffec75c24f36b5a"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/remediation-report/totalwatsed-hydrograph.png",
+    "bytes": 439809,
+    "sha256": "b9638f8210d645a3fe02d038301dbeba593b38cf102581e490b2ab279dc6a812"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/remediation-report/totalwatsed-smaller-events.png",
+    "bytes": 296400,
+    "sha256": "b36ecf8e1505f43b359ae92373542843bc2ff2f5cad31dd88e2720446d2521a9"
+  },
+  {
+    "path": "docs/work-packages/20261006_warming_rrinit_legacy/artifacts/comparison/figure-2-matched-10cm.png",
+    "bytes": 389726,
+    "sha256": "a299193d41721ce284ff3152359a6e3b0d98960fbc9f7fac4862e0ded272409e"
+  },
+  {
+    "path": "docs/work-packages/20261006_warming_rrinit_legacy/artifacts/comparison/figure-4-smaller-events.png",
+    "bytes": 327709,
+    "sha256": "c6bdf5d72ee52c4868e35162a1a9a0d6fd8ade122f830e0741adb545c44fdb80"
+  },
+  {
+    "path": "docs/work-packages/20261006_warming_rrinit_legacy/artifacts/comparison/figure-3-matched-hydrographs.png",
+    "bytes": 330512,
+    "sha256": "1e9d3598da5c0c61ad2c45751de901a53e277062e4d396a90a6a0e93bf448d76"
+  },
+  {
+    "path": "docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/topanga-mutant-vs-baseline-runoff.png",
+    "bytes": 747327,
+    "sha256": "37702c415d6daf0fa1cb56e73932e544515e62a1bbd0f8ee722776ac569a20d3"
+  },
+  {
+    "path": "docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/topanga-mutant-vs-baseline-erosion.png",
+    "bytes": 615840,
+    "sha256": "3cb1615097f92c4d0e051bdae66912cb4706b8a428980b198481cb46346e6628"
+  },
+  {
+    "path": "docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/topanga-mutant-vs-baseline-peakflow.png",
+    "bytes": 946738,
+    "sha256": "7655df44facb777df279f3c7c21d6fc0835e0fa31c7495b17e666bbbf7a3c192"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/topanga-figure-3-excluding-mixed-runoff.pdf",
+    "bytes": 208868,
+    "sha256": "0e7b5eaec35ade277c7af74f1ff949cee9d26094339963b4200d07293eff25a0"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/remediation-report/plot_totalwatsed.py",
+    "bytes": 4758,
+    "sha256": "bf2870da82d8d77d6ab9330d36b6c62e178f07c2af37a54f369cc24f9c2e7dbc"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/remediation-report/selection.json",
+    "bytes": 1537,
+    "sha256": "1196b4739c35fe2450c9956fa3b89b2b8e934c54e5976f8f71efa32d369c5590"
+  },
+  {
+    "path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/remediation-report/totalwatsed-comparison.json",
+    "bytes": 3465,
+    "sha256": "0261b6f3d9874e939745277a82c367f0b9d191e3f77a37039b10333804840aea"
+  }
+]

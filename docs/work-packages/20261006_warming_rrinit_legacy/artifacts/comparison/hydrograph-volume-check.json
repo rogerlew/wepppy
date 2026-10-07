@@ -1,0 +1,16 @@
+{
+  "original": {
+    "printed_integral_m3": 1266448890.2999997,
+    "ledger_volume_m3": 1272337716.46,
+    "integral_minus_ledger_m3": -5888826.160000324,
+    "printing_rounding_bound_m3": 2879069.3999999994,
+    "discrepancy_exceeds_printing_bound": true
+  },
+  "corrected": {
+    "printed_integral_m3": 1255527516.0599997,
+    "ledger_volume_m3": 1272337712.2099998,
+    "integral_minus_ledger_m3": -16810196.150000095,
+    "printing_rounding_bound_m3": 2878691.399999999,
+    "discrepancy_exceeds_printing_bound": true
+  }
+}

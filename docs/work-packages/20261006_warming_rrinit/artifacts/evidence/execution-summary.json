@@ -1,0 +1,36 @@
+{
+  "cases": [
+    {
+      "lane": "rr10",
+      "hillslope_count": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 652.6242747306824,
+        "success": true
+      }
+    },
+    {
+      "lane": "rr17",
+      "hillslope_count": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 527.5338821411133,
+        "success": true
+      }
+    },
+    {
+      "lane": "rr60",
+      "hillslope_count": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 536.7417461872101,
+        "success": true
+      }
+    }
+  ],
+  "source_unchanged": true,
+  "output_mode_parity": true
+}

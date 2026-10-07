@@ -1,0 +1,24 @@
+{
+  "definition": "lower half of original daily outlet local peaks; distance>=7d and prominence>=0.1m3/s",
+  "threshold_m3s": 4.08673,
+  "events": [
+    {
+      "date": "1990-10-21",
+      "original_daily_peak_m3s": 1.42494,
+      "corrected_daily_peak_m3s": 3.00761,
+      "peak_change_percent": 111.06923800300362
+    },
+    {
+      "date": "1998-09-18",
+      "original_daily_peak_m3s": 2.44958,
+      "corrected_daily_peak_m3s": 4.87131,
+      "peak_change_percent": 98.86307040390598
+    },
+    {
+      "date": "2001-10-22",
+      "original_daily_peak_m3s": 1.82269,
+      "corrected_daily_peak_m3s": 3.40262,
+      "peak_change_percent": 86.68122390532676
+    }
+  ]
+}

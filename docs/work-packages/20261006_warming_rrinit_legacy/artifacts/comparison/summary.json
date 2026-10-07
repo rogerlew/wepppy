@@ -1,0 +1,1484 @@
+{
+  "direction": "comparison minus reference; cross-build reference=original and comparison=corrected",
+  "cross_build": {
+    "rr10": {
+      "volume_m3": {
+        "n": 8766,
+        "reference_sum": 1272337716.46,
+        "comparison_sum": 1272337712.2099998,
+        "sum_change_percent": -3.34030825221987e-07,
+        "changed": 4546,
+        "max_abs_difference": 18273.740000000224,
+        "lower": 2335,
+        "higher": 2211,
+        "positive_reference_n": 8766,
+        "min_percent": -8.61661565657278,
+        "max_percent": 2.569498784608637,
+        "above_one_percent": 44,
+        "percentiles": {
+          "0.01": -0.43520207874357725,
+          "0.05": -0.04086130228198037,
+          "0.5": 0.0,
+          "0.95": 0.03723346362101143,
+          "0.99": 0.27435105787819664
+        }
+      },
+      "peak_m3s": {
+        "n": 8766,
+        "reference_sum": 16721.562400000003,
+        "comparison_sum": 16994.24583,
+        "sum_change_percent": 1.6307293749057594,
+        "changed": 4347,
+        "max_abs_difference": 15.050919999999998,
+        "lower": 1930,
+        "higher": 2417,
+        "positive_reference_n": 8766,
+        "min_percent": -46.97419506121351,
+        "max_percent": 156.00109758087245,
+        "above_one_percent": 2356,
+        "percentiles": {
+          "0.01": -16.036345569454422,
+          "0.05": -3.9263107014916225,
+          "0.5": 0.0,
+          "0.95": 6.909009055463172,
+          "0.99": 25.61725026611571
+        }
+      },
+      "printed_hydrograph_integral_m3": {
+        "n": 8766,
+        "reference_sum": 1266448890.3,
+        "comparison_sum": 1255527516.06,
+        "sum_change_percent": -0.8623620205796767,
+        "changed": 4459,
+        "max_abs_difference": 446574.0,
+        "lower": 3028,
+        "higher": 1431,
+        "positive_reference_n": 8766,
+        "min_percent": -29.963077295563224,
+        "max_percent": 5.078088469091924,
+        "above_one_percent": 777,
+        "percentiles": {
+          "0.01": -7.106484939880161,
+          "0.05": -1.8601964314265418,
+          "0.5": 0.0,
+          "0.95": 0.10757594837019213,
+          "0.99": 0.9308212059590515
+        }
+      },
+      "sediment_kg": {
+        "n": 8766,
+        "reference_sum": 202652.50999999998,
+        "comparison_sum": 172321.49000000002,
+        "sum_change_percent": -14.96700929092858,
+        "changed": 1561,
+        "max_abs_difference": 6198.33,
+        "lower": 619,
+        "higher": 942,
+        "positive_reference_n": 4874,
+        "min_percent": -100.0,
+        "max_percent": 308412.5,
+        "above_one_percent": 1001,
+        "percentiles": {
+          "0.01": -88.49428144448858,
+          "0.05": -10.047477281270119,
+          "0.5": 0.0,
+          "0.95": 25.740740740740584,
+          "0.99": 766.4604813664575
+        }
+      },
+      "totalwatsed": {
+        "Runoff": {
+          "n": 8766,
+          "reference_sum": 9992.603231087012,
+          "comparison_sum": 9992.603222659927,
+          "sum_change_percent": -8.433322928880216e-08,
+          "changed": 103,
+          "max_abs_difference": 5.192608629300821e-06,
+          "lower": 52,
+          "higher": 51,
+          "positive_reference_n": 4697,
+          "min_percent": -0.005558765001301147,
+          "max_percent": 0.0012747395070178413,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -3.739434970562172e-07,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 4.548076173449509e-07
+          }
+        },
+        "Lateral Flow": {
+          "n": 8766,
+          "reference_sum": 20996.287823136703,
+          "comparison_sum": 20996.28784169247,
+          "sum_change_percent": 8.837641729542156e-08,
+          "changed": 3,
+          "max_abs_difference": 1.1272530221928534e-05,
+          "lower": 1,
+          "higher": 2,
+          "positive_reference_n": 8766,
+          "min_percent": -0.00012782605702810201,
+          "max_percent": 0.003004488950919537,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        },
+        "Baseflow": {
+          "n": 8766,
+          "reference_sum": 34839.660502594415,
+          "comparison_sum": 34839.66050829085,
+          "sum_change_percent": 1.635043211933862e-08,
+          "changed": 8116,
+          "max_abs_difference": 3.907271395320322e-08,
+          "lower": 3046,
+          "higher": 5070,
+          "positive_reference_n": 8765,
+          "min_percent": -2.2910406904941283e-07,
+          "max_percent": 2.046545599654337e-06,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -9.237668985306868e-08,
+            "0.05": -1.7026677845421997e-08,
+            "0.5": 1.4432899320127035e-12,
+            "0.95": 1.748160594061683e-07,
+            "0.99": 6.407407120434528e-07
+          }
+        },
+        "Streamflow": {
+          "n": 8766,
+          "reference_sum": 65828.55155681814,
+          "comparison_sum": 65828.55157264325,
+          "sum_change_percent": 2.403988119681344e-08,
+          "changed": 8104,
+          "max_abs_difference": 1.127431570546733e-05,
+          "lower": 3073,
+          "higher": 5031,
+          "positive_reference_n": 8766,
+          "min_percent": -4.517729813580118e-05,
+          "max_percent": 0.0003701371462438985,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -1.2865856990895708e-07,
+            "0.05": -1.70394504062088e-08,
+            "0.5": 7.66053886991358e-13,
+            "0.95": 1.664944015988823e-07,
+            "0.99": 5.458194762830728e-07
+          }
+        }
+      },
+      "largest_outlet_peak_departures": [
+        {
+          "date": "1991-11-04",
+          "volume_m3": 75598.84,
+          "peak_m3s": 1.34842,
+          "volume_m3_corrected": 75690.23,
+          "peak_m3s_corrected": 3.45197,
+          "peak_change_percent": 156.00109758087245
+        },
+        {
+          "date": "1980-11-29",
+          "volume_m3": 170545.08,
+          "peak_m3s": 2.65357,
+          "volume_m3_corrected": 170550.95,
+          "peak_m3s_corrected": 5.62525,
+          "peak_change_percent": 111.9880010702563
+        },
+        {
+          "date": "1990-10-21",
+          "volume_m3": 80845.88,
+          "peak_m3s": 1.42494,
+          "volume_m3_corrected": 80867.85,
+          "peak_m3s_corrected": 3.00761,
+          "peak_change_percent": 111.06923800300362
+        },
+        {
+          "date": "1998-09-18",
+          "volume_m3": 108053.83,
+          "peak_m3s": 2.44958,
+          "volume_m3_corrected": 108068.39,
+          "peak_m3s_corrected": 4.87131,
+          "peak_change_percent": 98.86307040390598
+        },
+        {
+          "date": "1987-12-01",
+          "volume_m3": 300508.84,
+          "peak_m3s": 4.15598,
+          "volume_m3_corrected": 304738.38,
+          "peak_m3s_corrected": 8.06337,
+          "peak_change_percent": 94.01849864532556
+        },
+        {
+          "date": "2001-10-22",
+          "volume_m3": 83659.01,
+          "peak_m3s": 1.82269,
+          "volume_m3_corrected": 83722.56,
+          "peak_m3s_corrected": 3.40262,
+          "peak_change_percent": 86.68122390532676
+        },
+        {
+          "date": "1982-11-17",
+          "volume_m3": 193025.27,
+          "peak_m3s": 2.58713,
+          "volume_m3_corrected": 193151.03,
+          "peak_m3s_corrected": 4.65597,
+          "peak_change_percent": 79.96660392017407
+        },
+        {
+          "date": "1981-10-06",
+          "volume_m3": 76330.02,
+          "peak_m3s": 1.62366,
+          "volume_m3_corrected": 76331.03,
+          "peak_m3s_corrected": 2.86844,
+          "peak_change_percent": 76.66506534619317
+        },
+        {
+          "date": "1999-11-24",
+          "volume_m3": 213269.56,
+          "peak_m3s": 3.69369,
+          "volume_m3_corrected": 213459.92,
+          "peak_m3s_corrected": 6.52174,
+          "peak_change_percent": 76.56435705216194
+        },
+        {
+          "date": "1988-02-08",
+          "volume_m3": 320575.75,
+          "peak_m3s": 3.84776,
+          "volume_m3_corrected": 328812.94,
+          "peak_m3s_corrected": 6.71707,
+          "peak_change_percent": 74.57091918414869
+        }
+      ],
+      "hillslope_pass": {
+        "records": 7573824,
+        "volume_changed": 106,
+        "max_abs_volume_difference_m3": 0.10000000000013642,
+        "original_volume_m3": 192438982.86586896,
+        "corrected_volume_m3": 192438982.70357892,
+        "peak_changed": 392667,
+        "max_abs_peak_difference_m3s": 3.9384499999999996,
+        "duration_changed": 0,
+        "peak_below_daily_mean_original": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_below_daily_mean_corrected": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_reference_above_0.0_m3s": {
+          "n": 392824,
+          "reference_sum": 4200.7369013385,
+          "comparison_sum": 5727.266372395401,
+          "sum_change_percent": 36.33956391247679,
+          "changed": 392667,
+          "max_abs_difference": 3.9384499999999996,
+          "lower": 97410,
+          "higher": 295257,
+          "positive_reference_n": 392824,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.1172218423367,
+          "above_one_percent": 384068,
+          "percentiles": {
+            "0.01": -85.93202055617529,
+            "0.05": -60.03194880694392,
+            "0.5": 44.83877396497206,
+            "0.95": 783.3625269909066,
+            "0.99": 1358.1539532019954
+          }
+        },
+        "peak_reference_above_0.001_m3s": {
+          "n": 329392,
+          "reference_sum": 4169.740950599999,
+          "comparison_sum": 5575.413569489999,
+          "sum_change_percent": 33.711269729783375,
+          "changed": 329273,
+          "max_abs_difference": 3.9384499999999996,
+          "lower": 88067,
+          "higher": 241206,
+          "positive_reference_n": 329392,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.0548696844994,
+          "above_one_percent": 321670,
+          "percentiles": {
+            "0.01": -87.02154442065908,
+            "0.05": -62.959671907040324,
+            "0.5": 33.187400368223194,
+            "0.95": 481.3969491104406,
+            "0.99": 941.4190632119498
+          }
+        },
+        "peak_reference_above_0.01_m3s": {
+          "n": 115499,
+          "reference_sum": 3259.288785,
+          "comparison_sum": 3694.35044296,
+          "sum_change_percent": 13.348361764144801,
+          "changed": 115465,
+          "max_abs_difference": 3.9384499999999996,
+          "lower": 37586,
+          "higher": 77879,
+          "positive_reference_n": 115499,
+          "min_percent": -99.44636353480058,
+          "max_percent": 1624.8214956783163,
+          "above_one_percent": 110786,
+          "percentiles": {
+            "0.01": -93.39007136418081,
+            "0.05": -70.06720124813292,
+            "0.5": 12.982812788763631,
+            "0.95": 174.14446281358033,
+            "0.99": 316.1489654516668
+          }
+        }
+      }
+    },
+    "rr17": {
+      "volume_m3": {
+        "n": 8766,
+        "reference_sum": 1272198068.7300003,
+        "comparison_sum": 1272198063.8700001,
+        "sum_change_percent": -3.8201599661391583e-07,
+        "changed": 4517,
+        "max_abs_difference": 18273.5,
+        "lower": 2324,
+        "higher": 2193,
+        "positive_reference_n": 8766,
+        "min_percent": -8.61661565657278,
+        "max_percent": 2.569498784608637,
+        "above_one_percent": 44,
+        "percentiles": {
+          "0.01": -0.43515626874741914,
+          "0.05": -0.04086130228198037,
+          "0.5": 0.0,
+          "0.95": 0.03723346362101143,
+          "0.99": 0.2743422849648664
+        }
+      },
+      "peak_m3s": {
+        "n": 8766,
+        "reference_sum": 16712.18964,
+        "comparison_sum": 16992.716790000002,
+        "sum_change_percent": 1.6785780681220386,
+        "changed": 4337,
+        "max_abs_difference": 15.16939,
+        "lower": 1923,
+        "higher": 2414,
+        "positive_reference_n": 8766,
+        "min_percent": -47.26775478667336,
+        "max_percent": 156.00109758087245,
+        "above_one_percent": 2358,
+        "percentiles": {
+          "0.01": -16.016414515226057,
+          "0.05": -3.9049174088158836,
+          "0.5": 0.0,
+          "0.95": 6.878586825166111,
+          "0.99": 25.647997411549472
+        }
+      },
+      "printed_hydrograph_integral_m3": {
+        "n": 8766,
+        "reference_sum": 1266313662.24,
+        "comparison_sum": 1255483479.0,
+        "sum_change_percent": -0.8552528147601546,
+        "changed": 4456,
+        "max_abs_difference": 446526.00000000023,
+        "lower": 3024,
+        "higher": 1432,
+        "positive_reference_n": 8766,
+        "min_percent": -30.053194726783605,
+        "max_percent": 5.078088469091924,
+        "above_one_percent": 775,
+        "percentiles": {
+          "0.01": -7.106484939880161,
+          "0.05": -1.8520567114474695,
+          "0.5": 0.0,
+          "0.95": 0.10826963868874606,
+          "0.99": 0.9308212059590515
+        }
+      },
+      "sediment_kg": {
+        "n": 8766,
+        "reference_sum": 196593.31,
+        "comparison_sum": 165985.24,
+        "sum_change_percent": -15.569232747543648,
+        "changed": 1562,
+        "max_abs_difference": 6936.5,
+        "lower": 614,
+        "higher": 948,
+        "positive_reference_n": 4873,
+        "min_percent": -100.0,
+        "max_percent": 308412.5,
+        "above_one_percent": 1003,
+        "percentiles": {
+          "0.01": -88.70963677290472,
+          "0.05": -10.000000000000002,
+          "0.5": 0.0,
+          "0.95": 27.23738464559198,
+          "0.99": 772.0350029129075
+        }
+      },
+      "totalwatsed": {
+        "Runoff": {
+          "n": 8766,
+          "reference_sum": 9985.343696272226,
+          "comparison_sum": 9985.3436973175,
+          "sum_change_percent": 1.0468070854585676e-08,
+          "changed": 73,
+          "max_abs_difference": 5.192608639958962e-06,
+          "lower": 35,
+          "higher": 38,
+          "positive_reference_n": 4697,
+          "min_percent": -0.005558765001301147,
+          "max_percent": 0.0012747395070178413,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        },
+        "Lateral Flow": {
+          "n": 8766,
+          "reference_sum": 20996.295259122173,
+          "comparison_sum": 20996.295281667233,
+          "sum_change_percent": 1.0737637445856762e-07,
+          "changed": 2,
+          "max_abs_difference": 1.1272530221928534e-05,
+          "lower": 0,
+          "higher": 2,
+          "positive_reference_n": 8766,
+          "min_percent": 0.0,
+          "max_percent": 0.003004488950919537,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        },
+        "Baseflow": {
+          "n": 8766,
+          "reference_sum": 34839.66120001493,
+          "comparison_sum": 34839.661205736295,
+          "sum_change_percent": 1.6421974891045465e-08,
+          "changed": 8066,
+          "max_abs_difference": 3.907268553149379e-08,
+          "lower": 2398,
+          "higher": 5668,
+          "positive_reference_n": 8765,
+          "min_percent": -1.5619611160033742e-07,
+          "max_percent": 1.9039239518292561e-06,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -5.1535225420451525e-08,
+            "0.05": -7.540807978045903e-09,
+            "0.5": 3.3528735343679728e-12,
+            "0.95": 1.431529472739612e-07,
+            "0.99": 6.207328056007103e-07
+          }
+        },
+        "Streamflow": {
+          "n": 8766,
+          "reference_sum": 65821.30015540934,
+          "comparison_sum": 65821.30018472103,
+          "sum_change_percent": 4.453222235412113e-08,
+          "changed": 8045,
+          "max_abs_difference": 1.127444434878555e-05,
+          "lower": 2420,
+          "higher": 5625,
+          "positive_reference_n": 8766,
+          "min_percent": -4.3839670849088463e-05,
+          "max_percent": 0.00037014136964330646,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -5.27066745803495e-08,
+            "0.05": -7.357417453057735e-09,
+            "0.5": 1.8207657603852567e-12,
+            "0.95": 1.2474777877358179e-07,
+            "0.99": 5.272030600966827e-07
+          }
+        }
+      },
+      "largest_outlet_peak_departures": [
+        {
+          "date": "1991-11-04",
+          "volume_m3": 75598.84,
+          "peak_m3s": 1.34842,
+          "volume_m3_corrected": 75690.23,
+          "peak_m3s_corrected": 3.45197,
+          "peak_change_percent": 156.00109758087245
+        },
+        {
+          "date": "1980-11-29",
+          "volume_m3": 170545.08,
+          "peak_m3s": 2.65357,
+          "volume_m3_corrected": 170550.95,
+          "peak_m3s_corrected": 5.62525,
+          "peak_change_percent": 111.9880010702563
+        },
+        {
+          "date": "1990-10-21",
+          "volume_m3": 80845.88,
+          "peak_m3s": 1.42494,
+          "volume_m3_corrected": 80867.85,
+          "peak_m3s_corrected": 3.00761,
+          "peak_change_percent": 111.06923800300362
+        },
+        {
+          "date": "1998-09-18",
+          "volume_m3": 108053.83,
+          "peak_m3s": 2.44958,
+          "volume_m3_corrected": 108068.39,
+          "peak_m3s_corrected": 4.87131,
+          "peak_change_percent": 98.86307040390598
+        },
+        {
+          "date": "1987-12-01",
+          "volume_m3": 300508.84,
+          "peak_m3s": 4.15598,
+          "volume_m3_corrected": 304738.38,
+          "peak_m3s_corrected": 8.06337,
+          "peak_change_percent": 94.01849864532556
+        },
+        {
+          "date": "2001-10-22",
+          "volume_m3": 83659.01,
+          "peak_m3s": 1.82268,
+          "volume_m3_corrected": 83722.56,
+          "peak_m3s_corrected": 3.40262,
+          "peak_change_percent": 86.68224811815568
+        },
+        {
+          "date": "1982-11-17",
+          "volume_m3": 193025.27,
+          "peak_m3s": 2.58713,
+          "volume_m3_corrected": 193151.03,
+          "peak_m3s_corrected": 4.65597,
+          "peak_change_percent": 79.96660392017407
+        },
+        {
+          "date": "1981-10-06",
+          "volume_m3": 76330.02,
+          "peak_m3s": 1.62366,
+          "volume_m3_corrected": 76331.03,
+          "peak_m3s_corrected": 2.86844,
+          "peak_change_percent": 76.66506534619317
+        },
+        {
+          "date": "1999-11-24",
+          "volume_m3": 213269.5,
+          "peak_m3s": 3.69369,
+          "volume_m3_corrected": 213459.86,
+          "peak_m3s_corrected": 6.52174,
+          "peak_change_percent": 76.56435705216194
+        },
+        {
+          "date": "1988-02-08",
+          "volume_m3": 320575.75,
+          "peak_m3s": 3.84776,
+          "volume_m3_corrected": 328812.94,
+          "peak_m3s_corrected": 6.71707,
+          "peak_change_percent": 74.57091918414869
+        }
+      ],
+      "hillslope_pass": {
+        "records": 7573824,
+        "volume_changed": 74,
+        "max_abs_volume_difference_m3": 0.10000000000013642,
+        "original_volume_m3": 192299177.7056392,
+        "corrected_volume_m3": 192299177.72576922,
+        "peak_changed": 392681,
+        "max_abs_peak_difference_m3s": 2.580572,
+        "duration_changed": 0,
+        "peak_below_daily_mean_original": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_below_daily_mean_corrected": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_reference_above_0.0_m3s": {
+          "n": 392837,
+          "reference_sum": 4167.715040898302,
+          "comparison_sum": 5725.497440602401,
+          "sum_change_percent": 37.37737307895066,
+          "changed": 392681,
+          "max_abs_difference": 2.580572,
+          "lower": 97388,
+          "higher": 295293,
+          "positive_reference_n": 392837,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.1172218423367,
+          "above_one_percent": 384079,
+          "percentiles": {
+            "0.01": -85.89015800805005,
+            "0.05": -60.002117970983804,
+            "0.5": 44.84899748168938,
+            "0.95": 783.3545022645384,
+            "0.99": 1358.1522581541174
+          }
+        },
+        "peak_reference_above_0.001_m3s": {
+          "n": 329398,
+          "reference_sum": 4136.717936899999,
+          "comparison_sum": 5573.641799679998,
+          "sum_change_percent": 34.7358433593568,
+          "changed": 329280,
+          "max_abs_difference": 2.580572,
+          "lower": 88045,
+          "higher": 241235,
+          "positive_reference_n": 329398,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.0548696844994,
+          "above_one_percent": 321674,
+          "percentiles": {
+            "0.01": -86.9644499694442,
+            "0.05": -62.927793002358044,
+            "0.5": 33.19871732364423,
+            "0.95": 481.39605450585606,
+            "0.99": 941.4109801017051
+          }
+        },
+        "peak_reference_above_0.01_m3s": {
+          "n": 115497,
+          "reference_sum": 3226.215099,
+          "comparison_sum": 3692.5031974699996,
+          "sum_change_percent": 14.453100123873664,
+          "changed": 115463,
+          "max_abs_difference": 2.580572,
+          "lower": 37561,
+          "higher": 77902,
+          "positive_reference_n": 115497,
+          "min_percent": -99.44636353480058,
+          "max_percent": 1624.8214956783163,
+          "above_one_percent": 110781,
+          "percentiles": {
+            "0.01": -93.06865138993238,
+            "0.05": -69.99946146078761,
+            "0.5": 13.006396588486147,
+            "0.95": 174.14707679751038,
+            "0.99": 316.15195357405304
+          }
+        }
+      }
+    },
+    "rr60": {
+      "volume_m3": {
+        "n": 8766,
+        "reference_sum": 1272069779.63,
+        "comparison_sum": 1272069776.8600001,
+        "sum_change_percent": -2.1775534708723399e-07,
+        "changed": 4496,
+        "max_abs_difference": 18273.740000000224,
+        "lower": 2322,
+        "higher": 2174,
+        "positive_reference_n": 8766,
+        "min_percent": -8.61661565657278,
+        "max_percent": 2.5693156898226155,
+        "above_one_percent": 44,
+        "percentiles": {
+          "0.01": -0.4351850636162113,
+          "0.05": -0.04086130228198037,
+          "0.5": 0.0,
+          "0.95": 0.03723346362101143,
+          "0.99": 0.2743422849648664
+        }
+      },
+      "peak_m3s": {
+        "n": 8766,
+        "reference_sum": 16688.68292,
+        "comparison_sum": 16991.819340000002,
+        "sum_change_percent": 1.8164190754485388,
+        "changed": 4347,
+        "max_abs_difference": 15.501570000000001,
+        "lower": 1931,
+        "higher": 2416,
+        "positive_reference_n": 8766,
+        "min_percent": -47.4967529459477,
+        "max_percent": 156.00109758087245,
+        "above_one_percent": 2357,
+        "percentiles": {
+          "0.01": -16.05089640267232,
+          "0.05": -3.795197110401602,
+          "0.5": 0.0,
+          "0.95": 6.968594550235796,
+          "0.99": 25.989018854293935
+        }
+      },
+      "printed_hydrograph_integral_m3": {
+        "n": 8766,
+        "reference_sum": 1266184374.9,
+        "comparison_sum": 1255485738.6,
+        "sum_change_percent": -0.8449509022605883,
+        "changed": 4450,
+        "max_abs_difference": 447828.0,
+        "lower": 3023,
+        "higher": 1427,
+        "positive_reference_n": 8766,
+        "min_percent": -30.19318084989836,
+        "max_percent": 5.078088469091924,
+        "above_one_percent": 775,
+        "percentiles": {
+          "0.01": -7.037873163849086,
+          "0.05": -1.8461185225798538,
+          "0.5": 0.0,
+          "0.95": 0.10884171061847914,
+          "0.99": 0.9254567628708701
+        }
+      },
+      "sediment_kg": {
+        "n": 8766,
+        "reference_sum": 187794.33999999997,
+        "comparison_sum": 161539.2,
+        "sum_change_percent": -13.98079409635027,
+        "changed": 1561,
+        "max_abs_difference": 6902.39,
+        "lower": 605,
+        "higher": 956,
+        "positive_reference_n": 4871,
+        "min_percent": -100.0,
+        "max_percent": 308412.5,
+        "above_one_percent": 1001,
+        "percentiles": {
+          "0.01": -88.71795683571675,
+          "0.05": -9.684524655392934,
+          "0.5": 0.0,
+          "0.95": 27.77777777777779,
+          "0.99": 901.484843594505
+        }
+      },
+      "totalwatsed": {
+        "Runoff": {
+          "n": 8766,
+          "reference_sum": 9978.677691899165,
+          "comparison_sum": 9978.677734821265,
+          "sum_change_percent": 4.301381473226229e-07,
+          "changed": 63,
+          "max_abs_difference": 3.634826040865846e-05,
+          "lower": 33,
+          "higher": 30,
+          "positive_reference_n": 4697,
+          "min_percent": -0.005558765001301147,
+          "max_percent": 0.0008192960608166544,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        },
+        "Lateral Flow": {
+          "n": 8766,
+          "reference_sum": 20996.29963884256,
+          "comparison_sum": 20996.29966138762,
+          "sum_change_percent": 1.0737635225410713e-07,
+          "changed": 2,
+          "max_abs_difference": 1.1272530221928534e-05,
+          "lower": 0,
+          "higher": 2,
+          "positive_reference_n": 8766,
+          "min_percent": 0.0,
+          "max_percent": 0.003004488950919537,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        },
+        "Baseflow": {
+          "n": 8766,
+          "reference_sum": 34839.6613276575,
+          "comparison_sum": 34839.66133315087,
+          "sum_change_percent": 1.5767565031410413e-08,
+          "changed": 7994,
+          "max_abs_difference": 3.907262069446915e-08,
+          "lower": 2731,
+          "higher": 5263,
+          "positive_reference_n": 8765,
+          "min_percent": -1.674022809261544e-07,
+          "max_percent": 1.9039239740337166e-06,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -5.5132491016962604e-08,
+            "0.05": -6.715907829857312e-09,
+            "0.5": 2.7533531010703882e-12,
+            "0.95": 1.297153273682729e-07,
+            "0.99": 6.196753741249957e-07
+          }
+        },
+        "Streamflow": {
+          "n": 8766,
+          "reference_sum": 65814.63865839923,
+          "comparison_sum": 65814.63872935977,
+          "sum_change_percent": 1.0781877612942026e-07,
+          "changed": 7980,
+          "max_abs_difference": 3.634826391163415e-05,
+          "lower": 2743,
+          "higher": 5237,
+          "positive_reference_n": 8766,
+          "min_percent": -4.3839670949008536e-05,
+          "max_percent": 0.00037013484861514456,
+          "above_one_percent": 0,
+          "percentiles": {
+            "0.01": -6.50086973141839e-08,
+            "0.05": -6.027789378748594e-09,
+            "0.5": 1.4432899320127035e-12,
+            "0.95": 1.1252480058843162e-07,
+            "0.99": 5.272022718383352e-07
+          }
+        }
+      },
+      "largest_outlet_peak_departures": [
+        {
+          "date": "1991-11-04",
+          "volume_m3": 75598.84,
+          "peak_m3s": 1.34842,
+          "volume_m3_corrected": 75690.23,
+          "peak_m3s_corrected": 3.45197,
+          "peak_change_percent": 156.00109758087245
+        },
+        {
+          "date": "1980-11-29",
+          "volume_m3": 170545.08,
+          "peak_m3s": 2.65357,
+          "volume_m3_corrected": 170550.95,
+          "peak_m3s_corrected": 5.62525,
+          "peak_change_percent": 111.9880010702563
+        },
+        {
+          "date": "1990-10-21",
+          "volume_m3": 80845.88,
+          "peak_m3s": 1.42494,
+          "volume_m3_corrected": 80867.85,
+          "peak_m3s_corrected": 3.00761,
+          "peak_change_percent": 111.06923800300362
+        },
+        {
+          "date": "1998-09-18",
+          "volume_m3": 108053.83,
+          "peak_m3s": 2.44958,
+          "volume_m3_corrected": 108068.39,
+          "peak_m3s_corrected": 4.87131,
+          "peak_change_percent": 98.86307040390598
+        },
+        {
+          "date": "1987-12-01",
+          "volume_m3": 300508.84,
+          "peak_m3s": 4.15598,
+          "volume_m3_corrected": 304738.38,
+          "peak_m3s_corrected": 8.06337,
+          "peak_change_percent": 94.01849864532556
+        },
+        {
+          "date": "2001-10-22",
+          "volume_m3": 83659.01,
+          "peak_m3s": 1.82268,
+          "volume_m3_corrected": 83722.56,
+          "peak_m3s_corrected": 3.40262,
+          "peak_change_percent": 86.68224811815568
+        },
+        {
+          "date": "1982-11-17",
+          "volume_m3": 193025.2,
+          "peak_m3s": 2.5872,
+          "volume_m3_corrected": 193150.97,
+          "peak_m3s_corrected": 4.65597,
+          "peak_change_percent": 79.96173469387753
+        },
+        {
+          "date": "1981-10-06",
+          "volume_m3": 76330.02,
+          "peak_m3s": 1.62368,
+          "volume_m3_corrected": 76331.03,
+          "peak_m3s_corrected": 2.86844,
+          "peak_change_percent": 76.66288923925897
+        },
+        {
+          "date": "1999-11-24",
+          "volume_m3": 213269.56,
+          "peak_m3s": 3.69369,
+          "volume_m3_corrected": 213459.92,
+          "peak_m3s_corrected": 6.52174,
+          "peak_change_percent": 76.56435705216194
+        },
+        {
+          "date": "1988-02-08",
+          "volume_m3": 320576.41,
+          "peak_m3s": 3.84752,
+          "volume_m3_corrected": 328813.03,
+          "peak_m3s_corrected": 6.71706,
+          "peak_change_percent": 74.58154863392524
+        }
+      ],
+      "hillslope_pass": {
+        "records": 7573824,
+        "volume_changed": 64,
+        "max_abs_volume_difference_m3": 0.6999999999998181,
+        "original_volume_m3": 192170802.83958408,
+        "corrected_volume_m3": 192170803.66618407,
+        "peak_changed": 392754,
+        "max_abs_peak_difference_m3s": 2.4531539999999996,
+        "duration_changed": 0,
+        "peak_below_daily_mean_original": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_below_daily_mean_corrected": [
+          [
+            670,
+            1985,
+            324,
+            22.775,
+            0.0
+          ],
+          [
+            670,
+            1985,
+            325,
+            19.581,
+            0.0
+          ]
+        ],
+        "peak_reference_above_0.0_m3s": {
+          "n": 392910,
+          "reference_sum": 4108.1378403882,
+          "comparison_sum": 5725.093598348399,
+          "sum_change_percent": 39.35982240088136,
+          "changed": 392754,
+          "max_abs_difference": 2.4531539999999996,
+          "lower": 97375,
+          "higher": 295379,
+          "positive_reference_n": 392910,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.1172218423367,
+          "above_one_percent": 384147,
+          "percentiles": {
+            "0.01": -85.78678316680195,
+            "0.05": -59.951273178410965,
+            "0.5": 44.85645887774514,
+            "0.95": 783.3943489233361,
+            "0.99": 1358.155778638171
+          }
+        },
+        "peak_reference_above_0.001_m3s": {
+          "n": 329460,
+          "reference_sum": 4077.1393741000006,
+          "comparison_sum": 5573.23340863,
+          "sum_change_percent": 36.694699328502864,
+          "changed": 329342,
+          "max_abs_difference": 2.4531539999999996,
+          "lower": 88032,
+          "higher": 241310,
+          "positive_reference_n": 329460,
+          "min_percent": -99.44636353480058,
+          "max_percent": 2300.0548696844994,
+          "above_one_percent": 321731,
+          "percentiles": {
+            "0.01": -86.85066514820456,
+            "0.05": -62.85871497502751,
+            "0.5": 33.20212430537279,
+            "0.95": 481.3682811970705,
+            "0.99": 941.3883120687542
+          }
+        },
+        "peak_reference_above_0.01_m3s": {
+          "n": 115524,
+          "reference_sum": 3166.4686089999996,
+          "comparison_sum": 3691.8829066499998,
+          "sum_change_percent": 16.59306825769957,
+          "changed": 115490,
+          "max_abs_difference": 2.4531539999999996,
+          "lower": 37530,
+          "higher": 77960,
+          "positive_reference_n": 115524,
+          "min_percent": -99.44636353480058,
+          "max_percent": 1624.8214956783163,
+          "above_one_percent": 110802,
+          "percentiles": {
+            "0.01": -92.39650593341128,
+            "0.05": -69.90625448225607,
+            "0.5": 13.029018874746257,
+            "0.95": 174.1137490788045,
+            "0.99": 316.13392452776105
+          }
+        }
+      }
+    }
+  },
+  "within_build": {
+    "original": {
+      "rr17": {
+        "peak_m3s": {
+          "n": 8766,
+          "reference_sum": 16721.562400000003,
+          "comparison_sum": 16712.18964,
+          "sum_change_percent": -0.05605193926138119,
+          "changed": 726,
+          "max_abs_difference": 1.6195699999999995,
+          "lower": 321,
+          "higher": 405,
+          "positive_reference_n": 8766,
+          "min_percent": -18.234490659146985,
+          "max_percent": 4.83515970512598,
+          "above_one_percent": 26,
+          "percentiles": {
+            "0.01": -0.003574470284488096,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.003083085329684838
+          }
+        },
+        "volume_m3": {
+          "n": 8766,
+          "reference_sum": 1272337716.46,
+          "comparison_sum": 1272198068.7300003,
+          "sum_change_percent": -0.010975681078473354,
+          "changed": 1148,
+          "max_abs_difference": 28140.75,
+          "lower": 382,
+          "higher": 766,
+          "positive_reference_n": 8766,
+          "min_percent": -1.2858532270103362,
+          "max_percent": 0.12201310046324743,
+          "above_one_percent": 2,
+          "percentiles": {
+            "0.01": -7.804168698721803e-05,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 3.420041794766071e-05,
+            "0.99": 0.000495326933436238
+          }
+        },
+        "hillslope_peaks_above_0.001_m3s": {
+          "n": 329392,
+          "reference_sum": 4169.7409506,
+          "comparison_sum": 4136.44033134,
+          "sum_change_percent": -0.7986256137856418,
+          "changed": 499,
+          "max_abs_difference": 3.993686,
+          "lower": 274,
+          "higher": 225,
+          "positive_reference_n": 329392,
+          "min_percent": -100.0,
+          "max_percent": 105.74417476302615,
+          "above_one_percent": 202,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        }
+      },
+      "rr60": {
+        "peak_m3s": {
+          "n": 8766,
+          "reference_sum": 16721.562400000003,
+          "comparison_sum": 16688.68292,
+          "sum_change_percent": -0.19662923364148766,
+          "changed": 874,
+          "max_abs_difference": 2.9029000000000025,
+          "lower": 405,
+          "higher": 469,
+          "positive_reference_n": 8766,
+          "min_percent": -18.234490659146985,
+          "max_percent": 4.775732325925031,
+          "above_one_percent": 61,
+          "percentiles": {
+            "0.01": -0.021465137762440276,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0002108163608793845,
+            "0.99": 0.00493606127933816
+          }
+        },
+        "volume_m3": {
+          "n": 8766,
+          "reference_sum": 1272337716.46,
+          "comparison_sum": 1272069779.63,
+          "sum_change_percent": -0.02105862512237211,
+          "changed": 1267,
+          "max_abs_difference": 50011.25,
+          "lower": 416,
+          "higher": 851,
+          "positive_reference_n": 8766,
+          "min_percent": -2.2085334238676646,
+          "max_percent": 0.31789811633051723,
+          "above_one_percent": 4,
+          "percentiles": {
+            "0.01": -0.0001309118336600967,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 4.778487888157379e-05,
+            "0.99": 0.001067421595203353
+          }
+        },
+        "hillslope_peaks_above_0.001_m3s": {
+          "n": 329392,
+          "reference_sum": 4169.7409506,
+          "comparison_sum": 4075.8804139099993,
+          "sum_change_percent": -2.2509920352844714,
+          "changed": 631,
+          "max_abs_difference": 3.993686,
+          "lower": 452,
+          "higher": 179,
+          "positive_reference_n": 329392,
+          "min_percent": -100.0,
+          "max_percent": 171.20560335318774,
+          "above_one_percent": 306,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        }
+      }
+    },
+    "corrected": {
+      "rr17": {
+        "peak_m3s": {
+          "n": 8766,
+          "reference_sum": 16994.24583,
+          "comparison_sum": 16992.716790000002,
+          "sum_change_percent": -0.008997398385857114,
+          "changed": 657,
+          "max_abs_difference": 0.28918999999999784,
+          "lower": 244,
+          "higher": 413,
+          "positive_reference_n": 8766,
+          "min_percent": -1.599637727809733,
+          "max_percent": 0.4515047320760024,
+          "above_one_percent": 2,
+          "percentiles": {
+            "0.01": -0.0005750438152207771,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.002047575199132257
+          }
+        },
+        "volume_m3": {
+          "n": 8766,
+          "reference_sum": 1272337712.2099998,
+          "comparison_sum": 1272198063.8700001,
+          "sum_change_percent": -0.010975729058371186,
+          "changed": 832,
+          "max_abs_difference": 28132.5,
+          "lower": 250,
+          "higher": 582,
+          "positive_reference_n": 8766,
+          "min_percent": -1.2822176702652954,
+          "max_percent": 0.12135962557351387,
+          "above_one_percent": 2,
+          "percentiles": {
+            "0.01": -4.3869864504442184e-05,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 2.2501698382360047e-05,
+            "0.99": 0.00037261708859870346
+          }
+        },
+        "hillslope_peaks_above_0.001_m3s": {
+          "n": 355607,
+          "reference_sum": 5707.684172700001,
+          "comparison_sum": 5705.801048599999,
+          "sum_change_percent": -0.03299278732009636,
+          "changed": 1260,
+          "max_abs_difference": 0.21197600000000003,
+          "lower": 475,
+          "higher": 785,
+          "positive_reference_n": 355607,
+          "min_percent": -100.0,
+          "max_percent": 336.3417110941864,
+          "above_one_percent": 799,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        }
+      },
+      "rr60": {
+        "peak_m3s": {
+          "n": 8766,
+          "reference_sum": 16994.24583,
+          "comparison_sum": 16991.819340000002,
+          "sum_change_percent": -0.014278303516801483,
+          "changed": 728,
+          "max_abs_difference": 0.4209499999999977,
+          "lower": 277,
+          "higher": 451,
+          "positive_reference_n": 8766,
+          "min_percent": -2.50487855277034,
+          "max_percent": 0.5671861637296827,
+          "above_one_percent": 3,
+          "percentiles": {
+            "0.01": -0.0012879584736164018,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.00011001108738417642,
+            "0.99": 0.0062740969842012394
+          }
+        },
+        "volume_m3": {
+          "n": 8766,
+          "reference_sum": 1272337712.2099998,
+          "comparison_sum": 1272069776.8600001,
+          "sum_change_percent": -0.021058508871385495,
+          "changed": 1016,
+          "max_abs_difference": 49984.75,
+          "lower": 321,
+          "higher": 695,
+          "positive_reference_n": 8766,
+          "min_percent": -2.201989220620626,
+          "max_percent": 0.3178126860083452,
+          "above_one_percent": 4,
+          "percentiles": {
+            "0.01": -6.552090925537876e-05,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 3.350308921401535e-05,
+            "0.99": 0.000694149248245968
+          }
+        },
+        "hillslope_peaks_above_0.001_m3s": {
+          "n": 355607,
+          "reference_sum": 5707.6841727,
+          "comparison_sum": 5704.65124875,
+          "sum_change_percent": -0.05313755733903358,
+          "changed": 1501,
+          "max_abs_difference": 0.43186800000000003,
+          "lower": 568,
+          "higher": 933,
+          "positive_reference_n": 355607,
+          "min_percent": -100.0,
+          "max_percent": 661.8750687745296,
+          "above_one_percent": 1000,
+          "percentiles": {
+            "0.01": 0.0,
+            "0.05": 0.0,
+            "0.5": 0.0,
+            "0.95": 0.0,
+            "0.99": 0.0
+          }
+        }
+      }
+    }
+  },
+  "totalwatsed": {
+    "original_rr10": {
+      "total_m3": 1267735665.2886457,
+      "mean_annual_mm": 2742.8563148674225,
+      "component_annual_mm": {
+        "Runoff": 416.35846796195887,
+        "Lateral Flow": 874.8453259640293,
+        "Baseflow": 1451.652520941434
+      }
+    },
+    "original_rr17": {
+      "total_m3": 1267596016.762712,
+      "mean_annual_mm": 2742.554173142056,
+      "component_annual_mm": {
+        "Runoff": 416.0559873446761,
+        "Lateral Flow": 874.8456357967572,
+        "Baseflow": 1451.652550000622
+      }
+    },
+    "original_rr60": {
+      "total_m3": 1267467728.7000976,
+      "mean_annual_mm": 2742.2766107666343,
+      "component_annual_mm": {
+        "Runoff": 415.77823716246525,
+        "Lateral Flow": 874.8458182851067,
+        "Baseflow": 1451.6525553190625
+      }
+    },
+    "corrected_rr10": {
+      "total_m3": 1267735665.5934079,
+      "mean_annual_mm": 2742.856315526802,
+      "component_annual_mm": {
+        "Runoff": 416.3584676108303,
+        "Lateral Flow": 874.8453267371862,
+        "Baseflow": 1451.6525211787855
+      }
+    },
+    "corrected_rr17": {
+      "total_m3": 1267596017.3272007,
+      "mean_annual_mm": 2742.554174363376,
+      "component_annual_mm": {
+        "Runoff": 416.05598738822914,
+        "Lateral Flow": 874.8456367361347,
+        "Baseflow": 1451.6525502390123
+      }
+    },
+    "corrected_rr60": {
+      "total_m3": 1267467730.066666,
+      "mean_annual_mm": 2742.2766137233234,
+      "component_annual_mm": {
+        "Runoff": 415.7782389508861,
+        "Lateral Flow": 874.8458192244842,
+        "Baseflow": 1451.652555547953
+      }
+    }
+  },
+  "byte_parity": {
+    "rr10": {
+      "wat": {
+        "files": 864,
+        "identical": 820
+      },
+      "soil": {
+        "files": 864,
+        "identical": 840
+      },
+      "pass": {
+        "files": 864,
+        "identical": 18
+      },
+      "ebe": {
+        "files": 864,
+        "identical": 785
+      },
+      "element": {
+        "files": 864,
+        "identical": 18
+      },
+      "loss": {
+        "files": 864,
+        "identical": 797
+      }
+    },
+    "rr17": {
+      "wat": {
+        "files": 864,
+        "identical": 833
+      },
+      "soil": {
+        "files": 864,
+        "identical": 850
+      },
+      "pass": {
+        "files": 864,
+        "identical": 18
+      },
+      "ebe": {
+        "files": 864,
+        "identical": 806
+      },
+      "element": {
+        "files": 864,
+        "identical": 18
+      },
+      "loss": {
+        "files": 864,
+        "identical": 819
+      }
+    },
+    "rr60": {
+      "wat": {
+        "files": 864,
+        "identical": 850
+      },
+      "soil": {
+        "files": 864,
+        "identical": 854
+      },
+      "pass": {
+        "files": 864,
+        "identical": 18
+      },
+      "ebe": {
+        "files": 864,
+        "identical": 816
+      },
+      "element": {
+        "files": 864,
+        "identical": 18
+      },
+      "loss": {
+        "files": 864,
+        "identical": 831
+      }
+    }
+  }
+}

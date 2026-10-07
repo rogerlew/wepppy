@@ -1,0 +1,16 @@
+{
+  "2": {
+    "baseline_peak_max_mm_h": 54.186381385079585,
+    "mutant_peak_max_mm_h": 51.8516873853514,
+    "no_surface_return": 425,
+    "rows": 1021,
+    "surface_return": 596
+  },
+  "5": {
+    "baseline_peak_max_mm_h": 17.389143795298878,
+    "mutant_peak_max_mm_h": 21.28682044713059,
+    "no_surface_return": 184,
+    "rows": 218,
+    "surface_return": 34
+  }
+}

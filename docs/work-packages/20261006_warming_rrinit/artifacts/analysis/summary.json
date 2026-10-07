@@ -1,0 +1,219 @@
+{
+  "scope": "Corrected surface-return build; only initial 10 cm records changed.",
+  "validation": {
+    "rr10": {
+      "days": 8766,
+      "ebe_days": 8766,
+      "hydrograph_rows": 1262304,
+      "single_sample_days": 0,
+      "missing_ebe_days": 0,
+      "max_abs_printed_channel_balance_m3": 0.31,
+      "hydrograph_integral_vs_reported_volume_pct": -1.321205524970348,
+      "ebe_channel_volume_readback_max_abs_m3": 0.0
+    },
+    "rr17": {
+      "days": 8766,
+      "ebe_days": 8766,
+      "hydrograph_rows": 1262304,
+      "single_sample_days": 0,
+      "missing_ebe_days": 0,
+      "max_abs_printed_channel_balance_m3": 0.31,
+      "hydrograph_integral_vs_reported_volume_pct": -1.31383511299763,
+      "ebe_channel_volume_readback_max_abs_m3": 0.0
+    },
+    "rr60": {
+      "days": 8766,
+      "ebe_days": 8766,
+      "hydrograph_rows": 1262304,
+      "single_sample_days": 0,
+      "missing_ebe_days": 0,
+      "max_abs_printed_channel_balance_m3": 0.31,
+      "hydrograph_integral_vs_reported_volume_pct": -1.3037050766929292,
+      "ebe_channel_volume_readback_max_abs_m3": 0.0
+    }
+  },
+  "cases": {
+    "rr10": {
+      "total_reported_volume_m3": 1272337712.2099998,
+      "volume_change_pct": 0.0,
+      "maximum_daily_peak_m3s": 43.06409,
+      "maximum_peak_date": "1990-04-27",
+      "peak_ratio_threshold_m3s": 0.01,
+      "peak_ratio_count": 8766,
+      "peak_ratio_quantiles": {
+        "0.05": 1.0,
+        "0.25": 1.0,
+        "0.5": 1.0,
+        "0.75": 1.0,
+        "0.95": 1.0
+      },
+      "peak_ratio_min": 1.0,
+      "peak_ratio_max": 1.0,
+      "days_peak_change_over_one_percent": 0,
+      "maximum_paired_peak_increase_m3s": 0.0,
+      "maximum_paired_peak_decrease_m3s": 0.0,
+      "paired_higher_peak_days": 0,
+      "paired_lower_peak_days": 0,
+      "unique_printed_peak_timing_days": 1196,
+      "median_unique_peak_shift_hours": 0.0
+    },
+    "rr17": {
+      "total_reported_volume_m3": 1272198063.8700001,
+      "volume_change_pct": -0.010975729058371186,
+      "maximum_daily_peak_m3s": 42.7749,
+      "maximum_peak_date": "1990-04-27",
+      "peak_ratio_threshold_m3s": 0.01,
+      "peak_ratio_count": 8766,
+      "peak_ratio_quantiles": {
+        "0.05": 1.0,
+        "0.25": 1.0,
+        "0.5": 1.0,
+        "0.75": 1.0,
+        "0.95": 1.0
+      },
+      "peak_ratio_min": 0.9840036227219027,
+      "peak_ratio_max": 1.00451504732076,
+      "days_peak_change_over_one_percent": 2,
+      "maximum_paired_peak_increase_m3s": 0.10610000000000142,
+      "maximum_paired_peak_decrease_m3s": -0.28918999999999784,
+      "paired_higher_peak_days": 413,
+      "paired_lower_peak_days": 244,
+      "unique_printed_peak_timing_days": 1190,
+      "median_unique_peak_shift_hours": 0.0
+    },
+    "rr60": {
+      "total_reported_volume_m3": 1272069776.8600001,
+      "volume_change_pct": -0.021058508871385495,
+      "maximum_daily_peak_m3s": 42.67082,
+      "maximum_peak_date": "1990-04-27",
+      "peak_ratio_threshold_m3s": 0.01,
+      "peak_ratio_count": 8766,
+      "peak_ratio_quantiles": {
+        "0.05": 1.0,
+        "0.25": 1.0,
+        "0.5": 1.0,
+        "0.75": 1.0,
+        "0.95": 1.000001100110874
+      },
+      "peak_ratio_min": 0.9749512144722966,
+      "peak_ratio_max": 1.0056718616372968,
+      "days_peak_change_over_one_percent": 3,
+      "maximum_paired_peak_increase_m3s": 0.15287000000000006,
+      "maximum_paired_peak_decrease_m3s": -0.4209499999999977,
+      "paired_higher_peak_days": 451,
+      "paired_lower_peak_days": 277,
+      "unique_printed_peak_timing_days": 1183,
+      "median_unique_peak_shift_hours": 0.0
+    }
+  },
+  "hydrograph_selection": [
+    "1990-04-27",
+    "1999-11-25",
+    "2003-03-07"
+  ],
+  "selected_events": [
+    {
+      "baseline_peak_day": "1990-04-27",
+      "cases": {
+        "rr10": {
+          "printed_peak_m3s": 43.1,
+          "first_printed_peak": "1990-04-27 08:10:00",
+          "last_printed_peak": "1990-04-27 08:30:00",
+          "printed_peak_tied_samples": 3,
+          "hydrograph_integral_m3": 3340506.0,
+          "discharge_centroid_hours_from_window_start": 57.89092281229251,
+          "centroid_rounding_bound_minutes": 1.464750135318256
+        },
+        "rr17": {
+          "printed_peak_m3s": 42.8,
+          "first_printed_peak": "1990-04-27 08:10:00",
+          "last_printed_peak": "1990-04-27 08:40:00",
+          "printed_peak_tied_samples": 4,
+          "hydrograph_integral_m3": 3327672.0,
+          "discharge_centroid_hours_from_window_start": 57.903987231914684,
+          "centroid_rounding_bound_minutes": 1.470345541808243
+        },
+        "rr60": {
+          "printed_peak_m3s": 42.7,
+          "first_printed_peak": "1990-04-27 08:30:00",
+          "last_printed_peak": "1990-04-27 08:50:00",
+          "printed_peak_tied_samples": 3,
+          "hydrograph_integral_m3": 3324750.0,
+          "discharge_centroid_hours_from_window_start": 57.91235762087375,
+          "centroid_rounding_bound_minutes": 1.466420248018262
+        }
+      }
+    },
+    {
+      "baseline_peak_day": "1999-11-25",
+      "cases": {
+        "rr10": {
+          "printed_peak_m3s": 41.7,
+          "first_printed_peak": "1999-11-25 08:50:00",
+          "last_printed_peak": "1999-11-25 09:00:00",
+          "printed_peak_tied_samples": 2,
+          "hydrograph_integral_m3": 3045927.6,
+          "discharge_centroid_hours_from_window_start": 59.38994547999105,
+          "centroid_rounding_bound_minutes": 1.2313645015627253
+        },
+        "rr17": {
+          "printed_peak_m3s": 41.7,
+          "first_printed_peak": "1999-11-25 08:50:00",
+          "last_printed_peak": "1999-11-25 08:50:00",
+          "printed_peak_tied_samples": 1,
+          "hydrograph_integral_m3": 3045039.6,
+          "discharge_centroid_hours_from_window_start": 59.39064605268187,
+          "centroid_rounding_bound_minutes": 1.2317216157077744
+        },
+        "rr60": {
+          "printed_peak_m3s": 41.7,
+          "first_printed_peak": "1999-11-25 08:40:00",
+          "last_printed_peak": "1999-11-25 09:10:00",
+          "printed_peak_tied_samples": 4,
+          "hydrograph_integral_m3": 3048135.6,
+          "discharge_centroid_hours_from_window_start": 59.38935790783061,
+          "centroid_rounding_bound_minutes": 1.2304732119591628
+        }
+      }
+    },
+    {
+      "baseline_peak_day": "2003-03-07",
+      "cases": {
+        "rr10": {
+          "printed_peak_m3s": 40.1,
+          "first_printed_peak": "2003-03-07 08:40:00",
+          "last_printed_peak": "2003-03-07 09:00:00",
+          "printed_peak_tied_samples": 3,
+          "hydrograph_integral_m3": 3408180.0,
+          "discharge_centroid_hours_from_window_start": 62.049767911319236,
+          "centroid_rounding_bound_minutes": 1.4453697407303545
+        },
+        "rr17": {
+          "printed_peak_m3s": 39.8,
+          "first_printed_peak": "2003-03-07 08:40:00",
+          "last_printed_peak": "2003-03-07 09:00:00",
+          "printed_peak_tied_samples": 3,
+          "hydrograph_integral_m3": 3395250.0,
+          "discharge_centroid_hours_from_window_start": 62.07718606877255,
+          "centroid_rounding_bound_minutes": 1.4515987589181145
+        },
+        "rr60": {
+          "printed_peak_m3s": 39.9,
+          "first_printed_peak": "2003-03-07 08:30:00",
+          "last_printed_peak": "2003-03-07 09:00:00",
+          "printed_peak_tied_samples": 4,
+          "hydrograph_integral_m3": 3401820.0,
+          "discharge_centroid_hours_from_window_start": 62.06938462352505,
+          "centroid_rounding_bound_minutes": 1.4485875737816414
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "chan.out discharge has three significant digits; tied printed peaks make timing ambiguous.",
+    "Centroid and hydrograph integrals use the printed 600-second samples; they are window statistics, not travel times.",
+    "Runoff volume and daily peaks use EBE report precision, not rounded hydrograph samples.",
+    "This tests initial rrinit; roughness evolution, infiltration, and rill-width feedback remain active.",
+    "Only current 10 cm OFEs are changed. This is not a burned-versus-unburned experiment or physical calibration."
+  ]
+}

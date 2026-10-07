@@ -1,0 +1,98 @@
+{
+  "files": {
+    "aggregation.json": {
+      "bytes": 365,
+      "sha256": "ac6ff3d0af9897caec2b5936ea139ec16177d5af9069c8551029500236792d94"
+    },
+    "audit_inputs.py": {
+      "bytes": 2445,
+      "sha256": "4677251a74846a3e597604c028b565783fc861b1f263037f56ff37c5277be234"
+    },
+    "build.json": {
+      "bytes": 556,
+      "sha256": "8ea08853371392e7535cf087469e33582fd30b018f0b19eef2d7ce61abc9a092"
+    },
+    "event-pairs.parquet": {
+      "bytes": 5142770,
+      "sha256": "e2ace16c660aaa56ea9c135c25e7d8d7249e90d44bd2b07a9c80ab5e2ef0de5d"
+    },
+    "execution-summary.json": {
+      "bytes": 813,
+      "sha256": "75298ea06760193d40cdffad9ba4bb26b7b1effe563779dcc23efbd3145ce2ae"
+    },
+    "figures/figure-1.png": {
+      "bytes": 733722,
+      "sha256": "2aac8e65b6df6b13f6063520c36ddcc54cda338c7e9451e1b61de5c793840726"
+    },
+    "figures/figure-2.png": {
+      "bytes": 596734,
+      "sha256": "70aacbe82ee6224d8f40de554e136597a6c22bd3dbc99265109f737d1efe7ee5"
+    },
+    "figures/figure-3.png": {
+      "bytes": 844477,
+      "sha256": "da0a9d6270741f251fc04b9ba4396cbc776305938c46ec6820725cfa1ee183c4"
+    },
+    "figures/figure-statistics.json": {
+      "bytes": 3688,
+      "sha256": "3e86544a6cc96f8e352563612bf32e1de6b0f2fac73bb77b29709998a44de29f"
+    },
+    "finalize_evidence.py": {
+      "bytes": 4522,
+      "sha256": "34d49cd8fd1b4859369517c51d695540ebb396692a1a8de0b10eed0e07edaa47"
+    },
+    "input-comparison.json": {
+      "bytes": 5154,
+      "sha256": "5407d67e5c20478601510e0a4adef3c25bd7223f4e6e622bb06e42caf76286a3"
+    },
+    "inputs.json": {
+      "bytes": 120789,
+      "sha256": "0714d38e17cc0524094003264ed37e61c62f7bf14c7a89282a423bcbe541b775"
+    },
+    "observer.patch": {
+      "bytes": 649,
+      "sha256": "2d239805edf0b62bb3c4356993b985a4046c05695726aa7531191c5ec1f2dabc"
+    },
+    "parity.json": {
+      "bytes": 1538,
+      "sha256": "b69217a6cfe649c25f972c0a94858906a14e791310f5adfc620b062de2a0b12b"
+    },
+    "plan.json": {
+      "bytes": 892740,
+      "sha256": "b00731c1840e543be0cd4a4c8f06ade090b8b26c110cb68cd4d0db60f1a4da15"
+    },
+    "plot_figures.py": {
+      "bytes": 7829,
+      "sha256": "868087322c9f8c92c215808f520c6ce5b8a0f5cdf77ae0e6111bcdcc88850b1b"
+    },
+    "repeat_census.py": {
+      "bytes": 16741,
+      "sha256": "3fad5f6890def2408acda0ac271345f42225aad094246155640dc651af6912f5"
+    },
+    "repeat_census_analysis.py": {
+      "bytes": 17380,
+      "sha256": "53c586b2d2d7d76c1dea33679c005f846a346a4bc4f8b141a13955a0ec7754ae"
+    },
+    "report-readback.json": {
+      "bytes": 289365,
+      "sha256": "1b45da361fd0a366cf3ebf2240781d17f6b85351ec17f93fb29944f67b954527"
+    },
+    "sediment-pairs.parquet": {
+      "bytes": 396058,
+      "sha256": "5cd22e8bdd7cd7cd448ad8c27b3c0e1e19eea06ef23485325727f9fcf72857c4"
+    },
+    "tail-context.json": {
+      "bytes": 370,
+      "sha256": "c501099b0104a6b4d6ce2049a316e995e6546addbf089a2d7b2f20100669551a"
+    },
+    "terminal-inventory.csv": {
+      "bytes": 233249,
+      "sha256": "4830dbf80347c2b1a4c43be2ad4ceed62bc0b6a28ca3d66bafff1cedda18b02c"
+    },
+    "test_repeat.py": {
+      "bytes": 2618,
+      "sha256": "e9d416b1346b7bc2ae22d5cbbed16bdbba5838957ed352f76e03bebd31246942"
+    }
+  },
+  "host": "forest.tail305ec9.ts.net",
+  "root": "/workdir/hand-to-mouth-fixed-census-20261006-v2"
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "selected_peak_day": "1994-10-27",
+    "cases": {
+      "original": {
+        "printed_integral_m3": 2518796.22,
+        "ledger_volume_m3": 2539873.62,
+        "integral_minus_ledger_percent": -0.8298601880828982
+      },
+      "corrected": {
+        "printed_integral_m3": 2075129.5800000003,
+        "ledger_volume_m3": 2539873.33,
+        "integral_minus_ledger_percent": -18.297910549735953
+      }
+    }
+  },
+  {
+    "selected_peak_day": "1992-11-21",
+    "cases": {
+      "original": {
+        "printed_integral_m3": 1630008.0,
+        "ledger_volume_m3": 1644496.03,
+        "integral_minus_ledger_percent": -0.8810012147004054
+      },
+      "corrected": {
+        "printed_integral_m3": 1633865.9999999998,
+        "ledger_volume_m3": 1644495.6500000001,
+        "integral_minus_ledger_percent": -0.6463775079003975
+      }
+    }
+  },
+  {
+    "selected_peak_day": "1996-02-06",
+    "cases": {
+      "original": {
+        "printed_integral_m3": 6464736.000000001,
+        "ledger_volume_m3": 6493037.67,
+        "integral_minus_ledger_percent": -0.43587718781861184
+      },
+      "corrected": {
+        "printed_integral_m3": 6509058.0,
+        "ledger_volume_m3": 6494184.29,
+        "integral_minus_ledger_percent": 0.2290312275692985
+      }
+    }
+  }
+]

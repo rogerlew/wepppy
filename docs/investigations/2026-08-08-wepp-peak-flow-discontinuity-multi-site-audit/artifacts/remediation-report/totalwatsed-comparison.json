@@ -1,0 +1,106 @@
+{
+  "definition": "Streamflow = PASS runoff + bottom-OFE lateral flow + postprocessed baseflow; not routed outlet discharge",
+  "baseflow_opts": {
+    "gwstorage": 0,
+    "bfcoeff": 0.04,
+    "dscoeff": 0
+  },
+  "cases": {
+    "rr10": {
+      "days": 8766,
+      "area_m2": 19258143.089999996,
+      "total_m3": 1267735665.5934079,
+      "change_percent": 0.0,
+      "mean_m3s": 1.6738382956791813,
+      "max_daily_mean_m3s": 28.77008878095684,
+      "max_date": [
+        1990,
+        4,
+        27
+      ],
+      "annual_mm": {
+        "Runoff": 416.3584676108303,
+        "Lateral Flow": 874.8453267371862,
+        "Baseflow": 1451.6525211787855,
+        "Streamflow": 2742.856315526802
+      },
+      "component_change_percent": {
+        "Runoff": 0.0,
+        "Lateral Flow": 0.0,
+        "Baseflow": 0.0,
+        "Streamflow": 0.0
+      },
+      "daily_change_percent_min": 0.0,
+      "daily_change_percent_max": 0.0,
+      "days_abs_change_above_1pct": 0,
+      "outlet_ledger_total_m3": 1272337712.2099998,
+      "printed_hydrograph_total_m3": 1255527516.06,
+      "outlet_ledger_minus_totalwatsed_m3": 4602046.61659193,
+      "sha256": "70706696986651c09b7dc1a80cbe786e3498ef5ab0eafa4c8a68336968243236"
+    },
+    "rr17": {
+      "days": 8766,
+      "area_m2": 19258143.089999996,
+      "total_m3": 1267596017.3272007,
+      "change_percent": -0.01101556657253644,
+      "mean_m3s": 1.673653912907404,
+      "max_daily_mean_m3s": 28.594612725620042,
+      "max_date": [
+        1990,
+        4,
+        27
+      ],
+      "annual_mm": {
+        "Runoff": 416.05598738822914,
+        "Lateral Flow": 874.8456367361347,
+        "Baseflow": 1451.6525502390123,
+        "Streamflow": 2742.554174363376
+      },
+      "component_change_percent": {
+        "Runoff": -0.07264899026477867,
+        "Lateral Flow": 3.54347150288703e-05,
+        "Baseflow": 2.0018721125225625e-06,
+        "Streamflow": -0.01101556657253644
+      },
+      "daily_change_percent_min": -1.2794674376789716,
+      "daily_change_percent_max": 0.12078591151909457,
+      "days_abs_change_above_1pct": 2,
+      "outlet_ledger_total_m3": 1272198063.8700001,
+      "printed_hydrograph_total_m3": 1255483479.0,
+      "outlet_ledger_minus_totalwatsed_m3": 4602046.542799473,
+      "sha256": "cd5d8d9a3978b42701ebc174904cad688cda84486662987378c6dba31ba1293d"
+    },
+    "rr60": {
+      "days": 8766,
+      "area_m2": 19258143.089999996,
+      "total_m3": 1267467730.066666,
+      "change_percent": -0.021134967960101392,
+      "mean_m3s": 1.6734845304916854,
+      "max_daily_mean_m3s": 28.191882034162862,
+      "max_date": [
+        1990,
+        4,
+        27
+      ],
+      "annual_mm": {
+        "Runoff": 415.7782389508861,
+        "Lateral Flow": 874.8458192244842,
+        "Baseflow": 1451.652555547953,
+        "Streamflow": 2742.2766137233234
+      },
+      "component_change_percent": {
+        "Runoff": -0.13935795836548248,
+        "Lateral Flow": 5.629421371278198e-05,
+        "Baseflow": 2.3675891469565613e-06,
+        "Streamflow": -0.021134967960112494
+      },
+      "daily_change_percent_min": -2.197449345277669,
+      "daily_change_percent_max": 0.3206125449065178,
+      "days_abs_change_above_1pct": 4,
+      "outlet_ledger_total_m3": 1272069776.8600001,
+      "printed_hydrograph_total_m3": 1255485738.6,
+      "outlet_ledger_minus_totalwatsed_m3": 4602046.793334246,
+      "sha256": "d02a159299414ffbd93e2f355e08529d957cee198dbde61f85bed7e43f640c12"
+    }
+  }
+}

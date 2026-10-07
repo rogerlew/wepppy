@@ -1,0 +1,7 @@
+{
+  "root": "/workdir/wepppy/wepp_runner/bin",
+  "sha256": {
+    "wepp_260803": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+    "wepp_260803_hill": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7"
+  }
+}

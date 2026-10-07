@@ -1,0 +1,17 @@
+{
+  "terminal": {
+    "run": "pw0.run",
+    "returncode": 0,
+    "seconds": 548.0352296829224,
+    "success": true
+  },
+  "canonical_files": {
+    "chanwb.out": true,
+    "chnwb.txt": true,
+    "ebe_pw0.txt": true,
+    "loss_pw0.txt": true,
+    "pass_pw0.txt": true,
+    "plot_pw0.txt": true,
+    "soil_pw0.txt": true
+  }
+}

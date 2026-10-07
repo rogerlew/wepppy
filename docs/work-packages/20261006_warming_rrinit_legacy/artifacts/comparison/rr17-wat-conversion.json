@@ -1,0 +1,12 @@
+{
+  "rows_written": 16690464,
+  "candidate_records": 16690464,
+  "accepted_records": 16690464,
+  "rejected_records": 0,
+  "row_groups": 864,
+  "elapsed_ms": 81322,
+  "schema_version": "1",
+  "output_paths": [
+    "/workdir/warming-rrinit-legacy-20261006/rr17/output/interchange/H.wat.parquet"
+  ]
+}

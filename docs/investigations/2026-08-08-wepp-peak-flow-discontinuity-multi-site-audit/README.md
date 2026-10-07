@@ -5,8 +5,10 @@
 > the behavior generalizes beyond Topanga. Watershed propagation is a separate
 > follow-up, not part of the census critical path.
 
-**Status: TOPANGA LOCAL CENSUS COMPLETE (`2026-08-09`); CROSS-SITE REPLICATION
-PENDING.** Versioned schemas, immutable event-packet capture, process-isolated
+**Status: REMEDIATION ASSESSMENT UPDATED (`2026-10-06`); CANDIDATE IMPLEMENTED
+AND RESEARCH-TESTED; WATERSHED HYDROGRAPH VALIDATION UNRESOLVED.** Cross-site
+mutation replication remains pending. The original Topanga local census
+completed on `2026-08-09`. Versioned schemas, immutable event-packet capture, process-isolated
 solver replay, active-trace parity, compact acceptance fixtures, and the full
 1,088-trial Topanga local census pass. The
 [local-census amendment](../../work-packages/20260808_peakflow_phase2a_pilot/artifacts/study-design-amendment-local-census.md)
@@ -14,11 +16,52 @@ culls per-mutation watershed routing so unresolved routing criteria do not
 block the local census. Cross-site prevalence, snow-site, and overland flow
 element (OFE) work remain staged behind their own gates.
 
-The interim LaTeX report
+The updated LaTeX report
 [Small-Mutation Screening of WEPP Hillslope Peak Flow](topanga-small-mutation-census-report.pdf)
-documents the complete methodology and Topanga census results while preserving
-additional-site replication as future work. Its editable source is
+documents remediation options, the repeated Topanga mutation census, Cedar
+Creek roughness and original-build comparisons, and the retained original
+methodology and census. Its editable source is
 [`topanga-small-mutation-census-report.tex`](topanga-small-mutation-census-report.tex).
+The October section is in [`remediation-assessment.tex`](remediation-assessment.tex).
+
+## October remediation findings
+
+Raising `rrinit` can suppress rainfall excess and move return water away from
+the defective positive-excess-duration coupling. It does not eliminate return
+water or repair its timing. The 17 cm transition is case-specific, not a
+universal threshold; 60 cm produces 967.2 mm of nominal depression depth at
+30% slope, but that storage is not applied to every streamflow component.
+Changing roughness also changes physical runoff and resistance behavior and
+is not recommended as a general numerical repair.
+
+The implemented candidate uses the hourly return ledger when available and
+a 24-hour return-rate assumption otherwise, with no new flags or parameters.
+It is a peak estimator, not full coupled kinematic-wave routing. The
+`hand-to-mouth-drought` repeat reduces fivefold peak departures from 0.303%
+to 0.108%; twofold departures persist (0.508% versus 0.497% originally).
+Revised Figures 1–3 precede the historical August plots in the PDF.
+
+The `warming-championship` Cedar Creek study compares 10/17/60 cm for both
+the candidate and original `wepp_260803`. Original-build daily outlet peaks
+respond more strongly to the roughness intervention. Matched 10 cm builds
+preserve long-term totalwatsed yield to approximately 0.305 m³ out of
+1.2677 billion m³, while changing many peaks in both directions.
+
+**Release gate remains open:** the printed 600-second hydrograph's volume
+shortfall relative to the outlet ledger increases from 0.463% to 1.321% with
+the candidate; the October 25–29, 1994 window increases from 0.83% to 18.30%.
+Both whole-record discrepancies exceed conservative discharge-printing bounds.
+This is an output/ledger inconsistency, not demonstrated soil-water loss.
+Reconcile routed discharge, inflow and storage bookkeeping before claiming
+hydrograph validation. No production change or external stakeholder message
+is implied by this documentation update.
+
+Evidence remains in the immutable completed packages:
+
+- [Mutation repeat and revised figures](../../work-packages/20261006_surface_return_mutation/artifacts/results.md)
+- [Candidate roughness study](../../work-packages/20261006_warming_rrinit/artifacts/results.md)
+- [Original-build and matched-input comparison](../../work-packages/20261006_warming_rrinit_legacy/artifacts/results.md)
+- [Report figure provenance and build instructions](artifacts/remediation-report/README.md)
 
 ## Why This Investigation Exists
 
@@ -40,7 +83,8 @@ The intended result is first a reproducible *candidate anomaly census*. A
 candidate becomes a confirmed implementation defect only after local
 bracketing, frozen-event replay, and mechanism tracing. Compact confirmed
 fixtures will support openWEPP development. This is not a calibration study,
-and it is not an attempt to repair the legacy WEPP implementation.
+and the original census did not attempt to repair the legacy implementation.
+The October extension separately evaluates remediation and its validation gates.
 
 ## Study Questions
 

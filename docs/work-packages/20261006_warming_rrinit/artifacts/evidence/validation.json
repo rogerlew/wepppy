@@ -1,0 +1,74 @@
+{
+  "rr10": {
+    "terminal_count": 865,
+    "input_hash_mismatches": [],
+    "rrinit_tokens_changed_byte_verified": 0,
+    "negative_control_hillslopes": [
+      "257",
+      "266",
+      "281",
+      "308",
+      "310",
+      "313",
+      "314",
+      "315",
+      "316",
+      "319",
+      "320",
+      "321",
+      "380",
+      "411"
+    ],
+    "negative_control_output_files": 98,
+    "stderr": [],
+    "warning_lines": []
+  },
+  "rr17": {
+    "terminal_count": 865,
+    "input_hash_mismatches": [],
+    "rrinit_tokens_changed_byte_verified": 1885,
+    "negative_control_hillslopes": [
+      "257",
+      "266",
+      "281",
+      "308",
+      "310",
+      "313",
+      "314",
+      "315",
+      "316",
+      "319",
+      "320",
+      "321",
+      "380",
+      "411"
+    ],
+    "negative_control_output_files": 98,
+    "stderr": [],
+    "warning_lines": []
+  },
+  "rr60": {
+    "terminal_count": 865,
+    "input_hash_mismatches": [],
+    "rrinit_tokens_changed_byte_verified": 1885,
+    "negative_control_hillslopes": [
+      "257",
+      "266",
+      "281",
+      "308",
+      "310",
+      "313",
+      "314",
+      "315",
+      "316",
+      "319",
+      "320",
+      "321",
+      "380",
+      "411"
+    ],
+    "negative_control_output_files": 98,
+    "stderr": [],
+    "warning_lines": []
+  }
+}
