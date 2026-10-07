@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Checkpoint preparation: [Fork option availability and readiness](docs/work-packages/20261007_fork_option_readiness/package.md)
+— disable inapplicable Omni/SBS options and accept legitimate absent Omni state
+after a completed fork. Contract review and checkpoint commit precede code.
+
 Completed: [Topanga CLIGEN seed recurrence](docs/work-packages/20261006_topanga_cligen_seed_recurrence/package.md)
 — validated pilot plus 100 random seeds on openwepp; original-date recurrence
 78% for Ksat and 0% for the 1986 cover/dense fixtures, with new flagged dates.
