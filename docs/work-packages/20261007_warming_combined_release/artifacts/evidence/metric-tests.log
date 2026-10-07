@@ -1,0 +1,11 @@
+test_complete_dates (test_assess.MetricsTests.test_complete_dates) ... ok
+test_identity (test_assess.MetricsTests.test_identity) ... ok
+test_invalid_inputs (test_assess.MetricsTests.test_invalid_inputs) ... ok
+test_offset (test_assess.MetricsTests.test_offset) ... ok
+test_scale_not_hidden_by_r_squared (test_assess.MetricsTests.test_scale_not_hidden_by_r_squared) ... ok
+test_zero_reference_and_constant_are_explicit (test_assess.MetricsTests.test_zero_reference_and_constant_are_explicit) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.007s
+
+OK

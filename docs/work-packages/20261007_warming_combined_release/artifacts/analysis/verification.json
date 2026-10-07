@@ -1,0 +1,92 @@
+{
+  "raw_outputs": {
+    "legacy10": {
+      "checked": 6056,
+      "mismatches": []
+    },
+    "combined10": {
+      "checked": 6056,
+      "mismatches": []
+    },
+    "legacy17": {
+      "checked": 6056,
+      "mismatches": []
+    }
+  },
+  "historical_reproduction": {
+    "legacy10": {
+      "checked": 6056,
+      "changed": []
+    },
+    "legacy17": {
+      "checked": 6056,
+      "changed": []
+    }
+  },
+  "script_sha256": {
+    "assess.py": "5c880d43eefac7e8dcc29e9a446743f30e9106829b0322857715e00f3f696993",
+    "test_assess.py": "4d22f9a37f5cb22511acceffd6070bb357ecd91ba614a8bd1e1886c44bc1cb1e",
+    "verify.py": "d8d8d16bf38c60849d845389df763d62d12dcb00d6a55d9d57ffdf9d9784fed6",
+    "run_validation.py": "b3a6d04f182ebf438765c7041a4ef430746a6d9a025ee67c86ef9aabc6fda3ba"
+  },
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+    "wepppy_commit": "918b3ca0a1639c0ec057decbf4fd1b6bac25b10b",
+    "wepppyo3_commit": "60ba09905ff4eaec6f80c128dff213d677ac3e7a",
+    "libraries": {
+      "numpy": "1.26.0",
+      "pandas": "2.2.2",
+      "pyarrow": "16.1.0",
+      "scipy": "1.13.1",
+      "matplotlib": "3.9.0"
+    },
+    "native_extensions": {}
+  },
+  "baseflow_readback": {
+    "gwstorage": 0.0,
+    "bfcoeff": 0.04,
+    "dscoeff": 0.0,
+    "bfthreshold": 1.0
+  },
+  "frozen_inputs_unchanged": true,
+  "independent_standard_library_metrics": {
+    "combined10_totalwatsed_m3s": {
+      "NSE": 0.9999999999999994,
+      "KGE2009": 0.9999999994986567,
+      "R2": 0.9999999999999996
+    },
+    "combined10_channel_m3s": {
+      "NSE": 0.9954190747575616,
+      "KGE2009": 0.970289606821452,
+      "R2": 0.9961888713870011
+    },
+    "legacy17_totalwatsed_m3s": {
+      "NSE": 0.999992117221213,
+      "KGE2009": 0.99900875275627,
+      "R2": 0.9999930921030529
+    },
+    "legacy17_channel_m3s": {
+      "NSE": 0.9999918220427252,
+      "KGE2009": 0.9990059968691632,
+      "R2": 0.9999928022924586
+    }
+  },
+  "observer_parity": {
+    "terminal": {
+      "run": "pw0.run",
+      "returncode": 0,
+      "seconds": 498.2943162918091,
+      "success": true
+    },
+    "canonical_files": {
+      "chanwb.out": true,
+      "chnwb.txt": true,
+      "ebe_pw0.txt": true,
+      "loss_pw0.txt": true,
+      "pass_pw0.txt": true,
+      "plot_pw0.txt": true,
+      "soil_pw0.txt": true
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "pass": {
+    "rows_written": 7573824,
+    "candidate_records": 7573824,
+    "accepted_records": 7573824,
+    "rejected_records": 0,
+    "row_groups": 864,
+    "elapsed_ms": 21181,
+    "schema_version": "1",
+    "output_paths": [
+      "/workdir/warming-combined-release-20261007/legacy17/output/interchange/H.pass.parquet"
+    ]
+  },
+  "wat": {
+    "rows_written": 16690464,
+    "candidate_records": 16690464,
+    "accepted_records": 16690464,
+    "rejected_records": 0,
+    "row_groups": 864,
+    "elapsed_ms": 81022,
+    "schema_version": "1",
+    "output_paths": [
+      "/workdir/warming-combined-release-20261007/legacy17/output/interchange/H.wat.parquet"
+    ]
+  }
+}
