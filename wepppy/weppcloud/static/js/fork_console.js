@@ -1100,7 +1100,7 @@
           }
 
           saveTrackedForkRecord();
-          appendStatus("Fork job is queued and waiting for the fork worker.");
+          appendStatus("Fork job was submitted to the fork queue.");
           showTrackedJob(false);
         })
         .catch(function (err) {

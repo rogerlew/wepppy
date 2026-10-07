@@ -554,7 +554,7 @@ describe("Fork console smoke", () => {
         });
 
         expect(statusStreamInstance.append).toHaveBeenCalledWith(
-            "Fork job is queued and waiting for the fork worker."
+            "Fork job was submitted to the fork queue."
         );
         expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
      
@@ -584,7 +584,7 @@ describe("Fork console smoke", () => {
         }));
     });
 
-    test("replaces submitting text with queued guidance only after acceptance", async () => {
+    test("records submission as a past event only after acceptance", async () => {
         let resolveForkRequest;
         const pendingForkResponse = new Promise((resolve) => {
             resolveForkRequest = resolve;
@@ -609,7 +609,7 @@ describe("Fork console smoke", () => {
 
         expect(document.getElementById("the_console").textContent).toBe("Submitting fork job...");
         expect(statusStreamInstance.append).not.toHaveBeenCalledWith(
-            "Fork job is queued and waiting for the fork worker."
+            "Fork job was submitted to the fork queue."
         );
 
         resolveForkRequest({
@@ -628,7 +628,7 @@ describe("Fork console smoke", () => {
             "New runid: demo-run-new"
         );
         expect(statusStreamInstance.append).toHaveBeenCalledWith(
-            "Fork job is queued and waiting for the fork worker."
+            "Fork job was submitted to the fork queue."
         );
         expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
     });

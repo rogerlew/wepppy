@@ -15,8 +15,11 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 - Emits bounded stage and heartbeat updates via the `<runid>:fork` StatusStream channel only while a job is tracked.
 - Renders authoritative job status plus start/end timestamps in the status panel (`#rq_job`) via polling.
 - Shows `Submitting fork job...` only while the submission request is pending.
-  After acceptance, the console reports that the job is queued and waiting for
-  the fork worker; this may persist while earlier serial fork/archive work runs.
+  After acceptance, the log records `Fork job was submitted to the fork queue.`
+  This past event remains in the log after dispatch; read the polled status for
+  the current lifecycle state and the heartbeat for copy activity. Past-tense
+  wording prevents retained submission history from implying the job is still
+  waiting after it starts. Earlier serial fork/archive work may delay dispatch.
 - Replaces copy-heartbeat text in a live status region instead of appending it to the console log.
 
 ## Front-End Orchestration

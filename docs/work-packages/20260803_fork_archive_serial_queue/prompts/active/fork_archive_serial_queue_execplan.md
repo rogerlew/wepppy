@@ -32,6 +32,10 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
 
 ## Progress
 
+- [x] (2026-10-07) Diagnose retained queued wording beside live Started status;
+  apply the copy-only conformance fix. All 113 Jest suites / 923 tests,
+  frontend lint, and touched documentation lints pass.
+
 - [x] (2026-08-04 05:38Z) Read repository and subsystem instructions, the NFS
   evidence, queue/worker code, compose variants, UI surfaces, operator
   listings, graph artifacts, and focused tests.
@@ -73,6 +77,10 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
 
 ## Surprises & Discoveries
 
+- Observation: the fork submission log used present-tense queued wording that
+  survived dispatch. Evidence: operator's `some-oligopoly` console report and
+  two failing submission assertions before the wording fix.
+
 - Observation: archive restore belongs in the serial queue even though the
   initial request said “fork/archive”; it recursively removes and rewrites the
   same NAS-backed run tree.
@@ -109,6 +117,10 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
 
 ## Decision Log
 
+- Decision: Record submission in past tense; keep polling as lifecycle authority
+  under unchanged ADR-0021 Implementation Notes. A wording repair avoids a new
+  status mechanism. Date/Author: 2026-10-07 / Codex.
+
 - Decision: Propose queue name `fork-archive`, service name
   `rq-worker-fork-archive`, and worker-pool size `1`.
   Rationale: the names state the bounded workload and match existing
@@ -138,6 +150,11 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
   Date/Author: 2026-08-04 / Codex.
 
 ## Outcomes & Retrospective
+
+The 2026-10-07 follow-up corrected fork submission wording and its existing
+assertions; all 113 Jest suites / 923 tests, frontend lint, and documentation
+lint passed. This repair does not establish live rollout evidence for the
+broader package.
 
 The repository implementation is complete and locally validated. The three
 top-level jobs route to one queue; the supported stacks expose one-process

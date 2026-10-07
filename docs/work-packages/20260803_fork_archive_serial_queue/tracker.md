@@ -268,6 +268,29 @@ preflight before deployment.
 
 ## Progress Notes
 
+### 2026-10-07: Fork submission log wording conformance
+
+The reported `some-oligopoly` fork shows `Started` plus copy heartbeats beside
+the retained submission entry “Fork job is queued and waiting for the fork
+worker.” This is historical log text, not a second lifecycle observation.
+The unchanged authority is ADR-0021, Implementation Notes: jobstatus owns
+lifecycle state; heartbeats are presentation hints. The shared controller
+contract's polling requirements and RQ response contract remain unchanged.
+Use past-tense submission wording so the log cannot contradict current status;
+retain the existing status panel and replaceable heartbeat presentation.
+
+Regression plan: update existing submission assertions, run console smoke tests
+(including heartbeat, restoration, failure and completion), frontend lint/tests,
+and documentation lint. Idle/empty state has no submission entry; accepted
+queued/started/terminal states retain a historical entry; legacy session
+restoration and malformed-session/error handling remain unchanged. This is
+copy-only, with no auth, safety, persistence, exception, or queue changes.
+Validation: the two existing submission tests failed before the patch; afterward
+all 113 Jest suites / 923 tests passed, including the heartbeat regression.
+Frontend lint and all three touched documentation lints passed. Full Python
+tests are omitted for this copy-only JavaScript change. No production deployment
+is part of this repair.
+
 ### 2026-08-04 05:38 UTC: Discovery and scaffold
 
 **Agent/Contributor**: Codex
