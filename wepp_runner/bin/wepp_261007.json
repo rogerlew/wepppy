@@ -1,7 +1,7 @@
 {
   "binary_name": "wepp_261007",
   "binary_role": "watershed",
-  "built_utc": "2026-10-07T18:20:08Z",
+  "built_utc": "2026-10-07T20:37:16Z",
   "features": {
     "hbp_pass_family": "H*.hbp",
     "hbp_schema_major": 0,
@@ -15,9 +15,9 @@
   },
   "release_tag": "261007",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "9a19c3c8ed83576a2a1c175a9c8c4e0c5ac6c82fa61a293cd3052ee344d12343",
-  "source_branch": "repair/channel-hydrograph-volume-20261007",
-  "source_commit": "9c36ae950591e0bd9353662aec0a0f1486ba40db",
+  "sha256": "ad5ef3e31be7e6da2517567fb211fe350cb7ff0ea9320282368182cb6157127b",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "669ff4106a4158e49dc79e038026e4d63a489923",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "validation": {
     "hillslope_watchlist": "pass",
