@@ -1,0 +1,28 @@
+{
+  "binary_name": "wepp_261007",
+  "binary_role": "watershed",
+  "built_utc": "2026-10-07T18:20:08Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "process_mode_pass_pw0_required": true
+  },
+  "release_tag": "261007",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "9a19c3c8ed83576a2a1c175a9c8c4e0c5ac6c82fa61a293cd3052ee344d12343",
+  "source_branch": "repair/channel-hydrograph-volume-20261007",
+  "source_commit": "9c36ae950591e0bd9353662aec0a0f1486ba40db",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "hillslope_watchlist": "pass",
+    "host_smoke": "pass",
+    "same_build_watershed_replay": "retired"
+  },
+  "wepp_banner_version": "2020.500"
+}

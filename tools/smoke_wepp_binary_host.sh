@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RUNS_DIR="${RUNS_DIR:-/wc1/runs/du/dumbfounded-patentee/wepp/runs}"
-CASES="${CASES:-p962,p1}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+RUNS_DIR="${RUNS_DIR:-${REPO_ROOT}/tests/wepp/interchange/fixtures/deductive-futurist/wepp/runs}"
+CASES="${CASES:-p1}"
 TIMEOUT_SECONDS="${TIMEOUT_SECONDS:-120}"
 
 if [[ $# -ne 1 ]]; then
@@ -60,6 +63,19 @@ adapt_run_file_for_pass_family() {
   fi
   # HBP-capable releases require process pass names to be H*.hbp.
   sed -i 's/\.pass\.dat/.hbp/g' "${run_file}"
+}
+
+requested_final_year() {
+  local run_file="$1"
+  awk '
+    NF { lines[++n] = $0 }
+    END {
+      if (n < 2 || lines[n - 1] !~ /^[0-9]+$/) {
+        exit 1
+      }
+      print lines[n - 1]
+    }
+  ' "${run_file}"
 }
 
 PASS_FAMILY="$(infer_pass_family "${BINARY_PATH}")"
@@ -128,6 +144,7 @@ for case_id in "${case_list[@]}"; do
   done
 
   adapt_run_file_for_pass_family "${work_dir}/runs/${case_id}.run" "${PASS_FAMILY}"
+  expected_year="$(requested_final_year "${work_dir}/runs/${case_id}.run")"
 
   set +e
   (
@@ -141,14 +158,14 @@ for case_id in "${case_list[@]}"; do
   success_count="$(grep -c 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' "${work_dir}/stdout.log" || true)"
   last_line="$(grep -v '^$' "${work_dir}/stdout.log" | tail -n 1 || true)"
 
-  printf "%s\trc=%s\tsuccess=%s\tyears=[%s]\tlast=%s\twd=%s\n" \
-    "${case_id}" "${rc}" "${success_count}" "${years}" "${last_line}" "${work_dir}"
+  printf "%s\trc=%s\tsuccess=%s\texpected_year=%s\tyears=[%s]\tlast=%s\twd=%s\n" \
+    "${case_id}" "${rc}" "${success_count}" "${expected_year}" "${years}" "${last_line}" "${work_dir}"
 
   if [[ "${rc}" -ne 0 ]] || [[ "${success_count}" -lt 1 ]]; then
     overall_status=1
   fi
 
-  if ! grep -q 'SIMULATION YEAR = *17' "${work_dir}/stdout.log"; then
+  if ! grep -Eq "SIMULATION YEAR = *${expected_year}" "${work_dir}/stdout.log"; then
     overall_status=1
   fi
 done

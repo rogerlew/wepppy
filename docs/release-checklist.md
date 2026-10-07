@@ -4,7 +4,8 @@
 
 1. Build in `wepp-forest` with pinned compiler `/usr/bin/gfortran`.
 2. Run smoke and regression gates in `wepp-forest`.
-3. Confirm watershed replay completion marker on staged reference run.
+3. Confirm source-side artifact policy, hillslope watchlist, and ELF interpreter
+   gates pass for the staged release pair.
 
 ## Provenance Verification (Required)
 

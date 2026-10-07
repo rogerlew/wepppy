@@ -103,6 +103,12 @@ The JSON hashes provide integrity and connect the binary to claimed source
 bytes. They do not authenticate the publisher. Publisher authentication needs
 a separately governed and verified signature over the sidecar.
 
+## Vendored WEPP Release Log
+
+| Date | Release | Source | Binary SHA-256 | Notes |
+| --- | --- | --- | --- | --- |
+| 2026-10-07 | `wepp_261007`, `wepp_261007_hill` | `wepp-forest` source commit `9c36ae950591e0bd9353662aec0a0f1486ba40db`, merged to default branch `wepp_260430_negmeltfix_comparator` by `687fe7fc` | watershed `9a19c3c8ed83576a2a1c175a9c8c4e0c5ac6c82fa61a293cd3052ee344d12343`; hillslope `e3b554cf22f2229651697438c201b41804fafd0d210c89503a5ea66a1c12d183` | Channel hydrograph volume repair release. Vendored sidecars: `77fbc5ad41163912f8b8648c625e20319952da3374d56cc9792cc78448e7f946` and `68b35a7cf7c574085668023deee8d1e48acf801f5e5ad03e741275fec5fe9f55`. Source-side evidence: focused tests 7/7, full pytest 92/92, source and release host smoke, hillslope watchlist 12/12, artifact policy, JSON/hash checks, and system ELF interpreter checks. WEPPpy evidence: provenance, host smoke, and runner/output regressions passed. |
+
 ## Withdrawn Releases
 
 - `wepp_260727` and `wepp_260727_hill` were removed from the WEPPpy vendor set

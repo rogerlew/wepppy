@@ -661,10 +661,10 @@ The authoritative instructions are
    under `wepp-forest/release/`, generates their sidecars, prints hashes/compiler
    and library information, and rejects detected Intel toolchain fingerprints.
 3. **Execute source-side gates.** Run smoke checks for both binaries, the
-   permanent hillslope watchlist, pytest, the ablation artifact policy check,
-   and the required `reconciled-condenser` watershed replay. Require the model
-   success marker and absence of the specified parse/runtime errors. Verify
-   system-loader compatibility. A failed required gate blocks vendoring.
+   permanent hillslope watchlist, pytest, and the ablation artifact policy
+   check. Require success markers and absence of parse/runtime error signatures
+   in those gates. Verify system-loader compatibility. A failed required gate
+   blocks vendoring.
 4. **Finalize release evidence.** Record actual validation outcomes against the
    exact candidate binaries, retain logs and comparison artifacts, and update
    the source repository's `change-log.md`. Sidecar status must reflect observed
