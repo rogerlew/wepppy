@@ -725,12 +725,13 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         for record in by_hash.values()
     ]
 
-    assert len(records) == 16
+    assert len(records) == 17
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
         "d68d94816",
         "c1d02d73f",
+        "pending-reader-floor",
     }
     assert all(
         hashlib.sha256(
@@ -757,10 +758,11 @@ def test_amendment5_reader_floor_accepts_prior_and_new_structures(
     records = capability_graph_module._PRODUCTION_STRUCTURE_CATALOG[(3, profile_id)]
     evolved = _amendment5_reader_fixture(profile_id)
 
-    assert set(records) == {
-        prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id],
-        _SINGLE_INPUT_STRUCTURE_HASHES[profile_id],
-    }
+    expected_records = {prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id],
+                        _SINGLE_INPUT_STRUCTURE_HASHES[profile_id]}
+    if profile_id == "continental-us":
+        expected_records.add("2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3")
+    assert set(records) == expected_records
     assert capability_graph_module.capability_structure_sha256(evolved) == (
         _AMENDMENT5_STRUCTURE_HASHES[profile_id]
     )
@@ -1146,3 +1148,20 @@ def test_named_preset_capability_snapshot_reads_only_nodb_mods() -> None:
     })
 
     assert snapshot["mods"] == ["disturbed"]
+
+
+def test_prism_reader_floor_accepts_new_graph_without_live_catalog():
+    baseline = _amendment5_reader_fixture("continental-us")
+    ids = list(baseline.climate_datasets)
+    ids.insert(4, "observed_prism_800m")
+    changes = {"climate_datasets": tuple(ids)}
+    for name in ("climate_station_methods_by_dataset", "climate_spatial_methods_by_dataset",
+                 "climate_station_defaults", "climate_spatial_defaults"):
+        relation = dict(getattr(baseline, name))
+        relation["observed_prism_800m"] = relation["observed_gridmet"]
+        changes[name] = MappingProxyType(relation)
+    evolved = replace(baseline, **changes)
+    evolved.validate()
+    assert capability_graph_module.capability_structure_sha256(evolved) == (
+        "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3")
+    assert "observed_prism_800m" not in baseline.climate_datasets

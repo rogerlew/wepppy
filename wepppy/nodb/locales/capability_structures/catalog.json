@@ -5404,6 +5404,1010 @@
         "schema_version": 3
       },
       "structure_sha256": "106e6f36a3f975f1ad895afde641ec6738fb84899bbedebc5455ead1d2e009b1"
+    },
+    {
+      "first_reader_revision": "pending-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "continental-us",
+        "axes": {
+          "dem_sources": [
+            "usgs-ned1-2024",
+            "usgs-ned13-2022"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet",
+            "observed_prism_800m",
+            "dep_nexrad",
+            "future_cmip5",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-legacy",
+            "cligen-stations-2015",
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "soil_datasets": [
+            "ssurgo-gnatsgso-2025"
+          ],
+          "soil_builders": [
+            "gridded",
+            "single_mukey",
+            "single_database"
+          ],
+          "landuse_datasets": [
+            "nlcd-ever-forest-2024",
+            "nlcd-ever-forest-2023",
+            "nlcd-ever-forest-2022",
+            "nlcd-ever-forest-2021",
+            "nlcd-ever-forest-2020",
+            "nlcd-ever-forest-2019",
+            "nlcd-ever-forest-2018",
+            "nlcd-ever-forest-2017",
+            "nlcd-ever-forest-2016",
+            "nlcd-ever-forest-2015",
+            "nlcd-ever-forest-2014",
+            "nlcd-ever-forest-2013",
+            "nlcd-ever-forest-2012",
+            "nlcd-ever-forest-2011",
+            "nlcd-ever-forest-2010",
+            "nlcd-ever-forest-2009",
+            "nlcd-ever-forest-2008",
+            "nlcd-ever-forest-2007",
+            "nlcd-ever-forest-2006",
+            "nlcd-ever-forest-2005",
+            "nlcd-ever-forest-2004",
+            "nlcd-ever-forest-2003",
+            "nlcd-ever-forest-2002",
+            "nlcd-ever-forest-2001",
+            "nlcd-ever-forest-2000",
+            "nlcd-ever-forest-1999",
+            "nlcd-ever-forest-1998",
+            "nlcd-ever-forest-1997",
+            "nlcd-ever-forest-1996",
+            "nlcd-ever-forest-1995",
+            "nlcd-ever-forest-1994",
+            "nlcd-ever-forest-1993",
+            "nlcd-ever-forest-1992",
+            "nlcd-ever-forest-1991",
+            "nlcd-ever-forest-1990",
+            "nlcd-ever-forest-1989",
+            "nlcd-ever-forest-1988",
+            "nlcd-ever-forest-1987",
+            "nlcd-ever-forest-1986",
+            "nlcd-ever-forest-1985",
+            "nlcd-2024",
+            "nlcd-2023",
+            "nlcd-2022",
+            "nlcd-2021",
+            "nlcd-2020",
+            "nlcd-2019",
+            "nlcd-2018",
+            "nlcd-2017",
+            "nlcd-2016",
+            "nlcd-2015",
+            "nlcd-2014",
+            "nlcd-2013",
+            "nlcd-2012",
+            "nlcd-2011",
+            "nlcd-2010",
+            "nlcd-2009",
+            "nlcd-2008",
+            "nlcd-2007",
+            "nlcd-2006",
+            "nlcd-2005",
+            "nlcd-2004",
+            "nlcd-2003",
+            "nlcd-2002",
+            "nlcd-2001",
+            "nlcd-2000",
+            "nlcd-1999",
+            "nlcd-1998",
+            "nlcd-1997",
+            "nlcd-1996",
+            "nlcd-1995",
+            "nlcd-1994",
+            "nlcd-1993",
+            "nlcd-1992",
+            "nlcd-1991",
+            "nlcd-1990",
+            "nlcd-1989",
+            "nlcd-1988",
+            "nlcd-1987",
+            "nlcd-1986",
+            "nlcd-1985",
+            "emapr-vote-2017",
+            "emapr-vote-2016",
+            "emapr-vote-2015",
+            "emapr-vote-2014",
+            "emapr-vote-2013",
+            "emapr-vote-2012",
+            "emapr-vote-2011",
+            "emapr-vote-2010",
+            "emapr-vote-2009",
+            "emapr-vote-2008",
+            "emapr-vote-2007",
+            "emapr-vote-2006",
+            "emapr-vote-2005",
+            "emapr-vote-2004",
+            "emapr-vote-2003",
+            "emapr-vote-2002",
+            "emapr-vote-2001",
+            "emapr-vote-2000",
+            "emapr-vote-1999",
+            "emapr-vote-1998",
+            "emapr-vote-1997",
+            "emapr-vote-1996",
+            "emapr-vote-1995",
+            "emapr-vote-1994",
+            "emapr-vote-1993",
+            "emapr-vote-1992",
+            "emapr-vote-1991",
+            "emapr-vote-1990",
+            "emapr-vote-1989",
+            "emapr-vote-1988",
+            "emapr-vote-1987",
+            "emapr-vote-1986",
+            "emapr-vote-1985",
+            "emapr-vote-1984"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "prism_stochastic": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_gridmet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "dep_nexrad": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "future_cmip5": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ],
+            "observed_prism_800m": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "prism_stochastic": [
+              "single",
+              "multiple"
+            ],
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "observed_gridmet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "dep_nexrad": [
+              "single",
+              "multiple"
+            ],
+            "future_cmip5": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ],
+            "observed_prism_800m": [
+              "single",
+              "multiple",
+              "interpolated"
+            ]
+          },
+          "landuse_methods": {
+            "nlcd-ever-forest-2024": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2023": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2022": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2021": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2024": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2023": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2022": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2021": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1984": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "ssurgo-gnatsgso-2025": [
+              "gridded",
+              "single_mukey",
+              "single_database"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "prism_stochastic": "auto",
+            "observed_daymet": "auto",
+            "observed_gridmet": "auto",
+            "dep_nexrad": "auto",
+            "future_cmip5": "auto",
+            "user_defined_cli": "user_defined",
+            "observed_prism_800m": "auto"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "prism_stochastic": "single",
+            "observed_daymet": "single",
+            "observed_gridmet": "single",
+            "dep_nexrad": "single",
+            "future_cmip5": "single",
+            "user_defined_cli": "single",
+            "observed_prism_800m": "single"
+          },
+          "landuse": {
+            "nlcd-ever-forest-2024": "gridded",
+            "nlcd-ever-forest-2023": "gridded",
+            "nlcd-ever-forest-2022": "gridded",
+            "nlcd-ever-forest-2021": "gridded",
+            "nlcd-ever-forest-2020": "gridded",
+            "nlcd-ever-forest-2019": "gridded",
+            "nlcd-ever-forest-2018": "gridded",
+            "nlcd-ever-forest-2017": "gridded",
+            "nlcd-ever-forest-2016": "gridded",
+            "nlcd-ever-forest-2015": "gridded",
+            "nlcd-ever-forest-2014": "gridded",
+            "nlcd-ever-forest-2013": "gridded",
+            "nlcd-ever-forest-2012": "gridded",
+            "nlcd-ever-forest-2011": "gridded",
+            "nlcd-ever-forest-2010": "gridded",
+            "nlcd-ever-forest-2009": "gridded",
+            "nlcd-ever-forest-2008": "gridded",
+            "nlcd-ever-forest-2007": "gridded",
+            "nlcd-ever-forest-2006": "gridded",
+            "nlcd-ever-forest-2005": "gridded",
+            "nlcd-ever-forest-2004": "gridded",
+            "nlcd-ever-forest-2003": "gridded",
+            "nlcd-ever-forest-2002": "gridded",
+            "nlcd-ever-forest-2001": "gridded",
+            "nlcd-ever-forest-2000": "gridded",
+            "nlcd-ever-forest-1999": "gridded",
+            "nlcd-ever-forest-1998": "gridded",
+            "nlcd-ever-forest-1997": "gridded",
+            "nlcd-ever-forest-1996": "gridded",
+            "nlcd-ever-forest-1995": "gridded",
+            "nlcd-ever-forest-1994": "gridded",
+            "nlcd-ever-forest-1993": "gridded",
+            "nlcd-ever-forest-1992": "gridded",
+            "nlcd-ever-forest-1991": "gridded",
+            "nlcd-ever-forest-1990": "gridded",
+            "nlcd-ever-forest-1989": "gridded",
+            "nlcd-ever-forest-1988": "gridded",
+            "nlcd-ever-forest-1987": "gridded",
+            "nlcd-ever-forest-1986": "gridded",
+            "nlcd-ever-forest-1985": "gridded",
+            "nlcd-2024": "gridded",
+            "nlcd-2023": "gridded",
+            "nlcd-2022": "gridded",
+            "nlcd-2021": "gridded",
+            "nlcd-2020": "gridded",
+            "nlcd-2019": "gridded",
+            "nlcd-2018": "gridded",
+            "nlcd-2017": "gridded",
+            "nlcd-2016": "gridded",
+            "nlcd-2015": "gridded",
+            "nlcd-2014": "gridded",
+            "nlcd-2013": "gridded",
+            "nlcd-2012": "gridded",
+            "nlcd-2011": "gridded",
+            "nlcd-2010": "gridded",
+            "nlcd-2009": "gridded",
+            "nlcd-2008": "gridded",
+            "nlcd-2007": "gridded",
+            "nlcd-2006": "gridded",
+            "nlcd-2005": "gridded",
+            "nlcd-2004": "gridded",
+            "nlcd-2003": "gridded",
+            "nlcd-2002": "gridded",
+            "nlcd-2001": "gridded",
+            "nlcd-2000": "gridded",
+            "nlcd-1999": "gridded",
+            "nlcd-1998": "gridded",
+            "nlcd-1997": "gridded",
+            "nlcd-1996": "gridded",
+            "nlcd-1995": "gridded",
+            "nlcd-1994": "gridded",
+            "nlcd-1993": "gridded",
+            "nlcd-1992": "gridded",
+            "nlcd-1991": "gridded",
+            "nlcd-1990": "gridded",
+            "nlcd-1989": "gridded",
+            "nlcd-1988": "gridded",
+            "nlcd-1987": "gridded",
+            "nlcd-1986": "gridded",
+            "nlcd-1985": "gridded",
+            "emapr-vote-2017": "gridded",
+            "emapr-vote-2016": "gridded",
+            "emapr-vote-2015": "gridded",
+            "emapr-vote-2014": "gridded",
+            "emapr-vote-2013": "gridded",
+            "emapr-vote-2012": "gridded",
+            "emapr-vote-2011": "gridded",
+            "emapr-vote-2010": "gridded",
+            "emapr-vote-2009": "gridded",
+            "emapr-vote-2008": "gridded",
+            "emapr-vote-2007": "gridded",
+            "emapr-vote-2006": "gridded",
+            "emapr-vote-2005": "gridded",
+            "emapr-vote-2004": "gridded",
+            "emapr-vote-2003": "gridded",
+            "emapr-vote-2002": "gridded",
+            "emapr-vote-2001": "gridded",
+            "emapr-vote-2000": "gridded",
+            "emapr-vote-1999": "gridded",
+            "emapr-vote-1998": "gridded",
+            "emapr-vote-1997": "gridded",
+            "emapr-vote-1996": "gridded",
+            "emapr-vote-1995": "gridded",
+            "emapr-vote-1994": "gridded",
+            "emapr-vote-1993": "gridded",
+            "emapr-vote-1992": "gridded",
+            "emapr-vote-1991": "gridded",
+            "emapr-vote-1990": "gridded",
+            "emapr-vote-1989": "gridded",
+            "emapr-vote-1988": "gridded",
+            "emapr-vote-1987": "gridded",
+            "emapr-vote-1986": "gridded",
+            "emapr-vote-1985": "gridded",
+            "emapr-vote-1984": "gridded"
+          },
+          "soil": {
+            "ssurgo-gnatsgso-2025": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3"
     }
   ]
 }
