@@ -1,0 +1,249 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "umask": "0o22",
+  "configured_cache": "/wc1/cache/prism",
+  "resolved_cache": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+  "cache_owner_uid": 1000,
+  "cache_owner_gid": 993,
+  "cold_seconds": 6.995657242994639,
+  "warm_seconds": 3.1121817480016034,
+  "locations": {
+    "palouse": {
+      "lon": -116.5,
+      "lat": 46.5,
+      "source_crs": "EPSG:4326",
+      "cell": "r412c1022",
+      "row": 412,
+      "col": 1022,
+      "center": [
+        -116.50000000034102,
+        46.500000000137
+      ],
+      "grid": "us-800m-dc0537137fab7857"
+    },
+    "sierra": {
+      "lon": -119.5,
+      "lat": 37.7,
+      "source_crs": "EPSG:4326",
+      "cell": "r1468c662",
+      "row": 1468,
+      "col": 662,
+      "center": [
+        -119.50000000022101,
+        37.700000000489005
+      ],
+      "grid": "us-800m-dc0537137fab7857"
+    },
+    "topanga": {
+      "lon": -118.65872328468636,
+      "lat": 34.05536488765769,
+      "source_crs": "EPSG:4326",
+      "cell": "r1905c763",
+      "row": 1905,
+      "col": 763,
+      "center": [
+        -118.65833333358802,
+        34.05833333396801
+      ],
+      "grid": "us-800m-dc0537137fab7857"
+    },
+    "palouse_alias": {
+      "lon": -116.49900000034101,
+      "lat": 46.499000000137,
+      "source_crs": "EPSG:4326",
+      "cell": "r412c1022",
+      "row": 412,
+      "col": 1022,
+      "center": [
+        -116.50000000034102,
+        46.500000000137
+      ],
+      "grid": "us-800m-dc0537137fab7857"
+    }
+  },
+  "provenance": [
+    {
+      "schema": 1,
+      "grid": "us-800m-dc0537137fab7857",
+      "start": "2020-01-01",
+      "end": "2020-12-31",
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "freshness": "release_manifest_unchanged",
+      "sampling": "nearest_native_cell",
+      "units": {
+        "ppt": "mm",
+        "tmin": "degC",
+        "tmax": "degC",
+        "tdmean": "degC",
+        "soltotal": "MJ/m2/day"
+      },
+      "provider_day": "24 hours ending 12:00 UTC",
+      "cell": "r412c1022",
+      "data_sha256": "43fc78206a1cc25654fadac1734fb64f7f72480309b03ad003f1db6de9fe7749",
+      "semantic_sha256": "c51a0941f4b940678fca85e58e84fc0f998547d92e54475a1c706fe2f8c59d86",
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "checked_utc": "2026-10-08T21:47:57.183919+00:00",
+      "cache_hit": false
+    },
+    {
+      "schema": 1,
+      "grid": "us-800m-dc0537137fab7857",
+      "start": "2020-01-01",
+      "end": "2020-12-31",
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "freshness": "release_manifest_unchanged",
+      "sampling": "nearest_native_cell",
+      "units": {
+        "ppt": "mm",
+        "tmin": "degC",
+        "tmax": "degC",
+        "tdmean": "degC",
+        "soltotal": "MJ/m2/day"
+      },
+      "provider_day": "24 hours ending 12:00 UTC",
+      "cell": "r1468c662",
+      "data_sha256": "5a6c3dcee24c6233de01e9520467efb76cee3ea2177fff8c3aa7daa3887f7f8a",
+      "semantic_sha256": "b722e023ab11340229ce09152476198087f07e6e89afae9fe03c5a6b5a772067",
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "checked_utc": "2026-10-08T21:47:57.183967+00:00",
+      "cache_hit": false
+    },
+    {
+      "schema": 1,
+      "grid": "us-800m-dc0537137fab7857",
+      "start": "2020-01-01",
+      "end": "2020-12-31",
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "freshness": "release_manifest_unchanged",
+      "sampling": "nearest_native_cell",
+      "units": {
+        "ppt": "mm",
+        "tmin": "degC",
+        "tmax": "degC",
+        "tdmean": "degC",
+        "soltotal": "MJ/m2/day"
+      },
+      "provider_day": "24 hours ending 12:00 UTC",
+      "cell": "r1905c763",
+      "data_sha256": "d3561197093abe47ccb3a26e22166803485fd8d94b3e6747630b0afc12a53165",
+      "semantic_sha256": "620e6080d1e38d72c4f59b5da86edd834f5c464bbf44f4ba1f8ac1c6bdf1f8d4",
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "checked_utc": "2026-10-08T21:47:57.184002+00:00",
+      "cache_hit": false
+    }
+  ],
+  "warm_provenance": [
+    {
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "cell": "r412c1022",
+      "data_sha256": "43fc78206a1cc25654fadac1734fb64f7f72480309b03ad003f1db6de9fe7749",
+      "end": "2020-12-31",
+      "freshness": "release_manifest_unchanged",
+      "grid": "us-800m-dc0537137fab7857",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "provider_day": "24 hours ending 12:00 UTC",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "sampling": "nearest_native_cell",
+      "schema": 1,
+      "semantic_sha256": "c51a0941f4b940678fca85e58e84fc0f998547d92e54475a1c706fe2f8c59d86",
+      "start": "2020-01-01",
+      "units": {
+        "ppt": "mm",
+        "soltotal": "MJ/m2/day",
+        "tdmean": "degC",
+        "tmax": "degC",
+        "tmin": "degC"
+      },
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "b1df5340fa214be9be081b7598331fdf",
+      "checked_utc": "2026-10-08T21:48:00.247646+00:00",
+      "cache_hit": true
+    },
+    {
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "cell": "r1468c662",
+      "data_sha256": "5a6c3dcee24c6233de01e9520467efb76cee3ea2177fff8c3aa7daa3887f7f8a",
+      "end": "2020-12-31",
+      "freshness": "release_manifest_unchanged",
+      "grid": "us-800m-dc0537137fab7857",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "provider_day": "24 hours ending 12:00 UTC",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "sampling": "nearest_native_cell",
+      "schema": 1,
+      "semantic_sha256": "b722e023ab11340229ce09152476198087f07e6e89afae9fe03c5a6b5a772067",
+      "start": "2020-01-01",
+      "units": {
+        "ppt": "mm",
+        "soltotal": "MJ/m2/day",
+        "tdmean": "degC",
+        "tmax": "degC",
+        "tmin": "degC"
+      },
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "b1df5340fa214be9be081b7598331fdf",
+      "checked_utc": "2026-10-08T21:48:00.247721+00:00",
+      "cache_hit": true
+    },
+    {
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "cell": "r1905c763",
+      "data_sha256": "d3561197093abe47ccb3a26e22166803485fd8d94b3e6747630b0afc12a53165",
+      "end": "2020-12-31",
+      "freshness": "release_manifest_unchanged",
+      "grid": "us-800m-dc0537137fab7857",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "provider_day": "24 hours ending 12:00 UTC",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "sampling": "nearest_native_cell",
+      "schema": 1,
+      "semantic_sha256": "620e6080d1e38d72c4f59b5da86edd834f5c464bbf44f4ba1f8ac1c6bdf1f8d4",
+      "start": "2020-01-01",
+      "units": {
+        "ppt": "mm",
+        "soltotal": "MJ/m2/day",
+        "tdmean": "degC",
+        "tmax": "degC",
+        "tmin": "degC"
+      },
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "b1df5340fa214be9be081b7598331fdf",
+      "checked_utc": "2026-10-08T21:48:00.247800+00:00",
+      "cache_hit": true
+    }
+  ],
+  "cells": 3,
+  "days_per_cell": 366,
+  "same_cell_alias": true,
+  "raw_dewpoint_preserved": true,
+  "cold_warm_values_equal": true,
+  "independent_prior_bulk_parity": true,
+  "source_hashes": {
+    "wepppy/climates/prism/bulk_client.py": "8e35da7308bd3c8149812d3eea01e211f1d72c6110b52f261707cb3e893dcec2",
+    "wepppy/climates/prism/_bulk_transport.py": "3a4497a53adf1f222af6e9b0efa8c184588033bb3a8caec75c9c564e18bc48b7",
+    "wepppy/climates/prism/_bulk_cache.py": "34b357867e7f0679ac1ce859fce5d53022e951a53964f5753e6f080292dbf8a5",
+    "wepppy/climates/prism/_bulk_protocol.py": "ab6bbc8629ba9fb2ef58a2d77bab329d74eb6e5607dcce488225115d2c9a0744"
+  },
+  "mountinfo": [
+    "4105 4094 0:64 / /wc1 rw,noatime - nfs4 10.0.0.2:/ rw,vers=4.2,rsize=32768,wsize=32768,namlen=255,soft,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.0.0.1,local_lock=none,addr=10.0.0.2"
+  ]
+}

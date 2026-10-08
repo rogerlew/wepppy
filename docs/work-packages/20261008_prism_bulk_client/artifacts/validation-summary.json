@@ -1,0 +1,38 @@
+{
+  "focused_tests": 39,
+  "live_cases": [
+    "2020 full leap year / three cells and alias",
+    "2019-12-31 to 2020-01-02 / two partitions",
+    "2026-10-01 to 2026-10-07 / provisional interval",
+    "second worker reuse",
+    "final candidate cold and warm ten-day interval",
+    "mixed land/ocean batch rejected; raw evidence retained and no cache entries published"
+  ],
+  "compose_overrides": [
+    "dev",
+    "prod",
+    "prod.worker"
+  ],
+  "broad_exception_check": "pass",
+  "test_stub_completeness": "pass",
+  "full_suite": {
+    "command": "wctl run-pytest tests --maxfail=1",
+    "passed": 10253,
+    "skipped": 126,
+    "failed": 1,
+    "seconds": 2471.75,
+    "failure": "tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[ttl]",
+    "catalog_p95_seconds": 0.06550110199896153,
+    "baseline_p95_seconds": 0.0013581219973275438,
+    "allowed_delta_seconds": 0.05,
+    "disposition": "Unchanged PostgreSQL wall-clock latency test; entire failed module plus remaining tail passed on rerun. Original full invocation remains a failed run."
+  },
+  "stubtest": "pass",
+  "quality_observability": "Ran observe-only tool; changed-file deltas use committed base...HEAD and do not include the working-tree implementation.",
+  "tail_rerun": {
+    "passed": 207,
+    "seconds": 60.1,
+    "scope": "test_run_catalog_postgres.py and all subsequent test modules in collection order"
+  },
+  "markdown_lint": "pass"
+}

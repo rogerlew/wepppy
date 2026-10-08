@@ -1,0 +1,18 @@
+{
+  "docker-compose.dev.yml": {
+    "rq-engine": "/wc1/custom-prism-cache",
+    "rq-worker": "/wc1/custom-prism-cache",
+    "rq-worker-batch": "/wc1/custom-prism-cache",
+    "weppcloud": "/wc1/custom-prism-cache"
+  },
+  "docker-compose.prod.yml": {
+    "rq-engine": "/wc1/custom-prism-cache",
+    "rq-worker": "/wc1/custom-prism-cache",
+    "rq-worker-batch": "/wc1/custom-prism-cache",
+    "weppcloud": "/wc1/custom-prism-cache"
+  },
+  "docker-compose.prod.worker.yml": {
+    "rq-worker": "/wc1/custom-prism-cache",
+    "rq-worker-batch": "/wc1/custom-prism-cache"
+  }
+}

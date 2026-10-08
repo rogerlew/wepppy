@@ -13,6 +13,7 @@ x-wepppy-service: &wepppy-service
   working_dir: /workdir/wepppy
   environment: &wepppy-env
     PYTHONUNBUFFERED: "1"
+    PRISM_CACHE_DIR: ${PRISM_CACHE_DIR:-/wc1/cache/prism}
     REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
     REDIS_HOST: redis
     REDIS_PASSWORD_FILE: /run/secrets/redis_password

@@ -1,0 +1,72 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "configured_cache": "/wc1/cache/prism",
+  "first_provenance": [
+    {
+      "schema": 1,
+      "grid": "us-800m-dc0537137fab7857",
+      "start": "2020-01-21",
+      "end": "2020-01-30",
+      "attempt": "c6d463be3afd43258b14b8f08835264e",
+      "manifest_sha256": "eca282c3f6435d06fd91757830b40facd656157441f7d69c0693d145b707e262",
+      "raw_sha256": "f881a03e27f1eff282dbed643258f41e7854c9415e5ba4291f9dce0d6e209eee",
+      "freshness": "release_manifest_unchanged",
+      "sampling": "nearest_native_cell",
+      "units": {
+        "ppt": "mm",
+        "tmin": "degC",
+        "tmax": "degC",
+        "tdmean": "degC",
+        "soltotal": "MJ/m2/day"
+      },
+      "provider_day": "24 hours ending 12:00 UTC",
+      "cell": "r412c1022",
+      "data_sha256": "bb26e200326c283be3a020083dde46f69959d5f44eb9e52bf1bebc155ede57cc",
+      "semantic_sha256": "131b19083c3a56d301696b7a296d9aaa7b8dc2327db8b86563d1d6126afc0d21",
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/c6d463be3afd43258b14b8f08835264e",
+      "freshness_check_attempt": "c6d463be3afd43258b14b8f08835264e",
+      "checked_utc": "2026-10-08T22:04:03.086177+00:00",
+      "cache_hit": false
+    }
+  ],
+  "warm_provenance": [
+    {
+      "attempt": "c6d463be3afd43258b14b8f08835264e",
+      "cell": "r412c1022",
+      "data_sha256": "bb26e200326c283be3a020083dde46f69959d5f44eb9e52bf1bebc155ede57cc",
+      "end": "2020-01-30",
+      "freshness": "release_manifest_unchanged",
+      "grid": "us-800m-dc0537137fab7857",
+      "manifest_sha256": "eca282c3f6435d06fd91757830b40facd656157441f7d69c0693d145b707e262",
+      "provider_day": "24 hours ending 12:00 UTC",
+      "raw_sha256": "f881a03e27f1eff282dbed643258f41e7854c9415e5ba4291f9dce0d6e209eee",
+      "sampling": "nearest_native_cell",
+      "schema": 1,
+      "semantic_sha256": "131b19083c3a56d301696b7a296d9aaa7b8dc2327db8b86563d1d6126afc0d21",
+      "start": "2020-01-21",
+      "units": {
+        "ppt": "mm",
+        "soltotal": "MJ/m2/day",
+        "tdmean": "degC",
+        "tmax": "degC",
+        "tmin": "degC"
+      },
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/c6d463be3afd43258b14b8f08835264e",
+      "freshness_check_attempt": "5a1eadb2449f4061a68c85b0b0acff23",
+      "checked_utc": "2026-10-08T22:04:03.534977+00:00",
+      "cache_hit": true
+    }
+  ],
+  "source_hashes": {
+    "wepppy/climates/prism/bulk_client.py": "345b49ca9309c5b550b405a8f9379347f58416e8408b9ae6aefe9477a25f34c6",
+    "wepppy/climates/prism/_bulk_transport.py": "1953a6127648ffb4ab579a0dfd5ea74c1115ffd298f6be8f6d8427e6f8635849",
+    "wepppy/climates/prism/_bulk_cache.py": "8115e9409136e972a65ef403d8bf7c9e0b7bcb4e05cc25bf9112b33c7d79b0d9",
+    "wepppy/climates/prism/_bulk_protocol.py": "d872295c8b3f1fe37ff0929a7b34e1e8a3789abe19d39b17f1feff57e1589b3e"
+  },
+  "identical": true,
+  "days": 10,
+  "unique_cells": 1
+}

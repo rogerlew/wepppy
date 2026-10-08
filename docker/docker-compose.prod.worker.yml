@@ -16,6 +16,7 @@ x-wepppy-image: &wepppy-image
 
 x-worker-env: &worker-env
   PYTHONUNBUFFERED: "1"
+  PRISM_CACHE_DIR: ${PRISM_CACHE_DIR:-/wc1/cache/prism}
   MPLCONFIGDIR: /tmp/matplotlib
   # Base Redis URL without credentials; password is supplied via REDIS_PASSWORD_FILE.
   # Required for worker-only hosts because this stack does not define a redis service.

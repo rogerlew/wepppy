@@ -1,0 +1,74 @@
+{
+  "compose-validation.json": {
+    "bytes": 572,
+    "sha256": "264ec98293367a5912de01f8aeb5b27450336ce05d9ddfca4573da88ad031852"
+  },
+  "correctness-review.md": {
+    "bytes": 6590,
+    "sha256": "a30e9ff4b249ecb46804c8c3ce2508d30a3a4250bb78106a7a63581fbe1353b3"
+  },
+  "final-candidate-validation.json": {
+    "bytes": 3068,
+    "sha256": "c9c0b4eb2a60ad6819719d449009fd10cfabd200873f22b9cd06b981e4d4f54c"
+  },
+  "final_candidate_check.py": {
+    "bytes": 1270,
+    "sha256": "fd223d6c6d760fdc8d56aa6965fe1b8d21c22a421a46ddd88ef836fa3ed75b63"
+  },
+  "live-boundary-validation.json": {
+    "bytes": 8733,
+    "sha256": "818218b9a759143fac575357f6d1fc279de3110b78e4581c016c7b89094b7ba1"
+  },
+  "live-cache-archive.json": {
+    "bytes": 337,
+    "sha256": "81a799a28301836257c529f6efaf5e5254c77d3ee195ce192bd6e0216da7bf42"
+  },
+  "live-cache-evidence.tar.gz": {
+    "bytes": 218177,
+    "sha256": "f0d61a7b4a176ce2966682e0e854919b88524a6b661365a6f08fb8766ab32736"
+  },
+  "live-coverage-validation.json": {
+    "bytes": 287,
+    "sha256": "48f48a2f6f13a24fbe4ef1192834d20daed3e7760da1aa29ec01960453967e9b"
+  },
+  "live-validation.json": {
+    "bytes": 9656,
+    "sha256": "70cf40536ce6c5f1dfd94d1c0169925d045125ef1a6ece6d6a6ac69704a002cf"
+  },
+  "live_boundaries.py": {
+    "bytes": 1293,
+    "sha256": "a966609bd07dead79c3d5956e0a35d5f0376c4865468e5f29aa9dc8b6895987e"
+  },
+  "live_check.py": {
+    "bytes": 2724,
+    "sha256": "85944917ec7e30d30ba0c5be6b0ed81cbdb1e445ca700b1ed73a517986ff2b0e"
+  },
+  "live_coverage_check.py": {
+    "bytes": 1209,
+    "sha256": "7682140ffc615dea7d692fe547904961abb0ed8c788c7c12f1cbf4ffd387bd69"
+  },
+  "point-mapping-benchmark.json": {
+    "bytes": 147,
+    "sha256": "341a8e2b5b22a349c70913f17187ebc011ef3488dc1cd3e751d5f389ec3fcaea"
+  },
+  "quality-observability.json": {
+    "bytes": 602,
+    "sha256": "9908474bed263db26ea802c3d64bed6312957e66de64190b83ab31bdb20b409f"
+  },
+  "scale-parser-validation.json": {
+    "bytes": 479,
+    "sha256": "f0db34da7f8d1bc6f858851361c06b1a841fd67e94f8095ef424df63b6074be7"
+  },
+  "scale_parser_check.py": {
+    "bytes": 1817,
+    "sha256": "1446347c8dafc66e0423e62e52ded0d080f50ce736560f85d2e3c6cfe2cc521c"
+  },
+  "second-worker-validation.json": {
+    "bytes": 1288,
+    "sha256": "01807a3939e8320c97e124e97801d0ebc8a70b3a352bd8f7f97e348178ad1bba"
+  },
+  "validation-summary.json": {
+    "bytes": 1468,
+    "sha256": "cd84a19f8b096f6abc799667518b3cb0385b81a4f0084c3e51ad95d07bbfb04a"
+  }
+}

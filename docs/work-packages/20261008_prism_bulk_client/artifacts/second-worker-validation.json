@@ -1,0 +1,35 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "cache_hits": 1,
+  "rows": 366,
+  "provenance": [
+    {
+      "attempt": "e13bf86f37254a48940cc60780e8aaba",
+      "cell": "r412c1022",
+      "data_sha256": "43fc78206a1cc25654fadac1734fb64f7f72480309b03ad003f1db6de9fe7749",
+      "end": "2020-12-31",
+      "freshness": "release_manifest_unchanged",
+      "grid": "us-800m-dc0537137fab7857",
+      "manifest_sha256": "0f2954d4f293ec3b5e036d130b79d8d57511634f2025d5a0ec95d3e080b3a234",
+      "provider_day": "24 hours ending 12:00 UTC",
+      "raw_sha256": "03e02bb7c8e54d93d2a0d0bc1c27dce0253f357a1de74704156aa5606d0b74bd",
+      "sampling": "nearest_native_cell",
+      "schema": 1,
+      "semantic_sha256": "c51a0941f4b940678fca85e58e84fc0f998547d92e54475a1c706fe2f8c59d86",
+      "start": "2020-01-01",
+      "units": {
+        "ppt": "mm",
+        "soltotal": "MJ/m2/day",
+        "tdmean": "degC",
+        "tmax": "degC",
+        "tmin": "degC"
+      },
+      "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+      "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/e13bf86f37254a48940cc60780e8aaba",
+      "freshness_check_attempt": "085ff5a89e0943ae90f9ce63469f7211",
+      "checked_utc": "2026-10-08T21:51:36.418330+00:00",
+      "cache_hit": true
+    }
+  ]
+}

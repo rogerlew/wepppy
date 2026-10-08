@@ -1,0 +1,7 @@
+{
+  "attempts": 17,
+  "sha256": "f0d61a7b4a176ce2966682e0e854919b88524a6b661365a6f08fb8766ab32736",
+  "bytes": 218177,
+  "source": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+  "contains": "Worker-generated attempt metadata, HTTP evidence, raw CSV, parsed tables, failed attempt and freshness checks; coordination locks excluded."
+}

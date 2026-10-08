@@ -332,6 +332,7 @@ UID=$(id -u)
 GID=$(id -g)
 WC1_DIR=/wc1
 GEODATA_DIR=/wc1/geodata
+PRISM_CACHE_DIR=/wc1/cache/prism
 CADDY_FILE=./caddy/Caddyfile
 EXTERNAL_HOST=wc.bearhive.duckdns.org
 EXTERNAL_HOST_DESCRIPTION=forest.local
@@ -371,6 +372,15 @@ its browser-facing protected routes; its MCP signing secret remains separate.
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
 ## wctl (weppcloud control)
+The historic PRISM bulk client uses `PRISM_CACHE_DIR` (default
+`/wc1/cache/prism`) as a persistent **container-side** cache path. Set an override
+in `docker/.env`; it must resolve inside an existing writable bind mount shared
+by the workers that should reuse data. `.env` does not add a bind mount or change
+running containers. Apply it during the normal service recreation workflow.
+No root-owned cache provisioning or permission changes are required; the client
+creates its directories as the service user. See the [PRISM cache contract](../docs/dev-notes/prism-800m-client-design.md#implemented-bulk-api-and-docker-configuration)
+for the API, source provenance, freshness failures and recovery.
+
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
 The Docker Compose v2 plugin is an expected prerequisite for Compose-backed

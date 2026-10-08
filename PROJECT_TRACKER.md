@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Completed (code/local): [Historic PRISM bulk client](docs/work-packages/20261008_prism_bulk_client/package.md) — native-cell extraction and cache, configured through Docker `.env`.
+
 Completed (research): [PRISM-localized stochastic dewpoint](docs/work-packages/20261008_prism_stochastic_dewpoint/package.md) — 180 validated cases; forest precipitation now 90–102% of GridMET. Clipping improves seasonal RMSE in 36/36 comparisons, annual ET bias in only 6/36. Production unchanged.
 
 Completed (research): [Stochastic CLIGEN dewpoint](docs/work-packages/20261008_stochastic_dewpoint/package.md)

@@ -1,0 +1,194 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "checks": [
+    {
+      "start": "2019-12-31",
+      "end": "2020-01-02",
+      "rows": 3,
+      "partitions": 2,
+      "provenance": [
+        {
+          "schema": 1,
+          "grid": "us-800m-dc0537137fab7857",
+          "start": "2019-12-31",
+          "end": "2019-12-31",
+          "attempt": "99841e302aaf49ebb26cd1fe2f42e7ab",
+          "manifest_sha256": "cf2f6c729db36d07ee9b1f0d0ad4cf05a8295335a3a89fb0c338a6988333a2e6",
+          "raw_sha256": "2d77646b1c69e084e8d9e66bd7911ae9a27ad3c5fc6771599d3600e0bbb43a08",
+          "freshness": "release_manifest_unchanged",
+          "sampling": "nearest_native_cell",
+          "units": {
+            "ppt": "mm",
+            "tmin": "degC",
+            "tmax": "degC",
+            "tdmean": "degC",
+            "soltotal": "MJ/m2/day"
+          },
+          "provider_day": "24 hours ending 12:00 UTC",
+          "cell": "r412c1022",
+          "data_sha256": "07644f6f5704553b7c3f328d87c799946589744ef192a4a717b63a0e63ba23aa",
+          "semantic_sha256": "1c11d5968252d6dca0db82c86f9ea109cc29056e380b6de2a00f4871aaf989b4",
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/99841e302aaf49ebb26cd1fe2f42e7ab",
+          "freshness_check_attempt": "99841e302aaf49ebb26cd1fe2f42e7ab",
+          "checked_utc": "2026-10-08T21:50:47.156158+00:00",
+          "cache_hit": false
+        },
+        {
+          "schema": 1,
+          "grid": "us-800m-dc0537137fab7857",
+          "start": "2020-01-01",
+          "end": "2020-01-02",
+          "attempt": "088489e14f364b3b83ae657b9303186d",
+          "manifest_sha256": "13c6e3d509c779c92bbe27e90e6cd035efed38572f58567fed68669c8e5d383e",
+          "raw_sha256": "9b327b3239af20d166f0b2851cf1c10c3f7299c43abce9e51246098c30424752",
+          "freshness": "release_manifest_unchanged",
+          "sampling": "nearest_native_cell",
+          "units": {
+            "ppt": "mm",
+            "tmin": "degC",
+            "tmax": "degC",
+            "tdmean": "degC",
+            "soltotal": "MJ/m2/day"
+          },
+          "provider_day": "24 hours ending 12:00 UTC",
+          "cell": "r412c1022",
+          "data_sha256": "90b04b45ae939f001c59cee7332deeff7547a354d5169a32a7ae3719ddce7c18",
+          "semantic_sha256": "fcac814e064c063dbbc5f68abbf2c0f7005d2ce543c186b6a1e309e0f108d141",
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/088489e14f364b3b83ae657b9303186d",
+          "freshness_check_attempt": "088489e14f364b3b83ae657b9303186d",
+          "checked_utc": "2026-10-08T21:50:55.582770+00:00",
+          "cache_hit": false
+        }
+      ],
+      "warm_provenance": [
+        {
+          "attempt": "99841e302aaf49ebb26cd1fe2f42e7ab",
+          "cell": "r412c1022",
+          "data_sha256": "07644f6f5704553b7c3f328d87c799946589744ef192a4a717b63a0e63ba23aa",
+          "end": "2019-12-31",
+          "freshness": "release_manifest_unchanged",
+          "grid": "us-800m-dc0537137fab7857",
+          "manifest_sha256": "cf2f6c729db36d07ee9b1f0d0ad4cf05a8295335a3a89fb0c338a6988333a2e6",
+          "provider_day": "24 hours ending 12:00 UTC",
+          "raw_sha256": "2d77646b1c69e084e8d9e66bd7911ae9a27ad3c5fc6771599d3600e0bbb43a08",
+          "sampling": "nearest_native_cell",
+          "schema": 1,
+          "semantic_sha256": "1c11d5968252d6dca0db82c86f9ea109cc29056e380b6de2a00f4871aaf989b4",
+          "start": "2019-12-31",
+          "units": {
+            "ppt": "mm",
+            "soltotal": "MJ/m2/day",
+            "tdmean": "degC",
+            "tmax": "degC",
+            "tmin": "degC"
+          },
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/99841e302aaf49ebb26cd1fe2f42e7ab",
+          "freshness_check_attempt": "511bb95b2b9e4810b7aaf6d7536dc8d0",
+          "checked_utc": "2026-10-08T21:50:56.114931+00:00",
+          "cache_hit": true
+        },
+        {
+          "attempt": "088489e14f364b3b83ae657b9303186d",
+          "cell": "r412c1022",
+          "data_sha256": "90b04b45ae939f001c59cee7332deeff7547a354d5169a32a7ae3719ddce7c18",
+          "end": "2020-01-02",
+          "freshness": "release_manifest_unchanged",
+          "grid": "us-800m-dc0537137fab7857",
+          "manifest_sha256": "13c6e3d509c779c92bbe27e90e6cd035efed38572f58567fed68669c8e5d383e",
+          "provider_day": "24 hours ending 12:00 UTC",
+          "raw_sha256": "9b327b3239af20d166f0b2851cf1c10c3f7299c43abce9e51246098c30424752",
+          "sampling": "nearest_native_cell",
+          "schema": 1,
+          "semantic_sha256": "fcac814e064c063dbbc5f68abbf2c0f7005d2ce543c186b6a1e309e0f108d141",
+          "start": "2020-01-01",
+          "units": {
+            "ppt": "mm",
+            "soltotal": "MJ/m2/day",
+            "tdmean": "degC",
+            "tmax": "degC",
+            "tmin": "degC"
+          },
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/088489e14f364b3b83ae657b9303186d",
+          "freshness_check_attempt": "d3a0bbda60304bcda199114bc348349d",
+          "checked_utc": "2026-10-08T21:50:56.651145+00:00",
+          "cache_hit": true
+        }
+      ]
+    },
+    {
+      "start": "2026-10-01",
+      "end": "2026-10-07",
+      "rows": 7,
+      "partitions": 1,
+      "provenance": [
+        {
+          "schema": 1,
+          "grid": "us-800m-dc0537137fab7857",
+          "start": "2026-10-01",
+          "end": "2026-10-07",
+          "attempt": "401a48ab863a42b285d552a35e164840",
+          "manifest_sha256": "d00bbc1b396d1e9a733be3ba019dfcd8489cc8ed92c17e7ed7d9ce53afc13121",
+          "raw_sha256": "e01f838a4386b29804baff00cbdd9d5c1b60a5d9a67cc5ffd02e87a2d615ccb1",
+          "freshness": "release_manifest_unchanged",
+          "sampling": "nearest_native_cell",
+          "units": {
+            "ppt": "mm",
+            "tmin": "degC",
+            "tmax": "degC",
+            "tdmean": "degC",
+            "soltotal": "MJ/m2/day"
+          },
+          "provider_day": "24 hours ending 12:00 UTC",
+          "cell": "r412c1022",
+          "data_sha256": "2553173f425883e9a2c72212afcfbd1878b006afde49c452cd4837dde6160992",
+          "semantic_sha256": "44ce881e3bbe5eab3c00f9d67fb9c51015f28e6d0cb134ece9bb040a91216253",
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/401a48ab863a42b285d552a35e164840",
+          "freshness_check_attempt": "401a48ab863a42b285d552a35e164840",
+          "checked_utc": "2026-10-08T21:51:05.185466+00:00",
+          "cache_hit": false
+        }
+      ],
+      "warm_provenance": [
+        {
+          "attempt": "401a48ab863a42b285d552a35e164840",
+          "cell": "r412c1022",
+          "data_sha256": "2553173f425883e9a2c72212afcfbd1878b006afde49c452cd4837dde6160992",
+          "end": "2026-10-07",
+          "freshness": "release_manifest_unchanged",
+          "grid": "us-800m-dc0537137fab7857",
+          "manifest_sha256": "d00bbc1b396d1e9a733be3ba019dfcd8489cc8ed92c17e7ed7d9ce53afc13121",
+          "provider_day": "24 hours ending 12:00 UTC",
+          "raw_sha256": "e01f838a4386b29804baff00cbdd9d5c1b60a5d9a67cc5ffd02e87a2d615ccb1",
+          "sampling": "nearest_native_cell",
+          "schema": 1,
+          "semantic_sha256": "44ce881e3bbe5eab3c00f9d67fb9c51015f28e6d0cb134ece9bb040a91216253",
+          "start": "2026-10-01",
+          "units": {
+            "ppt": "mm",
+            "soltotal": "MJ/m2/day",
+            "tdmean": "degC",
+            "tmax": "degC",
+            "tmin": "degC"
+          },
+          "cache_root": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857",
+          "source_directory": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/401a48ab863a42b285d552a35e164840",
+          "freshness_check_attempt": "62f356422d7c40e29cacba030d2862bc",
+          "checked_utc": "2026-10-08T21:51:06.727983+00:00",
+          "cache_hit": true
+        }
+      ]
+    }
+  ],
+  "source_hashes": {
+    "wepppy/climates/prism/bulk_client.py": "2728e31c967034da322fa861ca7207a5a134bdbc23e768506aea1d53b54ed223",
+    "wepppy/climates/prism/_bulk_transport.py": "3a4497a53adf1f222af6e9b0efa8c184588033bb3a8caec75c9c564e18bc48b7",
+    "wepppy/climates/prism/_bulk_cache.py": "34b357867e7f0679ac1ce859fce5d53022e951a53964f5753e6f080292dbf8a5",
+    "wepppy/climates/prism/_bulk_protocol.py": "ab6bbc8629ba9fb2ef58a2d77bab329d74eb6e5607dcce488225115d2c9a0744"
+  }
+}

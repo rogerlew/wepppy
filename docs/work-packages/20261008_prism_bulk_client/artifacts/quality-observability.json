@@ -1,0 +1,33 @@
+{
+  "generated_at_utc": "2026-10-08T21:54:05Z",
+  "mode": "observe-only",
+  "base_ref": "origin/master",
+  "thresholds": {
+    "python_file_sloc": {
+      "yellow": 650,
+      "red": 1200
+    },
+    "python_function_len": {
+      "yellow": 80,
+      "red": 150
+    },
+    "python_cc": {
+      "yellow": 15,
+      "red": 30
+    },
+    "js_file_sloc": {
+      "yellow": 1500,
+      "red": 2500
+    },
+    "js_cc": {
+      "yellow": 15,
+      "red": 30
+    }
+  },
+  "tooling": {
+    "radon_available": true,
+    "eslint_available": true,
+    "python_version": "Python 3.14.6"
+  },
+  "changed_files": []
+}

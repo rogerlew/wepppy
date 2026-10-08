@@ -1,8 +1,9 @@
 # PRISM 800 m historical client design
 
-Status: accepted scope and cell-identity requirements; proposed freshness and
-validation design. Bulk feasibility evaluated on 2026-10-08; production client,
-cache, climate catalog, and WEPP integration are not implemented by this study.
+Status: bulk client/cache implemented as a separate callable API; validation is
+tracked in the [implementation package](../work-packages/20261008_prism_bulk_client/package.md).
+Climate catalog and WEPP integration remain separate work. The 2026-10-08
+investigation remains immutable feasibility evidence.
 Evidence: [bulk extraction investigation](../investigations/20261008_prism_800m_bulk/findings.md).
 
 ## Accepted scope and cell identity
@@ -28,7 +29,7 @@ not establish data coverage; masked cells must produce an explicit coverage
 failure. The study's controlled coordinates used native geographic axes and
 did not evaluate datum transformations near cell boundaries.
 
-## Acquisition and cache proposal
+## Acquisition and cache contract
 
 Use the Explorer multi-point flow: POST `pp/daily_timeseries_mp`, retain its
 ticket, poll `pp/checkup`, and download the returned CSV. Submit no more than
@@ -54,7 +55,7 @@ CLIGEN disaggregation remain separate integration decisions. Existing daily
 PRISM and Daymet/GridMET methods must retain their current identities and
 behavior; `ClimateMode.ObservedPRISM` currently routes to Daymet.
 
-## Freshness proposal
+## Freshness contract
 
 Use the documented range endpoint once per variable/date partition:
 
@@ -72,8 +73,8 @@ retain the attempt but do not publish it as verified current; repeat within a
 bounded attempt policy. On reuse, a changed manifest makes the affected
 partition stale. Missing records, malformed responses, API failures, or unknown
 versions mean freshness is unknown, not current. In particular, HTTP 200 may
-contain a plain-text error instead of JSON. A refresh cadence for stable history
-versus provisional data still requires an explicit operational decision.
+contain a plain-text error instead of JSON. The client rechecks release metadata on every retrieval, including cache hits;
+there is no stability-based TTL or stale-on-error behavior.
 
 This is conservative invalidation, not proof that the bulk backend served the
 advertised grid revision. Bulk CSVs expose no per-variable/day revision IDs, and
@@ -143,3 +144,87 @@ Before production wiring, add an active ExecPlan, the relevant climate/UI
 contracts and parameterization ADR, cache/concurrency validation, and artifact
 readback through PRN, CLI, and generated WEPP inputs. This investigation changes
 no run schemas, defaults, numeric formulas, or production behavior.
+
+
+## Implemented bulk API and Docker configuration
+
+Set `PRISM_CACHE_DIR=/wc1/cache/prism` in `docker/.env`. The committed default is
+in `docker/defaults.env`; dev, production and worker Compose environment anchors
+pass the value explicitly. This is a **container path**, normally inside the
+existing persistent `/wc1` mount. A custom path must already be mounted and
+writable by the service UID/GID. Do not put it in a container's ephemeral `/tmp`.
+Changing `.env` takes effect for services on their next normal recreation; it
+does not alter an already-running process. The Python constructor accepts an
+explicit absolute `cache_dir` for scripts/tests, otherwise it requires the env
+variable. Unconfigured non-Docker callers fail clearly.
+
+    from wepppy.climates.prism.bulk_client import PrismBulkClient
+    result = PrismBulkClient().retrieve(
+        {"hill_27": (-118.658723, 34.055365)}, "2020-01-01", "2020-12-31"
+    )
+    cell = result.locations["hill_27"]["cell"]
+    frame = result.frames[cell]
+
+`locations` maps caller identifiers to original coordinates, source CRS, native
+center and integer cell identity. Input CRS defaults to EPSG:4326; EPSG:4269 is
+also accepted explicitly. Exact internal grid boundaries go east/south, with
+1e-9-pixel tolerance only for floating-point boundary arithmetic. North/west
+outer edges are included; south/east outer edges are excluded.
+
+`frames` contains one date-indexed Pandas table per unique cell, with ordered
+columns `ppt`, `tmin`, `tmax`, `tdmean`, `soltotal`. Units are mm, °C, °C, °C,
+MJ/m²/day. These are raw observations: dewpoint below Tmin is retained. No
+wind, radiation conversion, model input generation or weather repair occurs.
+The interval is inclusive and split at calendar-year boundaries. Exact partial
+year intervals have independent cache keys; overlapping partial intervals are
+not merged. Multiple original points sharing a cell receive one shared series.
+
+`provenance` lists each cell/partition's immutable source directory, grid/schema,
+dates, source and normalized-value hashes, manifest hash, units, day boundary,
+cache-hit flag, and the retained freshness-check attempt. Its freshness label
+`release_manifest_unchanged` describes the evidence; it does not claim atomic
+bulk/grid revision identity. Caller-owned result tables can be modified without
+changing persisted cache records.
+
+## Cache files, failure and recovery
+
+Under `PRISM_CACHE_DIR/v1/<grid-id>/`, `attempts/<uuid>/` contains status, requested
+cells/dates, submit/poll/download evidence, before/after release responses,
+normalized manifest, original CSV bytes losslessly compressed, parsed per-cell
+parquet, and result references. Warm cache checks retain their own attempts.
+`entries/<start>_<end>/<cell>.json` points to a successful immutable source
+attempt. `locks/<start>_<end>.lock` is coordination only. Per-interval POSIX locks
+serialize concurrent readers/writers in cooperating processes. Batches are
+serialized within a client call; separate date intervals can proceed independently.
+The backing filesystem must support shared POSIX advisory locks and atomic rename.
+
+`raw_sha256` hashes the retained `bulk.csv.gz` artifact; the download receipt
+records the uncompressed response checksum. `manifest_sha256` hashes the
+normalized revision manifest. `semantic_sha256` hashes the canonical date/value
+table, independently of provider CSV metadata and other cells in the same batch.
+
+All candidate cells are parsed, semantically checked and read back from parquet
+before entry publication. Each entry reference is atomically replaced. If an
+operation fails partway through publishing several references, any already
+published reference names fully validated data; retry reuses those cells and
+fetches remaining ones. Useful failed/interrupted attempt data and temporary
+reference files remain visible. Failed requests never return a successful result
+or automatically serve old data. Network/protocol/coverage/freshness errors and
+lock timeouts are explicit. Cache corruption fails instead of being silently
+repaired; operators can inspect and move the affected entry reference aside to
+force a later fresh acquisition while retaining evidence. No automatic deletion
+or retention policy is introduced.
+
+Requests use connect/read timeouts, response size bounds, a bounded polling loop
+and a job deadline. A changed before/after manifest permits one retry. Unknown
+freshness is an error. Download paths must remain provider-relative under the
+Explorer temporary directory. A cache cannot prove source scientific accuracy
+or eliminate upstream backend lag.
+
+This shared source cache is not a run artifact or a substitute for run archives.
+Before future WEPP wiring, the consumer must snapshot raw/derived forcing and
+provenance under the normal climate directory and validate downstream CLI/model
+readback and archive restoration. Comparable existing layouts are GridMET/Daymet
+source parquet in `climate/` and visible attempt directories. This client-only
+slice does not create project records, so browser/archive integration is not
+claimed. See [ADR-0081](../adrs/ADR-0081-prism-native-cell-bulk-cache.md).

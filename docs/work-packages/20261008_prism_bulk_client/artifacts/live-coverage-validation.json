@@ -1,0 +1,8 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "error": "PRISM cell inventory mismatch; missing=['r1192c14'], unexpected=[]",
+  "failed_attempt": "/wc1/cache/prism/v1/us-800m-dc0537137fab7857/attempts/fbdf91e72ee14917961a18deed376fff",
+  "raw_payload_retained": true,
+  "no_entries_published": true
+}

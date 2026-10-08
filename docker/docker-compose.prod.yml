@@ -16,6 +16,7 @@ x-wepppy-image: &wepppy-image
 
 x-wepppy-env: &wepppy-env
   PYTHONUNBUFFERED: "1"
+  PRISM_CACHE_DIR: ${PRISM_CACHE_DIR:-/wc1/cache/prism}
   MPLCONFIGDIR: /tmp/matplotlib
   REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
   REDIS_HOST: ${REDIS_HOST:-redis}

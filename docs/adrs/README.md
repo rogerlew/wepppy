@@ -98,3 +98,5 @@ Each ADR should normally include:
 - `ADR-0062`: [Local Staley Rainfall and Results](ADR-0062-staley-local-rainfall-results.md) (Accepted; explicit R02 owner approval)
 
 - `ADR-0071`: [Omni thinning 30% and 50%](ADR-0071-omni-thinning-30-50.md) (Accepted, 2026-09-20)
+
+- `ADR-0081`: [Historic PRISM Native-Cell Bulk Cache](ADR-0081-prism-native-cell-bulk-cache.md) (Accepted for standalone client delivery, 2026-10-08)

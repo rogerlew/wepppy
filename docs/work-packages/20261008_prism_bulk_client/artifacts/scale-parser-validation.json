@@ -1,0 +1,10 @@
+{
+  "cells": 500,
+  "rows": 183000,
+  "production_parse_seconds": 2.3525754229922313,
+  "previous_boolean_scan_seconds": 8.22777012300503,
+  "all_values_equal": true,
+  "source_sha256": "2e759c8e3056bc929b1d5529a4cb99a9435c12d261919616ca8eb3b68a9af71c",
+  "adaptation": "Native cell identifiers replace original batch-local names only; all date/numeric tokens unchanged.",
+  "scope": "Offline parser scale/parity check, not a new upstream timing or live cache freshness claim"
+}
