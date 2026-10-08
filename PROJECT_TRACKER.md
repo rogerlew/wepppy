@@ -2,10 +2,12 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-08
-**Active Packages**: 41
+**Active Packages**: 42
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active: [Historic PRISM WEPP integration](docs/work-packages/20261008_prism_wepp_integration/package.md) — menu, both spatial methods, forest end-to-end acceptance.
 
 Completed (code/local): [Historic PRISM bulk client](docs/work-packages/20261008_prism_bulk_client/package.md) — native-cell extraction and cache, configured through Docker `.env`.
 

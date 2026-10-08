@@ -536,14 +536,14 @@ The current schema-v3 Builder matrix is:
 
 | Stable profile | Runtime token | DEM | Soil | Land cover | Climate | Station DB | Data defaults |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `continental-us` | `us` | NED1 2024; NED1/3 2022 | SSURGO/gNATSGO 2025 | annual NLCD and NLCD Ever Forest, 1985-2024; eMapR vote, 1984-2017 | Vanilla CLIGEN; PRISM stochastic; observed Daymet; observed gridMET; DEP NEXRAD Breakpoint; Future CMIP5; User-Defined Climate | Legacy; 2015; GHCN | NED1 2024; SSURGO/gNATSGO 2025; NLCD 2019; Vanilla CLIGEN; 2015 |
+| `continental-us` | `us` | NED1 2024; NED1/3 2022 | SSURGO/gNATSGO 2025 | annual NLCD and NLCD Ever Forest, 1985-2024; eMapR vote, 1984-2017 | Vanilla CLIGEN; PRISM stochastic; observed Daymet; observed gridMET; observed PRISM 800 m; DEP NEXRAD Breakpoint; Future CMIP5; User-Defined Climate | Legacy; 2015; GHCN | NED1 2024; SSURGO/gNATSGO 2025; NLCD 2019; Vanilla CLIGEN; 2015 |
 | `europe` | `eu` | EUDEM v1.1 | ESDAC | CORINE 1990, 2000, 2006, 2012, 2018 | Vanilla CLIGEN; E-OBS Modified (Europe); User-Defined Climate | GHCN | EUDEM v1.1; ESDAC; CORINE 2018; Vanilla CLIGEN; GHCN |
 | `canada` | `canada` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; observed Daymet; User-Defined Climate | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
 | `australia` | `au` | Australia SRTM 1 second | ASRIS | Australia 2010-2011 | Vanilla CLIGEN; AGDC; User-Defined Climate | GHCN | SRTM; ASRIS; Australia 2010-2011; Vanilla CLIGEN; GHCN |
 | `global-earth` | `earth` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; User-Defined Climate | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
 
 Stable IDs and exact runtime mappings for this matrix are domain-owned and
-recorded in ADR-0047. Canada MUST use only the listed global terrain, soil, and
+recorded in ADR-0047, with the additive historic PRISM amendment below governed by ADR-0082. Canada MUST use only the listed global terrain, soil, and
 land-cover datasets; Canada CDEM and Canada Land Cover 2020 remain outside this
 Builder profile. Vanilla CLIGEN MUST be available for every exposed locale.
 Vanilla CLIGEN is the climate-mode default for every exposed locale. E-OBS,
@@ -2390,3 +2390,9 @@ the selected single source. Existing authorization, response, persistence and
 controller invariants remain in force. This explicit exception governs where
 earlier unconditional Disturbed statements conflict; no other defaults change.
 Implementation conformance is pending the SUDI-01 checkpoint and validation.
+
+## Historic PRISM CONUS capability amendment (2026-10-08)
+
+PRISM-800M-INTEGRATION adds `observed_prism_800m` (ClimateMode16) to the current live Continental-US climate envelope, with station methods auto/distance/multi_factor, default auto, spatial single/multiple/interpolated, default single. [Historic PRISM climate contract](prism-historic-climate-contract.md) governs its full-year bounds and nearest-cell semantics. Other locale envelopes, Vanilla defaults, historical v2 compatibility graph and stored v2/v3 graphs remain unchanged. Previously stored graphs without this dataset do not gain it silently; use the existing eligible explicit refresh workflow. This bounded amendment does not execute or close unrelated Project Config initiatives.
+
+Append the new structure to reader authority before changing live locale writers. Prior CONUS identity `3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf` becomes `2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3`. Preserve all prior entries exactly. A standalone reader-floor commit must recognize both identities and historical graphs on forest before menu/Builder writers are exposed. Retain exact-candidate direct fixtures, live graph readback, and reader-floor reopening of the new graph without run-byte changes. Rollback after new graph writes retains this reader floor. Implementation conformance and forest evidence pending.

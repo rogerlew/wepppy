@@ -185,3 +185,7 @@ the only source or diagnostic evidence from a failed calculation. Hidden
 coordination copies are redundant, never the only inspectable work product.
 Scientific source units, generated filenames, catalog/timestamp ordering and
 the stale-write rejection contract are unchanged.
+
+## Historic PRISM acquisition source preservation
+
+Historic800m PRISM follows [the PRISM integration contract](prism-historic-climate-contract.md). Project-owned raw source parquet/CSV and manifests remain distinct from derived PRN/CLI and wepp_cli.parquet; unit conversion and dewpoint flooring cannot mutate source data. Retained visible prism800m-build attempts survive rebuild and archive/restore; provenance uses project-relative paths and is independent of the shared cache. Multiple stage failure follows the existing centroid-then-revision semantics above. Implementation conformance pending the PRISM integration package.
