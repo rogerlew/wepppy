@@ -1,0 +1,814 @@
+{
+  "totalwatsed_m3s": {
+    "peak_count": 329,
+    "small_count": 165,
+    "small_threshold_m3s": 3.3311228806046578,
+    "selection": "Baseline maximum plus three non-overlapping lower-half baseline local peaks ranked by largest relative departure of either comparison within \u00b13 days; distance 7 days, prominence 0.1 m\u00b3/s.",
+    "dates": [
+      "1990-04-27",
+      "1985-04-11",
+      "1984-05-25",
+      "1997-03-27"
+    ],
+    "events": [
+      {
+        "date": "1990-04-27",
+        "cases": {
+          "legacy10": {
+            "peak": 28.770088780956932,
+            "first_peak": "1990-04-27 00:00:00",
+            "volume_m3": 3942481.275131466,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 6.518652902003085,
+              "comparison_mean": 6.518652902003085,
+              "positive_reference_n": 7,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 28.77008878095684,
+            "first_peak": "1990-04-27 00:00:00",
+            "volume_m3": 3942481.2751314114,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 0.9999999999999862,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 0.9999999999999862,
+              "bias_percent": -1.3766765505351941e-12,
+              "RMSE": 9.196323665930685e-14,
+              "MAE": 9.167270117619149e-14,
+              "max_abs_difference": 1.0258460747536446e-13,
+              "reference_mean": 6.518652902003085,
+              "comparison_mean": 6.518652902002995,
+              "positive_reference_n": 7,
+              "percent_change_min": -4.893164637610718e-12,
+              "percent_change_max": -3.210645485041171e-13,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 9.237055564881302e-14,
+                "0.9": 1.0045297926808416e-13,
+                "0.95": 1.0151879337172431e-13,
+                "0.99": 1.0237144465463643e-13,
+                "1.0": 1.0258460747536446e-13
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 28.59461272562011,
+            "first_peak": "1990-04-27 00:00:00",
+            "volume_m3": 3927320.1449503554,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 0.9999468277992624,
+              "KGE2009": 0.992237923450888,
+              "R2": 0.999999884388314,
+              "r": 0.9999999421941553,
+              "alpha": 0.9932574974315359,
+              "beta": 0.9961544192291426,
+              "bias_percent": -0.3845580770857393,
+              "RMSE": 0.0663237147811204,
+              "MAE": 0.025068009558710042,
+              "max_abs_difference": 0.17547605533682287,
+              "reference_mean": 6.518652902003085,
+              "comparison_mean": 6.4935848957512485,
+              "positive_reference_n": 7,
+              "percent_change_min": -0.60992531748102,
+              "percent_change_max": 4.432543780683819e-07,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 1.9095836023552692e-14,
+                "0.9": 0.07019042907916356,
+                "0.95": 0.12283324220799306,
+                "0.99": 0.16494749271105685,
+                "1.0": 0.17547605533682287
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1985-04-11",
+        "cases": {
+          "legacy10": {
+            "peak": 2.8398133853356433,
+            "first_peak": "1985-04-11 00:00:00",
+            "volume_m3": 1623847.7937122167,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 0.9999999999999999,
+              "R2": 0.9999999999999998,
+              "r": 0.9999999999999999,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 2.6849335213495644,
+              "comparison_mean": 2.6849335213495644,
+              "positive_reference_n": 7,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 2.839813385335454,
+            "first_peak": "1985-04-11 00:00:00",
+            "volume_m3": 1623847.7937121016,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 0.9999999999999292,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 0.9999999999999998,
+              "beta": 0.9999999999999292,
+              "bias_percent": -7.083222897108499e-12,
+              "RMSE": 1.9065027378779078e-13,
+              "MAE": 1.9000674050013392e-13,
+              "max_abs_difference": 2.1449508835758024e-13,
+              "reference_mean": 2.6849335213495644,
+              "comparison_mean": 2.6849335213493744,
+              "positive_reference_n": 7,
+              "percent_change_min": -8.561701515917003e-12,
+              "percent_change_max": -6.439878257661783e-12,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 1.8918200339612667e-13,
+                "0.9": 2.0889956431346947e-13,
+                "0.95": 2.1169732633552484e-13,
+                "0.99": 2.1393553595316917e-13,
+                "1.0": 2.1449508835758024e-13
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 2.8398133853355443,
+            "first_peak": "1985-04-11 00:00:00",
+            "volume_m3": 1623306.7309399568,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 0.9995602305724351,
+              "KGE2009": 0.9994671980854577,
+              "R2": 0.9996230879415597,
+              "r": 0.999811526209595,
+              "alpha": 0.9996294131277231,
+              "beta": 0.9996668020399727,
+              "bias_percent": -0.03331979600272872,
+              "RMSE": 0.002366927147713374,
+              "MAE": 0.0008946143721230625,
+              "max_abs_difference": 0.006262300604257032,
+              "reference_mean": 2.6849335213495644,
+              "comparison_mean": 2.6840389069774417,
+              "positive_reference_n": 7,
+              "percent_change_min": -0.23254913475257583,
+              "percent_change_max": -3.3309715125836805e-12,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 1.0347278589506459e-13,
+                "0.9": 0.002504920241770228,
+                "0.95": 0.004383610423013624,
+                "0.99": 0.005886562568008348,
+                "1.0": 0.006262300604257032
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1984-05-25",
+        "cases": {
+          "legacy10": {
+            "peak": 3.0718772018756093,
+            "first_peak": "1984-05-25 00:00:00",
+            "volume_m3": 1580691.9151721844,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 2.6135779020704106,
+              "comparison_mean": 2.6135779020704106,
+              "positive_reference_n": 7,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 3.0718772018755844,
+            "first_peak": "1984-05-25 00:00:00",
+            "volume_m3": 1580691.9151721692,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 0.999999999999989,
+              "R2": 0.9999999999999996,
+              "r": 0.9999999999999998,
+              "alpha": 0.9999999999999944,
+              "beta": 0.9999999999999905,
+              "bias_percent": -9.547918011776346e-13,
+              "RMSE": 2.5240077816311952e-14,
+              "MAE": 2.512276101437497e-14,
+              "max_abs_difference": 2.886579864025407e-14,
+              "reference_mean": 2.6135779020704106,
+              "comparison_mean": 2.6135779020703858,
+              "positive_reference_n": 7,
+              "percent_change_min": -1.0609805551531695e-12,
+              "percent_change_max": -8.095699833450092e-13,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 2.4868995751603507e-14,
+                "0.9": 2.806643806252396e-14,
+                "0.95": 2.846611835138901e-14,
+                "0.99": 2.8785862582481056e-14,
+                "1.0": 2.886579864025407e-14
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 3.0718772018756093,
+            "first_peak": "1984-05-25 00:00:00",
+            "volume_m3": 1580139.3219705846,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 0.9999201779700694,
+              "KGE2009": 0.9963118686613605,
+              "R2": 0.9999448587676697,
+              "r": 0.9999724290037549,
+              "alpha": 0.996328577954717,
+              "beta": 0.9996504105598973,
+              "bias_percent": -0.034958944010266,
+              "RMSE": 0.0024173680350835364,
+              "MAE": 0.0009136792354497,
+              "max_abs_difference": 0.0063957546481479,
+              "reference_mean": 2.6135779020704106,
+              "comparison_mean": 2.6126642228349612,
+              "positive_reference_n": 7,
+              "percent_change_min": -0.21978898727429946,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0025583018592591623,
+                "0.95": 0.004477028253703525,
+                "0.99": 0.006012009369259023,
+                "1.0": 0.0063957546481479
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1997-03-27",
+        "cases": {
+          "legacy10": {
+            "peak": 3.319694791371998,
+            "first_peak": "1997-03-27 00:00:00",
+            "volume_m3": 1707632.6066195173,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 2.82346661147407,
+              "comparison_mean": 2.82346661147407,
+              "positive_reference_n": 7,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 3.319694791372025,
+            "first_peak": "1997-03-27 00:00:00",
+            "volume_m3": 1707632.6066195336,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 1.0,
+              "KGE2009": 0.9999999999999903,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0000000000000016,
+              "beta": 1.0000000000000095,
+              "bias_percent": 9.547918011776346e-13,
+              "RMSE": 2.691624454923505e-14,
+              "MAE": 2.6835676538082356e-14,
+              "max_abs_difference": 3.019806626980426e-14,
+              "reference_mean": 2.82346661147407,
+              "comparison_mean": 2.8234666114740965,
+              "positive_reference_n": 7,
+              "percent_change_min": 8.160220593549811e-13,
+              "percent_change_max": 1.089785127534019e-12,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 2.708944180085382e-14,
+                "0.9": 2.9398705692074146e-14,
+                "0.95": 2.97983859809392e-14,
+                "0.99": 3.0118130212031244e-14,
+                "1.0": 3.019806626980426e-14
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 3.3196947913719286,
+            "first_peak": "1997-03-27 00:00:00",
+            "volume_m3": 1707295.716255676,
+            "metrics_vs_baseline": {
+              "n": 7,
+              "NSE": 0.9999505614419449,
+              "KGE2009": 0.9984142089672349,
+              "R2": 0.9999601625835417,
+              "r": 0.9999800810933894,
+              "alpha": 1.0015733451784345,
+              "beta": 0.9998027149619096,
+              "bias_percent": -0.01972850380903557,
+              "RMSE": 0.0014737568150230127,
+              "MAE": 0.0005570277179921693,
+              "max_abs_difference": 0.0038991940255375113,
+              "reference_mean": 2.82346661147407,
+              "comparison_mean": 2.8229095837560783,
+              "positive_reference_n": 7,
+              "percent_change_min": -0.14436373792674492,
+              "percent_change_max": -2.086876086219296e-12,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 6.927791673660977e-14,
+                "0.9": 0.0015596776102613688,
+                "0.95": 0.0027294358178994367,
+                "0.99": 0.003665242384009895,
+                "1.0": 0.0038991940255375113
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "sampled_peak_m3s": {
+    "peak_count": 346,
+    "small_count": 173,
+    "small_threshold_m3s": 4.074999999999999,
+    "selection": "Baseline maximum plus three non-overlapping lower-half baseline local peaks ranked by largest relative departure of either comparison within \u00b13 days; distance 7 days, prominence 0.1 m\u00b3/s.",
+    "dates": [
+      "1994-10-27",
+      "1990-10-21",
+      "1991-10-25",
+      "1998-09-18"
+    ],
+    "events": [
+      {
+        "date": "1994-10-27",
+        "cases": {
+          "legacy10": {
+            "peak": 50.5,
+            "first_peak": "1994-10-27 04:40:00",
+            "volume_m3": 2535315.5399999996,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 0.9999999999999998,
+              "R2": 0.9999999999999996,
+              "r": 0.9999999999999998,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 4.19198998015873,
+              "comparison_mean": 4.19198998015873,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 35.4,
+            "first_peak": "1994-10-27 06:00:00",
+            "volume_m3": 2098636.8,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 0.911213502468111,
+              "KGE2009": 0.7008470988362223,
+              "R2": 0.9677585106753699,
+              "r": 0.9837471782299403,
+              "alpha": 0.7559462536303528,
+              "beta": 0.8277615811087562,
+              "bias_percent": -17.22384188912438,
+              "RMSE": 3.1543921764748832,
+              "MAE": 0.9305993055555555,
+              "max_abs_difference": 15.700000000000003,
+              "reference_mean": 4.19198998015873,
+              "comparison_mean": 3.4699682539682537,
+              "positive_reference_n": 1008,
+              "percent_change_min": -49.794238683127574,
+              "percent_change_max": 56.190476190476204,
+              "records_above_1_percent": 618,
+              "absolute_difference_quantiles": {
+                "0.5": 0.005850000000000001,
+                "0.9": 1.830000000000007,
+                "0.95": 4.789999999999987,
+                "0.99": 15.59299999999999,
+                "1.0": 15.700000000000003
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 50.5,
+            "first_peak": "1994-10-27 04:40:00",
+            "volume_m3": 2535282.54,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 0.9999976921670021,
+              "KGE2009": 0.9998884600527025,
+              "R2": 0.9999977047195608,
+              "r": 0.9999988523591219,
+              "alpha": 1.0001107719417952,
+              "beta": 0.9999869838686828,
+              "bias_percent": -0.0013016131317211688,
+              "RMSE": 0.01608216131925111,
+              "MAE": 0.0024553571428571584,
+              "max_abs_difference": 0.20000000000000284,
+              "reference_mean": 4.19198998015873,
+              "comparison_mean": 4.191935416666667,
+              "positive_reference_n": 1008,
+              "percent_change_min": -0.8196721311475381,
+              "percent_change_max": 0.5291005291005366,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.10000000000000142,
+                "1.0": 0.20000000000000284
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1990-10-21",
+        "cases": {
+          "legacy10": {
+            "peak": 1.42,
+            "first_peak": "1990-10-21 05:20:00",
+            "volume_m3": 266286.0,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.44028769841269844,
+              "comparison_mean": 0.44028769841269844,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 3.07,
+            "first_peak": "1990-10-21 05:20:00",
+            "volume_m3": 274921.2,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 0.4442388831867833,
+              "KGE2009": 0.5508495663796513,
+              "R2": 0.759213848980511,
+              "r": 0.8713287835143007,
+              "alpha": 1.429101661599236,
+              "beta": 1.0324282913859535,
+              "bias_percent": 3.242829138595349,
+              "RMSE": 0.1712240074121784,
+              "MAE": 0.040630952380952386,
+              "max_abs_difference": 1.65,
+              "reference_mean": 0.44028769841269844,
+              "comparison_mean": 0.4545654761904762,
+              "positive_reference_n": 1008,
+              "percent_change_min": -36.40350877192982,
+              "percent_change_max": 116.19718309859155,
+              "records_above_1_percent": 322,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.07930000000000008,
+                "0.95": 0.18949999999999984,
+                "0.99": 0.997199999999998,
+                "1.0": 1.65
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 1.42,
+            "first_peak": "1990-10-21 05:20:00",
+            "volume_m3": 266286.0,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.44028769841269844,
+              "comparison_mean": 0.44028769841269844,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1991-10-25",
+        "cases": {
+          "legacy10": {
+            "peak": 0.22,
+            "first_peak": "1991-10-25 13:50:00",
+            "volume_m3": 74695.86000000002,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.12350505952380955,
+              "comparison_mean": 0.12350505952380955,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 0.293,
+            "first_peak": "1991-10-25 05:40:00",
+            "volume_m3": 84910.2,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 0.36625741469397644,
+              "KGE2009": 0.7016304015580266,
+              "R2": 0.7041425114052321,
+              "r": 0.8391319987971094,
+              "alpha": 1.2108234058104181,
+              "beta": 1.136745731289525,
+              "bias_percent": 13.674573128952506,
+              "RMSE": 0.03008379880262507,
+              "MAE": 0.016888789682539686,
+              "max_abs_difference": 0.126,
+              "reference_mean": 0.12350505952380955,
+              "comparison_mean": 0.1403938492063492,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 116.66666666666667,
+              "records_above_1_percent": 740,
+              "absolute_difference_quantiles": {
+                "0.5": 0.008,
+                "0.9": 0.04,
+                "0.95": 0.07864999999999998,
+                "0.99": 0.1148599999999999,
+                "1.0": 0.126
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 0.22,
+            "first_peak": "1991-10-25 13:50:00",
+            "volume_m3": 74695.86000000002,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.12350505952380955,
+              "comparison_mean": 0.12350505952380955,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          }
+        }
+      },
+      {
+        "date": "1998-09-18",
+        "cases": {
+          "legacy10": {
+            "peak": 2.45,
+            "first_peak": "1998-09-18 05:10:00",
+            "volume_m3": 222745.19999999998,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.3682956349206349,
+              "comparison_mean": 0.3682956349206349,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          },
+          "combined10": {
+            "peak": 4.95,
+            "first_peak": "1998-09-18 05:30:00",
+            "volume_m3": 230159.39999999997,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 0.5786420843357142,
+              "KGE2009": 0.5934451165523558,
+              "R2": 0.818593190462943,
+              "r": 0.9047613997419115,
+              "alpha": 1.3938382325127145,
+              "beta": 1.0332855657495648,
+              "bias_percent": 3.328556574956476,
+              "RMSE": 0.28961213971146643,
+              "MAE": 0.0666001984126984,
+              "max_abs_difference": 2.5100000000000002,
+              "reference_mean": 0.3682956349206349,
+              "comparison_mean": 0.3805545634920634,
+              "positive_reference_n": 1008,
+              "percent_change_min": -54.84848484848485,
+              "percent_change_max": 103.29218106995886,
+              "records_above_1_percent": 168,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.02999999999999997,
+                "0.95": 0.4547499999999996,
+                "0.99": 1.724399999999996,
+                "1.0": 2.5100000000000002
+              }
+            }
+          },
+          "legacy17": {
+            "peak": 2.45,
+            "first_peak": "1998-09-18 05:10:00",
+            "volume_m3": 222745.19999999998,
+            "metrics_vs_baseline": {
+              "n": 1008,
+              "NSE": 1.0,
+              "KGE2009": 1.0,
+              "R2": 1.0,
+              "r": 1.0,
+              "alpha": 1.0,
+              "beta": 1.0,
+              "bias_percent": 0.0,
+              "RMSE": 0.0,
+              "MAE": 0.0,
+              "max_abs_difference": 0.0,
+              "reference_mean": 0.3682956349206349,
+              "comparison_mean": 0.3682956349206349,
+              "positive_reference_n": 1008,
+              "percent_change_min": 0.0,
+              "percent_change_max": 0.0,
+              "records_above_1_percent": 0,
+              "absolute_difference_quantiles": {
+                "0.5": 0.0,
+                "0.9": 0.0,
+                "0.95": 0.0,
+                "0.99": 0.0,
+                "1.0": 0.0
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "cases": [
+    {
+      "lane": "legacy10",
+      "hillslopes": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 495.1304843425751,
+        "success": true
+      }
+    },
+    {
+      "lane": "combined10",
+      "hillslopes": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 502.60235118865967,
+        "success": true
+      }
+    },
+    {
+      "lane": "legacy17",
+      "hillslopes": 864,
+      "watershed": {
+        "run": "pw0.run",
+        "returncode": 0,
+        "seconds": 502.4060728549957,
+        "success": true
+      }
+    }
+  ],
+  "source_unchanged": true,
+  "observer_parity": true
+}

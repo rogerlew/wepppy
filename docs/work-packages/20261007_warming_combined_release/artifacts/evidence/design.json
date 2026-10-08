@@ -1,0 +1,33 @@
+{
+  "cases": [
+    [
+      "legacy10",
+      "wepp_260803",
+      0.1
+    ],
+    [
+      "combined10",
+      "wepp_261007",
+      0.1
+    ],
+    [
+      "legacy17",
+      "wepp_260803",
+      0.17
+    ]
+  ],
+  "baseline": "legacy10",
+  "provisional_screen": {
+    "abs_yield_bias_pct": 0.1,
+    "NSE": 0.999,
+    "KGE": 0.999,
+    "R2": 0.999
+  },
+  "gwstorage": 0,
+  "bfcoeff": 0.04,
+  "dscoeff": 0,
+  "period": [
+    "1980-01-01",
+    "2003-12-31"
+  ]
+}

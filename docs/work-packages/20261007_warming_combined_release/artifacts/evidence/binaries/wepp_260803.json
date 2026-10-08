@@ -1,0 +1,28 @@
+{
+  "binary_name": "wepp_260803",
+  "binary_role": "watershed",
+  "built_utc": "2026-08-03T04:41:15Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "process_mode_pass_pw0_required": true
+  },
+  "release_tag": "260803",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "f24c957e3633898e0fd4cbbea5ae08c781f29dba",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "hillslope_watchlist": "pass",
+    "host_smoke": "pass",
+    "same_build_watershed_replay": "pass"
+  },
+  "wepp_banner_version": "2020.500"
+}

@@ -12,6 +12,13 @@ Completed (code/local): [Fork option availability and readiness](docs/work-packa
 after a completed fork. Python 10,418 and frontend 924 tests pass; read-only
 wepp1 predicate replay passes all three affected destinations. Not deployed.
 
+Completed (research): [Combined WEPP release validation](docs/work-packages/20261007_warming_combined_release/package.md)
+— 2,596 executions, raw-output audits and observer parity pass. Totalwatsed
+yield is virtually unchanged, but combined-release routed daily KGE is 0.9703
+with −0.598% volume bias; the 1994 integral/ledger deficit remains 18.08%.
+Six figures and manual assessment retained. Not a routed-flow equivalence or
+release-approval claim; production unchanged.
+
 Completed: [Topanga CLIGEN seed recurrence](docs/work-packages/20261006_topanga_cligen_seed_recurrence/package.md)
 — validated pilot plus 100 random seeds on openwepp; original-date recurrence
 78% for Ksat and 0% for the 1986 cover/dense fixtures, with new flagged dates.
