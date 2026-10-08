@@ -3258,6 +3258,8 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
         runid='source"><img data-injected src=x>',
         config='cfg"><script>alert(1)</script>',
         undisturbify=undisturbify,
+        can_undisturbify=True,
+        can_skip_omni=True,
         skip_wepp_runs_output=skip_wepp_runs_output,
         skip_omni_scenarios_contrasts=skip_omni,
         rq_engine_token="<rq-token>" if authenticated else None,
@@ -3304,6 +3306,35 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
         assert "disabled" in rendered
         assert "/cap/assets/widget.js" in rendered
         assert "/cap/assets/floating.js" in rendered
+
+
+@pytest.mark.parametrize("can_undisturbify,can_skip_omni", itertools.product((False, True), repeat=2))
+def test_fork_console_disables_unavailable_options_with_explanations(
+    jinja_env, can_undisturbify, can_skip_omni,
+):
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "controls/fork_console_control.htm"
+    ).render(
+        current_user=SimpleNamespace(is_authenticated=True),
+        runid="source", config="cfg", undisturbify=True,
+        skip_omni_scenarios_contrasts=True, skip_wepp_runs_output=True,
+        can_undisturbify=can_undisturbify, can_skip_omni=can_skip_omni,
+    )
+    for field, enabled, explanation in (
+        ("undisturbify_checkbox", can_undisturbify, "No SBS map to remove."),
+        ("skip_omni_scenarios_contrasts_checkbox", can_skip_omni, "No Omni scenarios or contrasts to skip."),
+    ):
+        tag = re.search(r'<input\b[^>]*id="' + field + r'"[^>]*>', rendered).group()
+        assert bool(re.search(r"\bdisabled=", tag)) is not enabled
+        assert bool(re.search(r"\bchecked\b", tag)) is enabled
+        if not enabled:
+            assert f'aria-describedby="{field}_help"' in tag
+            assert explanation in rendered
+    assert f'data-undisturbify="{str(can_undisturbify).lower()}"' in rendered
+    assert f'data-skip-omni-scenarios-contrasts="{str(can_skip_omni).lower()}"' in rendered
+    skip_tag = re.search(r'<input\b[^>]*id="skip_wepp_runs_output_checkbox"[^>]*>', rendered).group()
+    assert "disabled" not in skip_tag
+    assert "checked" in skip_tag
 
 
 def test_archive_console_renders_exact_authorized_urls_and_escaped_identity(

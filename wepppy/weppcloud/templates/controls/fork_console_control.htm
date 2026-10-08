@@ -11,9 +11,9 @@
   <div data-fork-console-config
        data-runid="{{ runid }}"
        data-config="{{ config }}"
-       data-undisturbify="{{ 'true' if undisturbify is sameas true else 'false' }}"
+       data-undisturbify="{{ 'true' if can_undisturbify and undisturbify is sameas true else 'false' }}"
        data-skip-wepp-runs-output="{{ 'true' if skip_wepp_runs_output is sameas true else 'false' }}"
-       data-skip-omni-scenarios-contrasts="{{ 'true' if skip_omni_scenarios_contrasts is sameas true else 'false' }}"
+       data-skip-omni-scenarios-contrasts="{{ 'true' if can_skip_omni and skip_omni_scenarios_contrasts is sameas true else 'false' }}"
        data-cap-required="{{ 'true' if not current_user.is_authenticated else 'false' }}"
        data-rq-engine-token="{{ rq_engine_token | default('', true) | e }}"
        data-cap-section="fork"
@@ -50,7 +50,9 @@
       {{ ui.checkbox_field(
            'undisturbify_checkbox',
            'Undisturbify output (optional)',
-           checked=undisturbify is sameas true
+           checked=can_undisturbify and undisturbify is sameas true,
+           attrs={} if can_undisturbify else {'disabled': 'disabled'},
+           help=None if can_undisturbify else 'No SBS map to remove.'
          ) }}
       {{ ui.checkbox_field(
            'skip_wepp_runs_output_checkbox',
@@ -60,7 +62,9 @@
       {{ ui.checkbox_field(
            'skip_omni_scenarios_contrasts_checkbox',
            'Skip Omni Scenarios/Contrasts and reset controllers',
-           checked=skip_omni_scenarios_contrasts is sameas true
+           checked=can_skip_omni and skip_omni_scenarios_contrasts is sameas true,
+           attrs={} if can_skip_omni else {'disabled': 'disabled'},
+           help=None if can_skip_omni else 'No Omni scenarios or contrasts to skip.'
          ) }}
       {% if not current_user.is_authenticated %}
       {{ cap_macros.cap_prompt("fork", "cap-fork", cap_base_url, cap_site_key, status_text="Complete verification to enable forking.") }}

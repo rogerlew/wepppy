@@ -12,6 +12,11 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 
 - Uses `control_shell` with a console-style status panel and stacktrace panel.
 - Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, a `Skip Omni Scenarios/Contrasts and reset controllers` checkbox, and submit/cancel controls.
+- Disables and unchecks undisturbify when no usable SBS map is present, and
+  Skip Omni when no configured scenarios/contrasts or retained child runs exist.
+  Inline help explains each disabled option. Configured but unrun Omni work
+  counts; empty collection directories alone do not. Existing derived SBS maps
+  remain eligible when the original upload is missing.
 - Emits bounded stage and heartbeat updates via the `<runid>:fork` StatusStream channel only while a job is tracked.
 - Renders authoritative job status plus start/end timestamps in the status panel (`#rq_job`) via polling.
 - Shows `Submitting fork job...` only while the submission request is pending.
@@ -26,6 +31,9 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 Script: `wepppy/weppcloud/static/js/fork_console.js`
 
 - Reads run context from `data-fork-console-config` and the form.
+- Preserves disabled checkbox state during bootstrap and explicitly submits
+  disabled options as false, including when a stale query requested true.
+  Restored jobs retain their original tracking regardless of current options.
 - Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` with all three option booleans.
 - Starts StatusStream on channel `fork` only after submission or session restoration and uses `controlBase` polling to keep job status authoritative:
   - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
@@ -151,6 +159,28 @@ leaf controllers depend on that identity inside their native Batch Runner contex
 - Operational thresholds and rationale are recorded in `docs/adrs/ADR-0021-fork-console-status-backpressure-thresholds.md`.
 - Destination-readiness retry thresholds and rationale are recorded in
   `docs/adrs/ADR-0031-fork-destination-readiness-retry-budget.md`.
+
+### Optional-state readiness and troubleshooting
+
+The [fork-console contract](contracts/fork-console-contract.md) defines current
+option availability and readiness rules. Capability inspection reads persisted
+JSON without hydrating controllers or migrating source projects. It never
+creates Omni or an SBS map just to enable a checkbox.
+
+A completed fork with skip Omni selected and no Omni controller is ready when
+the core destination files exist and optional Omni directories are absent or
+real and empty. Existing Omni controllers still require the complete empty
+reset directory structure. Unsafe entries and populated inconsistent state do
+not pass. API clients and already-queued jobs retain their existing flags.
+
+The October 6, 2026 Mariana incident was a false readiness rejection: the
+worker skipped absent Omni correctly, while the old web check demanded Omni
+reset files. Waiting or pressing retry could not satisfy that old predicate.
+After this patch is deployed, an existing affected console can use **Check
+project readiness** to obtain its link; it does not need another fork or a new
+project. A readiness timeout otherwise means the 30 checks were exhausted, not
+that the job is still copying. Inspect the exact job and destination state
+before retrying or declaring a copy failure.
 
 ## Initial Read Recovery and Prerequisite Failures
 

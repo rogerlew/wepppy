@@ -1,15 +1,16 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-06
+**Last Updated**: 2026-10-07
 **Active Packages**: 41
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-Checkpoint preparation: [Fork option availability and readiness](docs/work-packages/20261007_fork_option_readiness/package.md)
+Completed (code/local): [Fork option availability and readiness](docs/work-packages/20261007_fork_option_readiness/package.md)
 — disable inapplicable Omni/SBS options and accept legitimate absent Omni state
-after a completed fork. Contract review and checkpoint commit precede code.
+after a completed fork. Python 10,418 and frontend 924 tests pass; read-only
+wepp1 predicate replay passes all three affected destinations. Not deployed.
 
 Completed: [Topanga CLIGEN seed recurrence](docs/work-packages/20261006_topanga_cligen_seed_recurrence/package.md)
 — validated pilot plus 100 random seeds on openwepp; original-date recurrence

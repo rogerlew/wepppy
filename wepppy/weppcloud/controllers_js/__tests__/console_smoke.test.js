@@ -633,6 +633,39 @@ describe("Fork console smoke", () => {
         expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
     });
 
+    test("disabled fork options stay unchecked and submit false despite stale true defaults", async () => {
+        const container = document.querySelector('[data-controller="fork-console"]');
+        const config = container.querySelector("[data-fork-console-config]");
+        config.dataset.undisturbify = "true";
+        config.dataset.skipOmniScenariosContrasts = "true";
+        const controls = ["undisturbify_checkbox", "skip_omni_scenarios_contrasts_checkbox"].map(
+            (id) => document.getElementById(id)
+        );
+        controls.forEach((control) => {
+            control.disabled = true;
+            control.checked = true;
+        });
+        // Reinitialize a fresh DOM, as on a server-rendered page load.
+        container.replaceWith(container.cloneNode(true));
+        jest.resetModules();
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+        controls.forEach((control) => {
+            const current = document.getElementById(control.id);
+            expect(current.disabled).toBe(true);
+            expect(current.checked).toBe(false);
+            current.checked = true;
+        });
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        const forkCall = fetchMock.mock.calls.find(([url]) => url.endsWith("/cfg/fork"));
+        expect(forkCall[1].body).toBe(
+            "undisturbify=false&skip_wepp_runs_output=false&skip_omni_scenarios_contrasts=false"
+        );
+    });
+
     test("propagates rendered true option defaults into the exact submit payload", async () => {
         document.body.innerHTML = `
             <section data-controller="fork-console">
@@ -1047,7 +1080,12 @@ describe("Fork console smoke", () => {
         expect(document.querySelector("[data-fork-progress]").hidden).toBe(false);
     });
 
-    test("restores a tracked job and reconciles on focus", async () => {
+    test("restores a tracked job with unavailable options and reconciles on focus", async () => {
+        const config = document.querySelector("[data-fork-console-config]");
+        config.dataset.undisturbify = "true";
+        config.dataset.skipOmniScenariosContrasts = "true";
+        document.getElementById("undisturbify_checkbox").disabled = true;
+        document.getElementById("skip_omni_scenarios_contrasts_checkbox").disabled = true;
         window.sessionStorage.setItem("weppcloud:fork-console:demo-run:cfg", JSON.stringify({
             version: 1,
             runId: "demo-run",
@@ -1062,6 +1100,8 @@ describe("Fork console smoke", () => {
         await flushPromises();
 
         expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "job-restored");
+        expect(document.getElementById("undisturbify_checkbox").checked).toBe(false);
+        expect(document.getElementById("skip_omni_scenarios_contrasts_checkbox").checked).toBe(false);
         expect(global.StatusStream.attach).toHaveBeenCalledWith(expect.objectContaining({
             channel: "fork",
             runId: "demo-run",

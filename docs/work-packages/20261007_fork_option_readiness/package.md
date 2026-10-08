@@ -1,6 +1,7 @@
 # Fork Option Availability and Readiness
 
-Status: Open, checkpoint preparation (2026-10-07). Timezone: UTC.
+Status: Completed for code/local validation (2026-10-08 UTC).
+Production deployment remains separate. Timezone: UTC.
 Remediation ID: FORK-UI-01.
 
 ## Problem and scope
@@ -62,3 +63,18 @@ for any recurrence. No parameterization or retry-threshold ADR change is needed.
 - UI, API compatibility, and direct filesystem regression gates pass.
 - Focused and broad Python/frontend checks, docs lint, and required reviews pass.
 - Local/environment/deployed claims remain separate in the tracker.
+
+## Outcome
+
+The checkpoint was accepted, independently reviewed, and committed as
+`b80235d8f` before runtime edits. Both UI guards and the backend no-op readiness
+fix are implemented. Final focused tests pass (118), the full Python suite
+passes (10,418 passed / 126 skipped), and frontend tests pass (924). Lint,
+bundle rebuild, broad-exception enforcement, and documentation checks pass.
+Independent correctness/QA and security reviews have no unresolved findings.
+
+Read-only evaluation on the three real wepp1 destinations passes the candidate
+predicate and fails the deployed predicate under the existing web identity.
+Core controller identities match their destination and byte hashes are unchanged.
+No production files, jobs, services, or project data were modified. Actual
+endpoint/UI recovery is a separately authorized deployment acceptance check.

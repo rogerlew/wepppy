@@ -3,6 +3,9 @@
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 All paths are repository-relative. Timezone: UTC.
 
+Outcome: completed code/local validation and read-only production predicate
+replay on 2026-10-08 UTC. Production deployment remains separate.
+
 ## Purpose / Big Picture
 
 A completed non-Omni fork must expose its project link even if an older client
@@ -15,9 +18,13 @@ until its reviewed checkpoint is committed.
 
 - [x] (2026-10-07 23:09 UTC) Diagnose incident and prepare proposed checkpoint.
 - [x] (2026-10-07 UTC) Operator approved checkpoint, reviewers, and implementation.
-- [ ] Obtain exact checkpoint acceptance, two independent reviews, and commit.
-- [ ] Add regressions and implement within the recorded source boundary.
-- [ ] Complete local checks, production read-only replay, and final reviews.
+- [x] Obtain exact checkpoint acceptance and two independent reviews; commit
+  `b80235d8f` before implementation.
+- [x] Add regressions and implement within the recorded source boundary.
+- [x] Focused Python 118, frontend 924, lint, and final correctness/QA/security
+  reviews pass. Read-only wepp1 replay accepts all three affected destinations.
+- [x] Full Python suite: 10,418 passed, 126 skipped; final focused follow-up:
+  118 passed. All required local gates and independent reviews complete.
 
 ## Surprises & Discoveries
 
@@ -36,8 +43,12 @@ retained Omni children to avoid hiding useful reset behavior before execution.
 
 ## Outcomes & Retrospective
 
-Diagnosis and checkpoint draft only. Runtime edits, validation of the candidate,
-independent reviews, and deployment have not occurred.
+The implementation and independent reviews are complete. Local focused and
+frontend gates pass; the candidate readiness predicate passes on all three
+incident destinations under the existing wepp1 web identity, with controller
+identities verified and byte hashes unchanged. Full Python validation passed
+(10,418 passed, 126 skipped), with a final focused follow-up of 118 passed.
+Production endpoint/UI deployment has not occurred.
 
 ## Milestones and concrete steps
 

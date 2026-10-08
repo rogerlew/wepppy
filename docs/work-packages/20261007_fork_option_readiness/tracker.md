@@ -1,8 +1,10 @@
 # Tracker: Fork Option Availability and Readiness
 
-Timezone: UTC. Updated: 2026-10-07 23:09 UTC.
+Timezone: UTC. Updated: 2026-10-08 00:05 UTC.
 Base: `918b3ca0a1639c0ec057decbf4fd1b6bac25b10b`.
-Phase: proposed contract checkpoint; runtime files untouched.
+Phase: complete for code/local validation and read-only predicate replay.
+Production deployment remains separate. Accepted checkpoint ancestor:
+`b80235d8fcf15ab682bdae248171b5305802dea2`.
 
 ## Progress
 
@@ -10,8 +12,12 @@ Phase: proposed contract checkpoint; runtime files untouched.
 - [x] Draft capability/readiness contract, decision, and execution plan.
 - [x] Operator accepted the concrete checkpoint, checkpoint commit, two
   independent reviewer agents, and implementation on 2026-10-07 UTC.
-- [ ] Complete independent reviews and commit the standalone checkpoint.
-- [ ] Implement, validate, review, and document the bounded change.
+- [x] Independent correctness/security reviews passed and checkpoint committed.
+- [x] Implement and document the bounded change; focused and frontend tests pass.
+- [x] Independent correctness/QA and security reviews pass without findings.
+- [x] Candidate readiness passes all three incident destinations in read-only
+  wepp1 replay under uid 1002 / gid 130; original deployed helper remains false.
+- [x] Full Python suite: 10,418 passed, 126 skipped.
 
 ## Decisions and findings
 
@@ -25,6 +31,8 @@ on 2026-10-07 UTC. No production action is included.
 
 ## Validation
 
-All six touched/new Markdown files pass documentation lint; diff checks pass.
-No implementation or new runtime tests yet.
-Existing production diagnosis is not evidence that the proposed fix is deployed.
+Focused route/render tests: 118 passed. Frontend: 113 suites / 924 tests passed.
+Frontend lint, documentation lint, broad-exception enforcement, and diff checks
+pass. Controller bundle rebuild produced no generated diff. Full Python suite:
+10,418 passed, 126 skipped. Final review and validation artifacts are in `artifacts/`.
+Read-only production replay is not evidence that the web fix is deployed.

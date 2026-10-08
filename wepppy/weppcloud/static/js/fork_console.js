@@ -974,9 +974,9 @@
       }
 
       runId = submittedRunId;
-      var undisturbify = undisturbifyCheckbox ? !!undisturbifyCheckbox.checked : false;
+      var undisturbify = undisturbifyCheckbox && !undisturbifyCheckbox.disabled ? !!undisturbifyCheckbox.checked : false;
       var skipWeppRunsOutput = skipWeppRunsOutputCheckbox ? !!skipWeppRunsOutputCheckbox.checked : false;
-      var skipOmniScenariosContrasts = skipOmniScenariosContrastsCheckbox ? !!skipOmniScenariosContrastsCheckbox.checked : false;
+      var skipOmniScenariosContrasts = skipOmniScenariosContrastsCheckbox && !skipOmniScenariosContrastsCheckbox.disabled ? !!skipOmniScenariosContrastsCheckbox.checked : false;
 
       if (capRequired) {
         var capToken = getCapToken();
@@ -1219,13 +1219,13 @@
       stacktracePanel.hidden = true;
     }
     if (undisturbifyCheckbox) {
-      undisturbifyCheckbox.checked = initialUndisturbify;
+      undisturbifyCheckbox.checked = !undisturbifyCheckbox.disabled && initialUndisturbify;
     }
     if (skipWeppRunsOutputCheckbox) {
       skipWeppRunsOutputCheckbox.checked = initialSkipWeppRunsOutput;
     }
     if (skipOmniScenariosContrastsCheckbox) {
-      skipOmniScenariosContrastsCheckbox.checked = initialSkipOmniScenariosContrasts;
+      skipOmniScenariosContrastsCheckbox.checked = !skipOmniScenariosContrastsCheckbox.disabled && initialSkipOmniScenariosContrasts;
     }
     if (form) {
       form.addEventListener("submit", forkProject);

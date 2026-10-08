@@ -1,7 +1,9 @@
 # Fork Console Contract
 
 Status: Accepted and independently reviewed, 2026-10-07.
-Implementation conformance pending; this document does not claim deployment.
+Implementation locally validated, including full repository tests. Read-only
+readiness replay passes on the three affected wepp1 destinations. This document
+does not claim deployment.
 
 ## Scope and authority
 
