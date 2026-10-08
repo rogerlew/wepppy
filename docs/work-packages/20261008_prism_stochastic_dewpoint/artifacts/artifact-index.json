@@ -1,0 +1,250 @@
+{
+  "acquire.py": {
+    "bytes": 4883,
+    "sha256": "88b1528fdf802d9829b4a36c78202e9056d99407d18cf36680b68017ec9a04dc"
+  },
+  "annual-summary.csv": {
+    "bytes": 31737,
+    "sha256": "ae2e7307e31a62538c4624750de5efd9bfa8d171f4ef8f440c77fc18c87260e4"
+  },
+  "baseline-conclusions.json": {
+    "bytes": 677,
+    "sha256": "820b45328d09a4be8d6bda4b302ce21d35ecdd5d6ccd583be76d3d30beb414de"
+  },
+  "baseline-et-comparison.csv": {
+    "bytes": 174253,
+    "sha256": "9e5423984b6acb461506509c6d7570e4b72ec6c770d587a76e8a1f94c21b4949"
+  },
+  "climate-quality.csv": {
+    "bytes": 6184,
+    "sha256": "b19ed73e131bc62280f48024909577beeee837569c974a133491af3f901d0f76"
+  },
+  "compare_baselines.py": {
+    "bytes": 6010,
+    "sha256": "9a743b0b1a5844571b5672eaf49952b9334c3c4ecbf2c6eab95d8b320021fe65"
+  },
+  "comparison-metrics.csv": {
+    "bytes": 104908,
+    "sha256": "1b42c6d1054933d6222144043693aba4aaec72cbe331e95ec10d80f2c3ee4975"
+  },
+  "conclusions.json": {
+    "bytes": 368,
+    "sha256": "918a4e6927b69d6ae5491c4cde972d55e5892b96c758f2733a51736478d89288"
+  },
+  "diagnostic-free-metrics.csv": {
+    "bytes": 8078,
+    "sha256": "b22b23b94432427e8673b449883de3ea9e48acfbb30f2958af70768087411f62"
+  },
+  "environment.json": {
+    "bytes": 564,
+    "sha256": "6e4b1aa20264325361db15d55e032d237752d4b1a832fc9e8915349689de997b"
+  },
+  "executions.json": {
+    "bytes": 166756,
+    "sha256": "d9dd17284d46904f89a41b1df03efe9cf25d2ebc5eec7d7372d083c45daca8d3"
+  },
+  "forest-bias-sensitivity.csv": {
+    "bytes": 4576,
+    "sha256": "7ee6963bec37abf824d5a23920cd429c47ad9adb6ef928e299add8406f6e55b9"
+  },
+  "generated-climate-summary.csv": {
+    "bytes": 9136,
+    "sha256": "3d320e0ba4001bb503ddef75f9d6650f2b4f6d6e575d72c7e684800e1348c4e8"
+  },
+  "generated-climates.tar.gz": {
+    "bytes": 19619252,
+    "sha256": "4373ad77505fd9f76127fa3a447f96121cd09782b182aae9f235cda9efad2747"
+  },
+  "generated-monthly-climatology.csv": {
+    "bytes": 279188,
+    "sha256": "84fec41874c66e20b0c5a2c36affb2017d506e16a49a0f06fdf63232f0f092e7"
+  },
+  "generation-quality.json": {
+    "bytes": 13219,
+    "sha256": "d4ba5ceb119c4e1afac2986bdb13f7934b4820059c2aeb7f45e34b0ce140e384"
+  },
+  "handoff-validation.json": {
+    "bytes": 397,
+    "sha256": "8b5e97bb1c32657a5477fdf364d9c09639ec0de5e6e2d4d4234f155932d88d33"
+  },
+  "humidity-summary.csv": {
+    "bytes": 19071,
+    "sha256": "34396d1821500a32812dc5525eae43fcf7d15ea67447ce9ecaffe479031f8539"
+  },
+  "independent-validation.json": {
+    "bytes": 373,
+    "sha256": "21a4583cd34e87c11c183d347d61b5e96ee9c1e168c338f40ea72eb91c36039c"
+  },
+  "independent_check.py": {
+    "bytes": 2720,
+    "sha256": "a242df1039fcc662169c4ad9ed56b86a17e121106df248484da27827a754ee02"
+  },
+  "localization-readback.csv": {
+    "bytes": 9907,
+    "sha256": "0ee76111505349d266101a8be8734bfad5005325815fa25cde66993cc6c3bdc4"
+  },
+  "manifest.json": {
+    "bytes": 111402,
+    "sha256": "ec5cf58bf487bddf43e290629f6c58288fc64f5e1da89f503e1d1f180c65edba"
+  },
+  "normal-grid-validation.json": {
+    "bytes": 1801,
+    "sha256": "7002ca2726a64c84474ec7ae3b10ece6c2087d059899198f4994eb058f0a3f21"
+  },
+  "normal-validation.json": {
+    "bytes": 4396,
+    "sha256": "667b37519eaf9c014f2b6a4b18b3eaace0b62c45074b3224cd782145fb083b7e"
+  },
+  "normals-download.json": {
+    "bytes": 594,
+    "sha256": "7d7734b242bcecd50f4f828745d6d21910002f2d8cf710d93d1aa176b2266a91"
+  },
+  "normals-poll.json": {
+    "bytes": 214,
+    "sha256": "cd92b743078e63a19a2a281ab0809b6d1f1b7f90c17696653ddaeda0f2c3295c"
+  },
+  "normals-request.json": {
+    "bytes": 2068,
+    "sha256": "fe3f50f7589a48b1ff4dd15fd1bdf1623e614ed38917611d8ee8098c714917de"
+  },
+  "normals-submit.json": {
+    "bytes": 83,
+    "sha256": "aad6362f30f6f12dddd43d2271bd66cf301cf55d1c18f6228df713b3941c6e85"
+  },
+  "normals.csv": {
+    "bytes": 9050,
+    "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72"
+  },
+  "paired-effects.csv": {
+    "bytes": 14091,
+    "sha256": "938105bc1b4fb85ad070cfddc924e658177d74c7d6a4c173fd4a857758d7ef30"
+  },
+  "precipitation-comparison.csv": {
+    "bytes": 3091,
+    "sha256": "7acf5b29fffcaf342344b5cb56f8b7941fb8096d5a803e32805e72e4fa3f4f75"
+  },
+  "precipitation-comparison.png": {
+    "bytes": 87921,
+    "sha256": "c19527f7273c98d1d514cbaabba61232f5370684beeb5ab7998a53d5dbf40f32"
+  },
+  "precipitation-comparison.svg": {
+    "bytes": 75060,
+    "sha256": "622fd122b73c144cbdb4a0e558d8aea0cb792773fe0d37b03c0a362f16bf04da"
+  },
+  "prism_ppt_us_30s_202001_avg_30y.info.txt": {
+    "bytes": 208,
+    "sha256": "3ce8a11edc76209730db06de10dba501e9e19aaa492a2c2085b63fb2fed05de5"
+  },
+  "prism_ppt_us_30s_202001_avg_30y.prj": {
+    "bytes": 166,
+    "sha256": "5cff74dac30093ed5a1ca46ef65cdc3b57c293235f1016cd801ac42da1b3dcfc"
+  },
+  "prism_ppt_us_30s_202001_avg_30y.xml": {
+    "bytes": 8848,
+    "sha256": "36eaa52d2f112ca65598ebc6f18041e3849be63ee3326076f81d573812a63655"
+  },
+  "results.md": {
+    "bytes": 11631,
+    "sha256": "668e909e8947069e41d5e5dd031415963140b60b1e22b83470d0f8b2d22f619e"
+  },
+  "seasonal-et.png": {
+    "bytes": 724363,
+    "sha256": "451dae7018593984a5057235d1103236555ccdc9487b6066e2284a8e3db9c635"
+  },
+  "seasonal-et.svg": {
+    "bytes": 184796,
+    "sha256": "1b4357b52008122fe35d6c3e3d920af1a4c0e17f433360467f937f098d08a424"
+  },
+  "sensitivity.py": {
+    "bytes": 1041,
+    "sha256": "73fd82451e24af097263e2aa281bbeec03c04061e8067ede2d25aac449785762"
+  },
+  "station-site-mismatch.csv": {
+    "bytes": 1612,
+    "sha256": "a53ecd4671be4d48d083b82b4598e494c3abef7d9b5f11f6d6f6d64567f5f078"
+  },
+  "stations/apostolic-saw-h1153.log": {
+    "bytes": 929,
+    "sha256": "815f2383a14d9827b805e829e3a12e337d568e18fde4182bbd0c2e8942ecc423"
+  },
+  "stations/apostolic-saw-h1153.par": {
+    "bytes": 7027,
+    "sha256": "0ff6f18a6662dde45e93f1a567bf466c3e28555ee50fc9e410af040c03236be8"
+  },
+  "stations/apostolic-saw-h122.log": {
+    "bytes": 932,
+    "sha256": "d1fbbda3303fc9c435f4a7e840eda18ee9c7eed5a4ce632bb72c9d6e446338b4"
+  },
+  "stations/apostolic-saw-h122.par": {
+    "bytes": 7027,
+    "sha256": "6e752353cf3dfe9dc22ad219be9e42bc23a5d4e7f43a55666a2a1649780fa384"
+  },
+  "stations/apostolic-saw-h2196.log": {
+    "bytes": 914,
+    "sha256": "010f3b035eb6d88b027d43b635df591c4624cc70d7d57a2eaa8ae66ee6e8be76"
+  },
+  "stations/apostolic-saw-h2196.par": {
+    "bytes": 7027,
+    "sha256": "ac66155d8d486788b0b3b0e82d0478a17a9ca2546d2b59a662687a8f9ff74023"
+  },
+  "stations/cryptic-beechnut-h132.log": {
+    "bytes": 927,
+    "sha256": "17f4890d26dca0cd9171aba6ca1a0116cb8ced5efc1c6167da1b2674a405c07d"
+  },
+  "stations/cryptic-beechnut-h132.par": {
+    "bytes": 7027,
+    "sha256": "5f7538dbd3fbfa83b53cd8d9586a55aead4dfc4ee0366a09b96ea69be3490b5e"
+  },
+  "stations/cryptic-beechnut-h72.log": {
+    "bytes": 927,
+    "sha256": "98e0fb2bc8dc005c6cdb47e02efad29d96d2deeeb9225d8196699f3041e330a6"
+  },
+  "stations/cryptic-beechnut-h72.par": {
+    "bytes": 7027,
+    "sha256": "1195f39ae874aeda55c03416ba30f171179758e3f8dcdf0d784aa5da3c6df8ca"
+  },
+  "stations/cryptic-beechnut-h78.log": {
+    "bytes": 926,
+    "sha256": "c03985a076fb52a1ba6e3598b108eae5b3865ec522886868b90a29966fd5c428"
+  },
+  "stations/cryptic-beechnut-h78.par": {
+    "bytes": 7027,
+    "sha256": "61431de8667f584dec8255b3af3b7a2cdfca12b3485d90ef7aeb020e83032bbf"
+  },
+  "stations/hand-to-mouth-drought-h113.log": {
+    "bytes": 925,
+    "sha256": "5493a09c22fade4169405b794aca6a8620b6ed561c52cad13553fb77e7ab65ce"
+  },
+  "stations/hand-to-mouth-drought-h113.par": {
+    "bytes": 7027,
+    "sha256": "7daa8ce563679472a0bc033a4564bd44ca2c5f204554f4c105547321414231d9"
+  },
+  "stations/hand-to-mouth-drought-h27.log": {
+    "bytes": 921,
+    "sha256": "789df7f7c77e599c31a1aa02e6e423d25190cadd8c8aa27c589bf1f950fcb66a"
+  },
+  "stations/hand-to-mouth-drought-h27.par": {
+    "bytes": 7027,
+    "sha256": "d3bba8567243185c657b3c76079589a4c74c339d14cc5340c93ae56fc96759b0"
+  },
+  "stations/hand-to-mouth-drought-h74.log": {
+    "bytes": 929,
+    "sha256": "d3e775ee9fa167e5cea3fff9d4d8335bc056b3eca34aeef657b9f8b48b55cdd8"
+  },
+  "stations/hand-to-mouth-drought-h74.par": {
+    "bytes": 7027,
+    "sha256": "a067b3f66a5c4492bae6c5cd39f824c800f27d93653ceb27f89a381802175707"
+  },
+  "study.py": {
+    "bytes": 24420,
+    "sha256": "4f5881bc0b4dcd2a2bd4c859c7ce16acdb9a7c7e65a5c4a6cfdc7c132ae54bce"
+  },
+  "validation.json": {
+    "bytes": 33413,
+    "sha256": "15aff1647fd069a2641c504e1a8361e9cdcb466c237b191d60deb4018e7231ce"
+  },
+  "wepp-monthly.csv": {
+    "bytes": 2050508,
+    "sha256": "543156df741e9e68233a8dcc518caf99050d38a59c3626f0a5d2d1af49091663"
+  }
+}

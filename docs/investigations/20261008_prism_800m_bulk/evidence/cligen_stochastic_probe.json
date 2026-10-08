@@ -1,0 +1,58 @@
+{
+  "source_repository": "/workdir/jimf-cligen532",
+  "source_commit": "8b9619b68c78f52d3bac778be19dc8436cac7d51",
+  "source_hashes": {
+    "cligen.f": "35232eb8cc1849a398a417702bb2570e3bd6f73ec274d1c5f0436990aee708ae",
+    "cbk1.inc": "1b7b259e719e0edf9fbe59174a779bf8a48db2a6774357fd7bbc45aafc328256",
+    "cbk3.inc": "4e2d9f27ea2b5e9995470bffde3fb6d7388bbdc5fdc1e9d11d79950923c00a05",
+    "cbk4.inc": "2739a3e82f1867f739313806ff242a1a26f92e9b031888ff1253c9d11fde435b",
+    "cbk5.inc": "def46eed9fac58d123c3ddf8dc345c99ac1b6de743eedd4da334aae0470f1424",
+    "cbk7.inc": "e45752d5ee3f61ece6e6f9580ca2474a52bbc31fc87e68ec34de7206eaf2b21d",
+    "cbk9.inc": "48489630d2dc4a75fed14bfdd4c22b7bcb90163792fd46ef3593a541ecafe2d3",
+    "ccl1.inc": "b7bc3c8119340341a0a1782da4b70dd8be2590fa843d5e361b2aa551df90f2d6",
+    "cinterp.inc": "eb219556accb54c00320c210c56ee44cdd02f3a1442f28933cd51c5fc0d97701",
+    "command6.inc": "883187cfd4bcba58edf30bef2dc6f19fedc767c2fcc7022dc2cf56cb7f79c3a0",
+    "crandom.inc": "37d25b3ab552c9f165190a61abd48da0657152b77fe8c9c6111c0c0cfbde4f4c",
+    "crandom3.inc": "8f2ce2ee56f9e3f9f0c287b8d04967581c49d394be7de14f5156a00de4657770",
+    "csumr.inc": "69afdb830cd03f97d6253c72e53a20b0e01cc5d59f94b65bfa5239bb7c80f273",
+    "ctap2.inc": "bf3354bce8e4c19abc36036051acb880a8b4458b606d2fef15fa7f6d1c0418fa"
+  },
+  "build_command": [
+    "/usr/bin/gfortran",
+    "-O0",
+    "-I",
+    "/workdir/jimf-cligen532/cligen532",
+    "/workdir/jimf-cligen532/cligen532/cligen.f",
+    "-o",
+    "/tmp/cligen-dewpoint-audit-2jb_rksv/cligen"
+  ],
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "run_arguments": [
+    "-istation.par",
+    "-ooutput.cli",
+    "-t5",
+    "-y10",
+    "-b2000",
+    "-r12345",
+    "-I2",
+    "-F"
+  ],
+  "station_source": "/workdir/jimf-cligen532/db/2015_par_files/or354811.par",
+  "station_sha256": "0ce7141d6e0146fffe3025789b61bde17e253ca5826795db5ab60af2c678695a",
+  "binary_sha256": "2683ebe2abc73dd0fd3159e59de305ff399adf537df37e3b538686f366293bb7",
+  "cli_sha256": "7b2580299d46149f9319c830b6e2a873708fd375b0eea297c555a17495968af6",
+  "records": 3653,
+  "tdew_below_tmin": 1400,
+  "tdew_equal_tmin": 91,
+  "tdew_above_tmin": 2162,
+  "below_percentage": 38.32466465918423,
+  "largest_shortfall_c": 9.8,
+  "first_below": {
+    "date": "2000-01-01",
+    "tmin_c": -1.3,
+    "tdew_c": -1.6
+  },
+  "workdir": "/tmp/cligen-dewpoint-audit-2jb_rksv",
+  "run_exit_code": 0,
+  "stderr": "                                                                   \nSTOP Normal program termination\n"
+}

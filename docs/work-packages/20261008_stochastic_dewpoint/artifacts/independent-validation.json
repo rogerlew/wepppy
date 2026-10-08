@@ -1,0 +1,8 @@
+{
+  "independently_checked_metric_rows": 792,
+  "method": "Empirical CDF integration independent of scipy Wasserstein; 12 mean-cycle errors recomputed from stored monthly values.",
+  "monthly_rows": 15120,
+  "date_pairing_used": false,
+  "tolerance": 1e-10,
+  "prior_manifest_unchanged": true
+}

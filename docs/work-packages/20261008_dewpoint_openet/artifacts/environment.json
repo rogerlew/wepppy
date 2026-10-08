@@ -1,0 +1,15 @@
+{
+  "python": "3.12.3",
+  "uid": 1000,
+  "gid": 1000,
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "wepppy_revision": "73d8e06a2a6573d3f478306bd8f3eaff2ac16550",
+  "versions": {
+    "numpy": "1.26.0",
+    "pandas": "2.2.2",
+    "metpy": "1.6.2",
+    "requests": "2.32.4"
+  },
+  "execution_root": "/home/workdir/wepppy-scratch/dewpoint-openet-20261008",
+  "source_projects_modified": false
+}

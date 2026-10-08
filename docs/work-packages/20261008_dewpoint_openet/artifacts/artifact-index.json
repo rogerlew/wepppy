@@ -1,0 +1,258 @@
+{
+  "paired-summary.csv": {
+    "bytes": 4578,
+    "sha256": "1f66a5ee89ec9a98754928846bea7a73f4cc5bc4e5cbeef554114c4a7a4e0610"
+  },
+  "climate-quality.csv": {
+    "bytes": 990,
+    "sha256": "c479bfb9c0cc9a6d0bf72b79464bc2a3c4b9873282e6105c29bfb26b1eaf5857"
+  },
+  "study.py": {
+    "bytes": 27998,
+    "sha256": "1f8e38b57598f3f2914b241b0a95f6afbb0cf60dfd9f3b9da5b5cc8b4e4e90b4"
+  },
+  "validation.json": {
+    "bytes": 3029,
+    "sha256": "43075cc2ae8a77535f7f47b7eaffd8ff81714f8026fc8b79af28116af2355579"
+  },
+  "spatial-support.csv": {
+    "bytes": 877,
+    "sha256": "654bf0638f5d8f78aa843341498ed05d3ed0f0b43c8613bfc5d5212672c61c74"
+  },
+  "seasonal-effect.svg": {
+    "bytes": 77484,
+    "sha256": "d385fdb423b30f0527262f23eb0c7f21df7d48e7c429c1e9d46c4d97b9e77270"
+  },
+  "hand-to-mouth-drought-forcing.parquet": {
+    "bytes": 625530,
+    "sha256": "672669afdc71caf1c8ae190b780c3f994e52010b4a02f1c0d96c9ecda10b57bf"
+  },
+  "annual-comparison.csv": {
+    "bytes": 58314,
+    "sha256": "a68ced3f1a691044459c7c9110b9029bcc9215b4ef7fd995e083e56869aad39c"
+  },
+  "openet-monthly.csv": {
+    "bytes": 145830,
+    "sha256": "576fc95f2ac553227a4254bfe81d1a223920489c8fe3cbade589db86828b675a"
+  },
+  "climate-quality-events.csv": {
+    "bytes": 2137,
+    "sha256": "15e6e95850a9d5eddd83ff0b420e77410944f5e256f8210760a412f99804131f"
+  },
+  "cryptic-beechnut-forcing.parquet": {
+    "bytes": 572580,
+    "sha256": "7d7e1e65bb5f3db1357c83eeedf0401b1c5d7ba94a55aa28fda929da5e9675b3"
+  },
+  "seasonal-effect.png": {
+    "bytes": 156330,
+    "sha256": "e0823570aebea9ff93a9756c7d6d5e52dd4f4e34d0a964f37a0fa2fb3162df72"
+  },
+  "environment.json": {
+    "bytes": 411,
+    "sha256": "3cb602f33a2daf0a4bda9955d6fc82e13534bd7caffbc9b02ef1d31d0595778a"
+  },
+  "apostolic-saw-forcing.parquet": {
+    "bytes": 416556,
+    "sha256": "2192173478aa4a847ab9504e2ba07390b6ea207d63f5b60469078098d352147a"
+  },
+  "manifest.json": {
+    "bytes": 44069,
+    "sha256": "0a673de99578b3d8f6280f41be3114e04133e9a4c5dcde9b9f26d896e6d74235"
+  },
+  "fixtures-archive.json": {
+    "bytes": 83,
+    "sha256": "3c6f3c85ad26a65e12691c38e5fffffcd64367ebdcacb9e0d8aa55fd89cc1611"
+  },
+  "monthly-et.png": {
+    "bytes": 1059951,
+    "sha256": "0ff7d2715967991530f329378ee1b308323e8e2b73d03a88a544f44e4b5f0d9e"
+  },
+  "wepp-monthly.csv": {
+    "bytes": 225474,
+    "sha256": "5d8bbdc19b94d6b38676089b549efbc42cfaebe22f703d81271255fc182d9e1a"
+  },
+  "conclusions.json": {
+    "bytes": 408,
+    "sha256": "3e019579317a603f0ffb95ec8bbccfaac7fff3c8184edd89f3a1f0c900888601"
+  },
+  "independent-validation.json": {
+    "bytes": 220,
+    "sha256": "8f230d588f3b2c772977c294e23b8e07cd2eb74c495fab1cd692b1e3bc3dc397"
+  },
+  "monthly-et.svg": {
+    "bytes": 242621,
+    "sha256": "a7fd3af2050139fd9ab8e2d6481a39f3771ef67491cd87dfc84e64627f797be7"
+  },
+  "results.md": {
+    "bytes": 11587,
+    "sha256": "d4544cbe6f897cab17cdb80860b24a0ce3a968656ccc6ad7679c91452f687660"
+  },
+  "ensemble-bias-sensitivity.csv": {
+    "bytes": 2126,
+    "sha256": "f4067cfb499e9f4eddba204d8002740423c4b217de05814986080b9387effd14"
+  },
+  "fixtures.tar.gz": {
+    "bytes": 1848831,
+    "sha256": "866b6a6bb4bfd1530f5aad88901d634627f1881a68f24aa1f803ae83364dd627"
+  },
+  "executions.json": {
+    "bytes": 16326,
+    "sha256": "6022403fcd14587e0c1afc4eb7b1399fed162c420396b460deeb97c7b5a5efd5"
+  },
+  "climate-quality-sensitivity.csv": {
+    "bytes": 5482,
+    "sha256": "04f5aaa570aa16a76c89b2d79e8dda9f5d9ab129ba0160348349ba85d84484d7"
+  },
+  "comparison-metrics.csv": {
+    "bytes": 13585,
+    "sha256": "ca6cb9a9b5f5d74e84506c6c07c2b76c1d9f2fdd9f82a5c21100abf73ed97235"
+  },
+  "openet/cryptic-beechnut-h132-PTJPL.json": {
+    "bytes": 9553,
+    "sha256": "386c98efd26bbe7269d687250d7a6f463456931c5e517b303680884564f612e8"
+  },
+  "openet/apostolic-saw-h122-PTJPL.json": {
+    "bytes": 9122,
+    "sha256": "e0c55aec55a6f0f2c071b3947ae02ce4554afb62624cb98512698303fbb1fe4c"
+  },
+  "openet/cryptic-beechnut-h78-Ensemble.json": {
+    "bytes": 11108,
+    "sha256": "38d96cd6fb85f44929f069541369910a7bf75bb1e3c379dd1d170cf2710e6c71"
+  },
+  "openet/hand-to-mouth-drought-h113-Ensemble.json": {
+    "bytes": 9134,
+    "sha256": "4ed426b455e3449408aedf7dc0513bbe4f9fc699878f620bda3d0fe460def572"
+  },
+  "openet/cryptic-beechnut-h132-SSEBop.json": {
+    "bytes": 9546,
+    "sha256": "e5ce05289075c3d84123ddab3b98b1663317c41082c60fde2e7a44c83bd7690c"
+  },
+  "openet/hand-to-mouth-drought-h113-PTJPL.json": {
+    "bytes": 9127,
+    "sha256": "5a674472028fae75d009c9b8670f81493261d2a0dba5206c39f7f084897bbff1"
+  },
+  "openet/apostolic-saw-h2196-eeMETRIC.json": {
+    "bytes": 10214,
+    "sha256": "3d1af301e620fe794a5c55305f057a050bb8349e6ca6862ce4c4857885ad866b"
+  },
+  "openet/hand-to-mouth-drought-h74-eeMETRIC.json": {
+    "bytes": 10671,
+    "sha256": "21c26056ac7aa06bfcde6aa1a58171fa06277efa177890d1a7a53fc779347873"
+  },
+  "openet/hand-to-mouth-drought-h74-Ensemble.json": {
+    "bytes": 10681,
+    "sha256": "fa2bbef420c1f32f9af8f541d2b6f7e717f01439fd82ffc081db1a75cbb3cbe3"
+  },
+  "openet/hand-to-mouth-drought-h27-Ensemble.json": {
+    "bytes": 9805,
+    "sha256": "949496e0c237d7a20947b68c247d025a3a04849b4102f505cb07b1f62dbc8826"
+  },
+  "openet/cryptic-beechnut-h132-Ensemble.json": {
+    "bytes": 9556,
+    "sha256": "5918def62f4a7d033663091674569716fc3313f3ac1735a29092b688587ce61e"
+  },
+  "openet/apostolic-saw-h122-SSEBop.json": {
+    "bytes": 9123,
+    "sha256": "96d5bf56b8e6e27d625b07f68c26e06b0d47c6b3bb17640afc9b184829194f4e"
+  },
+  "openet/apostolic-saw-h1153-eeMETRIC.json": {
+    "bytes": 10657,
+    "sha256": "d36d0ffc6ab574996b066732622a8b425f8667d989a4f073d07bc72839e50340"
+  },
+  "openet/apostolic-saw-h122-eeMETRIC.json": {
+    "bytes": 9119,
+    "sha256": "53829b1a4e04bdd448652ab91f7879b0b26b7aa59e99975cf4a23b49d77b10c3"
+  },
+  "openet/apostolic-saw-h122-Ensemble.json": {
+    "bytes": 9133,
+    "sha256": "0e2bb7c7bcce80c98fc90d11fdde6d008657946336a7fce4a5b06b3e4c70665c"
+  },
+  "openet/apostolic-saw-h2196-PTJPL.json": {
+    "bytes": 10228,
+    "sha256": "8be87d1c67b17f52e5947e022a069fd2256d79b0ae9a2277b2b021beba03961a"
+  },
+  "openet/cryptic-beechnut-h72-SSEBop.json": {
+    "bytes": 9122,
+    "sha256": "e37decb53e4ba71671e5a164beb74b39fd778ae667b7d7deaff2cc657ea1c387"
+  },
+  "openet/cryptic-beechnut-h78-eeMETRIC.json": {
+    "bytes": 11092,
+    "sha256": "259644e8cf2e73926857aa1831cc6838ddd1be2be9641ea1af58a1148683ce05"
+  },
+  "openet/hand-to-mouth-drought-h27-eeMETRIC.json": {
+    "bytes": 9796,
+    "sha256": "f8af6a8183195d9dc5c21c984205476b640bd433129efdd4f87376f63c852e60"
+  },
+  "openet/apostolic-saw-h2196-Ensemble.json": {
+    "bytes": 10225,
+    "sha256": "f8c7d57248c45a04f23d54b96aab028fc80db65bf0b24fa86f538aaa0b0eea2a"
+  },
+  "openet/cryptic-beechnut-h78-SSEBop.json": {
+    "bytes": 11115,
+    "sha256": "d8d072f9cd710d84d170b27d6edfc546abf9a7a043a2dce472e4813fc463b17f"
+  },
+  "openet/cryptic-beechnut-h132-eeMETRIC.json": {
+    "bytes": 9554,
+    "sha256": "d197abc867260524579449da90e47c58a87118a7d9ff648143fbd594950f40fe"
+  },
+  "openet/hand-to-mouth-drought-h74-PTJPL.json": {
+    "bytes": 10684,
+    "sha256": "a3f9b36d2af148e6d3eea80857ea65b52d6dcc012c88fbed517d3b049175b42b"
+  },
+  "openet/failed-feature-format-probe.json": {
+    "bytes": 3222,
+    "sha256": "e05ab2acf3ad64f4c8c1ef760fe30f0d278436139df3004900c5646ac469ab2b"
+  },
+  "openet/apostolic-saw-h2196-SSEBop.json": {
+    "bytes": 10229,
+    "sha256": "685b8f1cd3f37d7ecbcf0aefbf483fda9911b1c09eedff035976dddeda939002"
+  },
+  "openet/cryptic-beechnut-h72-Ensemble.json": {
+    "bytes": 9116,
+    "sha256": "b8df0af6067fde35ff6b9717f0d9eda93a2e33f0b429d7f6437766dbbda38d5f"
+  },
+  "openet/cryptic-beechnut-h78-PTJPL.json": {
+    "bytes": 11123,
+    "sha256": "8d6140adf14c0f70ed6d783d4b941cffa12967bb928ffcd5f56fb4fa42b61c37"
+  },
+  "openet/apostolic-saw-h1153-PTJPL.json": {
+    "bytes": 10693,
+    "sha256": "f83fe5b1442962f8658b5ff1e5f728d43ff58530b72e8c5f787741221f0400e2"
+  },
+  "openet/hand-to-mouth-drought-h113-eeMETRIC.json": {
+    "bytes": 9102,
+    "sha256": "c1b106e6529969309be920adfcac241264721a4565340df14a2b3b4112cfa228"
+  },
+  "openet/apostolic-saw-h1153-SSEBop.json": {
+    "bytes": 10698,
+    "sha256": "660267dbd4954ea731597550ac9913e17927dcdb2aac6f3b3ed09ab2bf0e02d7"
+  },
+  "openet/hand-to-mouth-drought-h74-SSEBop.json": {
+    "bytes": 10667,
+    "sha256": "558f04bd32567c6c69894e42511d1477f7283ceb2c8e000b31610fbd48848f8d"
+  },
+  "openet/hand-to-mouth-drought-h113-SSEBop.json": {
+    "bytes": 9103,
+    "sha256": "eb8e62bfeceb27d77d630782c0c0fb01d851709971cbade8f7a9d3b9eeeeb172"
+  },
+  "openet/hand-to-mouth-drought-h27-SSEBop.json": {
+    "bytes": 9771,
+    "sha256": "53ae67daa6315db5659a006f5afca093cd8361d8219446f126d99b04e68344b1"
+  },
+  "openet/apostolic-saw-h1153-Ensemble.json": {
+    "bytes": 10693,
+    "sha256": "f8b1fd06e0b9be5e922e8ae0b68200d77c91067562ab368bd7d66d16ddc49cce"
+  },
+  "openet/cryptic-beechnut-h72-eeMETRIC.json": {
+    "bytes": 9078,
+    "sha256": "a7c98d2ce85614c1b457a8b13e61a5aaf7c6284d1fc1c5cbe88cd0592ae4603a"
+  },
+  "openet/hand-to-mouth-drought-h27-PTJPL.json": {
+    "bytes": 9806,
+    "sha256": "373408614eee3d3465dc947886c23941eb1cc3cbc2c8de3f3eb16f2ab7eb618b"
+  },
+  "openet/cryptic-beechnut-h72-PTJPL.json": {
+    "bytes": 9116,
+    "sha256": "6ee6962f935c0d1755c7b47e6524eb49f47ff9c9cf1fcf42042e59669f360fcf"
+  }
+}

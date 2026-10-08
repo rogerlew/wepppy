@@ -1,0 +1,38 @@
+{
+  "sierra": {
+    "cells": 9,
+    "mixed_wet_dry_days": 3,
+    "max_daily_spatial_range_mm": 2.6500000000000004,
+    "annual_total_range_mm": [
+      462.48999999999995,
+      479.61
+    ]
+  },
+  "tucson": {
+    "cells": 9,
+    "mixed_wet_dry_days": 7,
+    "max_daily_spatial_range_mm": 4.190000000000001,
+    "annual_total_range_mm": [
+      116.38,
+      119.86
+    ]
+  },
+  "oklahoma": {
+    "cells": 9,
+    "mixed_wet_dry_days": 10,
+    "max_daily_spatial_range_mm": 7.460000000000001,
+    "annual_total_range_mm": [
+      994.2700000000002,
+      1017.4000000000001
+    ]
+  },
+  "asheville": {
+    "cells": 9,
+    "mixed_wet_dry_days": 15,
+    "max_daily_spatial_range_mm": 11.470000000000002,
+    "annual_total_range_mm": [
+      1357.83,
+      1418.7199999999996
+    ]
+  }
+}

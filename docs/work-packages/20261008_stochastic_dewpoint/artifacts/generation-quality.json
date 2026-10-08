@@ -1,0 +1,253 @@
+[
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1001,
+    "unmet_targets": 30,
+    "parameters": {
+      "Precip. Amt.": 5,
+      "Temp. Dew Pt.": 21,
+      "Time to Peak": 4
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1002,
+    "unmet_targets": 37,
+    "parameters": {
+      "Precip. Amt.": 9,
+      "Time to Peak": 28
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1003,
+    "unmet_targets": 16,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Temp. Dew Pt.": 2,
+      "Time to Peak": 12
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1004,
+    "unmet_targets": 46,
+    "parameters": {
+      "Precip. Amt.": 31,
+      "Temp. Dew Pt.": 15
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1005,
+    "unmet_targets": 32,
+    "parameters": {
+      "Precip. Amt.": 27,
+      "Temp. Dew Pt.": 5
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1006,
+    "unmet_targets": 14,
+    "parameters": {
+      "Precip. Amt.": 4,
+      "Time to Peak": 10
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1007,
+    "unmet_targets": 7,
+    "parameters": {
+      "Precip. Amt.": 7
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1008,
+    "unmet_targets": 21,
+    "parameters": {
+      "Precip. Amt.": 4,
+      "Temp. Dew Pt.": 17
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1009,
+    "unmet_targets": 36,
+    "parameters": {
+      "Precip. Amt.": 18,
+      "Temp. Dew Pt.": 4,
+      "Time to Peak": 14
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought",
+    "seed": 1010,
+    "unmet_targets": 24,
+    "parameters": {
+      "Precip. Amt.": 6,
+      "Time to Peak": 18
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1001,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1002,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1004,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1005,
+    "unmet_targets": 10,
+    "parameters": {
+      "Time to Peak": 10
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1006,
+    "unmet_targets": 1,
+    "parameters": {
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1007,
+    "unmet_targets": 1,
+    "parameters": {
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1008,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1009,
+    "unmet_targets": 7,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 5
+    }
+  },
+  {
+    "slug": "apostolic-saw",
+    "seed": 1010,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1001,
+    "unmet_targets": 29,
+    "parameters": {
+      "Precip. Amt.": 22,
+      "Time to Peak": 7
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1002,
+    "unmet_targets": 34,
+    "parameters": {
+      "Precip. Amt.": 7,
+      "Temp. Dew Pt.": 27
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1003,
+    "unmet_targets": 15,
+    "parameters": {
+      "Time to Peak": 15
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1004,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1005,
+    "unmet_targets": 3,
+    "parameters": {
+      "Precip. Amt.": 3
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1006,
+    "unmet_targets": 13,
+    "parameters": {
+      "Precip. Amt.": 13
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1007,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1008,
+    "unmet_targets": 24,
+    "parameters": {
+      "Precip. Amt.": 8,
+      "Temp. Dew Pt.": 16
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1009,
+    "unmet_targets": 23,
+    "parameters": {
+      "Precip. Amt.": 1,
+      "Time to Peak": 22
+    }
+  },
+  {
+    "slug": "cryptic-beechnut",
+    "seed": 1010,
+    "unmet_targets": 27,
+    "parameters": {
+      "Precip. Amt.": 8,
+      "Temp. Dew Pt.": 11,
+      "Time to Peak": 8
+    }
+  }
+]

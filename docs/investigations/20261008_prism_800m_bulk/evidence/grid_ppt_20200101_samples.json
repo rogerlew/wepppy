@@ -1,0 +1,442 @@
+{
+  "tags": {
+    "PRISM_CODE_VERSION": "16.1-20200123-1742",
+    "PRISM_DATASET_CREATE_DATE": "20200713-2140",
+    "PRISM_DATASET_FILENAME": "adj_best_ppt_us_us_30s_20200101.bil",
+    "PRISM_DATASET_TYPE": "an81/r1812",
+    "PRISM_DATASET_VERSION": "D2",
+    "AREA_OR_POINT": "Area"
+  },
+  "crs": "EPSG:4269",
+  "nodata": -9999.0,
+  "transform": [
+    0.008333333333,
+    0.0,
+    -125.02083333333351,
+    0.0,
+    -0.008333333333,
+    49.9374999999995,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "rows": [
+    {
+      "name": "palouse",
+      "row": 412,
+      "col": 1022,
+      "grid": 14.619000434875488,
+      "bulk": 14.62,
+      "difference": 0.0009995651245109372
+    },
+    {
+      "name": "olympic",
+      "row": 256,
+      "col": 158,
+      "grid": 141.92100524902344,
+      "bulk": 141.92,
+      "difference": -0.0010052490234500056
+    },
+    {
+      "name": "sierra",
+      "row": 1468,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr00",
+      "row": 1467,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr01",
+      "row": 1467,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr02",
+      "row": 1467,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr10",
+      "row": 1468,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr12",
+      "row": 1468,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr20",
+      "row": 1469,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr21",
+      "row": 1469,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr22",
+      "row": 1469,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "deathvalley",
+      "row": 1617,
+      "col": 978,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "rockies",
+      "row": 1158,
+      "col": 2325,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucson",
+      "row": 2126,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso00",
+      "row": 2125,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso01",
+      "row": 2125,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso02",
+      "row": 2125,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso10",
+      "row": 2126,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso12",
+      "row": 2126,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso20",
+      "row": 2127,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso21",
+      "row": 2127,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso22",
+      "row": 2127,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklahoma",
+      "row": 1770,
+      "col": 3309,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah00",
+      "row": 1769,
+      "col": 3308,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah01",
+      "row": 1769,
+      "col": 3309,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah02",
+      "row": 1769,
+      "col": 3310,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah10",
+      "row": 1770,
+      "col": 3308,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah12",
+      "row": 1770,
+      "col": 3310,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah20",
+      "row": 1771,
+      "col": 3308,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah21",
+      "row": 1771,
+      "col": 3309,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklah22",
+      "row": 1771,
+      "col": 3310,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "houston",
+      "row": 2421,
+      "col": 3558,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "asheville",
+      "row": 1720,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev00",
+      "row": 1719,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev01",
+      "row": 1719,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev02",
+      "row": 1719,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev10",
+      "row": 1720,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev12",
+      "row": 1720,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev20",
+      "row": 1721,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev21",
+      "row": 1721,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev22",
+      "row": 1721,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "miami",
+      "row": 2901,
+      "col": 5379,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "maine",
+      "row": 484,
+      "col": 6771,
+      "grid": 21.160001754760742,
+      "bulk": 21.16,
+      "difference": -1.7547607420453915e-06
+    },
+    {
+      "name": "duluth",
+      "row": 377,
+      "col": 3950,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pacific",
+      "row": 1192,
+      "col": 14,
+      "grid": -9999.0,
+      "bulk": null,
+      "difference": null
+    },
+    {
+      "name": "superior",
+      "row": 292,
+      "col": 4442,
+      "grid": 0.7880000472068787,
+      "bulk": 0.79,
+      "difference": 0.0019999527931213734
+    },
+    {
+      "name": "coast",
+      "row": 952,
+      "col": 74,
+      "grid": -9999.0,
+      "bulk": null,
+      "difference": null
+    },
+    {
+      "name": "keywest",
+      "row": 3045,
+      "col": 5188,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pal_orig",
+      "row": 412,
+      "col": 1022,
+      "grid": 14.619000434875488,
+      "bulk": 14.62,
+      "difference": 0.0009995651245109372
+    },
+    {
+      "name": "sier_orig",
+      "row": 1468,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pal_sw",
+      "row": 412,
+      "col": 1022,
+      "grid": 14.619000434875488,
+      "bulk": 14.62,
+      "difference": 0.0009995651245109372
+    },
+    {
+      "name": "pal_ne",
+      "row": 412,
+      "col": 1022,
+      "grid": 14.619000434875488,
+      "bulk": 14.62,
+      "difference": 0.0009995651245109372
+    }
+  ],
+  "archive_sha256": "4dbb0fa207e5df7551b5cd44f3566f3df85653995b469dca51825d026e16d0e7"
+}

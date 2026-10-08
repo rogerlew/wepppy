@@ -1,0 +1,14 @@
+{
+  "cases": 180,
+  "daily_rows": 2344980,
+  "normals_input_hash_verified": true,
+  "production_localization_source_hash_verified": true,
+  "localized_station_hashes_verified": 9,
+  "doc_lint": "6 files; zero errors and warnings",
+  "spelling_preview_differences": [],
+  "figures_visually_reviewed": [
+    "seasonal-et.png",
+    "precipitation-comparison.png"
+  ],
+  "production_changes": false
+}

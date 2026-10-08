@@ -1,0 +1,10 @@
+{
+  "prior_artifact_hashes_verified": {
+    "20261008_dewpoint_openet": 64,
+    "20261008_stochastic_dewpoint": 24
+  },
+  "metric_rows_independently_verified": 792,
+  "max_metric_error": 2.842170943040401e-14,
+  "precipitation_output_vs_generated_verified": true,
+  "method": "explicit monthly means and empirical-CDF integral, independent of scipy wasserstein_distance"
+}

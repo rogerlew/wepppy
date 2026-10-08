@@ -1,11 +1,23 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-07
+**Last Updated**: 2026-10-08
 **Active Packages**: 41
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Completed (research): [PRISM-localized stochastic dewpoint](docs/work-packages/20261008_prism_stochastic_dewpoint/package.md) — 180 validated cases; forest precipitation now 90–102% of GridMET. Clipping improves seasonal RMSE in 36/36 comparisons, annual ET bias in only 6/36. Production unchanged.
+
+Completed (research): [Stochastic CLIGEN dewpoint](docs/work-packages/20261008_stochastic_dewpoint/package.md)
+— 180 paired cases at the nine prior hillslopes. Clipping modestly improves
+seasonal agreement, but station climate mismatch and generator diagnostics
+limit inference. Native stochastic production behavior remains unchanged.
+
+Completed (research): [Dewpoint clipping and OpenET](docs/work-packages/20261008_dewpoint_openet/package.md)
+— 18 paired hillslope runs and 36 OpenET series across three watersheds. Clipping
+has lower monthly ET MAE/RMSE in all 36 comparisons; retain current behavior and
+defer a general disable switch. Production unchanged; figures and caveats retained.
 
 Completed (code/local): [Fork option availability and readiness](docs/work-packages/20261007_fork_option_readiness/package.md)
 — disable inapplicable Omni/SBS options and accept legitimate absent Omni state

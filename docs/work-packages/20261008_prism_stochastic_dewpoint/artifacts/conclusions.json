@@ -1,0 +1,11 @@
+{
+  "cases": 180,
+  "pooled_comparisons": 36,
+  "seed_comparisons": 360,
+  "clipped_better_cycle_mae_mm": 31,
+  "seedwise_clipped_better_cycle_mae_mm": 318,
+  "clipped_better_cycle_rmse_mm": 36,
+  "seedwise_clipped_better_cycle_rmse_mm": 357,
+  "clipped_better_monthly_distribution_distance_mm": 34,
+  "seedwise_clipped_better_monthly_distribution_distance_mm": 339
+}

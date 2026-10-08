@@ -1,0 +1,31 @@
+{
+  "url": "https://prism.oregonstate.edu/explorer/dataexplorer/rpc.php",
+  "request": {
+    "spares": "800m",
+    "interp": "0",
+    "stats": "ppt tmin tmax tdmean soltotal",
+    "units": "si",
+    "range": "daily",
+    "start": "20261007",
+    "end": "20261010",
+    "stability": "early",
+    "lon": -116.5000000003,
+    "lat": 46.5000000001,
+    "call": "pp/daily_timeseries",
+    "proc": "gridserv"
+  },
+  "status": 200,
+  "seconds": 0.1268327989964746,
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:05:52 GMT",
+    "Server": "Apache",
+    "X-Powered-By": "PHP/8.4.26",
+    "Strict-Transport-Security": "max-age=63072000; includeSubdomains",
+    "Access-Control-Allow-Origin": "*",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Transfer-Encoding": "chunked",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "body": "{\"gricket\": \"mS1PacHCzqTqOg4S\", \"errors\": [[\"GridAccessError\", [\"InvalidGridKeys\", \"prism\", \"800m\", \"ppt\", \"daily\", \"20261008\"], [\"InvalidGridKeys\", \"prism\", \"800m\", \"ppt\", \"daily\", \"20261009\"], [\"InvalidGridKeys\", \"prism\", \"800m\", \"ppt\", \"daily\", \"20261010\"]]]}"
+}

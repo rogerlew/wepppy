@@ -1,0 +1,7 @@
+{
+  "monthly_model_rows": 1512,
+  "independently_recomputed_metric_pairs": 72,
+  "metric_agreement_abs_tolerance": 1e-10,
+  "all_api_geometry_units_and_coverage_match": true,
+  "no_credential_bytes_in_artifacts": true
+}

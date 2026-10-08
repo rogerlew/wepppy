@@ -1,0 +1,32 @@
+{
+  "pooled": {
+    "clipped": {
+      "cycle_mae_mm": 29,
+      "cycle_rmse_mm": 34,
+      "monthly_distribution_distance_mm": 34
+    },
+    "native": {
+      "cycle_mae_mm": 23,
+      "cycle_rmse_mm": 24,
+      "monthly_distribution_distance_mm": 23
+    }
+  },
+  "seedwise": {
+    "clipped": {
+      "cycle_mae_mm": 290,
+      "cycle_rmse_mm": 299,
+      "monthly_distribution_distance_mm": 319
+    },
+    "native": {
+      "cycle_mae_mm": 252,
+      "cycle_rmse_mm": 258,
+      "monthly_distribution_distance_mm": 254
+    }
+  },
+  "precipitation_closer_to_gridmet_sites": 9,
+  "generation_diagnostics": {
+    "affected": 69,
+    "total": 90,
+    "unmet_targets": 1324
+  }
+}

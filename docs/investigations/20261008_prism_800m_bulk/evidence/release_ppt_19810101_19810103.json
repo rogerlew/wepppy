@@ -1,0 +1,16 @@
+{
+  "url": "https://services.nacse.org/prism/data/get/releaseDate/us/800m/ppt/19810101/19810103?json=true",
+  "request": null,
+  "status": 200,
+  "seconds": 0.20543903698853683,
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:03:21 GMT",
+    "Server": "Apache",
+    "Content-Security-Policy": "default-src 'self'",
+    "Content-Length": "324",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "body": "[[\"1981-01-01\", \"2024-12-18\", \"ppt\", \"8\", \"https://services.nacse.org/prism/data/get/us/800m/ppt/19810101\"], [\"1981-01-02\", \"2024-12-18\", \"ppt\", \"8\", \"https://services.nacse.org/prism/data/get/us/800m/ppt/19810102\"], [\"1981-01-03\", \"2024-12-18\", \"ppt\", \"8\", \"https://services.nacse.org/prism/data/get/us/800m/ppt/19810103\"]]"
+}

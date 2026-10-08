@@ -1,0 +1,14 @@
+{
+  "sites": 9,
+  "watersheds": 3,
+  "openet_series": 36,
+  "openet_monthly_values": 3024,
+  "missing_openet_values": 0,
+  "comparisons": 36,
+  "clipped_lower_annual_monthly_mae_count": 63,
+  "annual_ensemble_comparisons": 63,
+  "clipped_lower_monthly_mae_mm_count": 36,
+  "clipped_lower_monthly_rmse_mm_count": 36,
+  "clipped_lower_low_snow_mae_mm_count": 36,
+  "clipped_lower_low_snow_rmse_mm_count": 36
+}

@@ -1,0 +1,3242 @@
+[
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6188136440032395,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "78f9fddd27eab80d9c723df39768dd2ea813c1280ddc0a4f34b46c0a7422b993",
+      "H27.pass.dat": "3160be741589d595fe791b6316bc739089b41bdd0d517282c743ddc868c9b894",
+      "H27.soil.dat": "a99bbe739f70881fbc345e00cbf5280173874d3285239c502bb7893d21d0c688",
+      "H27.loss.dat": "607a37b3e55afa7caa24e1d151377533526715632d854bf58a5fabdda453e7c8",
+      "H27.plot.dat": "7b2a04912d0105d09b807d93d308580a20c847f60ab2d79e535ce5a6466f5ebb",
+      "H27.ebe.dat": "39eea5412d2cd63111e5b59bc56ac1e52bb0516141e761bc847c7451cedb7e77",
+      "H27.element.dat": "6ee062c4e0a38c8106c3b4f34503ce20acfa218b8c009982fc4b100fb284079a"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.619542600994464,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "6b19e3af87fd484045d55ccd5736fa960190bd85206b1dc6496176492040f36b",
+      "H27.pass.dat": "e09771ca6de40d630a93e5aba2de590e3ee2f3927dd9aa66eaa887e5d802b802",
+      "H27.soil.dat": "b2ce1628aa035422fb53ee6328fe3a40619bb7c310c4771d26dceb12dd786730",
+      "H27.loss.dat": "f13cf332f6d53c7c30e33ac195d50aa54d2566b53959b619ba20c127fb45227a",
+      "H27.plot.dat": "5e3582f5cfa7795707080b38d15b11b1adffc7d597c2ef061c0b653a942ef50a",
+      "H27.ebe.dat": "7ea50af139b4e2025fc4733c587fed60d3c59650f6f7b2027db94df257a4c3ab",
+      "H27.element.dat": "cc16a76d03a92d1f6e423565be0379029131f468465898abf22ad24768a4c5ed"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6186636430065846,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "b5df59a01d4147cc859385e077fcb8f7f49aefdae16a73f1c83224085150f953",
+      "H27.pass.dat": "41c9a28351aaa4ddad371e533edea6dff8b5d3be4b15e0b34f13a4d518054049",
+      "H27.soil.dat": "c1a7cbb1563ca5fd0298a743e0333cfed50491036b7ba4c0941bc860096d4eec",
+      "H27.loss.dat": "1fdb7ee251c859ecf93b703d1d39eff2cdbed2d781b45302a90184bc7c971ae6",
+      "H27.plot.dat": "a80fc65064a71805c799b9343b360b1728c7bf9d6531ee6acd3e5f044313b284",
+      "H27.ebe.dat": "8385b4db41fc2c10b385dd0d7de36f77bbd4057e4fcce63db02bcf8af528f4e3",
+      "H27.element.dat": "d45f9b6d87343bfa4311e0fb1fb0bdf99039f98d17cf47a82e9d23ddd4414a90"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.616557585002738,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "83695e89f96a2b3998969fb748d4b9eea0ee94b781d8a6dfa097ea7fb2054eb0",
+      "H27.pass.dat": "a30d23616c00c1bc9ecd6d3062d16d62ba95bd78e12ccab1f8a6c89be81b6539",
+      "H27.soil.dat": "bdd3e5c2919da49ea1344f2f9ac07b2690cbca892d2023466b7faa8f38d89a1b",
+      "H27.loss.dat": "c4a06358a3a235c384c47a1e4f8a027c8bcc02a21d882e44611d10c5c8135e0a",
+      "H27.plot.dat": "69eac8f804ba6218340b6354bab93a078d7d35c25a0d1c3426ba7b190d135d4e",
+      "H27.ebe.dat": "f261133b1980b38c793ed38381754115b755d24529a224ee0ab7f3342a8bf562",
+      "H27.element.dat": "5f2ccaf14a4f2ef8ebbf99a54641299f9174683159093064e0662ab0c5ce69fb"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6158211649890291,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "98da89ac044ea2dd6b4f54f750765b79cd75e9ad8a73ffffefe13796472b5982",
+      "H27.pass.dat": "bf72daada543b679900f6e5b370b3829a58b97e16dd13e102b32b81c9a71938d",
+      "H27.soil.dat": "d8ec2a6224150341e43bf9fba92adbd388e669451d09f23ab55efe739976a81a",
+      "H27.loss.dat": "3ea8113d9feb7bd343c3f1a77321df213e7417bcb03adc236a63b8c33d60833e",
+      "H27.plot.dat": "598d8d1d1e19f5c2f9e9fd83d9eab06b46c46f7fdb7128d6813812955347c5d0",
+      "H27.ebe.dat": "8b457b7e0adf71c426685856f7a36d8bb3575627e35cb8f94e91147720930506",
+      "H27.element.dat": "d52cc77e7de5fb93297399ca04dcd181352b2ac8c711df5002d2fa6a3c3d30ec"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6160357650078367,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "ef48b05440ca4696d06811fbd8d53d2ea454c17944e585b57ff7bd26b835fd33",
+      "H27.pass.dat": "7a6c412e4a8586e5d7099ada9019d64edfa1d068e5734a869b40a7cccd412971",
+      "H27.soil.dat": "94e770ecbd97db210c62f1336ae8561747d4b02764a140daa4ba5bbac0b0e40b",
+      "H27.loss.dat": "a2c7e46a710caaee33595aa16488c02476edd40518ae1aaa75e0b50fe7994bbe",
+      "H27.plot.dat": "beffa881cead8cfdf0c226aa2f61469d9326fe5aa6a7ecb599af8dbda16e1331",
+      "H27.ebe.dat": "11cc3db8b7a8baa47000445ce6c750b7ea6b9d88830310ec65b96762e10320ca",
+      "H27.element.dat": "f50a2c0b33a9d308a1463c87f31ef6eda0855017daea4159ebe531f1f64eea83"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6159653100039577,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "056e6c2b5be77783ab020c665bd35536bfbbea108ee0660e8e0e78095a04d027",
+      "H27.pass.dat": "746371c9bb89623a680f3470e01e2b0cb9ef0ec4da94ee668ded3b84b633e32c",
+      "H27.soil.dat": "f3f87d9905117c893d60b27e3dea3e8f2a778e6dcf7331686921a67f5666ac28",
+      "H27.loss.dat": "1a5cb52f7815de610c083710ba7497b6081d091fb170321f346f2023112ef132",
+      "H27.plot.dat": "e61eb5f8003ddb63d7ccc7154e04075a0cf81687bb385c43caa072f0093b7dcb",
+      "H27.ebe.dat": "76ec6237fe5a0cfb7288de8c5fe5eba88b56905c04722e00e1e56bc5722a0146",
+      "H27.element.dat": "d21003295e54d7560851d61d9a47d18f460bdb61abc2d45cba5d6e8c2b170b43"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653983179945499,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "cda5fbc278bff67bbaceb23790485412baf5da2c64c789a1ec4705f09c8f551c",
+      "H27.pass.dat": "9db25522c5ead4b1dc65506a260895cd05b1c19bf90ba2e449e8cf57e559e919",
+      "H27.soil.dat": "379dc740ec70234b07297a7ae078a14edfb653742158ebef7a7049430865c689",
+      "H27.loss.dat": "d80c9122450da3e1af422978e47db599c836764ea782f9d9d47289e9260602c8",
+      "H27.plot.dat": "e6b1b63e496c15873bb04ae2074e3b937c8c50c573443a582b4c13cce107c94f",
+      "H27.ebe.dat": "481454e56eaf991c37b5d1b664a4491db7f935a108097024bf9fea8dabca5217",
+      "H27.element.dat": "432e0eb4865c59aa6490a84bf4598c45283db9b6b00edfa1318c3bd610aaaf2b"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6156946099945344,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "066bde3d5afacfe2e3d2191ced96d60f865a655892e630ceb05b2bfe16d4b78c",
+      "H27.pass.dat": "0e1b4cfefe2a36b458c22f833b47ec2f7a45f7b9e5b6ef80816b38e765adca01",
+      "H27.soil.dat": "6a01d34d27570dfaecafd996e2828d1d0119e261bfdfc62388f0d0cd24ab5c1f",
+      "H27.loss.dat": "54b94b847c5f41d07665e7e496cda0b4ab0d4ae13780a0359b6d511cc01efbd9",
+      "H27.plot.dat": "0c93a0310bce64b6a6651d2b0fa5a6a71ede51688f218be6d8cebc15686bff29",
+      "H27.ebe.dat": "7e9ab6a1acbdb9661c470e895601aab54ef37c8fead3d40a41051461885c0260",
+      "H27.element.dat": "c2beca076355e33e200d6f1353a50c5a8f7c60946843437846b03359f7ada75e"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6155338730022777,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "caf3858ac669dae3ab87828fb72b75d99cac1480cfa340fb2fccb0d6b84cdefa",
+      "H27.pass.dat": "ef1b1cd28d1234a452e9f56661062ecbaf0ee7472bc384d9fed9c821c6caec73",
+      "H27.soil.dat": "8af85e6dc6f55086ba34c5428c7ddc2b3e4a560ca5e5a82a416447210cef5365",
+      "H27.loss.dat": "5a829eda678b22e463c3b89f36818da7c7dc926a4c639b7de728f87ecc7e4a69",
+      "H27.plot.dat": "792f227a08c77760f9d384887bd2c27272d9169c33b357a8999d86fb7f833898",
+      "H27.ebe.dat": "cb340d70d6c531a4c35d9f2cf34c0e9e4aff86dc374d383d022426bf98e2c582",
+      "H27.element.dat": "6954ceba255771d96736b2fe4a0e58b3563ee8fb239b7357f831a3faa9d7ee7f"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6161568239913322,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "58f7a0eee62a22a2d3faee7606ecd6863fec664e216a3d2351bf56fa4c380389",
+      "H27.pass.dat": "7795fd63e7fa83d3590c37f74ef97cb4e3dbe9509f22cced47d850f0a04f3c8e",
+      "H27.soil.dat": "62bbc37b9db7d8916128eae5361d816fd15cf6f7f44f7d79f51bf731def9803b",
+      "H27.loss.dat": "9bb0e05ec27c3dcb16cb4c28d8f91e50074aec42ca5465518326404458e7fce9",
+      "H27.plot.dat": "358c0d6bffe664b8cb8f3e86e7bc167cfcfc5f5068ae4338b48df31d172713fd",
+      "H27.ebe.dat": "da1e71ec8167191007eda295aaaf51bcb4175fa6619d17b40636d7926b50b133",
+      "H27.element.dat": "906c9a82a4b720baedd9327c260577d3ec06eba5897d199f501dab37761ba443"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6152270890015643,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "31e0768701a66cc237df0c74e02d0ec27f0d6a81cd828ff7225561a0abbe6bb3",
+      "H27.pass.dat": "d9f88ebc60d47d31c11873fa843af39dd86da8815bd73917ff6e82cfd0adcc38",
+      "H27.soil.dat": "e0dd64682e85de7bce03411e95ac033eb61ad947971cde7b547b9754bdae14bf",
+      "H27.loss.dat": "0903402b91bc149c57ec3458dde7f87633e1ce9ef86db82ff73b319b43e79421",
+      "H27.plot.dat": "0a765e00f5c0bf9ee56f4a06918d8b889ea93d30cb069707a45dc0bb58aabb23",
+      "H27.ebe.dat": "26834895123eed59ee67c7d31efd5cf20b11940e7686af01dbc9187ee030b9e2",
+      "H27.element.dat": "98bacfeeb39d3839d719c3fd68d5bb067d4f58f9dfcb6eac0a3d555b08319a6f"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6157056059892057,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "44fd4e96f46fc2ae9f35145134e59c1466f819fb173cd6865b8517c2b870abc3",
+      "H27.pass.dat": "1ddc3a06f9bdd19185b92a15c497ff30a96cb6055c53926c51c11d005ae501d7",
+      "H27.soil.dat": "18c98a5d1fc00175a0469468f987b5e4941dacb5ff984eee44757d7175d2afbe",
+      "H27.loss.dat": "4af5f549c3b0f20b26a169cb5a79a0cfedff8b08625a0ff1955aa6900eb462e7",
+      "H27.plot.dat": "f23cf7bb8febdb9177a26525717dfd170b56bbe8835c35c7980714537e129caf",
+      "H27.ebe.dat": "227396b582e9d2eb64d2029b1977ba842dc5b0a610c79d561a722b6b1cdfa2e6",
+      "H27.element.dat": "44282c8fe3fd578bafb1bac69a4510eda671ad2efb9e9c6efed869b8f8fb6ee2"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.616008940996835,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "9a35959ea8e37bddee95019f81494fed5c81bd40552c821685bdf5659e1f8001",
+      "H27.pass.dat": "78c6714a6acde8979438a0ca4c8c45dcac99393f486d9900a751f88420011202",
+      "H27.soil.dat": "fd7c36ae68356acbb6c1a15f25c8b4a95f47dafb718be15af6eeaed191c7316c",
+      "H27.loss.dat": "14a663c071aca6cf785c225e370b57414e6f5de0716a2565510c9ab09b658347",
+      "H27.plot.dat": "cc758a26a77203df578e2d65ed10d14a755e9fcd2bc2e39cfb8eb0cbff1d1dee",
+      "H27.ebe.dat": "1bddd2ee0326755125f49442628edb40976d91c66971ce398a84c68fb2d97d58",
+      "H27.element.dat": "e07fe55d20563278e38fe63ebdd29e597da59ff7e17dbecd895935720cf630d6"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6159315910044825,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "b8a5481e2045d68b1bd4970bd7412f2f88fa2c120192024c19fa59e4e4355c60",
+      "H27.pass.dat": "f642111af32f8612e7554d8ae0965a60f6393ce302ade940ed6332635546a862",
+      "H27.soil.dat": "52bb386b72ea8a929225bdcdd25d3eb8c2e55d9d5f23c1af5be392c1bda8d45f",
+      "H27.loss.dat": "629db44f5d04822fcb1f01427ccfd15c0b3e76b399c6f3fc3978d8bf52300871",
+      "H27.plot.dat": "a48b839be87bd44fff871c4419483a755097563b1de71e81c5eecede33f626f2",
+      "H27.ebe.dat": "882bbbbdbecd7bea036847acad2c39e1555f1b514de61ee097043602ffc2e5d3",
+      "H27.element.dat": "029605a018e6952b4aba3bf0e3bf71767de7f8f047473901ddf9b282b5332968"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6154027980082901,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "70a8369963509e6d7ae2fb4cd1dd8ac32cdc451f353588177481416b608eb6da",
+      "H27.pass.dat": "83b6b45cc64042c036128b70879f19c0edc976afbe28ee930795f7068a090d4d",
+      "H27.soil.dat": "c08763576bfd8f2c8e25a0392551b70743a9385717fca675a71bbd202798c10e",
+      "H27.loss.dat": "9db3d1be28858a23b62b1cee091f8344b2cd4398a18f214d5606afa0e3638900",
+      "H27.plot.dat": "e95fe42833d6e8e5c38437e43855a601fc470af62a658759eef8f62ca67f441e",
+      "H27.ebe.dat": "06b54c346aed1254990dd2b248d80f209cd648854172ed55198f1471afc1bfa1",
+      "H27.element.dat": "a51e7fd137c0ae9309be744bc5fb2485cde7aac898fec7c3acc10af07f775ae1"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6158190309943166,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "2eea413e2031c4b25ac9b9e053857d5225c749fefb089c6fb1115e51f49699ee",
+      "H27.pass.dat": "123647417c6b35c3257e298c3bb27835d2901b193ce077720e34acf7622d4e2c",
+      "H27.soil.dat": "891931dabf19013f5f35779816a101c9ae4584441b0525b43d2ecca18446098b",
+      "H27.loss.dat": "3af2d0650ab5d11aa0a0f3bf3b0b8ceef72f565bcf55b2bcfa1f8d9a61b54c52",
+      "H27.plot.dat": "37930660878963d6b458062228eccad0179f407998825f68ddb9dc8841a7870c",
+      "H27.ebe.dat": "ea19319f4f4a67bfc88d5f5901305e38ad6ef98248dddf3455a0b56320983ea1",
+      "H27.element.dat": "cd0fe347887c2b7b8b68f330c299f331d90bec078dbca8a354ca280a44776c13"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6159380199969746,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "6b12acb0e0ecd39d7d70187405d96882f7bf7f450d9c674e1d7feeb8bd11947d",
+      "H27.pass.dat": "79a31f8e739034aca2e16e5b65face04637422264fc931ea98eb73a93da4937a",
+      "H27.soil.dat": "e455704f2a7a3451b9fbb84e7fcb570e160a014ddceefecf325f465f9bbf5409",
+      "H27.loss.dat": "dde149db092586de60621302b6905e7fe4f03807a1295b4492a6ffd99cf2d6a2",
+      "H27.plot.dat": "5c2c1f191962dba79bc66c563675574cd1cb931f376f4770ce8ab7d447dbe6d0",
+      "H27.ebe.dat": "46b7b54c419990f9c9db667038a89f767695cbbcb05f5322e3bd5d42e25e00dc",
+      "H27.element.dat": "cc318c4940ff5b048659ca1cd6ff4e951a0fa7f92ef4398206e679888a0921ed"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6154570360085927,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "f753a9ea2bda958c7cb1bcb2ad5815c22f68452ed7555720534317e227ce2099",
+      "H27.pass.dat": "d1e1879e04387cc52fd4af698535d77017057c21e833d7f22e867b4a585e4f2d",
+      "H27.soil.dat": "c237d40649dc957cc4bd10411243cd3aa007b1e5e86e3eafdf00740dda74238a",
+      "H27.loss.dat": "386d118774202e2f2c8add72575f71f91b2e43412b40706910e0209c03e964d7",
+      "H27.plot.dat": "34118780557b15f6e7f803bd1ce66985cad76f56fbc433d39e3d37894d948d35",
+      "H27.ebe.dat": "09d2c12482734321f664c810ecc5295e5f88fdc1d92361b8379d02ca53a3c0fc",
+      "H27.element.dat": "0c58341520e16b2b54622705cc46fef837f8113904eac39cf653d06a31e2ea92"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6160461580002448,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H27.wat.dat": "767a8f5be1ea0a3ed8f31f0d8354e2f6ea554be5b2a52aa95438dcb40122b9f4",
+      "H27.pass.dat": "a1b7719bcaf10201c6f35d3f05bcb5b4875cc9f0e2d3587570f797412cc54149",
+      "H27.soil.dat": "9e9170afae9b58783efb5a0b4c6f80011529c3ece57adede48063c9307023b52",
+      "H27.loss.dat": "7f9bcb6439bfbaa10722182cd6b6bc9f2f2ceffaa0ce7249d9def3f69405def3",
+      "H27.plot.dat": "08905cccb152d89badeba8672d0b82f4acc7b1ca9231f86449f5c7f7b8f0a540",
+      "H27.ebe.dat": "abed20f489ec498f5e36b0768c49d50580f00b3ec345d5e538bac632793106a6",
+      "H27.element.dat": "390fb1a66454219abef2850d8d638af40577501e3096b6007d7a75afd217cda8"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6158809810003731,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "e007b4655bfd0ef5ec73a509cb326219339d3e50f2431184530e91a5f267aa47",
+      "H113.wat.dat": "89f97ec2abb09a136a09f004862c3c0ad16631734f1f7549196eb86f59a31970",
+      "H113.loss.dat": "f68b6478a07403dfee3a41041e82b990325e8c3c1e0f9854ef24435b169e5fba",
+      "H113.soil.dat": "f961b0ff5f233bda72a1477d93d5faf7813a539f46401e857431e287a3dca460",
+      "H113.ebe.dat": "6d5bf650e2a84ffd891104250083d5552cdbfa13606a6cacf459558598cf9f25",
+      "H113.plot.dat": "53cfe1aef65bac5b4229da801a6f88d873415ae55d34dccdf6db2562bc4b0a18",
+      "H113.element.dat": "ea2f540853a4e0a1a14e7c153114a4500339ca5ff15d73b066f3608e651967ca"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6157466290023876,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "fb610352fdef8a237eceda873949c3ada78beb72cdb30a6b178486bfad9937e9",
+      "H113.wat.dat": "eb7b2b48006b15d4df8364dd77abea5c6732d0886ed6f2f354c98d236a566a48",
+      "H113.loss.dat": "3e62cb903d53410eaf14db84f2fe315f65f777230e1a4cc1a340c63f8cad8e9d",
+      "H113.soil.dat": "e195ae43e6994a8e6512e5cccdb7021fb24d11c819351aac320c6e0d03a644da",
+      "H113.ebe.dat": "daacd8e360d98d05b9a86d5a2f4fa92d65cfc7cb99b8714257963c8e6ad5e415",
+      "H113.plot.dat": "8865b8fd2cc70cd4419b6f12ec08d6ede1017c203dff63514cd54757c5c24fac",
+      "H113.element.dat": "552e95a1bcbe131348b8f3d545542879f222e1a52ea0ab58ce8f46a9ec74f2bf"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6159819799941033,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "b73fd20df325c79251150af381a4f371900393f322993a3ddf6ecce1a99c56ee",
+      "H113.wat.dat": "63715cfe1bde4191a153fe308aef1ceabcda59ecea96eedb40074e29d1684c84",
+      "H113.loss.dat": "46f3555544b66d6c0fafb0a5b4ef514e4ffae4b49a07fad075a9069b2c1454da",
+      "H113.soil.dat": "3f84c0033ad984cfe88149bc90d220d467528548f1868e8810a22c402d46429f",
+      "H113.ebe.dat": "b1185d4804a911fab4e90e4d2f0e6b1e4b045b8a939c9d17ac57b4b938e9ee4e",
+      "H113.plot.dat": "5c050dae2478827dbc3b328016b61bf27ca7fcb88b73e23158959101a452c1fb",
+      "H113.element.dat": "bfe59e4f209f7f0818769c9e8666dbca50da98cd7e4a58977614f55642507165"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6158746619912563,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "453287369e40ad926ac4772e17f0e1238dab74d925119c40cca5a55d070645a0",
+      "H113.wat.dat": "e62e1da6e447c4c8640d7d80403a2c72e177e6b60a09f25a794182f6048e74b7",
+      "H113.loss.dat": "6805017aa7b02ca66ff9c6b769a7cfd50e40d5d8f9905d5c0837ddd9d2ed0b1e",
+      "H113.soil.dat": "01fdfb3078529cd031466096054cfcd7bee6b6016e61a627776cb4ee26d1becc",
+      "H113.ebe.dat": "019be7342e91680ec70dcae7f0357ec52a1142edeec85b11e653b371e8406955",
+      "H113.plot.dat": "98ec03aa184b7680ebf614097d007201fe396eb207a2bca124567d100425649f",
+      "H113.element.dat": "ddc62c898f0b32df6a01d5b0859ecaba4d4a231d91b2e6eb5e8cf4cea104c38c"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6157332440052414,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "0ea6f8e35e66f47a4086a61e15b98301fe587cc96c4a731418658d3f7f182d55",
+      "H113.wat.dat": "2d05ea01689f477d898a2b9aa9d9ae24ac934287ff010af6718d238818017e77",
+      "H113.loss.dat": "ef55c21859695e060b33936af78e98759523ab4b7211497a3aab4d99815ffa82",
+      "H113.soil.dat": "b633347b6ee0f4fcf2d7b2129c8db5eb171b4e68fd33db2904a69436b36e772b",
+      "H113.ebe.dat": "868619f20b9bab22bb1506fdb9dad6a56ed0acb84482ebbd01bed470e52f1d9e",
+      "H113.plot.dat": "a442fd5857be6c8f6cc568d7155db9e2608341a06315666ed9f2cc0da23c34e6",
+      "H113.element.dat": "4e7960f7e984949068d622bad25bda65f5f7583aa9345b4c5ce362d11f977384"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6161716500064358,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "e6f31fd7bed4c0a355a879ae0a764f346bbe729eb6ad24f82f0e511531b6be3f",
+      "H113.wat.dat": "3138e2f918bfe40aaea671b9160cc84916f6a2d05de4ed2ef67d442ffebba990",
+      "H113.loss.dat": "39a1f41235e97e4c337ac9507162060e4361ce0b5c7474270717ada23da9d57b",
+      "H113.soil.dat": "cf1394598d5dfecfff0abb69a7101c11e1642fcc3522aa2a54150abf9b80d571",
+      "H113.ebe.dat": "ec454cdf11e1c7d46797a688081d56de33c6a3a96b4bd9abf0ef57b8f1d2d19a",
+      "H113.plot.dat": "e5920b00a76cc21716a0f8cbe82bb63c58cc6eded1a8f253aee79caadf2aa94e",
+      "H113.element.dat": "5d1d0b110133f9c22404417f5c048b95afdc0254be83ddf673316683efc45278"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6161111510009505,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "f46e718e961bee98f2b71f6348ea8c38256dde8167e8ea7aa262d62c4a377f65",
+      "H113.wat.dat": "f5e4c65099895a33d82df5644f3d7a4f5351395332e202c21ae8fe4634ca23d9",
+      "H113.loss.dat": "2152156bbeac61b3cd056053ff584ab18a66cefa0854a24456e098c0f1b11fab",
+      "H113.soil.dat": "6ad037fb1faca2787dc79644bd9ecafa504f3e614a50c9731a3eaeb71ad71d70",
+      "H113.ebe.dat": "45ec11c4092291628ea996407d9311fff409a6aee443390086fae17140167c0d",
+      "H113.plot.dat": "cd486823cd1d2f9767b846c8f058c318eec6583ee6b6c1a2837d94db6268a964",
+      "H113.element.dat": "e43d99571a93dbc65ebfe6d30806f4e0b009b25345c8843279ee6f6ebccd26cd"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.7679697490093531,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "f8ef8fb7b942fdd2fc012228aee509e44838c044b694c259e749ae35be6a8379",
+      "H113.wat.dat": "2733842eabba6df0615e195d444e79fd548d2c2c4b22320ded1b6a8299bb0c8b",
+      "H113.loss.dat": "4eefc8e653b46c4bb034e3315aea7b2d68eee632c9be0b0bec601d4bfde75f34",
+      "H113.soil.dat": "2d4de8cbdcb566f3906a2386e027f77b6a8ef89197cfd581f411e51e8d7d79d3",
+      "H113.ebe.dat": "65223c6c7ba056388030c883e4a9801e968be6f5a2a767aef29cf72c531dbbe9",
+      "H113.plot.dat": "210ab2412a298646011fc4f9485efe639da424fea4e213cc0374bb0b5fef9c43",
+      "H113.element.dat": "2f3b6c2ae4c7f53405983f417e3a9a6fc5348a2c141e23df14e0bbb4b143ea3a"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.615648571998463,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "7692dcdee9c2eed64d9044af3f0e250b47abefc9a4dfaedb21eaae2f568a4a24",
+      "H113.wat.dat": "b2c0a11c4785cd82ab89a01fc750c8c11e8a71dd6667a01fab94d62960435208",
+      "H113.loss.dat": "0a8b3092df291717b39a387054e956d5901301c20c7c78a8d425febd841e20e9",
+      "H113.soil.dat": "b5d8414c2c7a09097ef1e8ff268b15643d854427ad351be21b84a14523927c26",
+      "H113.ebe.dat": "15710f02b3da81585d60c7fe2df464551441b44d55151c0834bd6698151fe0c5",
+      "H113.plot.dat": "7bcfe454dd57168946e36a750b229d53a7485d207775e7691c9a329769c87699",
+      "H113.element.dat": "ec9664a902cf4e4238f34b92d12e65e387b73a57ee7d2f31a37042c65dd85e11"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.765685066988226,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "99401456d7789108bf38dfc8cddba3634325a75fed3cd4707abda8ef2e82d5e2",
+      "H113.wat.dat": "93b103bdf19b9ea6a92f1952acbf90d900572ee89a2b44c8ec14e7f8c7ba5838",
+      "H113.loss.dat": "7f328c2f731a1a75bd8064eb43779a4625d1302892cd7f42cc192e8591a962c4",
+      "H113.soil.dat": "f4d7916bfdb3bc1cfb0304a2a0e1539e0900d1fb45ab077e14bcfae31e641d5b",
+      "H113.ebe.dat": "bbb29fe45e32eae6e83488f3c4b101f69bb9661f406f11bb04b05722f2652f91",
+      "H113.plot.dat": "50318144a31c089ea5df9684ab9c082218fe59e5b65050121df8c001f4fa130d",
+      "H113.element.dat": "38910ff3d27930a12265a48852b02624b9f9fa38216bccc25016742a3385d014"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6157726740057115,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "305152c6e405efb4d9b46d203b75fc576ba5b87159823493dbe9edeb784a6e15",
+      "H113.wat.dat": "f3c715cadbf1dd8064b54d0c901ed5e60116e5ebc648036a91cfc6dd4f9f6185",
+      "H113.loss.dat": "d1530d1677ba2b8872d3b25885e2733d84a65a32174d825110d637abdebb06ef",
+      "H113.soil.dat": "80f2316a8dfe1731fbe71e623cee44bbc59528d8e0f09e79dd7dc0fd9e59722c",
+      "H113.ebe.dat": "b46da33155867f0d12a38f392a4c4660cc596cf668d463f48ffa8344079cb1da",
+      "H113.plot.dat": "0ea32d63d1ac48295202e7a7e2a179f53ba9245ff39dace8cbcd32c559619de8",
+      "H113.element.dat": "3d3a811479e3b030d4a6a9245031cfa593caaf56a8abd46bb11b87f6910aa7dd"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6152821120049339,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "27b4dad6ce601b0133090ef19b8dd5f6d28c5ff0807010f66e855b62bf2c6afc",
+      "H113.wat.dat": "9800c084e902803fd5ae3d881477e9d0551cc44d889bb359576f0dbdd987af6b",
+      "H113.loss.dat": "8a0129b632d5259f79180f461dd59d691499326abd2259346779ecadf2884fe1",
+      "H113.soil.dat": "a1f9dd918a71b78b0d6547afe8db9e95aeb4e41c9d92153ee1e905ca8cc026e5",
+      "H113.ebe.dat": "73f6bc4a6a176ecdc19348d1536554a82da17e327e1243dfd034c8252780d864",
+      "H113.plot.dat": "4a7a67d218af4afbe45e53e1801c8992039d056b295954edd8a0b19570d1f1fb",
+      "H113.element.dat": "ab77452aaae3f34d5e1f514f3b7d5e2f0dfe96aa4904ba73445075d4cd3f664f"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653718620014843,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "294974213829b942e2ba0544469d82ab58c99fd9c8abcb49e000c99329fe673d",
+      "H113.wat.dat": "c6b21fd12fb41fbc75ccb71773762dae79c63ca66befaad19b3e9755867644ee",
+      "H113.loss.dat": "c0887ba0cccc22651109c23d440bbf3325a953767c5358780f8ff07f22ac5c4b",
+      "H113.soil.dat": "161d425d7eaac9e2e4ba595e0d0e5d9db4adc3e43f143b994304de705b0ddaef",
+      "H113.ebe.dat": "6acac3df7e31072c7f9dbcb01f2114aae91bbf346fc6fbe85ea8e741f6f983f8",
+      "H113.plot.dat": "300c1b328304f429f96b06e2dcb9295d2b00205bf6aefee51b5ef4ee8d776ca5",
+      "H113.element.dat": "df70a27130b915b14a790554007142b6cd794c604d3b0fa3840a6fa0e972e1b5"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6156375270074932,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "18d9bfbefa1950bf4b8e9126bbd0698b2a11dd7d8f1b2e07bb23b4edc161c976",
+      "H113.wat.dat": "79f49354ea3dc17509f1287c811cbc6ab918e7b52624191b18489ecd965940fb",
+      "H113.loss.dat": "97a3b0e5ad73fca69971786acc921d27d57a7943f4aa23d9c9a25f1620ef0fe7",
+      "H113.soil.dat": "ac4501cd8bf2d7373a8b4e15263c706abb55b42f2a80e3484cf88fa425f3fc66",
+      "H113.ebe.dat": "a11d7d10b21382b317bed83d1dcb9a854d2e7fe4c774787cbe9a022e9c916260",
+      "H113.plot.dat": "6ef267c11827a274843f8f1c37636b6c12dd330571f156b3e9a494b75210f7aa",
+      "H113.element.dat": "d43b2a05ec3bdb65cf0d7c0f0673fe77da8c9bca0d1aae51840877a4ca99c0a4"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6156956889899448,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "dd6161a6ba13f7df1b47fd597223b25ccb4bac7d0b4ed5c72263c79c22af7956",
+      "H113.wat.dat": "26d469bde8dd137d8d82509f1ba56b78ad51719d4a1c4048f70dc9de5fb29989",
+      "H113.loss.dat": "938358b5263d6123a0c7d5c94cbae8fb9ceb3a993ba664aa0f492885526de265",
+      "H113.soil.dat": "48aa1f620847f1bf9ecec44c15bc5d412629abe475c3d02f02e535a085acb91d",
+      "H113.ebe.dat": "5c7f49160d80d02d9c27a34885eb25913a4996854af74a595dbe625985e9c4fd",
+      "H113.plot.dat": "9fef6e992f88555fc7baf4db98560a328a81a4336256fca79cf673f07517f821",
+      "H113.element.dat": "42f9c09bd023eee8b9fc4a02f83a8b69e91bf94ab54206662585ac202210d1d6"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6156325089978054,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "7cb1ec6b08f5a3c68acf899d566a2675e59ef225aff305f2540d96f462dc94a1",
+      "H113.wat.dat": "b681986a29568e1cfa2224d1b507af2c817e303c496c3ba34c42ce431beb8138",
+      "H113.loss.dat": "312e562117502bdf1c47cecd432ef4acf503fc5020d78ed6da985e06f86fe6ac",
+      "H113.soil.dat": "02440bf22a11ac3c56183cb4516cc68d67551949741728ef8c988b23b963fbfc",
+      "H113.ebe.dat": "985251a4decb2939c10aa80e7a9c87b97fb017932fd64ce1197eaa3c2ee34de5",
+      "H113.plot.dat": "6ebfcb7ff9da9236a8812ddb324c65afe1c376e3f13a88f551ac7ce07f37984f",
+      "H113.element.dat": "03895bd5808bf49ed674ab063e0632ce030468a4a0cac35f0bec8ec49f118feb"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6159080539946444,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "0a6d183246b192f21e268d11700b90fab99c5e0c33feed5f2b3524695290e6ac",
+      "H113.wat.dat": "be683fba301e78e4c4d7b6d1990c3754f6959d12b3a4806db7ee3a09794dff2e",
+      "H113.loss.dat": "6b5120f04d20f53b00fb3eb3039ff34ee6d3784fae5cea5413785ff3edbe1d30",
+      "H113.soil.dat": "a31a996463d1f6982e4e813f1336271907322e65b9d0f0f057ebcdcfa1b2a265",
+      "H113.ebe.dat": "1a6554b13576f1ef50e8339c97415a5ace1d3de735cdd15cd7e97a54601a63a0",
+      "H113.plot.dat": "f97added3afff558aaeb6aa3c1d055dcb344667edd174549f5f933c89b22fbc5",
+      "H113.element.dat": "2047db2cb26ec8c69fc550d44ce788f7bd22033cf9cc10013f506b5956e9f166"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6154040119872661,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "2bffb815675eb8ff76bb919d7fa1e415cfe885585c7ebe279d6812c2b92a3998",
+      "H113.wat.dat": "5e9d283423ae45327429205cb02e364881d3d5325c3053f9ba4b0d8fdf342ce1",
+      "H113.loss.dat": "ab1b6c76957af9d4768744709a0e5e55bcb51c25559515e72e59da5f067b9f42",
+      "H113.soil.dat": "0ba9b5a5db6fc20ab4d943fcbb968bcdd180bc566c35efe9a7ac0b9586846b8f",
+      "H113.ebe.dat": "dacafe3d668ffc0ce5551b3826d93d8fdd83e2004af79eec7debfc00c54c133d",
+      "H113.plot.dat": "38e061fc654261348854fe1601e386ca7ee39423e72361eac389153cd431ec30",
+      "H113.element.dat": "9d9c728cd297c39d307aa5b0df6de7ba5096972e6792fce786ed815bf9fc1451"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6153590829926543,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "9a51181fcbba4e281b87d11403a84a61e739662fd5ad28a2bdf18b793fbf1531",
+      "H113.wat.dat": "ee94c2c848b3c37c8c59ec505a07fcbebe8c7ac55ecb2e0f93fc4fec91dd3ded",
+      "H113.loss.dat": "d9502124d5fa03f46dfc369c4b84ccbac288e427f9343657ae03167294005304",
+      "H113.soil.dat": "1a2cd9a5dbf96a3be9d85df7991cec7953d02735d59b6bc8a741361d219adbc4",
+      "H113.ebe.dat": "f6ed65ce81ef112506244e67f5bfedab9b054b46afe0003db740b9d4bcb93bd7",
+      "H113.plot.dat": "0c6ab9e61ee9200fd6de9da3a1c6ddd29319c8d9f6abeeb4a1711043fbfc5280",
+      "H113.element.dat": "fa5b48258039789d11ddaf7fb8ef7d0f7901ecfd9eaf5137c472203a2840707d"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.615497154998593,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H113.pass.dat": "2d63e11aee94a73351edd2186c030e9896da9f20b516900686a881537e3f85e2",
+      "H113.wat.dat": "72aa4b60f96776d57f2f2ad21c855e044de1452cb63005ba7bbf0170d324b7be",
+      "H113.loss.dat": "d84e087a53ba7db135d8ad85e38e2bb5d8004be78262343cba17e3fb4002add8",
+      "H113.soil.dat": "658c4be1abba35174f6bfdbfd1bc39a709c44c24a0c8619c57f98367c98712f3",
+      "H113.ebe.dat": "ad39bf410688ee961728f75e6e16eb69ed18c3cf887cc6ad383a3da6aed64bf7",
+      "H113.plot.dat": "cb209dd6166e35bfe6615c0244ee377b693d90f66b5d69ffb6892c98ba1a50ab",
+      "H113.element.dat": "d695581ca29cb82a9fad3215ddd0294baa39f0d13e70aca1fd901eb3256e1bfb"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6152490109961946,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "b92b19995d62800c4c92513a1b993f218fc4fa93ac6e4541dbac1c8c4c156bd9",
+      "H74.soil.dat": "fa9a3494ad8d128febf3f173960300033e073947b8437296e2a93a87c0be9bff",
+      "H74.pass.dat": "4f7ef1c3c4f33141c1c32edafe678d3f871fbae3a0dd3306b123c81d17b0d63a",
+      "H74.ebe.dat": "c7b6ab5827b5e1d1f55d579c8978a7f635fbfc5e71d4193ea2f222bc077437b7",
+      "H74.loss.dat": "9f77c86dce3c992e7de95dc0e2e2c081e81f1acfeb94afc3963f75e6b26ca823",
+      "H74.element.dat": "d8b5cf516361f9f17279e3f50379269c1eb05c11de5177972dcbcc9cec64ade6",
+      "H74.plot.dat": "bd209d3be7fbe385c0afd82ebe776c9527900ffeff84fedba10a4f25f23078c8"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6155702959949849,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "3f686413ec78e23ec7e79872c878461682bba8afd6fa3bf85fa4301d93656448",
+      "H74.soil.dat": "82ee1b781cd609ac8dad839c94b1a0a8b2e7966c6bddeecb260f63e524984034",
+      "H74.pass.dat": "710199c38d658a4225eb18b10aaafb963a9ff6242ca48a16358fcca12d9dd807",
+      "H74.ebe.dat": "8f7b01529d51e972d826dbcd5911e00c1d2f0fa334ba2a5f256596c34da22047",
+      "H74.loss.dat": "0bf20266d1220c63bdb39436b4d1d5d7007935c9f1ab239d0cfa54575c66583c",
+      "H74.element.dat": "3468b076b3a9766dee6dc7cad2466c3bffebb39439beceab64edbd71b303c2ba",
+      "H74.plot.dat": "f2c0ad98d71608ac9052727e8df2ee50e55f4d7aa199abdabe0afa75be134e0e"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6157271990086883,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "771149211a4d80a5361a2f702b144eae737b234540394814d20c5d696d7f1ccd",
+      "H74.soil.dat": "4f9d178e058cdb1a9d3831dc569c89577b2dfd8af36ac7f1f9f51302bac508f8",
+      "H74.pass.dat": "05bbff1a956d91baa3cecac70c59620f3d0a49a1396517e744853717f1f85c8f",
+      "H74.ebe.dat": "4b1e24ee5c4ef03ad2dbc0d5fd5c55e0a34bcd5a5272f8d43d4a52295380c1a5",
+      "H74.loss.dat": "9bd90404ea405449d52186ff812533335f1860aa056371c853f27fd89d542021",
+      "H74.element.dat": "6752bb8256a45d91a3bc75dc05f74e2c1d33c8a51840f326fee3214dfe969276",
+      "H74.plot.dat": "95c4f5f746a7214c72a6830a051070a0114f29a6610eedcdeaa893518518e05f"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653374649991747,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "c1e77af9c25d3e9eaa9e2149d5c2b52f90a942e222279540f56971c715cd5fe0",
+      "H74.soil.dat": "db6ba314d6c0d31272461e0e9592be3820630e9bc9fce53402884e7daada7f3c",
+      "H74.pass.dat": "fd5e218746d44cbf799e9c7f97d8ae2744132777f488eeb2928b256ad19ea356",
+      "H74.ebe.dat": "5078b0740af33bb46eb5451cf2b2a1aa285c4347fd9dac3559405caaee2109d5",
+      "H74.loss.dat": "3de76fae054a9545094cab6df24a83ede0c8b0c6067985f8baaef0ab8b5077db",
+      "H74.element.dat": "56ed4c8353eb2bd92cf07dff6a408b919ea844312c16133e9dce24625bd2b5ce",
+      "H74.plot.dat": "48e7319fde42abb41ec84df7441d83c9ab6892f2afa7787eb61c75c946933f96"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.615371250998578,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "219cba8bd14746b4c0da0b20639d4f312a9ac49c6f2c46a9be6e82e445382b61",
+      "H74.soil.dat": "881fae246ad0a899f0262b4e4645bdb5958621a8d8f6110ae07783396849ca76",
+      "H74.pass.dat": "00fff4b56f3f79db2f57cd2094f40f3db354a79096fb8edde5b1f7050ace5c83",
+      "H74.ebe.dat": "8527589c18e6327a1a7f1792af9fb13c9c5465e4b4c8c893f1747b1adb74d8b2",
+      "H74.loss.dat": "b119ce51b8d6561647b4b45b8204a6481c18b1603c3fcc4dd34849b4345fbde6",
+      "H74.element.dat": "87f174ac97e24dbe9710937333cb0ab0de9d7aac5f8ce67b28b216dfc702eb02",
+      "H74.plot.dat": "b22a1792fce71ae14ae20cdbc02b5242fd92af1eb2c56b9667c1a6e0746c8b2f"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654446550033754,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "1d8ce5f2e6cea4ac7335153e14978927fe16c06f76d55aada9dd3422673fbe7c",
+      "H74.soil.dat": "2f659e1a48498e61e2fb5fded4c4a8e96b8522c8ea154a853072112197455741",
+      "H74.pass.dat": "2d01d8904c5de7459eb87e6d2d8e446048173642821d4a58a646e1afc80aab1f",
+      "H74.ebe.dat": "ea1dd2e9be6d3382848959dce15faa421bfe2e65555eb5681fd614ead7bbe11e",
+      "H74.loss.dat": "027077c5403965249867e60f6e6d334e7fa12b3ec6e2086d45d9ff3d868c80fb",
+      "H74.element.dat": "68d8a856c1c1823f7f6cee2c31090597203a1c93ba4eb714f7a4c1958c5442fe",
+      "H74.plot.dat": "6eb67ef4c08d7a3b891eef39268489531ce92057b811e0f185d3a49d9e09de41"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6153498530038632,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "a8e1179e8e4357313fa53fa4ce8eccfc0c71bfbe2eb9ab4ffac4cd7774fe42ae",
+      "H74.soil.dat": "52f2c9cdda32afa7fc4f21644a4c9e1e99bfb7db9386c2fdbfefe529a37be0aa",
+      "H74.pass.dat": "88e7a5eb595ee6539796cf223407884c80f365bb76bf8c4dc0ee4ba77e43e8b9",
+      "H74.ebe.dat": "8d87078008415e951e1e5412158995e3de6462a7c9778f7d9a648b09f617dd28",
+      "H74.loss.dat": "39731f07a2f7d0845858a6920e50a1e2d2d76b113d340a233ea829cdba8436cb",
+      "H74.element.dat": "33298e23b9ab0846d48c19c8aa19ff345b1d6ef49ad86e98a2ed4b19836e702d",
+      "H74.plot.dat": "03e8a6daf92ba9fa4225814b47b40097c519f29abc3ec19717327fd86ea38154"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652562299947022,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "04242253da1af4e6bb6a9452106c670409f2eecdabbdb3b0ea8ae8a8d2399619",
+      "H74.soil.dat": "0d4791230a69538cf0e7561daa42ba70624b4d38b5a763de74d703cd9ae0be01",
+      "H74.pass.dat": "3e39120081001780805a91a606a949a5654b9b3f62684470cca4e99307fc2daa",
+      "H74.ebe.dat": "f4a085be3c61e1de93c5bd159a55a9054586792eb477897ba6cb818181a953a1",
+      "H74.loss.dat": "eaa6564414c47c6ee7d531dc493f520586aaa450f7756f28b6c473f3e812b160",
+      "H74.element.dat": "168cea8efa1cfae458166d77e645c9b30827cd0a0a057bcfa534f50bc9dc17b1",
+      "H74.plot.dat": "c73bc9a3cd431ce7b42af6f8580928f56120aea5e2490502d800907903b4e758"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653475959989009,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "c456f9f5e99d88350185811d539c98a8312695adb9dfae0f8efbf604f526a6a1",
+      "H74.soil.dat": "71290c349362e24d100a8bf6d6e153a95d1a62bcf2af95ce248bbfac37a4f4f5",
+      "H74.pass.dat": "48c7045c52dcbb9473d7ee6cb528360695866208ee0833549db8145453ed05ac",
+      "H74.ebe.dat": "b382b5ada3b4827ef912634fe4f399c9fb6f5118df87d15167b2f0537bbd4e55",
+      "H74.loss.dat": "ef3ed11d94372b3bb970459c6521191deb3a369bbf1d890ea8d61cb99eaa10b8",
+      "H74.element.dat": "eb5dae06a5bba613ed4403efb8747717adfe8b99e7c3dc4ae9eeda31bcefdcbe",
+      "H74.plot.dat": "fb216bfc5e92a287cb2bd3d07fd94ed66b6c85a026edab17ed15b74a53c842f8"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6154813879984431,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "667adf61083af55f42efa78706d9e99dec18bf3195cdbb2469643af9c1fd8ada",
+      "H74.soil.dat": "94fac9ebcf53024cc80d8d82308f3aac5787a08f8505036c8b960308ac708bf3",
+      "H74.pass.dat": "3fee1f0cc5a913a18a144b3b2dc0bd5d463abf94b2790b9ed56c5ef1a13f3cd0",
+      "H74.ebe.dat": "f2fd61d9b5a63776499fe9362416b20a69f4143413f3d88ef3bdec6d34c1b3ef",
+      "H74.loss.dat": "c2c77870f95343883b3bb13529240fe848d4b0af40225bdd72015e00518ded8e",
+      "H74.element.dat": "bc3d0da1c0679e34c827524caba73871a590c180dae6488ea42ee06489f3f13c",
+      "H74.plot.dat": "ca7855f6171728a62dcdd615c5f732edb59628020331d17b173a7ffb1bbb6d5b"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6152111690025777,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "0bf5dfb9261fdc71ec9b4af101b43d637f531119e80749f444f631cf5009822c",
+      "H74.soil.dat": "8e8431f18e467b9483e67bb46b852772f25733ed07159b71ef89ece6c85687d6",
+      "H74.pass.dat": "9a99f4c689d9d47733f5f13aef01c464d3c6063333740e37f9ca3b829b39a3f0",
+      "H74.ebe.dat": "abdbea9757e3af6ed9ee111a26cca0fa7b0422b73d73d1a99f47382f474a5ccb",
+      "H74.loss.dat": "5aa6f49e7159de87e01054976a99aad07dae57f8185467c76cae1cc36bc067b5",
+      "H74.element.dat": "68ddab51f644399964d243567ff596632b9b17aa963d3114c68276de1c32aa11",
+      "H74.plot.dat": "a917eaf0e1c27525ae2c02cdc3a1c062e1755ab31b7d5e5b6cad8d4c077475fe"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6156888010009425,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "9ddf5db70b6ce21d78826a2c2abc4a1bababe1b97ec1dce676720287f7983197",
+      "H74.soil.dat": "2396611bdb03e45c830be09dcb0f907a4697c135ea034ba67d8ab11e3a11534e",
+      "H74.pass.dat": "850a9f6447b430fd0aaed5b2c412b8cb8f3e9e84d5673bf241f30c99a22269c9",
+      "H74.ebe.dat": "adecd470d5816c07c1af8082c0ffa21187b03b8263a30eaba2d48ec17ac6f906",
+      "H74.loss.dat": "4f8c828b339a3f9999df6d71b123390c646bef9227e74676cf04935b90d77f6c",
+      "H74.element.dat": "bd29572c20eefa9991e03bbd651ed0c096732ec4dcb1a81a51eb4cdcb58787ac",
+      "H74.plot.dat": "e3d6db65cb140a54bf96718282c71ac11eb3a8887264ec1f6ff4228a577357e0"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6153495390026364,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "91ee5ce68ba63a777db143b567dc608908f7cb0e32bfbdc505bc9db753f06bb2",
+      "H74.soil.dat": "4de80e391dd84c6ecd05281b8f738bfb69e406e9ac8e6685fedbd0d9a440f68b",
+      "H74.pass.dat": "3af5380900a3ccd1b8591238d329be254689af5b574a2d99ed985cd9ef874455",
+      "H74.ebe.dat": "145f900180e1a972affab5e6adfe9977396ca8955273746b2363c37c8b430d68",
+      "H74.loss.dat": "f5833aff66f6c978c90754293d05961af9b502e8b02a3aadac46ac753e426fd1",
+      "H74.element.dat": "0080fc874a7cfae1031960e39ad2595a46af26ae3fb284b9479df4b4214809be",
+      "H74.plot.dat": "5fcce602c5e9f6649ee2eec0aa79c028d5b9e553dfce9fb1b696a4c3ceae355c"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6152737829979742,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "f94cb97b71c977b6a7f7736fbeb6500d0e21ae4db48412db2310f6bc1b268306",
+      "H74.soil.dat": "51a1c9f3c62f11247f2b86125bc829543c8d6fe32e36d0ead67af42efb29c22e",
+      "H74.pass.dat": "0394522ea81c976128540f0616859aa63a9710d7bc9ec63330e986b6343928c2",
+      "H74.ebe.dat": "b6b2eb6b5116a7e713cccf5bab9c33341bfba9a1ac3ed7ad6a8286e0ea9b1877",
+      "H74.loss.dat": "ea697dc566b7bdde57b227cb82e33609a0360cd1d7994d169815167ba788c2d0",
+      "H74.element.dat": "4074764d8448a17454b04db06e316620a72f1a5eff4c0433b4f46db0c65c4d4b",
+      "H74.plot.dat": "806971a2e1bcabc57fec516c4ae1a4ee2a770494c2620cfc9512d4e792198e9b"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6156070930010173,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "6075c3014fbb190eab16448f86063b3dba68143422d0fc423e69d5fdf4df96af",
+      "H74.soil.dat": "814c09733181b160376ab4290085ce2ff391cf1b03fa9ac6767a04377bb5b420",
+      "H74.pass.dat": "361fe457855f8dc87e2bf3e8e8ea36456cc498efe2a3ea15ec9cfb462ad9af03",
+      "H74.ebe.dat": "96b3c855fe3738a31ae37a2309b6bbd1a2d8a069bda69c2c2355e4d7803e06b4",
+      "H74.loss.dat": "8de7a8da2e17eef3ed35927092568117fedf3b965521ff1c1c9caaa7b53ba863",
+      "H74.element.dat": "0af113364510e16438284af9e0c0483e9c945a6efaa453626e8de017179dc452",
+      "H74.plot.dat": "c3103864a187aad7e34025acf4fc87112d8ff929e9989ea5ec3783891c3cf934"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6153548760048579,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "680c372d1e514a0cef0826e71bfb11a5af90a4990817508b8b3c68da8ae0a318",
+      "H74.soil.dat": "fdd45f6f9007f0b8343bd6d179af26b9316017749788b7be269279dda8252a7b",
+      "H74.pass.dat": "bce35c597faef9dc08a11e9073336daa7c6f7704f71e5a6bbbb8c6af560c10e1",
+      "H74.ebe.dat": "04bbd2e9140228326bb7fdf5618cef6b11b5bc91e8b86e439f95a4661462cf4f",
+      "H74.loss.dat": "d6d05f7a65a34c6931c8f8234c37e1abe0d1ad55a57ce0102a4f8371d81bffdd",
+      "H74.element.dat": "01c47d2f3221d20835252103dfd7e78192fdca2c0dd16637ba7d7814657baf0e",
+      "H74.plot.dat": "69e8a7428f97a6ebc156816be0610e75d7755c09e2ce6d392a0d846b1cee15e3"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.6151887320011156,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "d941e68150bfca3c872f41e57c3c400faafed7b85fd8b349ce4c9825d62087b2",
+      "H74.soil.dat": "c9f6bd4343a54b36b24285222dbb00ca1e5cb797fe8bf609c3a05cd6991be896",
+      "H74.pass.dat": "cf68ffacf36f2361982e2fdb34c0177c26014e2d6da59121d6a0fbca052ac224",
+      "H74.ebe.dat": "14758dd7c86f88e26ca81db0b8cedc6adc29ab647d9388a8093d110a82fafb67",
+      "H74.loss.dat": "15bbbaeee17811177ec474c65863285fa3c93046713438a336d8e07c25e6e395",
+      "H74.element.dat": "03bd3ba1c1210054f1970a9ada0f7e4f8eac4d15c0f81d2e2986d2b0d74f6ea0",
+      "H74.plot.dat": "d84839534f098237215d2995c0bfa60af5deb8b30ea8b4b063bf9ed2b6b0dc7a"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6153518260107376,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "7a773726706ef6e5bcefd068900acf81ac121e94799499cb5c92db34e8407910",
+      "H74.soil.dat": "b9ab8be42f267f857d4dee185a55b5941c4a6b16021a3e3758e27ec4545536c1",
+      "H74.pass.dat": "9def0452728ff197b3414852bfb74b6fe9281bbd96e6556b70aa1bb0590a1e0c",
+      "H74.ebe.dat": "763a5505573e256bb2ab519b69850515a1e86b98de761aa21d5479e5a85fa29c",
+      "H74.loss.dat": "92573b88bf7b25d5a6ef943c57f3eedda2665dd1679d33c98b091915e3f07848",
+      "H74.element.dat": "95865c9ead656a3e95de3641fb14135119bf13a0aa958779e70eaacadfdb6fce",
+      "H74.plot.dat": "5696c65bab377d112eb6d6c11ef8ab62a695fc18f33266f8c99aa86d573161b9"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.615691719998722,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "5fedb06e925921f12f7f04351f67059e9d61acfe12effaf6c82c28c5956e01f7",
+      "H74.soil.dat": "2ae64586b269c36c2a857247b54d87b2e745719e48a40dec36ca6705ed8cbff4",
+      "H74.pass.dat": "a7458f2997f02c1424a148a21c03a71ac85e49fa180da51ab609789fa5e8fb51",
+      "H74.ebe.dat": "266ba692ea1e69bb4177a90bc3e1f5d0f9107b9e088c4db5edc7a4316f893d36",
+      "H74.loss.dat": "828c2a0db475f17fbcbdc88181dcc2e366647e0a977449c2a454b90050aa5100",
+      "H74.element.dat": "6e51d16c185924392f698932fb83cfac55da925e66e67906b5d29ee34fcad856",
+      "H74.plot.dat": "9333b7b12303d0e2e8718d8925d0d2f92bf03d2abfa22097da01f9031a7ea45e"
+    }
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6152045460039517,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H74.wat.dat": "4dec90de41f10d7660f138085dc7d0c67337097a281e51c7a02b851d604c6cce",
+      "H74.soil.dat": "7329f6e848149c42fb4e41f5200bac18d9ae52ec62cae82dded0e881cf02f5fc",
+      "H74.pass.dat": "1011469b12ebcea99df193d91940751f40cc80d8841f770605bec6ac75b24659",
+      "H74.ebe.dat": "6666700e24a468cb7d5d8c8f88edfb8918a33861b3517e4db3ed0a0289735804",
+      "H74.loss.dat": "160fbd583f5584c4f3a9f11cb855b58a65a0eb4e891f34641ac444c97de6ad9c",
+      "H74.element.dat": "787994741c13e6458690a2adfaa000885b8f2db47fb1d3ac0d7b79dcd9b759ac",
+      "H74.plot.dat": "71bc803a5e36063011a7866c55d54e4dfbfec42844aa561523631e5e509be88a"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41508390101080295,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "5e57a8c69fd12cc5a9457a7329fe2dee73f9b043e387a23655eb35ac1b82253e",
+      "H1153.loss.dat": "8ddc6f4f62047b648879c2e968c010f1f638af020d02b708fcd5e9621c523c67",
+      "H1153.ebe.dat": "091f3368ddb30674a861558f621006c749d41e4e63f489d9fe224e65f598e1f3",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "b033f06f98349eeaf90c5809bbf36bbea678f398c45a9059446b6ab561117c0e",
+      "H1153.element.dat": "c090022a2f6017bdf129fe30706ebf3de428ae7bd1a65aeeaa24fe48c83e59c5",
+      "H1153.wat.dat": "7650991356e237158b8e90d629cd458139a506bc9b396cf6d65eddb39f74c46e"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4148055209952872,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "40c1d30f358924d0f04585a007e1108d3bbdda93908f85965ca8f9200cb34e31",
+      "H1153.loss.dat": "59fc9092408c562f15e840857a0cd92c9a68cc3e689a4e388a3880c7519b956f",
+      "H1153.ebe.dat": "091f3368ddb30674a861558f621006c749d41e4e63f489d9fe224e65f598e1f3",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "b24efcf3d9ca3032ee57fa4331a29cccf86983eaefc951eb7da30425f7db81e6",
+      "H1153.element.dat": "05e506d99ffa2273b0c06da33f9f3dba5e5cbe455633a520feab46d58da6881b",
+      "H1153.wat.dat": "46af4e6947e13b6cb5c1553d85074c8f39ec7e710341726cf05b92d0d241241b"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.414825854008086,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "778f93baf10de7884cbbd2eab5a1c09bf40cc3373962a6f06751bbec223306fb",
+      "H1153.loss.dat": "120637f64b24164bd45c886740e660d9e5cd76250ed46d79aebcd166561e7036",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "96e36e14b788bf6b4b964323c0fdee3f477c070438dbdd201ffbffb0b3ac9ce5",
+      "H1153.element.dat": "4b3bf4a513d41220e555641a1e472d74c02e21f2426ad23629fa68d57ac54ef7",
+      "H1153.wat.dat": "22cf53e3629f38ab9168fea6aca497c8d37a6e089cddca86553959a9dd8e34f3"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41510564999771304,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "cbe0ce7961803091efa4fbb6c0ffeea424ba40d65f09d2c4864a71c3d437c472",
+      "H1153.loss.dat": "120637f64b24164bd45c886740e660d9e5cd76250ed46d79aebcd166561e7036",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "b82f9fb73a993e534ee72ad32905a8f597862e969e3ca0103e9b2f8c4d729403",
+      "H1153.element.dat": "62e5085a91aee707fefde26c40bff92ac1a3c4d59305cd2a4eebb917ff3939f9",
+      "H1153.wat.dat": "cce40b5d6b1aff319fc2fffc585d3a81a70e9e9dee15a68ce335969732d9e690"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.415189132996602,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "23b828d1b65cb8f2a9cf309d57505ddbb56a2ffb8e9245b64afcf77ff15ea23d",
+      "H1153.loss.dat": "653d8518432186da758921129697f0ce0aaeee6f40e91e75b3e4e036d2d04f40",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "154588f41273f192263d81a5bf2706e41cd5917b62b0b1e80f2dfc93a1916400",
+      "H1153.element.dat": "625c27ab6175f4d2ccd70248f52a9d634c72810b3d317fd17f0af55b91991a64",
+      "H1153.wat.dat": "ad3be31d6e56ff541fab8866bac7f0f20293376bbc0f4f84e046c6e77eef801b"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4148937540012412,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "e0e61a5e2724943dd69c96e17045014c502b2862becd42321da8c43b085980ed",
+      "H1153.loss.dat": "653d8518432186da758921129697f0ce0aaeee6f40e91e75b3e4e036d2d04f40",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "93130344c40a8441f1410318ecc0870fadce1d22e9951e44fcab36d6118d46a8",
+      "H1153.element.dat": "6f871ec9711bd270bf8e611f6a1e14ec639596071151605de0fe1c7d7b54e94d",
+      "H1153.wat.dat": "0e0348306c37f048c7af570d1fafac726b9e0841ef2315716da34177afe723a3"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4152964719978627,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "9dcb77a327d3e0430452927b65448d6e9db01fb5fb520e0c1921c1eb730e5aad",
+      "H1153.loss.dat": "d43e40a95863bc6dd5c5e44fbaeb3a9b13584fed4a537f582e066b7b42d53bf7",
+      "H1153.ebe.dat": "04a9d470de8caf1de2bdc1d6eac130ef765831970146474777dbbf82abda75fc",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "5117948b5f0f5b49c66462dbc871ba48bfafaae383778f13eeb83382a3298136",
+      "H1153.element.dat": "081aabbe046a83be4650beac098e7766643efe1b1dc4e35a400e0cb80bbfde53",
+      "H1153.wat.dat": "7e00640c59188e3f1185eca0d08b38a1546822178bf18c9f55911d17a3a3fb12"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4150241540046409,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "370a562b7eb1849283ed2a5b05ebbb45f59b02a0876a3b4e7c063c2b05870bf4",
+      "H1153.loss.dat": "d43e40a95863bc6dd5c5e44fbaeb3a9b13584fed4a537f582e066b7b42d53bf7",
+      "H1153.ebe.dat": "04a9d470de8caf1de2bdc1d6eac130ef765831970146474777dbbf82abda75fc",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "71156146e1c8193e0fd6fe2852a3003a44174b0d1dcab8fbde3c016c7a65bac6",
+      "H1153.element.dat": "5d524800eac4c48d9ef28df11d1aeb972c68a63d445d7ebcb63d5dc39d4828ef",
+      "H1153.wat.dat": "814a1884223a9fb096396e84bb172237ac5071f48edb5e6e06b728df1200e72e"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4148492419917602,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "08d7016d222de5624e29f05051804afe3a51cadbc3fc6813297caaad0754faac",
+      "H1153.loss.dat": "4df8c6a8b197781f2dfd2fdbc8529f1da87eacb9655865780dd68959be0de69f",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "bcc8956cbcf04d46e2e97a7dd902dc1bdc923a9f0620cec945da5a2c9e784fea",
+      "H1153.element.dat": "b01a27b5233fec645dd5cf07928ed58765c465655d2bb65ef9ea71bbc2c10750",
+      "H1153.wat.dat": "c5c75e002c8047bbc99225111dbcd8a5a4be4e38b444b7f4de9b8a4b2d8a8937"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4149910859996453,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "58f0db4c371a68f4f6c6bc6e5339439d3f7c611f7ca88df08708a92aae4ea3d1",
+      "H1153.loss.dat": "4df8c6a8b197781f2dfd2fdbc8529f1da87eacb9655865780dd68959be0de69f",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "14dddd941d6059f78981958e51c6bb910e2b0c240c9103dd4761b7d53b235772",
+      "H1153.element.dat": "0530cb17c28594c14da9b1460c79158bd153c709857a00e4f8f5fef3ddb30314",
+      "H1153.wat.dat": "03a9d5bda2930f3cee5b2da5f4bd6de171797a1d9277c67a7b42e81ab2bb1a21"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41508024200447835,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "ecee38a9277132157ebc0710d79a54c2d34f859383276ba25477fd4a24edbe47",
+      "H1153.loss.dat": "0cf22ae6730aa16d7726268646cff5e692d03753800dc6616d9bb79aaa78eaff",
+      "H1153.ebe.dat": "de387a89546009fed945070e0bcb98bff1c95aeb9e382b68d31c3ab1b53d02ef",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "88b4376ef081ef29478ad7501c36cc5d2b00ebb116d4acb697f68dd140f5c691",
+      "H1153.element.dat": "8c085498e90d40b9e25406337c10f03c15be65dff71241e8fea369a6bd21a4c8",
+      "H1153.wat.dat": "6ff20fcc833c910d281177dbdebd9248642df803f2c7dbf060dbf57aef49c4cc"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4149342399905436,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "13843f1b5b9bb51e6c5975612b7da27f4630c4dfa995bcb51c463e2f5e6a70bc",
+      "H1153.loss.dat": "c4377810bcef501c918a94b77511069f2a58d52225e52d138377c4295ba11708",
+      "H1153.ebe.dat": "de387a89546009fed945070e0bcb98bff1c95aeb9e382b68d31c3ab1b53d02ef",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "62bb8e79b7925799d1a3d0cbcba1c78dd9344064662bb921cce25311b741ed6c",
+      "H1153.element.dat": "ccabc156530534fe5f1ab9e4594608e7c12ddef211bd2d838cdf14f3838b8cf4",
+      "H1153.wat.dat": "cd1080450ef2a87968e58699186299aeb58758eef323001146ecac78fcd19bed"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41502207099983934,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "698eaae4b28d41c416c05c881cf1584f9d2b5afa440a5c97162550cbb8997930",
+      "H1153.loss.dat": "1755eec258eb02e5a697873b9631a054d71c5a5d59786d7f1d42a492381f7da5",
+      "H1153.ebe.dat": "9c4e2baad8f17b9764d0a649a76fea4670b5cdcbb631788e72233e7241aa4bb8",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "60c3a25776ea81717acfc5884ad84488782a2de944d6244bf0109aeca373282c",
+      "H1153.element.dat": "e229895f8fd265eb46cb64ff2f52081e34a89fca529067353d774041b3ea7441",
+      "H1153.wat.dat": "74f1db3094afbbc6e6f154238a15dfd4b2f596250976eed2fd232f5e2aeafec0"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41501308800070547,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "603ee231a290780a19d32ef86a2eb70fee2ee7a8b359f6b1c8dbc515c6b12a3d",
+      "H1153.loss.dat": "c356beaaff4a358f5126239b129ff9aa0edd2425b750ef7b1bd2e9936a575369",
+      "H1153.ebe.dat": "9c4e2baad8f17b9764d0a649a76fea4670b5cdcbb631788e72233e7241aa4bb8",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "fed4b2af4a988d06f4d98a88890d7e4d5149aa412f8b765edb4465e27ba6fe5b",
+      "H1153.element.dat": "9a32c8908046dc7b0e4f1507c44e3933bbbbbdec58ac5bcbed6b788e422fcff6",
+      "H1153.wat.dat": "436f38c745d7850ee6c1d1064df96a822294735d79eb47912846a793411c92d1"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41489112901035696,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "09e1a1b82d08c6f2185397c1f8d2ad862ceee4bfef65e47862a092e43ccb8b5b",
+      "H1153.loss.dat": "899e6a7437eb117a6ae4eece91da1912dd24a76cc8687d5f54a66122ece975b2",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "6ebe0534ef2183194a910c12694f96bff93e4c34ef771f7615f34bd9406f3b1f",
+      "H1153.element.dat": "1cca2e9f9358c8248fa93a64b142f67d90d7ec9cba738be355eeb5252d28ebcc",
+      "H1153.wat.dat": "88e2b371ad415d1a5bcc9df4982780e9dd3d3b62169b48cdf99fe8d87c65ee4f"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4150017350038979,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "8ece17235fd7b85202daea7c1f62c60dd849e2d17338f75fb1051b32b6aa5a08",
+      "H1153.loss.dat": "899e6a7437eb117a6ae4eece91da1912dd24a76cc8687d5f54a66122ece975b2",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "3b7072e3f2dabc6b0903693237b0778e6e7d28571665313f9a224eccc0219031",
+      "H1153.element.dat": "cecae20326d6275d97e832d639a9151e2548aaba69e07740b0784ef63a8d315d",
+      "H1153.wat.dat": "3eaf0f2bab4bfc5cd11885e05f9318a636294b8d5aad04fd9b13da58144c5495"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4149962689989479,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "1f51adef81fb277064d671f66faaf55eb8d68032ed0b6a3194e876c28cef1a54",
+      "H1153.loss.dat": "8aab54b0e420094b7aa68639d8f5eb97e1d07fa9f7e0fb36913b8d38bdf6089f",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "e70e5aab3c7957de8743c70012f4d3d8eb8c7a44605ec269e49aae53f3c54c7a",
+      "H1153.element.dat": "5f39cea6d5515770ce869b59ca2b932da7d09c5a2af284d0dae896e8e3fe7705",
+      "H1153.wat.dat": "de3d69ae4114e2ed3e81c88a73eb5b67ba871cc6d6a3f673be26e4e1d102bdbf"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4148840889974963,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "5b4f7034630c400489f50d903a6950c9c1231c00d04b1c6ebada2a8dffba9f08",
+      "H1153.loss.dat": "8aab54b0e420094b7aa68639d8f5eb97e1d07fa9f7e0fb36913b8d38bdf6089f",
+      "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "e611f8e49ae3edfa95d0c02cc719cb8a11b665615df0b4ccdafd1d0564ae75ce",
+      "H1153.element.dat": "dd2dcbe80b644813b55cbe7aa3d56e7beeb70d7f8e5828fb6fa9832d48f6bd35",
+      "H1153.wat.dat": "10295018d529beb5e59561f4a2f9852d71e3e439fc058c15a3afb2a5cfa76f1f"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4150750509870704,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "13b7a01b23c0c55ccca8510818eccf0f546c41e5601f1341890d70aa032dd0bb",
+      "H1153.loss.dat": "3171986b842fc8ac463b700ed5e76ab2afb0df9139abf788d4ec72b3839b0246",
+      "H1153.ebe.dat": "53ca99866657b021fc4be4ea3cfbb7146027591e8a6152b6e4d774899a515f05",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "6b67fb320e6f2868559f2f1f1a27d13ad6c28961032c377a0e76d9d52b0f1fa7",
+      "H1153.element.dat": "6c70e7daf73fd4665dc23480ae08033ed7d463811943f96683f51b5691f44de4",
+      "H1153.wat.dat": "a84dd4e5ecdc76495ca6d5fad2cdd93c42b335f249ea55032165abd72f514063"
+    }
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4149027570092585,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H1153.soil.dat": "7412dfcb27214de88d832e25e3d8109e4ca945f7cd9a94cf4ee4f2365b532bbc",
+      "H1153.loss.dat": "3171986b842fc8ac463b700ed5e76ab2afb0df9139abf788d4ec72b3839b0246",
+      "H1153.ebe.dat": "53ca99866657b021fc4be4ea3cfbb7146027591e8a6152b6e4d774899a515f05",
+      "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+      "H1153.pass.dat": "92c8d29e5872d8e398aed0655d1bf9deca1ee11177b7c14de488f4de3cfbced4",
+      "H1153.element.dat": "95ac821c6b4ebb1ca3e377945097a0cdf14094901af3c9be7379b36ae2ee3455",
+      "H1153.wat.dat": "555243000b058937b7009be538efe823b89f3fe2041089023aab5cfa56ab2fbd"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4149149069999112,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "8cac61c3d56a70aff8aca60545546cd7ea038c91965641bd97f6c1d74d525f2b",
+      "H122.element.dat": "62757670b160ea663a74db42e62a93424873629e759bde28f1585761ffdaef3c",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "59b745bfd425316530dd670519ac62c8b7c0222053607e371abf4e7529ec82ae",
+      "H122.soil.dat": "82076f9b58b994886e615dd2a1ddf582f31f08c7e95756138317f1e4e0456d26",
+      "H122.ebe.dat": "5296e73b9f156524f0dc25ed9e8d596977c079655de91e64d118e0fdc455320f",
+      "H122.wat.dat": "f2c42871496c6121415f65657b95313ff8a0f2ad2dbe607bda11b71763c20649"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4150223219912732,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "479c5d95b88e91bbbf9f60ca5c2a550868f2a8eea66c06b4e2cc0bd081c784dc",
+      "H122.element.dat": "6743568350fe910757e34c9458d48b17420811a4075c98d0e05b0222fc9b93b5",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "755f62b647ffdf5f9fd33a78b3bf6ff54a77f3bf789d26fb7cd7b964b5cf02ea",
+      "H122.soil.dat": "cdb6df898fc6ee973b99db4c0788be9a29c7fb88867fb788e1eb36bf2f792e07",
+      "H122.ebe.dat": "19d7de12fff613a73dd132ecd0a2e8e5f7a9802b41b13c8244a4bf8dfb9587bb",
+      "H122.wat.dat": "63e18c9566b87640a7cb7e39a5dd2bce34fec6fbf5a131f94545416e331e4528"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41528861901315395,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "04323cb434b0e10fa2d5b624f935b9fc652377d7468627138428d15dd3c9acdc",
+      "H122.element.dat": "da0c62474ae554d49c6a42777b8ef7122aa20df405baa8aa3271410ef3fe6924",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "2f9afcb8b223af11137760970be3d24e16cae9bc9ab40c319e4a52980fb57d66",
+      "H122.soil.dat": "0dc29d7b1a796f1d42b385a1ebc8969dcf42a172e10f7d8e8b899a25960f2f31",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "11393b7108075937eb9e221f5c1cd20d1854423f66186a4ea252e469c03d6c94"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41487798700109124,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "246e3179e305cc0c9233f9a0ce1ee468207620099b6455178073b875175d7f01",
+      "H122.element.dat": "e2853a4567c9c8b5c57dc8dc8b8d8d594021c50a9722a431053ad47639d0fab4",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "2f9afcb8b223af11137760970be3d24e16cae9bc9ab40c319e4a52980fb57d66",
+      "H122.soil.dat": "90e79335deaa40ce652bb4409ed0eee197713fccefc0095ecdf0d56cb169e107",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "6af23bb2136a1dc86663f8ae41e23db1b26c9482a0c5416e73ddab389d072cbd"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.3649851439986378,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "4e5d813459c408712d3202d302344439576e05d5c95c13ddc7c36f688368e8ec",
+      "H122.element.dat": "e8b48ed48e8d77a9dbef7ab87a1fb38a069cc5654565f5fbdee658a3402079fd",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "0797663c39e3f16bd1fe7278004d6e1cd1115d8101a0d7506b2ee833928b5268",
+      "H122.soil.dat": "c3b59b3888ede858bd06312cc3af7c6f78a025d18f463a378ec64c96b3601c35",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "00ab35b1a496f77105c773a7bb8a27e01197aabfdaffa8ae0b799e0bd402c909"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41495985299116,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "4a9ab43fc442e39a2c17ea08a422f576e424e2d7ad36ea30d9f17859c49af756",
+      "H122.element.dat": "06d5490f63ea1bbef400c1b727eb9a6e9755f5eebba8e24dd7471fcf7b502458",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "0797663c39e3f16bd1fe7278004d6e1cd1115d8101a0d7506b2ee833928b5268",
+      "H122.soil.dat": "77be36cd07514a7398dc7f6ff3d8c131f898c1c2a5c43798cb961786523333e2",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "933ca7f9cb4e0e13ed6e08ec4c7f4b0b9fffc83b83d57d1497393f9852de0654"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41508768900530413,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "4160082227811239b2e307d0cc1ad86d958e322f86e89e33ba8828260c248dd9",
+      "H122.element.dat": "4cc1278540492929006db7f6695a1c3e3e5fcd02156a1076fffb641528c2a324",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "52447813fc5698508de6b81c22ccf644c312c7d5394fd651ee9c064478cf7957",
+      "H122.soil.dat": "81897664c20d23ce813f2b9a4f67ce6feca17275c6b8582d219a9f05272818df",
+      "H122.ebe.dat": "2433cc8e974663d0e07128cc261f56cce475ad7a88b9f59d5ab6677e425171a9",
+      "H122.wat.dat": "45bad854435950d4b77ef84024b06725c37560d17674071e040c6a8c96c21c35"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41529512200213503,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "c6b95817605db99cb782fb8c216045f3c8de9dc62eceb6e3737321a355950816",
+      "H122.element.dat": "dd56e32020066f83dc06df140f2ac234aa53f50595bccfc42d34ec38dd7d6c87",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "c589d590a664f060d6d7d099da55ab4de4240382a61e348d3ead16594e57de39",
+      "H122.soil.dat": "da44c3b946defd080161041b2fd0ba520efa7969880adebdc74672f07a8da2a9",
+      "H122.ebe.dat": "012384ba26943a5c7d6fe4ddfabf79ee27e5d4c95ae4d3f633a80e81d0b184e7",
+      "H122.wat.dat": "d1991dcf314a9c75cf30fafadba812dffc2f6cd0833e4d14e53abf59d64a9fbb"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.415000720997341,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "0696ef3b555e665b9b0efe5bd76705b21ff12405db941d58302ab26e89a0c3ee",
+      "H122.element.dat": "ba4725968b25383c251f7a06c064907b33cfef0a43ff3aaae1d5425273129e38",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "e3c9547b86e7a7d6ec4abf5a614ba89061521378a0796746e129a1bc3474a3ad",
+      "H122.soil.dat": "777a796491f6cf29cd286e1520f5c021222169fe12f43ac3af27408189a9264c",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "f75f9343e59d40936097bd8eb8d823a406f42c4af0b6bd68006cf0805cb9b338"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41487200299161486,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "cf3175c0005594e8d26b97ca283883507e3469a789e763142bf7cff08bec0b7b",
+      "H122.element.dat": "d50c09236b2985776f52fd2c40778418ede8f5e0ab1b1526d34efca6779628bd",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "e3c9547b86e7a7d6ec4abf5a614ba89061521378a0796746e129a1bc3474a3ad",
+      "H122.soil.dat": "36b30ce1a641cc003c3ff7d0c97f142c9a2d61a174582b8cf0d99c17f0045af2",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "bca933ea40b378fa3ce10a99c6cb89c6c70f0880ab3d495fce9258b949b74223"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36500876100035384,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "e15ebdca4abc5c8fa0e456bd79fc365d19e0d18fb86a4fd8cca950b9394ffa7f",
+      "H122.element.dat": "3c8ec260bc94536cd87a9a00f868a1b4afe5fbb7f30a14d1c8d77591372ef3e0",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "ad5998a38a0ab9894a343755c91abb78b2a42c8141120361255ce943b8c6f27c",
+      "H122.soil.dat": "d8830b0723a8a62d13f37f677b382569087897fbe1b91e8b79dbe2c38ae19694",
+      "H122.ebe.dat": "98faad9f18b1d96ebaf8b9c8c4a8d8b2ba91198d894d318b4685f526845a1604",
+      "H122.wat.dat": "a41d2be7b54a02fa69254263ab50b2eccbafabbaaf5cbeac2c7b900fca87276f"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4149515900062397,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "c4bf74b872cb79a40df0f87fd53ad7ab81ac7d9d6191a30067509a9eda7753ac",
+      "H122.element.dat": "4b5abc072eaee9c959e4f37d9e5ab8e81fba1505760dc0ee9168072114004f61",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "a3410e3ac937afe5232b85191d36672497ac136c3d7698b1be81f3b4690e6701",
+      "H122.soil.dat": "2bee98643ca9366afeee2bbcbbb71f547a0df86f78f4da937be2bb817e2c62b2",
+      "H122.ebe.dat": "98faad9f18b1d96ebaf8b9c8c4a8d8b2ba91198d894d318b4685f526845a1604",
+      "H122.wat.dat": "a9d9962b430479add3f5bc6eb8e0e2fc112c390007aec0fc074b7972f3aec526"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.3649806950124912,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "dd8268a26fa1baa33fc12ce3546124a66dbfebd9bd33d58ef62bff5640f5fdb5",
+      "H122.element.dat": "fd868dc3b6915eae19e9ef93e71fc92bf64a578c490de87053b7e6598f8e5d6a",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "bcbc4e33f955d5ec1b1872300223d1f995f48a8951f5943c94cacef79ef633a4",
+      "H122.soil.dat": "08c4f96af257002e8f514fed9605ccf5ea1e6205f9449db2244d31d31d77579d",
+      "H122.ebe.dat": "4dbc74d8923b4312f3e02e705a6a2218ca963fc2bd1d784acf80532cf5025649",
+      "H122.wat.dat": "14009345717d6f3923744f976ee1bec026da49b1a9ca46ca4de04edb57267716"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4149526910041459,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "cb5b96219cf865aced83c408e1c6f7d5cd3789424ad0cca531843a1e73f33130",
+      "H122.element.dat": "03fbe92c888d99518fd001c1276451f39c63e22ea1720d2b82b885f728fe76c5",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "f34b512cb41217f97977e56f9b2bf8b41db7346010739ef8e6eb8281ed6890c7",
+      "H122.soil.dat": "fbb7883a7111d8474af64c7719e22c8bc6f9ecc18206185d3b1e554210cef93f",
+      "H122.ebe.dat": "4dbc74d8923b4312f3e02e705a6a2218ca963fc2bd1d784acf80532cf5025649",
+      "H122.wat.dat": "d73e87247a48e82cf72b6d413732ca90e7713f5e650503ad1d1dd61ee9ca7b8b"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41504201899806503,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "47f1eaea0806d23e8ed9d37d1bb66eb0bfa9cbd6bcf4fce2ebd2db511469d657",
+      "H122.element.dat": "c320d1ed4a24766066fd092da837354b724f00bcd0ad7911bbcb5001893c863e",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "9bc59f88d399457f4a8191dd62e697beadd88d424b3e1c747c0a5256a5a5ac61",
+      "H122.soil.dat": "0534f5c4fc1007c5596f2c3b25a4dc67a72aab673a5fafce74b0094aa150a9d7",
+      "H122.ebe.dat": "c6e505c4b443df8f8e8b5d978267dd689ad1cb223cb4af3f8b1546acf8823223",
+      "H122.wat.dat": "253f70d0d9df3f453642ca7527ac6e7ee0140efeda7255931b2acc11a8e5c777"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4150595269893529,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "cc8c3ec33f633665395b86c0f1b50eed28627a7e847508790e90b4bb970f0f65",
+      "H122.element.dat": "15472491432adcb32fa7c8641230d28078cb2c84e7f463bf96a038776cf2ccd6",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "0b3eaab9b218191ceeb870fd154266fb4e489048b6072287bd375156e2c27a57",
+      "H122.soil.dat": "469fa8b448262df80f71c0a81d0c6f42e05a359159dea4c3fe23586853daee6a",
+      "H122.ebe.dat": "4a52860a8b58d350ac91d3601f6d29e49d5db87aa40c28a8cd2a11e2e39e2604",
+      "H122.wat.dat": "331757adbec775f0e325fdbf63c2ceb311a1c4c628c2002e999925c95cb2d957"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.41483802600123454,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "724df4007b1d41cddf5fde4c9add86c88ce33d82be1819e29158c1b8dbcf5cd1",
+      "H122.element.dat": "83b3436c513c8d313343b821fdc947724415cf8c90975dc380f350a9981dee64",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "6f812a7ff14b37117d03ffee4fec7422a7477eec554ee2a88d4828a8b614782b",
+      "H122.soil.dat": "9eea2a2e67eced13540b3e07903dc232bcc711c6c0bd09b325011a0e5e070554",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "77511cefa3281a698290d7f9296582c48f7ff2701d144ca5313fde9989bb0121"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4147305869992124,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "030596c9eda98908ea89cee74281afe627baa040dfaeba00be70da8a4175aee2",
+      "H122.element.dat": "fd16779f88eb362fb23bdc7e9a98239e30282da3c6918be7246ee1027077ee7f",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "0ee82cdbc39c28c815f24f47a30dacde86d08dc2f7f2c43bd934c152dac208c3",
+      "H122.soil.dat": "c7cce59846c7de01e4b3ff1ddc635f91eedc37baa0352a49807d61780e28b69e",
+      "H122.ebe.dat": "d63fc119d0932da11dc4f78aea1a79472fe52b77e62a815ef0916847b354283e",
+      "H122.wat.dat": "984d72dd7b3decf0ed3fb86eb06212bbacaa113c5801d022119e2f1a5276ed7e"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4150100450060563,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "2a7f11bf82d36c4b606be4bd305622f0a0df6d3833228d90605e5b65f828d3b7",
+      "H122.element.dat": "5b72951d050e2e63afad1339de255d9de8238ddbd8df6cd7389e15612ae16779",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "6cdc9f4650fd22df6c436482fa6a64d151b2513f26b93bf21e69e8144a6196c7",
+      "H122.soil.dat": "08ebe9ee3cf4948843aaa8a9df5233cee5ffb10faecaefe7ef84e3be622d9271",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "feec97d378fb3673924aab4e4de5b7237a0d784b6c37cb9d56be84a24bc24ec2"
+    }
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4151484259928111,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H122.pass.dat": "5c8f7328e1312196f86c21c1abc8d60febb9d052d6a0db8ef3ee52cecd8c1c98",
+      "H122.element.dat": "966bda90c416c31eb003b35fa02c45c2d94842b6474375e01497312379a57b1d",
+      "H122.plot.dat": "f35bfb900625db66d3556d5ce1a377ce89a88db74d8cee9e833ccf9023ef94b4",
+      "H122.loss.dat": "6cdc9f4650fd22df6c436482fa6a64d151b2513f26b93bf21e69e8144a6196c7",
+      "H122.soil.dat": "e58cdba1ca7dc8cdde080138686be032243baecbc2d9c2af4c5b75e656a00f5b",
+      "H122.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H122.wat.dat": "3563c5921608bb530f33cc27f1e687b1ce5f3058539d38c88a8772379f33d6e4"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4154831610067049,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "0a1c908961ff0a6170c461415587114aea2c6ee34c2d13c9df0a443f079f52d9",
+      "H2196.wat.dat": "f07d53742be3fa26eb8f29ac0741863f4f120154f2d3d2801276462f49511d76",
+      "H2196.soil.dat": "7c488d7116cfd357eea934462ca03f9f1dc6a48446ae5ef4772b2b7d2a363c47",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "6b500280d61fbe60518a6ebecf342b4e44762b55354678ce1b11b5070110c903",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "ab721e6da4545c763856e6cbbee181ea1b9924e50571cbfe76772f1726d81400"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41490898800839204,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "b5d03831576b048f90fd872c59c7ee02fa9bd5bbd89f93d5f55718df9f32d2d6",
+      "H2196.wat.dat": "d2dc4ec028a3083d078692cde031a733052ae3091d8d839ac06d7c051da9c316",
+      "H2196.soil.dat": "b562f769562a64a9d52a97f74f1a500083b7a0db3789054eb50f56db8e0770f8",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "29f947e0cd48fae2d066a147de2415fb59e1d8b2d5883d93791c7c055ea6a425",
+      "H2196.ebe.dat": "7567dcfb528987374c17f69f9fb6da19db77d29f1a2e2d935ca7bc8a1ba0fa9e",
+      "H2196.loss.dat": "d2a52f59bf5083658a011d5c79b3f71435c57b00f4a633d72388bb4baf0126af"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36521693800750654,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "4912d651592668aed874b7f312495d4545d2bfb09cd2b9916c103ba170fadf91",
+      "H2196.wat.dat": "67c2c98df657ec5ea00a93ecb5570e582a5d283de775fc515583fc5c1f23c4b9",
+      "H2196.soil.dat": "9436b99d044698812e2313d53655c7510346892a96abce3634370479311e5eec",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "8261fade8f31bfa89c1d31901063174dc26438de46ab565c3b55660b21845886",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "1e42d6a1529e72a1b4dbfe2bb3e4ff9a2d9f3550be1f844cb81ff046d5dec23d"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41551715300010983,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "fde1a1dcce14f45f2c00751d8efe02c5a585269dedd3b0896b79db439635afab",
+      "H2196.wat.dat": "14c07a4ac44627f697a4c841f71d671f8529a53b99fda325b033254817a54603",
+      "H2196.soil.dat": "9c2274399cd4d4ce8704898fab9a239d77922ccb2f54e3a58b8c2c0076669b5b",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "7ccdd9c9cfb1fee80b703ea97041f04ac7122b63f10d33026d887785ff71e706",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "1e42d6a1529e72a1b4dbfe2bb3e4ff9a2d9f3550be1f844cb81ff046d5dec23d"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36480634099279996,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "35498bbcd56cec2a3afcc11eae651289df378f60d78859620ad1270c4d7b3ef2",
+      "H2196.wat.dat": "790656ae7b56cab6cfc6e815f1bc7504512b10c9bd66600a8282284c8acb9dc0",
+      "H2196.soil.dat": "590e0525ff8f6cc9020b3498ab039dc7fb9daed5e50766405ca903bfc23ab1b3",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "3c499ec198cc1d65a2c5cf2502bfb06f10e13c6ae402a6e411c4aa7f2427ef26",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "dd951952ce42ac73a3035b80022deeffed3a5a66e68c662169ad61ce319e9927"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41505106299882755,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "15f3884f5281f48a2f1f92897ec8f7eed9beb92de2960190e47f633f31b9ed40",
+      "H2196.wat.dat": "1798be80e4a9ec90cb8d72ddcf4f10553642da43759a085cfd3196676fb9dff7",
+      "H2196.soil.dat": "60d36e9ce7d4b577684205a30e8373b0ca7ae082ec29db8896a6c4fab98952aa",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "c8766fd8564bfd5b3ccbdf26f29fcfdeb682fc721a4798770ea20131308180bd",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "dd951952ce42ac73a3035b80022deeffed3a5a66e68c662169ad61ce319e9927"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.3650452989968471,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "15778973b3a03ff7107ad4d46c76babf017312f0410259a28fb63e2878396de1",
+      "H2196.wat.dat": "a1c53c42018e3d13048d07f79e7a4ebba8ed5810cf31745a0c5a686c13af88df",
+      "H2196.soil.dat": "45f8a620ee3b013dd024ab3a394459bb2bf3a8c50f6202992cb25649ec0ccdc9",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "2944e28077834d20ec8571b76db72bfba52fb8b9ad6cded129cefb213a6d4913",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "c669a3a3bbe4d384454a06bebe1f85644b4bf463be6024981ac645b38adc76a0"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41489328499301337,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "e3249375b8d9b0dfe5620c8cb2baed54591c043135c34b70a73369047d7cc46d",
+      "H2196.wat.dat": "8d31f36393ea84fb470c79745ec0adde46ecdbfeb779f1cc8c3ce84b0d85823e",
+      "H2196.soil.dat": "119f7f6ef0523455d85980d1942f735b94155302987c03156197dcb81e40bd4a",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "e4b43a3c30cf66289c4d27f593052aa9c779b06a71d6e164c471be178495d6ac",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "c669a3a3bbe4d384454a06bebe1f85644b4bf463be6024981ac645b38adc76a0"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4150670069939224,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "e499d4c99e95f03ff4d99bdb78cac39813d874f4aeb1c02f74ba9a43312a8ee6",
+      "H2196.wat.dat": "ed03703a95209879f2b4c9bc03336b958ad302e0a31810bbb85aeb31698ee491",
+      "H2196.soil.dat": "e4c222918eb1e7151427448fe48d744ef2d438b88e197b61856aec707ab29ae1",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "102e64c70ec943195cb68bd67cac4ddccb6bcfce72597315d26639ed9dfb3d8a",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "421ccbc735388f64ffc4d0ba8ac54468a7cee687107cab4181c0dab683ba152a"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.3648136709962273,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "3b315a34454908981ec7fb22caf0507cc3910066096c9a1fa1da0ab317d93a4e",
+      "H2196.wat.dat": "e07a79478f7060afab7975cc5007a2efcc40605d462d0ac8bf84c32c5af019c1",
+      "H2196.soil.dat": "52c355ef619558d4743c49e814c213ca73ed3f87c3101a8ade1988d4977b89d9",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "e13123352bd3c69a409c22772acc7cd86b5f7c5cf99f4a6c229cf7dc8ddab0fb",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "421ccbc735388f64ffc4d0ba8ac54468a7cee687107cab4181c0dab683ba152a"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.3649803709995467,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "db852a847b05df6c022606209695a7e0faa95db9506bbacda802ec89148ad9da",
+      "H2196.wat.dat": "93b9cd4f3532974f4204a13acb950796a909d132d2ab10ca936d09b0b50f1625",
+      "H2196.soil.dat": "0eae5f4e5ca182b72fca4437e0666c2d42dd4486c8988ff39be591cd83f97b0d",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "30569fbd448e46fffcaeb36d35dbdd5c35d89a7de2941bb27bcb606fb2a12dd6",
+      "H2196.ebe.dat": "c6ea597db9a97dd7fdd99082beb652f2951350b5f6f3bc20c9112daddd56b6e6",
+      "H2196.loss.dat": "64a6c764d8af0ea7c44d995ee4e0e18200c1a621a8f1ebc6acb049b11790441e"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.36500582299777307,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "ef961b4cad390653f930a96f5286c07a32d3adf6b195d9bebbed012ad992db7d",
+      "H2196.wat.dat": "cf3e73dd14466c31286e206f1bc99c37052764dcf827db014d2f4ba5c927c85c",
+      "H2196.soil.dat": "ddfb6b72b6e97ee2d9122cfd1e2d6bcb7de856c9883a67c0509e1f2aabf8469b",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "19dd5b8d8a13f494fda680c7516d695dcf7f8791d6f20cf260ea5a2306bdaff1",
+      "H2196.ebe.dat": "c6ea597db9a97dd7fdd99082beb652f2951350b5f6f3bc20c9112daddd56b6e6",
+      "H2196.loss.dat": "64a6c764d8af0ea7c44d995ee4e0e18200c1a621a8f1ebc6acb049b11790441e"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36490792699623853,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "c8c126ed38170eeb5dad60f4e89882f3fa16f48967e55776c73737b9624611db",
+      "H2196.wat.dat": "424607527b16d602bc3321b76697005bcc39dcff2cb2ea8026cca317f7cb088c",
+      "H2196.soil.dat": "f70af908ea06a7c7ee48954aef3c897dea8866de21935868bde3a93759631b5c",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "51b9205add84772a8ac04b6e4f40f7170ecb8b800a5d35c2d4dcb552f9ff6301",
+      "H2196.ebe.dat": "261679d0d0bfea7fa7b8cbbbc1c6a3fb435ef000e71bf0a352ec4cea8a54c9ae",
+      "H2196.loss.dat": "1f4b97e57ad965621c16ebfd923a4771aa64f0e11b61e68e6db298825b7bdf78"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.36494697599846404,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "be10d84131ba6be5d47f3e0c6ee5ef31c8ed37fd4c97ca9ee2353d1001f5ccbf",
+      "H2196.wat.dat": "89fa34c7b4d6ef28a44ac82e48f982b5fa8afaa744ea2020a2b680caa1a8bd90",
+      "H2196.soil.dat": "3193a81aef97f39e9cc517fa8749f4b91f9796486e66484796b408ef1fff9126",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "540ecfe923fdfaa7111823aaed77349bb315d6b889e9842b0b90c865704695fb",
+      "H2196.ebe.dat": "261679d0d0bfea7fa7b8cbbbc1c6a3fb435ef000e71bf0a352ec4cea8a54c9ae",
+      "H2196.loss.dat": "1f4b97e57ad965621c16ebfd923a4771aa64f0e11b61e68e6db298825b7bdf78"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36489034799160436,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "b431d2f21ce004e9484d21be5532d8fe27d10203895aadb635536b824c213e4e",
+      "H2196.wat.dat": "a9f361b33bc66fae64c2edcd6243ca37128275e53b4f925cd2e461fc66f337db",
+      "H2196.soil.dat": "33d06e4ea6b373d11733f7ec8a63a452caab4ced541ffd06c037006e81f76e32",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "ada6587621dd9abdb58dea5b1c73de1ad3f7fc28c1f5df833ccb1bafbbe9b7ad",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "32df951aa58fc93e25710c1885cb9ee0b3985b5fc0fbfba65dea0446bfca01d7"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.41507473500678316,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "411cf0a00d5fc7a321f0ec407d74cf3badfb62382b00a080845cfbce6981739a",
+      "H2196.wat.dat": "281a7f78772ab965da62068ed79c56a24b175b58bbf5c64919633a07586ffbe4",
+      "H2196.soil.dat": "b5eafe4657282ecfefd06437f9b9226044c885341e82606827a0cc9d2a9a9451",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "97137478f4871d5671ea912e6fd6f3cf3e5945d60756551ea9a85c416a6d6db7",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "32df951aa58fc93e25710c1885cb9ee0b3985b5fc0fbfba65dea0446bfca01d7"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.4150057079968974,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "33ca3f6da179309e345d1b60b13de97c1f19c7a5256cebed55a8d83ddfc83db0",
+      "H2196.wat.dat": "3ff59b37301615d8fde1d5fbdf4cebe629d569c787bfc74444926a895f6966c5",
+      "H2196.soil.dat": "4d30e094b87f72325e8fbc9279cc22156b038e2da185e5b2e063e30b24515ee5",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "107e07fd588b9fa7fa78acc4ec222cd08d9e69983f61229a5888b1c0bf81a26c",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "150d17a17024f92636cebddd793d61fcfee4c5bb6fdd5481bf2acd19770de65a"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.4151168630050961,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "8319a50dba24cc2e355fc43b30e4c688db05d6db4a671a0b5636f479d2a7f523",
+      "H2196.wat.dat": "d4541f57dd7b4800e62e540a4d472f972516159aa40a476e7b893d7955505d7b",
+      "H2196.soil.dat": "ba9fb3f08c8956a63021192df51d00b2452111843c5504d58cfb6a5000d38725",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "9b8f3077c9cfd96201608b2888d055507438d5cb29380a213913b0bd5c8aad4a",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "150d17a17024f92636cebddd793d61fcfee4c5bb6fdd5481bf2acd19770de65a"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.36485068600450177,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "7435db3e4e13eb8f0cba7f623e06be562bfd2db3880078fe70101ee0e48d9bcc",
+      "H2196.wat.dat": "a5eed7bb383540a2fbc27bcd871002a58079523b5aab0c53b807f10c7aa7eb55",
+      "H2196.soil.dat": "63927365b3333c49dc9e53bf5a488f4abe02e2d3db58b8edd0aeb2950db54383",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "3c922b517e65bcb9f826543229a640ccd31b92ebfa3b6dca9a9178120d4b2981",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "8f160fe5f7491e96a4ecd2fa9fa4d845eebeaa8e781e19a8125c8dee9db4c479"
+    }
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.364992221002467,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H2196.element.dat": "68c595287269103923872bac63fc3ee2a5bd5c8d5593bef946fc6afadd8b3fbb",
+      "H2196.wat.dat": "584b3ec5bd6ecddad2d2ffd22bd414ad5fdf3d1150a50c91ad86bf4e1f8f94c6",
+      "H2196.soil.dat": "38bae0c32a96972ad3290b95e6a47ac280bcba72d0999f592291f9469163cb58",
+      "H2196.plot.dat": "ddab9700016f42b2e6c1c2c95fda2bddbdc7714234dc2d52c8c2974299fc4c5d",
+      "H2196.pass.dat": "057454cfaf8da2bab182632f5e11c66e60eac3c66a1835c76841a17a8e2eca3d",
+      "H2196.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H2196.loss.dat": "8f160fe5f7491e96a4ecd2fa9fa4d845eebeaa8e781e19a8125c8dee9db4c479"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653402939933585,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "26acd4297a43ab2cfefe7b8a60a96ddb1809ba206938f1d5195f51505c042368",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "5bf3b836de9c2c1ae7ccb9904900b7ef93d659c7c2940f075e096aa8bf185f8d",
+      "H72.loss.dat": "1b9dc8be3d18edea9fa68c0efa3e2f9f19e821f582e9c242f15ebc5182ed21b9",
+      "H72.wat.dat": "4c905f1bcf14c7394f7698382a6ddec101dd4f046ea0fd6d3c203f6919012f18",
+      "H72.element.dat": "2d70683b805e2d70bab1132b4fad4211b321003e62a3a42cbb4682bec333f7cd"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.56517971798894,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "c401435107591bc4ded30a2f1ef6c3427a8c6658b8cb3b89e49bde55d33c9daa",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "3b3f0ca9f90f07ab4336c5f0aa683e59a3057c4cc4503a7c67bf0fe40019b253",
+      "H72.loss.dat": "1b9dc8be3d18edea9fa68c0efa3e2f9f19e821f582e9c242f15ebc5182ed21b9",
+      "H72.wat.dat": "f25b7b51fa970d4625d5fd6ef36ba9b61735719e33a86aaff87195e7e9927474",
+      "H72.element.dat": "99b3b55f1d7c7403d3547dd1d3f6d6113f28d8904508bafac4ea84a584a81848"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652785830025095,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "24590a65ab651724a5c6a9395f5f3832a513f7458cf7e2f223398208c06dacf2",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "2d9458d1c96e25e00513722f138b4b390468a66be89b3525cbdb19eabb72103f",
+      "H72.loss.dat": "a96092aa301fe959ae53984735efe25a637f10cdb1bcaf2ed568013d5a253c6a",
+      "H72.wat.dat": "af5b2b2a9c4043c0c466804a6d46a348b97e19363c538484c22b0b1bae3e0a76",
+      "H72.element.dat": "8bd3c6fab4387284d15765f4e98505b2d0372b705eb169a1d70295883d99ab90"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5655272659932962,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "698c669e5972d751949a014293f56739d00ccb49d7832123547ea3a633cb9803",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "ce9fe3de0ed45659f59ad870e5af6f5442d863a98a10f89a0a8d673ab49d4538",
+      "H72.loss.dat": "a96092aa301fe959ae53984735efe25a637f10cdb1bcaf2ed568013d5a253c6a",
+      "H72.wat.dat": "06b28fa91a138f8bc455507e3374848206d68863685681683f1658e1ce8740af",
+      "H72.element.dat": "5382ae0512506603b4c4ca09ae0bf1798f8124a45aa6896930f8a7895af598a3"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5655543280008715,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "56a31512dc3e805be12a12e87962b52c3d236d23b757791e817c0dc732b9a744",
+      "H72.ebe.dat": "853ed04dd267da2e618ca97b1c9e41dd962545b06e6e8bad33f09269218a3ead",
+      "H72.pass.dat": "460f156b7b78e5b0cd7711aa7720e0c3d772cafbbe15dbf297c46f102eab2371",
+      "H72.loss.dat": "8708816e39bc16d7d2f8ced280e9af5e20109f4cc969d199acece210e03f05d4",
+      "H72.wat.dat": "cbeffee35e4db3b80e657b47ba5faf99934c1954f66d83edd7bba50928cc7b87",
+      "H72.element.dat": "7410cd995f36be1bb0536cb3b182d893c4bb234549649ee276d8bea5a848405e"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653046559891663,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "5b28f7c9728c34016dcfe4a0173b7bf20f129ebd9318d9eb1407d2b5ffbcfcc6",
+      "H72.ebe.dat": "853ed04dd267da2e618ca97b1c9e41dd962545b06e6e8bad33f09269218a3ead",
+      "H72.pass.dat": "851d8d8c580e8d2e48c5a182ce6da4259e1c13a413b3cff4313e0db7d2652d65",
+      "H72.loss.dat": "882579297d772965b157d04f0ed31e2d4f51fe583a34293cb07dd899a9dc084f",
+      "H72.wat.dat": "5151180507f08fa24e9408194113e9e2620f60cef645be1c9bcb40b9ef373ed6",
+      "H72.element.dat": "53ad27d225d27021d0ad12bfae5632996162f83f7d60ec73aad10824e4c4b04a"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565448927009129,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "5c244b01585cae7dccaa34b8e3aa209dd02d341871ba2551d755cbdbfd01a825",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "3526556b5beacefa5e5e242058ab36e3f7a043390e0f73a0e3de75d838ab71eb",
+      "H72.loss.dat": "58caa495c6590495808dd82b4b3a237d9288b70ed243bac71799ba2873b43936",
+      "H72.wat.dat": "72b622248d28798441794cc1c8de86fd03ca9c3354e7a735a38ad2bb46f0464c",
+      "H72.element.dat": "cf3ef7ade518bd6a6817e19dd35f7aef07654374f42a6bb9b2f85c416709198c"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.6156838619936025,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "0f31335a49a417cff5a6371cdbe85d549f7eccb013229faed6c19740e73b33b7",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "d30821302ee0078565e3f98d7868ab1bf5eca8c513b0dc70e3b0d68f467b72ed",
+      "H72.loss.dat": "58caa495c6590495808dd82b4b3a237d9288b70ed243bac71799ba2873b43936",
+      "H72.wat.dat": "1bcfeb74b7fe1bfa43c7c4d75f8a701099ce97def9b075ed04289ce3ff3edc7e",
+      "H72.element.dat": "6efc775ed05588e3f59bce65dd3772a5da5c7f4aba3daacf79b8269cdc8497c7"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565365925009246,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "ac7408aadf4768013aeb3152c7abbe1a5acb0cdad76eb030bb04263cd59fb8cd",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "1b908c18ad3c7e47037cbc8e701e4707d4886333d4e53d4f046abcdff5e08ad9",
+      "H72.loss.dat": "d4ab0012589bed2c97c5e5088402f9cbfa799310f0b19c7a67f98cc3e6cec200",
+      "H72.wat.dat": "6400aa4a4764e5fc3af2629ef7dd0d501c9da6626488f2f641bf3f111b891ea5",
+      "H72.element.dat": "f0d0e3161b673cf9e5b01437ac1027786c5d675fb78832c28868d0a03f5121b3"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654055180057185,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "9ed8b6aa9a7827ed022d80686a90e9c88a885de4d815838e8821d0fff8b5971b",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "4a304006268be340d2adb3476f77bbbce1d4c94850416ce483d27d450d163eb5",
+      "H72.loss.dat": "d4ab0012589bed2c97c5e5088402f9cbfa799310f0b19c7a67f98cc3e6cec200",
+      "H72.wat.dat": "8129c973cb131e9b3859153a281eebf554c664008760ee0ad0519681af9db02e",
+      "H72.element.dat": "4c18397f82492713974264dec4e8f44e1f7003d3f5760228c7b2cb883f5b10b7"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652093310054624,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "84978f5491cff0b5a4c03575b69101e5b3a941e9a76c9e28604739f660610384",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "59da3d7d41bba7891b50ea2fe63d7a6d2462cdce10de1180f921342dbd0cd48b",
+      "H72.loss.dat": "9662248a5411bdbc00a21fc0cddcd41bc738ff3bdb4dd50ddd12ed0e7f4d529f",
+      "H72.wat.dat": "f51412ef4dc808c4bc48f2ce84ffd8225913475a46dc6382a46057f76aa7e6a1",
+      "H72.element.dat": "98a766a75884102abee08a49dff53400f5e4c700491263919d5b7721c4c8f7c4"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5650545930111548,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "815bbdb6abb8320c73735f14af1714ef998188f358566ebf4bc06e3e89a60df1",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "263e0205d0f089526b85e4a93ddbb55cb78f4d210b979b50d4bfc3b4debeaa76",
+      "H72.loss.dat": "9662248a5411bdbc00a21fc0cddcd41bc738ff3bdb4dd50ddd12ed0e7f4d529f",
+      "H72.wat.dat": "9f1ff1b103573bd8c8f9cecb1f561a87342bb3faea28b3b2ce7940084bfb294d",
+      "H72.element.dat": "8859ae4f64e0490977fcd3a153ebe6dc0af7454f65bd90e251d8b997b7de41d8"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653610519948415,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "95cf8b920357e4ea79e2b829662f1031486f6de24cac4e0b3a19470ba3fbf435",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "4307586670b60299ed6f490b3836b036eeb4dbacedf26451828419cc23ceb0ec",
+      "H72.loss.dat": "9b6d53c3e6a864ce50b0d986fbcc4de449e4c4ec589dad1b0c706f2c9241dbd1",
+      "H72.wat.dat": "fe6419bd1210233a4281da5ef4856b4a3cf4764aff8108771da57fc355670c60",
+      "H72.element.dat": "ffc88027997bec76205efaa1b00c4bebd388555f1da90450eb2102a4cab88afc"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653903169877594,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "e920968520751cedb202b8e700977a471e2d9739a8e8420da9027be8c10e96b6",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "ae37b65436a49894f08f3025d41aa7b3d088fa3dcdb3869b2a9b7886db2748e7",
+      "H72.loss.dat": "9b6d53c3e6a864ce50b0d986fbcc4de449e4c4ec589dad1b0c706f2c9241dbd1",
+      "H72.wat.dat": "d3ef32b47fdf0d931e6b48a7a42ef06845053269801070772a9d43f10e6134ce",
+      "H72.element.dat": "e1ebbf83c728ae1e4f0d365cbbdb0d5a7ee14d81b6caa06acdd41dadbc8adb32"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652480010030558,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "cfcfdbe2ddebfdb64d18ffc63b373f4e48ffba579eff3aa323ab76fc39a78ae7",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "4f9acdb7bac7b7a4d66a3b0d1388b07e7ee1afc21758c029f6f5a1d08313d0e0",
+      "H72.loss.dat": "97ab61ed5cd62050451c6df411a3c81c52a85b23d2fce1b1d846d51320bb9f5d",
+      "H72.wat.dat": "3747022665535111e61897a2d911e5c5d25b92d0a75f7c4ae87224e56915ef1a",
+      "H72.element.dat": "b32cf3efd5b98a6b42caa50cab60d70af2930be45d4eb23b52c3ff59bcfa8a41"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653088550025132,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "d5c935ca0a78b9071006b75b28fc48623fe60250bcac9533ddd277477157b39c",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "59b6a5dedf44feaed7e67397572c204e8a5a77605d542e6e56d7e8b741dd2578",
+      "H72.loss.dat": "97ab61ed5cd62050451c6df411a3c81c52a85b23d2fce1b1d846d51320bb9f5d",
+      "H72.wat.dat": "0abe222bad0523ca78d1fed40f2e4f6c4ac8d1ec4977b23fd98105f181fb4767",
+      "H72.element.dat": "9b41d5e80e7d9b92390ed82b739063b4ddbb758234a75db576fe0bdb4d1edc99"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653789779898943,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "329085b8a6b28fda11a3374a5b9aeaae64b80e0dd2e661c492ec3f193314dfe4",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "ad4acd2a4298fad2b7bc97ad85d8c8d7740ac138a0596567f9b83ea18c6af616",
+      "H72.loss.dat": "00c7c19779ae1d1cc2f6d0d7d41812608fa1cf8909a8ec95629157e21902f522",
+      "H72.wat.dat": "2cf8fb37fd692b041b784236a7ee3b6e3b35deea0a0411d6d6c9112d2c3548fc",
+      "H72.element.dat": "41e9b2276fcd4399825258cc5cb54c5cc65827efaf7af8d5c0f4becef7b3ae98"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652717299963115,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "38584ac67aeb5dbb024a7a6645bea929a8414b59d2196923255f63698904bbaa",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "d721c2230e323b35c1ab5939a36761bdb8d23b28f0c38c1d6d43b6c3f2f40c2e",
+      "H72.loss.dat": "00c7c19779ae1d1cc2f6d0d7d41812608fa1cf8909a8ec95629157e21902f522",
+      "H72.wat.dat": "37b3f52f66c92fd4c42b3f7e0a41661bdf431ad8ad4be1d18652be80c2995d93",
+      "H72.element.dat": "5af2bed95bd3750856532c0863a6d2b663c415d1cba98cf810fb9023791c51cb"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5654956310027046,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "d260f50f54a399d62e798884fdb0e161008df482300846a5b8c49d59baf7756c",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "b8fd85b47c78e8acee056603a484d0b83fdb5b26a6bd02081bda415bc7bd793c",
+      "H72.loss.dat": "b82b0db3596611217d24fd8f6fb2971aa8270723ea9db23c4579ca64304266ef",
+      "H72.wat.dat": "59b5a335afdc0d04a7eabefe691d3ef7b5fdc4255e39cbd64a4098608b1855b7",
+      "H72.element.dat": "2fa35325621760826b011dc8808d06f12d078861dffe66c8b5d31ad82e5b4972"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654916930070613,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H72.plot.dat": "7085398d2f258f8af72c77480091248cc6698d7a65d7f3ee24f33974047dfdc5",
+      "H72.soil.dat": "228951fdad035e00055cd96f921a993f02d3c63b4bd844ea9a34dc18c2213878",
+      "H72.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H72.pass.dat": "e7a6d71aaaa89127504f4fc2dff1c9d2a1dba7fcf81ca62cca27ee7f74d866dd",
+      "H72.loss.dat": "b82b0db3596611217d24fd8f6fb2971aa8270723ea9db23c4579ca64304266ef",
+      "H72.wat.dat": "9c3e8c7fcfd5ce904b5a70fe5fa64c2c1bc70ca4610c92a56ff7054371a588d3",
+      "H72.element.dat": "7f854fc5175841ad844484dff61babf8de34db5f8cc79d513dac33d779f5e7f0"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652854310028488,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "a209c5319680eeccb4cd676554bf7ab92689ceeaaedd27fbbc2dc90d35de07e3",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "5e2e9e17ee129da301695a847fe1ccd84bcdfd8b4617ea5552a8d32155ea4157",
+      "H78.wat.dat": "66f083253c27871da8b1388e8fea57648293059dc20b90ab97099922e35d1749",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "76b3e7b674f82f1d7512a66b352afebf8b8b20bec452591b3b75364cc16bc855",
+      "H78.element.dat": "49e2c40c43891a5a61048115674629211d7ef6d8cc74d3b7537bd5ecca8725e6"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654812510038028,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "a209c5319680eeccb4cd676554bf7ab92689ceeaaedd27fbbc2dc90d35de07e3",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "f2499e9f9402b261a5252309b4ecd22f43c075b1ec4b3cbead69faf9605d7ef2",
+      "H78.wat.dat": "cff130c40d67aca625d5a93afeb185b913673d1935506ce49ca5b4679fd01227",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "a97d3e9436b9251dcaad31ca2a2113850b8cad8e9792a5337f9f438d774cb9b5",
+      "H78.element.dat": "7c4b6e9377cc7dbd9dec1b3478aab024d523fa6ad972370a2bee9b6890380b50"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653012940019835,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "6c784812b648f7fadad25dba2f1c81dcb213b05604fd6126eb5c19449d045dce",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "ea8da96df98d2a4702a49a77a7ca35cffbd3068c704c23766534956c06cbec3d",
+      "H78.wat.dat": "80e0b40073eac67915c2f37fde494533beadeed29c39d82cbd48f814253d4846",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "032594222f0f078121da8aa02780d160f5d90c4eb5a2a84f9274ae3e78b83036",
+      "H78.element.dat": "5cc7246b4564741038dad94be96ab8e7a8b66a3a67813a3bed546fbe53232de6"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653733680082951,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "6c784812b648f7fadad25dba2f1c81dcb213b05604fd6126eb5c19449d045dce",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "2f79e8c7fd8e75d35708a225ef1889a5011acf90795b2da71c68e85be1148324",
+      "H78.wat.dat": "01b0ba9d5371e40604b1400d66f2def541af859b60150b97d3d58272153c5e38",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "36cb0ea171cd73b3c9cc2dc99984ef083c1bfb7d0430b0317b672219dfc0da1f",
+      "H78.element.dat": "c19a249ca9d091ee0c951b2d48b7185190ee7057525a8298759987b9769e4645"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5654430739959935,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "c9a0f9d1ca863a299164d76523554bdaa2b8218380192898a253d52e372ba064",
+      "H78.ebe.dat": "068e66432e15642f6c57d51c69a0220f1b768791ff54986b076372d0b4af2f4c",
+      "H78.pass.dat": "1afe01fcda8db817c59afb8e6db5d847c892a67801d874f2883f005a8ff21baa",
+      "H78.wat.dat": "374d4ca3b86f8b97e7cc1ca327b88387ff1365a7c7f08090170ab1fdb588e400",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "a6039140fe36a933ade534aeebbcf0f3dce366877d8dfdf99bb08de5bb861088",
+      "H78.element.dat": "4d7c15612813421ce2d73ba42c35d6c7138040b3d2446524d3e01bb5da7ca437"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654243009921629,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "a50eb2780eb503271bd55b58c9887c81f5b2c8425fa1c80bd53a61053526dd33",
+      "H78.ebe.dat": "068e66432e15642f6c57d51c69a0220f1b768791ff54986b076372d0b4af2f4c",
+      "H78.pass.dat": "3c9fe1dbf1fdb2e3679396c98529555c5a6c74e241742ff13ebf293ffdc3dc39",
+      "H78.wat.dat": "1e92234c4200f5c2cb26561d1c2800dc2d93f95db7e0e4539df4cfaea9d1b079",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "3474627409cbf838e73731c52ccfc7adff8efea091a2c0434f72f0778cbd20ba",
+      "H78.element.dat": "6535240d00e6784037cd1f4ec55f9d5349c028636eda432c4d13b337987abfe4"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5651558579993434,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "8f2580fa8de2184e38a9da9eb0c4319c50bb9635d0b12515871de4c94f13b633",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "1e191fb9a773d42df5476550bced0a3f17d531cc9060deedfd9711d096b2e7c2",
+      "H78.wat.dat": "8e790c5e011b551890d79828b8df2105a676b57660cf4bd93f337285984ca2f2",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "f0cc981f7c4a6d1bcfe5a035b796e02158dae80020e545c025decf25ff7235ae",
+      "H78.element.dat": "dbcf7ba622fd6a7ff1001752e95c1f9d021f288f701009d6b5b54bd457402559"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653070560074411,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "8f2580fa8de2184e38a9da9eb0c4319c50bb9635d0b12515871de4c94f13b633",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "a0f212233def10ad3627b69af5c0a1d5be181c5f54c7e27710c2d37c8869c787",
+      "H78.wat.dat": "0dee353cdff68cad150cb26da26caf58b4a501549b5ef5a5fa5971c90cca017b",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "10786228e51aaa2906b8c37606b0084e17241493b9701d53638aff8e5709d298",
+      "H78.element.dat": "f010f099499fbf18d90ef9e6bb2c31dcec903bdf6d8b43307e1cbeac74bec1b2"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5654362530040089,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "68ce9c7e619bbe61814fa06bbf4b86586a6135b5e7cb848445c22f52c0266e96",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "9a4ffba755de0c68f86e5dd77373c295ed68a2f71fa7eb1b34800ecd1aba838e",
+      "H78.wat.dat": "6744db3f95ae6c3478d5b4a4a85a9a14e155a985954289cd172af36168af7116",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "07016d7931b1e3dce06c79b5672f39e4eb6e9be188ddc89b22192e5dff3bbb8c",
+      "H78.element.dat": "3fd5ab263ddf63dc7f0aa57dcc20d74ea0e328b48f730fb91e727927a596a061"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5651556759985397,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "68ce9c7e619bbe61814fa06bbf4b86586a6135b5e7cb848445c22f52c0266e96",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "24ffb370fa34307bf2606b64985e4758f4124592a07005d2d7806ffdf8b8b19f",
+      "H78.wat.dat": "aa3c07cb8df159c852545f5f62026946c7b829ce1d1501f95f9303d746188a36",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "fe53b73914f1ab1eebdfa6d00c7161dc6c5add762ac20ed78cb7037a5395a06f",
+      "H78.element.dat": "c218105881aea94e3cade0d791a0af6101d4bc9e2e7cec8d52a099878b7c7096"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565552045009099,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "22c78f67ee0dcc0f30163a05fdce5f5e48e69c7910e9c69b65491472c2e8b342",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "14227d9934bc2757ca2af9fed31581d63f10d7e7d0230a0c5c07eb086e4be6d0",
+      "H78.wat.dat": "1c2719f57c7368577665fe52089c6198ad1fbd6bed1126326934e673b8458c98",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "d8c72fb99594c13b16806e37198668bcee19063dc218e04f2532063200bf1157",
+      "H78.element.dat": "747f359ae8ef85e5581b435a5be609ffa97c3689fe4e650f651a826492b0c550"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5655152980034472,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "22c78f67ee0dcc0f30163a05fdce5f5e48e69c7910e9c69b65491472c2e8b342",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "c2148fb140ed90404036ad5ad92a7b8fb9c90ad47b2c7cc6e93a3fad95031e76",
+      "H78.wat.dat": "402eee88feeaa51988284a632464ceadb1a237efd2252070360b015dc2aba63d",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "36ed700a13e5422f872cdcf7c4a44f259f86c148e7629b9aaa252897d1d8208b",
+      "H78.element.dat": "ccb3501aa16b93d8287da012f06fbc3de4e9e2b64d30c83294ac4070676e6937"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652313169994159,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "91854c898d215cf6ff52971ea8d7b9b5f3e1e4365c34def6fa654269700d892d",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "f018d7472fd939a94901fd5f072c0c372a5e376a897a7cf1d41db56de92370b3",
+      "H78.wat.dat": "1fd35bc13216585b8469a405e4976aadb110ad53036dc34e8d8e806eca05d19f",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "8de4d95235a6c910def0aac247e12113590ec3a46b61f3a4ad6bf48e7f9986ed",
+      "H78.element.dat": "cacbeb974f8421160dff672185b6279b00e40b3672b1c25d82acf192c77a2a85"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5663788439997006,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "91854c898d215cf6ff52971ea8d7b9b5f3e1e4365c34def6fa654269700d892d",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "f09454886f250989d826cbb3cc38c7ca39d45eb288897c2fa44a01109815c1e1",
+      "H78.wat.dat": "815503aa04be04a084b6c75c939cc7f867e6c82fb1ef1a1f106faf430207a045",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "7675aa88d63e321c7cda2b5bbacca07710e0c3b9d579e77121c762e0a99c649d",
+      "H78.element.dat": "5a3df2e1ae76dc895e83372ad634a9300ddfcc3add258da4bd501be804264524"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653862289909739,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "3630ce44e995c63f9fe6e68b7beeadb521e16c816f8671b4a2e84ab0475a1847",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "14f39fee09ccdc6e41e5ef336f575011115388b1a3988026d9cf10b0aa647fd0",
+      "H78.wat.dat": "1e8c2a7781df20f107b5e308c1bbcf1913a1c1afdb59540c87fce0573a58af49",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "d1743e6954963302dac8d5411963efb9e1071bf053d59b2246de1934b2fcf5ff",
+      "H78.element.dat": "7b4b1106492b68cf0a6c2ade404e5db951e1d3b66b1549821e11f1f2a22314c6"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653065239894204,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "3630ce44e995c63f9fe6e68b7beeadb521e16c816f8671b4a2e84ab0475a1847",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "29be3df744334b7016214cd41fe7991f7ece787d4ae51921fc793d8140610429",
+      "H78.wat.dat": "f705dea6d6283c4017ec55e41a4f03dca0b051b0f9731795fa0767cc09067183",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "459e7234344f0b6bd47e841ae90b00c96e8acc2195a28473c602cc311decb97f",
+      "H78.element.dat": "9f3eb637f84db19ceaf7adbee93db7e5934f9b7e4b767d0e15de313a64be3845"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565270072009298,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "6385963d1e736b0f1ac9d89f0170bf14588e347e8e9da66174e55b633f95b988",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "a857b40bd55a7b9825ae36ceab9e7a14fa8b52a6d000c0741b30826688896c0a",
+      "H78.wat.dat": "6801955be7b4042ef599f0afa8a9c83258fafd39992bf53ef9c54bf44b6fdda6",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "0e6fe52cb7717af12abca620e8a1a6cae0e87c70094a7315f472668726447dd2",
+      "H78.element.dat": "60e62b584c88d11e2dd34e9ddbdd7bdeadcc2247d05be3fbe1314cf8fede3e7b"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5651824009983102,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "6385963d1e736b0f1ac9d89f0170bf14588e347e8e9da66174e55b633f95b988",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "b71c8ea9cab7d6035041d031ea9a0312f4a02fd0c6f8303793154b1d9ae706a8",
+      "H78.wat.dat": "a8baaa05c46e0153011664f51f08a8d652c8a6ed826670cd035c240f82a0965e",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "03a33f9cd78446ed8e4bd945d9148fc547253dc81fea3fb1fdc2083e762babfb",
+      "H78.element.dat": "740c4ab03d96aa1677907a08712c572cec8f99b3d0dd44d0a50252c1d96aee6f"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653099519986426,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "30cf27d07a048f245882b8e7bd0891fd8977dc76161feea3a91b6259e90a90cb",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "c27656a1690a5a82f9b9d1ca934894fa9128ed34372142bda6be057ce4bf34af",
+      "H78.wat.dat": "92d81befc60970d8202d665bb6cc92b548874ada3231a935534b2819533c3f45",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "a77a783717c9c1c53ca06a5b34d30d5c71296deb5c7d263795cd6e13d961c19e",
+      "H78.element.dat": "f717eb4ae68e00137561fb33ae22bfc4623ee8021a54c1e9000562e6d4ef286c"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653631070017582,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H78.loss.dat": "30cf27d07a048f245882b8e7bd0891fd8977dc76161feea3a91b6259e90a90cb",
+      "H78.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H78.pass.dat": "e6c65eda603320be9fbd8f39455f9fd4d8e01e527509264b80869306054943a3",
+      "H78.wat.dat": "4d1e6e15687b8200169c952a94bf91d0a73fdd2e5526ae0799e0cb90503e9b36",
+      "H78.plot.dat": "fff1b135712446120ab203f09b92a40b96fd0d76fded4fa6cd1884db96d81879",
+      "H78.soil.dat": "5e5536050b2a3e6cbffbc8948dbbef711a19d7cb86d5bcc2dc094946341d4b5c",
+      "H78.element.dat": "42879027b153514a5f442d46b9ad182f1b06189710b2045b6ca3294a57ffaa78"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1001,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5651928860024782,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "5c28fba8fd0969fbc53a1a3426bbd307462460014ad67929d33f21ed7ec7314a",
+      "H132.wat.dat": "79b2e748107f9db7bcd9566cbb4f6141567315bea774cc4bcc5bffed09c33229",
+      "H132.pass.dat": "ddc5b8b50b082ea6171d042100b86c47a854d9880e9fbeacad036a7bfb399a60",
+      "H132.soil.dat": "3351aa416fdeeeb9ecb44e9c9f72a0a545feae2abdd5bb83ffde3e4584e292a6",
+      "H132.loss.dat": "9fc02b1b881054fc10a5074f4216e2132f732fb99298958a039a429a1dba0774"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1001,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652111719973618,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "763076ec7ac4c2b9cda631113c90fd83d08f0a4b4a383c8a72d2ee3b39bc4c27",
+      "H132.wat.dat": "d19719d9c43559514ec9788603efa00eb3e49dcaf249bed18627109c20393253",
+      "H132.pass.dat": "344e491a60758b0ae96d259330561edb3bbcdce6bc7ab4793367b27e26d78e0e",
+      "H132.soil.dat": "e11ba9b3737db486c146fa7568da3402e973c207f8b38b6ce6e3edbd53958bc5",
+      "H132.loss.dat": "9fc02b1b881054fc10a5074f4216e2132f732fb99298958a039a429a1dba0774"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1002,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653109769918956,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "0eaba633ce08789998120c475c6fb86fc65c3d85de7302458f705b00c514a56b",
+      "H132.wat.dat": "ecef21db6d0b6a289f87934777fd5e66c339098e22e1580fe223dafb7d6cd5ad",
+      "H132.pass.dat": "3f51ad91849e7576a898fa7fe4114228edb4d8dc0fc94d19f2477f4f962f3e53",
+      "H132.soil.dat": "4ee2bdc56ceda66af5eb48deef6c94d12bcd2059106c71fb8b09176471e8d87b",
+      "H132.loss.dat": "63d75ed75aa65ad6b05235497ac4e123d6b37a43b0d873f726e4d37873c1d519"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1002,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652757190109696,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "ed0007ffad838ea72cc572bd024cc8587ddefe1f53c2770bf17cc9266c26d937",
+      "H132.wat.dat": "7cfda95e23b1a039cf83ab6c4d3df122ab98a94b5bebe6cdb7ddd707aca349c0",
+      "H132.pass.dat": "65030df7cfed2d8843c539feae2b1a4bb6bf84b0c6d01221867a1f57133281a8",
+      "H132.soil.dat": "c8f152a40451e95ae70460a0389710dd1f477c0f89fc48c32aebdc14831e821e",
+      "H132.loss.dat": "63d75ed75aa65ad6b05235497ac4e123d6b37a43b0d873f726e4d37873c1d519"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1003,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5651963940035785,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "34b74a51f7c6b326f51d58adfecc4fd1df8e2365c3af6afb242d7eaccf81881a",
+      "H132.element.dat": "770e10fd5deef93f43e992581b9d64702a04593fb6b9172b62a5c6b4da6238c7",
+      "H132.wat.dat": "902599716e7d280681459de9c44036c0e889891d38e21aa2e63704aaace56815",
+      "H132.pass.dat": "f724250f1467de343fe13fdd0ab341a09b28dd2782cb4f51edde504e390714a4",
+      "H132.soil.dat": "e292a68534534bf62c5b7426f364682f0bdd08adf247261739fc3b6b9541b907",
+      "H132.loss.dat": "382e047348a0d15b64dda62a2875ab152313db4f1626e617c7fa930b77c6a83e"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1003,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653311460046098,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "b412efcb750724788f3dc0e535fa4b948759a91a75449ddb41822507d745585f",
+      "H132.element.dat": "3413f366865b0466381e61d3fa7a6988a2a163804c747202cdb3cafc74a69bae",
+      "H132.wat.dat": "c0cc68c98d14f4ac25ab18bdb9f7027d7509fb6a6365933c9c90e42ab79c605c",
+      "H132.pass.dat": "f102ea189f6abbae453376e1589223d6c9dfb01fbc657bfea9a373b3ead56d2f",
+      "H132.soil.dat": "fc316b0a606c4995f37255c1d1ed7f3e1418f122c037967b2cc4b36a5786da41",
+      "H132.loss.dat": "382e047348a0d15b64dda62a2875ab152313db4f1626e617c7fa930b77c6a83e"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1004,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5652996660064673,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "a39426df3183c3d57f517a1ce2a74a2742ab7c35609da65e33031a1e08345bf7",
+      "H132.wat.dat": "4048c96a141cfd3d3f35defedb187be6fa55546f8fb7ad708069739198daa150",
+      "H132.pass.dat": "b6881d9832a8af51d08840e27be7cd97d16956d1e52558a0c488b1fc557e0eee",
+      "H132.soil.dat": "bcd65d3b1e0be208a776e604b876c321178f9ec7f043aa8a9d2c1cd0a331f022",
+      "H132.loss.dat": "772713ed88ac9159c229a034b98794c0705f0842f29742db988bb9d938698a0b"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1004,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652398969978094,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "61025640530569d46b6e57101b3758a1e7ecc346872434cc8a55ac0d42fad3c1",
+      "H132.wat.dat": "07bd06040c2117a4c2db1adc61bba63af50a46ffbf75422fc231b1fc4819082c",
+      "H132.pass.dat": "8d97af17ddca406798c14ae9a9df8169a677f2f2bde43604c2816b78b03d150e",
+      "H132.soil.dat": "eff9eb1c3b82b419f9266454356015afc2b4e404dbc847a2b262764519fd7aba",
+      "H132.loss.dat": "772713ed88ac9159c229a034b98794c0705f0842f29742db988bb9d938698a0b"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1005,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5654602010035887,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "b89397934e4c2fc5d87a8c7985e55cfb9535904dacbfc1c1eb141d71e860335c",
+      "H132.wat.dat": "f18e92a7cff16aac634cf31bda4276f336ab440db5f0feeaaa543cb971c144cb",
+      "H132.pass.dat": "d193465cc604e9f89713adb882b90a413ca2d8a9ca161689f3ae4076c0fb3477",
+      "H132.soil.dat": "192e466ea6ce5d41e1d4923533aae50080c8b9770378e1196dbc2e296e9d7202",
+      "H132.loss.dat": "84f4cbbd9c8dbeb5407b4a73522be79679a584773a264794489cc27e413105b4"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1005,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653121409995947,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "20770d0ccd4496d5693fd5d03e83ac048216e40ab8068a915f599b5366098284",
+      "H132.wat.dat": "3fda3c5386c5b7abe52ee04ac8e8ada2626c69c772b6f7877b0b7b26826b9c44",
+      "H132.pass.dat": "53852afb72dc6f14a28416bf9a5030a8e060ee14d5d041db62979ea15c80c903",
+      "H132.soil.dat": "5c30dcfe16b2e87bd850de3db65bade8103f514553b15d888efcd1c97621ffd9",
+      "H132.loss.dat": "84f4cbbd9c8dbeb5407b4a73522be79679a584773a264794489cc27e413105b4"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1006,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565437942990684,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "f7e667791a8acdb7270fe2bc0ab37386862eb75091c4381e7262d47e67126401",
+      "H132.wat.dat": "e2c8d00233eef1ed8c5fbe0832fd24cff234450b7ba0d3b8ef7ac28b5381d392",
+      "H132.pass.dat": "a6c16b01e122ff21e5d6fd1fc98948a344c28ee594d074352fc16d4a533ed4ce",
+      "H132.soil.dat": "4b0539e57481ffdae7532e1817714e1bf3fcd411d752a4637eca772c272a0a78",
+      "H132.loss.dat": "3770638084f07abf43bab5ee4c156090e6143f4c4a2089bbc2bc51374df6aaab"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1006,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654618590051541,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "bbe6bcd2089899b68f06825dea48e683c0585415e803913152e530d0a97f499c",
+      "H132.wat.dat": "ef2644d40f2973172fbab17e926a126d4f6c452333fb08c9631bd6c5c3b4632f",
+      "H132.pass.dat": "ef23633cf169852a274b3f988bd84d97aa38892141f1b8499639b63b68af5019",
+      "H132.soil.dat": "f18468611d3f73b1a14121a841275554febaa9c0ea667ae9c89f31e70583ff23",
+      "H132.loss.dat": "3770638084f07abf43bab5ee4c156090e6143f4c4a2089bbc2bc51374df6aaab"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1007,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5655356240022229,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "3dc14c484af4ca771893678f161300a662a72b03dbc3255c36713366d7b097e3",
+      "H132.wat.dat": "b696b5f1d7f616f10c1a7c04b27db5aa184a2805a735e047e2f006368548cc52",
+      "H132.pass.dat": "3a3d7a70ca73ff6eddb02fb82d8cb9fcbc79823f700737ec41b76410ed2079fb",
+      "H132.soil.dat": "13222bcd6e45f8c985d5505c891eca165c5c6a1802909b8f57ed01be7b79325c",
+      "H132.loss.dat": "00d4c09abaf47303823a48307c7e0feb259269d093b5e5b89586705df7b8baed"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1007,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5652424509898992,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "122cc9038d361cd27461b454b752792e6da0e279a16bc6dd8d7ad9f41855ff63",
+      "H132.wat.dat": "5d098992f97f692843fc2015d671cd32d05d6657d8221236057b9bb3a9198234",
+      "H132.pass.dat": "0b638eef535273552a71f04078b547def8193dae884504c9d7b22fee98196bc2",
+      "H132.soil.dat": "96584b8f42c51747bff353df9c6f23f4581b20a176378cda42af53e8540893a8",
+      "H132.loss.dat": "00d4c09abaf47303823a48307c7e0feb259269d093b5e5b89586705df7b8baed"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1008,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5653543480002554,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "982dcce1ca7941bb530a9675f96185e0e9b87fc78367077eb917aa04414b9ad5",
+      "H132.wat.dat": "2112707d10d756375c80269b711f7d1b29eab49a1a7289fd08360282f1aecb7f",
+      "H132.pass.dat": "8166811dd9ace994f1508d0666b2bb51aebdcf77ce42cbe7a4aff497c6bff9ac",
+      "H132.soil.dat": "f71dc0dd9b2529e4768a0b4f10e930ac573f55e0f9ef83cc5573c2fc9cd4bb95",
+      "H132.loss.dat": "748d22a08d4c86b85be0eb45c26492507c77bd3658d347622e46fa89391292be"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1008,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5656709559989395,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "4fe8622cb895a17e168e98ea85dab0508da84e65d87fb2be99e75467f92f97b3",
+      "H132.wat.dat": "09aba7a7fceffce66feb242b6ce2acb6ac46c26d7f6ced36c12bcd1dbf2c31ad",
+      "H132.pass.dat": "43a9d995b3aa8edd380c0f345f8e4c27b268f81a0a19ce23bc6624fa86774d3e",
+      "H132.soil.dat": "7a3f4a114842b7ac641add38667eb6aba3e5d7c55d0bf4aa4518ee7bd457f1c7",
+      "H132.loss.dat": "748d22a08d4c86b85be0eb45c26492507c77bd3658d347622e46fa89391292be"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1009,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.5651979120011674,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "9e2cd33f7fde85ea20a4176ff670d2049bb1a24b9b71975363fab534469a0b49",
+      "H132.wat.dat": "62a9995660466b9b3389a10ad8eb9cdce49aba33296ff3806b523880fa17422c",
+      "H132.pass.dat": "12a33a36009a65aec3cffb2142349b4811e2b8ec63215078a466aa2c45c5e635",
+      "H132.soil.dat": "6924b8021a6cc1fb796a8aa3da87831a5601622e387edd9196e2ce00fe954eb1",
+      "H132.loss.dat": "e8fabd6fa8c186f5cc84ec5191f63ade11edadb15e25d4701a6447ad7049f5de"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1009,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5653428540099412,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "6eb86d67432f4c6b818948346dae7dfa54b072f33e02e13de1523d13836d4a16",
+      "H132.wat.dat": "48e1413b148222b15b3a12d7dac19c924269699dfee01983c34826c2821b8d21",
+      "H132.pass.dat": "b6dcfcc3837df2c474289f6ab9865e4a78c765f4abf6155d7d530c50e3247674",
+      "H132.soil.dat": "9a2cfb579a0c0c9eaacac3362887f113b00ec558bc08fe1bae32cf0a478351c0",
+      "H132.loss.dat": "e8fabd6fa8c186f5cc84ec5191f63ade11edadb15e25d4701a6447ad7049f5de"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1010,
+    "arm": "native",
+    "returncode": 0,
+    "seconds": 0.565572591003729,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "a850d34095022f59dbae0cce490443adb7128bea49100d802d8009cc9e5dcc76",
+      "H132.wat.dat": "edb6f04f4b6929f5b47cbd65e3c4706e8be856b0ecb048ab07d508f3ff78b6c6",
+      "H132.pass.dat": "19f1ad9881161e27a0c18131e8bbfc8fd67083c212d322b189b96df155353259",
+      "H132.soil.dat": "331bd5d93b8793828918d84801cfe973b321b48e732b969391ef9c3254b5ecf4",
+      "H132.loss.dat": "c19d4bfe5a420cb7ba39f04a03e5e521d3a61b48469530e9d67080b5ae651cfb"
+    }
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1010,
+    "arm": "clipped",
+    "returncode": 0,
+    "seconds": 0.5654007209959673,
+    "normal_completion": true,
+    "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "output_hashes": {
+      "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+      "H132.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+      "H132.element.dat": "01b7e5c38dbe08cb44fc3988fa31ef9a29876bfa79815155fa58097e4992a09a",
+      "H132.wat.dat": "eeebac0114c9df0f16acc2e0aa67d0c201cda4dcbb3f6b180fd0099acea96154",
+      "H132.pass.dat": "25820bff73a63840fa5e129a65d06e173811b6996f64ff992ff8c188437a0d6c",
+      "H132.soil.dat": "2ca3ed8f63445f8f44eaf5c35fe01028a6a164e81c48b45c03f07f75fc410573",
+      "H132.loss.dat": "c19d4bfe5a420cb7ba39f04a03e5e521d3a61b48469530e9d67080b5ae651cfb"
+    }
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "locations": 52,
+  "start": "20261001",
+  "end": "20261007",
+  "ready_seconds": 5.280161910995957,
+  "total_seconds": 5.405830072995741,
+  "polls": 1,
+  "csv_url": "https://prism.oregonstate.edu/explorer/tmp/WeMoGxMoNHyTpct6/PRISM_ppt_tmin_tmax_tdmean_soltotal_early_800m_20261001_20261007.csv",
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:03:28 GMT",
+    "Server": "Apache",
+    "Strict-Transport-Security": "max-age=63072000; includeSubdomains",
+    "Last-Modified": "Thu, 08 Oct 2026 20:03:23 GMT",
+    "ETag": "\"5df1-65d59b957adfc\"",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "24049",
+    "Access-Control-Allow-Origin": "*",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Content-Type": "text/csv"
+  },
+  "bytes": 24049,
+  "sha256": "b77cf14fbe2ce4ef4aff3cb0def0300a7a9897696c164b5febe2186d14624a59"
+}

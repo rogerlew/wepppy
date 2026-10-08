@@ -1,0 +1,730 @@
+[
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1001,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1002,
+    "unmet_targets": 80,
+    "parameters": {
+      "Precip. Amt.": 18,
+      "Temp. Dew Pt.": 60,
+      "Time to Peak": 2
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1003,
+    "unmet_targets": 17,
+    "parameters": {
+      "Precip. Amt.": 17
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1004,
+    "unmet_targets": 12,
+    "parameters": {
+      "Precip. Amt.": 5,
+      "Temp. Dew Pt.": 7
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1005,
+    "unmet_targets": 22,
+    "parameters": {
+      "Precip. Amt.": 18,
+      "Time to Peak": 4
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1006,
+    "unmet_targets": 44,
+    "parameters": {
+      "Precip. Amt.": 14,
+      "Temp. Dew Pt.": 14,
+      "Time to Peak": 16
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1007,
+    "unmet_targets": 20,
+    "parameters": {
+      "Precip. Amt.": 19,
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1008,
+    "unmet_targets": 50,
+    "parameters": {
+      "Precip. Amt.": 43,
+      "Time to Peak": 7
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1009,
+    "unmet_targets": 28,
+    "parameters": {
+      "Precip. Amt.": 16,
+      "Time to Peak": 12
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h27",
+    "seed": 1010,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1001,
+    "unmet_targets": 34,
+    "parameters": {
+      "Precip. Amt.": 14,
+      "Temp. Dew Pt.": 5,
+      "Time to Peak": 15
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1002,
+    "unmet_targets": 37,
+    "parameters": {
+      "Precip. Amt.": 19,
+      "Temp. Dew Pt.": 12,
+      "Time to Peak": 6
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1003,
+    "unmet_targets": 17,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 7
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1004,
+    "unmet_targets": 62,
+    "parameters": {
+      "Precip. Amt.": 22,
+      "Temp. Dew Pt.": 24,
+      "Time to Peak": 16
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1005,
+    "unmet_targets": 7,
+    "parameters": {
+      "Precip. Amt.": 7
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1006,
+    "unmet_targets": 28,
+    "parameters": {
+      "Precip. Amt.": 7,
+      "Temp. Dew Pt.": 21
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1007,
+    "unmet_targets": 40,
+    "parameters": {
+      "Precip. Amt.": 31,
+      "Temp. Dew Pt.": 9
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1008,
+    "unmet_targets": 16,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 6
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1009,
+    "unmet_targets": 16,
+    "parameters": {
+      "Precip. Amt.": 14,
+      "Time to Peak": 2
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h113",
+    "seed": 1010,
+    "unmet_targets": 13,
+    "parameters": {
+      "Precip. Amt.": 13
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1001,
+    "unmet_targets": 8,
+    "parameters": {
+      "Precip. Amt.": 8
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1002,
+    "unmet_targets": 21,
+    "parameters": {
+      "Precip. Amt.": 18,
+      "Temp. Dew Pt.": 2,
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1003,
+    "unmet_targets": 15,
+    "parameters": {
+      "Precip. Amt.": 11,
+      "Time to Peak": 4
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1004,
+    "unmet_targets": 13,
+    "parameters": {
+      "Precip. Amt.": 11,
+      "Time to Peak": 2
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1005,
+    "unmet_targets": 66,
+    "parameters": {
+      "Precip. Amt.": 20,
+      "Temp. Dew Pt.": 46
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1006,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1007,
+    "unmet_targets": 55,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 27,
+      "Time to Peak": 18
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1008,
+    "unmet_targets": 100,
+    "parameters": {
+      "Precip. Amt.": 14,
+      "Temp. Dew Pt.": 76,
+      "Time to Peak": 10
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1009,
+    "unmet_targets": 70,
+    "parameters": {
+      "Precip. Amt.": 31,
+      "Temp. Dew Pt.": 25,
+      "Time to Peak": 14
+    }
+  },
+  {
+    "slug": "hand-to-mouth-drought-h74",
+    "seed": 1010,
+    "unmet_targets": 36,
+    "parameters": {
+      "Precip. Amt.": 13,
+      "Temp. Dew Pt.": 9,
+      "Time to Peak": 14
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1001,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1002,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1003,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1004,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1005,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1006,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1007,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1008,
+    "unmet_targets": 1,
+    "parameters": {
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1009,
+    "unmet_targets": 9,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 7
+    }
+  },
+  {
+    "slug": "apostolic-saw-h1153",
+    "seed": 1010,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 1,
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1001,
+    "unmet_targets": 3,
+    "parameters": {
+      "Time to Peak": 3
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1002,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1004,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1005,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1006,
+    "unmet_targets": 6,
+    "parameters": {
+      "Time to Peak": 6
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1007,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1008,
+    "unmet_targets": 2,
+    "parameters": {
+      "Time to Peak": 2
+    }
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1009,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h122",
+    "seed": 1010,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1001,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1002,
+    "unmet_targets": 1,
+    "parameters": {
+      "Time to Peak": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1004,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1005,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1006,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1007,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1008,
+    "unmet_targets": 9,
+    "parameters": {
+      "Time to Peak": 9
+    }
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1009,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "apostolic-saw-h2196",
+    "seed": 1010,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1001,
+    "unmet_targets": 22,
+    "parameters": {
+      "Precip. Amt.": 11,
+      "Temp. Dew Pt.": 11
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1002,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1004,
+    "unmet_targets": 15,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 5
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1005,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1006,
+    "unmet_targets": 11,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Temp. Dew Pt.": 9
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1007,
+    "unmet_targets": 8,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 6
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1008,
+    "unmet_targets": 56,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 54
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1009,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h72",
+    "seed": 1010,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1001,
+    "unmet_targets": 22,
+    "parameters": {
+      "Precip. Amt.": 11,
+      "Temp. Dew Pt.": 11
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1002,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1004,
+    "unmet_targets": 15,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 5
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1005,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1006,
+    "unmet_targets": 11,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Temp. Dew Pt.": 9
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1007,
+    "unmet_targets": 8,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 6
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1008,
+    "unmet_targets": 56,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 54
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1009,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h78",
+    "seed": 1010,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1001,
+    "unmet_targets": 22,
+    "parameters": {
+      "Precip. Amt.": 11,
+      "Temp. Dew Pt.": 11
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1002,
+    "unmet_targets": 1,
+    "parameters": {
+      "Precip. Amt.": 1
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1003,
+    "unmet_targets": 0,
+    "parameters": {}
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1004,
+    "unmet_targets": 15,
+    "parameters": {
+      "Precip. Amt.": 10,
+      "Temp. Dew Pt.": 5
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1005,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1006,
+    "unmet_targets": 11,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Temp. Dew Pt.": 9
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1007,
+    "unmet_targets": 8,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 6
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1008,
+    "unmet_targets": 56,
+    "parameters": {
+      "Precip. Amt.": 2,
+      "Time to Peak": 54
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1009,
+    "unmet_targets": 2,
+    "parameters": {
+      "Precip. Amt.": 2
+    }
+  },
+  {
+    "slug": "cryptic-beechnut-h132",
+    "seed": 1010,
+    "unmet_targets": 0,
+    "parameters": {}
+  }
+]

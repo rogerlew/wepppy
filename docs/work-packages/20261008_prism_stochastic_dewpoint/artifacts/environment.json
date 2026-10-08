@@ -1,0 +1,16 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "packages": {
+    "numpy": "1.26.0",
+    "pandas": "2.2.2",
+    "scipy": "1.13.1",
+    "matplotlib": "3.9.0",
+    "requests": "2.32.4",
+    "rasterio": "1.3.10",
+    "pyproj": "3.7.1"
+  },
+  "repo_head": "73d8e06a2a6573d3f478306bd8f3eaff2ac16550",
+  "scope": "standalone research, no production deployment",
+  "source_scripts": "Adapted closed station study driver; production par_mod executed directly with retained PRISM data."
+}

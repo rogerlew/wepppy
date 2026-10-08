@@ -1,0 +1,22 @@
+{
+  "url": "https://prism.oregonstate.edu/explorer/dataexplorer/rpc.php",
+  "request": {
+    "call": "pp/checkup",
+    "proc": "gridserv",
+    "gricket": "WeMoGxMoNHyTpct6"
+  },
+  "status": 200,
+  "seconds": 0.13352980400668457,
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:03:28 GMT",
+    "Server": "Apache",
+    "X-Powered-By": "PHP/8.4.26",
+    "Strict-Transport-Security": "max-age=63072000; includeSubdomains",
+    "Access-Control-Allow-Origin": "*",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Transfer-Encoding": "chunked",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "body": "{\"result\": {\"csv\": \"WeMoGxMoNHyTpct6/PRISM_ppt_tmin_tmax_tdmean_soltotal_early_800m_20261001_20261007.csv\", \"csvsize\": 24049}, \"errors\": false}"
+}

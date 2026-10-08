@@ -1,0 +1,16 @@
+{
+  "url": "https://services.nacse.org/prism/data/get/releaseDate/us/800m/tdmean/20261001/20261007?json=true",
+  "request": null,
+  "status": 200,
+  "seconds": 0.10079887000028975,
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:05:52 GMT",
+    "Server": "Apache",
+    "Content-Security-Policy": "default-src 'self'",
+    "Content-Length": "798",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "body": "[[\"2026-10-01\", \"2026-10-06\", \"tdmean\", \"2\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261001\"], [\"2026-10-02\", \"2026-10-07\", \"tdmean\", \"2\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261002\"], [\"2026-10-03\", \"2026-10-08\", \"tdmean\", \"2\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261003\"], [\"2026-10-04\", \"2026-10-05\", \"tdmean\", \"1\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261004\"], [\"2026-10-05\", \"2026-10-06\", \"tdmean\", \"1\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261005\"], [\"2026-10-06\", \"2026-10-07\", \"tdmean\", \"1\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261006\"], [\"2026-10-07\", \"2026-10-08\", \"tdmean\", \"1\", \"https://services.nacse.org/prism/data/get/us/800m/tdmean/20261007\"]]"
+}

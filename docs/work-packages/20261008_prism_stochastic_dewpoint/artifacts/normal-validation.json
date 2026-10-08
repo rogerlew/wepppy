@@ -1,0 +1,166 @@
+{
+  "verified_utc": "2026-10-08T21:27:14.234892+00:00",
+  "period": "1991-2020",
+  "resolution": "800m",
+  "sampling": "nearest native cell; no interpolation or nearest-valid substitution",
+  "projection_operation": "axis order change (2D) + Inverse of NAD83 to WGS 84 (1) + axis order change (2D)",
+  "projection_accuracy_m": 4.0,
+  "grid_sha256": "374f1a80023c6dcf8681b75c333e42983cec9e6a446c129bb76a42f445c8cb28",
+  "csv_sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+  "sites": [
+    {
+      "site": "hand-to-mouth-drought-h27",
+      "row": 1905,
+      "col": 763,
+      "center": [
+        -118.658333335876,
+        34.058333671906
+      ],
+      "transformed_site": [
+        -118.65872328468636,
+        34.05536488765769
+      ],
+      "january_raster_p_mm": 110.42389678955078,
+      "january_bulk_p_mm": 110.42,
+      "grid_elevation_m": 303,
+      "hill_elevation_m": 293.3
+    },
+    {
+      "site": "hand-to-mouth-drought-h113",
+      "row": 1905,
+      "col": 764,
+      "center": [
+        -118.650000002546,
+        34.058333671906
+      ],
+      "transformed_site": [
+        -118.6520131665658,
+        34.05893612197307
+      ],
+      "january_raster_p_mm": 108.38089752197266,
+      "january_bulk_p_mm": 108.38,
+      "grid_elevation_m": 421,
+      "hill_elevation_m": 471.7
+    },
+    {
+      "site": "hand-to-mouth-drought-h74",
+      "row": 1904,
+      "col": 763,
+      "center": [
+        -118.658333335876,
+        34.066667005236
+      ],
+      "transformed_site": [
+        -118.66191857902948,
+        34.06772685259555
+      ],
+      "january_raster_p_mm": 118.25389862060547,
+      "january_bulk_p_mm": 118.25,
+      "grid_elevation_m": 444,
+      "hill_elevation_m": 673.6
+    },
+    {
+      "site": "apostolic-saw-h1153",
+      "row": 472,
+      "col": 841,
+      "center": [
+        -118.008333336136,
+        46.000000333796
+      ],
+      "transformed_site": [
+        -118.0068466163846,
+        45.99920182530399
+      ],
+      "january_raster_p_mm": 145.7509002685547,
+      "january_bulk_p_mm": 145.75,
+      "grid_elevation_m": 980,
+      "hill_elevation_m": 1130.8045654296875
+    },
+    {
+      "site": "apostolic-saw-h122",
+      "row": 475,
+      "col": 827,
+      "center": [
+        -118.125000002756,
+        45.975000333806
+      ],
+      "transformed_site": [
+        -118.12186410489718,
+        45.97478022570241
+      ],
+      "january_raster_p_mm": 149.9290008544922,
+      "january_bulk_p_mm": 149.93,
+      "grid_elevation_m": 1190,
+      "hill_elevation_m": 1341.4832763671875
+    },
+    {
+      "site": "apostolic-saw-h2196",
+      "row": 465,
+      "col": 850,
+      "center": [
+        -117.933333336166,
+        46.058333667106
+      ],
+      "transformed_site": [
+        -117.93706934002029,
+        46.05463062439973
+      ],
+      "january_raster_p_mm": 203.212890625,
+      "january_bulk_p_mm": 203.21,
+      "grid_elevation_m": 1550,
+      "hill_elevation_m": 1548.181396484375
+    },
+    {
+      "site": "cryptic-beechnut-h72",
+      "row": 311,
+      "col": 506,
+      "center": [
+        -120.800000001686,
+        47.341666999926
+      ],
+      "transformed_site": [
+        -120.80061589178611,
+        47.34489676466949
+      ],
+      "january_raster_p_mm": 157.26390075683594,
+      "january_bulk_p_mm": 157.26,
+      "grid_elevation_m": 1026,
+      "hill_elevation_m": 1087.899169921875
+    },
+    {
+      "site": "cryptic-beechnut-h78",
+      "row": 310,
+      "col": 506,
+      "center": [
+        -120.800000001686,
+        47.350000333256
+      ],
+      "transformed_site": [
+        -120.80183796077058,
+        47.350129664414396
+      ],
+      "january_raster_p_mm": 161.62889099121094,
+      "january_bulk_p_mm": 161.63,
+      "grid_elevation_m": 1074,
+      "hill_elevation_m": 1199.6351318359375
+    },
+    {
+      "site": "cryptic-beechnut-h132",
+      "row": 309,
+      "col": 508,
+      "center": [
+        -120.783333335026,
+        47.358333666586
+      ],
+      "transformed_site": [
+        -120.77943336272179,
+        47.355624209146555
+      ],
+      "january_raster_p_mm": 168.3118896484375,
+      "january_bulk_p_mm": 168.31,
+      "grid_elevation_m": 1246,
+      "hill_elevation_m": 1337.09521484375
+    }
+  ],
+  "limitation": "Single-month ppt grid parity verifies geometry and point extraction; not all-variable grid parity or immutable bulk revision identity."
+}

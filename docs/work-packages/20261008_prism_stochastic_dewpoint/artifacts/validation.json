@@ -1,0 +1,1622 @@
+[
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1001,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1002,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1003,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1004,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1005,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1006,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1007,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1008,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1009,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1010,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1001,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1002,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1003,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1004,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1005,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1006,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1007,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1008,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1009,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1010,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1001,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1002,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1003,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1004,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1005,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1006,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1007,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1008,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1009,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1010,
+    "arm": "native",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 16437,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1001,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1002,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1003,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1004,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1005,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1006,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1007,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1008,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1009,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1010,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1001,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1002,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1003,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1004,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1005,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1006,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1007,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1008,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1009,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1010,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1001,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1002,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1003,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1004,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1005,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1006,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1007,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1008,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1009,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1010,
+    "arm": "native",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 9132,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1001,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1002,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1003,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1004,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1005,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1006,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1007,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1008,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1009,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1010,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1001,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1002,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1003,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1004,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1005,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1006,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1007,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1008,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1009,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1010,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1001,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1001,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1002,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1002,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1003,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1003,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1004,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1004,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1005,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1005,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1006,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1006,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1007,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1007,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1008,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1008,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1009,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1009,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1010,
+    "arm": "native",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "seed": 1010,
+    "arm": "clipped",
+    "days": 13514,
+    "finite": true,
+    "precip_readback": true,
+    "treatment_isolation": true
+  }
+]

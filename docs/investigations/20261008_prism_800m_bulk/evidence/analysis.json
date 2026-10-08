@@ -1,0 +1,6912 @@
+{
+  "label_stable_recent": {
+    "rows": 14,
+    "locations": 2,
+    "expected_rows": 14,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 2",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2026-10-01 - 2026-10-07",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        2.43
+      ],
+      "tmin (degrees C)": [
+        -2.3,
+        10.5
+      ],
+      "tmax (degrees C)": [
+        6.9,
+        29.2
+      ],
+      "tdmean (degrees C)": [
+        -1.9,
+        10.8
+      ],
+      "soltotal (MJ/m^2/day)": [
+        4.42,
+        15.46
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 12,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "olympic": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.75,
+        "ppt_max_mm": 2.43,
+        "wet_days": 2,
+        "dew_below_tmin": 6
+      },
+      "palouse": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 6
+      }
+    },
+    "same_cell_comparisons": {}
+  },
+  "sample_1981": {
+    "rows": 18250,
+    "locations": 50,
+    "expected_rows": 18980,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 52",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 1981-01-01 - 1981-12-31",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [
+      "coast",
+      "pacific"
+    ],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        168.95
+      ],
+      "tmin (degrees C)": [
+        -31.8,
+        36.5
+      ],
+      "tmax (degrees C)": [
+        -22.4,
+        51.7
+      ],
+      "tdmean (degrees C)": [
+        -34.2,
+        26.3
+      ],
+      "soltotal (MJ/m^2/day)": [
+        0.81,
+        33.57
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 11654,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "ashev00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 632.6300000000001,
+        "ppt_max_mm": 40.84,
+        "wet_days": 91,
+        "dew_below_tmin": 55
+      },
+      "ashev01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 634.0500000000001,
+        "ppt_max_mm": 40.97,
+        "wet_days": 94,
+        "dew_below_tmin": 54
+      },
+      "ashev02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 638.66,
+        "ppt_max_mm": 41.23,
+        "wet_days": 97,
+        "dew_below_tmin": 74
+      },
+      "ashev10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 634.9699999999999,
+        "ppt_max_mm": 41.33,
+        "wet_days": 92,
+        "dew_below_tmin": 57
+      },
+      "ashev12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 634.0,
+        "ppt_max_mm": 41.75,
+        "wet_days": 94,
+        "dew_below_tmin": 66
+      },
+      "ashev20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 638.54,
+        "ppt_max_mm": 42.39,
+        "wet_days": 92,
+        "dew_below_tmin": 54
+      },
+      "ashev21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 635.2,
+        "ppt_max_mm": 42.28,
+        "wet_days": 93,
+        "dew_below_tmin": 53
+      },
+      "ashev22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 632.73,
+        "ppt_max_mm": 42.28,
+        "wet_days": 93,
+        "dew_below_tmin": 65
+      },
+      "asheville": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 632.6700000000001,
+        "ppt_max_mm": 41.32,
+        "wet_days": 91,
+        "dew_below_tmin": 54
+      },
+      "deathvalley": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 45.099999999999994,
+        "ppt_max_mm": 18.63,
+        "wet_days": 15,
+        "dew_below_tmin": 365
+      },
+      "duluth": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 795.61,
+        "ppt_max_mm": 40.98,
+        "wet_days": 124,
+        "dew_below_tmin": 150
+      },
+      "houston": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1427.31,
+        "ppt_max_mm": 147.29,
+        "wet_days": 114,
+        "dew_below_tmin": 214
+      },
+      "keywest": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 879.48,
+        "ppt_max_mm": 109.76,
+        "wet_days": 104,
+        "dew_below_tmin": 320
+      },
+      "maine": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1353.6200000000001,
+        "ppt_max_mm": 69.24,
+        "wet_days": 169,
+        "dew_below_tmin": 157
+      },
+      "miami": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1539.9699999999998,
+        "ppt_max_mm": 104.25,
+        "wet_days": 136,
+        "dew_below_tmin": 312
+      },
+      "oklah00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.4200000000001,
+        "ppt_max_mm": 62.65,
+        "wet_days": 83,
+        "dew_below_tmin": 242
+      },
+      "oklah01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.53,
+        "ppt_max_mm": 62.69,
+        "wet_days": 83,
+        "dew_below_tmin": 242
+      },
+      "oklah02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.8999999999999,
+        "ppt_max_mm": 62.82,
+        "wet_days": 83,
+        "dew_below_tmin": 242
+      },
+      "oklah10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.2700000000001,
+        "ppt_max_mm": 62.58,
+        "wet_days": 83,
+        "dew_below_tmin": 244
+      },
+      "oklah12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.73,
+        "ppt_max_mm": 62.76,
+        "wet_days": 83,
+        "dew_below_tmin": 237
+      },
+      "oklah20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.4199999999998,
+        "ppt_max_mm": 62.66,
+        "wet_days": 83,
+        "dew_below_tmin": 236
+      },
+      "oklah21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.57,
+        "ppt_max_mm": 62.7,
+        "wet_days": 83,
+        "dew_below_tmin": 236
+      },
+      "oklah22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.91,
+        "ppt_max_mm": 62.83,
+        "wet_days": 83,
+        "dew_below_tmin": 237
+      },
+      "oklahoma": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 869.4,
+        "ppt_max_mm": 62.63,
+        "wet_days": 83,
+        "dew_below_tmin": 239
+      },
+      "olympic": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 6660.700000000001,
+        "ppt_max_mm": 168.95,
+        "wet_days": 222,
+        "dew_below_tmin": 182
+      },
+      "pal_ne": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 649.61,
+        "ppt_max_mm": 30.53,
+        "wet_days": 156,
+        "dew_below_tmin": 235
+      },
+      "pal_orig": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 649.61,
+        "ppt_max_mm": 30.53,
+        "wet_days": 156,
+        "dew_below_tmin": 235
+      },
+      "pal_sw": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 649.61,
+        "ppt_max_mm": 30.53,
+        "wet_days": 156,
+        "dew_below_tmin": 235
+      },
+      "palouse": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 649.61,
+        "ppt_max_mm": 30.53,
+        "wet_days": 156,
+        "dew_below_tmin": 235
+      },
+      "rockies": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1096.23,
+        "ppt_max_mm": 30.13,
+        "wet_days": 175,
+        "dew_below_tmin": 209
+      },
+      "sier_orig": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.7800000000002,
+        "ppt_max_mm": 85.57,
+        "wet_days": 96,
+        "dew_below_tmin": 264
+      },
+      "sierr00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.36,
+        "ppt_max_mm": 86.21,
+        "wet_days": 97,
+        "dew_below_tmin": 262
+      },
+      "sierr01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.9699999999998,
+        "ppt_max_mm": 85.01,
+        "wet_days": 97,
+        "dew_below_tmin": 260
+      },
+      "sierr02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1169.7800000000002,
+        "ppt_max_mm": 85.83,
+        "wet_days": 97,
+        "dew_below_tmin": 263
+      },
+      "sierr10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1147.05,
+        "ppt_max_mm": 85.35,
+        "wet_days": 97,
+        "dew_below_tmin": 263
+      },
+      "sierr12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1162.73,
+        "ppt_max_mm": 84.92,
+        "wet_days": 97,
+        "dew_below_tmin": 269
+      },
+      "sierr20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1120.7999999999997,
+        "ppt_max_mm": 82.31,
+        "wet_days": 96,
+        "dew_below_tmin": 267
+      },
+      "sierr21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1132.77,
+        "ppt_max_mm": 82.53,
+        "wet_days": 97,
+        "dew_below_tmin": 264
+      },
+      "sierr22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1141.48,
+        "ppt_max_mm": 83.27,
+        "wet_days": 98,
+        "dew_below_tmin": 272
+      },
+      "sierra": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.7800000000002,
+        "ppt_max_mm": 85.57,
+        "wet_days": 96,
+        "dew_below_tmin": 264
+      },
+      "superior": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 855.38,
+        "ppt_max_mm": 31.36,
+        "wet_days": 167,
+        "dew_below_tmin": 212
+      },
+      "tucso00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 241.79,
+        "ppt_max_mm": 17.55,
+        "wet_days": 54,
+        "dew_below_tmin": 362
+      },
+      "tucso01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 244.60000000000002,
+        "ppt_max_mm": 17.62,
+        "wet_days": 54,
+        "dew_below_tmin": 362
+      },
+      "tucso02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 244.96999999999997,
+        "ppt_max_mm": 17.61,
+        "wet_days": 54,
+        "dew_below_tmin": 362
+      },
+      "tucso10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 244.51999999999998,
+        "ppt_max_mm": 17.54,
+        "wet_days": 56,
+        "dew_below_tmin": 362
+      },
+      "tucso12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 248.40999999999997,
+        "ppt_max_mm": 17.7,
+        "wet_days": 55,
+        "dew_below_tmin": 362
+      },
+      "tucso20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 247.5,
+        "ppt_max_mm": 17.59,
+        "wet_days": 56,
+        "dew_below_tmin": 362
+      },
+      "tucso21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 250.03000000000003,
+        "ppt_max_mm": 17.56,
+        "wet_days": 56,
+        "dew_below_tmin": 362
+      },
+      "tucso22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 250.14,
+        "ppt_max_mm": 17.66,
+        "wet_days": 56,
+        "dew_below_tmin": 362
+      },
+      "tucson": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 247.72,
+        "ppt_max_mm": 17.58,
+        "wet_days": 55,
+        "dew_below_tmin": 362
+      }
+    },
+    "same_cell_comparisons": {
+      "pal_orig": true,
+      "pal_sw": true,
+      "pal_ne": true,
+      "sier_orig": true
+    }
+  },
+  "sample_2020": {
+    "rows": 18300,
+    "locations": 50,
+    "expected_rows": 19032,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 52",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2020-01-01 - 2020-12-31",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [
+      "coast",
+      "pacific"
+    ],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        247.53
+      ],
+      "tmin (degrees C)": [
+        -27.0,
+        39.6
+      ],
+      "tmax (degrees C)": [
+        -17.4,
+        53.1
+      ],
+      "tdmean (degrees C)": [
+        -29.4,
+        26.3
+      ],
+      "soltotal (MJ/m^2/day)": [
+        0.47,
+        32.74
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 12227,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "ashev00": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1357.83,
+        "ppt_max_mm": 66.64,
+        "wet_days": 158,
+        "dew_below_tmin": 87
+      },
+      "ashev01": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1369.88,
+        "ppt_max_mm": 64.12,
+        "wet_days": 156,
+        "dew_below_tmin": 88
+      },
+      "ashev02": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1384.3,
+        "ppt_max_mm": 62.32,
+        "wet_days": 157,
+        "dew_below_tmin": 85
+      },
+      "ashev10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1369.8,
+        "ppt_max_mm": 65.32,
+        "wet_days": 156,
+        "dew_below_tmin": 86
+      },
+      "ashev12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1395.6399999999999,
+        "ppt_max_mm": 62.07,
+        "wet_days": 158,
+        "dew_below_tmin": 80
+      },
+      "ashev20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1393.0,
+        "ppt_max_mm": 64.0,
+        "wet_days": 156,
+        "dew_below_tmin": 88
+      },
+      "ashev21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1404.79,
+        "ppt_max_mm": 62.5,
+        "wet_days": 159,
+        "dew_below_tmin": 87
+      },
+      "ashev22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1418.72,
+        "ppt_max_mm": 62.08,
+        "wet_days": 159,
+        "dew_below_tmin": 79
+      },
+      "asheville": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1380.8600000000001,
+        "ppt_max_mm": 63.54,
+        "wet_days": 156,
+        "dew_below_tmin": 87
+      },
+      "deathvalley": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 26.47,
+        "ppt_max_mm": 5.6,
+        "wet_days": 13,
+        "dew_below_tmin": 366
+      },
+      "duluth": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 668.3100000000001,
+        "ppt_max_mm": 55.61,
+        "wet_days": 112,
+        "dew_below_tmin": 219
+      },
+      "houston": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1395.9099999999999,
+        "ppt_max_mm": 114.35,
+        "wet_days": 121,
+        "dew_below_tmin": 256
+      },
+      "keywest": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1529.84,
+        "ppt_max_mm": 228.45,
+        "wet_days": 127,
+        "dew_below_tmin": 339
+      },
+      "maine": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1174.28,
+        "ppt_max_mm": 62.44,
+        "wet_days": 152,
+        "dew_below_tmin": 170
+      },
+      "miami": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2019.3300000000002,
+        "ppt_max_mm": 136.65,
+        "wet_days": 185,
+        "dew_below_tmin": 328
+      },
+      "oklah00": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1002.81,
+        "ppt_max_mm": 103.22,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "oklah01": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 997.7700000000001,
+        "ppt_max_mm": 102.51,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "oklah02": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 994.27,
+        "ppt_max_mm": 101.74,
+        "wet_days": 91,
+        "dew_below_tmin": 176
+      },
+      "oklah10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.99,
+        "ppt_max_mm": 104.66,
+        "wet_days": 90,
+        "dew_below_tmin": 176
+      },
+      "oklah12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1000.35,
+        "ppt_max_mm": 101.8,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "oklah20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.4,
+        "ppt_max_mm": 103.96,
+        "wet_days": 89,
+        "dew_below_tmin": 173
+      },
+      "oklah21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.83,
+        "ppt_max_mm": 102.87,
+        "wet_days": 88,
+        "dew_below_tmin": 173
+      },
+      "oklah22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.02,
+        "ppt_max_mm": 101.11,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "oklahoma": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.9100000000001,
+        "ppt_max_mm": 103.53,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "olympic": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 7666.21,
+        "ppt_max_mm": 247.53,
+        "wet_days": 222,
+        "dew_below_tmin": 193
+      },
+      "pal_ne": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 633.66,
+        "ppt_max_mm": 28.62,
+        "wet_days": 159,
+        "dew_below_tmin": 256
+      },
+      "pal_orig": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 633.66,
+        "ppt_max_mm": 28.62,
+        "wet_days": 159,
+        "dew_below_tmin": 256
+      },
+      "pal_sw": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 633.66,
+        "ppt_max_mm": 28.62,
+        "wet_days": 159,
+        "dew_below_tmin": 256
+      },
+      "palouse": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 633.66,
+        "ppt_max_mm": 28.62,
+        "wet_days": 159,
+        "dew_below_tmin": 256
+      },
+      "rockies": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.8600000000001,
+        "ppt_max_mm": 39.06,
+        "wet_days": 165,
+        "dew_below_tmin": 277
+      },
+      "sier_orig": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 477.11,
+        "ppt_max_mm": 57.02,
+        "wet_days": 65,
+        "dew_below_tmin": 313
+      },
+      "sierr00": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 476.33,
+        "ppt_max_mm": 56.89,
+        "wet_days": 66,
+        "dew_below_tmin": 309
+      },
+      "sierr01": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 477.37999999999994,
+        "ppt_max_mm": 56.98,
+        "wet_days": 66,
+        "dew_below_tmin": 308
+      },
+      "sierr02": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 479.61,
+        "ppt_max_mm": 57.13,
+        "wet_days": 66,
+        "dew_below_tmin": 309
+      },
+      "sierr10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 475.39,
+        "ppt_max_mm": 56.94,
+        "wet_days": 65,
+        "dew_below_tmin": 312
+      },
+      "sierr12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 476.15,
+        "ppt_max_mm": 56.96,
+        "wet_days": 65,
+        "dew_below_tmin": 319
+      },
+      "sierr20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 462.49,
+        "ppt_max_mm": 56.94,
+        "wet_days": 64,
+        "dew_below_tmin": 327
+      },
+      "sierr21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 465.9,
+        "ppt_max_mm": 57.04,
+        "wet_days": 65,
+        "dew_below_tmin": 328
+      },
+      "sierr22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 468.09999999999997,
+        "ppt_max_mm": 56.99,
+        "wet_days": 66,
+        "dew_below_tmin": 340
+      },
+      "sierra": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 477.11,
+        "ppt_max_mm": 57.02,
+        "wet_days": 65,
+        "dew_below_tmin": 313
+      },
+      "superior": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 692.75,
+        "ppt_max_mm": 30.63,
+        "wet_days": 161,
+        "dew_below_tmin": 300
+      },
+      "tucso00": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 118.41,
+        "ppt_max_mm": 19.79,
+        "wet_days": 34,
+        "dew_below_tmin": 362
+      },
+      "tucso01": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 118.23,
+        "ppt_max_mm": 20.1,
+        "wet_days": 31,
+        "dew_below_tmin": 361
+      },
+      "tucso02": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 116.38,
+        "ppt_max_mm": 17.7,
+        "wet_days": 29,
+        "dew_below_tmin": 361
+      },
+      "tucso10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 118.0,
+        "ppt_max_mm": 20.14,
+        "wet_days": 32,
+        "dew_below_tmin": 362
+      },
+      "tucso12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 119.45,
+        "ppt_max_mm": 19.59,
+        "wet_days": 30,
+        "dew_below_tmin": 361
+      },
+      "tucso20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 119.86000000000001,
+        "ppt_max_mm": 21.89,
+        "wet_days": 33,
+        "dew_below_tmin": 362
+      },
+      "tucso21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 119.13,
+        "ppt_max_mm": 21.4,
+        "wet_days": 31,
+        "dew_below_tmin": 361
+      },
+      "tucso22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 118.96000000000001,
+        "ppt_max_mm": 19.78,
+        "wet_days": 30,
+        "dew_below_tmin": 361
+      },
+      "tucson": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 117.65,
+        "ppt_max_mm": 19.74,
+        "wet_days": 31,
+        "dew_below_tmin": 361
+      }
+    },
+    "same_cell_comparisons": {
+      "pal_orig": true,
+      "pal_sw": true,
+      "pal_ne": true,
+      "sier_orig": true
+    }
+  },
+  "sample_2025": {
+    "rows": 18250,
+    "locations": 50,
+    "expected_rows": 18980,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 52",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2025-01-01 - 2025-12-31",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [
+      "coast",
+      "pacific"
+    ],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        243.79
+      ],
+      "tmin (degrees C)": [
+        -30.8,
+        36.5
+      ],
+      "tmax (degrees C)": [
+        -22.6,
+        50.6
+      ],
+      "tdmean (degrees C)": [
+        -33.4,
+        26.3
+      ],
+      "soltotal (MJ/m^2/day)": [
+        0.43,
+        32.4
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 12731,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "ashev00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.25,
+        "ppt_max_mm": 60.06,
+        "wet_days": 145,
+        "dew_below_tmin": 159
+      },
+      "ashev01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.31,
+        "ppt_max_mm": 57.47,
+        "wet_days": 146,
+        "dew_below_tmin": 169
+      },
+      "ashev02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.76,
+        "ppt_max_mm": 53.42,
+        "wet_days": 147,
+        "dew_below_tmin": 190
+      },
+      "ashev10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.78,
+        "ppt_max_mm": 57.37,
+        "wet_days": 145,
+        "dew_below_tmin": 159
+      },
+      "ashev12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 967.1400000000001,
+        "ppt_max_mm": 51.04,
+        "wet_days": 144,
+        "dew_below_tmin": 162
+      },
+      "ashev20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.34,
+        "ppt_max_mm": 51.89,
+        "wet_days": 146,
+        "dew_below_tmin": 157
+      },
+      "ashev21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.62,
+        "ppt_max_mm": 49.88,
+        "wet_days": 146,
+        "dew_below_tmin": 162
+      },
+      "ashev22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.3899999999999,
+        "ppt_max_mm": 47.66,
+        "wet_days": 144,
+        "dew_below_tmin": 150
+      },
+      "asheville": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 969.5900000000001,
+        "ppt_max_mm": 55.03,
+        "wet_days": 144,
+        "dew_below_tmin": 173
+      },
+      "deathvalley": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 88.19,
+        "ppt_max_mm": 17.12,
+        "wet_days": 14,
+        "dew_below_tmin": 362
+      },
+      "duluth": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 550.38,
+        "ppt_max_mm": 31.86,
+        "wet_days": 118,
+        "dew_below_tmin": 233
+      },
+      "houston": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1262.63,
+        "ppt_max_mm": 62.73,
+        "wet_days": 125,
+        "dew_below_tmin": 261
+      },
+      "keywest": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1172.76,
+        "ppt_max_mm": 181.01,
+        "wet_days": 105,
+        "dew_below_tmin": 308
+      },
+      "maine": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1157.7800000000002,
+        "ppt_max_mm": 37.08,
+        "wet_days": 154,
+        "dew_below_tmin": 146
+      },
+      "miami": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1357.87,
+        "ppt_max_mm": 114.21,
+        "wet_days": 130,
+        "dew_below_tmin": 324
+      },
+      "oklah00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1111.77,
+        "ppt_max_mm": 71.92,
+        "wet_days": 95,
+        "dew_below_tmin": 206
+      },
+      "oklah01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1108.9299999999998,
+        "ppt_max_mm": 69.95,
+        "wet_days": 96,
+        "dew_below_tmin": 208
+      },
+      "oklah02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1105.2,
+        "ppt_max_mm": 68.35,
+        "wet_days": 95,
+        "dew_below_tmin": 209
+      },
+      "oklah10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1114.76,
+        "ppt_max_mm": 70.98,
+        "wet_days": 96,
+        "dew_below_tmin": 206
+      },
+      "oklah12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1096.28,
+        "ppt_max_mm": 67.78,
+        "wet_days": 91,
+        "dew_below_tmin": 206
+      },
+      "oklah20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1106.1399999999999,
+        "ppt_max_mm": 70.08,
+        "wet_days": 91,
+        "dew_below_tmin": 199
+      },
+      "oklah21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1091.94,
+        "ppt_max_mm": 68.16,
+        "wet_days": 91,
+        "dew_below_tmin": 207
+      },
+      "oklah22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1080.59,
+        "ppt_max_mm": 66.84,
+        "wet_days": 90,
+        "dew_below_tmin": 205
+      },
+      "oklahoma": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1104.39,
+        "ppt_max_mm": 68.92,
+        "wet_days": 92,
+        "dew_below_tmin": 211
+      },
+      "olympic": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 5955.860000000001,
+        "ppt_max_mm": 243.79,
+        "wet_days": 202,
+        "dew_below_tmin": 187
+      },
+      "pal_ne": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 574.07,
+        "ppt_max_mm": 25.84,
+        "wet_days": 137,
+        "dew_below_tmin": 219
+      },
+      "pal_orig": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 574.07,
+        "ppt_max_mm": 25.84,
+        "wet_days": 137,
+        "dew_below_tmin": 219
+      },
+      "pal_sw": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 574.07,
+        "ppt_max_mm": 25.84,
+        "wet_days": 137,
+        "dew_below_tmin": 219
+      },
+      "palouse": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 574.07,
+        "ppt_max_mm": 25.84,
+        "wet_days": 137,
+        "dew_below_tmin": 219
+      },
+      "rockies": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 803.02,
+        "ppt_max_mm": 33.11,
+        "wet_days": 178,
+        "dew_below_tmin": 278
+      },
+      "sier_orig": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1166.1100000000001,
+        "ppt_max_mm": 124.37,
+        "wet_days": 85,
+        "dew_below_tmin": 302
+      },
+      "sierr00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1171.44,
+        "ppt_max_mm": 121.13,
+        "wet_days": 84,
+        "dew_below_tmin": 295
+      },
+      "sierr01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1163.2000000000003,
+        "ppt_max_mm": 121.74,
+        "wet_days": 84,
+        "dew_below_tmin": 296
+      },
+      "sierr02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1182.66,
+        "ppt_max_mm": 124.27,
+        "wet_days": 85,
+        "dew_below_tmin": 297
+      },
+      "sierr10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1175.03,
+        "ppt_max_mm": 123.07,
+        "wet_days": 83,
+        "dew_below_tmin": 300
+      },
+      "sierr12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1178.38,
+        "ppt_max_mm": 126.67,
+        "wet_days": 85,
+        "dew_below_tmin": 300
+      },
+      "sierr20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1139.73,
+        "ppt_max_mm": 120.13,
+        "wet_days": 83,
+        "dew_below_tmin": 305
+      },
+      "sierr21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1140.27,
+        "ppt_max_mm": 121.8,
+        "wet_days": 83,
+        "dew_below_tmin": 304
+      },
+      "sierr22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1151.13,
+        "ppt_max_mm": 124.78,
+        "wet_days": 83,
+        "dew_below_tmin": 290
+      },
+      "sierra": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1166.1100000000001,
+        "ppt_max_mm": 124.37,
+        "wet_days": 85,
+        "dew_below_tmin": 302
+      },
+      "superior": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 818.6300000000001,
+        "ppt_max_mm": 36.49,
+        "wet_days": 177,
+        "dew_below_tmin": 218
+      },
+      "tucso00": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 195.63999999999996,
+        "ppt_max_mm": 23.6,
+        "wet_days": 42,
+        "dew_below_tmin": 356
+      },
+      "tucso01": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 195.83,
+        "ppt_max_mm": 23.23,
+        "wet_days": 42,
+        "dew_below_tmin": 356
+      },
+      "tucso02": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 197.07999999999998,
+        "ppt_max_mm": 22.94,
+        "wet_days": 42,
+        "dew_below_tmin": 357
+      },
+      "tucso10": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 194.25,
+        "ppt_max_mm": 22.7,
+        "wet_days": 42,
+        "dew_below_tmin": 356
+      },
+      "tucso12": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 198.95999999999998,
+        "ppt_max_mm": 22.58,
+        "wet_days": 43,
+        "dew_below_tmin": 357
+      },
+      "tucso20": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 193.51999999999998,
+        "ppt_max_mm": 22.05,
+        "wet_days": 42,
+        "dew_below_tmin": 356
+      },
+      "tucso21": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 197.38,
+        "ppt_max_mm": 22.48,
+        "wet_days": 43,
+        "dew_below_tmin": 357
+      },
+      "tucso22": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 201.60000000000002,
+        "ppt_max_mm": 23.19,
+        "wet_days": 43,
+        "dew_below_tmin": 357
+      },
+      "tucson": {
+        "rows": 365,
+        "missing_rows": 0,
+        "ppt_sum_mm": 194.64,
+        "ppt_max_mm": 22.74,
+        "wet_days": 42,
+        "dew_below_tmin": 357
+      }
+    },
+    "same_cell_comparisons": {
+      "pal_orig": true,
+      "pal_sw": true,
+      "pal_ne": true,
+      "sier_orig": true
+    }
+  },
+  "sample_recent": {
+    "rows": 350,
+    "locations": 50,
+    "expected_rows": 364,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 52",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2026-10-01 - 2026-10-07",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [
+      "coast",
+      "pacific"
+    ],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        119.08
+      ],
+      "tmin (degrees C)": [
+        -2.3,
+        31.9
+      ],
+      "tmax (degrees C)": [
+        6.9,
+        41.9
+      ],
+      "tdmean (degrees C)": [
+        -5.7,
+        26.0
+      ],
+      "soltotal (MJ/m^2/day)": [
+        2.19,
+        21.94
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 239,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "ashev00": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1.99,
+        "ppt_max_mm": 1.99,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev01": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.71,
+        "ppt_max_mm": 2.71,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev02": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 3.96,
+        "ppt_max_mm": 3.96,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev10": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.18,
+        "ppt_max_mm": 2.18,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev12": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 4.19,
+        "ppt_max_mm": 4.19,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev20": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.23,
+        "ppt_max_mm": 2.23,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev21": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.84,
+        "ppt_max_mm": 2.84,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "ashev22": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 4.09,
+        "ppt_max_mm": 4.09,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "asheville": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.89,
+        "ppt_max_mm": 2.89,
+        "wet_days": 1,
+        "dew_below_tmin": 0
+      },
+      "deathvalley": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "duluth": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 15.43,
+        "ppt_max_mm": 12.52,
+        "wet_days": 2,
+        "dew_below_tmin": 4
+      },
+      "houston": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 30.8,
+        "ppt_max_mm": 26.22,
+        "wet_days": 4,
+        "dew_below_tmin": 6
+      },
+      "keywest": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 158.9,
+        "ppt_max_mm": 119.08,
+        "wet_days": 6,
+        "dew_below_tmin": 4
+      },
+      "maine": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 10.53,
+        "ppt_max_mm": 5.6,
+        "wet_days": 2,
+        "dew_below_tmin": 2
+      },
+      "miami": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 59.849999999999994,
+        "ppt_max_mm": 52.48,
+        "wet_days": 4,
+        "dew_below_tmin": 6
+      },
+      "oklah00": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 33.91,
+        "ppt_max_mm": 32.93,
+        "wet_days": 2,
+        "dew_below_tmin": 3
+      },
+      "oklah01": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 34.300000000000004,
+        "ppt_max_mm": 33.34,
+        "wet_days": 2,
+        "dew_below_tmin": 3
+      },
+      "oklah02": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 34.78,
+        "ppt_max_mm": 33.88,
+        "wet_days": 2,
+        "dew_below_tmin": 5
+      },
+      "oklah10": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 34.47,
+        "ppt_max_mm": 33.47,
+        "wet_days": 2,
+        "dew_below_tmin": 4
+      },
+      "oklah12": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 34.37,
+        "ppt_max_mm": 33.44,
+        "wet_days": 2,
+        "dew_below_tmin": 4
+      },
+      "oklah20": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 33.980000000000004,
+        "ppt_max_mm": 32.96,
+        "wet_days": 2,
+        "dew_below_tmin": 3
+      },
+      "oklah21": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 33.71,
+        "ppt_max_mm": 32.72,
+        "wet_days": 2,
+        "dew_below_tmin": 4
+      },
+      "oklah22": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 33.480000000000004,
+        "ppt_max_mm": 32.53,
+        "wet_days": 2,
+        "dew_below_tmin": 5
+      },
+      "oklahoma": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 34.37,
+        "ppt_max_mm": 33.4,
+        "wet_days": 2,
+        "dew_below_tmin": 5
+      },
+      "olympic": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 2.75,
+        "ppt_max_mm": 2.43,
+        "wet_days": 2,
+        "dew_below_tmin": 6
+      },
+      "pal_ne": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 6
+      },
+      "pal_orig": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 6
+      },
+      "pal_sw": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 6
+      },
+      "palouse": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 6
+      },
+      "rockies": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sier_orig": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr00": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr01": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr02": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr10": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr12": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr20": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr21": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierr22": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "sierra": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "superior": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 7.07,
+        "ppt_max_mm": 7.07,
+        "wet_days": 1,
+        "dew_below_tmin": 4
+      },
+      "tucso00": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso01": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso02": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso10": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso12": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso20": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso21": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucso22": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      },
+      "tucson": {
+        "rows": 7,
+        "missing_rows": 0,
+        "ppt_sum_mm": 0.0,
+        "ppt_max_mm": 0.0,
+        "wet_days": 0,
+        "dew_below_tmin": 7
+      }
+    },
+    "same_cell_comparisons": {
+      "pal_orig": true,
+      "pal_sw": true,
+      "pal_ne": true,
+      "sier_orig": true
+    }
+  },
+  "scale_100": {
+    "rows": 36600,
+    "locations": 100,
+    "expected_rows": 36600,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 100",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2020-01-01 - 2020-12-31",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        103.53
+      ],
+      "tmin (degrees C)": [
+        -9.6,
+        24.8
+      ],
+      "tmax (degrees C)": [
+        -0.9,
+        39.1
+      ],
+      "tdmean (degrees C)": [
+        -12.3,
+        24.3
+      ],
+      "soltotal (MJ/m^2/day)": [
+        0.93,
+        30.87
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 17208,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "r0c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.9100000000001,
+        "ppt_max_mm": 103.53,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "r0c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1000.35,
+        "ppt_max_mm": 101.8,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "r0c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.25,
+        "ppt_max_mm": 92.01,
+        "wet_days": 94,
+        "dew_below_tmin": 175
+      },
+      "r0c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.1899999999999,
+        "ppt_max_mm": 91.97,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r0c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.4599999999999,
+        "ppt_max_mm": 91.73,
+        "wet_days": 92,
+        "dew_below_tmin": 174
+      },
+      "r0c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.87,
+        "ppt_max_mm": 91.11,
+        "wet_days": 94,
+        "dew_below_tmin": 177
+      },
+      "r0c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.91,
+        "ppt_max_mm": 89.93,
+        "wet_days": 95,
+        "dew_below_tmin": 173
+      },
+      "r0c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.99,
+        "ppt_max_mm": 88.06,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r0c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.3900000000001,
+        "ppt_max_mm": 86.09,
+        "wet_days": 95,
+        "dew_below_tmin": 174
+      },
+      "r0c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.71,
+        "ppt_max_mm": 84.95,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r0c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.29,
+        "ppt_max_mm": 84.59,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r0c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.18,
+        "ppt_max_mm": 84.4,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r0c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 992.0,
+        "ppt_max_mm": 99.27,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "r0c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 949.4499999999999,
+        "ppt_max_mm": 84.31,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r0c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 949.87,
+        "ppt_max_mm": 83.91,
+        "wet_days": 98,
+        "dew_below_tmin": 169
+      },
+      "r0c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 948.51,
+        "ppt_max_mm": 83.64,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r0c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 947.09,
+        "ppt_max_mm": 83.44,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r0c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 944.1300000000001,
+        "ppt_max_mm": 83.26,
+        "wet_days": 98,
+        "dew_below_tmin": 170
+      },
+      "r0c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.86,
+        "ppt_max_mm": 95.22,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r0c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.18,
+        "ppt_max_mm": 91.2,
+        "wet_days": 89,
+        "dew_below_tmin": 172
+      },
+      "r0c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.03,
+        "ppt_max_mm": 89.06,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r0c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.2399999999999,
+        "ppt_max_mm": 89.22,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r0c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.52,
+        "ppt_max_mm": 90.11,
+        "wet_days": 95,
+        "dew_below_tmin": 170
+      },
+      "r0c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.53,
+        "ppt_max_mm": 91.11,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r0c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.0899999999999,
+        "ppt_max_mm": 91.76,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r1c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.83,
+        "ppt_max_mm": 102.87,
+        "wet_days": 88,
+        "dew_below_tmin": 173
+      },
+      "r1c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.02,
+        "ppt_max_mm": 101.11,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "r1c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.1800000000001,
+        "ppt_max_mm": 92.15,
+        "wet_days": 95,
+        "dew_below_tmin": 174
+      },
+      "r1c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.9499999999999,
+        "ppt_max_mm": 92.01,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r1c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.1200000000001,
+        "ppt_max_mm": 91.73,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r1c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.95,
+        "ppt_max_mm": 91.02,
+        "wet_days": 94,
+        "dew_below_tmin": 174
+      },
+      "r1c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.8199999999999,
+        "ppt_max_mm": 89.97,
+        "wet_days": 95,
+        "dew_below_tmin": 171
+      },
+      "r1c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.8899999999999,
+        "ppt_max_mm": 88.25,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r1c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.01,
+        "ppt_max_mm": 86.43,
+        "wet_days": 97,
+        "dew_below_tmin": 174
+      },
+      "r1c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.0699999999999,
+        "ppt_max_mm": 85.27,
+        "wet_days": 98,
+        "dew_below_tmin": 174
+      },
+      "r1c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.6800000000001,
+        "ppt_max_mm": 84.64,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r1c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.32,
+        "ppt_max_mm": 84.57,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r1c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 994.97,
+        "ppt_max_mm": 98.34,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r1c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.59,
+        "ppt_max_mm": 84.32,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r1c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.3799999999999,
+        "ppt_max_mm": 84.27,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r1c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.1500000000001,
+        "ppt_max_mm": 84.1,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r1c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.48,
+        "ppt_max_mm": 83.98,
+        "wet_days": 99,
+        "dew_below_tmin": 168
+      },
+      "r1c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.04,
+        "ppt_max_mm": 83.82,
+        "wet_days": 99,
+        "dew_below_tmin": 170
+      },
+      "r1c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.15,
+        "ppt_max_mm": 94.55,
+        "wet_days": 91,
+        "dew_below_tmin": 172
+      },
+      "r1c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.36,
+        "ppt_max_mm": 91.36,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "r1c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.6600000000001,
+        "ppt_max_mm": 89.66,
+        "wet_days": 90,
+        "dew_below_tmin": 172
+      },
+      "r1c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 962.12,
+        "ppt_max_mm": 89.67,
+        "wet_days": 92,
+        "dew_below_tmin": 173
+      },
+      "r1c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.41,
+        "ppt_max_mm": 90.5,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r1c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.41,
+        "ppt_max_mm": 91.33,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r1c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.26,
+        "ppt_max_mm": 91.99,
+        "wet_days": 95,
+        "dew_below_tmin": 175
+      },
+      "r2c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.8399999999999,
+        "ppt_max_mm": 101.73,
+        "wet_days": 87,
+        "dew_below_tmin": 173
+      },
+      "r2c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.27,
+        "ppt_max_mm": 100.18,
+        "wet_days": 89,
+        "dew_below_tmin": 171
+      },
+      "r2c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.04,
+        "ppt_max_mm": 91.89,
+        "wet_days": 93,
+        "dew_below_tmin": 175
+      },
+      "r2c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.1500000000001,
+        "ppt_max_mm": 91.77,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r2c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.74,
+        "ppt_max_mm": 91.53,
+        "wet_days": 94,
+        "dew_below_tmin": 175
+      },
+      "r2c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 962.8,
+        "ppt_max_mm": 91.14,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r2c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.66,
+        "ppt_max_mm": 90.21,
+        "wet_days": 94,
+        "dew_below_tmin": 173
+      },
+      "r2c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.3299999999999,
+        "ppt_max_mm": 88.74,
+        "wet_days": 96,
+        "dew_below_tmin": 173
+      },
+      "r2c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.76,
+        "ppt_max_mm": 87.2,
+        "wet_days": 96,
+        "dew_below_tmin": 172
+      },
+      "r2c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.3900000000001,
+        "ppt_max_mm": 86.14,
+        "wet_days": 97,
+        "dew_below_tmin": 171
+      },
+      "r2c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.34,
+        "ppt_max_mm": 85.56,
+        "wet_days": 100,
+        "dew_below_tmin": 172
+      },
+      "r2c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.8000000000001,
+        "ppt_max_mm": 85.25,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r2c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.5,
+        "ppt_max_mm": 97.78,
+        "wet_days": 89,
+        "dew_below_tmin": 168
+      },
+      "r2c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 956.5500000000001,
+        "ppt_max_mm": 85.12,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r2c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.44,
+        "ppt_max_mm": 85.0,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.3800000000001,
+        "ppt_max_mm": 85.16,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.9599999999999,
+        "ppt_max_mm": 85.08,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r2c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.02,
+        "ppt_max_mm": 85.06,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 991.7700000000001,
+        "ppt_max_mm": 94.77,
+        "wet_days": 90,
+        "dew_below_tmin": 168
+      },
+      "r2c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 984.5,
+        "ppt_max_mm": 92.48,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r2c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 976.6899999999999,
+        "ppt_max_mm": 90.93,
+        "wet_days": 90,
+        "dew_below_tmin": 175
+      },
+      "r2c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.45,
+        "ppt_max_mm": 90.68,
+        "wet_days": 91,
+        "dew_below_tmin": 175
+      },
+      "r2c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.78,
+        "ppt_max_mm": 91.02,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r2c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.57,
+        "ppt_max_mm": 91.55,
+        "wet_days": 93,
+        "dew_below_tmin": 170
+      },
+      "r2c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.52,
+        "ppt_max_mm": 91.84,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r3c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1021.75,
+        "ppt_max_mm": 100.28,
+        "wet_days": 89,
+        "dew_below_tmin": 171
+      },
+      "r3c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.05,
+        "ppt_max_mm": 98.83,
+        "wet_days": 87,
+        "dew_below_tmin": 168
+      },
+      "r3c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.71,
+        "ppt_max_mm": 91.1,
+        "wet_days": 93,
+        "dew_below_tmin": 177
+      },
+      "r3c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.43,
+        "ppt_max_mm": 91.05,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r3c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 966.1700000000001,
+        "ppt_max_mm": 91.04,
+        "wet_days": 93,
+        "dew_below_tmin": 176
+      },
+      "r3c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.8299999999999,
+        "ppt_max_mm": 90.92,
+        "wet_days": 96,
+        "dew_below_tmin": 173
+      },
+      "r3c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.47,
+        "ppt_max_mm": 90.54,
+        "wet_days": 96,
+        "dew_below_tmin": 174
+      },
+      "r3c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.95,
+        "ppt_max_mm": 89.63,
+        "wet_days": 95,
+        "dew_below_tmin": 171
+      },
+      "r3c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.5500000000001,
+        "ppt_max_mm": 88.43,
+        "wet_days": 98,
+        "dew_below_tmin": 173
+      },
+      "r3c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.6799999999998,
+        "ppt_max_mm": 87.63,
+        "wet_days": 98,
+        "dew_below_tmin": 170
+      },
+      "r3c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.4599999999999,
+        "ppt_max_mm": 87.22,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r3c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.02,
+        "ppt_max_mm": 86.99,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r3c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1004.6099999999999,
+        "ppt_max_mm": 97.0,
+        "wet_days": 89,
+        "dew_below_tmin": 166
+      },
+      "r3c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.81,
+        "ppt_max_mm": 86.81,
+        "wet_days": 100,
+        "dew_below_tmin": 173
+      },
+      "r3c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 969.0600000000002,
+        "ppt_max_mm": 86.8,
+        "wet_days": 100,
+        "dew_below_tmin": 171
+      },
+      "r3c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.84,
+        "ppt_max_mm": 86.76,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r3c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.54,
+        "ppt_max_mm": 86.74,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r3c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.3700000000001,
+        "ppt_max_mm": 86.76,
+        "wet_days": 100,
+        "dew_below_tmin": 171
+      },
+      "r3c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.7700000000001,
+        "ppt_max_mm": 95.01,
+        "wet_days": 89,
+        "dew_below_tmin": 169
+      },
+      "r3c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 993.53,
+        "ppt_max_mm": 93.25,
+        "wet_days": 90,
+        "dew_below_tmin": 173
+      },
+      "r3c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 987.04,
+        "ppt_max_mm": 91.88,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "r3c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 982.45,
+        "ppt_max_mm": 91.32,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.03,
+        "ppt_max_mm": 91.22,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.8600000000001,
+        "ppt_max_mm": 91.26,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 977.0,
+        "ppt_max_mm": 91.14,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      }
+    },
+    "same_cell_comparisons": {}
+  },
+  "scale_500": {
+    "rows": 183000,
+    "locations": 500,
+    "expected_rows": 183000,
+    "duplicates": 0,
+    "metadata": [
+      "PRISM Time Series Data",
+      "Locations: 500",
+      "\"Climate variables: ppt,tmin,tmax,tdmean,soltotal\"",
+      "Spatial resolution: 800m",
+      "Period: 2020-01-01 - 2020-12-31",
+      "Dataset: AN91d",
+      "PRISM day definition: 24 hours ending at 1200 UTC on the day shown",
+      "Grid Cell Interpolation: Off",
+      "Time series generated: 2026-Oct-08",
+      "Details: http://www.prism.oregonstate.edu/documents/PRISM_datasets.pdf"
+    ],
+    "omitted_locations": [],
+    "unexpected_locations": [],
+    "calendar_mismatches": [],
+    "nonfinite": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "sentinel_minus9999": {
+      "ppt (mm)": 0,
+      "tmin (degrees C)": 0,
+      "tmax (degrees C)": 0,
+      "tdmean (degrees C)": 0,
+      "soltotal (MJ/m^2/day)": 0
+    },
+    "ranges": {
+      "ppt (mm)": [
+        0.0,
+        149.93
+      ],
+      "tmin (degrees C)": [
+        -9.6,
+        24.9
+      ],
+      "tmax (degrees C)": [
+        -0.9,
+        39.3
+      ],
+      "tdmean (degrees C)": [
+        -12.4,
+        24.4
+      ],
+      "soltotal (MJ/m^2/day)": [
+        0.93,
+        30.89
+      ]
+    },
+    "negative_ppt": 0,
+    "negative_solar": 0,
+    "tmin_gt_tmax": 0,
+    "dew_below_tmin": 83209,
+    "dew_above_tmax": 0,
+    "locations_with_missing": [],
+    "per_location": {
+      "r0c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.9100000000001,
+        "ppt_max_mm": 103.53,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "r0c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1000.35,
+        "ppt_max_mm": 101.8,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "r0c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.25,
+        "ppt_max_mm": 92.01,
+        "wet_days": 94,
+        "dew_below_tmin": 175
+      },
+      "r0c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.1899999999999,
+        "ppt_max_mm": 91.97,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r0c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.4599999999999,
+        "ppt_max_mm": 91.73,
+        "wet_days": 92,
+        "dew_below_tmin": 174
+      },
+      "r0c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.87,
+        "ppt_max_mm": 91.11,
+        "wet_days": 94,
+        "dew_below_tmin": 177
+      },
+      "r0c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.91,
+        "ppt_max_mm": 89.93,
+        "wet_days": 95,
+        "dew_below_tmin": 173
+      },
+      "r0c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.99,
+        "ppt_max_mm": 88.06,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r0c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.3900000000001,
+        "ppt_max_mm": 86.09,
+        "wet_days": 95,
+        "dew_below_tmin": 174
+      },
+      "r0c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.71,
+        "ppt_max_mm": 84.95,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r0c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.29,
+        "ppt_max_mm": 84.59,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r0c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.18,
+        "ppt_max_mm": 84.4,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r0c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 992.0,
+        "ppt_max_mm": 99.27,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "r0c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 949.4499999999999,
+        "ppt_max_mm": 84.31,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r0c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 949.87,
+        "ppt_max_mm": 83.91,
+        "wet_days": 98,
+        "dew_below_tmin": 169
+      },
+      "r0c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 948.51,
+        "ppt_max_mm": 83.64,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r0c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 947.09,
+        "ppt_max_mm": 83.44,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r0c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 944.1300000000001,
+        "ppt_max_mm": 83.26,
+        "wet_days": 98,
+        "dew_below_tmin": 170
+      },
+      "r0c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.86,
+        "ppt_max_mm": 95.22,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r0c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.18,
+        "ppt_max_mm": 91.2,
+        "wet_days": 89,
+        "dew_below_tmin": 172
+      },
+      "r0c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.03,
+        "ppt_max_mm": 89.06,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r0c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.2399999999999,
+        "ppt_max_mm": 89.22,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r0c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.52,
+        "ppt_max_mm": 90.11,
+        "wet_days": 95,
+        "dew_below_tmin": 170
+      },
+      "r0c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.53,
+        "ppt_max_mm": 91.11,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r0c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.0899999999999,
+        "ppt_max_mm": 91.76,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r10c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1044.58,
+        "ppt_max_mm": 84.48,
+        "wet_days": 96,
+        "dew_below_tmin": 159
+      },
+      "r10c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.6999999999998,
+        "ppt_max_mm": 81.95,
+        "wet_days": 95,
+        "dew_below_tmin": 164
+      },
+      "r10c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.47,
+        "ppt_max_mm": 82.61,
+        "wet_days": 93,
+        "dew_below_tmin": 169
+      },
+      "r10c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.2299999999999,
+        "ppt_max_mm": 84.39,
+        "wet_days": 95,
+        "dew_below_tmin": 169
+      },
+      "r10c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1004.9300000000001,
+        "ppt_max_mm": 86.08,
+        "wet_days": 95,
+        "dew_below_tmin": 163
+      },
+      "r10c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.4200000000001,
+        "ppt_max_mm": 87.5,
+        "wet_days": 95,
+        "dew_below_tmin": 169
+      },
+      "r10c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1010.5500000000001,
+        "ppt_max_mm": 88.56,
+        "wet_days": 96,
+        "dew_below_tmin": 170
+      },
+      "r10c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.26,
+        "ppt_max_mm": 89.48,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r10c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1016.5600000000001,
+        "ppt_max_mm": 90.78,
+        "wet_days": 98,
+        "dew_below_tmin": 170
+      },
+      "r10c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1018.83,
+        "ppt_max_mm": 92.13,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r10c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1023.0,
+        "ppt_max_mm": 93.56,
+        "wet_days": 98,
+        "dew_below_tmin": 166
+      },
+      "r10c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.84,
+        "ppt_max_mm": 95.77,
+        "wet_days": 99,
+        "dew_below_tmin": 164
+      },
+      "r10c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1029.2,
+        "ppt_max_mm": 80.27,
+        "wet_days": 94,
+        "dew_below_tmin": 166
+      },
+      "r10c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.07,
+        "ppt_max_mm": 98.88,
+        "wet_days": 99,
+        "dew_below_tmin": 168
+      },
+      "r10c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1047.51,
+        "ppt_max_mm": 101.67,
+        "wet_days": 100,
+        "dew_below_tmin": 165
+      },
+      "r10c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1052.26,
+        "ppt_max_mm": 102.84,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r10c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1054.92,
+        "ppt_max_mm": 104.27,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r10c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1062.6399999999999,
+        "ppt_max_mm": 106.09,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r10c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.05,
+        "ppt_max_mm": 79.06,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r10c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.26,
+        "ppt_max_mm": 78.04,
+        "wet_days": 94,
+        "dew_below_tmin": 166
+      },
+      "r10c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.0799999999999,
+        "ppt_max_mm": 77.07,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r10c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.25,
+        "ppt_max_mm": 76.76,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      },
+      "r10c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.15,
+        "ppt_max_mm": 77.64,
+        "wet_days": 93,
+        "dew_below_tmin": 175
+      },
+      "r10c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1007.38,
+        "ppt_max_mm": 79.09,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r10c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1005.9300000000001,
+        "ppt_max_mm": 80.87,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r11c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1044.04,
+        "ppt_max_mm": 83.8,
+        "wet_days": 96,
+        "dew_below_tmin": 160
+      },
+      "r11c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1036.3000000000002,
+        "ppt_max_mm": 81.55,
+        "wet_days": 96,
+        "dew_below_tmin": 159
+      },
+      "r11c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.3699999999999,
+        "ppt_max_mm": 82.26,
+        "wet_days": 93,
+        "dew_below_tmin": 167
+      },
+      "r11c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.68,
+        "ppt_max_mm": 84.25,
+        "wet_days": 93,
+        "dew_below_tmin": 165
+      },
+      "r11c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.1800000000001,
+        "ppt_max_mm": 86.39,
+        "wet_days": 96,
+        "dew_below_tmin": 166
+      },
+      "r11c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1015.4300000000001,
+        "ppt_max_mm": 88.25,
+        "wet_days": 95,
+        "dew_below_tmin": 167
+      },
+      "r11c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.8,
+        "ppt_max_mm": 89.82,
+        "wet_days": 95,
+        "dew_below_tmin": 169
+      },
+      "r11c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1020.83,
+        "ppt_max_mm": 91.03,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r11c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.38,
+        "ppt_max_mm": 92.95,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r11c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.46,
+        "ppt_max_mm": 94.64,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r11c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1032.77,
+        "ppt_max_mm": 96.36,
+        "wet_days": 100,
+        "dew_below_tmin": 164
+      },
+      "r11c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.97,
+        "ppt_max_mm": 98.85,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r11c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.22,
+        "ppt_max_mm": 79.35,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r11c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1049.3,
+        "ppt_max_mm": 102.92,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r11c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1059.5300000000002,
+        "ppt_max_mm": 106.39,
+        "wet_days": 100,
+        "dew_below_tmin": 164
+      },
+      "r11c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1066.14,
+        "ppt_max_mm": 108.97,
+        "wet_days": 100,
+        "dew_below_tmin": 165
+      },
+      "r11c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1070.52,
+        "ppt_max_mm": 110.94,
+        "wet_days": 101,
+        "dew_below_tmin": 164
+      },
+      "r11c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1077.74,
+        "ppt_max_mm": 112.88,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r11c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1025.08,
+        "ppt_max_mm": 77.88,
+        "wet_days": 95,
+        "dew_below_tmin": 167
+      },
+      "r11c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.78,
+        "ppt_max_mm": 76.45,
+        "wet_days": 94,
+        "dew_below_tmin": 170
+      },
+      "r11c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.96,
+        "ppt_max_mm": 75.55,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      },
+      "r11c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.6099999999999,
+        "ppt_max_mm": 75.25,
+        "wet_days": 93,
+        "dew_below_tmin": 172
+      },
+      "r11c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.53,
+        "ppt_max_mm": 76.32,
+        "wet_days": 93,
+        "dew_below_tmin": 176
+      },
+      "r11c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.43,
+        "ppt_max_mm": 78.12,
+        "wet_days": 93,
+        "dew_below_tmin": 172
+      },
+      "r11c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.81,
+        "ppt_max_mm": 80.12,
+        "wet_days": 93,
+        "dew_below_tmin": 169
+      },
+      "r12c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1040.1,
+        "ppt_max_mm": 83.81,
+        "wet_days": 97,
+        "dew_below_tmin": 160
+      },
+      "r12c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1033.58,
+        "ppt_max_mm": 81.58,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r12c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.4499999999999,
+        "ppt_max_mm": 83.63,
+        "wet_days": 93,
+        "dew_below_tmin": 165
+      },
+      "r12c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1016.32,
+        "ppt_max_mm": 85.99,
+        "wet_days": 93,
+        "dew_below_tmin": 166
+      },
+      "r12c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1020.5999999999999,
+        "ppt_max_mm": 88.96,
+        "wet_days": 94,
+        "dew_below_tmin": 163
+      },
+      "r12c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.8000000000002,
+        "ppt_max_mm": 91.57,
+        "wet_days": 95,
+        "dew_below_tmin": 166
+      },
+      "r12c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.28,
+        "ppt_max_mm": 93.99,
+        "wet_days": 94,
+        "dew_below_tmin": 164
+      },
+      "r12c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1031.71,
+        "ppt_max_mm": 95.93,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r12c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1037.6399999999999,
+        "ppt_max_mm": 98.52,
+        "wet_days": 101,
+        "dew_below_tmin": 161
+      },
+      "r12c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1043.75,
+        "ppt_max_mm": 100.56,
+        "wet_days": 101,
+        "dew_below_tmin": 164
+      },
+      "r12c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1048.6,
+        "ppt_max_mm": 102.33,
+        "wet_days": 101,
+        "dew_below_tmin": 163
+      },
+      "r12c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1056.51,
+        "ppt_max_mm": 106.19,
+        "wet_days": 101,
+        "dew_below_tmin": 163
+      },
+      "r12c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.29,
+        "ppt_max_mm": 79.74,
+        "wet_days": 96,
+        "dew_below_tmin": 161
+      },
+      "r12c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1067.85,
+        "ppt_max_mm": 110.56,
+        "wet_days": 100,
+        "dew_below_tmin": 161
+      },
+      "r12c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1080.45,
+        "ppt_max_mm": 115.11,
+        "wet_days": 99,
+        "dew_below_tmin": 163
+      },
+      "r12c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1088.46,
+        "ppt_max_mm": 118.22,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r12c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1094.4499999999998,
+        "ppt_max_mm": 120.94,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r12c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1102.42,
+        "ppt_max_mm": 122.72,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r12c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.37,
+        "ppt_max_mm": 78.3,
+        "wet_days": 95,
+        "dew_below_tmin": 166
+      },
+      "r12c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.8,
+        "ppt_max_mm": 77.03,
+        "wet_days": 94,
+        "dew_below_tmin": 165
+      },
+      "r12c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1015.54,
+        "ppt_max_mm": 76.37,
+        "wet_days": 94,
+        "dew_below_tmin": 173
+      },
+      "r12c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1010.98,
+        "ppt_max_mm": 76.06,
+        "wet_days": 94,
+        "dew_below_tmin": 176
+      },
+      "r12c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1010.42,
+        "ppt_max_mm": 77.05,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r12c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.8799999999999,
+        "ppt_max_mm": 79.0,
+        "wet_days": 94,
+        "dew_below_tmin": 175
+      },
+      "r12c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.97,
+        "ppt_max_mm": 81.52,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      },
+      "r13c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.56,
+        "ppt_max_mm": 83.96,
+        "wet_days": 96,
+        "dew_below_tmin": 159
+      },
+      "r13c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1026.28,
+        "ppt_max_mm": 81.91,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r13c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.18,
+        "ppt_max_mm": 87.39,
+        "wet_days": 95,
+        "dew_below_tmin": 166
+      },
+      "r13c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.85,
+        "ppt_max_mm": 90.15,
+        "wet_days": 94,
+        "dew_below_tmin": 165
+      },
+      "r13c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1031.54,
+        "ppt_max_mm": 94.42,
+        "wet_days": 94,
+        "dew_below_tmin": 167
+      },
+      "r13c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.04,
+        "ppt_max_mm": 98.4,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r13c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1044.78,
+        "ppt_max_mm": 101.95,
+        "wet_days": 100,
+        "dew_below_tmin": 164
+      },
+      "r13c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1051.3899999999999,
+        "ppt_max_mm": 104.32,
+        "wet_days": 101,
+        "dew_below_tmin": 165
+      },
+      "r13c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1060.98,
+        "ppt_max_mm": 108.17,
+        "wet_days": 102,
+        "dew_below_tmin": 164
+      },
+      "r13c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1068.34,
+        "ppt_max_mm": 110.28,
+        "wet_days": 102,
+        "dew_below_tmin": 162
+      },
+      "r13c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1074.5300000000002,
+        "ppt_max_mm": 112.46,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r13c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1082.4,
+        "ppt_max_mm": 115.25,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r13c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.99,
+        "ppt_max_mm": 80.49,
+        "wet_days": 97,
+        "dew_below_tmin": 157
+      },
+      "r13c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1096.28,
+        "ppt_max_mm": 121.07,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r13c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1110.55,
+        "ppt_max_mm": 125.88,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r13c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1120.1399999999999,
+        "ppt_max_mm": 130.18,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r13c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1127.02,
+        "ppt_max_mm": 132.89,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r13c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1133.55,
+        "ppt_max_mm": 133.78,
+        "wet_days": 102,
+        "dew_below_tmin": 164
+      },
+      "r13c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1020.04,
+        "ppt_max_mm": 79.04,
+        "wet_days": 96,
+        "dew_below_tmin": 164
+      },
+      "r13c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.73,
+        "ppt_max_mm": 78.46,
+        "wet_days": 95,
+        "dew_below_tmin": 164
+      },
+      "r13c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.8199999999999,
+        "ppt_max_mm": 77.79,
+        "wet_days": 94,
+        "dew_below_tmin": 168
+      },
+      "r13c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.4300000000001,
+        "ppt_max_mm": 77.9,
+        "wet_days": 94,
+        "dew_below_tmin": 164
+      },
+      "r13c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.88,
+        "ppt_max_mm": 79.21,
+        "wet_days": 94,
+        "dew_below_tmin": 171
+      },
+      "r13c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1015.4899999999999,
+        "ppt_max_mm": 81.84,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r13c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.6300000000001,
+        "ppt_max_mm": 84.79,
+        "wet_days": 94,
+        "dew_below_tmin": 164
+      },
+      "r14c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.05,
+        "ppt_max_mm": 84.48,
+        "wet_days": 98,
+        "dew_below_tmin": 155
+      },
+      "r14c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1018.71,
+        "ppt_max_mm": 82.65,
+        "wet_days": 98,
+        "dew_below_tmin": 159
+      },
+      "r14c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.33,
+        "ppt_max_mm": 90.52,
+        "wet_days": 95,
+        "dew_below_tmin": 165
+      },
+      "r14c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1029.73,
+        "ppt_max_mm": 94.15,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r14c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.6,
+        "ppt_max_mm": 98.9,
+        "wet_days": 97,
+        "dew_below_tmin": 163
+      },
+      "r14c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1046.0900000000001,
+        "ppt_max_mm": 103.87,
+        "wet_days": 99,
+        "dew_below_tmin": 165
+      },
+      "r14c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1055.28,
+        "ppt_max_mm": 108.04,
+        "wet_days": 100,
+        "dew_below_tmin": 165
+      },
+      "r14c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1065.55,
+        "ppt_max_mm": 112.1,
+        "wet_days": 101,
+        "dew_below_tmin": 163
+      },
+      "r14c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1076.49,
+        "ppt_max_mm": 115.42,
+        "wet_days": 101,
+        "dew_below_tmin": 161
+      },
+      "r14c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1084.45,
+        "ppt_max_mm": 117.47,
+        "wet_days": 101,
+        "dew_below_tmin": 162
+      },
+      "r14c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1091.06,
+        "ppt_max_mm": 118.82,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r14c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1099.56,
+        "ppt_max_mm": 121.24,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r14c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1015.9300000000001,
+        "ppt_max_mm": 81.06,
+        "wet_days": 97,
+        "dew_below_tmin": 161
+      },
+      "r14c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1113.13,
+        "ppt_max_mm": 125.04,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r14c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1129.06,
+        "ppt_max_mm": 130.17,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r14c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1140.26,
+        "ppt_max_mm": 135.14,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r14c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1147.7199999999998,
+        "ppt_max_mm": 137.85,
+        "wet_days": 103,
+        "dew_below_tmin": 162
+      },
+      "r14c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1153.02,
+        "ppt_max_mm": 139.02,
+        "wet_days": 102,
+        "dew_below_tmin": 164
+      },
+      "r14c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.8399999999999,
+        "ppt_max_mm": 80.13,
+        "wet_days": 97,
+        "dew_below_tmin": 161
+      },
+      "r14c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.9200000000001,
+        "ppt_max_mm": 79.24,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r14c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.03,
+        "ppt_max_mm": 79.1,
+        "wet_days": 94,
+        "dew_below_tmin": 161
+      },
+      "r14c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1010.52,
+        "ppt_max_mm": 79.44,
+        "wet_days": 95,
+        "dew_below_tmin": 160
+      },
+      "r14c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.7000000000002,
+        "ppt_max_mm": 81.05,
+        "wet_days": 95,
+        "dew_below_tmin": 166
+      },
+      "r14c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1015.5100000000001,
+        "ppt_max_mm": 84.1,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r14c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1020.46,
+        "ppt_max_mm": 87.65,
+        "wet_days": 95,
+        "dew_below_tmin": 165
+      },
+      "r15c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1021.27,
+        "ppt_max_mm": 86.11,
+        "wet_days": 96,
+        "dew_below_tmin": 156
+      },
+      "r15c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1018.1199999999999,
+        "ppt_max_mm": 83.92,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r15c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.44,
+        "ppt_max_mm": 93.1,
+        "wet_days": 98,
+        "dew_below_tmin": 166
+      },
+      "r15c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.31,
+        "ppt_max_mm": 96.76,
+        "wet_days": 98,
+        "dew_below_tmin": 166
+      },
+      "r15c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1044.31,
+        "ppt_max_mm": 102.04,
+        "wet_days": 97,
+        "dew_below_tmin": 163
+      },
+      "r15c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1054.1599999999999,
+        "ppt_max_mm": 107.35,
+        "wet_days": 99,
+        "dew_below_tmin": 165
+      },
+      "r15c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1063.3600000000001,
+        "ppt_max_mm": 111.64,
+        "wet_days": 100,
+        "dew_below_tmin": 165
+      },
+      "r15c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1074.83,
+        "ppt_max_mm": 116.55,
+        "wet_days": 100,
+        "dew_below_tmin": 161
+      },
+      "r15c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1085.1399999999999,
+        "ppt_max_mm": 119.95,
+        "wet_days": 100,
+        "dew_below_tmin": 164
+      },
+      "r15c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1092.2099999999998,
+        "ppt_max_mm": 120.93,
+        "wet_days": 102,
+        "dew_below_tmin": 161
+      },
+      "r15c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1098.39,
+        "ppt_max_mm": 121.86,
+        "wet_days": 103,
+        "dew_below_tmin": 160
+      },
+      "r15c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1106.3500000000001,
+        "ppt_max_mm": 123.38,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r15c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.64,
+        "ppt_max_mm": 82.33,
+        "wet_days": 97,
+        "dew_below_tmin": 158
+      },
+      "r15c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1120.1,
+        "ppt_max_mm": 126.65,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r15c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1135.33,
+        "ppt_max_mm": 130.54,
+        "wet_days": 103,
+        "dew_below_tmin": 163
+      },
+      "r15c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1147.48,
+        "ppt_max_mm": 134.85,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r15c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.94,
+        "ppt_max_mm": 137.86,
+        "wet_days": 102,
+        "dew_below_tmin": 161
+      },
+      "r15c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1161.76,
+        "ppt_max_mm": 139.01,
+        "wet_days": 102,
+        "dew_below_tmin": 162
+      },
+      "r15c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.3,
+        "ppt_max_mm": 81.06,
+        "wet_days": 97,
+        "dew_below_tmin": 160
+      },
+      "r15c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.2399999999999,
+        "ppt_max_mm": 80.31,
+        "wet_days": 98,
+        "dew_below_tmin": 161
+      },
+      "r15c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.67,
+        "ppt_max_mm": 80.13,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r15c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.2400000000001,
+        "ppt_max_mm": 80.63,
+        "wet_days": 95,
+        "dew_below_tmin": 163
+      },
+      "r15c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.4300000000001,
+        "ppt_max_mm": 82.45,
+        "wet_days": 96,
+        "dew_below_tmin": 160
+      },
+      "r15c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1016.3299999999999,
+        "ppt_max_mm": 85.78,
+        "wet_days": 96,
+        "dew_below_tmin": 164
+      },
+      "r15c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.6400000000001,
+        "ppt_max_mm": 89.63,
+        "wet_days": 97,
+        "dew_below_tmin": 168
+      },
+      "r16c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1027.59,
+        "ppt_max_mm": 88.27,
+        "wet_days": 96,
+        "dew_below_tmin": 157
+      },
+      "r16c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.85,
+        "ppt_max_mm": 86.1,
+        "wet_days": 97,
+        "dew_below_tmin": 158
+      },
+      "r16c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.18,
+        "ppt_max_mm": 97.16,
+        "wet_days": 98,
+        "dew_below_tmin": 166
+      },
+      "r16c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1042.6799999999998,
+        "ppt_max_mm": 101.21,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r16c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1052.27,
+        "ppt_max_mm": 106.96,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r16c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1061.33,
+        "ppt_max_mm": 111.73,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r16c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1070.8400000000001,
+        "ppt_max_mm": 115.82,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r16c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1082.78,
+        "ppt_max_mm": 121.16,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r16c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1092.9499999999998,
+        "ppt_max_mm": 124.19,
+        "wet_days": 100,
+        "dew_below_tmin": 161
+      },
+      "r16c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1099.27,
+        "ppt_max_mm": 124.83,
+        "wet_days": 101,
+        "dew_below_tmin": 161
+      },
+      "r16c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1104.31,
+        "ppt_max_mm": 124.68,
+        "wet_days": 102,
+        "dew_below_tmin": 160
+      },
+      "r16c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1111.79,
+        "ppt_max_mm": 125.19,
+        "wet_days": 103,
+        "dew_below_tmin": 159
+      },
+      "r16c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.4300000000001,
+        "ppt_max_mm": 84.48,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r16c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1124.96,
+        "ppt_max_mm": 127.36,
+        "wet_days": 103,
+        "dew_below_tmin": 159
+      },
+      "r16c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1140.1399999999999,
+        "ppt_max_mm": 130.08,
+        "wet_days": 104,
+        "dew_below_tmin": 160
+      },
+      "r16c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1151.19,
+        "ppt_max_mm": 132.57,
+        "wet_days": 101,
+        "dew_below_tmin": 163
+      },
+      "r16c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1160.3400000000001,
+        "ppt_max_mm": 134.48,
+        "wet_days": 102,
+        "dew_below_tmin": 161
+      },
+      "r16c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1170.3199999999997,
+        "ppt_max_mm": 137.17,
+        "wet_days": 102,
+        "dew_below_tmin": 163
+      },
+      "r16c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.27,
+        "ppt_max_mm": 83.36,
+        "wet_days": 97,
+        "dew_below_tmin": 160
+      },
+      "r16c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.34,
+        "ppt_max_mm": 82.55,
+        "wet_days": 98,
+        "dew_below_tmin": 159
+      },
+      "r16c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.59,
+        "ppt_max_mm": 82.46,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r16c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1016.99,
+        "ppt_max_mm": 83.19,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r16c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.9399999999999,
+        "ppt_max_mm": 85.39,
+        "wet_days": 97,
+        "dew_below_tmin": 161
+      },
+      "r16c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.4399999999998,
+        "ppt_max_mm": 89.34,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r16c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.76,
+        "ppt_max_mm": 93.65,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r17c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1037.07,
+        "ppt_max_mm": 91.61,
+        "wet_days": 95,
+        "dew_below_tmin": 156
+      },
+      "r17c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.62,
+        "ppt_max_mm": 89.72,
+        "wet_days": 97,
+        "dew_below_tmin": 154
+      },
+      "r17c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1047.95,
+        "ppt_max_mm": 106.5,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r17c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1056.15,
+        "ppt_max_mm": 110.87,
+        "wet_days": 99,
+        "dew_below_tmin": 162
+      },
+      "r17c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1065.4299999999998,
+        "ppt_max_mm": 116.54,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r17c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1074.31,
+        "ppt_max_mm": 121.29,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r17c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1083.12,
+        "ppt_max_mm": 125.06,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r17c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1095.23,
+        "ppt_max_mm": 129.54,
+        "wet_days": 102,
+        "dew_below_tmin": 164
+      },
+      "r17c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1106.66,
+        "ppt_max_mm": 132.44,
+        "wet_days": 101,
+        "dew_below_tmin": 161
+      },
+      "r17c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1112.81,
+        "ppt_max_mm": 132.24,
+        "wet_days": 101,
+        "dew_below_tmin": 160
+      },
+      "r17c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1116.68,
+        "ppt_max_mm": 130.82,
+        "wet_days": 102,
+        "dew_below_tmin": 157
+      },
+      "r17c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1123.1399999999999,
+        "ppt_max_mm": 129.7,
+        "wet_days": 103,
+        "dew_below_tmin": 158
+      },
+      "r17c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1026.1,
+        "ppt_max_mm": 88.57,
+        "wet_days": 97,
+        "dew_below_tmin": 160
+      },
+      "r17c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1134.85,
+        "ppt_max_mm": 129.46,
+        "wet_days": 103,
+        "dew_below_tmin": 158
+      },
+      "r17c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1149.12,
+        "ppt_max_mm": 130.59,
+        "wet_days": 102,
+        "dew_below_tmin": 158
+      },
+      "r17c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1160.4299999999998,
+        "ppt_max_mm": 131.72,
+        "wet_days": 102,
+        "dew_below_tmin": 160
+      },
+      "r17c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1169.97,
+        "ppt_max_mm": 133.02,
+        "wet_days": 102,
+        "dew_below_tmin": 162
+      },
+      "r17c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1179.9,
+        "ppt_max_mm": 134.2,
+        "wet_days": 101,
+        "dew_below_tmin": 160
+      },
+      "r17c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1025.0300000000002,
+        "ppt_max_mm": 87.97,
+        "wet_days": 98,
+        "dew_below_tmin": 159
+      },
+      "r17c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.6100000000001,
+        "ppt_max_mm": 88.02,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r17c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1025.8000000000002,
+        "ppt_max_mm": 88.48,
+        "wet_days": 98,
+        "dew_below_tmin": 164
+      },
+      "r17c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1027.1,
+        "ppt_max_mm": 89.91,
+        "wet_days": 98,
+        "dew_below_tmin": 165
+      },
+      "r17c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1029.92,
+        "ppt_max_mm": 93.42,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r17c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1034.44,
+        "ppt_max_mm": 97.93,
+        "wet_days": 98,
+        "dew_below_tmin": 164
+      },
+      "r17c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1041.4299999999998,
+        "ppt_max_mm": 102.64,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r18c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1046.1299999999999,
+        "ppt_max_mm": 96.32,
+        "wet_days": 95,
+        "dew_below_tmin": 155
+      },
+      "r18c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.13,
+        "ppt_max_mm": 95.04,
+        "wet_days": 95,
+        "dew_below_tmin": 157
+      },
+      "r18c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1067.5900000000001,
+        "ppt_max_mm": 122.17,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r18c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1076.5,
+        "ppt_max_mm": 126.92,
+        "wet_days": 99,
+        "dew_below_tmin": 162
+      },
+      "r18c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1086.6699999999998,
+        "ppt_max_mm": 133.17,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r18c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1094.33,
+        "ppt_max_mm": 137.17,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r18c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1101.86,
+        "ppt_max_mm": 139.64,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r18c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1113.25,
+        "ppt_max_mm": 142.02,
+        "wet_days": 100,
+        "dew_below_tmin": 161
+      },
+      "r18c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1125.0900000000001,
+        "ppt_max_mm": 143.24,
+        "wet_days": 101,
+        "dew_below_tmin": 161
+      },
+      "r18c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1132.3,
+        "ppt_max_mm": 142.65,
+        "wet_days": 101,
+        "dew_below_tmin": 160
+      },
+      "r18c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1136.87,
+        "ppt_max_mm": 140.73,
+        "wet_days": 101,
+        "dew_below_tmin": 158
+      },
+      "r18c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1139.8600000000001,
+        "ppt_max_mm": 135.58,
+        "wet_days": 101,
+        "dew_below_tmin": 158
+      },
+      "r18c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.44,
+        "ppt_max_mm": 95.18,
+        "wet_days": 98,
+        "dew_below_tmin": 158
+      },
+      "r18c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1150.61,
+        "ppt_max_mm": 133.23,
+        "wet_days": 101,
+        "dew_below_tmin": 158
+      },
+      "r18c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1163.44,
+        "ppt_max_mm": 131.87,
+        "wet_days": 100,
+        "dew_below_tmin": 158
+      },
+      "r18c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1175.33,
+        "ppt_max_mm": 131.6,
+        "wet_days": 100,
+        "dew_below_tmin": 160
+      },
+      "r18c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1185.63,
+        "ppt_max_mm": 131.83,
+        "wet_days": 100,
+        "dew_below_tmin": 159
+      },
+      "r18c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1195.46,
+        "ppt_max_mm": 131.64,
+        "wet_days": 101,
+        "dew_below_tmin": 159
+      },
+      "r18c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.19,
+        "ppt_max_mm": 95.98,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r18c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1037.52,
+        "ppt_max_mm": 97.41,
+        "wet_days": 100,
+        "dew_below_tmin": 162
+      },
+      "r18c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1039.9,
+        "ppt_max_mm": 98.98,
+        "wet_days": 99,
+        "dew_below_tmin": 161
+      },
+      "r18c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1043.65,
+        "ppt_max_mm": 102.27,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r18c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1048.6,
+        "ppt_max_mm": 107.82,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r18c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1054.29,
+        "ppt_max_mm": 113.79,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r18c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1059.9900000000002,
+        "ppt_max_mm": 118.25,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r19c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1051.85,
+        "ppt_max_mm": 98.82,
+        "wet_days": 94,
+        "dew_below_tmin": 148
+      },
+      "r19c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1043.93,
+        "ppt_max_mm": 98.34,
+        "wet_days": 96,
+        "dew_below_tmin": 152
+      },
+      "r19c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1083.42,
+        "ppt_max_mm": 133.42,
+        "wet_days": 99,
+        "dew_below_tmin": 162
+      },
+      "r19c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1093.71,
+        "ppt_max_mm": 139.51,
+        "wet_days": 99,
+        "dew_below_tmin": 160
+      },
+      "r19c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1102.26,
+        "ppt_max_mm": 145.12,
+        "wet_days": 99,
+        "dew_below_tmin": 160
+      },
+      "r19c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1108.48,
+        "ppt_max_mm": 148.24,
+        "wet_days": 99,
+        "dew_below_tmin": 160
+      },
+      "r19c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1115.23,
+        "ppt_max_mm": 149.51,
+        "wet_days": 99,
+        "dew_below_tmin": 159
+      },
+      "r19c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1125.87,
+        "ppt_max_mm": 149.93,
+        "wet_days": 99,
+        "dew_below_tmin": 160
+      },
+      "r19c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1137.6,
+        "ppt_max_mm": 149.44,
+        "wet_days": 100,
+        "dew_below_tmin": 158
+      },
+      "r19c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1145.23,
+        "ppt_max_mm": 148.12,
+        "wet_days": 100,
+        "dew_below_tmin": 158
+      },
+      "r19c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1149.81,
+        "ppt_max_mm": 145.42,
+        "wet_days": 99,
+        "dew_below_tmin": 158
+      },
+      "r19c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1155.0900000000001,
+        "ppt_max_mm": 141.58,
+        "wet_days": 99,
+        "dew_below_tmin": 158
+      },
+      "r19c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1039.94,
+        "ppt_max_mm": 99.79,
+        "wet_days": 96,
+        "dew_below_tmin": 158
+      },
+      "r19c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1163.83,
+        "ppt_max_mm": 136.75,
+        "wet_days": 99,
+        "dew_below_tmin": 158
+      },
+      "r19c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1175.92,
+        "ppt_max_mm": 133.5,
+        "wet_days": 99,
+        "dew_below_tmin": 158
+      },
+      "r19c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1189.56,
+        "ppt_max_mm": 132.52,
+        "wet_days": 99,
+        "dew_below_tmin": 160
+      },
+      "r19c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1206.19,
+        "ppt_max_mm": 131.96,
+        "wet_days": 102,
+        "dew_below_tmin": 158
+      },
+      "r19c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1214.8600000000001,
+        "ppt_max_mm": 131.02,
+        "wet_days": 103,
+        "dew_below_tmin": 159
+      },
+      "r19c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1040.58,
+        "ppt_max_mm": 101.76,
+        "wet_days": 97,
+        "dew_below_tmin": 159
+      },
+      "r19c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1045.2,
+        "ppt_max_mm": 104.45,
+        "wet_days": 100,
+        "dew_below_tmin": 160
+      },
+      "r19c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1051.61,
+        "ppt_max_mm": 108.19,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r19c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1058.67,
+        "ppt_max_mm": 112.85,
+        "wet_days": 100,
+        "dew_below_tmin": 163
+      },
+      "r19c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1064.62,
+        "ppt_max_mm": 119.12,
+        "wet_days": 98,
+        "dew_below_tmin": 161
+      },
+      "r19c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1070.3600000000001,
+        "ppt_max_mm": 124.86,
+        "wet_days": 98,
+        "dew_below_tmin": 160
+      },
+      "r19c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1076.09,
+        "ppt_max_mm": 129.36,
+        "wet_days": 98,
+        "dew_below_tmin": 162
+      },
+      "r1c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.83,
+        "ppt_max_mm": 102.87,
+        "wet_days": 88,
+        "dew_below_tmin": 173
+      },
+      "r1c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.02,
+        "ppt_max_mm": 101.11,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "r1c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.1800000000001,
+        "ppt_max_mm": 92.15,
+        "wet_days": 95,
+        "dew_below_tmin": 174
+      },
+      "r1c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.9499999999999,
+        "ppt_max_mm": 92.01,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r1c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.1200000000001,
+        "ppt_max_mm": 91.73,
+        "wet_days": 92,
+        "dew_below_tmin": 177
+      },
+      "r1c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.95,
+        "ppt_max_mm": 91.02,
+        "wet_days": 94,
+        "dew_below_tmin": 174
+      },
+      "r1c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 957.8199999999999,
+        "ppt_max_mm": 89.97,
+        "wet_days": 95,
+        "dew_below_tmin": 171
+      },
+      "r1c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.8899999999999,
+        "ppt_max_mm": 88.25,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r1c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.01,
+        "ppt_max_mm": 86.43,
+        "wet_days": 97,
+        "dew_below_tmin": 174
+      },
+      "r1c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.0699999999999,
+        "ppt_max_mm": 85.27,
+        "wet_days": 98,
+        "dew_below_tmin": 174
+      },
+      "r1c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.6800000000001,
+        "ppt_max_mm": 84.64,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r1c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 951.32,
+        "ppt_max_mm": 84.57,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r1c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 994.97,
+        "ppt_max_mm": 98.34,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r1c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.59,
+        "ppt_max_mm": 84.32,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r1c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.3799999999999,
+        "ppt_max_mm": 84.27,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r1c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.1500000000001,
+        "ppt_max_mm": 84.1,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r1c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 952.48,
+        "ppt_max_mm": 83.98,
+        "wet_days": 99,
+        "dew_below_tmin": 168
+      },
+      "r1c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 950.04,
+        "ppt_max_mm": 83.82,
+        "wet_days": 99,
+        "dew_below_tmin": 170
+      },
+      "r1c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.15,
+        "ppt_max_mm": 94.55,
+        "wet_days": 91,
+        "dew_below_tmin": 172
+      },
+      "r1c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.36,
+        "ppt_max_mm": 91.36,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "r1c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.6600000000001,
+        "ppt_max_mm": 89.66,
+        "wet_days": 90,
+        "dew_below_tmin": 172
+      },
+      "r1c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 962.12,
+        "ppt_max_mm": 89.67,
+        "wet_days": 92,
+        "dew_below_tmin": 173
+      },
+      "r1c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.41,
+        "ppt_max_mm": 90.5,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r1c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.41,
+        "ppt_max_mm": 91.33,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r1c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.26,
+        "ppt_max_mm": 91.99,
+        "wet_days": 95,
+        "dew_below_tmin": 175
+      },
+      "r2c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.8399999999999,
+        "ppt_max_mm": 101.73,
+        "wet_days": 87,
+        "dew_below_tmin": 173
+      },
+      "r2c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.27,
+        "ppt_max_mm": 100.18,
+        "wet_days": 89,
+        "dew_below_tmin": 171
+      },
+      "r2c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.04,
+        "ppt_max_mm": 91.89,
+        "wet_days": 93,
+        "dew_below_tmin": 175
+      },
+      "r2c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.1500000000001,
+        "ppt_max_mm": 91.77,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r2c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.74,
+        "ppt_max_mm": 91.53,
+        "wet_days": 94,
+        "dew_below_tmin": 175
+      },
+      "r2c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 962.8,
+        "ppt_max_mm": 91.14,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r2c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.66,
+        "ppt_max_mm": 90.21,
+        "wet_days": 94,
+        "dew_below_tmin": 173
+      },
+      "r2c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.3299999999999,
+        "ppt_max_mm": 88.74,
+        "wet_days": 96,
+        "dew_below_tmin": 173
+      },
+      "r2c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 955.76,
+        "ppt_max_mm": 87.2,
+        "wet_days": 96,
+        "dew_below_tmin": 172
+      },
+      "r2c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.3900000000001,
+        "ppt_max_mm": 86.14,
+        "wet_days": 97,
+        "dew_below_tmin": 171
+      },
+      "r2c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 954.34,
+        "ppt_max_mm": 85.56,
+        "wet_days": 100,
+        "dew_below_tmin": 172
+      },
+      "r2c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 953.8000000000001,
+        "ppt_max_mm": 85.25,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r2c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.5,
+        "ppt_max_mm": 97.78,
+        "wet_days": 89,
+        "dew_below_tmin": 168
+      },
+      "r2c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 956.5500000000001,
+        "ppt_max_mm": 85.12,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r2c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.44,
+        "ppt_max_mm": 85.0,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.3800000000001,
+        "ppt_max_mm": 85.16,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.9599999999999,
+        "ppt_max_mm": 85.08,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r2c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.02,
+        "ppt_max_mm": 85.06,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r2c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 991.7700000000001,
+        "ppt_max_mm": 94.77,
+        "wet_days": 90,
+        "dew_below_tmin": 168
+      },
+      "r2c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 984.5,
+        "ppt_max_mm": 92.48,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r2c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 976.6899999999999,
+        "ppt_max_mm": 90.93,
+        "wet_days": 90,
+        "dew_below_tmin": 175
+      },
+      "r2c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.45,
+        "ppt_max_mm": 90.68,
+        "wet_days": 91,
+        "dew_below_tmin": 175
+      },
+      "r2c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.78,
+        "ppt_max_mm": 91.02,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r2c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 973.57,
+        "ppt_max_mm": 91.55,
+        "wet_days": 93,
+        "dew_below_tmin": 170
+      },
+      "r2c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.52,
+        "ppt_max_mm": 91.84,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r3c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1021.75,
+        "ppt_max_mm": 100.28,
+        "wet_days": 89,
+        "dew_below_tmin": 171
+      },
+      "r3c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.05,
+        "ppt_max_mm": 98.83,
+        "wet_days": 87,
+        "dew_below_tmin": 168
+      },
+      "r3c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.71,
+        "ppt_max_mm": 91.1,
+        "wet_days": 93,
+        "dew_below_tmin": 177
+      },
+      "r3c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.43,
+        "ppt_max_mm": 91.05,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r3c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 966.1700000000001,
+        "ppt_max_mm": 91.04,
+        "wet_days": 93,
+        "dew_below_tmin": 176
+      },
+      "r3c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 965.8299999999999,
+        "ppt_max_mm": 90.92,
+        "wet_days": 96,
+        "dew_below_tmin": 173
+      },
+      "r3c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.47,
+        "ppt_max_mm": 90.54,
+        "wet_days": 96,
+        "dew_below_tmin": 174
+      },
+      "r3c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.95,
+        "ppt_max_mm": 89.63,
+        "wet_days": 95,
+        "dew_below_tmin": 171
+      },
+      "r3c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 959.5500000000001,
+        "ppt_max_mm": 88.43,
+        "wet_days": 98,
+        "dew_below_tmin": 173
+      },
+      "r3c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.6799999999998,
+        "ppt_max_mm": 87.63,
+        "wet_days": 98,
+        "dew_below_tmin": 170
+      },
+      "r3c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 958.4599999999999,
+        "ppt_max_mm": 87.22,
+        "wet_days": 98,
+        "dew_below_tmin": 171
+      },
+      "r3c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 960.02,
+        "ppt_max_mm": 86.99,
+        "wet_days": 99,
+        "dew_below_tmin": 172
+      },
+      "r3c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1004.6099999999999,
+        "ppt_max_mm": 97.0,
+        "wet_days": 89,
+        "dew_below_tmin": 166
+      },
+      "r3c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.81,
+        "ppt_max_mm": 86.81,
+        "wet_days": 100,
+        "dew_below_tmin": 173
+      },
+      "r3c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 969.0600000000002,
+        "ppt_max_mm": 86.8,
+        "wet_days": 100,
+        "dew_below_tmin": 171
+      },
+      "r3c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.84,
+        "ppt_max_mm": 86.76,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r3c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.54,
+        "ppt_max_mm": 86.74,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r3c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.3700000000001,
+        "ppt_max_mm": 86.76,
+        "wet_days": 100,
+        "dew_below_tmin": 171
+      },
+      "r3c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.7700000000001,
+        "ppt_max_mm": 95.01,
+        "wet_days": 89,
+        "dew_below_tmin": 169
+      },
+      "r3c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 993.53,
+        "ppt_max_mm": 93.25,
+        "wet_days": 90,
+        "dew_below_tmin": 173
+      },
+      "r3c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 987.04,
+        "ppt_max_mm": 91.88,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "r3c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 982.45,
+        "ppt_max_mm": 91.32,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.03,
+        "ppt_max_mm": 91.22,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.8600000000001,
+        "ppt_max_mm": 91.26,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r3c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 977.0,
+        "ppt_max_mm": 91.14,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      },
+      "r4c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.69,
+        "ppt_max_mm": 99.2,
+        "wet_days": 89,
+        "dew_below_tmin": 166
+      },
+      "r4c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1021.45,
+        "ppt_max_mm": 97.89,
+        "wet_days": 89,
+        "dew_below_tmin": 166
+      },
+      "r4c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 977.85,
+        "ppt_max_mm": 90.4,
+        "wet_days": 90,
+        "dew_below_tmin": 174
+      },
+      "r4c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.75,
+        "ppt_max_mm": 90.39,
+        "wet_days": 91,
+        "dew_below_tmin": 174
+      },
+      "r4c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.4,
+        "ppt_max_mm": 90.45,
+        "wet_days": 92,
+        "dew_below_tmin": 173
+      },
+      "r4c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.63,
+        "ppt_max_mm": 90.57,
+        "wet_days": 94,
+        "dew_below_tmin": 173
+      },
+      "r4c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 966.76,
+        "ppt_max_mm": 90.46,
+        "wet_days": 97,
+        "dew_below_tmin": 172
+      },
+      "r4c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.1700000000001,
+        "ppt_max_mm": 89.99,
+        "wet_days": 97,
+        "dew_below_tmin": 170
+      },
+      "r4c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.98,
+        "ppt_max_mm": 89.13,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r4c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.59,
+        "ppt_max_mm": 88.58,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r4c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 961.95,
+        "ppt_max_mm": 88.25,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r4c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.19,
+        "ppt_max_mm": 88.13,
+        "wet_days": 100,
+        "dew_below_tmin": 167
+      },
+      "r4c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.22,
+        "ppt_max_mm": 96.46,
+        "wet_days": 90,
+        "dew_below_tmin": 167
+      },
+      "r4c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.6499999999999,
+        "ppt_max_mm": 88.02,
+        "wet_days": 99,
+        "dew_below_tmin": 173
+      },
+      "r4c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 974.76,
+        "ppt_max_mm": 87.96,
+        "wet_days": 99,
+        "dew_below_tmin": 171
+      },
+      "r4c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 978.1700000000001,
+        "ppt_max_mm": 87.84,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r4c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 978.9300000000001,
+        "ppt_max_mm": 87.75,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r4c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.02,
+        "ppt_max_mm": 87.81,
+        "wet_days": 100,
+        "dew_below_tmin": 173
+      },
+      "r4c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.06,
+        "ppt_max_mm": 94.86,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "r4c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1004.63,
+        "ppt_max_mm": 93.46,
+        "wet_days": 92,
+        "dew_below_tmin": 169
+      },
+      "r4c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 997.0899999999999,
+        "ppt_max_mm": 92.12,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r4c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 991.2,
+        "ppt_max_mm": 91.32,
+        "wet_days": 92,
+        "dew_below_tmin": 172
+      },
+      "r4c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.6899999999998,
+        "ppt_max_mm": 90.99,
+        "wet_days": 93,
+        "dew_below_tmin": 171
+      },
+      "r4c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.8499999999999,
+        "ppt_max_mm": 90.74,
+        "wet_days": 92,
+        "dew_below_tmin": 175
+      },
+      "r4c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.95,
+        "ppt_max_mm": 90.47,
+        "wet_days": 91,
+        "dew_below_tmin": 172
+      },
+      "r5c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1039.51,
+        "ppt_max_mm": 98.4,
+        "wet_days": 91,
+        "dew_below_tmin": 168
+      },
+      "r5c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1031.46,
+        "ppt_max_mm": 97.06,
+        "wet_days": 93,
+        "dew_below_tmin": 165
+      },
+      "r5c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 984.53,
+        "ppt_max_mm": 89.67,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "r5c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 978.81,
+        "ppt_max_mm": 89.55,
+        "wet_days": 91,
+        "dew_below_tmin": 172
+      },
+      "r5c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 975.1299999999999,
+        "ppt_max_mm": 89.69,
+        "wet_days": 91,
+        "dew_below_tmin": 175
+      },
+      "r5c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.65,
+        "ppt_max_mm": 89.92,
+        "wet_days": 94,
+        "dew_below_tmin": 171
+      },
+      "r5c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 969.89,
+        "ppt_max_mm": 90.03,
+        "wet_days": 96,
+        "dew_below_tmin": 173
+      },
+      "r5c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 967.4200000000001,
+        "ppt_max_mm": 89.78,
+        "wet_days": 98,
+        "dew_below_tmin": 173
+      },
+      "r5c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.5999999999999,
+        "ppt_max_mm": 89.17,
+        "wet_days": 98,
+        "dew_below_tmin": 172
+      },
+      "r5c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 963.9,
+        "ppt_max_mm": 88.77,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r5c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 964.1600000000001,
+        "ppt_max_mm": 88.55,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r5c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 966.78,
+        "ppt_max_mm": 88.49,
+        "wet_days": 100,
+        "dew_below_tmin": 168
+      },
+      "r5c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1023.77,
+        "ppt_max_mm": 95.74,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r5c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 971.51,
+        "ppt_max_mm": 88.41,
+        "wet_days": 100,
+        "dew_below_tmin": 167
+      },
+      "r5c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 977.84,
+        "ppt_max_mm": 88.38,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r5c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 982.47,
+        "ppt_max_mm": 88.26,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r5c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 983.39,
+        "ppt_max_mm": 88.08,
+        "wet_days": 98,
+        "dew_below_tmin": 165
+      },
+      "r5c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.52,
+        "ppt_max_mm": 88.12,
+        "wet_days": 100,
+        "dew_below_tmin": 168
+      },
+      "r5c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.4100000000001,
+        "ppt_max_mm": 94.37,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r5c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.49,
+        "ppt_max_mm": 93.14,
+        "wet_days": 92,
+        "dew_below_tmin": 173
+      },
+      "r5c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.56,
+        "ppt_max_mm": 91.92,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r5c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1000.04,
+        "ppt_max_mm": 91.12,
+        "wet_days": 93,
+        "dew_below_tmin": 173
+      },
+      "r5c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 995.69,
+        "ppt_max_mm": 90.57,
+        "wet_days": 92,
+        "dew_below_tmin": 166
+      },
+      "r5c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 992.12,
+        "ppt_max_mm": 90.22,
+        "wet_days": 91,
+        "dew_below_tmin": 171
+      },
+      "r5c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.24,
+        "ppt_max_mm": 89.84,
+        "wet_days": 90,
+        "dew_below_tmin": 170
+      },
+      "r6c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1046.76,
+        "ppt_max_mm": 97.81,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r6c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1039.43,
+        "ppt_max_mm": 96.37,
+        "wet_days": 93,
+        "dew_below_tmin": 169
+      },
+      "r6c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.91,
+        "ppt_max_mm": 88.82,
+        "wet_days": 91,
+        "dew_below_tmin": 173
+      },
+      "r6c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 983.6899999999999,
+        "ppt_max_mm": 88.73,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r6c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 980.54,
+        "ppt_max_mm": 88.86,
+        "wet_days": 92,
+        "dew_below_tmin": 169
+      },
+      "r6c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 977.45,
+        "ppt_max_mm": 89.11,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r6c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 974.63,
+        "ppt_max_mm": 89.3,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r6c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 972.4300000000001,
+        "ppt_max_mm": 89.21,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r6c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 969.79,
+        "ppt_max_mm": 88.94,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r6c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.61,
+        "ppt_max_mm": 88.62,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r6c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 968.29,
+        "ppt_max_mm": 88.54,
+        "wet_days": 99,
+        "dew_below_tmin": 164
+      },
+      "r6c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 970.0699999999999,
+        "ppt_max_mm": 88.55,
+        "wet_days": 99,
+        "dew_below_tmin": 170
+      },
+      "r6c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1033.62,
+        "ppt_max_mm": 95.0,
+        "wet_days": 93,
+        "dew_below_tmin": 170
+      },
+      "r6c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 975.76,
+        "ppt_max_mm": 88.63,
+        "wet_days": 100,
+        "dew_below_tmin": 173
+      },
+      "r6c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.6700000000001,
+        "ppt_max_mm": 88.7,
+        "wet_days": 98,
+        "dew_below_tmin": 172
+      },
+      "r6c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 987.2499999999999,
+        "ppt_max_mm": 88.57,
+        "wet_days": 97,
+        "dew_below_tmin": 167
+      },
+      "r6c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 989.89,
+        "ppt_max_mm": 88.4,
+        "wet_days": 97,
+        "dew_below_tmin": 167
+      },
+      "r6c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 991.4100000000001,
+        "ppt_max_mm": 88.4,
+        "wet_days": 99,
+        "dew_below_tmin": 169
+      },
+      "r6c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1028.0,
+        "ppt_max_mm": 93.62,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "r6c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1022.2,
+        "ppt_max_mm": 92.35,
+        "wet_days": 90,
+        "dew_below_tmin": 172
+      },
+      "r6c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.78,
+        "ppt_max_mm": 91.24,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r6c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.91,
+        "ppt_max_mm": 90.37,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r6c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1002.0999999999999,
+        "ppt_max_mm": 89.83,
+        "wet_days": 92,
+        "dew_below_tmin": 167
+      },
+      "r6c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 997.9300000000001,
+        "ppt_max_mm": 89.37,
+        "wet_days": 92,
+        "dew_below_tmin": 166
+      },
+      "r6c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 993.1799999999998,
+        "ppt_max_mm": 88.97,
+        "wet_days": 90,
+        "dew_below_tmin": 171
+      },
+      "r7c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1051.94,
+        "ppt_max_mm": 96.9,
+        "wet_days": 93,
+        "dew_below_tmin": 165
+      },
+      "r7c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1044.3600000000001,
+        "ppt_max_mm": 95.07,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r7c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 990.53,
+        "ppt_max_mm": 87.62,
+        "wet_days": 92,
+        "dew_below_tmin": 166
+      },
+      "r7c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.63,
+        "ppt_max_mm": 87.69,
+        "wet_days": 92,
+        "dew_below_tmin": 169
+      },
+      "r7c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 983.24,
+        "ppt_max_mm": 87.7,
+        "wet_days": 92,
+        "dew_below_tmin": 166
+      },
+      "r7c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 982.24,
+        "ppt_max_mm": 88.07,
+        "wet_days": 95,
+        "dew_below_tmin": 172
+      },
+      "r7c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 980.44,
+        "ppt_max_mm": 88.3,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r7c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.03,
+        "ppt_max_mm": 88.42,
+        "wet_days": 96,
+        "dew_below_tmin": 168
+      },
+      "r7c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 979.1699999999998,
+        "ppt_max_mm": 88.47,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r7c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 978.51,
+        "ppt_max_mm": 88.55,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r7c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 978.75,
+        "ppt_max_mm": 88.64,
+        "wet_days": 99,
+        "dew_below_tmin": 165
+      },
+      "r7c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 981.25,
+        "ppt_max_mm": 88.91,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r7c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1038.64,
+        "ppt_max_mm": 93.52,
+        "wet_days": 92,
+        "dew_below_tmin": 170
+      },
+      "r7c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 985.8500000000001,
+        "ppt_max_mm": 89.31,
+        "wet_days": 99,
+        "dew_below_tmin": 170
+      },
+      "r7c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 992.99,
+        "ppt_max_mm": 89.67,
+        "wet_days": 99,
+        "dew_below_tmin": 170
+      },
+      "r7c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.39,
+        "ppt_max_mm": 89.76,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r7c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1002.1099999999999,
+        "ppt_max_mm": 89.64,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r7c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1005.8800000000001,
+        "ppt_max_mm": 89.79,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r7c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1033.1599999999999,
+        "ppt_max_mm": 92.2,
+        "wet_days": 91,
+        "dew_below_tmin": 172
+      },
+      "r7c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1025.47,
+        "ppt_max_mm": 90.67,
+        "wet_days": 90,
+        "dew_below_tmin": 172
+      },
+      "r7c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.76,
+        "ppt_max_mm": 89.59,
+        "wet_days": 91,
+        "dew_below_tmin": 168
+      },
+      "r7c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.64,
+        "ppt_max_mm": 88.81,
+        "wet_days": 91,
+        "dew_below_tmin": 167
+      },
+      "r7c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1004.97,
+        "ppt_max_mm": 88.26,
+        "wet_days": 92,
+        "dew_below_tmin": 168
+      },
+      "r7c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1000.48,
+        "ppt_max_mm": 87.74,
+        "wet_days": 92,
+        "dew_below_tmin": 166
+      },
+      "r7c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 995.3599999999999,
+        "ppt_max_mm": 87.69,
+        "wet_days": 91,
+        "dew_below_tmin": 167
+      },
+      "r8c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1049.32,
+        "ppt_max_mm": 91.96,
+        "wet_days": 95,
+        "dew_below_tmin": 164
+      },
+      "r8c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1041.34,
+        "ppt_max_mm": 89.92,
+        "wet_days": 95,
+        "dew_below_tmin": 167
+      },
+      "r8c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 993.23,
+        "ppt_max_mm": 86.1,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r8c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.9499999999999,
+        "ppt_max_mm": 86.57,
+        "wet_days": 94,
+        "dew_below_tmin": 166
+      },
+      "r8c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 987.97,
+        "ppt_max_mm": 86.95,
+        "wet_days": 94,
+        "dew_below_tmin": 163
+      },
+      "r8c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.79,
+        "ppt_max_mm": 87.4,
+        "wet_days": 96,
+        "dew_below_tmin": 169
+      },
+      "r8c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 988.5500000000001,
+        "ppt_max_mm": 87.73,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r8c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 989.89,
+        "ppt_max_mm": 88.16,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r8c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 992.43,
+        "ppt_max_mm": 88.61,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r8c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 993.78,
+        "ppt_max_mm": 88.91,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r8c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 996.21,
+        "ppt_max_mm": 89.58,
+        "wet_days": 99,
+        "dew_below_tmin": 168
+      },
+      "r8c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 999.13,
+        "ppt_max_mm": 90.25,
+        "wet_days": 98,
+        "dew_below_tmin": 163
+      },
+      "r8c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.0,
+        "ppt_max_mm": 88.43,
+        "wet_days": 92,
+        "dew_below_tmin": 173
+      },
+      "r8c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1005.53,
+        "ppt_max_mm": 91.3,
+        "wet_days": 98,
+        "dew_below_tmin": 168
+      },
+      "r8c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1012.55,
+        "ppt_max_mm": 92.17,
+        "wet_days": 98,
+        "dew_below_tmin": 165
+      },
+      "r8c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1018.07,
+        "ppt_max_mm": 92.47,
+        "wet_days": 96,
+        "dew_below_tmin": 163
+      },
+      "r8c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1021.77,
+        "ppt_max_mm": 92.77,
+        "wet_days": 96,
+        "dew_below_tmin": 172
+      },
+      "r8c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1027.69,
+        "ppt_max_mm": 93.05,
+        "wet_days": 97,
+        "dew_below_tmin": 166
+      },
+      "r8c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.0800000000002,
+        "ppt_max_mm": 87.56,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "r8c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1024.45,
+        "ppt_max_mm": 86.58,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r8c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1017.0899999999999,
+        "ppt_max_mm": 85.77,
+        "wet_days": 91,
+        "dew_below_tmin": 168
+      },
+      "r8c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1010.31,
+        "ppt_max_mm": 85.14,
+        "wet_days": 91,
+        "dew_below_tmin": 170
+      },
+      "r8c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.3700000000001,
+        "ppt_max_mm": 84.92,
+        "wet_days": 90,
+        "dew_below_tmin": 170
+      },
+      "r8c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.59,
+        "ppt_max_mm": 85.06,
+        "wet_days": 91,
+        "dew_below_tmin": 162
+      },
+      "r8c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.96,
+        "ppt_max_mm": 85.54,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r9c0": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1045.1999999999998,
+        "ppt_max_mm": 86.96,
+        "wet_days": 94,
+        "dew_below_tmin": 165
+      },
+      "r9c1": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1036.8799999999999,
+        "ppt_max_mm": 84.65,
+        "wet_days": 93,
+        "dew_below_tmin": 166
+      },
+      "r9c10": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 998.73,
+        "ppt_max_mm": 84.18,
+        "wet_days": 94,
+        "dew_below_tmin": 172
+      },
+      "r9c11": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 995.7,
+        "ppt_max_mm": 85.36,
+        "wet_days": 95,
+        "dew_below_tmin": 164
+      },
+      "r9c12": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 996.77,
+        "ppt_max_mm": 86.43,
+        "wet_days": 95,
+        "dew_below_tmin": 165
+      },
+      "r9c13": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 999.6500000000001,
+        "ppt_max_mm": 87.41,
+        "wet_days": 96,
+        "dew_below_tmin": 167
+      },
+      "r9c14": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1001.6300000000001,
+        "ppt_max_mm": 88.23,
+        "wet_days": 96,
+        "dew_below_tmin": 169
+      },
+      "r9c15": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1003.7,
+        "ppt_max_mm": 88.79,
+        "wet_days": 97,
+        "dew_below_tmin": 165
+      },
+      "r9c16": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1008.21,
+        "ppt_max_mm": 89.72,
+        "wet_days": 98,
+        "dew_below_tmin": 169
+      },
+      "r9c17": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1011.48,
+        "ppt_max_mm": 90.75,
+        "wet_days": 99,
+        "dew_below_tmin": 167
+      },
+      "r9c18": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1014.3399999999999,
+        "ppt_max_mm": 91.74,
+        "wet_days": 98,
+        "dew_below_tmin": 165
+      },
+      "r9c19": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1019.34,
+        "ppt_max_mm": 93.4,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r9c2": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1030.98,
+        "ppt_max_mm": 83.26,
+        "wet_days": 94,
+        "dew_below_tmin": 169
+      },
+      "r9c20": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1027.1100000000001,
+        "ppt_max_mm": 95.81,
+        "wet_days": 98,
+        "dew_below_tmin": 167
+      },
+      "r9c21": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1035.1100000000001,
+        "ppt_max_mm": 97.61,
+        "wet_days": 99,
+        "dew_below_tmin": 164
+      },
+      "r9c22": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1036.51,
+        "ppt_max_mm": 96.91,
+        "wet_days": 99,
+        "dew_below_tmin": 166
+      },
+      "r9c23": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1039.56,
+        "ppt_max_mm": 97.52,
+        "wet_days": 97,
+        "dew_below_tmin": 164
+      },
+      "r9c24": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1047.46,
+        "ppt_max_mm": 98.64,
+        "wet_days": 97,
+        "dew_below_tmin": 166
+      },
+      "r9c3": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1025.5300000000002,
+        "ppt_max_mm": 82.47,
+        "wet_days": 92,
+        "dew_below_tmin": 170
+      },
+      "r9c4": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1020.5100000000001,
+        "ppt_max_mm": 81.52,
+        "wet_days": 93,
+        "dew_below_tmin": 168
+      },
+      "r9c5": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1013.8100000000001,
+        "ppt_max_mm": 80.68,
+        "wet_days": 91,
+        "dew_below_tmin": 169
+      },
+      "r9c6": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1009.6700000000001,
+        "ppt_max_mm": 80.21,
+        "wet_days": 92,
+        "dew_below_tmin": 169
+      },
+      "r9c7": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1007.71,
+        "ppt_max_mm": 80.59,
+        "wet_days": 92,
+        "dew_below_tmin": 171
+      },
+      "r9c8": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1006.11,
+        "ppt_max_mm": 81.59,
+        "wet_days": 92,
+        "dew_below_tmin": 169
+      },
+      "r9c9": {
+        "rows": 366,
+        "missing_rows": 0,
+        "ppt_sum_mm": 1002.99,
+        "ppt_max_mm": 82.87,
+        "wet_days": 93,
+        "dew_below_tmin": 169
+      }
+    },
+    "same_cell_comparisons": {}
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "python": "3.12.3",
+  "numpy": "1.26.0",
+  "pandas": "2.2.2",
+  "uid": 1000,
+  "gid": 1000,
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39"
+}

@@ -1,0 +1,98 @@
+{
+  "generated-climate-summary.csv": {
+    "bytes": 9094,
+    "sha256": "f0c8fc8796dc300419c21d1d589727c9e67cec03dc65605947e606d67c6ad1f5"
+  },
+  "diagnostic-free-metrics.csv": {
+    "bytes": 3627,
+    "sha256": "5cf4a23b4cd445ebded4919ca0d978cbb634493b0899dcded0aa0106d115c09c"
+  },
+  "annual-summary.csv": {
+    "bytes": 32008,
+    "sha256": "0ee63d1c970fcaf0481875a4687ac46cd3caaf539d2f38ec3ee8b13801ff9df4"
+  },
+  "climate-quality.csv": {
+    "bytes": 6298,
+    "sha256": "dd8167f28030b8755ba20f9171adeccea4322d5a78bdad142b035603af112964"
+  },
+  "seasonal-et.png": {
+    "bytes": 657165,
+    "sha256": "50c26396e4fe3ae58729db26175fd5526e924a74a45758f3b2cc25bd77c42e29"
+  },
+  "study.py": {
+    "bytes": 20333,
+    "sha256": "dd22187743af30756d1587745fae33569b18216b09c7b0dd0be0ef1ac4760237"
+  },
+  "validation.json": {
+    "bytes": 33413,
+    "sha256": "15aff1647fd069a2641c504e1a8361e9cdcb466c237b191d60deb4018e7231ce"
+  },
+  "paired-effects.csv": {
+    "bytes": 14067,
+    "sha256": "25404754f009a7a08d131c7dd53a77d4212e21ac6e5540195015f9e9c1bf2983"
+  },
+  "environment.json": {
+    "bytes": 160,
+    "sha256": "2b276d3a32d5843e04c539e0dcf949c626cf7f8ea267d4e0d2c88d14681cb94d"
+  },
+  "manifest.json": {
+    "bytes": 68816,
+    "sha256": "ad5428f7ff0e4cb8abc784ee5cd74b118e33ace923c250cdcfabde6bd4d99ea0"
+  },
+  "station-site-mismatch.csv": {
+    "bytes": 1615,
+    "sha256": "eff13a092f6788413924984ef5e3b824cb5f5d6278a65d22532c38012a7917aa"
+  },
+  "wepp-monthly.csv": {
+    "bytes": 1946849,
+    "sha256": "825aed7b24a18b71d4322eed540c305f6e32afd912dfab78890b6baf9ed3ce1c"
+  },
+  "conclusions.json": {
+    "bytes": 368,
+    "sha256": "51cf59bb6f33c41bcfcbf484cdc9c02c19064364a427881d516ec5d8b9155267"
+  },
+  "generated-climates.tar.gz": {
+    "bytes": 6235455,
+    "sha256": "b76e942e696223218f1ad7842d4e8c68693921b180a5a6ada3a059d36c3f2e2f"
+  },
+  "independent-validation.json": {
+    "bytes": 295,
+    "sha256": "efaeb50ae0a21f80f00b02350a7abc78896fc70f294f9345a60a548d77a70a7f"
+  },
+  "results.md": {
+    "bytes": 10592,
+    "sha256": "c5eb86053bae3e6e84ceac560bde07b20ca49af8a3ab9f69f7b5115ccd899ef3"
+  },
+  "generation-quality.json": {
+    "bytes": 4417,
+    "sha256": "7c4541a81a65d7c25272e550eb9620256c44f59a8358301ff7249f8f11e2af18"
+  },
+  "seasonal-et.svg": {
+    "bytes": 181744,
+    "sha256": "6569a1d65305ca6a5dc8369496f7c962855fa393a7ec30e09bf5d2ab9a1e2528"
+  },
+  "humidity-summary.csv": {
+    "bytes": 18931,
+    "sha256": "f67b754095d949753e124d1d70e343dda8f36107711d777cb4b38f8a00eca8c9"
+  },
+  "executions.json": {
+    "bytes": 166757,
+    "sha256": "7c38b28c41941fa63a2c07e7eb3de9b26406675fb15828ecf6dd28a1b97b34e2"
+  },
+  "comparison-metrics.csv": {
+    "bytes": 104975,
+    "sha256": "a310a609c37d25cebc0acd631ddad39fd26ce974530ae8259908b4c07b51127b"
+  },
+  "stations/wa459074.par": {
+    "bytes": 7022,
+    "sha256": "ad5c44ec2b1eae8c73da68b9ccc5fc548115e6ecff541781a4b71b89e518b44a"
+  },
+  "stations/wa458928.par": {
+    "bytes": 7022,
+    "sha256": "c256d99fff9b1f5d6a299fb344845570c2028d36bed40709894cab4c9fc592fb"
+  },
+  "stations/ca041484.par": {
+    "bytes": 7022,
+    "sha256": "805fcf428eef13294cd204320f63eb18a5b95a072bab8620144e838e50976d50"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "reports": 7,
+  "primary_rows": 274750,
+  "limitations": "Sampled access/parity only; no provider revision transition or WEPP execution tested."
+}

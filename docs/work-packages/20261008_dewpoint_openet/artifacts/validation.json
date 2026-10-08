@@ -1,0 +1,146 @@
+[
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "arm": "clipped",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h27",
+    "arm": "raw",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "arm": "clipped",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h113",
+    "arm": "raw",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "arm": "clipped",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "hand-to-mouth-drought-h74",
+    "arm": "raw",
+    "daily_rows": 16437,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "arm": "clipped",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h1153",
+    "arm": "raw",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "arm": "clipped",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h122",
+    "arm": "raw",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "arm": "clipped",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "apostolic-saw-h2196",
+    "arm": "raw",
+    "daily_rows": 9132,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "arm": "clipped",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h72",
+    "arm": "raw",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "arm": "clipped",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h78",
+    "arm": "raw",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "arm": "clipped",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  },
+  {
+    "site": "cryptic-beechnut-h132",
+    "arm": "raw",
+    "daily_rows": 13514,
+    "assessment_days": 2557,
+    "finite": true,
+    "input_isolation": true
+  }
+]

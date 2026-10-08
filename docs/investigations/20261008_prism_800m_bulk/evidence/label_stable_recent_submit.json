@@ -1,0 +1,32 @@
+{
+  "url": "https://prism.oregonstate.edu/explorer/dataexplorer/rpc.php",
+  "request": {
+    "spares": "800m",
+    "interp": "0",
+    "stats": "ppt tmin tmax tdmean soltotal",
+    "units": "si",
+    "range": "daily",
+    "start": "20261001",
+    "end": "20261007",
+    "stability": "stable",
+    "call": "pp/daily_timeseries_mp",
+    "proc": "gridserv",
+    "lons": "-116.5000000003|-123.7000000001",
+    "lats": "46.5000000001|47.8000000001",
+    "names": "palouse|olympic"
+  },
+  "status": 200,
+  "seconds": 0.1367848740046611,
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 20:05:46 GMT",
+    "Server": "Apache",
+    "X-Powered-By": "PHP/8.4.26",
+    "Strict-Transport-Security": "max-age=63072000; includeSubdomains",
+    "Access-Control-Allow-Origin": "*",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Transfer-Encoding": "chunked",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "body": "{\"gricket\": \"VmRehIAzl2J1Wgyd\", \"errors\": false, \"delay\": {\"status\": \"processing\"}}"
+}

@@ -1,0 +1,447 @@
+{
+  "tags": {
+    "PRISM_CODE_VERSION": "16.2-20250715-1813",
+    "PRISM_DATASET_CREATE_DATE": "20261006-0419",
+    "PRISM_DATASET_FILENAME": "prism_ppt_us_30s_20261001.tif",
+    "PRISM_DATASET_RELEASE_HISTORY": "2026-10-02 03:23:00",
+    "PRISM_DATASET_RELEASE_NUMBER": "2",
+    "PRISM_DATASET_REMARKS": "precipitation data were modeled with PRISM at 30-arc-second (~800m) resolution to produce the source grid(s) listed under PRISM_SOURCE_FILENAME, on the date(s) listed under PRISM_SOURCE_CREATE_DATE.",
+    "PRISM_DATASET_TYPE": "an91/r2112",
+    "PRISM_DATASET_VERSION": "D2",
+    "PRISM_SOURCE_CREATE_DATE": "20261006-0403",
+    "PRISM_SOURCE_FILENAME": "cai_ppt_us_us_30s_20261001.bil",
+    "AREA_OR_POINT": "Area"
+  },
+  "crs": "EPSG:4269",
+  "nodata": -9999.0,
+  "transform": [
+    0.008333333333,
+    0.0,
+    -125.02083333333351,
+    0.0,
+    -0.008333333333,
+    49.9374999999995,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "rows": [
+    {
+      "name": "palouse",
+      "row": 412,
+      "col": 1022,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "olympic",
+      "row": 256,
+      "col": 158,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierra",
+      "row": 1468,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr00",
+      "row": 1467,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr01",
+      "row": 1467,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr02",
+      "row": 1467,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr10",
+      "row": 1468,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr12",
+      "row": 1468,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr20",
+      "row": 1469,
+      "col": 661,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr21",
+      "row": 1469,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sierr22",
+      "row": 1469,
+      "col": 663,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "deathvalley",
+      "row": 1617,
+      "col": 978,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "rockies",
+      "row": 1158,
+      "col": 2325,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucson",
+      "row": 2126,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso00",
+      "row": 2125,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso01",
+      "row": 2125,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso02",
+      "row": 2125,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso10",
+      "row": 2126,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso12",
+      "row": 2126,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso20",
+      "row": 2127,
+      "col": 1685,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso21",
+      "row": 2127,
+      "col": 1686,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "tucso22",
+      "row": 2127,
+      "col": 1687,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "oklahoma",
+      "row": 1770,
+      "col": 3309,
+      "grid": 33.399620056152344,
+      "bulk": 33.4,
+      "difference": 0.0003799438476548289
+    },
+    {
+      "name": "oklah00",
+      "row": 1769,
+      "col": 3308,
+      "grid": 32.928062438964844,
+      "bulk": 32.93,
+      "difference": 0.0019375610351559658
+    },
+    {
+      "name": "oklah01",
+      "row": 1769,
+      "col": 3309,
+      "grid": 33.33753967285156,
+      "bulk": 33.34,
+      "difference": 0.0024603271484409106
+    },
+    {
+      "name": "oklah02",
+      "row": 1769,
+      "col": 3310,
+      "grid": 33.88494110107422,
+      "bulk": 33.88,
+      "difference": -0.004941101074216192
+    },
+    {
+      "name": "oklah10",
+      "row": 1770,
+      "col": 3308,
+      "grid": 33.469093322753906,
+      "bulk": 33.47,
+      "difference": 0.0009066772460926131
+    },
+    {
+      "name": "oklah12",
+      "row": 1770,
+      "col": 3310,
+      "grid": 33.4419059753418,
+      "bulk": 33.44,
+      "difference": -0.0019059753417991487
+    },
+    {
+      "name": "oklah20",
+      "row": 1771,
+      "col": 3308,
+      "grid": 32.964927673339844,
+      "bulk": 32.96,
+      "difference": -0.004927673339842897
+    },
+    {
+      "name": "oklah21",
+      "row": 1771,
+      "col": 3309,
+      "grid": 32.71650314331055,
+      "bulk": 32.72,
+      "difference": 0.003496856689451988
+    },
+    {
+      "name": "oklah22",
+      "row": 1771,
+      "col": 3310,
+      "grid": 32.532588958740234,
+      "bulk": 32.53,
+      "difference": -0.002588958740233238
+    },
+    {
+      "name": "houston",
+      "row": 2421,
+      "col": 3558,
+      "grid": 0.43747958540916443,
+      "bulk": 0.44,
+      "difference": 0.0025204145908355735
+    },
+    {
+      "name": "asheville",
+      "row": 1720,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev00",
+      "row": 1719,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev01",
+      "row": 1719,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev02",
+      "row": 1719,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev10",
+      "row": 1720,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev12",
+      "row": 1720,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev20",
+      "row": 1721,
+      "col": 5095,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev21",
+      "row": 1721,
+      "col": 5096,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "ashev22",
+      "row": 1721,
+      "col": 5097,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "miami",
+      "row": 2901,
+      "col": 5379,
+      "grid": 6.3350911140441895,
+      "bulk": 6.34,
+      "difference": 0.004908885955810405
+    },
+    {
+      "name": "maine",
+      "row": 484,
+      "col": 6771,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "duluth",
+      "row": 377,
+      "col": 3950,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pacific",
+      "row": 1192,
+      "col": 14,
+      "grid": -9999.0,
+      "bulk": null,
+      "difference": null
+    },
+    {
+      "name": "superior",
+      "row": 292,
+      "col": 4442,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "coast",
+      "row": 952,
+      "col": 74,
+      "grid": -9999.0,
+      "bulk": null,
+      "difference": null
+    },
+    {
+      "name": "keywest",
+      "row": 3045,
+      "col": 5188,
+      "grid": 16.72478675842285,
+      "bulk": 16.72,
+      "difference": -0.004786758422852699
+    },
+    {
+      "name": "pal_orig",
+      "row": 412,
+      "col": 1022,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "sier_orig",
+      "row": 1468,
+      "col": 662,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pal_sw",
+      "row": 412,
+      "col": 1022,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    },
+    {
+      "name": "pal_ne",
+      "row": 412,
+      "col": 1022,
+      "grid": 0.0,
+      "bulk": 0.0,
+      "difference": 0.0
+    }
+  ],
+  "archive_sha256": "3809135600b540b7f58c76d976a1f92e4db035564a8dd94522967f9260405495"
+}

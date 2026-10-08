@@ -1,0 +1,79 @@
+{
+  "locations": [
+    {
+      "site": "hand-to-mouth-drought-h27",
+      "row": 1905,
+      "col": 763,
+      "lon": -118.6583333336,
+      "lat": 34.058333334
+    },
+    {
+      "site": "hand-to-mouth-drought-h113",
+      "row": 1905,
+      "col": 764,
+      "lon": -118.6500000003,
+      "lat": 34.058333334
+    },
+    {
+      "site": "hand-to-mouth-drought-h74",
+      "row": 1904,
+      "col": 763,
+      "lon": -118.6583333336,
+      "lat": 34.0666666673
+    },
+    {
+      "site": "apostolic-saw-h1153",
+      "row": 472,
+      "col": 841,
+      "lon": -118.0083333336,
+      "lat": 46.0000000002
+    },
+    {
+      "site": "apostolic-saw-h122",
+      "row": 475,
+      "col": 827,
+      "lon": -118.1250000003,
+      "lat": 45.9750000002
+    },
+    {
+      "site": "apostolic-saw-h2196",
+      "row": 465,
+      "col": 850,
+      "lon": -117.9333333336,
+      "lat": 46.0583333335
+    },
+    {
+      "site": "cryptic-beechnut-h72",
+      "row": 311,
+      "col": 506,
+      "lon": -120.8000000002,
+      "lat": 47.3416666668
+    },
+    {
+      "site": "cryptic-beechnut-h78",
+      "row": 310,
+      "col": 506,
+      "lon": -120.8000000002,
+      "lat": 47.3500000001
+    },
+    {
+      "site": "cryptic-beechnut-h132",
+      "row": 309,
+      "col": 508,
+      "lon": -120.7833333335,
+      "lat": 47.3583333334
+    }
+  ],
+  "params": {
+    "call": "pp/monthly_normals_timeseries_mp",
+    "proc": "gridserv",
+    "spares": "800m",
+    "interp": "0",
+    "stats": "ppt tmin tmax tdmean",
+    "units": "si",
+    "range": "monthly_normals",
+    "lons": "-118.6583333336|-118.6500000003|-118.6583333336|-118.0083333336|-118.1250000003|-117.9333333336|-120.8000000002|-120.8000000002|-120.7833333335",
+    "lats": "34.058333334|34.058333334|34.0666666673|46.0000000002|45.9750000002|46.0583333335|47.3416666668|47.3500000001|47.3583333334",
+    "names": "hand-to-mouth-drought-h27|hand-to-mouth-drought-h113|hand-to-mouth-drought-h74|apostolic-saw-h1153|apostolic-saw-h122|apostolic-saw-h2196|cryptic-beechnut-h72|cryptic-beechnut-h78|cryptic-beechnut-h132"
+  }
+}

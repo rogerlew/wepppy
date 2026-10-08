@@ -1,0 +1,74 @@
+{
+  "url": "https://services.nacse.org/prism/data/get/normals/us/800m/ppt/01",
+  "headers": {
+    "Date": "Thu, 08 Oct 2026 21:23:01 GMT",
+    "Server": "Apache",
+    "Content-Disposition": "filename=\"prism_ppt_us_30s_202001_avg_30y.zip\"",
+    "Content-Security-Policy": "default-src 'self'",
+    "Keep-Alive": "timeout=5, max=100",
+    "Connection": "Keep-Alive",
+    "Transfer-Encoding": "chunked",
+    "Content-Type": "application/zip"
+  },
+  "sha256": "374f1a80023c6dcf8681b75c333e42983cec9e6a446c129bb76a42f445c8cb28",
+  "transform": [
+    0.00833333333,
+    0.0,
+    -125.020833333331,
+    0.0,
+    -0.00833333333,
+    49.937500332221,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "crs": "EPSG:4269",
+  "width": 7025,
+  "height": 3105,
+  "tags": {
+    "AREA_OR_POINT": "Area",
+    "PRISM_CODE_VERSION": "16.1-20210412-1020",
+    "PRISM_DATASET_CREATE_DATE": "20220830-1807",
+    "PRISM_DATASET_FILENAME": "dem_ppt_us_us_30s_912001.bil",
+    "PRISM_DATASET_TYPE": "an91/r2207d, normals/9120.a",
+    "PRISM_DATASET_VERSION": "M4 "
+  },
+  "samples": [
+    {
+      "site": "hand-to-mouth-drought-h27",
+      "ppt": 110.42389678955078
+    },
+    {
+      "site": "hand-to-mouth-drought-h113",
+      "ppt": 108.38089752197266
+    },
+    {
+      "site": "hand-to-mouth-drought-h74",
+      "ppt": 118.25389862060547
+    },
+    {
+      "site": "apostolic-saw-h1153",
+      "ppt": 145.7509002685547
+    },
+    {
+      "site": "apostolic-saw-h122",
+      "ppt": 149.9290008544922
+    },
+    {
+      "site": "apostolic-saw-h2196",
+      "ppt": 203.212890625
+    },
+    {
+      "site": "cryptic-beechnut-h72",
+      "ppt": 157.26390075683594
+    },
+    {
+      "site": "cryptic-beechnut-h78",
+      "ppt": 161.62889099121094
+    },
+    {
+      "site": "cryptic-beechnut-h132",
+      "ppt": 168.3118896484375
+    }
+  ]
+}
