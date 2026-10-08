@@ -1,0 +1,9 @@
+case,scenario,metric,increase_years,mean,median
+experimental,thinning_30_75,water_m3,100,3835107.82,3813656.5
+experimental,thinning_30_75,sediment_t,100,231.319,179.54999999999998
+experimental,thinning_65_90,water_m3,100,2631345.01,2622035.5
+experimental,thinning_65_90,sediment_t,100,116.751,97.4
+larger,thinning_30_75,water_m3,100,20507802.56,19905989.0
+larger,thinning_30_75,sediment_t,76,204.59699999999998,92.2
+larger,thinning_65_90,water_m3,100,15258770.12,14746818.0
+larger,thinning_65_90,sediment_t,78,120.296,69.3

@@ -1,5 +1,36 @@
 # Evidence map and evaluation checklist
 
+## Current manuscript evidence (October 8, 2026)
+
+The [primary and comparative analysis record](data/tenderfoot-experimental/analysis.md)
+is the numerical authority for the revised manuscript. It retains the new
+`turbinate-melodrama` snapshot, verifies both cases, and consistently calculates
+outlet differences from annual tables. The original September evidence below
+remains useful for implementation lineage but its evaluation and figure plans
+are historical; the checklist here governs the current draft.
+
+- [x] Retain and check the primary case: 30.84 km², 33 groups, 66 contrasts.
+- [x] Recalculate both cases with annual tables and retain the comparison figure.
+- [x] Record the rounding-method change: primary −3.7%/−8.3%; larger +51.4%/+37.0%.
+- [x] Correct the earlier claim that channel-level contrast summaries are absent.
+- [x] Document basin extent as a hypothesis with grouping/climate confounders.
+- [ ] Verify modeled boundaries against the official forest boundary and each other.
+- [ ] Audit actual consumed treatment parameters and temporal/initialization assumptions.
+- [ ] Capture Figure 1 setup, Figure 2 boundaries/groups, and Figure 3 dashboard;
+      validate identities, values, units, area weighting, and difference signs.
+- [ ] Verify an assembled contrast against an independently prepared full run.
+- [ ] Vary grouping within one fixed application before testing compatible extents.
+- [ ] Explain channel responses using retained reach-level summaries.
+- [ ] Resolve or explicitly handle the zero-difference export defect in the UI path.
+- [ ] Archive exact model inputs and executable/runtime identity; both source commits
+      remain unknown in the saved metadata.
+
+Screenshot placeholders in `paper.md` are intentional and do not establish UI
+validation. No production changes or additional model runs were made for this
+revision. Performance and user-effectiveness measurements are not claimed.
+
+## Historical implementation and evaluation record
+
 > Source inspection: 2026-09-21, WEPPpy HEAD `0ab1ce026` with no runtime code edits
 > for this task. These are implementation observations, not live validation.
 

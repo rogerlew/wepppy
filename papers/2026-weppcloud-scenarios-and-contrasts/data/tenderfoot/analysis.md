@@ -4,6 +4,12 @@ Analysis snapshot: September 23, 2026, 17:41 UTC. Source:
 [animal-misgiving](https://wepp.cloud/weppcloud/runs/animal-misgiving/disturbed9002_wbt/).
 This is an analysis of model responses, not validation against observations.
 
+> October 8 revision: this record preserves the original larger-basin,
+> rounded-summary analysis. The manuscript now uses `turbinate-melodrama` as
+> its primary case and the [annual-table comparison](../tenderfoot-experimental/analysis.md)
+> for both applications. Its larger-basin discrepancy percentages are 51.4% and
+> 37.0%, replacing the 51.0% and 36.5% rounded-summary values below in the paper.
+
 ## Recommended narrative
 
 **From treatment prescriptions to spatially explicit watershed consequences:
@@ -115,9 +121,11 @@ Two examples illustrate why a hillslope-only ranking is insufficient:
 Across groups, the rank correlation between added hillslope delivery and added
 outlet sediment is 0.815 for 30/75 and 0.639 for 65/90. Local erosion is informative
 but does not uniquely determine outlet response. Changes in transport and
-storage are a plausible interpretation; identifying the responsible channel
-reaches requires channel-resolved contrast outputs, which were disabled in this
-run.
+storage are a plausible interpretation. October 8 inspection confirmed that
+channel-level mean and annual loss summaries are retained for all contrasts;
+the previous claim that these outputs were disabled was too broad. Identifying
+the responsible reaches requires analyzing those summaries and, where needed,
+additional event-scale diagnostics.
 
 ### Isolated effects are not additive
 

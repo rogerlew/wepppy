@@ -1,0 +1,51 @@
+{
+  "station": "Lower Tenderfoot Creek (LOTE)",
+  "source_retrieved": "2026-10-08",
+  "sources": {
+    "daily": {
+      "doi": "10.2737/RDS-2017-0030",
+      "sha256": "61bc75572523ec5786f161918cc9ac1882c976bf5ee17c994f593d29b05279a0",
+      "member": "Data/Tenderfoot_avg_daily_streamflow.csv"
+    },
+    "quarter_hour": {
+      "doi": "10.2737/RDS-2010-0003.2",
+      "sha256": "cc4e579cc92762488ebd27b10dabf03f4f1717f5b70f7bd8c9b4639e0780006a",
+      "member": "Data/Tenderfoot_15min_streamflow_data.csv"
+    }
+  },
+  "gauge_location": {
+    "latitude_wgs84": 46.926932,
+    "longitude_wgs84": -110.902815,
+    "source_nad27_utm12n_easting_m": 507463,
+    "source_nad27_utm12n_northing_m": 5196842
+  },
+  "normalization_area_km2": 22.8,
+  "area_reference": "https://doi.org/10.1002/2015WR017972",
+  "area_reference_detail": "Bergstrom et al. (2016), section 2.1 and Figure 1: 22.8 km2 gauged Tenderfoot catchment; adopted literature area, not a new delineation.",
+  "conversion": "mm/day = mean_cfs * 0.3048^3 * 86400 * 1000 / area_m2",
+  "mm_per_day_per_cfs": 0.10730594498021054,
+  "time_basis": "Source calendar dates; metadata specifies Mountain Standard Time; no UTC/DST conversion.",
+  "date_format_correction": "CSV dates are month/day/year despite metadata saying dd/mm/yyyy.",
+  "quality_policy": "Exclude any nonblank LOTE flag, nonfinite or negative flow. Logger days require exactly 96 distinct quarter-hour timestamps and 96 valid unflagged values. No gap filling or outlier clipping.",
+  "source_priority": "Daily strip-chart archive before 2001-07-19; logger daily means from that date onward, without fallback.",
+  "flag_meanings": {
+    "daily_1": "Estimated missing data from nearby-stream regression",
+    "daily_2": "Estimated winter flow during frozen-well conditions",
+    "quarter_hour_1": "Sensor anomalies",
+    "quarter_hour_2": "Frozen-well winter readings"
+  },
+  "archive_caveat": "Unflagged does not certify accuracy. The logger archive includes some short gaps estimated by its authors without separate flags.",
+  "overlap_unflagged_paired_days": 0,
+  "overlap_mean_absolute_difference_cfs": null,
+  "quarter_hour_duplicate_timestamp_rows": 10,
+  "first_accepted_date": "1992-10-01",
+  "last_accepted_date": "2015-09-22",
+  "accepted_days": 4142,
+  "excluded_days": 4251,
+  "accepted_days_by_source": {
+    "10.2737/RDS-2010-0003.2": 2524,
+    "10.2737/RDS-2017-0030": 1618
+  },
+  "output": "lote_observed_daily_1992-2015.csv",
+  "output_sha256": "5a14b9d92b01b9b7301bffa2dfb571c1954324f8b6fefb0ad3f8bc16c017216b"
+}

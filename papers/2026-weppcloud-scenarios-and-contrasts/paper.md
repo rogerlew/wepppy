@@ -1,37 +1,36 @@
 # From hillslope treatment to watershed response: OMNI scenarios and spatial contrasts in WEPPcloud
 
-> Working manuscript, September 23, 2026. Intended audience: land managers,
-> hydrologists, soil scientists, and watershed specialists. Not ready for
-> submission: geographic verification, independent contrast/full-run comparison,
-> a checked Tenderfoot dashboard example, and durable data archiving remain open.
+> Working manuscript, October 8, 2026. Primary case: `turbinate-melodrama`;
+> larger-basin comparison: `animal-misgiving`. Screenshot placeholders are
+> intentional. Boundary verification, consumed-input parameter audit, independent
+> contrast/full-run comparison, and durable model-input archiving remain open.
 
 **Authors and affiliations:** [TODO: confirm author list, order, and affiliations.]
 
 ## Abstract
 
 Forest treatment planning requires comparison of both management prescriptions
-and their placement within a watershed. Separate model projects can make these
-comparisons difficult to maintain, while hillslope erosion estimates alone do
-not describe sediment delivery downstream. OMNI extends WEPPcloud with scenarios
+and their placement within a watershed. OMNI extends WEPPcloud with scenarios
 that share a watershed delineation and spatial contrasts that combine treatment
-and baseline hillslope outputs before rerunning WEPP's channel routing.
-Interactive maps and scenario summaries support inspection and comparison of
-these alternatives. We demonstrate the approach in a 269.9-km² Tenderfoot-area
-watershed using an unburned baseline, two thinning prescriptions, and 36 contrasts
-across 18 spatial groups under a common 100-year synthetic climate sequence.
-Mean annual hillslope soil loss increased from 0.0041 tonne/ha/year to 0.0311
-and 0.0127 tonne/ha/year under prescriptions of 30/75 and 65/90 percent
-canopy/ground cover. Mean outlet sediment increased by 47.9% and 28.2%,
-respectively, with substantial variation among treatment locations. Adding the
-isolated group sediment effects overestimated the corresponding full-scenario
-increments by 51.0% and 36.5%, whereas outlet-water changes were nearly additive.
-The results illustrate why treatment effects at the outlet must be evaluated
-within their watershed context. Contrasts describe the effect of a selected
-treatment while other areas remain at baseline; they are not additive shares
-of a treatment portfolio. The application demonstrates a reproducible analysis
-of saved model outputs, rather than field validation of thinning outcomes.
+and baseline hillslope outputs before rerunning WEPP's channel routing. We
+apply the workflow to a 30.84-km² Tenderfoot experimental-forest application,
+using two thinning prescriptions and 66 contrasts across 33 spatial groups.
+Under a common 100-year synthetic climate realization, mean hillslope soil loss
+increased from 0.00398 tonne/ha/year to 0.03547 and 0.01253 tonne/ha/year for
+30/75 and 65/90 percent canopy/ground-cover prescriptions. Mean outlet sediment
+increased by 143.7% and 72.5%. Summing isolated group effects underestimated the
+full-scenario sediment increments by 3.7% and 8.3%. In a complementary
+269.93-km² Tenderfoot-area application, summed effects instead overestimated
+the increments by 51.4% and 37.0%. Outlet-water changes were nearly additive in
+both applications. Basin extent, treatment grouping, and climate realization
+differed between the applications, preventing attribution of this difference
+to basin size alone. Contrasts describe conditional effects of selected
+treatments; their sum is not necessarily the response to a treatment portfolio.
+The applications demonstrate internally checked model comparisons, rather than
+field validation of thinning outcomes.
 
 ## 1. Introduction
+
 
 Management of forests and other native-vegetation landscapes requires assessing
 how disturbance and treatment alter runoff, erosion, and downstream sediment
@@ -66,7 +65,7 @@ spatial inputs and assessing land-use alternatives, emphasizing consistency
 between data resolution, model representation, and the scale of the decision
 ([Renschler, 2003](https://doi.org/10.1002/hyp.1177)). WEPPcloud makes
 watershed-scale modeling accessible through an online environment
-that automatics the acquisition of environmental data, prepares WEPP inputs, executes simulations,
+that automates environmental-data acquisition, prepares WEPP inputs, executes simulations,
 and presents results ([Lew et al., 2022](https://doi.org/10.1016/j.jhydrol.2022.127603)).
 Its forest applications include undisturbed watershed assessment and pre- and
 post-fire management comparisons
@@ -132,8 +131,8 @@ Interpreting these alternatives also requires spatial and quantitative compariso
 Pi-VAT demonstrated the value of interactive synthesis of multi-scenario watershed
 model outputs ([Deval et al., 2022](https://doi.org/10.1016/j.jhydrol.2022.127529)).
 Here, we examine a workflow connecting OMNI's scenarios and spatial contrasts
-with map-based inspection and quantitative comparison. A Tenderfoot-area
-application addresses three questions: how do alternative thinning prescriptions
+with map-based inspection and quantitative comparison. A Tenderfoot experimental-forest application,
+with a larger Tenderfoot-area basin for comparison, addresses three questions: how do alternative thinning prescriptions
 change water and sediment outputs; how do effects vary among treatment locations;
 and can separate spatial effects be added to represent a combined treatment?
 The purpose is to demonstrate the interpretation these comparisons support,
@@ -141,49 +140,450 @@ while distinguishing model responses from observed treatment outcomes.
 
 ## 2. Comparing management alternatives within one watershed
 
-### 2.1. Treatments translate management choices into model inputs
+### 2.1. Treatments define the modeled condition
 
-WEPPcloud's Treatments module ensures that management prescriptions are sensible to the landuse and soil conditions they are applied to. For example, only forested hillslopes can be thinned or prescribed burned, and only burned hillslopes can be mulched. A treatment is an assignment to a
-modeled hillslope, such as a thinning prescription, mulch application, or
-prescribed fire. The module can be used directly within a project by selecting
-hillslopes or supplying a treatment raster. The treatments user-interface provides the ability for users to upload a raster for specifying spatial treatments within each hillslope determines its assignment; the
-raster does not automatically create smaller treatment units within that
-hillslope. OMNI uses the same treatment machinery to build scenario alternatives.
+The Treatments module translates a management prescription into hillslope
+management and soil inputs within the `(Un)Disturbed` framework. Eligibility
+rules restrict thinning to applicable forest classes and mulching to applicable
+burned classes; prescribed-fire classes include forest, shrub, and grass.
+These checks establish software eligibility, not site-specific silvicultural
+suitability. Assignments can be selected directly or derived from a treatment
+raster. Each assigned hillslope remains a whole modeling unit; raster or polygon
+boundaries do not automatically create fractional hillslope treatments.
 
-Treatments operates within the `(Un)Disturbed` parameterization framework.
-It identifies the existing vegetation or disturbance class, checks whether the
-requested treatment is applicable, and updates the hillslope's management
-assignment. It then uses soil texture and the resulting treatment class to
-select the applicable soil-parameter rules. These rules produce treatment soil
-files from the underlying soils and update the hillslope-to-soil assignments.
-The subsequent input-preparation step writes the management files used by WEPP.
-Treatment effects thus enter the hydrologic and erosion calculations through
-model inputs; they are not percentage adjustments applied to predicted runoff
-or sediment after a simulation.
+Thinning selects a management class with specified canopy and ground cover and
+applies its associated soil rules. Forest and thinning classes can also differ
+in hydraulic and erosion parameters, rooting depth, and leaf area. Thus, a
+30/75 prescription identifies a complete parameterized condition, not a
+canopy-only experiment. Mulch retains the burned base and increases initial
+rill and interrill ground cover using the saturating relationship in Appendix B.
+Prescribed fire selects the appropriate vegetation-specific treatment class.
+WEPP calculates the responses from these inputs; Treatments does not apply
+percentage adjustments to predicted runoff or sediment.
 
-The treatment types represent different changes. Thinning selects a management
-class with specified canopy and ground cover and applies the corresponding
-thinning soil rules to eligible forest hillslopes. The supplied parameter tables
-can also distinguish forest and thinning conditions through erosion and
-hydraulic parameters and vegetation properties such as rooting depth and leaf
-area. A thinning alternative therefore represents a complete parameterized
-condition, not an experiment in changing canopy cover alone. Exact parameter
-values depend on the project's active lookup tables and management files.
+### 2.2. Scenarios and contrasts answer different questions
 
-Mulch follows a different path. It applies to eligible fire-disturbed hillslopes,
-retains the burned class as the basis for soil and vegetation parameters, and
-increases the initial ground cover protecting rill and interrill areas. The
-cover calculation depends on both existing cover and application rate and
-approaches a saturation limit, rather than adding the same number of percentage
-points everywhere. Prescribed fire selects the corresponding forest, shrub, or
-grass prescribed-fire class and its associated parameterization. These rules
-represent specified post-treatment conditions; the module does not simulate
-tree-removal operations or predict the behavior of a prescribed burn.
+OMNI constructs related scenario workspaces from a parent project. Children
+share terrain, watershed, and climate assets, retain common hillslope/channel
+identities, and receive the mutable settings and resources needed to prepare
+alternative conditions. OMNI establishes the reference condition, identifies
+eligible treatment hillslopes, applies Treatments, and executes hillslope and
+watershed simulations. Full scenarios in this study treat all eligible forest.
+Inheritance occurs at construction or rebuilding; subsequent relevant parent
+edits require regenerating affected inputs and outputs.
 
-### 2.2. Representing mulch application as additional ground cover
+A contrast selects treatment-scenario hillslope pass files inside a chosen area
+and control-scenario pass files elsewhere. OMNI reruns the watershed calculation
+using the parent project's channel network and routing configuration. The
+control and alternative must therefore have compatible geometry, climate,
+execution settings, and routing conditions. An ordered scenario pair identifies
+the two sources of hillslope outputs; it is not simply a subtraction of two
+full-scenario outlet values. A burned control and mulched alternative, for
+example, ask a different question from an unburned control and thinned alternative.
+
+The resulting difference is conditional on the rest of the basin remaining at
+control. Treating another area changes inputs to shared downstream channels,
+so the combined response may differ from the sum of isolated effects. Selected
+combinations require their own assembled-and-routed evaluation.
+
+### 2.3. Selecting treatment locations
+
+OMNI supports four selection modes. All substitute whole hillslope outputs;
+scenario eligibility still determines which selected hillslopes actually change.
+
+| Selection mode | Definition and interpretation |
+| --- | --- |
+| Cumulative contribution screening | Ranks positive control outputs and selects hillslopes up to a cumulative fraction or count limit. Each selection creates an independent single-hillslope contrast, not a growing portfolio. Optional slope/severity filters apply before calculating the retained total. |
+| Mapped treatment areas | Uses uploaded GeoJSON polygons and optional labels. At least half a hillslope must overlap a polygon for inclusion; features sharing a label form one selection. Selections may overlap. |
+| Explicit hillslope groups | Uses user-supplied hillslope IDs, one group per line, to evaluate known treatment units or combinations. |
+| Stream-order groups | Applies order-reduction passes to the drainage network for grouping, then assigns original hillslopes by greatest spatial overlap. Requires WhiteboxTools delineation and retains the original routing network. |
+
+Cumulative screening uses one scenario pair and is currently limited to 100
+selected hillslopes. Its water-volume objectives account for area, whereas
+summing hillslope depths does not. Other modes accept multiple pairs per group
+and do not use the cumulative-screening filters. Both applications here use
+stream-order groups, with each group evaluated against both thinning scenarios.
+
+> **Screenshot placeholder — Figure 1: scenario and contrast setup.** Capture
+> `turbinate-melodrama` with the two prescriptions, undisturbed control,
+> stream-order mode, two reduction passes, and 66 contrasts. Show the settings
+> that establish the comparison; exclude unrelated interface panels.
+
+### 2.4. Inspecting and quantifying the comparisons
+
+GL-Dashboard provides spatial inspection of management conditions and model
+outputs, difference maps, distributions, and multi-scenario graphs. Map and
+graph selections must be checked separately. The query engine supports table
+filtering, spatial joins, and aggregation. Area-weighted erosion rates, for
+example, require summing soil-loss mass and dividing by the corresponding area,
+not taking an unweighted mean of hillslope rates.
+
+In this paper positive changes mean **treatment minus baseline**. The documented
+dashboard difference-map convention is Base minus Scenario, so a displayed
+positive value can have the opposite meaning. Captions must identify the
+convention rather than silently reverse it. Numerical results below come from
+retained output tables and analysis scripts. Screenshot placeholders do not
+constitute validation of dashboard values or of query-engine performance.
+
+## 3. Tenderfoot applications and analysis
+
+### 3.1. Study extents and common design
+
+The primary application is the public WEPPcloud project
+[`turbinate-melodrama`](https://wc.openwepp.org/weppcloud/runs/turbinate-melodrama/disturbed9002_wbt/),
+named “tenderfoot exp forest.” Its modeled contributing area is 30.84 km².
+Tenderfoot Creek Experimental Forest provides the management context: its
+research includes forest treatments, water yield, and sediment transport (USDA
+Forest Service, n.d.). The administrative forest covers approximately 36.9 km²;
+the model delineation must be overlaid with that boundary and the monitoring
+catchments before claiming an exact match. The application does not reconstruct
+the experimental forest's actual treatment layout.
+
+The earlier project
+[`animal-misgiving`](https://wepp.cloud/weppcloud/runs/animal-misgiving/disturbed9002_wbt/)
+is retained as a larger Tenderfoot-area comparison. The relationship between
+these delineations, including whether one fully contains the other, remains to
+be verified spatially. They are separate model configurations, not a controlled
+basin-size experiment.
+
+**Table 1.** Modeled extents and comparison designs. “Experimental-forest”
+identifies the primary application, not a verified administrative boundary.
+
+| Property | Experimental-forest application | Larger-basin comparison |
+| --- | ---: | ---: |
+| Contributing area (km²) | 30.84 | 269.93 |
+| Hillslopes / channels | 455 / 239 | 2,149 / 918 |
+| Eligible treated forest (ha) | 3,066.15 | 25,768.18 |
+| Stream-order reduction passes | 2 | 3 |
+| Disjoint groups / contrasts | 33 / 66 | 18 / 36 |
+| Synthetic climate years | 100 | 100 |
+| CLIGEN seed | 92740 | 76729 |
+| Mean precipitation (mm/year) | 801.1 | 559.7 |
+
+Both applications use PRISM stochastic climate mode with CLIGEN station
+`mt241552`, spatially distributed climate inputs, and selected WEPP executable
+`wepp_260803`. Alternatives within each application share the same climate
+realization. Between applications, the seed and climate support differ. These
+years represent synthetic weather variability, not a dated observation period
+or a forecast. Saved settings enable snow and baseflow, disable frost, and set
+channel critical shear to 19 Pa. These settings describe the runs; they do not
+establish their suitability for every site or complete executable provenance.
+
+> **Screenshot placeholder — Figure 2: study extents and treatment groups.**
+> Show both modeled boundaries, outlets, and the official experimental-forest
+> boundary. Include a detailed panel of the primary application's 33 groups,
+> channel network, and eligible forest. Verify geographic overlap, scale, group
+> IDs, and boundary sources before interpreting the two extents as nested.
+
+### 3.2. Prescriptions and treatment support
+
+The two prescriptions specify remaining canopy/ground cover of **30%/75%** and
+**65%/90%**. They are hypothetical parameterized conditions, not percentages of
+trees removed or measured operations. Full scenarios change the eligible
+forest class; other classes retain baseline management. Within a contrast,
+only eligible hillslopes in the selected group change. “Undisturbed” names the
+model baseline and does not establish an absence of historical management.
+
+Groups form a complete, nonoverlapping partition within each application.
+Actual treated areas range from 7.29 to 251.29 ha in the primary application
+and 43.92 to 3,321.74 ha in the larger basin. Group IDs are local analysis
+identifiers and do not denote corresponding locations between applications.
+Differences among groups therefore combine treatment area, hillslope response,
+and position in the drainage network.
+
+> **Parameter-audit placeholder.** Add baseline/30–75/65–90 values from the
+> actual prepared management and soil files: canopy and ground cover, relevant
+> hydraulic/erosion parameters, rooting and leaf-area settings, and any spatial
+> ranges. Document initialization, treatment persistence or repetition, and
+> whether a warm-up period was excluded. Prepared inputs are present on `hpc`,
+> but that audit is not complete; cover labels alone cannot explain the water
+> yield changes or establish a century-long treatment trajectory.
+
+### 3.3. Quantities, precision, and checks
+
+The analysis separates gross hillslope soil loss, sediment leaving hillslopes,
+gross channel soil loss, and sediment discharged at the outlet. Hillslope
+soil-loss density uses summed source-summary mass divided by total modeled
+hillslope area. Outlet-water depth uses total contributing area. Group means
+give equal weight to groups, not equal treated areas.
+
+Outlet and channel means and differences are calculated from the individual
+annual tables, pairing the same simulation years. This avoids repeatedly
+subtracting rounded long-term baseline values when summing many contrasts.
+If B is baseline, C_g is the response to treating group g alone, and S is the
+full-scenario response, the additivity comparison is Σ(C_g − B) versus S − B.
+We report 100[Σ(C_g − B)/(S − B) − 1] as the signed percentage discrepancy.
+Positive values indicate overestimation by the sum; negative values indicate
+underestimation. These are discrepancies between simulations, not model errors
+against observations.
+
+Checks verified snapshot hashes, recorded source-output dependencies, scenario
+and contrast summary agreement, source assignments, group coverage, annual
+means against long-term reports, and reconstruction of mixed hillslope losses.
+All 66 and 36 contrast status artifacts indicate completion, but the numerical
+checks, rather than status alone, support the reported comparisons.
+
+Both saved combined contrast exports incorrectly repeat each contrast's own
+values in their control columns and consequently store zero differences. All
+paper differences are recalculated from individual baseline and contrast
+outputs. This workaround supports the analysis but does not establish a correct
+end-to-end interactive contrast report. The larger run also has a previously
+identified duplicate daily event label; this study uses separate annual tables.
+The [comparison analysis record](data/tenderfoot-experimental/analysis.md)
+documents these checks and the precision change from the earlier draft.
+
+## 4. Results
+
+### 4.1. Full prescriptions change both hillslope and outlet responses
+
+In the primary application, mean hillslope soil loss increased from 0.00398
+tonne/ha/year to 0.03547 under 30/75 and 0.01253 under 65/90 (Table 2).
+Outlet water increased by 79.4% and 54.5%, and outlet sediment by 143.7% and
+72.5%. These are responses to the complete treatment parameterization; they do
+not isolate the effects of canopy or ground cover. Absolute erosion values
+are provided alongside relative changes, without assigning an ecological
+acceptability threshold.
+
+**Table 2.** Primary application's annual means. Hillslope masses come from
+source hillslope summaries; outlet and channel values are means of annual tables.
+
+| Quantity | Baseline | 30/75 cover | 65/90 cover |
+| --- | ---: | ---: | ---: |
+| Hillslope soil loss (tonne/ha/year) | 0.00398 | 0.03547 | 0.01253 |
+| Hillslope soil loss (tonne/year) | 12.26 | 109.26 | 38.59 |
+| Outlet water discharge (mm/year) | 156.58 | 280.94 | 241.91 |
+| Gross channel soil loss (tonne/year) | 149.29 | 283.31 | 238.06 |
+| Outlet sediment delivery (tonne/year) | 160.94 | 392.26 | 277.69 |
+
+Gross channel soil loss exceeds gross hillslope soil loss in all three
+conditions. These totals do not identify the channel-origin fraction of outlet
+sediment because deposition intervenes between sources and the outlet. The
+larger-basin application also increases mean hillslope loss, water discharge,
+and outlet sediment under both prescriptions; its outlet sediment changes are
+47.9% and 28.2%.
+
+> **Screenshot placeholder — Figure 3: checked primary-case dashboard.** Show
+> a treatment difference map and the baseline/30–75/65–90 scenario graph. State
+> each metric, unit, aggregation period, and subtraction direction. Check
+> selected hillslope values and graph aggregates against the retained tables;
+> identify any export workaround. Do not substitute the older basin's image.
+
+### 4.2. Individual groups give conditional, unequal-area responses
+
+Across the primary application's 33 groups, mean outlet-sediment increments
+were 6.75 tonne/year for 30/75 and 3.24 for 65/90. These equal-group means are
+4.20% and 2.02% of baseline outlet delivery. Mean outlet-water increments were
+3.77 and 2.59 mm/year, respectively, using the whole basin as the denominator.
+Mean hillslope soil-loss increments were 0.00095 and 0.00026 tonne/ha/year,
+using the whole hillslope area; these are 24.0% and 6.5% of baseline soil loss.
+These averages depend on the chosen partition and are not per-hectare treatment
+benefits.
+
+Group outlet-sediment responses range from approximately −0.04 to +21.33
+tonne/year under 30/75 and −0.19 to +11.50 under 65/90. The very small negative
+values warrant checking report precision and routing details before assigning
+them physical significance. The range primarily demonstrates variation among
+conditional group responses, with unequal treatment areas explicitly retained
+in the accompanying results.
+
+The larger basin provides a stronger example of different hillslope and outlet
+rankings. Under 65/90, group 6 adds 55.42 tonne/year of hillslope sediment delivery
+but about 6.2 tonne/year at the outlet; group 17 adds 17.45 tonne/year locally
+but about 39.1 tonne/year at the outlet. These group numbers refer only to the
+larger-basin analysis. Mean and annual channel summaries are available for its
+contrasts and can support a reach-by-reach investigation; those diagnostics
+have not yet established the mechanism behind the differing responses.
+
+### 4.3. The sum can underestimate or overestimate the combined effect
+
+In the primary application, adding isolated group effects underestimates the
+full-scenario sediment increment by 3.7% and 8.3%. In the larger basin, the same
+comparison overestimates it by 51.4% and 37.0% (Table 3; Figure 4). The two
+applications therefore demonstrate different directions and magnitudes of
+nonadditivity.
+
+**Table 3.** Mean annual outlet-sediment increments, calculated from annual
+tables. Discrepancies use unrounded values before display rounding.
+
+| Application | Prescription | Sum of isolated changes (tonne/year) | Full-scenario change (tonne/year) | Signed discrepancy (%) |
+| --- | --- | ---: | ---: | ---: |
+| Experimental forest | 30/75 | 222.81 | 231.32 | −3.7 |
+| Experimental forest | 65/90 | 107.07 | 116.75 | −8.3 |
+| Larger basin | 30/75 | 309.84 | 204.60 | +51.4 |
+| Larger basin | 65/90 | 164.84 | 120.30 | +37.0 |
+
+Hillslope soil-loss increments sum to the full-scenario increment within
+numerical precision because the groups partition the same source hillslopes.
+Outlet-water discrepancies are less than 0.001% in all four comparisons.
+The sediment discrepancy appears after the selected hillslope outputs are
+assembled and routed; omitted or overlapping groups do not explain it.
+Independent full-run checks are still needed to verify assembly equivalence.
+
+![Comparison of isolated and combined sediment effects in both Tenderfoot applications](data/tenderfoot-experimental/results/basin_comparison.png)
+
+**Figure 4.** Full-scenario outlet-sediment increments and the sum of isolated
+group increments. Within each application, both calculations represent the same
+eligible treated hillslopes and weather sequence. Between applications, basin
+extent, group design, and climate realization differ. The figure does not isolate
+a basin-size effect.
+
+### 4.4. Annual responses also differ between applications
+
+Both full prescriptions increase water and outlet sediment in all 100 simulated
+years of the primary application. Median annual sediment increments are 179.55
+and 97.40 tonnes, below the means of 231.32 and 116.75 tonnes. In the larger
+basin, water increases in all years, but sediment increases in 76 years under
+30/75 and 78 under 65/90. Its median sediment increments are 92.2 and 69.3 tonnes.
+The long-term mean therefore conceals variation within each climate realization;
+these years are not independent treatment experiments or a parameter-uncertainty
+ensemble.
+
+## 5. Implications for watershed treatment assessment
+
+### 5.1. Match the quantity to the management question
+
+Maintaining soil on a hillslope and limiting sediment reaching a downstream
+resource are different objectives. Hillslope soil loss describes local erosion;
+outlet sediment also reflects delivery, channel erosion, and deposition through
+the intervening network. Full scenarios characterize prescription responses,
+while contrasts evaluate selected treatment locations against an explicit
+baseline. Spatial inspection can then guide closer field assessment and more
+detailed treatment design.
+
+The modeled increases are not recommendations for or against thinning. These
+simulations do not quantify avoided wildfire, future burn severity, recovery
+trajectories, habitat outcomes, or operational costs. Management interpretation
+requires evidence about how actual operations change canopy, ground cover,
+and soil properties, and whether the modeled conditions represent the intended
+period after treatment.
+
+### 5.2. Basin extent is a hypothesis; grouping is part of the experiment
+
+Basin extent and drainage-network configuration are plausible explanations for
+the different sediment interactions. A larger network could alter the balance
+of channel erosion and deposition as treatment-generated inputs combine.
+However, the present comparison does not isolate that mechanism: the modeled
+areas, hillslope populations, group boundaries, order-reduction passes, and
+climate realizations differ.
+
+Grouping itself affects the additivity comparison. Interactions among hillslopes
+inside one group are already represented in its routed contrast. Summing group
+effects omits interactions between groups. Changing the partition can therefore
+change the discrepancy even with the basin, treatment inputs, and weather held
+fixed. Group count alone does not predict the direction or magnitude of that
+change.
+
+A first follow-up will vary grouping resolution within one application while
+reusing its baseline and treatment hillslope outputs and holding channel inputs
+fixed. A subsequent basin-extent comparison should verify spatial overlap,
+align weather and treatment inputs over shared areas, and use comparable group
+support. Channel summaries can then identify reaches where delivery and erosion
+responses diverge. These are proposed diagnostic comparisons, not completed
+results. No general transition from underestimation to overestimation with
+increasing basin size is established here.
+
+### 5.3. What the workflow establishes
+
+An isolated contrast describes treating one group while the rest of the basin
+retains baseline conditions. Neither its ranking nor the sum of several such
+contrasts establishes an optimal portfolio. Candidate combinations require
+their own routed evaluation. The two applications show why a universal correction
+factor or assumption about the direction of summation bias would be unsupported.
+
+The analysis establishes internal consistency of retained outputs, not field
+accuracy or independent equivalence of assembled and fully simulated contrasts.
+The large water-yield changes deserve a consumed-input audit before management
+use. Boundary verification, treatment-parameter documentation, and an independent
+full-run comparison remain necessary. The interactive workflow also needs checked
+screenshots and correction or explicit handling of the stored contrast-difference
+problem. Reusing hillslope outputs avoids repeating that computation, but no
+measured speedup, user-error reduction, or improvement in management decisions
+is claimed.
+
+## 6. Conclusions
+
+OMNI organizes treatment alternatives around a common watershed and evaluates
+selected locations by reusing compatible hillslope results and rerunning channel
+routing. In the primary Tenderfoot experimental-forest application, isolated
+group effects underestimate full-scenario sediment increments by 3.7% and 8.3%;
+in a larger Tenderfoot-area basin they overestimate them by 51.4% and 37.0%.
+Water changes remain nearly additive in both. Treatment effects at the outlet
+are conditional on the modeled watershed and the treatment configuration
+elsewhere. Basin extent and grouping provide testable explanations for the
+difference between applications, but neither has yet been isolated. Evaluating
+combinations explicitly connects spatial treatment choices to their modeled
+downstream consequences while leaving field validation and management judgment
+as essential next steps.
+
+## Code and data availability
+
+WEPPcloud source is available in [WEPPpy](https://github.com/rogerlew/wepppy).
+The [two-application analysis record](data/tenderfoot-experimental/analysis.md)
+and [comparison script](data/tenderfoot-experimental/analyze.py) document and
+reproduce the revised numerical comparison. The
+[earlier analysis](data/tenderfoot/analysis.md) retains the larger-basin snapshot
+and its original summary-based calculations. Tracked manifests and generated
+CSVs accompany both records; raw snapshots remain locally retained and excluded
+from Git. These snapshots reproduce output analysis, not complete model
+execution. Prepared model inputs and the executable still require durable
+archiving. Both applications record an unknown source commit; an executable
+selection name does not establish complete runtime provenance. Public project
+URLs are mutable and do not replace an archive of the reviewed artifacts.
+
+## Author contributions and AI assistance
+
+[TODO: confirm authors, affiliations, and contributions.]
+An AI coding assistant assisted with literature and source review, analysis
+scripts, artifact checks, figures, and manuscript drafting. The authors are
+responsible for reviewing the analysis, interpretation, and final text.
+
+## Appendix A. Complementary postfire scenario example: Lookout Creek
+
+The earlier Lookout Creek demonstration (`traveled-calligrapher`, Oregon)
+illustrates the same scenario workflow for postfire mitigation. Its approximately
+61.34-km² delineation uses a mapped soil burn severity baseline, an undisturbed
+reference, and two mulch alternatives labeled `mulch_30` and `mulch_60`,
+corresponding to catalog application rates of 1 and 2 tons/acre. These labels
+do not specify uniform percentage-point cover increases (Appendix B). Climate
+inputs cover 1986–2025 using GRIDMET data.
+Applying alternative conditions across that weather sequence is not a historical
+reconstruction of fire timing and vegetation recovery.
+
+Preliminary mean annual hillslope soil losses were 1.560 tonne/ha/year for the
+SBS-based parent, 0.006 for the undisturbed reference, and 1.388 and 1.295 for the
+two mulch alternatives. These watershed-wide averages use 6,124.9762 ha of
+hillslope area and imply reductions of approximately 11% and 17% with mulch.
+Treatment masks and exact averaging years require final verification before
+publication. [Scenario data](data/lookout/scenarios/scenarios.out.parquet) and
+[the dashboard difference map](figures/gl-dashboard-difference-map.png) are
+retained; the map's Base − Scenario convention is opposite to the
+Treatment − Baseline convention used for Tenderfoot in this paper.
+
+The Forest Service's initial BAER assessment reported that approximately 85% of
+the entire Lookout Fire perimeter was low severity or unburned/underburned, with
+13% moderate and 2% high soil burn severity. Retained soil structure and
+infiltration supported an expectation of limited erosion overall, with localized
+hazards on steep burned slopes lacking cover (USDA Forest Service, 2023). This
+is qualitative context, not validation of modeled erosion or mulch effectiveness;
+fire-perimeter proportions are not the modeled watershed's proportions.
+Andrews Forest documentation subsequently reported sediment blockage at the
+Mack Creek gauge and unusable discharge records from December 1, 2023 to
+February 14, 2024 (Johnson et al., 2026). Modest watershed averages can coexist
+with consequential local effects.
+
+A separate comparison of the SBS-based parent's daily discharge with USGS
+14161500 for August 1, 2023–December 31, 2025 gave NSE 0.474, KGE 0.450, and
+modeled volume 30.7% below observations. These metrics provide hydrologic context
+only; they do not validate sediment or the treatment comparisons. The
+[assessment](data/lookout/fit-2023-2025/assessment.json) and supporting
+[precipitation analysis](data/lookout/precipitation-comparison/provenance.json)
+remain available.
+
+## Appendix B. Mulch application and initial ground cover
+
 
 Mulch protects exposed soil, but its modeled effect depends on how much cover
-was already present, as mulch is added some covers bare ground and some covers already mulched ground. The Treatments module translates application rate into
+was already present. Added mulch can cover either bare or already protected ground. The Treatments module translates application rate into
 initial ground cover using a bounded, saturating relationship:
 
 \[
@@ -218,509 +618,6 @@ that extension has not been independently validated against field measurements.
 Application method, material, and measured cover should therefore inform the
 choice and interpretation of a mulch scenario. The present analysis does not
 establish the accuracy of this application-rate-to-cover relationship.
-
-### 2.3. OMNI constructs and runs the related scenarios
-
-OMNI supplies the organization around these treatment operations. Each scenario
-has a definition describing its base condition, requested treatment, and any
-applicable selection filters. The construction and execution sequence is:
-
-1. **Establish a scenario workspace.** OMNI creates a separate child project
-   under the parent run. The child refers to shared climate, terrain, and
-   watershed assets, preserving the same hillslope and channel identities.
-   It receives copies of project settings and the soil, land-use, and disturbance
-   resources needed to construct its alternative inputs.
-2. **Prepare the reference condition.** OMNI establishes the unburned, mapped
-   burn-severity, or uniform burn-severity condition required by the scenario.
-   For example, thinning is constructed on an unburned condition, while a mulch
-   scenario uses its specified burned base. Land-use and soil inputs are rebuilt
-   where the scenario requires them.
-3. **Assign and apply the treatment.** For a treatment scenario, OMNI resolves
-   the requested prescription in the treatment catalog and identifies eligible
-   hillslopes, subject to any configured slope or burn-severity filters. It
-   passes the resulting hillslope-to-treatment assignments to Treatments, which
-   applies the management and soil rules described above. Channel elements are
-   not assigned hillslope treatments.
-4. **Prepare and execute WEPP.** The scenario's management and soil files are
-   paired with the shared climate and slope inputs. WEPP runs the hillslopes,
-   saves their water and sediment outputs, and then runs the watershed channel
-   network. Each full scenario therefore has its own simulated hillslope and
-   routed watershed results.
-5. **Assemble comparable summaries.** OMNI retains scenario identity in combined
-   hillslope, channel, and outlet tables. These outputs support numerical
-   comparisons and provide the source hillslope results for later contrasts.
-
-For Tenderfoot, the definitions `thinning_30_75` and `thinning_65_90` select two
-catalog prescriptions. OMNI identifies the eligible forest hillslopes and asks
-Treatments to construct their alternative management and soil assignments.
-Treatments does not independently choose where thinning should occur. In the
-full scenarios, all eligible forest is treated; subsequent contrasts select
-which locations contribute treatment outputs to a particular watershed run.
-
-This division of responsibilities lets users compare alternatives without
-manually rebuilding and synchronizing separate projects: Treatments defines
-how a prescription is represented, OMNI manages the related scenarios and
-spatial selections, and WEPP calculates their responses. Shared inputs and
-copied settings reflect the construction process, not a guarantee that completed
-outputs remain current. Relevant parent edits require rebuilding or rerunning
-the affected alternatives. New hillslope simulations are needed when treatment
-or other hillslope inputs change; compatible saved outputs can be reused when
-only their spatial selection changes in a contrast.
-
-### 2.4. Contrasts evaluate treatment location
-
-A full scenario answers what happens when a prescription is applied across all
-eligible locations. A contrast asks what happens when that prescription is
-applied only to a selected hillslope or group of hillslopes, with the remainder
-of the watershed held at a reference condition. Here, the reference is the
-undisturbed modeling baseline.
-
-WEPP first simulates water movement and erosion on each hillslope. It saves the
-water and sediment leaving those hillslopes in files subsequently read by the
-watershed model. OMNI assembles a watershed using treatment outputs for the
-selected hillslopes and baseline outputs elsewhere, then reruns channel routing.
-The outlet response therefore includes the channel network's response to the
-changed inputs. Hillslope soil loss and outlet sediment delivery are distinct:
-sediment can be deposited before reaching the outlet, and channels can themselves
-supply sediment through erosion.
-
-A contrast is a conditional comparison. Its result describes treating the chosen
-area while the rest of the watershed remains at baseline. If another area is also
-treated, water and sediment entering the shared downstream network change again.
-The combined response must be evaluated rather than assumed to equal the sum of
-the separate effects. OMNI's spatial selections can represent individual
-hillslopes, user-defined treatment areas, or drainage-based groups. The Tenderfoot
-application uses groups, not individual-hillslope contrasts.
-
-### 2.5. Specifying contrast pairs and treatment locations
-
-A contrast definition combines an ordered **scenario pair** with a spatial
-selection. The **control scenario** supplies hillslope outputs outside the
-selected area; the **contrast scenario** supplies outputs inside it. Either
-member can be the parent project's base condition or an available OMNI scenario
-with the required outputs. For example, a burned control paired with a mulched
-alternative asks about mulching selected burned hillslopes. An undisturbed
-control paired with a thinning alternative asks about thinning selected forest
-areas. The control need not be undisturbed, and changing the order of a pair
-changes the question. A pair identifies the two sources used to construct a
-mixed watershed; it does not simply subtract two full-scenario results.
-
-The assembled hillslope outputs are routed through the parent project's channel
-network and routing configuration. Comparison with the control's watershed
-result then estimates the effect of the selected substitution under compatible
-routing conditions. The shared delineation and hillslope identifiers make these
-substitutions possible. Scenario treatment rules still determine which selected
-hillslopes actually change: selecting an area does not make an ineligible land
-cover receive the prescription.
-
-OMNI provides four ways to specify locations:
-
-- **Cumulative contribution screening** ranks hillslopes by a selected output
-  from the control scenario and selects them until a cumulative fraction or
-  hillslope-count limit is reached. Objectives include soil-loss mass, surface
-  or subsurface runoff depth or volume, and total phosphorus mass. Optional
-  filters restrict candidates by slope or burn severity; the cumulative fraction
-  is calculated over the retained candidates. Often a small percentage of hillslopes will acount for a large percentage of the runoff or soil-loss.
-  Each selected hillslope produces an independent contrast; the selected
-  hillslopes are not progressively combined into one treated area. The current
-  limit is 100 hillslopes due to computational limits. For water-contribution screening, volume is the
-  appropriate objective: summing hillslope depths does not account for unequal
-  hillslope areas.
-- **Mapped treatment areas** use uploaded GeoJSON polygons, optionally labeled by a
-  feature attribute. A hillslope is included when at least half its area
-  overlaps a polygon. Features sharing an area label contribute to one
-  selection, and different selections may overlap. Selected hillslopes are
-  substituted as whole modeling units; polygon boundaries do not create
-  fractional hillslope treatments.
-- **Explicit hillslope groups** use user-supplied hillslope identifiers, with
-  one group per line. This supports testing a known treatment unit or a
-  particular combination of locations without drawing polygons.
-- **Stream-order groups** use the drainage network to define treatment units.
-  Successive order-reduction passes remove the smallest remaining headwater
-  channels for grouping purposes. Original hillslopes are assigned to the
-  resulting drainage groups by greatest spatial overlap. This changes the
-  grouping used to select treatments; watershed routing retains the original
-  channel network. This option requires WhiteboxTools delineation.
-
-Cumulative screening uses one control–alternative pair per build. The other
-three modes accept multiple pairs and evaluate each pair for each nonempty
-area or group. Cumulative screening filters do not apply to these three modes. Thus, the Tenderfoot demonstration combines two pairs—undisturbed to
-30/75 thinning and undisturbed to 65/90 thinning—with 18 drainage groups to
-produce 36 contrasts. This design separates the choice of prescription from
-its placement while keeping both explicit in the interpretation.
-
-### 2.6. Maps and summaries support interpretation
-
-GL-Dashboard displays management conditions and model outputs on a common map,
-allowing users to inspect where a prescription changes soil loss, runoff, or
-other quantities. Difference maps support comparison with a reference condition;
-distributions and multi-scenario graphs help distinguish widespread responses
-from a few large changes. Users must check which alternatives appear in each
-map and graph and how the difference is defined. A positive difference can mean
-an increase or a reduction, depending on the selected subtraction convention.
-In this paper, a positive change always means **treatment minus baseline**.
-
-The query engine provides access to model-output tables for filtering, joining
-spatial attributes, and aggregating results. For example, a comparison can sum
-soil-loss mass over selected hillslopes and divide by their combined area. It
-should not average hillslope erosion rates without accounting for unequal areas.
-Hillslope soil loss, sediment leaving hillslopes, and sediment leaving the
-watershed must remain separate throughout the analysis. Here, numerical results
-were calculated independently from saved model-output tables with retained
-Python scripts. They are not values estimated from map colors or a test of the
-query engine's performance.
-
-## 3. Tenderfoot-area demonstration and analysis
-
-### 3.1. Study extent and modeling conditions
-
-The demonstration uses the WEPPcloud project
-[`animal-misgiving`](https://wepp.cloud/weppcloud/runs/animal-misgiving/disturbed9002_wbt/)
-in the Tenderfoot Creek area of Montana. Tenderfoot Creek Experimental Forest
-provides a relevant management context: its research includes forest treatments,
-water yield, sediment transport, and untreated reference catchments (USDA Forest
-Service, n.d.). The modeled basin, however, covers **269.927 km²**, considerably
-more than the approximately 36.9-km² experimental forest. This application is to demonstrate the
-current modeling capability for demonstrative purposes, it is not a reconstruction of the experimental
-forest's treatment layout or a comparison with its monitored catchments. The modeled results are not recommendations or suggestions for treating or not treating the area.
-
-The model contains 2,149 hillslopes and 918 channels. The total area including channels is 26,993 ha.
-The baseline uses the unburned parameterization without an SBS map. “Undisturbed”
-is the model's baseline designation and does not establish that the entire basin
-has never been harvested or otherwise managed.
-
-All alternatives use a 100-year synthetic climate sequence generated in
-WEPPcloud's PRISM stochastic mode, with station `mt241552`. The PRISM stochastic mode uses CLIGEN to generate a 100-year daily climate series, then uses PRISM gridded monthly precip and temperature to spatially downscale for each hillslope.
-Mean annual precipitation over the modeled basin is approximately
-560 mm. The years represent a climate realization, not a dated observation
-period or a forecast of the next century.
-
-### 3.2. Thinning prescriptions and spatial groups
-
-Two scenarios prescribe **30% canopy cover with 75% ground cover** and **65%
-canopy cover with 90% ground cover**, abbreviated 30/75 and 65/90. These are
-remaining cover settings, not percentages of trees removed. Both scenarios
-change the modeled evergreen-forest class, covering 25,768.182 ha, or about
-95.6% of modeled hillslope area. Other land-cover classes retain their baseline
-management. The prescriptions are hypothetical parameterized alternatives;
-neither is presented as a measured operation at Tenderfoot. They use the
-Treatments module's management classes and associated soil rules (Section 2.1).
-The cover labels identify prescriptions rather than enumerate every model
-parameter that differs from the forest baseline. These runs do not isolate
-the individual effects of canopy cover, ground cover, or treatment soil rules.
-
-The basin was divided into 18 drainage-based groups using stream-order selection
-with three order-reduction passes. Each group was evaluated with both thinning
-prescriptions, producing 36 contrasts. The groups do not overlap and together
-contain all 2,149 hillslopes. Within a selected group, only hillslopes eligible
-for thinning change management. Group size varies, so both selected area and
-actually treated area are retained with the results. Group numbers in this paper
-are analysis identifiers; exact hillslope membership accompanies the data.
-
-### 3.3. Response measures and consistency checks
-
-The analysis distinguishes three sediment quantities: gross hillslope soil loss,
-sediment delivered from hillslopes to the channel network, and sediment discharged
-at the watershed outlet. Gross channel soil loss is reported separately. These
-quantities describe different parts of the sediment balance and are not
-interchangeable measures of watershed erosion.
-
-Mean annual hillslope soil loss per hectare was calculated by summing hillslope
-soil-loss mass and dividing by total hillslope area. Outlet sediment density and
-water-discharge depth use total contributing area. Each contrast was compared
-with the same baseline. Average contrast effects give equal weight to each of
-the 18 groups within a prescription; they do not describe equal-area treatments.
-Annual results were paired by simulation year to characterize variation within
-the shared climate realization.
-
-To examine whether effects could be added, the 18 isolated group changes were
-summed and compared with the corresponding full-scenario change. In notation,
-if B is the baseline response, C_g the response after treating group g alone,
-and S the full-scenario response, the comparison is between Σ(C_g − B) and
-S − B. Because the groups form a complete partition, the same eligible
-hillslopes are represented in both evaluations; their treatment configuration
-outside any one group differs.
-
-Checks confirmed complete group coverage, agreement between selected hillslopes
-and saved baseline/treatment file assignments, and agreement of combined outlet
-summaries with the individual run outputs. Reconstructed hillslope soil-loss
-changes agreed with contrast reports within their printed precision. Annual
-means were checked against long-term summaries. Input checksums and recorded
-source-output dependencies were also verified. These tests assess internal
-consistency; they do not replace comparison with observations or independently
-prepared full simulations.
-
-The combined contrast export contained incorrect reference values in stream-order
-mode, making its stored differences zero. All differences reported here were
-therefore calculated directly from the individual baseline and contrast outputs.
-Outlet sediment densities were recalculated from mass and area because printed
-densities were rounded to zero. A duplicate daily date label in the final
-simulation year prevented a daily timing analysis; annual comparisons use the
-separate annual output tables. Details and discrepancy records are retained in
-the [analysis record](data/tenderfoot/analysis.md).
-
-## 4. Results
-
-### 4.1. Full scenarios: large relative changes from a small erosion baseline
-
-Both prescriptions increased modeled hillslope soil loss, water discharge, and
-outlet sediment compared with the baseline (Table 1). Mean annual hillslope soil
-loss increased from 0.00407 tonne/ha/year to 0.03110 under 30/75 and 0.01273 under
-65/90. These are increases by factors of approximately 7.64 and 3.13, but the
-absolute rates remain small. Reporting percentages alone would obscure that
-small starting value.
-
-**Table 1.** Whole-watershed annual means over the 100-year climate realization.
-Hillslope soil-loss density excludes channel area from its denominator; outlet
-water depth includes the entire contributing area.
-
-| Quantity | Baseline | 30/75 cover | 65/90 cover |
-| --- | ---: | ---: | ---: |
-| Hillslope soil loss (tonne/ha/year) | 0.00407 | 0.03110 | 0.01273 |
-| Hillslope soil loss (tonne/year) | 109.75 | 838.47 | 343.24 |
-| Outlet water discharge (mm/year) | 71.08 | 147.06 | 127.61 |
-| Gross channel soil loss (tonne/year) | 1,162.6 | 2,507.4 | 2,125.9 |
-| Outlet sediment delivery (tonne/year) | 426.9 | 631.5 | 547.2 |
-
-Water discharge increased by 106.9% under 30/75 and 79.5% under 65/90. Outlet
-sediment increased by 47.9% and 28.2%, respectively. Gross channel soil loss
-exceeded gross hillslope soil loss under all three conditions. This highlights
-the importance of channel response, although it does not establish what fraction
-of outlet sediment originated from channels: deposition and storage occur
-between sediment sources and the outlet.
-
-![Whole-watershed scenario comparison](data/tenderfoot/results/scenario_comparison.png)
-
-**Figure 1.** Mean annual hillslope soil loss, outlet water discharge, and outlet
-sediment delivery for the baseline and two prescribed cover conditions. All
-values describe simulations, not measured treatment outcomes.
-
-### 4.2. Average group effects and variation among locations
-
-Treating one group at a time produced smaller whole-watershed changes than
-applying the prescription to all eligible forest (Table 2). Across the 18 groups,
-the average hillslope soil-loss increase was 36.9% for 30/75 and 11.8% for 65/90.
-Average outlet-water increases were 5.94% and 4.42%, and average outlet-sediment
-increases were 4.02% and 2.14%.
-
-**Table 2.** Mean treatment-minus-baseline change across 18 equally weighted
-spatial-group contrasts per prescription. Percentages refer to the
-whole-watershed baseline. Density and depth increments use the entire modeled
-hillslope or contributing area, respectively, not the treated group area.
-
-| Change in annual mean | 30/75 cover | 65/90 cover |
-| --- | ---: | ---: |
-| Hillslope soil loss (%) | +36.9 | +11.8 |
-| Hillslope soil loss (tonne/ha/year) | +0.00150 | +0.00048 |
-| Outlet water discharge (%) | +5.94 | +4.42 |
-| Outlet water discharge (mm/year) | +4.22 | +3.14 |
-| Outlet sediment delivery (%) | +4.02 | +2.14 |
-| Outlet sediment delivery (tonne/year) | +17.17 | +9.12 |
-
-The means conceal substantial spatial variation. Isolated-group outlet sediment
-changes ranged from −1.7 to +57.1 tonne/year under 30/75 and from −4.8 to +39.0
-under 65/90. These differences reflect both group size and the hydrologic and
-sediment response of its location; they should not be interpreted as an equal-area
-comparison of treatment efficiency.
-
-Changes in hillslope delivery did not give the same ranking as changes at the
-outlet. Under 65/90, group 6 added 55.42 tonne/year of hillslope sediment delivery
-but only 6.2 tonne/year at the outlet. Group 17 added 17.45 tonne/year of hillslope
-delivery but 39.0 tonne/year at the outlet, accompanied by a larger increase in
-gross channel erosion. Across all groups, rank correlations between added
-hillslope delivery and added outlet sediment were 0.815 for 30/75 and 0.639 for
-65/90. Hillslope response was informative, but insufficient to determine the
-outlet response.
-
-![Spatial contrast responses](data/tenderfoot/results/contrast_location_response.png)
-
-**Figure 2.** Mean annual outlet-sediment changes by spatial group (left) and in
-relation to changes in hillslope sediment delivery (right). Selected group labels
-identify examples discussed in the text. Each point represents treatment of one
-group against the otherwise unchanged baseline. Groups have unequal areas.
-
-### 4.3. Separate sediment effects do not sum to the combined effect
-
-For 30/75, the isolated group sediment increments summed to 309.0 tonne/year,
-whereas treating all eligible forest increased outlet delivery by 204.6
-tonne/year. For 65/90, the corresponding increments were 164.2 and 120.3
-tonne/year. Thus, adding isolated effects overestimated the full-scenario
-increment by 51.0% and 36.5% (Figure 3). These discrepancies are much larger than
-the 0.1-tonne resolution of the outlet summaries.
-
-Hillslope soil-loss increments summed exactly when calculated from the source
-hillslope summaries. Outlet-water increments were also nearly additive, differing
-from their full-scenario increments by less than 0.004%. The sediment discrepancy
-therefore arises after the hillslope responses are assembled and routed, rather
-than from omitted or overlapping treatment groups.
-
-![Additivity of water and sediment responses](data/tenderfoot/results/routing_nonadditivity.png)
-
-**Figure 3.** Full-scenario changes compared with the sum of isolated group
-changes. Water-volume changes are nearly additive, whereas summed sediment
-changes exceed those from the corresponding full scenario. Both comparisons
-refer to the same eligible treatment area and climate realization.
-
-### 4.4. Long-term means do not describe every year
-
-Both full prescriptions increased water discharge in all 100 simulated years.
-Outlet sediment increased in 76 years under 30/75 and 78 under 65/90. Median
-annual sediment increments were 92.2 and 69.3 tonnes, smaller than the respective
-mean increments of 204.6 and 120.3 tonnes. A subset of years therefore contributed
-disproportionately to the long-term mean response.
-
-Small negative mean outlet responses also occurred among the spatial contrasts.
-Group 12 increased local hillslope delivery and water discharge under both
-prescriptions, while mean outlet sediment declined by 1.7 and 2.9 tonne/year.
-Such results are consistent with a changed balance of transport and storage
-within the model; they are not evidence that thinning generally reduces soil
-loss. Channel-resolved contrast outputs would be needed to locate the reaches
-responsible for these changes.
-
-## 5. Implications for watershed treatment assessment
-
-### 5.1. Match the response measure to the management question
-
-A treatment assessment may seek to maintain soil on a slope, protect a stream
-reach, or limit sediment reaching a reservoir. These objectives concern different
-response measures. Hillslope soil loss addresses local detachment, while outlet
-sediment reflects delivery through the intervening network as well as channel
-erosion. A map of hillslope soil loss alone cannot establish the downstream
-consequence of treating a particular area.
-
-The Tenderfoot example shows how scenarios and contrasts can address these
-questions in sequence. Full scenarios characterize the response to each
-prescription. Spatial contrasts identify where applying that prescription changes
-the selected downstream measure. Maps provide geographic context; tabular
-aggregation supplies comparable masses, depths, and area-normalized rates.
-An assessment can then focus on candidate locations that warrant closer field
-inspection and more detailed treatment design.
-
-The modeled increases reported here should not be interpreted as a recommendation
-for or against thinning. The scenarios do not quantify wildfire probability,
-future burn severity, vegetation recovery trajectories, habitat outcomes, or
-operational costs. A broader decision would need those considerations and
-site-specific information about how a proposed operation changes canopy,
-ground cover, and soil conditions. In particular, these simulations do not
-estimate an avoided postfire erosion benefit.
-
-### 5.2. Evaluate combinations as combinations
-
-The contrast results show why a list of individual effects is not a treatment
-portfolio. Treating one area changes water and sediment entering downstream
-channels. Treating additional areas changes those boundary conditions again,
-so the outlet consequence of one intervention need not remain the same. The
-substantial difference between summed and combined sediment responses makes
-this qualification practically relevant in the present simulation.
-
-For planning, isolated contrasts can screen locations and expose spatial
-variation. Selected combinations then require their own assembled-and-routed
-evaluation. Neither a ranking of hillslope erosion nor a ranking of isolated
-outlet effects establishes an optimal treatment layout. The retained watershed
-routing is central to that evaluation, rather than an optional correction to
-hillslope totals.
-
-### 5.3. Demonstrated capabilities and remaining uncertainty
-
-The application demonstrates consistent spatial comparisons and internally
-checked model responses. It does not validate treatment effects against field
-measurements. The synthetic climate years characterize variation within one
-realization, not independent treatment replicates or uncertainty in soil,
-vegetation, and channel parameters. The large changes in water yield particularly
-warrant scrutiny of those inputs before management use. Modeled absolute erosion
-rates are not compared with a site-specific soil-loss tolerance or ecological
-impact threshold here.
-
-The model boundary must also be distinguished from the experimental forest's
-boundary and monitoring catchments. A future observational evaluation would need
-a matching contributing area, measured weather, and documented treatment history.
-An independent full simulation of a selected contrast is still needed to test
-assembly equivalence directly. Agreement among the saved outputs and source
-assignments establishes a narrower form of consistency.
-
-Reuse of hillslope outputs avoids repeating that component of computation for
-each compatible contrast, but no measured speedup is claimed. Similarly, the
-available map and query capabilities establish a way to inspect alternatives,
-not evidence of improved decisions or reduced user task time. Publication should
-include a Tenderfoot dashboard example with selected values checked against the
-saved tables; the numerical figures here are script-generated.
-
-## 6. Conclusions
-
-OMNI organizes management alternatives around a common watershed project and
-uses spatial contrasts to evaluate how selected treatment locations affect
-routed water and sediment. In the Tenderfoot-area demonstration, two thinning
-prescriptions increased mean hillslope soil loss and outlet sediment, while
-absolute hillslope losses remained modest. The magnitude and, in some cases,
-sign of the outlet sediment response depended on treatment location.
-
-Summing isolated group effects overestimated full-scenario sediment increments
-by 51.0% and 36.5%, even though water-volume changes were nearly additive. This
-provides a concrete reason to evaluate treatment combinations through the
-watershed model. For land managers and watershed specialists, the contribution
-is a practical connection between treatment definitions, spatial inspection,
-and downstream response assessment. Field validation and management judgment
-remain necessary to turn a modeled comparison into a treatment decision.
-
-## Code and data availability
-
-WEPPcloud source is available in [WEPPpy](https://github.com/rogerlew/wepppy).
-The [Tenderfoot analysis record](data/tenderfoot/analysis.md) documents the
-snapshot, inputs, numerical checks, and limitations. Retained
-[acquisition](data/tenderfoot/fetch_snapshot.py) and
-[analysis](data/tenderfoot/analyze.py) scripts reproduce the tables and figures;
-CSV results and a file-checksum manifest accompany them. The approximately
-224-MB raw snapshot is retained locally and excluded from Git. A durable archive
-of those exact inputs is needed for publication because the online project can
-change. The recorded source commit is unknown; the retained outputs and model
-executable name do not establish complete runtime provenance.
-
-## Author contributions and AI assistance
-
-[TODO: confirm authors, affiliations, and contributions.]
-An AI coding assistant assisted with literature and source review, analysis
-scripts, artifact checks, figures, and manuscript drafting. The authors are
-responsible for reviewing the analysis, interpretation, and final text.
-
-## Appendix A. Complementary postfire scenario example: Lookout Creek
-
-The earlier Lookout Creek demonstration (`traveled-calligrapher`, Oregon)
-illustrates the same scenario workflow for postfire mitigation. Its approximately
-61.34-km² delineation uses a mapped soil burn severity baseline, an undisturbed
-reference, and two mulch alternatives with nominal 30% and 60% ground-cover
-increase settings. Climate inputs cover 1986–2025 using observed GRIDMET data.
-Applying alternative conditions across that weather sequence is not a historical
-reconstruction of fire timing and vegetation recovery.
-
-Preliminary mean annual hillslope soil losses were 1.560 tonne/ha/year for the
-SBS-based parent, 0.006 for the undisturbed reference, and 1.388 and 1.295 for the
-two mulch alternatives. These watershed-wide averages use 6,124.9762 ha of
-hillslope area and imply reductions of approximately 11% and 17% with mulch.
-Treatment masks and exact averaging years require final verification before
-publication. [Scenario data](data/lookout/scenarios/scenarios.out.parquet) and
-[the dashboard difference map](figures/gl-dashboard-difference-map.png) are
-retained; the map's Base − Scenario convention is opposite to the
-Treatment − Baseline convention used for Tenderfoot in this paper.
-
-The Forest Service's initial BAER assessment reported that approximately 85% of
-the entire Lookout Fire perimeter was low severity or unburned/underburned, with
-13% moderate and 2% high soil burn severity. Retained soil structure and
-infiltration supported an expectation of limited erosion overall, with localized
-hazards on steep burned slopes lacking cover (USDA Forest Service, 2023). This
-is qualitative context, not validation of modeled erosion or mulch effectiveness;
-fire-perimeter proportions are not the modeled watershed's proportions.
-Andrews Forest documentation subsequently reported sediment blockage at the
-Mack Creek gauge and unusable discharge records from December 1, 2023 to
-February 14, 2024 (Johnson et al., 2026). Modest watershed averages can coexist
-with consequential local effects.
-
-A separate comparison of the SBS-based parent's daily discharge with USGS
-14161500 for August 1, 2023–December 31, 2025 gave NSE 0.474, KGE 0.450, and
-modeled volume 30.7% below observations. These metrics provide hydrologic context
-only; they do not validate sediment or the treatment comparisons. The
-[assessment](data/lookout/fit-2023-2025/assessment.json) and supporting
-[precipitation analysis](data/lookout/precipitation-comparison/provenance.json)
-remain available.
 
 ## References
 
@@ -759,10 +656,6 @@ Stream discharge in gaged watersheds at the HJ Andrews Experimental Forest,
 See "Quality Assurance - HF004" for the Mack Creek post-fire sedimentation note.
 https://andrewsforest.oregonstate.edu/data/datacatalog/HF004
 Accessed September 21, 2026.
-
-Larsen, I. J., and MacDonald, L. H. (2007). Predicting postfire sediment yields
-at the hillslope scale: Testing RUSLE and Disturbed WEPP. *Water Resources
-Research*, 43, W11412. https://doi.org/10.1029/2006WR005560
 
 Lew, R., et al. (2022). WEPPcloud: An online watershed-scale hydrologic modeling
 tool. Part I. Model description. *Journal of Hydrology*, 608, 127603.

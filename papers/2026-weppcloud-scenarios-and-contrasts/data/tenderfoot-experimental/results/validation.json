@@ -1,0 +1,16 @@
+{
+  "experimental": {
+    "files_verified": 1037,
+    "dependency_hashes_verified": 132,
+    "groups": 33,
+    "contrasts": 66,
+    "export_control_mismatches": 296
+  },
+  "larger": {
+    "files_verified": 743,
+    "dependency_hashes_verified": 72,
+    "groups": 18,
+    "contrasts": 36,
+    "export_control_mismatches": 172
+  }
+}

@@ -34,7 +34,7 @@ gap below, so installation is not evidence of submission readiness.
 
 | Field | Working value |
 | --- | --- |
-| Article Title | OMNI: Interactive watershed treatment assessment with spatial contrasts and scenario analytics |
+| Article Title | From hillslope treatment to watershed response: OMNI scenarios and spatial contrasts in WEPPcloud |
 | Category | `earth/sustainability` |
 | Submission Type | Case Study |
 | Supporting repository | `https://github.com/rogerlew/wepppy` |
@@ -53,9 +53,9 @@ manuscript without first resolving and verifying that mismatch.
 At submission time, use the current official issue form or a reviewed current
 CLI version. Follow the current parser/form rather than the older website's
 frontmatter example. Inside Article Body, use `##` section headings: the current
-agent guide reserves `###` headings for issue-form fields. The manuscript scaffold
-uses `##` sections and keeps submission metadata here to avoid premature coupling
-to the outdated installed parser.
+agent guide reserves `###` headings for issue-form fields. The working manuscript
+currently uses `###` subsections; adapt those during verified submission-format
+preparation. Keep submission metadata here until that conversion is reviewed.
 
 ## Preparation checklist
 

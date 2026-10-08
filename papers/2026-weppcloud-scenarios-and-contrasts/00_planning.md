@@ -7,7 +7,39 @@
 
 ## Working files and editorial decision
 
-### Accepted narrative and audience (Roger, 2026-09-23)
+### Current narrative and revision scope (Roger, 2026-10-08)
+
+Use `turbinate-melodrama` on openwepp.org as the primary experimental-forest
+application (30.84 km², 33 groups, 66 contrasts), retaining `animal-misgiving`
+as a larger-basin comparison (269.93 km², 18 groups, 36 contrasts). Keep the
+land-manager/hydrologist audience and the sequence: define prescriptions,
+select locations, route their combined effects, and interpret the comparisons.
+Leave explicit screenshot placeholders for setup, study-area/group maps, and
+checked dashboard comparisons. Do not present placeholders as completed UI checks.
+
+The primary case underestimates combined sediment increments when isolated
+effects are summed; the larger case overestimates them. This supports conditional,
+application-dependent nonadditivity rather than a universal overestimation claim.
+Roger's basin-size explanation is a working hypothesis. Grouping resolution,
+weather realization, and spatial support also differ; isolate grouping first
+within one basin before attributing the difference to extent. Verify boundary
+overlap before calling the applications nested or equating either delineation
+with the administrative experimental forest.
+
+Use annual tables for both cases: underestimation of 3.7%/8.3% in the primary
+case and overestimation of 51.4%/37.0% in the larger case. This replaces the
+earlier rounded-summary percentages in the manuscript while retaining the
+original analysis as a documented calculation. Rationale, provenance, checks,
+and the unexecuted diagnostic design are in the
+[comparison record](data/tenderfoot-experimental/analysis.md).
+
+This revision establishes a coherent draft, not completion of all publication
+gates. Parameter audits, verified screenshots, independent full-run equivalence,
+controlled grouping/extent experiments, and durable model-input archiving remain
+open. The accepted Lookout appendix is retained; detailed mulch methods move
+beside it to keep the main methods focused on the thinning comparisons.
+
+### Earlier narrative and audience (Roger, 2026-09-23; superseded above)
 
 Write for land managers, hydrologists, soil scientists, and watershed specialists.
 The main case is the Tenderfoot-area `animal-misgiving` run: two thinning
