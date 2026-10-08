@@ -2396,3 +2396,15 @@ Implementation conformance is pending the SUDI-01 checkpoint and validation.
 PRISM-800M-INTEGRATION adds `observed_prism_800m` (ClimateMode16) to the current live Continental-US climate envelope, with station methods auto/distance/multi_factor, default auto, spatial single/multiple/interpolated, default single. [Historic PRISM climate contract](prism-historic-climate-contract.md) governs its full-year bounds and nearest-cell semantics. Other locale envelopes, Vanilla defaults, historical v2 compatibility graph and stored v2/v3 graphs remain unchanged. Previously stored graphs without this dataset do not gain it silently; use the existing eligible explicit refresh workflow. This bounded amendment does not execute or close unrelated Project Config initiatives.
 
 Append the new structure to reader authority before changing live locale writers. Prior CONUS identity `3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf` becomes `2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3`. Preserve all prior entries exactly. A standalone reader-floor commit must recognize both identities and historical graphs on forest before menu/Builder writers are exposed. Retain exact-candidate direct fixtures, live graph readback, and reader-floor reopening of the new graph without run-byte changes. Rollback after new graph writes retains this reader floor. Implementation conformance and forest evidence pending.
+
+The same additive climate envelope applies to the existing single-user-defined
+landuse/soil upload variant. Its prior CONUS structure
+`8c9fd249f34531e3254ecb0f57e2724f335ef3e5d23cd581ac256cc0168f091f`
+gains the climate entry as
+`545e2197c8a67a88da9c796246a2b0572427c8228bcb0e5d3ccd883f11b320a6`.
+Register this exact variant in an additional standalone reader-floor ancestor
+before a writer can successfully persist it. Preserve its existing module,
+binary, landuse/soil and representation restrictions. Rationale: adding a CONUS
+climate must not break creation of otherwise valid single-input projects. The
+initial ordinary-CONUS reader floor alone is insufficient for rollback after
+this variant is written; the aggregate floor must include both new identities.
