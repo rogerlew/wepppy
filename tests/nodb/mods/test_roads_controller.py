@@ -20,6 +20,26 @@ from wepppy.nodb.mods.roads.roads import Roads
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
 
+@pytest.mark.parametrize("marker", ["", "WEPP_PASS_COMPONENTS 3\r\n"])
+def test_pass_climate_rewrite_preserves_version_and_payload(tmp_path, marker):
+    path = tmp_path / "H1.pass.dat"
+    tail = " 1 2000\r\n1000\r\nparticles\r\nphosphorus\r\nSRC3 2000 1 0\r\n"
+    path.write_bytes((marker + "old.cli\r\n" + tail).encode())
+    assert Roads._read_pass_header_climate_line(path) == "old.cli"
+    Roads._rewrite_pass_header_climate_line(path, "new.cli")
+    assert path.read_bytes() == (marker + "new.cli\r\n" + tail).encode()
+
+
+@pytest.mark.parametrize("version", [1, 2, 4])
+def test_pass_climate_rejects_unknown_component_version(tmp_path, version):
+    path = tmp_path / "H1.pass.dat"
+    path.write_text(f"WEPP_PASS_COMPONENTS {version}\np1.cli\n")
+    with pytest.raises(ValueError, match="Unsupported PASS"):
+        Roads._read_pass_header_climate_line(path)
+    with pytest.raises(ValueError, match="Unsupported PASS"):
+        Roads._rewrite_pass_header_climate_line(path, "new.cli")
+
+
 def _write_roads_geojson(path: Path, *, crs: dict[str, object] | None = None) -> None:
     payload = {
         "type": "FeatureCollection",

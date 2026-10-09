@@ -105,6 +105,13 @@ a separately governed and verified signature over the sidecar.
 
 ## Vendored WEPP Release Log
 
+WEPP 261009 preparation pairs the model with the component-v3 native reader.
+See [the v3 compatibility contract](schemas/pass-components-v3-contract.md).
+Regenerate every contributing PASS file with the same selected build; do not
+mix legacy and v3 files during Roads or AgFields integration. Existing binary
+defaults remain unchanged. Mutation and disturbed-parameterization studies
+must precede full deployment; vendoring alone is not deployment approval.
+
 | Date | Release | Source | Binary SHA-256 | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-10-07 | `wepp_261007`, `wepp_261007_hill` | `wepp-forest` source commit `669ff4106a4158e49dc79e038026e4d63a489923`, recut and merged to default branch `wepp_260430_negmeltfix_comparator` by `7e49614c` | watershed `ad5ef3e31be7e6da2517567fb211fe350cb7ff0ea9320282368182cb6157127b`; hillslope `cba2927f489a324774180164f1b8065118fb3a1fa6b64737710b46b0f96036df` | Combined channel hydrograph volume repair and surface-return peak estimator release. Vendored sidecars: `7596787c0eafd75cec2c1287d3ac1b8c9ae21d3a696ff049947c851078e5a214` and `678242f7ab030f5b08e8be49945235dafbb95c8de8888db654141cbe24d6b60b`. Source-side evidence: focused tests 7/7, full pytest 92/92, source and release host smoke, hillslope watchlist 12/12, artifact policy, JSON/hash checks, `surpeak_` symbol checks, and system ELF interpreter checks. WEPPpy evidence: provenance, host smoke, and runner/output regressions passed. |

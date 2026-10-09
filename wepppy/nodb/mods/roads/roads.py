@@ -3453,24 +3453,35 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _read_pass_header_climate_line(pass_path: Path) -> str:
+        from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
+
         with pass_path.open("r", encoding="utf-8") as handle:
             first_line = handle.readline()
+            if pass_metadata_offset(first_line):
+                first_line = handle.readline()
         if not first_line:
             raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
         return first_line.rstrip("\r\n")
 
     @staticmethod
     def _rewrite_pass_header_climate_line(pass_path: Path, climate_line: str) -> None:
-        lines = pass_path.read_text(encoding="utf-8").splitlines(keepends=True)
+        from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
+
+        with pass_path.open(encoding="utf-8", newline="") as stream:
+            lines = stream.readlines()
         if not lines:
             raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
+        offset = pass_metadata_offset(lines[0])
+        if len(lines) <= offset:
+            raise ValueError(f"{pass_path}: PASS file missing climate-file token")
         newline = "\n"
-        if lines[0].endswith("\r\n"):
+        if lines[offset].endswith("\r\n"):
             newline = "\r\n"
-        elif lines[0].endswith("\n"):
+        elif lines[offset].endswith("\n"):
             newline = "\n"
-        lines[0] = f"{climate_line}{newline}"
-        pass_path.write_text("".join(lines), encoding="utf-8")
+        lines[offset] = f"{climate_line}{newline}"
+        with pass_path.open("w", encoding="utf-8", newline="") as stream:
+            stream.writelines(lines)
 
     @staticmethod
     def _resolve_pass_header_climate_path(pass_path: Path, climate_token: str) -> Optional[Path]:

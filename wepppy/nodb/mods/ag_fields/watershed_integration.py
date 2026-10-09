@@ -805,8 +805,16 @@ class AgFieldsWatershedIntegrator:
 
     @staticmethod
     def _read_pass_header(path: Path) -> tuple[str, float]:
+        from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
+
         with path.open(encoding="utf-8") as stream:
-            lines = [stream.readline() for _ in range(5)]
+            first = stream.readline()
+            try:
+                offset = pass_metadata_offset(first)
+            except ValueError as exc:
+                raise AgFieldsWatershedIntegrationError(str(exc)) from exc
+            lines = ([first] if not offset else [])
+            lines.extend(stream.readline() for _ in range(5 - len(lines)))
         if any(line == "" for line in lines):
             raise AgFieldsWatershedIntegrationError(f"PASS header is incomplete: {path.name}")
         try:

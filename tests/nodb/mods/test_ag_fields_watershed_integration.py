@@ -26,6 +26,21 @@ from wepppy.topo.watershed_abstraction.wepp_top_translator import WeppTopTransla
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
 
+@pytest.mark.parametrize("marker", ["", "WEPP_PASS_COMPONENTS 3\n"])
+def test_pass_metadata_accepts_legacy_and_v3(tmp_path, marker):
+    path = tmp_path / "H1.pass.dat"
+    path.write_text(marker + "p1.cli\n1 2000\n1234.5\nparticles\nphosphorus\n")
+    assert AgFieldsWatershedIntegrator._read_pass_header(path) == ("p1.cli", 1234.5)
+
+
+@pytest.mark.parametrize("payload", ["WEPP_PASS_COMPONENTS 2\np1.cli\n", "WEPP_PASS_COMPONENTS 3\np1.cli\n"])
+def test_pass_metadata_rejects_unknown_or_truncated_extension(tmp_path, payload):
+    path = tmp_path / "H1.pass.dat"
+    path.write_text(payload)
+    with pytest.raises(AgFieldsWatershedIntegrationError):
+        AgFieldsWatershedIntegrator._read_pass_header(path)
+
+
 def _write_raster(path: Path, values: np.ndarray, *, transform: tuple[float, ...] = (0, 10, 0, 20, 0, -10)) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     driver = gdal.GetDriverByName("GTiff")
