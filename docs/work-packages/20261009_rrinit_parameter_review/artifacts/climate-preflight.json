@@ -1,0 +1,49 @@
+{
+  "rows": 2192,
+  "years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "header_years": 100,
+  "nonfinite_rows": 22,
+  "first_bad": [
+    "10",
+    "12",
+    "2025",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0",
+    "0.0",
+    "0",
+    "nan"
+  ],
+  "last_bad": [
+    "31",
+    "12",
+    "2025",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0.0",
+    "0",
+    "0.0",
+    "0",
+    "nan"
+  ],
+  "baseline_returncode": -8,
+  "observer_markers": [
+    "EVP_U035_TDPT y=  2025 d= 344 e=   1 c=   0 s=   0 v1=         NaN v2=  0.0000E+00"
+  ],
+  "raw_evidence": "/wc1/holdouts/rrinit-climate-invalid-observed-20261009",
+  "classification": "invalid climate input; before RR mutation; no model patch"
+}

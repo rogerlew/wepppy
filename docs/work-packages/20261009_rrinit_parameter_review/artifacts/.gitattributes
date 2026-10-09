@@ -1,0 +1,4 @@
+# Preserve generated evidence and its recorded checksums.
+management-inventory.csv -text whitespace=cr-at-eol
+static-equation-illustrations.csv -text whitespace=cr-at-eol
+sensitivity/*.log -text -whitespace

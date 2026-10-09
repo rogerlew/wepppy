@@ -1,5 +1,11 @@
 ## Test Matrix Analysis Results
 
+**Historical results:** these tables predate the 96-case hourly wepp_261009
+matrix. The old climate fixture has only six years despite its header, and
+the original slope-length description is incorrect. Do not treat these tables
+as current-release or verified 100-year sensitivity evidence. See
+[the current study](../../docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md).
+
 Analysis of 80 hillslope simulations across:
 - 4 soil textures (clay loam, loam, sand loam, silt loam)
 - 5 vegetation types (forest, deciduous forest, mixed forest, shrub, tall grass)

@@ -1,0 +1,130 @@
+{
+  "rrinit-canonical-valid-tests.log": {
+    "bytes": 1620,
+    "sha256": "e9ac81b16879e069f666f4cd0562edebf4ca160b7bd590032b262b934cdb849a"
+  },
+  "effective-roughness.png": {
+    "bytes": 232048,
+    "sha256": "e2793d98175555aecbf10fda0e536f8d3eb82aacd210e60bd2a6da3328d919f1"
+  },
+  "annual.parquet": {
+    "bytes": 426707,
+    "sha256": "06bf0fe5024a810eb1ceb2c187951c0ed3e8511057f9d2ad518bb6d31e49b923"
+  },
+  "response-matrix.png": {
+    "bytes": 358348,
+    "sha256": "ee54404a9c9543f72758b2c01dc4d7ef4a9992bba2e595bb7ef8eab74c96c6b6"
+  },
+  "canonical-analysis.md": {
+    "bytes": 31967,
+    "sha256": "63b9f86127cef65928581539f2ecc92deb0acc90752f283c1047d308849bbb35"
+  },
+  "rrinit-final-young-preflight.log": {
+    "bytes": 1191,
+    "sha256": "98ad3508a6cd72c5e43df1503b93b42fb241c41cae39cb70d0435ced78d499d0"
+  },
+  "plan.json": {
+    "bytes": 213805,
+    "sha256": "1d72927950ce0f52dbb2bc15558966dc66fbade1c61e44f3654788784d369db0"
+  },
+  "run_sensitivity.py": {
+    "bytes": 11430,
+    "sha256": "9c30e0c168da1f673160234fa1a31092650581aa2abdcedbbe85e9b96b693263"
+  },
+  "identity.json": {
+    "bytes": 5147,
+    "sha256": "9ee7c19982afbdcde2219f05687d3b6b9f08597877b18b1fe711acf30013db1e"
+  },
+  "rrinit-canonical-final-tests.log": {
+    "bytes": 1620,
+    "sha256": "d6167be8cf3d583c35631bf1a65139c3fb6bca1cff7ac99b98351cce9a825362"
+  },
+  "sentinels.log": {
+    "bytes": 26,
+    "sha256": "e81148a58aa2a3a3a15f1dd4e183640c890b471d36ffcead91adfdc313309150"
+  },
+  "receipts.json": {
+    "bytes": 3043343,
+    "sha256": "20300cb74e7ec30653628ca795caefdfc10e56002f3bc20ca907c4a107f4e89a"
+  },
+  "matrix-at-execution.py": {
+    "bytes": 17149,
+    "sha256": "559bfa1468e9c5d532ada413635a64763ef777f25640d4b94e62db95c876d1a7"
+  },
+  "rankings.csv": {
+    "bytes": 80906,
+    "sha256": "f20cf8298a53eb7106d0f6b5b28ac96d63582d7a93d3b6e93c615beb4e664022"
+  },
+  "rrinit-contract-tests-final.log": {
+    "bytes": 1104,
+    "sha256": "b6805bfdef1c069f929b222be0ea9e7d3c0b4ac4222e47cdd62f3b345a7c5186"
+  },
+  "canonical-numeric-comparison.csv": {
+    "bytes": 10346,
+    "sha256": "63f3af3db245c2a4b076b13e2ba513ac5f1268f94a22d554704df05c9273df85"
+  },
+  "runtime-libraries.json": {
+    "bytes": 530,
+    "sha256": "69ba382bde559b2b3fcc6957dbe412e20124dc74734875e218613cd39d2e6166"
+  },
+  "rrinit-climate-2000-generation.log": {
+    "bytes": 812,
+    "sha256": "5a3a21e49511a2558f1e34937f730b995d1b6ca36a83f9eb1046213088541a88"
+  },
+  "execution-runner.py": {
+    "bytes": 11430,
+    "sha256": "9c30e0c168da1f673160234fa1a31092650581aa2abdcedbbe85e9b96b693263"
+  },
+  "largest-event-changes.csv": {
+    "bytes": 2325,
+    "sha256": "c7986d7e78cf366654b5914ce193a906a9c50ce8ef0a69687929628d5a969c20"
+  },
+  "runtime-checks.json": {
+    "bytes": 413,
+    "sha256": "5cdd9d6d3acee35b4f654b895a588d0bce07b12c884a23e82566b6b6f6ee26fd"
+  },
+  "execution.json": {
+    "bytes": 59,
+    "sha256": "2201212c02bde3314343d462f9643f7d587d46c4de7f280d3c7926886315f1eb"
+  },
+  "execution.log": {
+    "bytes": 1562,
+    "sha256": "26dff2bdc291ce456e6ac3e89c22bfc5ca876a31fdf5d50b449d8d085d26c58b"
+  },
+  "case-results.csv": {
+    "bytes": 241604,
+    "sha256": "941d6220f8f8c382e12c6a41c0e926c6968e9ce0f8b2dccb13e13326058a0169"
+  },
+  "sentinel-results.csv": {
+    "bytes": 4697,
+    "sha256": "48232948a88a70b222ff0bcab481f74e5dac6c6b7aab4a8870c3dd739d26883e"
+  },
+  "analysis-final.log": {
+    "bytes": 14450,
+    "sha256": "894ea873b4dea40155536a1f61f65b268499050332b76ca473da5f5e141f26dc"
+  },
+  "canonical-parity.json": {
+    "bytes": 44672,
+    "sha256": "3989dcceb1eb295842d4b992d053e13aac2c30ded07dbfc22228c0483d6636b6"
+  },
+  "responses.csv": {
+    "bytes": 443688,
+    "sha256": "145c022f313452f99f15834f3f87bcb95bb6af3b858a6b9d0d6f08c93a7beeae"
+  },
+  "rrinit-canonical-tests.log": {
+    "bytes": 6763,
+    "sha256": "8430d418a9452d1d249099d57249f425706b24b0693b8c777b464623796b177a"
+  },
+  "analyze_sensitivity.py": {
+    "bytes": 10492,
+    "sha256": "e6e0b69e1e43cccd8a5dff25540f69e4897e1a1de1dad6039d42443d14e702db"
+  },
+  "sentinels.json": {
+    "bytes": 57,
+    "sha256": "12eeb7923e909cd31fc100a312670d575eaf286f93581f580d586aeda766da9c"
+  },
+  "summary.json": {
+    "bytes": 14450,
+    "sha256": "894ea873b4dea40155536a1f61f65b268499050332b76ca473da5f5e141f26dc"
+  }
+}

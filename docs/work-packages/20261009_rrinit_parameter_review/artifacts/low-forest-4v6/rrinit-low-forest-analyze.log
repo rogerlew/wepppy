@@ -1,0 +1,17 @@
+  texture       vegetation  runoff_mm_pct  pass_sediment_kg_pct  peak_max_m3_s_pct
+clay loam           forest            0.0              0.000000           0.000000
+clay loam deciduous forest            0.0              0.000000           0.000000
+clay loam     mixed forest            0.0              0.000000           0.000000
+     loam           forest            0.0              0.000000           0.000000
+     loam deciduous forest            0.0              0.000000           0.000000
+     loam     mixed forest            0.0              0.000000           0.000000
+sand loam           forest            0.0            -17.490697           0.017611
+sand loam deciduous forest            0.0            -17.490697           0.017611
+sand loam     mixed forest            0.0            -17.490697           0.017611
+silt loam           forest            0.0              0.000000           0.000000
+silt loam deciduous forest            0.0              0.000000           0.000000
+silt loam     mixed forest            0.0              0.000000           0.000000
+clay loam     young forest            0.0              0.000000           0.000000
+     loam     young forest            0.0              0.000000           0.000000
+sand loam     young forest            0.0            -17.490697           0.017611
+silt loam     young forest            0.0              0.000000           0.000000

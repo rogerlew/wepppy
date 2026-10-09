@@ -1,0 +1,145 @@
+policy,texture,vegetation,metric,unburned,low,moderate,high,nondecreasing
+current,clay loam,deciduous forest,runoff_mm,32631.4,41620.0,42493.4,47404.5,True
+current,clay loam,deciduous forest,pass_sediment_kg,2878.230191848106,111737.84657842241,185229.45288974166,709896.0860742226,True
+current,clay loam,deciduous forest,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False
+current,clay loam,forest,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True
+current,clay loam,forest,pass_sediment_kg,7684.232912604419,111737.84657842241,185229.45288974166,709896.0860742226,True
+current,clay loam,forest,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False
+current,clay loam,mixed forest,runoff_mm,31956.8,41620.0,42493.4,47404.5,True
+current,clay loam,mixed forest,pass_sediment_kg,2294.234740548388,111737.84657842241,185229.45288974166,709896.0860742226,True
+current,clay loam,mixed forest,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False
+current,clay loam,shrub,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True
+current,clay loam,shrub,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169769.1887996942,True
+current,clay loam,shrub,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True
+current,clay loam,tall grass,runoff_mm,38274.4,40671.8,40926.2,47219.6,True
+current,clay loam,tall grass,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True
+current,clay loam,tall grass,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False
+current,clay loam,young forest,runoff_mm,37169.3,41620.0,42493.4,47404.5,True
+current,clay loam,young forest,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709896.0860742226,True
+current,clay loam,young forest,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False
+current,loam,deciduous forest,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True
+current,loam,deciduous forest,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476581.35315047455,True
+current,loam,deciduous forest,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True
+current,loam,forest,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True
+current,loam,forest,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476581.35315047455,True
+current,loam,forest,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True
+current,loam,mixed forest,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True
+current,loam,mixed forest,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476581.35315047455,True
+current,loam,mixed forest,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True
+current,loam,shrub,runoff_mm,32049.1,41813.1,43333.4,49282.8,True
+current,loam,shrub,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728622.9643939878,True
+current,loam,shrub,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True
+current,loam,tall grass,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True
+current,loam,tall grass,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True
+current,loam,tall grass,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True
+current,loam,young forest,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True
+current,loam,young forest,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476581.35315047455,True
+current,loam,young forest,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True
+current,sand loam,deciduous forest,runoff_mm,9118.2,11975.9,12128.7,37639.8,True
+current,sand loam,deciduous forest,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True
+current,sand loam,deciduous forest,peak_max_m3_s,0.019412,0.17035,0.17337,0.31351,True
+current,sand loam,forest,runoff_mm,9273.4,11975.9,12128.7,37639.8,True
+current,sand loam,forest,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True
+current,sand loam,forest,peak_max_m3_s,0.020084,0.17035,0.17337,0.31351,True
+current,sand loam,mixed forest,runoff_mm,9051.2,11975.9,12128.7,37639.8,True
+current,sand loam,mixed forest,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True
+current,sand loam,mixed forest,peak_max_m3_s,0.019827,0.17035,0.17337,0.31351,True
+current,sand loam,shrub,runoff_mm,10681.1,13030.3,13354.5,35114.1,True
+current,sand loam,shrub,pass_sediment_kg,61.385271278999994,3373.5195767511004,7338.5902778422005,576467.7031236436,True
+current,sand loam,shrub,peak_max_m3_s,0.069135,0.1737,0.18793,0.3092,True
+current,sand loam,tall grass,runoff_mm,11173.7,11574.6,11550.1,12834.4,False
+current,sand loam,tall grass,pass_sediment_kg,219.73608461249,238.4183851924,457.44991961259996,8286.87865534,True
+current,sand loam,tall grass,peak_max_m3_s,0.13598,0.12957,0.13111,0.14132,False
+current,sand loam,young forest,runoff_mm,10390.1,11975.9,12128.7,37639.8,True
+current,sand loam,young forest,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True
+current,sand loam,young forest,peak_max_m3_s,0.01897,0.17035,0.17337,0.31351,True
+current,silt loam,deciduous forest,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True
+current,silt loam,deciduous forest,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392197.67699454847,True
+current,silt loam,deciduous forest,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True
+current,silt loam,forest,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True
+current,silt loam,forest,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392197.67699454847,True
+current,silt loam,forest,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True
+current,silt loam,mixed forest,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True
+current,silt loam,mixed forest,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392197.67699454847,True
+current,silt loam,mixed forest,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True
+current,silt loam,shrub,runoff_mm,22777.2,28513.4,29483.3,36073.3,True
+current,silt loam,shrub,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502600.5853983492,True
+current,silt loam,shrub,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True
+current,silt loam,tall grass,runoff_mm,23335.1,24734.7,24870.9,28730.9,True
+current,silt loam,tall grass,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True
+current,silt loam,tall grass,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True
+current,silt loam,young forest,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True
+current,silt loam,young forest,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392197.67699454847,True
+current,silt loam,young forest,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True
+low_forest_6cm,clay loam,deciduous forest,runoff_mm,32631.4,41620.0,42493.4,47404.5,True
+low_forest_6cm,clay loam,deciduous forest,pass_sediment_kg,2878.230191848106,111737.84657842241,185229.45288974166,709896.0860742226,True
+low_forest_6cm,clay loam,deciduous forest,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False
+low_forest_6cm,clay loam,forest,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True
+low_forest_6cm,clay loam,forest,pass_sediment_kg,7684.232912604419,111737.84657842241,185229.45288974166,709896.0860742226,True
+low_forest_6cm,clay loam,forest,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False
+low_forest_6cm,clay loam,mixed forest,runoff_mm,31956.8,41620.0,42493.4,47404.5,True
+low_forest_6cm,clay loam,mixed forest,pass_sediment_kg,2294.234740548388,111737.84657842241,185229.45288974166,709896.0860742226,True
+low_forest_6cm,clay loam,mixed forest,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False
+low_forest_6cm,clay loam,shrub,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True
+low_forest_6cm,clay loam,shrub,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169769.1887996942,True
+low_forest_6cm,clay loam,shrub,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True
+low_forest_6cm,clay loam,tall grass,runoff_mm,38274.4,40671.8,40926.2,47219.6,True
+low_forest_6cm,clay loam,tall grass,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True
+low_forest_6cm,clay loam,tall grass,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False
+low_forest_6cm,clay loam,young forest,runoff_mm,37169.3,41620.0,42493.4,47404.5,True
+low_forest_6cm,clay loam,young forest,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709896.0860742226,True
+low_forest_6cm,clay loam,young forest,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False
+low_forest_6cm,loam,deciduous forest,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True
+low_forest_6cm,loam,deciduous forest,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476581.35315047455,True
+low_forest_6cm,loam,deciduous forest,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True
+low_forest_6cm,loam,forest,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True
+low_forest_6cm,loam,forest,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476581.35315047455,True
+low_forest_6cm,loam,forest,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True
+low_forest_6cm,loam,mixed forest,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True
+low_forest_6cm,loam,mixed forest,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476581.35315047455,True
+low_forest_6cm,loam,mixed forest,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True
+low_forest_6cm,loam,shrub,runoff_mm,32049.1,41813.1,43333.4,49282.8,True
+low_forest_6cm,loam,shrub,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728622.9643939878,True
+low_forest_6cm,loam,shrub,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True
+low_forest_6cm,loam,tall grass,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True
+low_forest_6cm,loam,tall grass,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True
+low_forest_6cm,loam,tall grass,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True
+low_forest_6cm,loam,young forest,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True
+low_forest_6cm,loam,young forest,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476581.35315047455,True
+low_forest_6cm,loam,young forest,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True
+low_forest_6cm,sand loam,deciduous forest,runoff_mm,9118.2,11975.9,12128.7,37639.8,True
+low_forest_6cm,sand loam,deciduous forest,pass_sediment_kg,0.0,676.1223014981,2498.301262276,362512.4884916505,True
+low_forest_6cm,sand loam,deciduous forest,peak_max_m3_s,0.019412,0.17038,0.17337,0.31351,True
+low_forest_6cm,sand loam,forest,runoff_mm,9273.4,11975.9,12128.7,37639.8,True
+low_forest_6cm,sand loam,forest,pass_sediment_kg,0.0,676.1223014981,2498.301262276,362512.4884916505,True
+low_forest_6cm,sand loam,forest,peak_max_m3_s,0.020084,0.17038,0.17337,0.31351,True
+low_forest_6cm,sand loam,mixed forest,runoff_mm,9051.2,11975.9,12128.7,37639.8,True
+low_forest_6cm,sand loam,mixed forest,pass_sediment_kg,0.0,676.1223014981,2498.301262276,362512.4884916505,True
+low_forest_6cm,sand loam,mixed forest,peak_max_m3_s,0.019827,0.17038,0.17337,0.31351,True
+low_forest_6cm,sand loam,shrub,runoff_mm,10681.1,13030.3,13354.5,35114.1,True
+low_forest_6cm,sand loam,shrub,pass_sediment_kg,61.385271278999994,3373.5195767511004,7338.5902778422005,576467.7031236436,True
+low_forest_6cm,sand loam,shrub,peak_max_m3_s,0.069135,0.1737,0.18793,0.3092,True
+low_forest_6cm,sand loam,tall grass,runoff_mm,11173.7,11574.6,11550.1,12834.4,False
+low_forest_6cm,sand loam,tall grass,pass_sediment_kg,219.73608461249,238.4183851924,457.44991961259996,8286.87865534,True
+low_forest_6cm,sand loam,tall grass,peak_max_m3_s,0.13598,0.12957,0.13111,0.14132,False
+low_forest_6cm,sand loam,young forest,runoff_mm,10390.1,11975.9,12128.7,37639.8,True
+low_forest_6cm,sand loam,young forest,pass_sediment_kg,0.0,676.1223014981,2498.301262276,362512.4884916505,True
+low_forest_6cm,sand loam,young forest,peak_max_m3_s,0.01897,0.17038,0.17337,0.31351,True
+low_forest_6cm,silt loam,deciduous forest,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True
+low_forest_6cm,silt loam,deciduous forest,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392197.67699454847,True
+low_forest_6cm,silt loam,deciduous forest,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True
+low_forest_6cm,silt loam,forest,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True
+low_forest_6cm,silt loam,forest,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392197.67699454847,True
+low_forest_6cm,silt loam,forest,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True
+low_forest_6cm,silt loam,mixed forest,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True
+low_forest_6cm,silt loam,mixed forest,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392197.67699454847,True
+low_forest_6cm,silt loam,mixed forest,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True
+low_forest_6cm,silt loam,shrub,runoff_mm,22777.2,28513.4,29483.3,36073.3,True
+low_forest_6cm,silt loam,shrub,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502600.5853983492,True
+low_forest_6cm,silt loam,shrub,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True
+low_forest_6cm,silt loam,tall grass,runoff_mm,23335.1,24734.7,24870.9,28730.9,True
+low_forest_6cm,silt loam,tall grass,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True
+low_forest_6cm,silt loam,tall grass,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True
+low_forest_6cm,silt loam,young forest,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True
+low_forest_6cm,silt loam,young forest,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392197.67699454847,True
+low_forest_6cm,silt loam,young forest,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True

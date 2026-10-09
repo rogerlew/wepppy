@@ -1,11 +1,15 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-08
-**Active Packages**: 42
+**Last Updated**: 2026-10-09
+**Active Packages**: 43
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Ready for decision (research): [RRINIT sensitivity](docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md): 896 cases completed; young forest added to the 96-case canonical matrix. Strong soil-state-dependent response; no blanket default revision recommended. Production defaults unchanged.
+
+Adopted: [low forest 4 -> 6 cm](docs/adrs/ADR-0083-low-severity-forest-initial-random-roughness.md). Corrects a parameterization inconsistency after 112 successful simulations; sandy-loam low-over-moderate event sediment inversions fall from 17 to zero. Shared template and four extended-lookup rows updated; 16 prepared management readbacks match the validated candidate. No deployment.
 
 Active: [PRISM downstream alignment](docs/work-packages/20261008_prism_openet_agfields_alignment/package.md) — eligibility and bounded calendar/parent-file checks pass; operator confirmed the expired Climate Engine token; renewal and production acquisition recheck are deferred.
 

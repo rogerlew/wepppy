@@ -83,6 +83,17 @@ selected by the application/runtime.
 
 ## Steps
 
+As of 2026-10-09, the shared low-severity forest management template uses
+6 cm initial random roughness (`ini.data.rrinit = 0.06` m), replacing 4 cm.
+The packaged extended lookup has the same value for all four soil textures.
+This includes young, deciduous and mixed forest when mapped to that template.
+The canonical assessment found negligible runoff impact but reduced sandy-loam
+sediment delivery, including suppression of smaller sediment events. See
+[ADR-0083](../../../../docs/adrs/ADR-0083-low-severity-forest-initial-random-roughness.md).
+Existing project-local lookups and prepared management files are not migrated
+automatically; regenerate intended inputs and inspect final `p*.man` values.
+Explicit custom roughness overrides remain authoritative.
+
 1. Start the project in a WEPPcloud `(Un)Disturbed` interface.
    Expect the interface to use the disturbed parameterization during landuse and soil building, even if the scenario is unburned.
 

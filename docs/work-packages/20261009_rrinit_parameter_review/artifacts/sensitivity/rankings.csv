@@ -1,0 +1,721 @@
+profile,texture,vegetation,level,metric,unburned,low,moderate,high,nondecreasing,low_ge_unburned,moderate_ge_low,high_ge_moderate
+steep,clay loam,forest,current,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,forest,current,pass_sediment_kg,7684.232912604419,111737.84657842241,185229.45288974166,709896.0860742226,True,True,True,True
+steep,clay loam,forest,current,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,forest,0.006,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,forest,0.006,pass_sediment_kg,7684.464007914418,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,forest,0.006,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,forest,0.01,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,forest,0.01,pass_sediment_kg,7684.464007914418,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,forest,0.01,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,forest,0.02,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,forest,0.02,pass_sediment_kg,7684.464007914418,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,forest,0.02,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,forest,0.04,runoff_mm,32589.300000000003,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,forest,0.04,pass_sediment_kg,7684.464007914418,111737.84657842241,185229.45288974166,709899.8842787226,True,True,True,True
+steep,clay loam,forest,0.04,peak_max_m3_s,0.13172,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,deciduous forest,current,runoff_mm,32631.4,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,deciduous forest,current,pass_sediment_kg,2878.230191848106,111737.84657842241,185229.45288974166,709896.0860742226,True,True,True,True
+steep,clay loam,deciduous forest,current,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,deciduous forest,0.006,runoff_mm,32631.4,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,deciduous forest,0.006,pass_sediment_kg,2878.4976660771063,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,deciduous forest,0.006,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,deciduous forest,0.01,runoff_mm,32631.4,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,deciduous forest,0.01,pass_sediment_kg,2878.4976660771063,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,deciduous forest,0.01,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,deciduous forest,0.02,runoff_mm,32631.4,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,deciduous forest,0.02,pass_sediment_kg,2878.4976660771063,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,deciduous forest,0.02,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,deciduous forest,0.04,runoff_mm,32631.4,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,deciduous forest,0.04,pass_sediment_kg,2878.4976660771063,111737.84657842241,185229.45288974166,709899.8842787226,True,True,True,True
+steep,clay loam,deciduous forest,0.04,peak_max_m3_s,0.12193,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,mixed forest,current,runoff_mm,31956.8,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,mixed forest,current,pass_sediment_kg,2294.234740548388,111737.84657842241,185229.45288974166,709896.0860742226,True,True,True,True
+steep,clay loam,mixed forest,current,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,mixed forest,0.006,runoff_mm,31956.8,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,mixed forest,0.006,pass_sediment_kg,2294.530772280388,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,mixed forest,0.006,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,mixed forest,0.01,runoff_mm,31956.8,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,mixed forest,0.01,pass_sediment_kg,2294.530772280388,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,mixed forest,0.01,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,mixed forest,0.02,runoff_mm,31956.8,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,mixed forest,0.02,pass_sediment_kg,2294.530772280388,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,mixed forest,0.02,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,mixed forest,0.04,runoff_mm,31956.8,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,mixed forest,0.04,pass_sediment_kg,2294.530772280388,111737.84657842241,185229.45288974166,709899.8842787226,True,True,True,True
+steep,clay loam,mixed forest,0.04,peak_max_m3_s,0.12262,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,shrub,current,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True,True,True,True
+steep,clay loam,shrub,current,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169769.1887996942,True,True,True,True
+steep,clay loam,shrub,current,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True,True,True,True
+steep,clay loam,shrub,0.006,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True,True,True,True
+steep,clay loam,shrub,0.006,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169842.2693039943,True,True,True,True
+steep,clay loam,shrub,0.006,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True,True,True,True
+steep,clay loam,shrub,0.01,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True,True,True,True
+steep,clay loam,shrub,0.01,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169842.2693039943,True,True,True,True
+steep,clay loam,shrub,0.01,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True,True,True,True
+steep,clay loam,shrub,0.02,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True,True,True,True
+steep,clay loam,shrub,0.02,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169842.2693039943,True,True,True,True
+steep,clay loam,shrub,0.02,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True,True,True,True
+steep,clay loam,shrub,0.04,runoff_mm,37581.8,46570.100000000006,48125.7,52103.0,True,True,True,True
+steep,clay loam,shrub,0.04,pass_sediment_kg,78909.48139308736,204164.80293791814,320619.85359847377,1169831.112420994,True,True,True,True
+steep,clay loam,shrub,0.04,peak_max_m3_s,0.11495,0.15408,0.20098,0.26035,True,True,True,True
+steep,clay loam,tall grass,current,runoff_mm,38274.4,40671.8,40926.2,47219.6,True,True,True,True
+steep,clay loam,tall grass,current,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True,True,True,True
+steep,clay loam,tall grass,current,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False,False,False,True
+steep,clay loam,tall grass,0.006,runoff_mm,38274.4,40671.8,40926.2,47219.6,True,True,True,True
+steep,clay loam,tall grass,0.006,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True,True,True,True
+steep,clay loam,tall grass,0.006,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False,False,False,True
+steep,clay loam,tall grass,0.01,runoff_mm,38274.4,40671.8,40926.2,47219.6,True,True,True,True
+steep,clay loam,tall grass,0.01,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True,True,True,True
+steep,clay loam,tall grass,0.01,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False,False,False,True
+steep,clay loam,tall grass,0.02,runoff_mm,38274.4,40671.8,40926.2,47219.6,True,True,True,True
+steep,clay loam,tall grass,0.02,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True,True,True,True
+steep,clay loam,tall grass,0.02,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False,False,False,True
+steep,clay loam,tall grass,0.04,runoff_mm,38274.4,40671.8,40926.2,47219.6,True,True,True,True
+steep,clay loam,tall grass,0.04,pass_sediment_kg,32262.202978466197,42483.2653362185,70324.82053985374,809999.6898034327,True,True,True,True
+steep,clay loam,tall grass,0.04,peak_max_m3_s,0.11739,0.10006,0.092987,0.19783,False,False,False,True
+steep,clay loam,young forest,current,runoff_mm,37169.3,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,young forest,current,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709896.0860742226,True,True,True,True
+steep,clay loam,young forest,current,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,young forest,0.006,runoff_mm,37169.3,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,young forest,0.006,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,young forest,0.006,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,young forest,0.01,runoff_mm,37169.3,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,young forest,0.01,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,young forest,0.01,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,young forest,0.02,runoff_mm,37169.3,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,young forest,0.02,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709901.0779313225,True,True,True,True
+steep,clay loam,young forest,0.02,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False,False,True,True
+steep,clay loam,young forest,0.04,runoff_mm,37169.3,41620.0,42493.4,47404.5,True,True,True,True
+steep,clay loam,young forest,0.04,pass_sediment_kg,21720.091754051395,111737.84657842241,185229.45288974166,709899.8842787226,True,True,True,True
+steep,clay loam,young forest,0.04,peak_max_m3_s,0.12122,0.11104,0.11393,0.267,False,False,True,True
+steep,loam,forest,current,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,forest,current,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476581.35315047455,True,True,True,True
+steep,loam,forest,current,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,forest,0.006,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,forest,0.006,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,forest,0.006,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,forest,0.01,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,forest,0.01,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,forest,0.01,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,forest,0.02,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,forest,0.02,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476611.6710998311,True,True,True,True
+steep,loam,forest,0.02,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,forest,0.04,runoff_mm,26111.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,forest,0.04,pass_sediment_kg,1483.6400959443,21630.307212259002,43237.5016598009,476603.36369344115,True,True,True,True
+steep,loam,forest,0.04,peak_max_m3_s,0.08876,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,deciduous forest,current,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,deciduous forest,current,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476581.35315047455,True,True,True,True
+steep,loam,deciduous forest,current,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,deciduous forest,0.006,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,deciduous forest,0.006,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,deciduous forest,0.006,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,deciduous forest,0.01,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,deciduous forest,0.01,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,deciduous forest,0.01,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,deciduous forest,0.02,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,deciduous forest,0.02,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476611.6710998311,True,True,True,True
+steep,loam,deciduous forest,0.02,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,deciduous forest,0.04,runoff_mm,26123.6,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,deciduous forest,0.04,pass_sediment_kg,1251.250529337,21630.307212259002,43237.5016598009,476603.36369344115,True,True,True,True
+steep,loam,deciduous forest,0.04,peak_max_m3_s,0.083576,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,mixed forest,current,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,mixed forest,current,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476581.35315047455,True,True,True,True
+steep,loam,mixed forest,current,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,mixed forest,0.006,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,mixed forest,0.006,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,mixed forest,0.006,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,mixed forest,0.01,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,mixed forest,0.01,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,mixed forest,0.01,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,mixed forest,0.02,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,mixed forest,0.02,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476611.6710998311,True,True,True,True
+steep,loam,mixed forest,0.02,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,mixed forest,0.04,runoff_mm,25535.0,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,mixed forest,0.04,pass_sediment_kg,1281.280371793,21630.307212259002,43237.5016598009,476603.36369344115,True,True,True,True
+steep,loam,mixed forest,0.04,peak_max_m3_s,0.084581,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,shrub,current,runoff_mm,32049.1,41813.1,43333.4,49282.8,True,True,True,True
+steep,loam,shrub,current,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728622.9643939878,True,True,True,True
+steep,loam,shrub,current,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True,True,True,True
+steep,loam,shrub,0.006,runoff_mm,32049.1,41813.1,43333.4,49282.8,True,True,True,True
+steep,loam,shrub,0.006,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728692.0447125877,True,True,True,True
+steep,loam,shrub,0.006,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True,True,True,True
+steep,loam,shrub,0.01,runoff_mm,32049.1,41813.1,43333.4,49282.8,True,True,True,True
+steep,loam,shrub,0.01,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728692.0447125877,True,True,True,True
+steep,loam,shrub,0.01,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True,True,True,True
+steep,loam,shrub,0.02,runoff_mm,32049.1,41813.1,43333.4,49282.8,True,True,True,True
+steep,loam,shrub,0.02,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728691.4131905078,True,True,True,True
+steep,loam,shrub,0.02,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True,True,True,True
+steep,loam,shrub,0.04,runoff_mm,32049.1,41813.1,43333.4,49282.8,True,True,True,True
+steep,loam,shrub,0.04,pass_sediment_kg,15012.23793756348,52291.99062392154,103629.42266067385,728678.7241030377,True,True,True,True
+steep,loam,shrub,0.04,peak_max_m3_s,0.084811,0.14498,0.18361,0.29654,True,True,True,True
+steep,loam,tall grass,current,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True,True,True,True
+steep,loam,tall grass,current,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True,True,True,True
+steep,loam,tall grass,current,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True,True,True,True
+steep,loam,tall grass,0.006,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True,True,True,True
+steep,loam,tall grass,0.006,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True,True,True,True
+steep,loam,tall grass,0.006,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True,True,True,True
+steep,loam,tall grass,0.01,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True,True,True,True
+steep,loam,tall grass,0.01,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True,True,True,True
+steep,loam,tall grass,0.01,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True,True,True,True
+steep,loam,tall grass,0.02,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True,True,True,True
+steep,loam,tall grass,0.02,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True,True,True,True
+steep,loam,tall grass,0.02,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True,True,True,True
+steep,loam,tall grass,0.04,runoff_mm,32821.0,35299.100000000006,35553.5,41686.5,True,True,True,True
+steep,loam,tall grass,0.04,pass_sediment_kg,9399.71150213,11487.209732868001,20628.392693629998,207274.97979135357,True,True,True,True
+steep,loam,tall grass,0.04,peak_max_m3_s,0.091322,0.091335,0.09394,0.1373,True,True,True,True
+steep,loam,young forest,current,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,young forest,current,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476581.35315047455,True,True,True,True
+steep,loam,young forest,current,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,young forest,0.006,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,young forest,0.006,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,young forest,0.006,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,young forest,0.01,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,young forest,0.01,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476611.93273169117,True,True,True,True
+steep,loam,young forest,0.01,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,young forest,0.02,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,young forest,0.02,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476611.6710998311,True,True,True,True
+steep,loam,young forest,0.02,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True,True,True,True
+steep,loam,young forest,0.04,runoff_mm,31631.5,36858.99999999999,37759.8,45795.7,True,True,True,True
+steep,loam,young forest,0.04,pass_sediment_kg,2650.0571551556004,21630.307212259002,43237.5016598009,476603.36369344115,True,True,True,True
+steep,loam,young forest,0.04,peak_max_m3_s,0.072375,0.13427,0.13598,0.2932,True,True,True,True
+steep,sand loam,forest,current,runoff_mm,9273.4,11975.9,12128.7,37639.8,True,True,True,True
+steep,sand loam,forest,current,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True,True,True,True
+steep,sand loam,forest,current,peak_max_m3_s,0.020084,0.17035,0.17337,0.31351,True,True,True,True
+steep,sand loam,forest,0.006,runoff_mm,9273.4,11976.7,12130.7,37669.9,True,True,True,True
+steep,sand loam,forest,0.006,pass_sediment_kg,51.8364000385,3364.9170035453,8090.55996441268,642223.0988369929,True,True,True,True
+steep,sand loam,forest,0.006,peak_max_m3_s,0.021608,0.1676,0.17724,0.3164,True,True,True,True
+steep,sand loam,forest,0.01,runoff_mm,9273.4,11976.6,12130.6,37668.2,True,True,True,True
+steep,sand loam,forest,0.01,pass_sediment_kg,43.390444821,2877.1664096665004,7244.431105600021,604808.0425918188,True,True,True,True
+steep,sand loam,forest,0.01,peak_max_m3_s,0.02147,0.16784,0.17762,0.31614,True,True,True,True
+steep,sand loam,forest,0.02,runoff_mm,9273.4,11976.0,12128.9,37647.2,True,True,True,True
+steep,sand loam,forest,0.02,pass_sediment_kg,21.21821941,1776.0398176884,5284.6255879099,515523.45667991106,True,True,True,True
+steep,sand loam,forest,0.02,peak_max_m3_s,0.020434,0.16971,0.17245,0.31418,True,True,True,True
+steep,sand loam,forest,0.04,runoff_mm,9273.4,11975.9,12128.7,37640.2,True,True,True,True
+steep,sand loam,forest,0.04,pass_sediment_kg,6.283749911923328,819.4497763079257,2848.747697048584,381439.35273099074,True,True,True,True
+steep,sand loam,forest,0.04,peak_max_m3_s,0.020098,0.17035,0.17333,0.31354,True,True,True,True
+steep,sand loam,deciduous forest,current,runoff_mm,9118.2,11975.9,12128.7,37639.8,True,True,True,True
+steep,sand loam,deciduous forest,current,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True,True,True,True
+steep,sand loam,deciduous forest,current,peak_max_m3_s,0.019412,0.17035,0.17337,0.31351,True,True,True,True
+steep,sand loam,deciduous forest,0.006,runoff_mm,9118.2,11976.7,12130.7,37669.9,True,True,True,True
+steep,sand loam,deciduous forest,0.006,pass_sediment_kg,13.2417090015,3364.9170035453,8090.55996441268,642223.0988369929,True,True,True,True
+steep,sand loam,deciduous forest,0.006,peak_max_m3_s,0.019412,0.1676,0.17724,0.3164,True,True,True,True
+steep,sand loam,deciduous forest,0.01,runoff_mm,9118.2,11976.6,12130.6,37668.2,True,True,True,True
+steep,sand loam,deciduous forest,0.01,pass_sediment_kg,11.084482461500002,2877.1664096665004,7244.431105600021,604808.0425918188,True,True,True,True
+steep,sand loam,deciduous forest,0.01,peak_max_m3_s,0.019412,0.16784,0.17762,0.31614,True,True,True,True
+steep,sand loam,deciduous forest,0.02,runoff_mm,9118.2,11976.0,12128.9,37647.2,True,True,True,True
+steep,sand loam,deciduous forest,0.02,pass_sediment_kg,5.4215942841,1776.0398176884,5284.6255879099,515523.45667991106,True,True,True,True
+steep,sand loam,deciduous forest,0.02,peak_max_m3_s,0.019412,0.16971,0.17245,0.31418,True,True,True,True
+steep,sand loam,deciduous forest,0.04,runoff_mm,9118.2,11975.9,12128.7,37640.2,True,True,True,True
+steep,sand loam,deciduous forest,0.04,pass_sediment_kg,1.6057506993713242,819.4497763079257,2848.747697048584,381439.35273099074,True,True,True,True
+steep,sand loam,deciduous forest,0.04,peak_max_m3_s,0.019412,0.17035,0.17333,0.31354,True,True,True,True
+steep,sand loam,mixed forest,current,runoff_mm,9051.2,11975.9,12128.7,37639.8,True,True,True,True
+steep,sand loam,mixed forest,current,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True,True,True,True
+steep,sand loam,mixed forest,current,peak_max_m3_s,0.019827,0.17035,0.17337,0.31351,True,True,True,True
+steep,sand loam,mixed forest,0.006,runoff_mm,9051.2,11976.7,12130.7,37669.9,True,True,True,True
+steep,sand loam,mixed forest,0.006,pass_sediment_kg,18.9343678491,3364.9170035453,8090.55996441268,642223.0988369929,True,True,True,True
+steep,sand loam,mixed forest,0.006,peak_max_m3_s,0.019827,0.1676,0.17724,0.3164,True,True,True,True
+steep,sand loam,mixed forest,0.01,runoff_mm,9051.2,11976.6,12130.6,37668.2,True,True,True,True
+steep,sand loam,mixed forest,0.01,pass_sediment_kg,15.849424870000002,2877.1664096665004,7244.431105600021,604808.0425918188,True,True,True,True
+steep,sand loam,mixed forest,0.01,peak_max_m3_s,0.019827,0.16784,0.17762,0.31614,True,True,True,True
+steep,sand loam,mixed forest,0.02,runoff_mm,9051.2,11976.0,12128.9,37647.2,True,True,True,True
+steep,sand loam,mixed forest,0.02,pass_sediment_kg,7.7513475039,1776.0398176884,5284.6255879099,515523.45667991106,True,True,True,True
+steep,sand loam,mixed forest,0.02,peak_max_m3_s,0.019827,0.16971,0.17245,0.31418,True,True,True,True
+steep,sand loam,mixed forest,0.04,runoff_mm,9051.2,11975.9,12128.7,37640.2,True,True,True,True
+steep,sand loam,mixed forest,0.04,pass_sediment_kg,2.2956410330703,819.4497763079257,2848.747697048584,381439.35273099074,True,True,True,True
+steep,sand loam,mixed forest,0.04,peak_max_m3_s,0.019827,0.17035,0.17333,0.31354,True,True,True,True
+steep,sand loam,shrub,current,runoff_mm,10681.1,13030.3,13354.5,35114.1,True,True,True,True
+steep,sand loam,shrub,current,pass_sediment_kg,61.385271278999994,3373.5195767511004,7338.5902778422005,576467.7031236436,True,True,True,True
+steep,sand loam,shrub,current,peak_max_m3_s,0.069135,0.1737,0.18793,0.3092,True,True,True,True
+steep,sand loam,shrub,0.006,runoff_mm,10681.3,13032.1,13359.1,35154.0,True,True,True,True
+steep,sand loam,shrub,0.006,pass_sediment_kg,329.084538528,7455.96781863398,16766.63153294552,792578.7937197373,True,True,True,True
+steep,sand loam,shrub,0.006,peak_max_m3_s,0.074354,0.1776,0.19193,0.31258,True,True,True,True
+steep,sand loam,shrub,0.01,runoff_mm,10681.3,13032.1,13359.0,35152.0,True,True,True,True
+steep,sand loam,shrub,0.01,pass_sediment_kg,247.984578434,6718.6084957087005,15129.693753692798,765306.4028218789,True,True,True,True
+steep,sand loam,shrub,0.01,peak_max_m3_s,0.073098,0.17784,0.19157,0.31223,True,True,True,True
+steep,sand loam,shrub,0.02,runoff_mm,10681.1,13031.3,13354.9,35122.5,True,True,True,True
+steep,sand loam,shrub,0.02,pass_sediment_kg,121.93191052699999,5097.9994736718,11614.75383479082,698502.7267167171,True,True,True,True
+steep,sand loam,shrub,0.02,peak_max_m3_s,0.072708,0.17286,0.18887,0.30995,True,True,True,True
+steep,sand loam,shrub,0.04,runoff_mm,10681.1,13030.3,13354.5,35114.3,True,True,True,True
+steep,sand loam,shrub,0.04,pass_sediment_kg,69.903378713,3618.555598672991,7769.198250250719,592663.2233811344,True,True,True,True
+steep,sand loam,shrub,0.04,peak_max_m3_s,0.069277,0.17367,0.18797,0.30923,True,True,True,True
+steep,sand loam,tall grass,current,runoff_mm,11173.7,11574.6,11550.1,12834.4,False,True,False,True
+steep,sand loam,tall grass,current,pass_sediment_kg,219.73608461249,238.4183851924,457.44991961259996,8286.87865534,True,True,True,True
+steep,sand loam,tall grass,current,peak_max_m3_s,0.13598,0.12957,0.13111,0.14132,False,False,True,True
+steep,sand loam,tall grass,0.006,runoff_mm,11175.7,11574.8,11550.4,12836.0,False,True,False,True
+steep,sand loam,tall grass,0.006,pass_sediment_kg,512.4805404988,520.4694065535999,986.1913251110001,16495.5559626139,True,True,True,True
+steep,sand loam,tall grass,0.006,peak_max_m3_s,0.13759,0.13121,0.13303,0.14463,False,False,True,True
+steep,sand loam,tall grass,0.01,runoff_mm,11175.6,11574.8,11550.4,12835.9,False,True,False,True
+steep,sand loam,tall grass,0.01,pass_sediment_kg,430.85133708140006,438.89987851129996,840.5908462149999,14184.514583606298,True,True,True,True
+steep,sand loam,tall grass,0.01,peak_max_m3_s,0.13742,0.13103,0.13282,0.14421,False,False,True,True
+steep,sand loam,tall grass,0.02,runoff_mm,11173.7,11574.6,11550.1,12834.4,False,True,False,True
+steep,sand loam,tall grass,0.02,pass_sediment_kg,219.73608461249,238.4183851924,457.44991961259996,8286.87865534,True,True,True,True
+steep,sand loam,tall grass,0.02,peak_max_m3_s,0.13598,0.12957,0.13111,0.14132,False,False,True,True
+steep,sand loam,tall grass,0.04,runoff_mm,11170.5,11571.2,11550.1,12832.7,False,True,False,True
+steep,sand loam,tall grass,0.04,pass_sediment_kg,66.5540414407711,81.9205844093872,175.4905035843489,4088.045419480803,True,True,True,True
+steep,sand loam,tall grass,0.04,peak_max_m3_s,0.13545,0.12903,0.13049,0.1404,False,False,True,True
+steep,sand loam,young forest,current,runoff_mm,10390.1,11975.9,12128.7,37639.8,True,True,True,True
+steep,sand loam,young forest,current,pass_sediment_kg,0.0,819.4497763079257,2498.301262276,362512.4884916505,True,True,True,True
+steep,sand loam,young forest,current,peak_max_m3_s,0.01897,0.17035,0.17337,0.31351,True,True,True,True
+steep,sand loam,young forest,0.006,runoff_mm,10391.0,11976.7,12130.7,37669.9,True,True,True,True
+steep,sand loam,young forest,0.006,pass_sediment_kg,39.0780130339,3364.9170035453,8090.55996441268,642223.0988369929,True,True,True,True
+steep,sand loam,young forest,0.006,peak_max_m3_s,0.039714,0.1676,0.17724,0.3164,True,True,True,True
+steep,sand loam,young forest,0.01,runoff_mm,10391.0,11976.6,12130.6,37668.2,True,True,True,True
+steep,sand loam,young forest,0.01,pass_sediment_kg,32.325051594,2877.1664096665004,7244.431105600021,604808.0425918188,True,True,True,True
+steep,sand loam,young forest,0.01,peak_max_m3_s,0.039296,0.16784,0.17762,0.31614,True,True,True,True
+steep,sand loam,young forest,0.02,runoff_mm,10390.1,11976.0,12128.9,37647.2,True,True,True,True
+steep,sand loam,young forest,0.02,pass_sediment_kg,14.6711524679,1776.0398176884,5284.6255879099,515523.45667991106,True,True,True,True
+steep,sand loam,young forest,0.02,peak_max_m3_s,0.01897,0.16971,0.17245,0.31418,True,True,True,True
+steep,sand loam,young forest,0.04,runoff_mm,10390.1,11975.9,12128.7,37640.2,True,True,True,True
+steep,sand loam,young forest,0.04,pass_sediment_kg,4.339634161599999,819.4497763079257,2848.747697048584,381439.35273099074,True,True,True,True
+steep,sand loam,young forest,0.04,peak_max_m3_s,0.01897,0.17035,0.17333,0.31354,True,True,True,True
+steep,silt loam,forest,current,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,forest,current,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392197.67699454847,True,True,True,True
+steep,silt loam,forest,current,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,forest,0.006,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,forest,0.006,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,forest,0.006,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,forest,0.01,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,forest,0.01,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,forest,0.01,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,forest,0.02,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,forest,0.02,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392227.9708423801,True,True,True,True
+steep,silt loam,forest,0.02,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,forest,0.04,runoff_mm,19166.1,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,forest,0.04,pass_sediment_kg,1105.53407002,8824.653027355002,21815.833487876,392219.87954392604,True,True,True,True
+steep,silt loam,forest,0.04,peak_max_m3_s,0.043601,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,deciduous forest,current,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,deciduous forest,current,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392197.67699454847,True,True,True,True
+steep,silt loam,deciduous forest,current,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,deciduous forest,0.006,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,deciduous forest,0.006,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,deciduous forest,0.006,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,deciduous forest,0.01,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,deciduous forest,0.01,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,deciduous forest,0.01,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,deciduous forest,0.02,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,deciduous forest,0.02,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392227.9708423801,True,True,True,True
+steep,silt loam,deciduous forest,0.02,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,deciduous forest,0.04,runoff_mm,19181.6,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,deciduous forest,0.04,pass_sediment_kg,1221.1211718399998,8824.653027355002,21815.833487876,392219.87954392604,True,True,True,True
+steep,silt loam,deciduous forest,0.04,peak_max_m3_s,0.042985,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,mixed forest,current,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,mixed forest,current,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392197.67699454847,True,True,True,True
+steep,silt loam,mixed forest,current,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,mixed forest,0.006,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,mixed forest,0.006,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,mixed forest,0.006,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,mixed forest,0.01,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,mixed forest,0.01,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,mixed forest,0.01,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,mixed forest,0.02,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,mixed forest,0.02,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392227.9708423801,True,True,True,True
+steep,silt loam,mixed forest,0.02,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,mixed forest,0.04,runoff_mm,18792.8,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,mixed forest,0.04,pass_sediment_kg,1262.0228418699999,8824.653027355002,21815.833487876,392219.87954392604,True,True,True,True
+steep,silt loam,mixed forest,0.04,peak_max_m3_s,0.042882,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,shrub,current,runoff_mm,22777.2,28513.4,29483.3,36073.3,True,True,True,True
+steep,silt loam,shrub,current,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502600.5853983492,True,True,True,True
+steep,silt loam,shrub,current,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True,True,True,True
+steep,silt loam,shrub,0.006,runoff_mm,22777.2,28513.4,29483.3,36073.3,True,True,True,True
+steep,silt loam,shrub,0.006,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502642.503286854,True,True,True,True
+steep,silt loam,shrub,0.006,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True,True,True,True
+steep,silt loam,shrub,0.01,runoff_mm,22777.2,28513.4,29483.3,36073.3,True,True,True,True
+steep,silt loam,shrub,0.01,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502642.503286854,True,True,True,True
+steep,silt loam,shrub,0.01,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True,True,True,True
+steep,silt loam,shrub,0.02,runoff_mm,22777.2,28513.4,29483.3,36073.3,True,True,True,True
+steep,silt loam,shrub,0.02,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502641.88430484605,True,True,True,True
+steep,silt loam,shrub,0.02,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True,True,True,True
+steep,silt loam,shrub,0.04,runoff_mm,22777.2,28513.4,29483.3,36073.3,True,True,True,True
+steep,silt loam,shrub,0.04,pass_sediment_kg,3330.75243079937,20987.3638248108,47649.204124161304,502628.1449121748,True,True,True,True
+steep,silt loam,shrub,0.04,peak_max_m3_s,0.063491,0.12999,0.13313,0.30129,True,True,True,True
+steep,silt loam,tall grass,current,runoff_mm,23335.1,24734.7,24870.9,28730.9,True,True,True,True
+steep,silt loam,tall grass,current,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True,True,True,True
+steep,silt loam,tall grass,current,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True,True,True,True
+steep,silt loam,tall grass,0.006,runoff_mm,23335.1,24734.7,24870.9,28730.9,True,True,True,True
+steep,silt loam,tall grass,0.006,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True,True,True,True
+steep,silt loam,tall grass,0.006,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True,True,True,True
+steep,silt loam,tall grass,0.01,runoff_mm,23335.1,24734.7,24870.9,28730.9,True,True,True,True
+steep,silt loam,tall grass,0.01,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True,True,True,True
+steep,silt loam,tall grass,0.01,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True,True,True,True
+steep,silt loam,tall grass,0.02,runoff_mm,23335.1,24734.7,24870.9,28730.9,True,True,True,True
+steep,silt loam,tall grass,0.02,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True,True,True,True
+steep,silt loam,tall grass,0.02,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True,True,True,True
+steep,silt loam,tall grass,0.04,runoff_mm,23335.1,24734.7,24870.9,28730.9,True,True,True,True
+steep,silt loam,tall grass,0.04,pass_sediment_kg,8517.919564119999,9538.99710079,18438.660608669998,79313.8228559052,True,True,True,True
+steep,silt loam,tall grass,0.04,peak_max_m3_s,0.089809,0.090001,0.095976,0.10265,True,True,True,True
+steep,silt loam,young forest,current,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,young forest,current,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392197.67699454847,True,True,True,True
+steep,silt loam,young forest,current,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,young forest,0.006,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,young forest,0.006,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,young forest,0.006,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,young forest,0.01,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,young forest,0.01,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392228.22860589204,True,True,True,True
+steep,silt loam,young forest,0.01,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,young forest,0.02,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,young forest,0.02,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392227.9708423801,True,True,True,True
+steep,silt loam,young forest,0.02,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True,True,True,True
+steep,silt loam,young forest,0.04,runoff_mm,22517.5,25505.6,26093.800000000003,34843.0,True,True,True,True
+steep,silt loam,young forest,0.04,pass_sediment_kg,1744.149461067,8824.653027355002,21815.833487876,392219.87954392604,True,True,True,True
+steep,silt loam,young forest,0.04,peak_max_m3_s,0.043293,0.12931,0.13173,0.29482,True,True,True,True
+gentle,clay loam,forest,current,runoff_mm,38475.7,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,forest,current,pass_sediment_kg,3534.0690977226004,53513.78537997375,90444.78290669073,412712.081438923,True,True,True,True
+gentle,clay loam,forest,current,peak_max_m3_s,0.12367,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,forest,0.006,runoff_mm,38475.7,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,forest,0.006,pass_sediment_kg,3534.359926579601,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,forest,0.006,peak_max_m3_s,0.12367,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,forest,0.01,runoff_mm,38475.7,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,forest,0.01,pass_sediment_kg,3534.359926579601,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,forest,0.01,peak_max_m3_s,0.12367,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,forest,0.02,runoff_mm,38475.7,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,forest,0.02,pass_sediment_kg,3534.359926579601,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,forest,0.02,peak_max_m3_s,0.12367,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,forest,0.04,runoff_mm,38475.7,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,forest,0.04,pass_sediment_kg,3534.359926579601,53513.78537997375,90444.78290669073,412745.48407245305,True,True,True,True
+gentle,clay loam,forest,0.04,peak_max_m3_s,0.12367,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,deciduous forest,current,runoff_mm,38833.4,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,deciduous forest,current,pass_sediment_kg,2144.2193944675782,53513.78537997375,90444.78290669073,412712.081438923,True,True,True,True
+gentle,clay loam,deciduous forest,current,peak_max_m3_s,0.12103,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,deciduous forest,0.006,runoff_mm,38833.4,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,deciduous forest,0.006,pass_sediment_kg,2144.433475939579,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,deciduous forest,0.006,peak_max_m3_s,0.12103,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,deciduous forest,0.01,runoff_mm,38833.4,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,deciduous forest,0.01,pass_sediment_kg,2144.433475939579,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,deciduous forest,0.01,peak_max_m3_s,0.12103,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,deciduous forest,0.02,runoff_mm,38833.4,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,deciduous forest,0.02,pass_sediment_kg,2144.433475939579,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,deciduous forest,0.02,peak_max_m3_s,0.12103,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,deciduous forest,0.04,runoff_mm,38833.4,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,deciduous forest,0.04,pass_sediment_kg,2144.433475939579,53513.78537997375,90444.78290669073,412745.48407245305,True,True,True,True
+gentle,clay loam,deciduous forest,0.04,peak_max_m3_s,0.12103,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,mixed forest,current,runoff_mm,37906.5,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,mixed forest,current,pass_sediment_kg,1809.616044719417,53513.78537997375,90444.78290669073,412712.081438923,True,True,True,True
+gentle,clay loam,mixed forest,current,peak_max_m3_s,0.11969,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,mixed forest,0.006,runoff_mm,37906.5,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,mixed forest,0.006,pass_sediment_kg,1809.848209886417,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,mixed forest,0.006,peak_max_m3_s,0.11969,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,mixed forest,0.01,runoff_mm,37906.5,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,mixed forest,0.01,pass_sediment_kg,1809.848209886417,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,mixed forest,0.01,peak_max_m3_s,0.11969,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,mixed forest,0.02,runoff_mm,37906.5,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,mixed forest,0.02,pass_sediment_kg,1809.848209886417,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,mixed forest,0.02,peak_max_m3_s,0.11969,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,mixed forest,0.04,runoff_mm,37906.5,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,mixed forest,0.04,pass_sediment_kg,1809.848209886417,53513.78537997375,90444.78290669073,412745.48407245305,True,True,True,True
+gentle,clay loam,mixed forest,0.04,peak_max_m3_s,0.11969,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,shrub,current,runoff_mm,45435.2,56975.3,58800.7,62158.1,True,True,True,True
+gentle,clay loam,shrub,current,pass_sediment_kg,43892.583658373456,110692.76862791125,193306.83654269017,785560.4307370657,True,True,True,True
+gentle,clay loam,shrub,current,peak_max_m3_s,0.10904,0.20524,0.20548,0.25649,True,True,True,True
+gentle,clay loam,shrub,0.006,runoff_mm,45435.2,56975.3,58800.7,62158.1,True,True,True,True
+gentle,clay loam,shrub,0.006,pass_sediment_kg,43892.583658373456,110704.41640181126,193330.42352013016,785617.3510477857,True,True,True,True
+gentle,clay loam,shrub,0.006,peak_max_m3_s,0.10904,0.20524,0.20548,0.25649,True,True,True,True
+gentle,clay loam,shrub,0.01,runoff_mm,45435.2,56975.3,58800.7,62158.1,True,True,True,True
+gentle,clay loam,shrub,0.01,pass_sediment_kg,43892.583658373456,110704.41640181126,193330.42352013016,785617.3510477857,True,True,True,True
+gentle,clay loam,shrub,0.01,peak_max_m3_s,0.10904,0.20524,0.20548,0.25649,True,True,True,True
+gentle,clay loam,shrub,0.02,runoff_mm,45435.2,56975.3,58800.7,62158.1,True,True,True,True
+gentle,clay loam,shrub,0.02,pass_sediment_kg,43892.583658373456,110704.41640181126,193330.42352013016,785617.3510477857,True,True,True,True
+gentle,clay loam,shrub,0.02,peak_max_m3_s,0.10904,0.20524,0.20548,0.25649,True,True,True,True
+gentle,clay loam,shrub,0.04,runoff_mm,45435.2,56975.3,58800.7,62158.1,True,True,True,True
+gentle,clay loam,shrub,0.04,pass_sediment_kg,43892.583658373456,110702.62819343126,193326.81380883016,785608.6391757857,True,True,True,True
+gentle,clay loam,shrub,0.04,peak_max_m3_s,0.10904,0.20524,0.20548,0.25649,True,True,True,True
+gentle,clay loam,tall grass,current,runoff_mm,45966.9,49620.0,49968.7,58184.40000000001,True,True,True,True
+gentle,clay loam,tall grass,current,pass_sediment_kg,22454.79172846914,31044.326936813966,55537.389894032196,486648.1196307196,True,True,True,True
+gentle,clay loam,tall grass,current,peak_max_m3_s,0.11815,0.10129,0.1159,0.20214,False,False,True,True
+gentle,clay loam,tall grass,0.006,runoff_mm,45966.9,49620.0,49968.7,58184.40000000001,True,True,True,True
+gentle,clay loam,tall grass,0.006,pass_sediment_kg,22454.79172846914,31044.326936813966,55537.389894032196,486648.1196307196,True,True,True,True
+gentle,clay loam,tall grass,0.006,peak_max_m3_s,0.11815,0.10129,0.1159,0.20214,False,False,True,True
+gentle,clay loam,tall grass,0.01,runoff_mm,45966.9,49620.0,49968.7,58184.40000000001,True,True,True,True
+gentle,clay loam,tall grass,0.01,pass_sediment_kg,22454.79172846914,31044.326936813966,55537.389894032196,486648.1196307196,True,True,True,True
+gentle,clay loam,tall grass,0.01,peak_max_m3_s,0.11815,0.10129,0.1159,0.20214,False,False,True,True
+gentle,clay loam,tall grass,0.02,runoff_mm,45966.9,49620.0,49968.7,58184.40000000001,True,True,True,True
+gentle,clay loam,tall grass,0.02,pass_sediment_kg,22454.79172846914,31044.326936813966,55537.389894032196,486648.1196307196,True,True,True,True
+gentle,clay loam,tall grass,0.02,peak_max_m3_s,0.11815,0.10129,0.1159,0.20214,False,False,True,True
+gentle,clay loam,tall grass,0.04,runoff_mm,45966.9,49620.0,49968.7,58184.40000000001,True,True,True,True
+gentle,clay loam,tall grass,0.04,pass_sediment_kg,22454.79172846914,31044.326936813966,55537.389894032196,486648.1196307196,True,True,True,True
+gentle,clay loam,tall grass,0.04,peak_max_m3_s,0.11815,0.10129,0.1159,0.20214,False,False,True,True
+gentle,clay loam,young forest,current,runoff_mm,45214.3,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,young forest,current,pass_sediment_kg,8962.243850274761,53513.78537997375,90444.78290669073,412712.081438923,True,True,True,True
+gentle,clay loam,young forest,current,peak_max_m3_s,0.12244,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,young forest,0.006,runoff_mm,45214.3,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,young forest,0.006,pass_sediment_kg,8962.243850274761,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,young forest,0.006,peak_max_m3_s,0.12244,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,young forest,0.01,runoff_mm,45214.3,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,young forest,0.01,pass_sediment_kg,8962.243850274761,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,young forest,0.01,peak_max_m3_s,0.12244,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,young forest,0.02,runoff_mm,45214.3,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,young forest,0.02,pass_sediment_kg,8962.243850274761,53513.78537997375,90444.78290669073,412746.40843556303,True,True,True,True
+gentle,clay loam,young forest,0.02,peak_max_m3_s,0.12244,0.11822,0.17945,0.2531,False,False,True,True
+gentle,clay loam,young forest,0.04,runoff_mm,45214.3,50334.4,51436.100000000006,57036.3,True,True,True,True
+gentle,clay loam,young forest,0.04,pass_sediment_kg,8962.243850274761,53513.78537997375,90444.78290669073,412745.48407245305,True,True,True,True
+gentle,clay loam,young forest,0.04,peak_max_m3_s,0.12244,0.11822,0.17945,0.2531,False,False,True,True
+gentle,loam,forest,current,runoff_mm,32921.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,forest,current,pass_sediment_kg,1271.48138021062,13500.424015343999,24370.231416535,256193.47100215883,True,True,True,True
+gentle,loam,forest,current,peak_max_m3_s,0.086893,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,forest,0.006,runoff_mm,32921.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,forest,0.006,pass_sediment_kg,1271.48138021062,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,forest,0.006,peak_max_m3_s,0.086893,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,forest,0.01,runoff_mm,32921.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,forest,0.01,pass_sediment_kg,1271.48138021062,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,forest,0.01,peak_max_m3_s,0.086893,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,forest,0.02,runoff_mm,32921.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,forest,0.02,pass_sediment_kg,1271.48138021062,13500.424015343999,24370.231416535,256219.08254630803,True,True,True,True
+gentle,loam,forest,0.02,peak_max_m3_s,0.086893,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,forest,0.04,runoff_mm,32921.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,forest,0.04,pass_sediment_kg,1271.48138021062,13500.424015343999,24370.231416535,256213.01974433204,True,True,True,True
+gentle,loam,forest,0.04,peak_max_m3_s,0.086893,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,deciduous forest,current,runoff_mm,33230.5,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,deciduous forest,current,pass_sediment_kg,1310.195426377,13500.424015343999,24370.231416535,256193.47100215883,True,True,True,True
+gentle,loam,deciduous forest,current,peak_max_m3_s,0.081279,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,deciduous forest,0.006,runoff_mm,33230.5,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,deciduous forest,0.006,pass_sediment_kg,1310.195426377,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,deciduous forest,0.006,peak_max_m3_s,0.081279,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,deciduous forest,0.01,runoff_mm,33230.5,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,deciduous forest,0.01,pass_sediment_kg,1310.195426377,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,deciduous forest,0.01,peak_max_m3_s,0.081279,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,deciduous forest,0.02,runoff_mm,33230.5,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,deciduous forest,0.02,pass_sediment_kg,1310.195426377,13500.424015343999,24370.231416535,256219.08254630803,True,True,True,True
+gentle,loam,deciduous forest,0.02,peak_max_m3_s,0.081279,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,deciduous forest,0.04,runoff_mm,33230.5,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,deciduous forest,0.04,pass_sediment_kg,1310.195426377,13500.424015343999,24370.231416535,256213.01974433204,True,True,True,True
+gentle,loam,deciduous forest,0.04,peak_max_m3_s,0.081279,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,mixed forest,current,runoff_mm,32369.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,mixed forest,current,pass_sediment_kg,1344.945755143,13500.424015343999,24370.231416535,256193.47100215883,True,True,True,True
+gentle,loam,mixed forest,current,peak_max_m3_s,0.080562,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,mixed forest,0.006,runoff_mm,32369.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,mixed forest,0.006,pass_sediment_kg,1344.945755143,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,mixed forest,0.006,peak_max_m3_s,0.080562,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,mixed forest,0.01,runoff_mm,32369.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,mixed forest,0.01,pass_sediment_kg,1344.945755143,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,mixed forest,0.01,peak_max_m3_s,0.080562,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,mixed forest,0.02,runoff_mm,32369.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,mixed forest,0.02,pass_sediment_kg,1344.945755143,13500.424015343999,24370.231416535,256219.08254630803,True,True,True,True
+gentle,loam,mixed forest,0.02,peak_max_m3_s,0.080562,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,mixed forest,0.04,runoff_mm,32369.4,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,mixed forest,0.04,pass_sediment_kg,1344.945755143,13500.424015343999,24370.231416535,256213.01974433204,True,True,True,True
+gentle,loam,mixed forest,0.04,peak_max_m3_s,0.080562,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,shrub,current,runoff_mm,41024.0,53738.8,55568.3,60366.9,True,True,True,True
+gentle,loam,shrub,current,pass_sediment_kg,7971.845380164178,28197.73684435946,60260.69278150586,415826.5927792787,True,True,True,True
+gentle,loam,shrub,current,peak_max_m3_s,0.079664,0.20043,0.20165,0.25199,True,True,True,True
+gentle,loam,shrub,0.006,runoff_mm,41024.0,53738.8,55568.3,60366.9,True,True,True,True
+gentle,loam,shrub,0.006,pass_sediment_kg,7971.845380164178,28204.870997879458,60273.50696211586,415877.1669755547,True,True,True,True
+gentle,loam,shrub,0.006,peak_max_m3_s,0.079664,0.20043,0.20165,0.25199,True,True,True,True
+gentle,loam,shrub,0.01,runoff_mm,41024.0,53738.8,55568.3,60366.9,True,True,True,True
+gentle,loam,shrub,0.01,pass_sediment_kg,7971.845380164178,28204.870997879458,60273.50696211586,415877.1669755547,True,True,True,True
+gentle,loam,shrub,0.01,peak_max_m3_s,0.079664,0.20043,0.20165,0.25199,True,True,True,True
+gentle,loam,shrub,0.02,runoff_mm,41024.0,53738.8,55568.3,60366.9,True,True,True,True
+gentle,loam,shrub,0.02,pass_sediment_kg,7971.845380164178,28204.870997879458,60273.50696211586,415876.6781279907,True,True,True,True
+gentle,loam,shrub,0.02,peak_max_m3_s,0.079664,0.20043,0.20165,0.25199,True,True,True,True
+gentle,loam,shrub,0.04,runoff_mm,41024.0,53738.8,55568.3,60366.9,True,True,True,True
+gentle,loam,shrub,0.04,pass_sediment_kg,7971.845380164178,28204.870997879458,60273.50696211586,415868.39899096073,True,True,True,True
+gentle,loam,shrub,0.04,peak_max_m3_s,0.079664,0.20043,0.20165,0.25199,True,True,True,True
+gentle,loam,tall grass,current,runoff_mm,41630.8,45631.3,45990.0,54388.4,True,True,True,True
+gentle,loam,tall grass,current,pass_sediment_kg,7724.059838654,10053.078961344,19909.974565459997,132617.91571733876,True,True,True,True
+gentle,loam,tall grass,current,peak_max_m3_s,0.09743,0.097444,0.10575,0.19818,True,True,True,True
+gentle,loam,tall grass,0.006,runoff_mm,41630.8,45631.3,45990.0,54388.4,True,True,True,True
+gentle,loam,tall grass,0.006,pass_sediment_kg,7724.059838654,10053.078961344,19909.974565459997,132617.91571733876,True,True,True,True
+gentle,loam,tall grass,0.006,peak_max_m3_s,0.09743,0.097444,0.10575,0.19818,True,True,True,True
+gentle,loam,tall grass,0.01,runoff_mm,41630.8,45631.3,45990.0,54388.4,True,True,True,True
+gentle,loam,tall grass,0.01,pass_sediment_kg,7724.059838654,10053.078961344,19909.974565459997,132617.91571733876,True,True,True,True
+gentle,loam,tall grass,0.01,peak_max_m3_s,0.09743,0.097444,0.10575,0.19818,True,True,True,True
+gentle,loam,tall grass,0.02,runoff_mm,41630.8,45631.3,45990.0,54388.4,True,True,True,True
+gentle,loam,tall grass,0.02,pass_sediment_kg,7724.059838654,10053.078961344,19909.974565459997,132617.91571733876,True,True,True,True
+gentle,loam,tall grass,0.02,peak_max_m3_s,0.09743,0.097444,0.10575,0.19818,True,True,True,True
+gentle,loam,tall grass,0.04,runoff_mm,41630.8,45631.3,45990.0,54388.4,True,True,True,True
+gentle,loam,tall grass,0.04,pass_sediment_kg,7724.059838654,10053.078961344,19909.974565459997,132617.91571733876,True,True,True,True
+gentle,loam,tall grass,0.04,peak_max_m3_s,0.09743,0.097444,0.10575,0.19818,True,True,True,True
+gentle,loam,young forest,current,runoff_mm,40793.0,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,young forest,current,pass_sediment_kg,1945.4230823541002,13500.424015343999,24370.231416535,256193.47100215883,True,True,True,True
+gentle,loam,young forest,current,peak_max_m3_s,0.070289,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,young forest,0.006,runoff_mm,40793.0,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,young forest,0.006,pass_sediment_kg,1945.4230823541002,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,young forest,0.006,peak_max_m3_s,0.070289,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,young forest,0.01,runoff_mm,40793.0,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,young forest,0.01,pass_sediment_kg,1945.4230823541002,13500.424015343999,24370.231416535,256219.28486933804,True,True,True,True
+gentle,loam,young forest,0.01,peak_max_m3_s,0.070289,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,young forest,0.02,runoff_mm,40793.0,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,young forest,0.02,pass_sediment_kg,1945.4230823541002,13500.424015343999,24370.231416535,256219.08254630803,True,True,True,True
+gentle,loam,young forest,0.02,peak_max_m3_s,0.070289,0.13735,0.1698,0.27254,True,True,True,True
+gentle,loam,young forest,0.04,runoff_mm,40793.0,46809.4,47935.7,55890.4,True,True,True,True
+gentle,loam,young forest,0.04,pass_sediment_kg,1945.4230823541002,13500.424015343999,24370.231416535,256213.01974433204,True,True,True,True
+gentle,loam,young forest,0.04,peak_max_m3_s,0.070289,0.13735,0.1698,0.27254,True,True,True,True
+gentle,sand loam,forest,current,runoff_mm,17697.899999999998,24831.6,25505.5,36878.100000000006,True,True,True,True
+gentle,sand loam,forest,current,pass_sediment_kg,0.0,465.14793798194273,546.0096928476205,91226.95762808202,True,True,True,True
+gentle,sand loam,forest,current,peak_max_m3_s,0.019721,0.15603,0.13393,0.30709,False,True,False,True
+gentle,sand loam,forest,0.006,runoff_mm,17697.899999999998,24833.9,25532.2,43551.7,True,True,True,True
+gentle,sand loam,forest,0.006,pass_sediment_kg,103.9799989305,2315.208518303,4461.6189616674,266203.2384240454,True,True,True,True
+gentle,sand loam,forest,0.006,peak_max_m3_s,0.019721,0.16381,0.17407,0.31409,True,True,True,True
+gentle,sand loam,forest,0.01,runoff_mm,17697.899999999998,24832.4,25532.0,43548.90000000001,True,True,True,True
+gentle,sand loam,forest,0.01,pass_sediment_kg,87.04075522749999,1935.5044728498,3823.5782596443,246778.64540704712,True,True,True,True
+gentle,sand loam,forest,0.01,peak_max_m3_s,0.019721,0.16086,0.17445,0.31376,True,True,True,True
+gentle,sand loam,forest,0.02,runoff_mm,17697.899999999998,24831.6,25529.4,43520.1,True,True,True,True
+gentle,sand loam,forest,0.02,pass_sediment_kg,42.57275583050001,1059.51948914257,2384.0518133516002,199939.84632097068,True,True,True,True
+gentle,sand loam,forest,0.02,peak_max_m3_s,0.019721,0.15504,0.16577,0.31132,True,True,True,True
+gentle,sand loam,forest,0.04,runoff_mm,17697.899999999998,24831.6,25528.5,43507.9,True,True,True,True
+gentle,sand loam,forest,0.04,pass_sediment_kg,12.608765033351498,465.14793798194273,1101.2638201273985,137660.20692468897,True,True,True,True
+gentle,sand loam,forest,0.04,peak_max_m3_s,0.019721,0.15603,0.1576,0.31053,True,True,True,True
+gentle,sand loam,deciduous forest,current,runoff_mm,17816.3,24831.6,25505.5,36878.100000000006,True,True,True,True
+gentle,sand loam,deciduous forest,current,pass_sediment_kg,0.0,465.14793798194273,546.0096928476205,91226.95762808202,True,True,True,True
+gentle,sand loam,deciduous forest,current,peak_max_m3_s,0.019614,0.15603,0.13393,0.30709,False,True,False,True
+gentle,sand loam,deciduous forest,0.006,runoff_mm,17816.3,24833.9,25532.2,43551.7,True,True,True,True
+gentle,sand loam,deciduous forest,0.006,pass_sediment_kg,70.6319735353,2315.208518303,4461.6189616674,266203.2384240454,True,True,True,True
+gentle,sand loam,deciduous forest,0.006,peak_max_m3_s,0.019614,0.16381,0.17407,0.31409,True,True,True,True
+gentle,sand loam,deciduous forest,0.01,runoff_mm,17816.3,24832.4,25532.0,43548.90000000001,True,True,True,True
+gentle,sand loam,deciduous forest,0.01,pass_sediment_kg,59.12640218730001,1935.5044728498,3823.5782596443,246778.64540704712,True,True,True,True
+gentle,sand loam,deciduous forest,0.01,peak_max_m3_s,0.019614,0.16086,0.17445,0.31376,True,True,True,True
+gentle,sand loam,deciduous forest,0.02,runoff_mm,17816.3,24831.6,25529.4,43520.1,True,True,True,True
+gentle,sand loam,deciduous forest,0.02,pass_sediment_kg,28.922272313200004,1059.51948914257,2384.0518133516002,199939.84632097068,True,True,True,True
+gentle,sand loam,deciduous forest,0.02,peak_max_m3_s,0.019614,0.15504,0.16577,0.31132,True,True,True,True
+gentle,sand loam,deciduous forest,0.04,runoff_mm,17816.3,24831.6,25528.5,43507.9,True,True,True,True
+gentle,sand loam,deciduous forest,0.04,pass_sediment_kg,8.566240914,465.14793798194273,1101.2638201273985,137660.20692468897,True,True,True,True
+gentle,sand loam,deciduous forest,0.04,peak_max_m3_s,0.019614,0.15603,0.1576,0.31053,True,True,True,True
+gentle,sand loam,mixed forest,current,runoff_mm,17384.0,24831.6,25505.5,36878.100000000006,True,True,True,True
+gentle,sand loam,mixed forest,current,pass_sediment_kg,0.0,465.14793798194273,546.0096928476205,91226.95762808202,True,True,True,True
+gentle,sand loam,mixed forest,current,peak_max_m3_s,0.02023,0.15603,0.13393,0.30709,False,True,False,True
+gentle,sand loam,mixed forest,0.006,runoff_mm,17384.0,24833.9,25532.2,43551.7,True,True,True,True
+gentle,sand loam,mixed forest,0.006,pass_sediment_kg,64.4013766288,2315.208518303,4461.6189616674,266203.2384240454,True,True,True,True
+gentle,sand loam,mixed forest,0.006,peak_max_m3_s,0.02023,0.16381,0.17407,0.31409,True,True,True,True
+gentle,sand loam,mixed forest,0.01,runoff_mm,17384.0,24832.4,25532.0,43548.90000000001,True,True,True,True
+gentle,sand loam,mixed forest,0.01,pass_sediment_kg,53.9102396047,1935.5044728498,3823.5782596443,246778.64540704712,True,True,True,True
+gentle,sand loam,mixed forest,0.01,peak_max_m3_s,0.02023,0.16086,0.17445,0.31376,True,True,True,True
+gentle,sand loam,mixed forest,0.02,runoff_mm,17384.0,24831.6,25529.4,43520.1,True,True,True,True
+gentle,sand loam,mixed forest,0.02,pass_sediment_kg,26.370645317500003,1059.51948914257,2384.0518133516002,199939.84632097068,True,True,True,True
+gentle,sand loam,mixed forest,0.02,peak_max_m3_s,0.02023,0.15504,0.16577,0.31132,True,True,True,True
+gentle,sand loam,mixed forest,0.04,runoff_mm,17384.0,24831.6,25528.5,43507.9,True,True,True,True
+gentle,sand loam,mixed forest,0.04,pass_sediment_kg,7.810512364006556,465.14793798194273,1101.2638201273985,137660.20692468897,True,True,True,True
+gentle,sand loam,mixed forest,0.04,peak_max_m3_s,0.02023,0.15603,0.1576,0.31053,True,True,True,True
+gentle,sand loam,shrub,current,runoff_mm,21680.9,28339.3,29462.5,38290.8,True,True,True,True
+gentle,sand loam,shrub,current,pass_sediment_kg,0.4571960635,1024.0053926086,2807.4254065143,181792.7275234237,True,True,True,True
+gentle,sand loam,shrub,current,peak_max_m3_s,0.036229,0.13242,0.15014,0.30553,True,True,True,True
+gentle,sand loam,shrub,0.006,runoff_mm,21688.4,28364.3,29485.1,42804.1,True,True,True,True
+gentle,sand loam,shrub,0.006,pass_sediment_kg,194.42059074718998,5113.419170946099,10922.67116135063,382939.5853355059,True,True,True,True
+gentle,sand loam,shrub,0.006,peak_max_m3_s,0.062817,0.17468,0.18808,0.31039,True,True,True,True
+gentle,sand loam,shrub,0.01,runoff_mm,21688.4,28364.1,29485.0,42798.9,True,True,True,True
+gentle,sand loam,shrub,0.01,pass_sediment_kg,159.7260697012,4522.457298745319,9690.54713144983,365729.9131729935,True,True,True,True
+gentle,sand loam,shrub,0.01,peak_max_m3_s,0.063038,0.1749,0.18764,0.30998,True,True,True,True
+gentle,sand loam,shrub,0.02,runoff_mm,21688.4,28361.5,29483.2,42767.7,True,True,True,True
+gentle,sand loam,shrub,0.02,pass_sediment_kg,81.057266538,3107.8123729112003,6942.707137659983,323523.4784010592,True,True,True,True
+gentle,sand loam,shrub,0.02,peak_max_m3_s,0.064955,0.15733,0.18429,0.30713,True,True,True,True
+gentle,sand loam,shrub,0.04,runoff_mm,21687.9,28360.2,29480.7,42755.3,True,True,True,True
+gentle,sand loam,shrub,0.04,pass_sediment_kg,25.471780133678884,1776.137646397638,4322.589410577779,263017.2661666737,True,True,True,True
+gentle,sand loam,shrub,0.04,peak_max_m3_s,0.065685,0.15857,0.18316,0.30624,True,True,True,True
+gentle,sand loam,tall grass,current,runoff_mm,22331.6,24155.5,24347.2,28855.1,True,True,True,True
+gentle,sand loam,tall grass,current,pass_sediment_kg,241.5288050268,237.77423883560002,410.6274804515,4078.56949282,False,False,True,True
+gentle,sand loam,tall grass,current,peak_max_m3_s,0.13122,0.1251,0.12685,0.13766,False,False,True,True
+gentle,sand loam,tall grass,0.006,runoff_mm,22334.1,24157.5,24347.7,28856.9,True,True,True,True
+gentle,sand loam,tall grass,0.006,pass_sediment_kg,606.5421030006,598.176991256,961.5848449539999,8003.959568084676,False,False,True,True
+gentle,sand loam,tall grass,0.006,peak_max_m3_s,0.13323,0.12715,0.12925,0.14178,False,False,True,True
+gentle,sand loam,tall grass,0.01,runoff_mm,22334.0,24157.5,24347.7,28857.0,True,True,True,True
+gentle,sand loam,tall grass,0.01,pass_sediment_kg,504.95833402360006,498.15812791300004,809.3549301065,6533.340427441701,False,False,True,True
+gentle,sand loam,tall grass,0.01,peak_max_m3_s,0.13302,0.12693,0.12898,0.14127,False,False,True,True
+gentle,sand loam,tall grass,0.02,runoff_mm,22331.6,24155.5,24347.2,28855.1,True,True,True,True
+gentle,sand loam,tall grass,0.02,pass_sediment_kg,241.5288050268,237.77423883560002,410.6274804515,4078.56949282,False,False,True,True
+gentle,sand loam,tall grass,0.02,peak_max_m3_s,0.13122,0.1251,0.12685,0.13766,False,False,True,True
+gentle,sand loam,tall grass,0.04,runoff_mm,22331.7,24155.4,24347.2,28855.0,True,True,True,True
+gentle,sand loam,tall grass,0.04,pass_sediment_kg,70.2889667709586,67.51465990590378,123.06057346912247,2093.5030368261378,False,False,True,True
+gentle,sand loam,tall grass,0.04,peak_max_m3_s,0.13056,0.12443,0.12609,0.13653,False,False,True,True
+gentle,sand loam,young forest,current,runoff_mm,21339.0,24831.6,25505.5,36878.100000000006,True,True,True,True
+gentle,sand loam,young forest,current,pass_sediment_kg,0.0,465.14793798194273,546.0096928476205,91226.95762808202,True,True,True,True
+gentle,sand loam,young forest,current,peak_max_m3_s,0.019162,0.15603,0.13393,0.30709,False,True,False,True
+gentle,sand loam,young forest,0.006,runoff_mm,21339.300000000003,24833.9,25532.2,43551.7,True,True,True,True
+gentle,sand loam,young forest,0.006,pass_sediment_kg,98.2221988744,2315.208518303,4461.6189616674,266203.2384240454,True,True,True,True
+gentle,sand loam,young forest,0.006,peak_max_m3_s,0.019162,0.16381,0.17407,0.31409,True,True,True,True
+gentle,sand loam,young forest,0.01,runoff_mm,21339.300000000003,24832.4,25532.0,43548.90000000001,True,True,True,True
+gentle,sand loam,young forest,0.01,pass_sediment_kg,82.2045152929,1935.5044728498,3823.5782596443,246778.64540704712,True,True,True,True
+gentle,sand loam,young forest,0.01,peak_max_m3_s,0.019162,0.16086,0.17445,0.31376,True,True,True,True
+gentle,sand loam,young forest,0.02,runoff_mm,21339.300000000003,24831.6,25529.4,43520.1,True,True,True,True
+gentle,sand loam,young forest,0.02,pass_sediment_kg,40.15737627600001,1059.51948914257,2384.0518133516002,199939.84632097068,True,True,True,True
+gentle,sand loam,young forest,0.02,peak_max_m3_s,0.019162,0.15504,0.16577,0.31132,True,True,True,True
+gentle,sand loam,young forest,0.04,runoff_mm,21339.300000000003,24831.6,25528.5,43507.9,True,True,True,True
+gentle,sand loam,young forest,0.04,pass_sediment_kg,11.8889346742,465.14793798194273,1101.2638201273985,137660.20692468897,True,True,True,True
+gentle,sand loam,young forest,0.04,peak_max_m3_s,0.019162,0.15603,0.1576,0.31053,True,True,True,True
+gentle,silt loam,forest,current,runoff_mm,27791.2,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,forest,current,pass_sediment_kg,1102.602153662,6179.370315336,14558.841856408,208042.26083597043,True,True,True,True
+gentle,silt loam,forest,current,peak_max_m3_s,0.042886,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,forest,0.006,runoff_mm,27791.2,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,forest,0.006,pass_sediment_kg,1102.602153662,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,forest,0.006,peak_max_m3_s,0.042886,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,forest,0.01,runoff_mm,27791.2,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,forest,0.01,pass_sediment_kg,1102.602153662,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,forest,0.01,peak_max_m3_s,0.042886,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,forest,0.02,runoff_mm,27791.2,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,forest,0.02,pass_sediment_kg,1102.602153662,6179.370315336,14558.841856408,208062.94445971394,True,True,True,True
+gentle,silt loam,forest,0.02,peak_max_m3_s,0.042886,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,forest,0.04,runoff_mm,27791.2,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,forest,0.04,pass_sediment_kg,1102.602153662,6179.370315336,14558.841856408,208057.25818362992,True,True,True,True
+gentle,silt loam,forest,0.04,peak_max_m3_s,0.042886,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,deciduous forest,current,runoff_mm,28122.6,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,deciduous forest,current,pass_sediment_kg,1448.787407196,6179.370315336,14558.841856408,208042.26083597043,True,True,True,True
+gentle,silt loam,deciduous forest,current,peak_max_m3_s,0.042199,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,deciduous forest,0.006,runoff_mm,28122.6,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,deciduous forest,0.006,pass_sediment_kg,1448.787407196,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,deciduous forest,0.006,peak_max_m3_s,0.042199,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,deciduous forest,0.01,runoff_mm,28122.6,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,deciduous forest,0.01,pass_sediment_kg,1448.787407196,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,deciduous forest,0.01,peak_max_m3_s,0.042199,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,deciduous forest,0.02,runoff_mm,28122.6,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,deciduous forest,0.02,pass_sediment_kg,1448.787407196,6179.370315336,14558.841856408,208062.94445971394,True,True,True,True
+gentle,silt loam,deciduous forest,0.02,peak_max_m3_s,0.042199,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,deciduous forest,0.04,runoff_mm,28122.6,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,deciduous forest,0.04,pass_sediment_kg,1448.787407196,6179.370315336,14558.841856408,208057.25818362992,True,True,True,True
+gentle,silt loam,deciduous forest,0.04,peak_max_m3_s,0.042199,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,mixed forest,current,runoff_mm,27381.4,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,mixed forest,current,pass_sediment_kg,1545.08632382,6179.370315336,14558.841856408,208042.26083597043,True,True,True,True
+gentle,silt loam,mixed forest,current,peak_max_m3_s,0.042062,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,mixed forest,0.006,runoff_mm,27381.4,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,mixed forest,0.006,pass_sediment_kg,1545.08632382,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,mixed forest,0.006,peak_max_m3_s,0.042062,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,mixed forest,0.01,runoff_mm,27381.4,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,mixed forest,0.01,pass_sediment_kg,1545.08632382,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,mixed forest,0.01,peak_max_m3_s,0.042062,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,mixed forest,0.02,runoff_mm,27381.4,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,mixed forest,0.02,pass_sediment_kg,1545.08632382,6179.370315336,14558.841856408,208062.94445971394,True,True,True,True
+gentle,silt loam,mixed forest,0.02,peak_max_m3_s,0.042062,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,mixed forest,0.04,runoff_mm,27381.4,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,mixed forest,0.04,pass_sediment_kg,1545.08632382,6179.370315336,14558.841856408,208057.25818362992,True,True,True,True
+gentle,silt loam,mixed forest,0.04,peak_max_m3_s,0.042062,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,shrub,current,runoff_mm,34255.7,44174.5,45835.7,51212.2,True,True,True,True
+gentle,silt loam,shrub,current,pass_sediment_kg,2460.9379966395,16549.173161135743,37650.223793517056,315179.67766155256,True,True,True,True
+gentle,silt loam,shrub,current,peak_max_m3_s,0.080266,0.13888,0.1946,0.26145,True,True,True,True
+gentle,silt loam,shrub,0.006,runoff_mm,34255.7,44174.5,45835.7,51212.2,True,True,True,True
+gentle,silt loam,shrub,0.006,pass_sediment_kg,2460.9379966395,16549.173161135743,37650.223793517056,315221.0501007874,True,True,True,True
+gentle,silt loam,shrub,0.006,peak_max_m3_s,0.080266,0.13888,0.1946,0.26145,True,True,True,True
+gentle,silt loam,shrub,0.01,runoff_mm,34255.7,44174.5,45835.7,51212.2,True,True,True,True
+gentle,silt loam,shrub,0.01,pass_sediment_kg,2460.9379966395,16549.173161135743,37650.223793517056,315221.0501007874,True,True,True,True
+gentle,silt loam,shrub,0.01,peak_max_m3_s,0.080266,0.13888,0.1946,0.26145,True,True,True,True
+gentle,silt loam,shrub,0.02,runoff_mm,34255.7,44174.5,45835.7,51212.2,True,True,True,True
+gentle,silt loam,shrub,0.02,pass_sediment_kg,2460.9379966395,16549.173161135743,37650.223793517056,315220.57053662743,True,True,True,True
+gentle,silt loam,shrub,0.02,peak_max_m3_s,0.080266,0.13888,0.1946,0.26145,True,True,True,True
+gentle,silt loam,shrub,0.04,runoff_mm,34255.7,44174.5,45835.7,51212.2,True,True,True,True
+gentle,silt loam,shrub,0.04,pass_sediment_kg,2460.9379966395,16549.173161135743,37650.223793517056,315210.96395586303,True,True,True,True
+gentle,silt loam,shrub,0.04,peak_max_m3_s,0.080266,0.13888,0.1946,0.26145,True,True,True,True
+gentle,silt loam,tall grass,current,runoff_mm,34777.0,37781.9,38143.5,45236.8,True,True,True,True
+gentle,silt loam,tall grass,current,pass_sediment_kg,8686.233923681,9744.018464592,20176.78343496,75647.08161511441,True,True,True,True
+gentle,silt loam,tall grass,current,peak_max_m3_s,0.10219,0.10206,0.10899,0.17623,False,False,True,True
+gentle,silt loam,tall grass,0.006,runoff_mm,34777.0,37781.9,38143.5,45236.8,True,True,True,True
+gentle,silt loam,tall grass,0.006,pass_sediment_kg,8686.233923681,9744.018464592,20176.78343496,75647.08161511441,True,True,True,True
+gentle,silt loam,tall grass,0.006,peak_max_m3_s,0.10219,0.10206,0.10899,0.17623,False,False,True,True
+gentle,silt loam,tall grass,0.01,runoff_mm,34777.0,37781.9,38143.5,45236.8,True,True,True,True
+gentle,silt loam,tall grass,0.01,pass_sediment_kg,8686.233923681,9744.018464592,20176.78343496,75647.08161511441,True,True,True,True
+gentle,silt loam,tall grass,0.01,peak_max_m3_s,0.10219,0.10206,0.10899,0.17623,False,False,True,True
+gentle,silt loam,tall grass,0.02,runoff_mm,34777.0,37781.9,38143.5,45236.8,True,True,True,True
+gentle,silt loam,tall grass,0.02,pass_sediment_kg,8686.233923681,9744.018464592,20176.78343496,75647.08161511441,True,True,True,True
+gentle,silt loam,tall grass,0.02,peak_max_m3_s,0.10219,0.10206,0.10899,0.17623,False,False,True,True
+gentle,silt loam,tall grass,0.04,runoff_mm,34777.0,37781.9,38143.5,45236.8,True,True,True,True
+gentle,silt loam,tall grass,0.04,pass_sediment_kg,8686.233923681,9744.018464592,20176.78343496,75647.08161511441,True,True,True,True
+gentle,silt loam,tall grass,0.04,peak_max_m3_s,0.10219,0.10206,0.10899,0.17623,False,False,True,True
+gentle,silt loam,young forest,current,runoff_mm,34045.8,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,young forest,current,pass_sediment_kg,1766.755368856,6179.370315336,14558.841856408,208042.26083597043,True,True,True,True
+gentle,silt loam,young forest,current,peak_max_m3_s,0.042597,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,young forest,0.006,runoff_mm,34045.8,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,young forest,0.006,pass_sediment_kg,1766.755368856,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,young forest,0.006,peak_max_m3_s,0.042597,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,young forest,0.01,runoff_mm,34045.8,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,young forest,0.01,pass_sediment_kg,1766.755368856,6179.370315336,14558.841856408,208063.1437843379,True,True,True,True
+gentle,silt loam,young forest,0.01,peak_max_m3_s,0.042597,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,young forest,0.02,runoff_mm,34045.8,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,young forest,0.02,pass_sediment_kg,1766.755368856,6179.370315336,14558.841856408,208062.94445971394,True,True,True,True
+gentle,silt loam,young forest,0.02,peak_max_m3_s,0.042597,0.13794,0.14053,0.27408,True,True,True,True
+gentle,silt loam,young forest,0.04,runoff_mm,34045.8,38534.8,39591.2,47359.4,True,True,True,True
+gentle,silt loam,young forest,0.04,pass_sediment_kg,1766.755368856,6179.370315336,14558.841856408,208057.25818362992,True,True,True,True
+gentle,silt loam,young forest,0.04,peak_max_m3_s,0.042597,0.13794,0.14053,0.27408,True,True,True,True

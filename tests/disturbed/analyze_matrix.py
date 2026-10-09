@@ -11,7 +11,6 @@ Output: Markdown tables for inclusion in the disturbed README.md
 """
 
 import argparse
-import re
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,47 +26,49 @@ import numpy as np
 TEXTURES = ["clay loam", "loam", "sand loam", "silt loam"]
 SEVERITIES = [0, 1, 2, 3]
 SEVERITY_NAMES = {0: "unburned", 1: "low", 2: "moderate", 3: "high"}
-VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass"]
-FOREST_FAMILY_VEG_TYPES = ["forest", "deciduous forest", "mixed forest"]
+VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass", "young forest"]
+FOREST_FAMILY_VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "young forest"]
 TOTAL_SIMULATIONS = len(TEXTURES) * len(SEVERITIES) * len(VEG_TYPES)
 
 DISTURBED_CLASSES = {
     # Unburned
     ("forest", 0): "forest",
+    ("young forest", 0): "young forest",
     ("deciduous forest", 0): "deciduous forest",
     ("mixed forest", 0): "mixed forest",
     ("shrub", 0): "shrub",
     ("tall grass", 0): "tall grass",
     # Low severity
     ("forest", 1): "forest low sev fire",
+    ("young forest", 1): "forest low sev fire",
     ("deciduous forest", 1): "forest low sev fire",
     ("mixed forest", 1): "forest low sev fire",
     ("shrub", 1): "shrub low sev fire",
     ("tall grass", 1): "grass low sev fire",
     # Moderate severity
     ("forest", 2): "forest moderate sev fire",
+    ("young forest", 2): "forest moderate sev fire",
     ("deciduous forest", 2): "forest moderate sev fire",
     ("mixed forest", 2): "forest moderate sev fire",
     ("shrub", 2): "shrub moderate sev fire",
     ("tall grass", 2): "grass moderate sev fire",
     # High severity
     ("forest", 3): "forest high sev fire",
+    ("young forest", 3): "forest high sev fire",
     ("deciduous forest", 3): "forest high sev fire",
     ("mixed forest", 3): "forest high sev fire",
     ("shrub", 3): "shrub high sev fire",
     ("tall grass", 3): "grass high sev fire",
 }
 
-PASS_EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
-PASS_EVENT_FLOAT_COUNT = 24  # dur..tdep + sedcon + sediment fractions + groundwater terms
-
-
 def generate_wepp_id(texture: str, severity: int, veg_type: str) -> int:
     """Generate a unique WEPP ID for this combination."""
     texture_idx = TEXTURES.index(texture)
+    if veg_type == "young forest":
+        return 81 + texture_idx * len(SEVERITIES) + severity
     veg_idx = VEG_TYPES.index(veg_type)
     return (
-        texture_idx * len(VEG_TYPES) * len(SEVERITIES)
+        texture_idx * (len(VEG_TYPES)-1) * len(SEVERITIES)
         + veg_idx * len(SEVERITIES)
         + severity
         + 1
@@ -76,8 +77,13 @@ def generate_wepp_id(texture: str, severity: int, veg_type: str) -> int:
 
 def wepp_id_to_params(wepp_id: int) -> Tuple[str, int, str]:
     """Convert WEPP ID back to parameters."""
+    if not 1 <= wepp_id <= TOTAL_SIMULATIONS:
+        raise ValueError(f"Invalid matrix ID: {wepp_id}")
+    if wepp_id > 80:
+        index = wepp_id - 81
+        return TEXTURES[index // 4], index % 4, "young forest"
     wepp_id -= 1  # Convert to 0-indexed
-    texture_stride = len(VEG_TYPES) * len(SEVERITIES)
+    texture_stride = (len(VEG_TYPES)-1) * len(SEVERITIES)
     texture_idx = wepp_id // texture_stride
     remainder = wepp_id % texture_stride
     veg_idx = remainder // len(SEVERITIES)
@@ -154,6 +160,14 @@ class ComparisonResult:
     peak_unburned_std: float
     peak_unburned_median: float
     peak_unburned_sum: float
+    burned_only_events: int = 0
+    unburned_only_events: int = 0
+    peak_burned_only_events: int = 0
+    peak_unburned_only_events: int = 0
+    full_burned_runoff: float = 0.0
+    full_unburned_runoff: float = 0.0
+    full_burned_sediment: float = 0.0
+    full_unburned_sediment: float = 0.0
 
 
 # =============================================================================
@@ -176,8 +190,8 @@ def parse_ebe_file(filepath: Path) -> List[Event]:
         # Parse fixed-width format
         # day mo  year Precp  Runoff  IR-det Av-det Mx-det  Point  Av-dep Max-dep  Point Sed.Del    ER
         parts = line.split()
-        if len(parts) < 14:
-            continue
+        if len(parts) not in (14, 16):
+            raise ValueError(f"Malformed EBE row in {filepath}: {line}")
 
         try:
             day = int(parts[0])
@@ -186,6 +200,8 @@ def parse_ebe_file(filepath: Path) -> List[Event]:
             precip = float(parts[3])
             runoff = float(parts[4])
             sed_del = float(parts[12])  # Sed.Del column (13th column, 0-indexed as 12)
+            if not np.isfinite([float(p) for p in parts]).all():
+                raise ValueError(f"Nonfinite EBE row in {filepath}: {line}")
 
             events.append(Event(
                 day=day,
@@ -195,8 +211,8 @@ def parse_ebe_file(filepath: Path) -> List[Event]:
                 runoff=runoff,
                 sed_del=sed_del
             ))
-        except (ValueError, IndexError):
-            continue
+        except (ValueError, IndexError) as exc:
+            raise ValueError(f"Invalid EBE row in {filepath}: {line}") from exc
 
     return events
 
@@ -216,63 +232,25 @@ def load_all_events(output_dir: Path) -> Dict[int, List[Event]]:
 
 
 def parse_pass_peakflow_file(filepath: Path) -> List[PeakEvent]:
-    """Parse pass.dat EVENT rows and extract peak runoff rate (peak discharge)."""
-    peak_events: List[PeakEvent] = []
+    """Read validated legacy/v3 PASS through the paired native reader."""
+    from wepppyo3.wepp_interchange import hillslope_pass_to_columns
+    from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
 
-    with open(filepath, "r") as f:
-        lines = f.readlines()
-
-    if len(lines) < 6:
-        return peak_events
-
-    header_tokens = lines[1].split()
-    if not header_tokens:
-        return peak_events
-
-    try:
-        start_year = int(header_tokens[-1])
-    except ValueError:
-        return peak_events
-
-    data_lines = lines[5:]
-    idx = 0
-    while idx < len(data_lines):
-        raw_line = data_lines[idx]
-        label = raw_line[:8].strip().upper()
-        if label != "EVENT":
-            idx += 1
-            continue
-
-        tokens = raw_line[8:].split()
-        idx += 1
-        expected = 2 + PASS_EVENT_FLOAT_COUNT
-
-        while len(tokens) < expected and idx < len(data_lines):
-            candidate = data_lines[idx]
-            candidate_label = candidate[:8].strip().upper()
-            if candidate_label in PASS_EVENT_LABELS and candidate_label:
-                break
-            tokens.extend(candidate.split())
-            idx += 1
-
-        if len(tokens) < expected:
-            continue
-
-        try:
-            absolute_year = int(tokens[0])
-            julian = int(tokens[1])
-            values = tokens[2:]
-            if len(values) != PASS_EVENT_FLOAT_COUNT:
-                continue
-            peakflow = float(values[9])  # peakro field in pass EVENT payload
-            sim_year = absolute_year - start_year + 1
-            peak_events.append(
-                PeakEvent(year=sim_year, julian=julian, peakflow=peakflow)
-            )
-        except (ValueError, IndexError):
-            continue
-
-    return peak_events
+    columns = hillslope_pass_to_columns(str(filepath), 1, 0)
+    with filepath.open() as stream:
+        first = stream.readline()
+        if pass_metadata_offset(first):
+            stream.readline()
+        metadata = stream.readline().split()
+    start_year = int(metadata[-1])
+    result = [
+        PeakEvent(year=int(y)-start_year+1, julian=int(d), peakflow=float(q))
+        for kind, y, d, q in zip(columns["event"], columns["year"],
+                                  columns["julian"], columns["peakro"])
+        if kind == "EVENT"
+    ]
+    peak_events_to_dict(result)
+    return result
 
 
 def load_all_peak_events(output_dir: Path) -> Dict[int, List[PeakEvent]]:
@@ -323,12 +301,18 @@ def require_full_matrix(
 
 def events_to_dict(events: List[Event]) -> Dict[Tuple[int, int, int], Event]:
     """Convert event list to dict keyed by (day, month, year)."""
-    return {(e.day, e.month, e.year): e for e in events}
+    result = {(e.day, e.month, e.year): e for e in events}
+    if len(result) != len(events):
+        raise ValueError("Duplicate EBE event date")
+    return result
 
 
 def peak_events_to_dict(events: List[PeakEvent]) -> Dict[Tuple[int, int], PeakEvent]:
     """Convert peak event list to dict keyed by (simulation year, julian day)."""
-    return {(e.year, e.julian): e for e in events}
+    result = {(e.year, e.julian): e for e in events}
+    if len(result) != len(events):
+        raise ValueError("Duplicate PASS event date")
+    return result
 
 
 def compare_burned_vs_unburned(
@@ -539,6 +523,14 @@ def analyze_all_comparisons(
                     peak_unburned_std=np.std(peak_unburned_arr) if len(peak_unburned_arr) else 0,
                     peak_unburned_median=np.median(peak_unburned_arr) if len(peak_unburned_arr) else 0,
                     peak_unburned_sum=np.sum(peak_unburned_arr) if len(peak_unburned_arr) else 0,
+                    burned_only_events=len(set(events_to_dict(burned_events))-set(events_to_dict(unburned_events))),
+                    unburned_only_events=len(set(events_to_dict(unburned_events))-set(events_to_dict(burned_events))),
+                    peak_burned_only_events=len(set(peak_events_to_dict(peak_burned_events))-set(peak_events_to_dict(peak_unburned_events))),
+                    peak_unburned_only_events=len(set(peak_events_to_dict(peak_unburned_events))-set(peak_events_to_dict(peak_burned_events))),
+                    full_burned_runoff=sum(e.runoff for e in burned_events),
+                    full_unburned_runoff=sum(e.runoff for e in unburned_events),
+                    full_burned_sediment=sum(e.sed_del for e in burned_events),
+                    full_unburned_sediment=sum(e.sed_del for e in unburned_events),
                 ))
 
     return results
@@ -631,26 +623,26 @@ def generate_directionality_markdown(results: List[ComparisonResult]) -> str:
     lines.append("")
     lines.append(
         "These rows compare the existing generic burned forest managements "
-        "against each forest-family unburned baseline. Deciduous and mixed "
+        "against each forest-family unburned baseline. Deciduous, mixed and young "
         "forest use their distinct unburned managements at severity `0`, then "
         "reuse `Low_Severity_Fire.man`, `Moderate_Severity_Fire.man`, and "
         "`High_Severity_Fire.man` for burn severities `1..3`."
     )
     lines.append("")
     lines.append(
-        "Directionally correct means the burned total is greater than the "
-        "matched unburned total for runoff, sediment delivery, and peakflow."
+        "This diagnostic asks whether burned matched-event sums exceed unburned "
+        "sums for runoff, sediment delivery and event peaks. It does not establish "
+        "physical correctness, a full severity ranking, or a peak-flow volume."
     )
     lines.append("")
     lines.append(
         "| Veg Type | Severity | Runoff Ratio | Runoff Burned> Share | "
-        "Sediment Ratio | Peakflow Ratio | Directionally Correct? |"
+        "Sediment Ratio | Peakflow Ratio | Burned Higher on All Three? |"
     )
     lines.append(
         "|----------|----------|-------------:|---------------------:|---------------:|---------------:|------------------------|"
     )
 
-    all_pass = True
     for veg_type in FOREST_FAMILY_VEG_TYPES:
         for severity in [1, 2, 3]:
             key = (veg_type, severity)
@@ -661,7 +653,6 @@ def generate_directionality_markdown(results: List[ComparisonResult]) -> str:
             sed_ok = a["sed_burned_sum"] > a["sed_unburned_sum"]
             peak_ok = a["peak_burned_sum"] > a["peak_unburned_sum"]
             directional = runoff_ok and sed_ok and peak_ok
-            all_pass = all_pass and directional
             runoff_directional_events = (
                 a["runoff_burned_gt"] + a["runoff_unburned_gt"]
             )
@@ -675,19 +666,11 @@ def generate_directionality_markdown(results: List[ComparisonResult]) -> str:
             )
 
     lines.append("")
-    if all_pass:
-        lines.append(
-            "Assessment: the existing generic forest burn managements remain "
-            "directionally correct for evergreen, deciduous, and mixed "
-            "unburned baselines in this matrix. No low/moderate/high burned "
-            "deciduous or mixed parameterization is indicated by this test."
-        )
-    else:
-        lines.append(
-            "Assessment: at least one forest-family row is not directionally "
-            "correct. Open a follow-up parameterization package before relying "
-            "on the generic burned forest classes for that class/severity."
-        )
+    lines.append(
+        "These matched-event rankings are descriptive, not an acceptance gate. "
+        "Use full-record totals and one-sided-event counts below; inspect magnitudes "
+        "and rare events before drawing a parameterization conclusion."
+    )
 
     return "\n".join(lines)
 
@@ -958,17 +941,30 @@ def generate_full_report(results: List[ComparisonResult]) -> str:
     lines.append("")
     lines.append(f"Analysis of {TOTAL_SIMULATIONS} hillslope simulations across:")
     lines.append("- 4 soil textures (clay loam, loam, sand loam, silt loam)")
-    lines.append("- 5 vegetation types (forest, deciduous forest, mixed forest, shrub, tall grass)")
+    lines.append("- 6 vegetation types (forest, deciduous forest, mixed forest, shrub, tall grass, young forest)")
     lines.append("- 4 burn severities (unburned, low, moderate, high)")
     lines.append("")
-    lines.append("**Climate**: MC KENZIE BRIDGE RS, OR - 100 years, ~1,194 mm/yr precipitation")
+    lines.append("**Canonical climate**: MC KENZIE BRIDGE RS, OR - synthetic 2000-2099, seed 26109, 1,205.406 mm/yr precipitation")
     lines.append("")
-    lines.append("**Slope**: 201.68m variable profile (avg ~43% grade)")
+    lines.append("**Canonical slope**: 87.9 m variable profile (length-weighted average 38.56% grade)")
     lines.append("")
     lines.append("**Soil format**: 9002 with hydrophobicity parameters")
     lines.append("")
 
     lines.append(generate_directionality_markdown(results))
+    lines.append("")
+    lines.append("### Full-Record Totals and One-Sided Events")
+    lines.append("")
+    lines.append("Full totals include every record independently; paired comparisons do not zero-fill absent events.")
+    lines.append("")
+    lines.append("| Texture | Vegetation | Severity | Burned-only EBE | Unburned-only EBE | Burned-only peak | Unburned-only peak | Full runoff ratio | Full sediment ratio |")
+    lines.append("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |")
+    for row in results:
+        lines.append(f"| {row.texture} | {row.veg_type} | {SEVERITY_NAMES[row.severity]} | "
+                     f"{row.burned_only_events} | {row.unburned_only_events} | "
+                     f"{row.peak_burned_only_events} | {row.peak_unburned_only_events} | "
+                     f"{format_ratio(row.full_burned_runoff, row.full_unburned_runoff)} | "
+                     f"{format_ratio(row.full_burned_sediment, row.full_unburned_sediment)} |")
     lines.append("")
     lines.append(generate_event_counts_markdown(results))
     lines.append("")
@@ -994,7 +990,7 @@ def main():
     parser.add_argument(
         "--out",
         type=Path,
-        default=Path(__file__).parent / "analysis_results.md",
+        default=Path(__file__).parent / "analysis_results_current.md",
         help="Output markdown file"
     )
     args = parser.parse_args()

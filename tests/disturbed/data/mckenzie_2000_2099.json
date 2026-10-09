@@ -1,0 +1,25 @@
+{
+  "station": "or355362",
+  "seed": 26109,
+  "years": 100,
+  "forcing": "synthetic; no observed data or missing-value imputation",
+  "binary_sha256": "119ba1de5bc48757901224c8d6e91022a91bf255a45043a98579199e681aaddc",
+  "parameter_sha256": "163a55005e6a3358bf9906eae93cfcbcc717bdc9f1ea955ea0f53e9613c87f09",
+  "climate_sha256": "4e3284e2960b28fee3379235fa5d9699068d305ad945c3753812ed37b3805649",
+  "daily_records": 36525,
+  "year_range": [
+    2000,
+    2099
+  ],
+  "annual_precipitation_mm": 1205.406,
+  "command": [
+    "/home/workdir/wepppy/wepppy/climates/cligen/bin/cligen532",
+    "-ior355362.par",
+    "-r26109",
+    "-b2000",
+    "-y100",
+    "-t5",
+    "-omckenzie_2000_2099.cli"
+  ],
+  "reason": "Historical test_climate.cli has only six years and 22 nonfinite dewpoints despite a 100-year header."
+}

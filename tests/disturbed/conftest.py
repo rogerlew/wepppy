@@ -14,7 +14,7 @@ DATA_DIR = TEST_DIR / "data"
 
 @pytest.fixture(scope="session")
 def canonical_slope_path() -> Path:
-    """Path to the canonical 200m slope profile."""
+    """Path to the canonical 87.9 m variable-slope profile."""
     path = DATA_DIR / "canonical_slope.slp"
     assert path.exists(), f"Canonical slope file not found: {path}"
     return path
@@ -23,8 +23,10 @@ def canonical_slope_path() -> Path:
 @pytest.fixture(scope="session")
 def test_climate_path() -> Path:
     """Path to the 100-year test climate file."""
-    path = DATA_DIR / "test_climate.cli"
+    path = DATA_DIR / "mckenzie_2000_2099.cli"
     assert path.exists(), f"Test climate file not found: {path}"
+    from generate_climate_fixture import validate_climate
+    validate_climate(path)
     return path
 
 
@@ -81,6 +83,8 @@ def run_dir(tmp_path_factory) -> Path:
     output_dir = run_dir / "output"  # At same level as runs/, not inside
     runs_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
+    from test_disturbed_matrix import stage_shared_inputs
+    stage_shared_inputs(runs_dir)
     return run_dir
 
 

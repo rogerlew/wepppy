@@ -1,0 +1,549 @@
+{
+  "cases": 896,
+  "references": 192,
+  "mutated_cases": 704,
+  "years": [
+    2000,
+    2099
+  ],
+  "max_absolute_runoff_change_pct": 17.89131590194666,
+  "max_absolute_sediment_delta_kg_m": 2721.0999999999995,
+  "max_absolute_peak_change_pct": 109.3516078017923,
+  "zero_reported_runoff_change": 568,
+  "zero_reported_sediment_change": 400,
+  "rankings": [
+    {
+      "level": "0.006",
+      "metric": "pass_sediment_kg",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.006",
+      "metric": "peak_max_m3_s",
+      "nondecreasing": 35,
+      "total": 48
+    },
+    {
+      "level": "0.006",
+      "metric": "runoff_mm",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.01",
+      "metric": "pass_sediment_kg",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.01",
+      "metric": "peak_max_m3_s",
+      "nondecreasing": 35,
+      "total": 48
+    },
+    {
+      "level": "0.01",
+      "metric": "runoff_mm",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.02",
+      "metric": "pass_sediment_kg",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.02",
+      "metric": "peak_max_m3_s",
+      "nondecreasing": 35,
+      "total": 48
+    },
+    {
+      "level": "0.02",
+      "metric": "runoff_mm",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.04",
+      "metric": "pass_sediment_kg",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "0.04",
+      "metric": "peak_max_m3_s",
+      "nondecreasing": 35,
+      "total": 48
+    },
+    {
+      "level": "0.04",
+      "metric": "runoff_mm",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "current",
+      "metric": "pass_sediment_kg",
+      "nondecreasing": 47,
+      "total": 48
+    },
+    {
+      "level": "current",
+      "metric": "peak_max_m3_s",
+      "nondecreasing": 31,
+      "total": 48
+    },
+    {
+      "level": "current",
+      "metric": "runoff_mm",
+      "nondecreasing": 47,
+      "total": 48
+    }
+  ],
+  "extremes": {
+    "runoff_change_pct": [
+      {
+        "case": "gentle/H044_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "runoff_change_pct": 17.89131590194666
+      },
+      {
+        "case": "gentle/H048_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "runoff_change_pct": 17.89131590194666
+      },
+      {
+        "case": "gentle/H052_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "runoff_change_pct": 17.89131590194666
+      },
+      {
+        "case": "gentle/H092_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "runoff_change_pct": 17.89131590194666
+      },
+      {
+        "case": "gentle/H044_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "runoff_change_pct": 17.884089880334407
+      },
+      {
+        "case": "gentle/H048_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "runoff_change_pct": 17.884089880334407
+      },
+      {
+        "case": "gentle/H052_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "runoff_change_pct": 17.884089880334407
+      },
+      {
+        "case": "gentle/H092_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "runoff_change_pct": 17.884089880334407
+      },
+      {
+        "case": "gentle/H044_rr0.02000",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.02,
+        "runoff_change_pct": 17.82292294760932
+      },
+      {
+        "case": "gentle/H048_rr0.02000",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.02,
+        "runoff_change_pct": 17.82292294760932
+      },
+      {
+        "case": "gentle/H052_rr0.02000",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.02,
+        "runoff_change_pct": 17.82292294760932
+      },
+      {
+        "case": "gentle/H092_rr0.02000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.02,
+        "runoff_change_pct": 17.82292294760932
+      }
+    ],
+    "sediment_delta_kg_m": [
+      {
+        "case": "steep/H044_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 2721.0999999999995
+      },
+      {
+        "case": "steep/H048_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 2721.0999999999995
+      },
+      {
+        "case": "steep/H052_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 2721.0999999999995
+      },
+      {
+        "case": "steep/H092_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 2721.0999999999995
+      },
+      {
+        "case": "steep/H044_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 2357.0
+      },
+      {
+        "case": "steep/H048_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 2357.0
+      },
+      {
+        "case": "steep/H052_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 2357.0
+      },
+      {
+        "case": "steep/H092_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 2357.0
+      },
+      {
+        "case": "steep/H056_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 2108.3999999999996
+      },
+      {
+        "case": "gentle/H056_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "sediment_delta_kg_m": 1962.8999999999999
+      },
+      {
+        "case": "steep/H056_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 1844.9000000000005
+      },
+      {
+        "case": "gentle/H056_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "sediment_delta_kg_m": 1796.0000000000002
+      }
+    ],
+    "pass_sediment_delta_kg": [
+      {
+        "case": "steep/H044_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 279710.6103453424
+      },
+      {
+        "case": "steep/H048_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 279710.6103453424
+      },
+      {
+        "case": "steep/H052_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 279710.6103453424
+      },
+      {
+        "case": "steep/H092_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 279710.6103453424
+      },
+      {
+        "case": "steep/H044_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 242295.55410016835
+      },
+      {
+        "case": "steep/H048_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 242295.55410016835
+      },
+      {
+        "case": "steep/H052_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 242295.55410016835
+      },
+      {
+        "case": "steep/H092_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 242295.55410016835
+      },
+      {
+        "case": "steep/H056_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 216111.09059609368
+      },
+      {
+        "case": "gentle/H056_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "pass_sediment_delta_kg": 201146.8578120822
+      },
+      {
+        "case": "steep/H056_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 188838.69969823526
+      },
+      {
+        "case": "gentle/H056_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 3,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "pass_sediment_delta_kg": 183937.18564956982
+      }
+    ],
+    "peak_max_change_pct": [
+      {
+        "case": "steep/H089_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 0,
+        "profile": "steep",
+        "rrinit_m": 0.006,
+        "peak_max_change_pct": 109.3516078017923
+      },
+      {
+        "case": "steep/H089_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 0,
+        "profile": "steep",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 107.14812862414335
+      },
+      {
+        "case": "gentle/H053_rr0.04000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 0,
+        "profile": "gentle",
+        "rrinit_m": 0.04,
+        "peak_max_change_pct": 81.30503188053768
+      },
+      {
+        "case": "gentle/H053_rr0.02000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 0,
+        "profile": "gentle",
+        "rrinit_m": 0.02,
+        "peak_max_change_pct": 79.29007148969059
+      },
+      {
+        "case": "gentle/H053_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 0,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 73.9987302989318
+      },
+      {
+        "case": "gentle/H053_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 0,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "peak_max_change_pct": 73.38872174225068
+      },
+      {
+        "case": "gentle/H054_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 1,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 32.07974626189396
+      },
+      {
+        "case": "gentle/H054_rr0.00600",
+        "texture": "sand loam",
+        "vegetation": "shrub",
+        "severity": 1,
+        "profile": "gentle",
+        "rrinit_m": 0.006,
+        "peak_max_change_pct": 31.91360821628153
+      },
+      {
+        "case": "gentle/H043_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "forest",
+        "severity": 2,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 30.254610617486755
+      },
+      {
+        "case": "gentle/H047_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "deciduous forest",
+        "severity": 2,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 30.254610617486755
+      },
+      {
+        "case": "gentle/H051_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "mixed forest",
+        "severity": 2,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 30.254610617486755
+      },
+      {
+        "case": "gentle/H091_rr0.01000",
+        "texture": "sand loam",
+        "vegetation": "young forest",
+        "severity": 2,
+        "profile": "gentle",
+        "rrinit_m": 0.01,
+        "peak_max_change_pct": 30.254610617486755
+      }
+    ]
+  },
+  "note": "Descriptive sensitivity and weak rank order, not automatic acceptance; production defaults unchanged."
+}

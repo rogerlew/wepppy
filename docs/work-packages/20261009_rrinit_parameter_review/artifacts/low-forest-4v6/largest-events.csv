@@ -1,0 +1,401 @@
+id,texture,vegetation,kind,field,year,julian,presence,baseline,trial,delta
+2,clay loam,forest,pass,runvol,2000,12,both,77.657,77.657,0.0
+2,clay loam,forest,pass,runvol,2000,57,both,162.42,162.42,0.0
+2,clay loam,forest,pass,runvol,2000,61,both,189.88,189.88,0.0
+2,clay loam,forest,pass,runvol,2000,62,both,81.603,81.603,0.0
+2,clay loam,forest,pass,runvol,2000,63,both,200.18,200.18,0.0
+2,clay loam,forest,pass,peakro,2000,12,both,0.0070034,0.0070034,0.0
+2,clay loam,forest,pass,peakro,2000,57,both,0.007622,0.007622,0.0
+2,clay loam,forest,pass,peakro,2000,61,both,0.00359,0.00359,0.0
+2,clay loam,forest,pass,peakro,2000,62,both,0.0031845,0.0031845,0.0
+2,clay loam,forest,pass,peakro,2000,63,both,0.0038684,0.0038684,0.0
+2,clay loam,forest,pass,sediment_kg,2000,12,both,27.271662916999997,27.271662916999997,0.0
+2,clay loam,forest,pass,sediment_kg,2000,57,both,80.67580061999999,80.67580061999999,0.0
+2,clay loam,forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+2,clay loam,forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+2,clay loam,forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+2,clay loam,forest,ebe,Runoff,2000,12,both,8.6,8.6,0.0
+2,clay loam,forest,ebe,Runoff,2000,57,both,18.0,18.0,0.0
+2,clay loam,forest,ebe,Runoff,2000,61,both,21.1,21.1,0.0
+2,clay loam,forest,ebe,Runoff,2000,62,both,9.1,9.1,0.0
+2,clay loam,forest,ebe,Runoff,2000,63,both,22.2,22.2,0.0
+2,clay loam,forest,ebe,Sed.Del,2000,12,both,0.3,0.3,0.0
+2,clay loam,forest,ebe,Sed.Del,2000,57,both,0.8,0.8,0.0
+2,clay loam,forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+2,clay loam,forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+2,clay loam,forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,pass,runvol,2000,12,both,77.657,77.657,0.0
+6,clay loam,deciduous forest,pass,runvol,2000,57,both,162.42,162.42,0.0
+6,clay loam,deciduous forest,pass,runvol,2000,61,both,189.88,189.88,0.0
+6,clay loam,deciduous forest,pass,runvol,2000,62,both,81.603,81.603,0.0
+6,clay loam,deciduous forest,pass,runvol,2000,63,both,200.18,200.18,0.0
+6,clay loam,deciduous forest,pass,peakro,2000,12,both,0.0070034,0.0070034,0.0
+6,clay loam,deciduous forest,pass,peakro,2000,57,both,0.007622,0.007622,0.0
+6,clay loam,deciduous forest,pass,peakro,2000,61,both,0.00359,0.00359,0.0
+6,clay loam,deciduous forest,pass,peakro,2000,62,both,0.0031845,0.0031845,0.0
+6,clay loam,deciduous forest,pass,peakro,2000,63,both,0.0038684,0.0038684,0.0
+6,clay loam,deciduous forest,pass,sediment_kg,2000,12,both,27.271662916999997,27.271662916999997,0.0
+6,clay loam,deciduous forest,pass,sediment_kg,2000,57,both,80.67580061999999,80.67580061999999,0.0
+6,clay loam,deciduous forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,ebe,Runoff,2000,12,both,8.6,8.6,0.0
+6,clay loam,deciduous forest,ebe,Runoff,2000,57,both,18.0,18.0,0.0
+6,clay loam,deciduous forest,ebe,Runoff,2000,61,both,21.1,21.1,0.0
+6,clay loam,deciduous forest,ebe,Runoff,2000,62,both,9.1,9.1,0.0
+6,clay loam,deciduous forest,ebe,Runoff,2000,63,both,22.2,22.2,0.0
+6,clay loam,deciduous forest,ebe,Sed.Del,2000,12,both,0.3,0.3,0.0
+6,clay loam,deciduous forest,ebe,Sed.Del,2000,57,both,0.8,0.8,0.0
+6,clay loam,deciduous forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+6,clay loam,deciduous forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+10,clay loam,mixed forest,pass,runvol,2000,12,both,77.657,77.657,0.0
+10,clay loam,mixed forest,pass,runvol,2000,57,both,162.42,162.42,0.0
+10,clay loam,mixed forest,pass,runvol,2000,61,both,189.88,189.88,0.0
+10,clay loam,mixed forest,pass,runvol,2000,62,both,81.603,81.603,0.0
+10,clay loam,mixed forest,pass,runvol,2000,63,both,200.18,200.18,0.0
+10,clay loam,mixed forest,pass,peakro,2000,12,both,0.0070034,0.0070034,0.0
+10,clay loam,mixed forest,pass,peakro,2000,57,both,0.007622,0.007622,0.0
+10,clay loam,mixed forest,pass,peakro,2000,61,both,0.00359,0.00359,0.0
+10,clay loam,mixed forest,pass,peakro,2000,62,both,0.0031845,0.0031845,0.0
+10,clay loam,mixed forest,pass,peakro,2000,63,both,0.0038684,0.0038684,0.0
+10,clay loam,mixed forest,pass,sediment_kg,2000,12,both,27.271662916999997,27.271662916999997,0.0
+10,clay loam,mixed forest,pass,sediment_kg,2000,57,both,80.67580061999999,80.67580061999999,0.0
+10,clay loam,mixed forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+10,clay loam,mixed forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+10,clay loam,mixed forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+10,clay loam,mixed forest,ebe,Runoff,2000,12,both,8.6,8.6,0.0
+10,clay loam,mixed forest,ebe,Runoff,2000,57,both,18.0,18.0,0.0
+10,clay loam,mixed forest,ebe,Runoff,2000,61,both,21.1,21.1,0.0
+10,clay loam,mixed forest,ebe,Runoff,2000,62,both,9.1,9.1,0.0
+10,clay loam,mixed forest,ebe,Runoff,2000,63,both,22.2,22.2,0.0
+10,clay loam,mixed forest,ebe,Sed.Del,2000,12,both,0.3,0.3,0.0
+10,clay loam,mixed forest,ebe,Sed.Del,2000,57,both,0.8,0.8,0.0
+10,clay loam,mixed forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+10,clay loam,mixed forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+10,clay loam,mixed forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+22,loam,forest,pass,runvol,2000,12,both,17.313,17.313,0.0
+22,loam,forest,pass,runvol,2000,57,both,73.693,73.693,0.0
+22,loam,forest,pass,runvol,2000,61,both,177.35,177.35,0.0
+22,loam,forest,pass,runvol,2000,62,both,80.017,80.017,0.0
+22,loam,forest,pass,runvol,2000,63,both,198.6,198.6,0.0
+22,loam,forest,pass,peakro,2000,12,both,0.0048093,0.0048093,0.0
+22,loam,forest,pass,peakro,2000,57,both,0.0071986,0.0071986,0.0
+22,loam,forest,pass,peakro,2000,61,both,0.0035716,0.0035716,0.0
+22,loam,forest,pass,peakro,2000,62,both,0.0031661,0.0031661,0.0
+22,loam,forest,pass,peakro,2000,63,both,0.00385,0.00385,0.0
+22,loam,forest,pass,sediment_kg,2000,12,both,0.0,0.0,0.0
+22,loam,forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+22,loam,forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+22,loam,forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+22,loam,forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+22,loam,forest,ebe,Runoff,2000,12,both,1.9,1.9,0.0
+22,loam,forest,ebe,Runoff,2000,57,both,8.2,8.2,0.0
+22,loam,forest,ebe,Runoff,2000,61,both,19.7,19.7,0.0
+22,loam,forest,ebe,Runoff,2000,62,both,8.9,8.9,0.0
+22,loam,forest,ebe,Runoff,2000,63,both,22.1,22.1,0.0
+22,loam,forest,ebe,Sed.Del,2000,12,both,0.0,0.0,0.0
+22,loam,forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+22,loam,forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+22,loam,forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+22,loam,forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+26,loam,deciduous forest,pass,runvol,2000,12,both,17.313,17.313,0.0
+26,loam,deciduous forest,pass,runvol,2000,57,both,73.693,73.693,0.0
+26,loam,deciduous forest,pass,runvol,2000,61,both,177.35,177.35,0.0
+26,loam,deciduous forest,pass,runvol,2000,62,both,80.017,80.017,0.0
+26,loam,deciduous forest,pass,runvol,2000,63,both,198.6,198.6,0.0
+26,loam,deciduous forest,pass,peakro,2000,12,both,0.0048093,0.0048093,0.0
+26,loam,deciduous forest,pass,peakro,2000,57,both,0.0071986,0.0071986,0.0
+26,loam,deciduous forest,pass,peakro,2000,61,both,0.0035716,0.0035716,0.0
+26,loam,deciduous forest,pass,peakro,2000,62,both,0.0031661,0.0031661,0.0
+26,loam,deciduous forest,pass,peakro,2000,63,both,0.00385,0.00385,0.0
+26,loam,deciduous forest,pass,sediment_kg,2000,12,both,0.0,0.0,0.0
+26,loam,deciduous forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+26,loam,deciduous forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+26,loam,deciduous forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+26,loam,deciduous forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+26,loam,deciduous forest,ebe,Runoff,2000,12,both,1.9,1.9,0.0
+26,loam,deciduous forest,ebe,Runoff,2000,57,both,8.2,8.2,0.0
+26,loam,deciduous forest,ebe,Runoff,2000,61,both,19.7,19.7,0.0
+26,loam,deciduous forest,ebe,Runoff,2000,62,both,8.9,8.9,0.0
+26,loam,deciduous forest,ebe,Runoff,2000,63,both,22.1,22.1,0.0
+26,loam,deciduous forest,ebe,Sed.Del,2000,12,both,0.0,0.0,0.0
+26,loam,deciduous forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+26,loam,deciduous forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+26,loam,deciduous forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+26,loam,deciduous forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+30,loam,mixed forest,pass,runvol,2000,12,both,17.313,17.313,0.0
+30,loam,mixed forest,pass,runvol,2000,57,both,73.693,73.693,0.0
+30,loam,mixed forest,pass,runvol,2000,61,both,177.35,177.35,0.0
+30,loam,mixed forest,pass,runvol,2000,62,both,80.017,80.017,0.0
+30,loam,mixed forest,pass,runvol,2000,63,both,198.6,198.6,0.0
+30,loam,mixed forest,pass,peakro,2000,12,both,0.0048093,0.0048093,0.0
+30,loam,mixed forest,pass,peakro,2000,57,both,0.0071986,0.0071986,0.0
+30,loam,mixed forest,pass,peakro,2000,61,both,0.0035716,0.0035716,0.0
+30,loam,mixed forest,pass,peakro,2000,62,both,0.0031661,0.0031661,0.0
+30,loam,mixed forest,pass,peakro,2000,63,both,0.00385,0.00385,0.0
+30,loam,mixed forest,pass,sediment_kg,2000,12,both,0.0,0.0,0.0
+30,loam,mixed forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+30,loam,mixed forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+30,loam,mixed forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+30,loam,mixed forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+30,loam,mixed forest,ebe,Runoff,2000,12,both,1.9,1.9,0.0
+30,loam,mixed forest,ebe,Runoff,2000,57,both,8.2,8.2,0.0
+30,loam,mixed forest,ebe,Runoff,2000,61,both,19.7,19.7,0.0
+30,loam,mixed forest,ebe,Runoff,2000,62,both,8.9,8.9,0.0
+30,loam,mixed forest,ebe,Runoff,2000,63,both,22.1,22.1,0.0
+30,loam,mixed forest,ebe,Sed.Del,2000,12,both,0.0,0.0,0.0
+30,loam,mixed forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+30,loam,mixed forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+30,loam,mixed forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+30,loam,mixed forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+42,sand loam,forest,pass,runvol,2041,194,both,16.045,16.013,-0.03200000000000003
+42,sand loam,forest,pass,runvol,2021,273,both,11.235,11.212,-0.022999999999999687
+42,sand loam,forest,pass,runvol,2022,1,both,104.05,104.06,0.010000000000005116
+42,sand loam,forest,pass,runvol,2065,102,both,996.96,996.97,0.009999999999990905
+42,sand loam,forest,pass,runvol,2000,68,both,78.471,78.471,0.0
+42,sand loam,forest,pass,peakro,2009,241,both,0.088283,0.088103,-0.0001799999999999996
+42,sand loam,forest,pass,peakro,2037,196,both,0.044949,0.044888,-6.1000000000005494e-05
+42,sand loam,forest,pass,peakro,2041,194,both,0.0080965,0.0080554,-4.1099999999998776e-05
+42,sand loam,forest,pass,peakro,2096,235,both,0.019932,0.019892,-3.999999999999837e-05
+42,sand loam,forest,pass,peakro,2021,273,both,0.019132,0.019094,-3.799999999999984e-05
+42,sand loam,forest,pass,sediment_kg,2079,197,both,298.15611534,283.58538967,-14.570725670000002
+42,sand loam,forest,pass,sediment_kg,2034,134,both,216.15686148999998,203.29997448,-12.85688700999998
+42,sand loam,forest,pass,sediment_kg,2083,32,both,9.040679268,0.0,-9.040679268
+42,sand loam,forest,pass,sediment_kg,2065,102,both,8.857299378571346,0.0,-8.857299378571346
+42,sand loam,forest,pass,sediment_kg,2016,23,both,8.349517580907248,0.0,-8.349517580907248
+42,sand loam,forest,ebe,Runoff,2000,68,both,8.7,8.7,0.0
+42,sand loam,forest,ebe,Runoff,2000,69,both,7.9,7.9,0.0
+42,sand loam,forest,ebe,Runoff,2000,70,both,9.0,9.0,0.0
+42,sand loam,forest,ebe,Runoff,2000,71,both,3.4,3.4,0.0
+42,sand loam,forest,ebe,Runoff,2000,334,both,1.4,1.4,0.0
+42,sand loam,forest,ebe,Sed.Del,2034,134,both,2.1,2.0,-0.10000000000000009
+42,sand loam,forest,ebe,Sed.Del,2074,127,both,1.1,1.0,-0.10000000000000009
+42,sand loam,forest,ebe,Sed.Del,2079,197,both,2.9,2.8,-0.10000000000000009
+42,sand loam,forest,ebe,Sed.Del,2016,23,both,0.1,0.0,-0.1
+42,sand loam,forest,ebe,Sed.Del,2020,318,both,0.1,0.0,-0.1
+46,sand loam,deciduous forest,pass,runvol,2041,194,both,16.045,16.013,-0.03200000000000003
+46,sand loam,deciduous forest,pass,runvol,2021,273,both,11.235,11.212,-0.022999999999999687
+46,sand loam,deciduous forest,pass,runvol,2022,1,both,104.05,104.06,0.010000000000005116
+46,sand loam,deciduous forest,pass,runvol,2065,102,both,996.96,996.97,0.009999999999990905
+46,sand loam,deciduous forest,pass,runvol,2000,68,both,78.471,78.471,0.0
+46,sand loam,deciduous forest,pass,peakro,2009,241,both,0.088283,0.088103,-0.0001799999999999996
+46,sand loam,deciduous forest,pass,peakro,2037,196,both,0.044949,0.044888,-6.1000000000005494e-05
+46,sand loam,deciduous forest,pass,peakro,2041,194,both,0.0080965,0.0080554,-4.1099999999998776e-05
+46,sand loam,deciduous forest,pass,peakro,2096,235,both,0.019932,0.019892,-3.999999999999837e-05
+46,sand loam,deciduous forest,pass,peakro,2021,273,both,0.019132,0.019094,-3.799999999999984e-05
+46,sand loam,deciduous forest,pass,sediment_kg,2079,197,both,298.15611534,283.58538967,-14.570725670000002
+46,sand loam,deciduous forest,pass,sediment_kg,2034,134,both,216.15686148999998,203.29997448,-12.85688700999998
+46,sand loam,deciduous forest,pass,sediment_kg,2083,32,both,9.040679268,0.0,-9.040679268
+46,sand loam,deciduous forest,pass,sediment_kg,2065,102,both,8.857299378571346,0.0,-8.857299378571346
+46,sand loam,deciduous forest,pass,sediment_kg,2016,23,both,8.349517580907248,0.0,-8.349517580907248
+46,sand loam,deciduous forest,ebe,Runoff,2000,68,both,8.7,8.7,0.0
+46,sand loam,deciduous forest,ebe,Runoff,2000,69,both,7.9,7.9,0.0
+46,sand loam,deciduous forest,ebe,Runoff,2000,70,both,9.0,9.0,0.0
+46,sand loam,deciduous forest,ebe,Runoff,2000,71,both,3.4,3.4,0.0
+46,sand loam,deciduous forest,ebe,Runoff,2000,334,both,1.4,1.4,0.0
+46,sand loam,deciduous forest,ebe,Sed.Del,2034,134,both,2.1,2.0,-0.10000000000000009
+46,sand loam,deciduous forest,ebe,Sed.Del,2074,127,both,1.1,1.0,-0.10000000000000009
+46,sand loam,deciduous forest,ebe,Sed.Del,2079,197,both,2.9,2.8,-0.10000000000000009
+46,sand loam,deciduous forest,ebe,Sed.Del,2016,23,both,0.1,0.0,-0.1
+46,sand loam,deciduous forest,ebe,Sed.Del,2020,318,both,0.1,0.0,-0.1
+50,sand loam,mixed forest,pass,runvol,2041,194,both,16.045,16.013,-0.03200000000000003
+50,sand loam,mixed forest,pass,runvol,2021,273,both,11.235,11.212,-0.022999999999999687
+50,sand loam,mixed forest,pass,runvol,2022,1,both,104.05,104.06,0.010000000000005116
+50,sand loam,mixed forest,pass,runvol,2065,102,both,996.96,996.97,0.009999999999990905
+50,sand loam,mixed forest,pass,runvol,2000,68,both,78.471,78.471,0.0
+50,sand loam,mixed forest,pass,peakro,2009,241,both,0.088283,0.088103,-0.0001799999999999996
+50,sand loam,mixed forest,pass,peakro,2037,196,both,0.044949,0.044888,-6.1000000000005494e-05
+50,sand loam,mixed forest,pass,peakro,2041,194,both,0.0080965,0.0080554,-4.1099999999998776e-05
+50,sand loam,mixed forest,pass,peakro,2096,235,both,0.019932,0.019892,-3.999999999999837e-05
+50,sand loam,mixed forest,pass,peakro,2021,273,both,0.019132,0.019094,-3.799999999999984e-05
+50,sand loam,mixed forest,pass,sediment_kg,2079,197,both,298.15611534,283.58538967,-14.570725670000002
+50,sand loam,mixed forest,pass,sediment_kg,2034,134,both,216.15686148999998,203.29997448,-12.85688700999998
+50,sand loam,mixed forest,pass,sediment_kg,2083,32,both,9.040679268,0.0,-9.040679268
+50,sand loam,mixed forest,pass,sediment_kg,2065,102,both,8.857299378571346,0.0,-8.857299378571346
+50,sand loam,mixed forest,pass,sediment_kg,2016,23,both,8.349517580907248,0.0,-8.349517580907248
+50,sand loam,mixed forest,ebe,Runoff,2000,68,both,8.7,8.7,0.0
+50,sand loam,mixed forest,ebe,Runoff,2000,69,both,7.9,7.9,0.0
+50,sand loam,mixed forest,ebe,Runoff,2000,70,both,9.0,9.0,0.0
+50,sand loam,mixed forest,ebe,Runoff,2000,71,both,3.4,3.4,0.0
+50,sand loam,mixed forest,ebe,Runoff,2000,334,both,1.4,1.4,0.0
+50,sand loam,mixed forest,ebe,Sed.Del,2034,134,both,2.1,2.0,-0.10000000000000009
+50,sand loam,mixed forest,ebe,Sed.Del,2074,127,both,1.1,1.0,-0.10000000000000009
+50,sand loam,mixed forest,ebe,Sed.Del,2079,197,both,2.9,2.8,-0.10000000000000009
+50,sand loam,mixed forest,ebe,Sed.Del,2016,23,both,0.1,0.0,-0.1
+50,sand loam,mixed forest,ebe,Sed.Del,2020,318,both,0.1,0.0,-0.1
+62,silt loam,forest,pass,runvol,2000,57,both,20.776,20.776,0.0
+62,silt loam,forest,pass,runvol,2000,61,both,88.778,88.778,0.0
+62,silt loam,forest,pass,runvol,2000,62,both,74.238,74.238,0.0
+62,silt loam,forest,pass,runvol,2000,63,both,192.82,192.82,0.0
+62,silt loam,forest,pass,runvol,2000,64,both,21.111,21.111,0.0
+62,silt loam,forest,pass,peakro,2000,57,both,0.0057711,0.0057711,0.0
+62,silt loam,forest,pass,peakro,2000,61,both,0.0035048,0.0035048,0.0
+62,silt loam,forest,pass,peakro,2000,62,both,0.0030993,0.0030993,0.0
+62,silt loam,forest,pass,peakro,2000,63,both,0.0037832,0.0037832,0.0
+62,silt loam,forest,pass,peakro,2000,64,both,0.0028258,0.0028258,0.0
+62,silt loam,forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+62,silt loam,forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+62,silt loam,forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+62,silt loam,forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+62,silt loam,forest,pass,sediment_kg,2000,64,both,0.0,0.0,0.0
+62,silt loam,forest,ebe,Runoff,2000,57,both,2.3,2.3,0.0
+62,silt loam,forest,ebe,Runoff,2000,61,both,9.9,9.9,0.0
+62,silt loam,forest,ebe,Runoff,2000,62,both,8.2,8.2,0.0
+62,silt loam,forest,ebe,Runoff,2000,63,both,21.4,21.4,0.0
+62,silt loam,forest,ebe,Runoff,2000,64,both,2.3,2.3,0.0
+62,silt loam,forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+62,silt loam,forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+62,silt loam,forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+62,silt loam,forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+62,silt loam,forest,ebe,Sed.Del,2000,64,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,pass,runvol,2000,57,both,20.776,20.776,0.0
+66,silt loam,deciduous forest,pass,runvol,2000,61,both,88.778,88.778,0.0
+66,silt loam,deciduous forest,pass,runvol,2000,62,both,74.238,74.238,0.0
+66,silt loam,deciduous forest,pass,runvol,2000,63,both,192.82,192.82,0.0
+66,silt loam,deciduous forest,pass,runvol,2000,64,both,21.111,21.111,0.0
+66,silt loam,deciduous forest,pass,peakro,2000,57,both,0.0057711,0.0057711,0.0
+66,silt loam,deciduous forest,pass,peakro,2000,61,both,0.0035048,0.0035048,0.0
+66,silt loam,deciduous forest,pass,peakro,2000,62,both,0.0030993,0.0030993,0.0
+66,silt loam,deciduous forest,pass,peakro,2000,63,both,0.0037832,0.0037832,0.0
+66,silt loam,deciduous forest,pass,peakro,2000,64,both,0.0028258,0.0028258,0.0
+66,silt loam,deciduous forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,pass,sediment_kg,2000,64,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,ebe,Runoff,2000,57,both,2.3,2.3,0.0
+66,silt loam,deciduous forest,ebe,Runoff,2000,61,both,9.9,9.9,0.0
+66,silt loam,deciduous forest,ebe,Runoff,2000,62,both,8.2,8.2,0.0
+66,silt loam,deciduous forest,ebe,Runoff,2000,63,both,21.4,21.4,0.0
+66,silt loam,deciduous forest,ebe,Runoff,2000,64,both,2.3,2.3,0.0
+66,silt loam,deciduous forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+66,silt loam,deciduous forest,ebe,Sed.Del,2000,64,both,0.0,0.0,0.0
+70,silt loam,mixed forest,pass,runvol,2000,57,both,20.776,20.776,0.0
+70,silt loam,mixed forest,pass,runvol,2000,61,both,88.778,88.778,0.0
+70,silt loam,mixed forest,pass,runvol,2000,62,both,74.238,74.238,0.0
+70,silt loam,mixed forest,pass,runvol,2000,63,both,192.82,192.82,0.0
+70,silt loam,mixed forest,pass,runvol,2000,64,both,21.111,21.111,0.0
+70,silt loam,mixed forest,pass,peakro,2000,57,both,0.0057711,0.0057711,0.0
+70,silt loam,mixed forest,pass,peakro,2000,61,both,0.0035048,0.0035048,0.0
+70,silt loam,mixed forest,pass,peakro,2000,62,both,0.0030993,0.0030993,0.0
+70,silt loam,mixed forest,pass,peakro,2000,63,both,0.0037832,0.0037832,0.0
+70,silt loam,mixed forest,pass,peakro,2000,64,both,0.0028258,0.0028258,0.0
+70,silt loam,mixed forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+70,silt loam,mixed forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+70,silt loam,mixed forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+70,silt loam,mixed forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+70,silt loam,mixed forest,pass,sediment_kg,2000,64,both,0.0,0.0,0.0
+70,silt loam,mixed forest,ebe,Runoff,2000,57,both,2.3,2.3,0.0
+70,silt loam,mixed forest,ebe,Runoff,2000,61,both,9.9,9.9,0.0
+70,silt loam,mixed forest,ebe,Runoff,2000,62,both,8.2,8.2,0.0
+70,silt loam,mixed forest,ebe,Runoff,2000,63,both,21.4,21.4,0.0
+70,silt loam,mixed forest,ebe,Runoff,2000,64,both,2.3,2.3,0.0
+70,silt loam,mixed forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+70,silt loam,mixed forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+70,silt loam,mixed forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+70,silt loam,mixed forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+70,silt loam,mixed forest,ebe,Sed.Del,2000,64,both,0.0,0.0,0.0
+82,clay loam,young forest,pass,runvol,2000,12,both,77.657,77.657,0.0
+82,clay loam,young forest,pass,runvol,2000,57,both,162.42,162.42,0.0
+82,clay loam,young forest,pass,runvol,2000,61,both,189.88,189.88,0.0
+82,clay loam,young forest,pass,runvol,2000,62,both,81.603,81.603,0.0
+82,clay loam,young forest,pass,runvol,2000,63,both,200.18,200.18,0.0
+82,clay loam,young forest,pass,peakro,2000,12,both,0.0070034,0.0070034,0.0
+82,clay loam,young forest,pass,peakro,2000,57,both,0.007622,0.007622,0.0
+82,clay loam,young forest,pass,peakro,2000,61,both,0.00359,0.00359,0.0
+82,clay loam,young forest,pass,peakro,2000,62,both,0.0031845,0.0031845,0.0
+82,clay loam,young forest,pass,peakro,2000,63,both,0.0038684,0.0038684,0.0
+82,clay loam,young forest,pass,sediment_kg,2000,12,both,27.271662916999997,27.271662916999997,0.0
+82,clay loam,young forest,pass,sediment_kg,2000,57,both,80.67580061999999,80.67580061999999,0.0
+82,clay loam,young forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+82,clay loam,young forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+82,clay loam,young forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+82,clay loam,young forest,ebe,Runoff,2000,12,both,8.6,8.6,0.0
+82,clay loam,young forest,ebe,Runoff,2000,57,both,18.0,18.0,0.0
+82,clay loam,young forest,ebe,Runoff,2000,61,both,21.1,21.1,0.0
+82,clay loam,young forest,ebe,Runoff,2000,62,both,9.1,9.1,0.0
+82,clay loam,young forest,ebe,Runoff,2000,63,both,22.2,22.2,0.0
+82,clay loam,young forest,ebe,Sed.Del,2000,12,both,0.3,0.3,0.0
+82,clay loam,young forest,ebe,Sed.Del,2000,57,both,0.8,0.8,0.0
+82,clay loam,young forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+82,clay loam,young forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+82,clay loam,young forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+86,loam,young forest,pass,runvol,2000,12,both,17.313,17.313,0.0
+86,loam,young forest,pass,runvol,2000,57,both,73.693,73.693,0.0
+86,loam,young forest,pass,runvol,2000,61,both,177.35,177.35,0.0
+86,loam,young forest,pass,runvol,2000,62,both,80.017,80.017,0.0
+86,loam,young forest,pass,runvol,2000,63,both,198.6,198.6,0.0
+86,loam,young forest,pass,peakro,2000,12,both,0.0048093,0.0048093,0.0
+86,loam,young forest,pass,peakro,2000,57,both,0.0071986,0.0071986,0.0
+86,loam,young forest,pass,peakro,2000,61,both,0.0035716,0.0035716,0.0
+86,loam,young forest,pass,peakro,2000,62,both,0.0031661,0.0031661,0.0
+86,loam,young forest,pass,peakro,2000,63,both,0.00385,0.00385,0.0
+86,loam,young forest,pass,sediment_kg,2000,12,both,0.0,0.0,0.0
+86,loam,young forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+86,loam,young forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+86,loam,young forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+86,loam,young forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+86,loam,young forest,ebe,Runoff,2000,12,both,1.9,1.9,0.0
+86,loam,young forest,ebe,Runoff,2000,57,both,8.2,8.2,0.0
+86,loam,young forest,ebe,Runoff,2000,61,both,19.7,19.7,0.0
+86,loam,young forest,ebe,Runoff,2000,62,both,8.9,8.9,0.0
+86,loam,young forest,ebe,Runoff,2000,63,both,22.1,22.1,0.0
+86,loam,young forest,ebe,Sed.Del,2000,12,both,0.0,0.0,0.0
+86,loam,young forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+86,loam,young forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+86,loam,young forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+86,loam,young forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+90,sand loam,young forest,pass,runvol,2041,194,both,16.045,16.013,-0.03200000000000003
+90,sand loam,young forest,pass,runvol,2021,273,both,11.235,11.212,-0.022999999999999687
+90,sand loam,young forest,pass,runvol,2022,1,both,104.05,104.06,0.010000000000005116
+90,sand loam,young forest,pass,runvol,2065,102,both,996.96,996.97,0.009999999999990905
+90,sand loam,young forest,pass,runvol,2000,68,both,78.471,78.471,0.0
+90,sand loam,young forest,pass,peakro,2009,241,both,0.088283,0.088103,-0.0001799999999999996
+90,sand loam,young forest,pass,peakro,2037,196,both,0.044949,0.044888,-6.1000000000005494e-05
+90,sand loam,young forest,pass,peakro,2041,194,both,0.0080965,0.0080554,-4.1099999999998776e-05
+90,sand loam,young forest,pass,peakro,2096,235,both,0.019932,0.019892,-3.999999999999837e-05
+90,sand loam,young forest,pass,peakro,2021,273,both,0.019132,0.019094,-3.799999999999984e-05
+90,sand loam,young forest,pass,sediment_kg,2079,197,both,298.15611534,283.58538967,-14.570725670000002
+90,sand loam,young forest,pass,sediment_kg,2034,134,both,216.15686148999998,203.29997448,-12.85688700999998
+90,sand loam,young forest,pass,sediment_kg,2083,32,both,9.040679268,0.0,-9.040679268
+90,sand loam,young forest,pass,sediment_kg,2065,102,both,8.857299378571346,0.0,-8.857299378571346
+90,sand loam,young forest,pass,sediment_kg,2016,23,both,8.349517580907248,0.0,-8.349517580907248
+90,sand loam,young forest,ebe,Runoff,2000,68,both,8.7,8.7,0.0
+90,sand loam,young forest,ebe,Runoff,2000,69,both,7.9,7.9,0.0
+90,sand loam,young forest,ebe,Runoff,2000,70,both,9.0,9.0,0.0
+90,sand loam,young forest,ebe,Runoff,2000,71,both,3.4,3.4,0.0
+90,sand loam,young forest,ebe,Runoff,2000,334,both,1.4,1.4,0.0
+90,sand loam,young forest,ebe,Sed.Del,2034,134,both,2.1,2.0,-0.10000000000000009
+90,sand loam,young forest,ebe,Sed.Del,2074,127,both,1.1,1.0,-0.10000000000000009
+90,sand loam,young forest,ebe,Sed.Del,2079,197,both,2.9,2.8,-0.10000000000000009
+90,sand loam,young forest,ebe,Sed.Del,2016,23,both,0.1,0.0,-0.1
+90,sand loam,young forest,ebe,Sed.Del,2020,318,both,0.1,0.0,-0.1
+94,silt loam,young forest,pass,runvol,2000,57,both,20.776,20.776,0.0
+94,silt loam,young forest,pass,runvol,2000,61,both,88.778,88.778,0.0
+94,silt loam,young forest,pass,runvol,2000,62,both,74.238,74.238,0.0
+94,silt loam,young forest,pass,runvol,2000,63,both,192.82,192.82,0.0
+94,silt loam,young forest,pass,runvol,2000,64,both,21.111,21.111,0.0
+94,silt loam,young forest,pass,peakro,2000,57,both,0.0057711,0.0057711,0.0
+94,silt loam,young forest,pass,peakro,2000,61,both,0.0035048,0.0035048,0.0
+94,silt loam,young forest,pass,peakro,2000,62,both,0.0030993,0.0030993,0.0
+94,silt loam,young forest,pass,peakro,2000,63,both,0.0037832,0.0037832,0.0
+94,silt loam,young forest,pass,peakro,2000,64,both,0.0028258,0.0028258,0.0
+94,silt loam,young forest,pass,sediment_kg,2000,57,both,0.0,0.0,0.0
+94,silt loam,young forest,pass,sediment_kg,2000,61,both,0.0,0.0,0.0
+94,silt loam,young forest,pass,sediment_kg,2000,62,both,0.0,0.0,0.0
+94,silt loam,young forest,pass,sediment_kg,2000,63,both,0.0,0.0,0.0
+94,silt loam,young forest,pass,sediment_kg,2000,64,both,0.0,0.0,0.0
+94,silt loam,young forest,ebe,Runoff,2000,57,both,2.3,2.3,0.0
+94,silt loam,young forest,ebe,Runoff,2000,61,both,9.9,9.9,0.0
+94,silt loam,young forest,ebe,Runoff,2000,62,both,8.2,8.2,0.0
+94,silt loam,young forest,ebe,Runoff,2000,63,both,21.4,21.4,0.0
+94,silt loam,young forest,ebe,Runoff,2000,64,both,2.3,2.3,0.0
+94,silt loam,young forest,ebe,Sed.Del,2000,57,both,0.0,0.0,0.0
+94,silt loam,young forest,ebe,Sed.Del,2000,61,both,0.0,0.0,0.0
+94,silt loam,young forest,ebe,Sed.Del,2000,62,both,0.0,0.0,0.0
+94,silt loam,young forest,ebe,Sed.Del,2000,63,both,0.0,0.0,0.0
+94,silt loam,young forest,ebe,Sed.Del,2000,64,both,0.0,0.0,0.0

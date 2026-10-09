@@ -1,0 +1,2231 @@
+{
+  "cases": 96,
+  "files": 768,
+  "byte_identical": false,
+  "mismatches": [
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.element.dat"
+    },
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.grph.dat"
+    },
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.loss.dat"
+    },
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.pass.dat"
+    },
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.soil.dat"
+    },
+    {
+      "case": "steep/H001_rr0.10000",
+      "file": "H1.wat.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.element.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.grph.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.loss.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.pass.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.soil.dat"
+    },
+    {
+      "case": "steep/H002_rr0.04000",
+      "file": "H2.wat.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.element.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.grph.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.loss.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.pass.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.soil.dat"
+    },
+    {
+      "case": "steep/H003_rr0.06000",
+      "file": "H3.wat.dat"
+    },
+    {
+      "case": "steep/H004_rr0.06000",
+      "file": "H4.element.dat"
+    },
+    {
+      "case": "steep/H004_rr0.06000",
+      "file": "H4.grph.dat"
+    },
+    {
+      "case": "steep/H004_rr0.06000",
+      "file": "H4.pass.dat"
+    },
+    {
+      "case": "steep/H004_rr0.06000",
+      "file": "H4.soil.dat"
+    },
+    {
+      "case": "steep/H004_rr0.06000",
+      "file": "H4.wat.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.element.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.grph.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.loss.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.pass.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.soil.dat"
+    },
+    {
+      "case": "steep/H005_rr0.10000",
+      "file": "H5.wat.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.element.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.grph.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.loss.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.pass.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.soil.dat"
+    },
+    {
+      "case": "steep/H006_rr0.04000",
+      "file": "H6.wat.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.element.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.grph.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.loss.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.pass.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.soil.dat"
+    },
+    {
+      "case": "steep/H007_rr0.06000",
+      "file": "H7.wat.dat"
+    },
+    {
+      "case": "steep/H008_rr0.06000",
+      "file": "H8.element.dat"
+    },
+    {
+      "case": "steep/H008_rr0.06000",
+      "file": "H8.grph.dat"
+    },
+    {
+      "case": "steep/H008_rr0.06000",
+      "file": "H8.pass.dat"
+    },
+    {
+      "case": "steep/H008_rr0.06000",
+      "file": "H8.soil.dat"
+    },
+    {
+      "case": "steep/H008_rr0.06000",
+      "file": "H8.wat.dat"
+    },
+    {
+      "case": "steep/H009_rr0.10000",
+      "file": "H9.grph.dat"
+    },
+    {
+      "case": "steep/H009_rr0.10000",
+      "file": "H9.pass.dat"
+    },
+    {
+      "case": "steep/H009_rr0.10000",
+      "file": "H9.soil.dat"
+    },
+    {
+      "case": "steep/H009_rr0.10000",
+      "file": "H9.wat.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.element.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.grph.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.loss.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.pass.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.soil.dat"
+    },
+    {
+      "case": "steep/H010_rr0.04000",
+      "file": "H10.wat.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.element.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.grph.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.loss.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.pass.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.soil.dat"
+    },
+    {
+      "case": "steep/H011_rr0.06000",
+      "file": "H11.wat.dat"
+    },
+    {
+      "case": "steep/H012_rr0.06000",
+      "file": "H12.element.dat"
+    },
+    {
+      "case": "steep/H012_rr0.06000",
+      "file": "H12.grph.dat"
+    },
+    {
+      "case": "steep/H012_rr0.06000",
+      "file": "H12.pass.dat"
+    },
+    {
+      "case": "steep/H012_rr0.06000",
+      "file": "H12.soil.dat"
+    },
+    {
+      "case": "steep/H012_rr0.06000",
+      "file": "H12.wat.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.ebe.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.element.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.grph.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.loss.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.pass.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.plot.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.soil.dat"
+    },
+    {
+      "case": "steep/H013_rr0.06000",
+      "file": "H13.wat.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.ebe.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.element.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.grph.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.pass.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.soil.dat"
+    },
+    {
+      "case": "steep/H014_rr0.06000",
+      "file": "H14.wat.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.element.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.grph.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.loss.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.pass.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.plot.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.soil.dat"
+    },
+    {
+      "case": "steep/H015_rr0.06000",
+      "file": "H15.wat.dat"
+    },
+    {
+      "case": "steep/H016_rr0.06000",
+      "file": "H16.ebe.dat"
+    },
+    {
+      "case": "steep/H016_rr0.06000",
+      "file": "H16.element.dat"
+    },
+    {
+      "case": "steep/H016_rr0.06000",
+      "file": "H16.grph.dat"
+    },
+    {
+      "case": "steep/H016_rr0.06000",
+      "file": "H16.pass.dat"
+    },
+    {
+      "case": "steep/H016_rr0.06000",
+      "file": "H16.wat.dat"
+    },
+    {
+      "case": "steep/H017_rr0.02000",
+      "file": "H17.element.dat"
+    },
+    {
+      "case": "steep/H017_rr0.02000",
+      "file": "H17.grph.dat"
+    },
+    {
+      "case": "steep/H017_rr0.02000",
+      "file": "H17.pass.dat"
+    },
+    {
+      "case": "steep/H017_rr0.02000",
+      "file": "H17.soil.dat"
+    },
+    {
+      "case": "steep/H017_rr0.02000",
+      "file": "H17.wat.dat"
+    },
+    {
+      "case": "steep/H018_rr0.02000",
+      "file": "H18.grph.dat"
+    },
+    {
+      "case": "steep/H018_rr0.02000",
+      "file": "H18.pass.dat"
+    },
+    {
+      "case": "steep/H018_rr0.02000",
+      "file": "H18.wat.dat"
+    },
+    {
+      "case": "steep/H019_rr0.02000",
+      "file": "H19.element.dat"
+    },
+    {
+      "case": "steep/H019_rr0.02000",
+      "file": "H19.grph.dat"
+    },
+    {
+      "case": "steep/H019_rr0.02000",
+      "file": "H19.pass.dat"
+    },
+    {
+      "case": "steep/H019_rr0.02000",
+      "file": "H19.wat.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.element.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.grph.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.loss.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.pass.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.soil.dat"
+    },
+    {
+      "case": "steep/H020_rr0.02000",
+      "file": "H20.wat.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.element.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.grph.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.loss.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.pass.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.soil.dat"
+    },
+    {
+      "case": "steep/H021_rr0.10000",
+      "file": "H21.wat.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.element.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.grph.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.loss.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.pass.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.soil.dat"
+    },
+    {
+      "case": "steep/H022_rr0.04000",
+      "file": "H22.wat.dat"
+    },
+    {
+      "case": "steep/H023_rr0.06000",
+      "file": "H23.element.dat"
+    },
+    {
+      "case": "steep/H023_rr0.06000",
+      "file": "H23.grph.dat"
+    },
+    {
+      "case": "steep/H023_rr0.06000",
+      "file": "H23.pass.dat"
+    },
+    {
+      "case": "steep/H023_rr0.06000",
+      "file": "H23.soil.dat"
+    },
+    {
+      "case": "steep/H023_rr0.06000",
+      "file": "H23.wat.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.ebe.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.element.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.grph.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.pass.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.soil.dat"
+    },
+    {
+      "case": "steep/H024_rr0.06000",
+      "file": "H24.wat.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.ebe.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.element.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.grph.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.loss.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.pass.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.soil.dat"
+    },
+    {
+      "case": "steep/H025_rr0.10000",
+      "file": "H25.wat.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.element.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.grph.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.loss.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.pass.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.soil.dat"
+    },
+    {
+      "case": "steep/H026_rr0.04000",
+      "file": "H26.wat.dat"
+    },
+    {
+      "case": "steep/H027_rr0.06000",
+      "file": "H27.element.dat"
+    },
+    {
+      "case": "steep/H027_rr0.06000",
+      "file": "H27.grph.dat"
+    },
+    {
+      "case": "steep/H027_rr0.06000",
+      "file": "H27.pass.dat"
+    },
+    {
+      "case": "steep/H027_rr0.06000",
+      "file": "H27.soil.dat"
+    },
+    {
+      "case": "steep/H027_rr0.06000",
+      "file": "H27.wat.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.ebe.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.element.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.grph.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.pass.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.soil.dat"
+    },
+    {
+      "case": "steep/H028_rr0.06000",
+      "file": "H28.wat.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.ebe.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.element.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.grph.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.loss.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.pass.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.soil.dat"
+    },
+    {
+      "case": "steep/H029_rr0.10000",
+      "file": "H29.wat.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.element.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.grph.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.loss.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.pass.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.soil.dat"
+    },
+    {
+      "case": "steep/H030_rr0.04000",
+      "file": "H30.wat.dat"
+    },
+    {
+      "case": "steep/H031_rr0.06000",
+      "file": "H31.element.dat"
+    },
+    {
+      "case": "steep/H031_rr0.06000",
+      "file": "H31.grph.dat"
+    },
+    {
+      "case": "steep/H031_rr0.06000",
+      "file": "H31.pass.dat"
+    },
+    {
+      "case": "steep/H031_rr0.06000",
+      "file": "H31.soil.dat"
+    },
+    {
+      "case": "steep/H031_rr0.06000",
+      "file": "H31.wat.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.ebe.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.element.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.grph.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.pass.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.soil.dat"
+    },
+    {
+      "case": "steep/H032_rr0.06000",
+      "file": "H32.wat.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.ebe.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.element.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.grph.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.loss.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.pass.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.soil.dat"
+    },
+    {
+      "case": "steep/H033_rr0.06000",
+      "file": "H33.wat.dat"
+    },
+    {
+      "case": "steep/H034_rr0.06000",
+      "file": "H34.element.dat"
+    },
+    {
+      "case": "steep/H034_rr0.06000",
+      "file": "H34.grph.dat"
+    },
+    {
+      "case": "steep/H034_rr0.06000",
+      "file": "H34.pass.dat"
+    },
+    {
+      "case": "steep/H034_rr0.06000",
+      "file": "H34.soil.dat"
+    },
+    {
+      "case": "steep/H034_rr0.06000",
+      "file": "H34.wat.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.element.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.grph.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.loss.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.pass.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.soil.dat"
+    },
+    {
+      "case": "steep/H035_rr0.06000",
+      "file": "H35.wat.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.ebe.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.element.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.grph.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.loss.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.pass.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.soil.dat"
+    },
+    {
+      "case": "steep/H036_rr0.06000",
+      "file": "H36.wat.dat"
+    },
+    {
+      "case": "steep/H037_rr0.02000",
+      "file": "H37.element.dat"
+    },
+    {
+      "case": "steep/H037_rr0.02000",
+      "file": "H37.grph.dat"
+    },
+    {
+      "case": "steep/H037_rr0.02000",
+      "file": "H37.pass.dat"
+    },
+    {
+      "case": "steep/H037_rr0.02000",
+      "file": "H37.wat.dat"
+    },
+    {
+      "case": "steep/H038_rr0.02000",
+      "file": "H38.element.dat"
+    },
+    {
+      "case": "steep/H038_rr0.02000",
+      "file": "H38.grph.dat"
+    },
+    {
+      "case": "steep/H038_rr0.02000",
+      "file": "H38.pass.dat"
+    },
+    {
+      "case": "steep/H038_rr0.02000",
+      "file": "H38.soil.dat"
+    },
+    {
+      "case": "steep/H038_rr0.02000",
+      "file": "H38.wat.dat"
+    },
+    {
+      "case": "steep/H039_rr0.02000",
+      "file": "H39.element.dat"
+    },
+    {
+      "case": "steep/H039_rr0.02000",
+      "file": "H39.grph.dat"
+    },
+    {
+      "case": "steep/H039_rr0.02000",
+      "file": "H39.loss.dat"
+    },
+    {
+      "case": "steep/H039_rr0.02000",
+      "file": "H39.pass.dat"
+    },
+    {
+      "case": "steep/H039_rr0.02000",
+      "file": "H39.wat.dat"
+    },
+    {
+      "case": "steep/H040_rr0.02000",
+      "file": "H40.element.dat"
+    },
+    {
+      "case": "steep/H040_rr0.02000",
+      "file": "H40.grph.dat"
+    },
+    {
+      "case": "steep/H040_rr0.02000",
+      "file": "H40.pass.dat"
+    },
+    {
+      "case": "steep/H040_rr0.02000",
+      "file": "H40.soil.dat"
+    },
+    {
+      "case": "steep/H040_rr0.02000",
+      "file": "H40.wat.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.ebe.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.element.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.grph.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.loss.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.pass.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.soil.dat"
+    },
+    {
+      "case": "steep/H041_rr0.10000",
+      "file": "H41.wat.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.element.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.grph.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.loss.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.pass.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.soil.dat"
+    },
+    {
+      "case": "steep/H042_rr0.04000",
+      "file": "H42.wat.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.element.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.grph.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.loss.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.pass.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.soil.dat"
+    },
+    {
+      "case": "steep/H043_rr0.06000",
+      "file": "H43.wat.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.ebe.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.element.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.grph.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.loss.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.pass.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.soil.dat"
+    },
+    {
+      "case": "steep/H044_rr0.06000",
+      "file": "H44.wat.dat"
+    },
+    {
+      "case": "steep/H045_rr0.10000",
+      "file": "H45.element.dat"
+    },
+    {
+      "case": "steep/H045_rr0.10000",
+      "file": "H45.grph.dat"
+    },
+    {
+      "case": "steep/H045_rr0.10000",
+      "file": "H45.pass.dat"
+    },
+    {
+      "case": "steep/H045_rr0.10000",
+      "file": "H45.wat.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.element.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.grph.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.loss.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.pass.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.soil.dat"
+    },
+    {
+      "case": "steep/H046_rr0.04000",
+      "file": "H46.wat.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.element.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.grph.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.loss.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.pass.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.soil.dat"
+    },
+    {
+      "case": "steep/H047_rr0.06000",
+      "file": "H47.wat.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.ebe.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.element.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.grph.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.loss.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.pass.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.soil.dat"
+    },
+    {
+      "case": "steep/H048_rr0.06000",
+      "file": "H48.wat.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.ebe.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.element.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.grph.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.loss.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.pass.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.soil.dat"
+    },
+    {
+      "case": "steep/H049_rr0.10000",
+      "file": "H49.wat.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.element.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.grph.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.loss.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.pass.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.soil.dat"
+    },
+    {
+      "case": "steep/H050_rr0.04000",
+      "file": "H50.wat.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.element.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.grph.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.loss.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.pass.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.soil.dat"
+    },
+    {
+      "case": "steep/H051_rr0.06000",
+      "file": "H51.wat.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.ebe.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.element.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.grph.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.loss.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.pass.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.soil.dat"
+    },
+    {
+      "case": "steep/H052_rr0.06000",
+      "file": "H52.wat.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.ebe.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.element.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.grph.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.loss.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.pass.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.soil.dat"
+    },
+    {
+      "case": "steep/H053_rr0.06000",
+      "file": "H53.wat.dat"
+    },
+    {
+      "case": "steep/H054_rr0.06000",
+      "file": "H54.element.dat"
+    },
+    {
+      "case": "steep/H054_rr0.06000",
+      "file": "H54.grph.dat"
+    },
+    {
+      "case": "steep/H054_rr0.06000",
+      "file": "H54.pass.dat"
+    },
+    {
+      "case": "steep/H054_rr0.06000",
+      "file": "H54.wat.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.element.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.grph.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.loss.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.pass.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.soil.dat"
+    },
+    {
+      "case": "steep/H055_rr0.06000",
+      "file": "H55.wat.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.ebe.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.element.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.grph.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.loss.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.pass.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.plot.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.soil.dat"
+    },
+    {
+      "case": "steep/H056_rr0.06000",
+      "file": "H56.wat.dat"
+    },
+    {
+      "case": "steep/H057_rr0.02000",
+      "file": "H57.element.dat"
+    },
+    {
+      "case": "steep/H057_rr0.02000",
+      "file": "H57.grph.dat"
+    },
+    {
+      "case": "steep/H057_rr0.02000",
+      "file": "H57.pass.dat"
+    },
+    {
+      "case": "steep/H057_rr0.02000",
+      "file": "H57.soil.dat"
+    },
+    {
+      "case": "steep/H057_rr0.02000",
+      "file": "H57.wat.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.ebe.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.element.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.grph.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.pass.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.soil.dat"
+    },
+    {
+      "case": "steep/H058_rr0.02000",
+      "file": "H58.wat.dat"
+    },
+    {
+      "case": "steep/H059_rr0.02000",
+      "file": "H59.element.dat"
+    },
+    {
+      "case": "steep/H059_rr0.02000",
+      "file": "H59.grph.dat"
+    },
+    {
+      "case": "steep/H059_rr0.02000",
+      "file": "H59.pass.dat"
+    },
+    {
+      "case": "steep/H059_rr0.02000",
+      "file": "H59.wat.dat"
+    },
+    {
+      "case": "steep/H060_rr0.02000",
+      "file": "H60.element.dat"
+    },
+    {
+      "case": "steep/H060_rr0.02000",
+      "file": "H60.grph.dat"
+    },
+    {
+      "case": "steep/H060_rr0.02000",
+      "file": "H60.pass.dat"
+    },
+    {
+      "case": "steep/H060_rr0.02000",
+      "file": "H60.soil.dat"
+    },
+    {
+      "case": "steep/H060_rr0.02000",
+      "file": "H60.wat.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.element.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.grph.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.loss.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.pass.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.soil.dat"
+    },
+    {
+      "case": "steep/H061_rr0.10000",
+      "file": "H61.wat.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.element.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.grph.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.loss.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.pass.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.soil.dat"
+    },
+    {
+      "case": "steep/H062_rr0.04000",
+      "file": "H62.wat.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.element.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.grph.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.loss.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.pass.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.soil.dat"
+    },
+    {
+      "case": "steep/H063_rr0.06000",
+      "file": "H63.wat.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.ebe.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.element.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.grph.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.pass.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.soil.dat"
+    },
+    {
+      "case": "steep/H064_rr0.06000",
+      "file": "H64.wat.dat"
+    },
+    {
+      "case": "steep/H065_rr0.10000",
+      "file": "H65.element.dat"
+    },
+    {
+      "case": "steep/H065_rr0.10000",
+      "file": "H65.grph.dat"
+    },
+    {
+      "case": "steep/H065_rr0.10000",
+      "file": "H65.pass.dat"
+    },
+    {
+      "case": "steep/H065_rr0.10000",
+      "file": "H65.soil.dat"
+    },
+    {
+      "case": "steep/H065_rr0.10000",
+      "file": "H65.wat.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.element.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.grph.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.loss.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.pass.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.soil.dat"
+    },
+    {
+      "case": "steep/H066_rr0.04000",
+      "file": "H66.wat.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.element.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.grph.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.loss.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.pass.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.soil.dat"
+    },
+    {
+      "case": "steep/H067_rr0.06000",
+      "file": "H67.wat.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.ebe.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.element.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.grph.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.pass.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.soil.dat"
+    },
+    {
+      "case": "steep/H068_rr0.06000",
+      "file": "H68.wat.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.element.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.grph.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.loss.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.pass.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.soil.dat"
+    },
+    {
+      "case": "steep/H069_rr0.10000",
+      "file": "H69.wat.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.element.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.grph.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.loss.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.pass.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.soil.dat"
+    },
+    {
+      "case": "steep/H070_rr0.04000",
+      "file": "H70.wat.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.element.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.grph.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.loss.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.pass.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.soil.dat"
+    },
+    {
+      "case": "steep/H071_rr0.06000",
+      "file": "H71.wat.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.ebe.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.element.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.grph.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.pass.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.soil.dat"
+    },
+    {
+      "case": "steep/H072_rr0.06000",
+      "file": "H72.wat.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.ebe.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.element.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.grph.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.loss.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.pass.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.soil.dat"
+    },
+    {
+      "case": "steep/H073_rr0.06000",
+      "file": "H73.wat.dat"
+    },
+    {
+      "case": "steep/H074_rr0.06000",
+      "file": "H74.element.dat"
+    },
+    {
+      "case": "steep/H074_rr0.06000",
+      "file": "H74.grph.dat"
+    },
+    {
+      "case": "steep/H074_rr0.06000",
+      "file": "H74.pass.dat"
+    },
+    {
+      "case": "steep/H074_rr0.06000",
+      "file": "H74.soil.dat"
+    },
+    {
+      "case": "steep/H074_rr0.06000",
+      "file": "H74.wat.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.element.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.grph.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.loss.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.pass.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.soil.dat"
+    },
+    {
+      "case": "steep/H075_rr0.06000",
+      "file": "H75.wat.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.ebe.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.element.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.grph.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.loss.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.pass.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.plot.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.soil.dat"
+    },
+    {
+      "case": "steep/H076_rr0.06000",
+      "file": "H76.wat.dat"
+    },
+    {
+      "case": "steep/H077_rr0.02000",
+      "file": "H77.element.dat"
+    },
+    {
+      "case": "steep/H077_rr0.02000",
+      "file": "H77.grph.dat"
+    },
+    {
+      "case": "steep/H077_rr0.02000",
+      "file": "H77.pass.dat"
+    },
+    {
+      "case": "steep/H077_rr0.02000",
+      "file": "H77.soil.dat"
+    },
+    {
+      "case": "steep/H077_rr0.02000",
+      "file": "H77.wat.dat"
+    },
+    {
+      "case": "steep/H078_rr0.02000",
+      "file": "H78.element.dat"
+    },
+    {
+      "case": "steep/H078_rr0.02000",
+      "file": "H78.grph.dat"
+    },
+    {
+      "case": "steep/H078_rr0.02000",
+      "file": "H78.pass.dat"
+    },
+    {
+      "case": "steep/H078_rr0.02000",
+      "file": "H78.soil.dat"
+    },
+    {
+      "case": "steep/H078_rr0.02000",
+      "file": "H78.wat.dat"
+    },
+    {
+      "case": "steep/H079_rr0.02000",
+      "file": "H79.element.dat"
+    },
+    {
+      "case": "steep/H079_rr0.02000",
+      "file": "H79.grph.dat"
+    },
+    {
+      "case": "steep/H079_rr0.02000",
+      "file": "H79.pass.dat"
+    },
+    {
+      "case": "steep/H079_rr0.02000",
+      "file": "H79.soil.dat"
+    },
+    {
+      "case": "steep/H079_rr0.02000",
+      "file": "H79.wat.dat"
+    },
+    {
+      "case": "steep/H080_rr0.02000",
+      "file": "H80.element.dat"
+    },
+    {
+      "case": "steep/H080_rr0.02000",
+      "file": "H80.grph.dat"
+    },
+    {
+      "case": "steep/H080_rr0.02000",
+      "file": "H80.pass.dat"
+    },
+    {
+      "case": "steep/H080_rr0.02000",
+      "file": "H80.soil.dat"
+    },
+    {
+      "case": "steep/H080_rr0.02000",
+      "file": "H80.wat.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.ebe.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.element.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.grph.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.loss.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.pass.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.soil.dat"
+    },
+    {
+      "case": "steep/H081_rr0.08000",
+      "file": "H81.wat.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.element.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.grph.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.loss.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.pass.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.soil.dat"
+    },
+    {
+      "case": "steep/H082_rr0.04000",
+      "file": "H82.wat.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.element.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.grph.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.loss.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.pass.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.soil.dat"
+    },
+    {
+      "case": "steep/H083_rr0.06000",
+      "file": "H83.wat.dat"
+    },
+    {
+      "case": "steep/H084_rr0.06000",
+      "file": "H84.element.dat"
+    },
+    {
+      "case": "steep/H084_rr0.06000",
+      "file": "H84.grph.dat"
+    },
+    {
+      "case": "steep/H084_rr0.06000",
+      "file": "H84.pass.dat"
+    },
+    {
+      "case": "steep/H084_rr0.06000",
+      "file": "H84.soil.dat"
+    },
+    {
+      "case": "steep/H084_rr0.06000",
+      "file": "H84.wat.dat"
+    },
+    {
+      "case": "steep/H085_rr0.08000",
+      "file": "H85.element.dat"
+    },
+    {
+      "case": "steep/H085_rr0.08000",
+      "file": "H85.grph.dat"
+    },
+    {
+      "case": "steep/H085_rr0.08000",
+      "file": "H85.loss.dat"
+    },
+    {
+      "case": "steep/H085_rr0.08000",
+      "file": "H85.pass.dat"
+    },
+    {
+      "case": "steep/H085_rr0.08000",
+      "file": "H85.wat.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.element.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.grph.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.loss.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.pass.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.soil.dat"
+    },
+    {
+      "case": "steep/H086_rr0.04000",
+      "file": "H86.wat.dat"
+    },
+    {
+      "case": "steep/H087_rr0.06000",
+      "file": "H87.element.dat"
+    },
+    {
+      "case": "steep/H087_rr0.06000",
+      "file": "H87.grph.dat"
+    },
+    {
+      "case": "steep/H087_rr0.06000",
+      "file": "H87.pass.dat"
+    },
+    {
+      "case": "steep/H087_rr0.06000",
+      "file": "H87.soil.dat"
+    },
+    {
+      "case": "steep/H087_rr0.06000",
+      "file": "H87.wat.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.ebe.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.element.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.grph.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.pass.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.soil.dat"
+    },
+    {
+      "case": "steep/H088_rr0.06000",
+      "file": "H88.wat.dat"
+    },
+    {
+      "case": "steep/H089_rr0.08000",
+      "file": "H89.element.dat"
+    },
+    {
+      "case": "steep/H089_rr0.08000",
+      "file": "H89.grph.dat"
+    },
+    {
+      "case": "steep/H089_rr0.08000",
+      "file": "H89.pass.dat"
+    },
+    {
+      "case": "steep/H089_rr0.08000",
+      "file": "H89.soil.dat"
+    },
+    {
+      "case": "steep/H089_rr0.08000",
+      "file": "H89.wat.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.element.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.grph.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.loss.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.pass.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.soil.dat"
+    },
+    {
+      "case": "steep/H090_rr0.04000",
+      "file": "H90.wat.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.element.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.grph.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.loss.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.pass.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.soil.dat"
+    },
+    {
+      "case": "steep/H091_rr0.06000",
+      "file": "H91.wat.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.ebe.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.element.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.grph.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.loss.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.pass.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.soil.dat"
+    },
+    {
+      "case": "steep/H092_rr0.06000",
+      "file": "H92.wat.dat"
+    },
+    {
+      "case": "steep/H093_rr0.08000",
+      "file": "H93.element.dat"
+    },
+    {
+      "case": "steep/H093_rr0.08000",
+      "file": "H93.grph.dat"
+    },
+    {
+      "case": "steep/H093_rr0.08000",
+      "file": "H93.pass.dat"
+    },
+    {
+      "case": "steep/H093_rr0.08000",
+      "file": "H93.soil.dat"
+    },
+    {
+      "case": "steep/H093_rr0.08000",
+      "file": "H93.wat.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.element.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.grph.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.loss.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.pass.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.soil.dat"
+    },
+    {
+      "case": "steep/H094_rr0.04000",
+      "file": "H94.wat.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.element.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.grph.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.loss.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.pass.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.soil.dat"
+    },
+    {
+      "case": "steep/H095_rr0.06000",
+      "file": "H95.wat.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.ebe.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.element.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.grph.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.pass.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.soil.dat"
+    },
+    {
+      "case": "steep/H096_rr0.06000",
+      "file": "H96.wat.dat"
+    }
+  ]
+}

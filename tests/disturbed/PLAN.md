@@ -1,5 +1,43 @@
 # Disturbed WEPP Test Matrix Implementation Plan
 
+## Current Contract: 2026-10-09
+
+The canonical matrix now contains **96 cases**: four textures, four severities
+and six vegetation types, including young forest. Historical IDs 1-80 remain
+unchanged; young forest occupies 81-96. Its burned states reuse the forest
+burn templates, matching the standard Disturbed remapper.
+
+The default test binary is wepp_261009; WEPP_DISTURBED_BINARY can explicitly
+select another installed build. Committed shared hourly/snow/ET inputs are
+staged from tests/wepp_runner/fixtures/hillslope_smoke/runs. The model must
+finish successfully and produce PASS/graph outputs. Severity-gradient test
+names do not imply numerical or scientific rank acceptance.
+
+Use data/mckenzie_2000_2099.cli: 100 finite synthetic years, seed 26109, generated
+from the committed or355362 station and CLIGEN release. Reproduce it with
+generate_climate_fixture.py. The provenance sidecar pins the binary, parameter
+file and climate hashes. Climate completeness/finiteness is checked before
+model execution. The old test_climate.cli is historical: its header claims
+100 years, but it contains six years and 22 NaN dewpoint records.
+
+The actual canonical slope is **87.9 m**, with length-weighted grade **38.56%**.
+The old 201.68 m interpretation below misread the aspect field as length.
+The RRINIT study retains this profile and separately generates a 20% profile.
+
+Run tests with wctl run-pytest tests/disturbed. analyze_matrix.py uses the
+paired native legacy/v3 PASS reader, reports unpaired events and full-record
+totals, and writes analysis_results_current.md by default. Its rankings are
+descriptive; malformed records and duplicate dates fail rather than disappear.
+The old analysis_results.md is not replaced or claimed as current-release evidence.
+
+See the [RRINIT study](../../docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md).
+No production parameter defaults change as part of these harness revisions.
+
+## Historical Original Design
+
+The original design below is retained for context. Its 80-case scope, climate
+coverage and slope interpretation are superseded by the current contract above.
+
 ## Overview
 
 This document describes the implementation plan for a comprehensive test script that exercises the disturbed/WEPP nodb code by running the full matrix of:

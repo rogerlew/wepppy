@@ -1,0 +1,7 @@
+{
+  "host_libm": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+  "host_libgfortran": "342618ccfebe840446e4ef2b7893f4161b2084845e570f42d68a70bfde58a58d",
+  "container_libm": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+  "container_libgfortran": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+  "note": "Different runtimes confirmed; no single-library causal attribution. All RR comparisons use the frozen host runtime; selected host repeats are byte-identical."
+}

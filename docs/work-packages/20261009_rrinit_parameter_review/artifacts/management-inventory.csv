@@ -1,0 +1,276 @@
+mapping,key,disturbed_class,management,initial_scenario,lanuse,rrinit_m,rrinit_cm,rhinit_m,rfcum_mm,bdtill_g_cm3,imngmt,rtyp,rspace_m,width_m,inrcov,rilcov,surface_sequences,operations
+au-disturbed.json,a1,tall grass,wepppy/wepp/management/data/GeoWEPP/Mountain Big Sagebrush.man,1,1,0.008,0.8,0.017,700.02399,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+au-disturbed.json,a17,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a18,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a19,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a20,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a21,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a22,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a24,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a25,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,a4,young forest,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tree-5 yr old forest-disturbed WEPP.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,0.2,0.2,0,0
+au-disturbed.json,c1,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,c14,tall grass,wepppy/wepp/management/data/GIS/Poor grass.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.4,0.4,1,1
+au-disturbed.json,c2,tall grass,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,c3,tall grass,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+au-disturbed.json,c5,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,c6,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,f2,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,f3,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,f4,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,f5,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,f6,forest,wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+au-disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+au-disturbed.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+au-disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+au-disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+au-disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+au-disturbed.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+au-disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+au-disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+au-disturbed.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+au-disturbed.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+au-disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+au-disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+c3s-disturbed-nigeria.json,40,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+c3s-disturbed-nigeria.json,50,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,60,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,61,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,62,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,70,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,71,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,72,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,80,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,81,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,82,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,90,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,100,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed-nigeria.json,110,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed-nigeria.json,120,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed-nigeria.json,121,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed-nigeria.json,122,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed-nigeria.json,130,tall grass,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,30,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,40,young forest,wepppy/wepp/management/data/UnDisturbed/Young_Forest.man,1,1,0.08,8.0,0.08,400.0,1.1,2,1,0.0,0.0,0.96,0.96,0,0
+c3s-disturbed.json,50,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,60,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,61,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,62,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,70,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,71,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,72,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,80,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,81,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,82,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,90,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,100,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+c3s-disturbed.json,110,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,120,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,121,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,122,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+c3s-disturbed.json,130,tall grass,wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+c3s-disturbed.json,405,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+c3s-disturbed.json,418,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+c3s-disturbed.json,406,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+c3s-disturbed.json,410,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+c3s-disturbed.json,419,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+c3s-disturbed.json,420,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+c3s-disturbed.json,421,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+c3s-disturbed.json,422,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+c3s-disturbed.json,429,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.1,0.1,0,0
+c3s-disturbed.json,430,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.35,0.35,0,0
+c3s-disturbed.json,431,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+c3s-disturbed.json,432,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+ca-disturbed.json,1,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+ca-disturbed.json,2,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+ca-disturbed.json,5,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+ca-disturbed.json,6,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+ca-disturbed.json,8,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+ca-disturbed.json,10,tall grass,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+ca-disturbed.json,11,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+ca-disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+ca-disturbed.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+ca-disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+ca-disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+ca-disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+ca-disturbed.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+ca-disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+ca-disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+ca-disturbed.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.1,0.1,0,0
+ca-disturbed.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.35,0.35,0,0
+ca-disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+ca-disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+disturbed.json,41,deciduous forest,wepppy/wepp/management/data/UnDisturbed/Deciduous_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+disturbed.json,42,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+disturbed.json,43,mixed forest,wepppy/wepp/management/data/UnDisturbed/Mixed_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+disturbed.json,44,young forest,wepppy/wepp/management/data/UnDisturbed/Young_Forest.man,1,1,0.08,8.0,0.08,400.0,1.1,2,1,0.0,0.0,0.96,0.96,0,0
+disturbed.json,51,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+disturbed.json,52,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+disturbed.json,61,young forest,wepppy/wepp/management/data/UnDisturbed/Young_Forest.man,1,1,0.08,8.0,0.08,400.0,1.1,2,1,0.0,0.0,0.96,0.96,0,0
+disturbed.json,71,tall grass,wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+disturbed.json,72,tall grass,wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+disturbed.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+disturbed.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+disturbed.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.1,0.1,0,0
+disturbed.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.35,0.35,0,0
+disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+eu-corine-disturbed.json,16,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+eu-corine-disturbed.json,17,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+eu-corine-disturbed.json,22,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-corine-disturbed.json,23,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-corine-disturbed.json,24,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-corine-disturbed.json,25,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-corine-disturbed.json,26,tall grass,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tall grass prarie.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,0.8,0.8,0,0
+eu-corine-disturbed.json,28,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+eu-corine-disturbed.json,29,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-corine-disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+eu-corine-disturbed.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+eu-corine-disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-corine-disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+eu-corine-disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+eu-corine-disturbed.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+eu-corine-disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-corine-disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+eu-corine-disturbed.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-corine-disturbed.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-corine-disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-corine-disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,1,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,2,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-esdac-disturbed.json,4,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,5,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+eu-esdac-disturbed.json,7,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+eu-esdac-disturbed.json,8,shrub,wepppy/wepp/management/data/GIS/Shrubs.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,1,1
+eu-esdac-disturbed.json,9,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,19,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,20,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+eu-esdac-disturbed.json,118,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+eu-esdac-disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+eu-esdac-disturbed.json,120,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+eu-esdac-disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-esdac-disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+eu-esdac-disturbed.json,129,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-esdac-disturbed.json,130,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-esdac-disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+eu-esdac-disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+palouse_map.json,41,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+palouse_map.json,42,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+palouse_map.json,43,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+palouse_map.json,51,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+palouse_map.json,52,shrub,wepppy/wepp/management/data/UnDisturbed/Shrub.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.9,0.9,0,0
+palouse_map.json,61,young forest,wepppy/wepp/management/data/GeoWEPP/grass.man,1,1,0.02,2.0,0.02,500.0,1.1,2,1,0.0,0.0,0.5,0.5,0,0
+palouse_map.json,71,tall grass,wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+palouse_map.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+palouse_map.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+palouse_map.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+palouse_map.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+palouse_map.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+palouse_map.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+palouse_map.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+palouse_map.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+palouse_map.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.1,0.1,0,0
+palouse_map.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.35,0.35,0,0
+palouse_map.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+palouse_map.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man,1,1,0.02,2.0,0.02,400.0,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+revegetation.json,41,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,41,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,41,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,41,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,42,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,42,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,42,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,42,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,43,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,43,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,43,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,43,forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,51,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,51,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,51,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,51,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,52,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,52,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,52,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,52,shrub,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,61,young forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,61,young forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,61,young forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,61,young forest,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,71,tall grass,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,71,tall grass,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,71,tall grass,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,71,tall grass,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,72,tall grass,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tall grass prarie.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,0.8,0.8,0,0
+revegetation.json,105,forest high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,105,forest high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,105,forest high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,105,forest high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,118,forest moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,118,forest moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,118,forest moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,118,forest moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,106,forest low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,106,forest low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,106,forest low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,106,forest low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,110,forest prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,110,forest prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,110,forest prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,110,forest prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,119,shrub high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,119,shrub high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,119,shrub high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,119,shrub high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,120,shrub moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,120,shrub moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,120,shrub moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,120,shrub moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,121,shrub low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,121,shrub low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,121,shrub low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,121,shrub low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,122,shrub prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,122,shrub prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,122,shrub prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,122,shrub prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,129,grass high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,129,grass high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,129,grass high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,129,grass high sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,130,grass moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,130,grass moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,130,grass moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,130,grass moderate sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,131,grass low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,131,grass low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,131,grass low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,131,grass low sev fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,132,grass prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,132,grass prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,2,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,132,grass prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,3,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+revegetation.json,132,grass prescribed fire,wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man,4,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+vi-disturbed.json,8,forest,wepppy/wepp/management/data/UnDisturbed/Old_Forest.man,1,1,0.1,10.0,0.1,400.0,1.1,2,1,0.0,0.0,1.0,1.0,0,0
+vi-disturbed.json,10,tall grass,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tall grass prarie.man,1,1,0.1,10.0,0.1,999.99799,1.1,2,1,0.0,0.0,0.8,0.8,0,0
+vi-disturbed.json,12,shrub,wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man,1,1,0.1,10.0,0.1,1000.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+vi-disturbed.json,105,forest high sev fire,wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,0.0,0.0,0.3,0.3,0,0
+vi-disturbed.json,118,forest moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man,1,1,0.06,6.0,0.04826,400.04999,1.1,2,1,0.0,0.0,0.6,0.6,0,0
+vi-disturbed.json,106,forest low sev fire,wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man,1,1,0.04,4.0,0.04,400.0,1.1,2,1,0.0,0.0,0.85,0.85,0,0
+vi-disturbed.json,110,forest prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+vi-disturbed.json,119,shrub high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.3,0.3,0,0
+vi-disturbed.json,120,shrub moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.55,0.55,0,0
+vi-disturbed.json,121,shrub low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+vi-disturbed.json,122,shrub prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0
+vi-disturbed.json,129,grass high sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+vi-disturbed.json,130,grass moderate sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+vi-disturbed.json,131,grass low sev fire,wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.8,0.8,0,0
+vi-disturbed.json,132,grass prescribed fire,wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man,1,1,0.06,6.0,0.06,400.0,1.1,2,1,2.0,0.0,0.85,0.85,0,0

@@ -1,0 +1,392 @@
+{
+  "scope": "Static parsing and equation evaluation only; no model runs or default changes",
+  "wepppy_commit": "c08d2496bf4985d34414b044b045a3be07e7539b",
+  "forest_commit": "692c225e672844c71114bbdda851625616ebbba9",
+  "parsed_records": 275,
+  "maps": [
+    "au-disturbed.json",
+    "c3s-disturbed-nigeria.json",
+    "c3s-disturbed.json",
+    "ca-disturbed.json",
+    "disturbed.json",
+    "eu-corine-disturbed.json",
+    "eu-esdac-disturbed.json",
+    "palouse_map.json",
+    "revegetation.json",
+    "vi-disturbed.json"
+  ],
+  "unique_managements": 25,
+  "roundtrips": {
+    "wepppy/wepp/management/data/GeoWEPP/Mountain Big Sagebrush.man": true,
+    "wepppy/wepp/management/data/GeoWEPP/grass.man": true,
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tree-5 yr old forest-disturbed WEPP.man": true,
+    "wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man": true,
+    "wepppy/wepp/management/data/GIS/Poor grass.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Old_Forest.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Shrub.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Young_Forest.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Deciduous_Forest.man": true,
+    "wepppy/wepp/management/data/UnDisturbed/Mixed_Forest.man": true,
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tall grass prarie.man": true,
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man": true,
+    "wepppy/wepp/management/data/GIS/Shrubs.man": true,
+    "wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man": true
+  },
+  "disturbed_defaults_m": {
+    "deciduous forest": [
+      0.1
+    ],
+    "forest": [
+      0.1
+    ],
+    "mixed forest": [
+      0.1
+    ],
+    "young forest": [
+      0.08
+    ],
+    "shrub": [
+      0.06
+    ],
+    "tall grass": [
+      0.02
+    ],
+    "forest high sev fire": [
+      0.06
+    ],
+    "forest moderate sev fire": [
+      0.06
+    ],
+    "forest low sev fire": [
+      0.04
+    ],
+    "forest prescribed fire": [
+      0.06
+    ],
+    "shrub high sev fire": [
+      0.06
+    ],
+    "shrub moderate sev fire": [
+      0.06
+    ],
+    "shrub low sev fire": [
+      0.06
+    ],
+    "shrub prescribed fire": [
+      0.06
+    ],
+    "grass high sev fire": [
+      0.02
+    ],
+    "grass moderate sev fire": [
+      0.02
+    ],
+    "grass low sev fire": [
+      0.02
+    ],
+    "grass prescribed fire": [
+      0.02
+    ]
+  },
+  "values_across_all_maps_m": {
+    "tall grass": [
+      0.008,
+      0.02,
+      0.04,
+      0.06,
+      0.1
+    ],
+    "young forest": [
+      0.02,
+      0.08,
+      0.1
+    ],
+    "forest": [
+      0.1
+    ],
+    "forest high sev fire": [
+      0.06,
+      0.1
+    ],
+    "forest moderate sev fire": [
+      0.06,
+      0.1
+    ],
+    "forest low sev fire": [
+      0.04,
+      0.06,
+      0.1
+    ],
+    "forest prescribed fire": [
+      0.06,
+      0.1
+    ],
+    "shrub high sev fire": [
+      0.06,
+      0.1
+    ],
+    "shrub moderate sev fire": [
+      0.06,
+      0.1
+    ],
+    "shrub low sev fire": [
+      0.06,
+      0.1
+    ],
+    "shrub prescribed fire": [
+      0.06,
+      0.1
+    ],
+    "grass high sev fire": [
+      0.02,
+      0.06,
+      0.1
+    ],
+    "grass moderate sev fire": [
+      0.02,
+      0.06,
+      0.1
+    ],
+    "grass low sev fire": [
+      0.02,
+      0.06,
+      0.1
+    ],
+    "grass prescribed fire": [
+      0.02,
+      0.06,
+      0.1
+    ],
+    "shrub": [
+      0.06,
+      0.1
+    ],
+    "deciduous forest": [
+      0.1
+    ],
+    "mixed forest": [
+      0.1
+    ]
+  },
+  "packaged_export_discrepancies": [
+    {
+      "disturbed_class": "shrub",
+      "texture": "clay loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.06
+      ]
+    },
+    {
+      "disturbed_class": "shrub",
+      "texture": "loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.06
+      ]
+    },
+    {
+      "disturbed_class": "shrub",
+      "texture": "sand loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.06
+      ]
+    },
+    {
+      "disturbed_class": "shrub",
+      "texture": "silt loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.06
+      ]
+    },
+    {
+      "disturbed_class": "tall grass",
+      "texture": "clay loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.02
+      ]
+    },
+    {
+      "disturbed_class": "tall grass",
+      "texture": "loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.02
+      ]
+    },
+    {
+      "disturbed_class": "tall grass",
+      "texture": "sand loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.02
+      ]
+    },
+    {
+      "disturbed_class": "tall grass",
+      "texture": "silt loam",
+      "packaged_export_rrinit_m": 0.1,
+      "parsed_default_rrinit_m": [
+        0.02
+      ]
+    },
+    {
+      "disturbed_class": "young forest",
+      "texture": "clay loam",
+      "packaged_export_rrinit_m": 0.02,
+      "parsed_default_rrinit_m": [
+        0.08
+      ]
+    },
+    {
+      "disturbed_class": "young forest",
+      "texture": "loam",
+      "packaged_export_rrinit_m": 0.02,
+      "parsed_default_rrinit_m": [
+        0.08
+      ]
+    },
+    {
+      "disturbed_class": "young forest",
+      "texture": "sand loam",
+      "packaged_export_rrinit_m": 0.02,
+      "parsed_default_rrinit_m": [
+        0.08
+      ]
+    },
+    {
+      "disturbed_class": "young forest",
+      "texture": "silt loam",
+      "packaged_export_rrinit_m": 0.02,
+      "parsed_default_rrinit_m": [
+        0.08
+      ]
+    }
+  ],
+  "current_ksflags": {
+    "deciduous forest": [
+      "0"
+    ],
+    "forest": [
+      "0"
+    ],
+    "mixed forest": [
+      "0"
+    ],
+    "young forest": [
+      "0"
+    ],
+    "shrub": [
+      "0"
+    ],
+    "tall grass": [
+      "0"
+    ],
+    "forest high sev fire": [
+      "0"
+    ],
+    "forest moderate sev fire": [
+      "0"
+    ],
+    "forest low sev fire": [
+      "0"
+    ],
+    "forest prescribed fire": [
+      "0"
+    ],
+    "shrub high sev fire": [
+      "0"
+    ],
+    "shrub moderate sev fire": [
+      "0"
+    ],
+    "shrub low sev fire": [
+      "0"
+    ],
+    "shrub prescribed fire": [
+      "0"
+    ],
+    "grass high sev fire": [
+      "0"
+    ],
+    "grass moderate sev fire": [
+      "0"
+    ],
+    "grass low sev fire": [
+      "0"
+    ],
+    "grass prescribed fire": [
+      "0"
+    ]
+  },
+  "inputs_sha256": {
+    "wepppy/wepp/management/data/au-disturbed.json": "564a7a8e5bfe696a3ea48ecc727a65e241c4bb60d8df7cc42a1d58146d189e7e",
+    "wepppy/wepp/management/data/GeoWEPP/Mountain Big Sagebrush.man": "611be6cd9437770496de70ea3372ab43d52261f8d562f7a3ab683490d93e8745",
+    "wepppy/wepp/management/data/GeoWEPP/grass.man": "d9f07a41f3be6f7d9cd43346adeef07feac00399d36b761d57fe8aefe8755e3b",
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tree-5 yr old forest-disturbed WEPP.man": "d05299d17a035f37e6c0b6f749a73e5c080439ffd53318f79570def6c03419c9",
+    "wepppy/wepp/management/data/GeoWEPP/forest_perrenial.man": "de506e5de4af4207b3b00a43d3661bebeeeeb3a0502a5dd710ac44bb02a2995b",
+    "wepppy/wepp/management/data/GIS/Poor grass.man": "a632fcf3a1eadb35ecac7b7380bff3e8ca3f93ab6ba2a12e9ee14d64b64de00c",
+    "wepppy/wepp/management/data/UnDisturbed/High_Severity_Fire.man": "373a20999ad5bac2285975f7209f0b464d8d4956f597732bf863ecae2388648b",
+    "wepppy/wepp/management/data/UnDisturbed/Moderate_Severity_Fire.man": "47239888e8c067ab353ea2613e3d2db695ff9963fb63969349aeb38763f3fd58",
+    "wepppy/wepp/management/data/UnDisturbed/Low_Severity_Fire.man": "15613f0363d5fc88587e865e43872606ff5f5eb4136f659da71b58e438212f58",
+    "wepppy/wepp/management/data/UnDisturbed/Prescribed_Fire.man": "14a95c7f5293fa6af70db62590f6023f68c4f75000ddfe2c11f3c7392fd518cb",
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_High_Severity_Fire.man": "99d6a9ace04aacbe6922c29702c370d70eec8fbf0484cffc9d7ea006a3959543",
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man": "d0f1cffb84b183c808ac4035a18130764552746eb660ff7614ef1f0b59402495",
+    "wepppy/wepp/management/data/UnDisturbed/Shrub_Low_Severity_Fire.man": "46e1a7d591c16cb018dc65ab86d07c3f43a0812ba4ba8e3c26cb1e329f4d2196",
+    "wepppy/wepp/management/data/c3s-disturbed-nigeria.json": "30a05709211d4b5c038c06c9e4562e61bd037d232cea0811b4ddd8aa3a64489f",
+    "wepppy/wepp/management/data/UnDisturbed/Old_Forest.man": "ee361de0d9bb38fb91940b17d84e0160ec9968b5f5e3ec468cc6668bd3405306",
+    "wepppy/wepp/management/data/UnDisturbed/Shrub.man": "15b7620912be9e003fb5791f46ff53cffd049179ee3090186bec207aab3bba7f",
+    "wepppy/wepp/management/data/c3s-disturbed.json": "73ee592a4cbd874042e0325f59e565e4d7b111cf7472d1e3ce09b25a80e54d8b",
+    "wepppy/wepp/management/data/UnDisturbed/Young_Forest.man": "baaa52e76d2d2dac7b1df1d991af2aa44707333bc1b272a074ba57a4d85ee7b8",
+    "wepppy/wepp/management/data/UnDisturbed/Tall_Grass.man": "dc0c10999c6e348bab5e32ee6530b8c4e674683b3276cc303b9314c8bdb87b18",
+    "wepppy/wepp/management/data/UnDisturbed/Grass_High_Severity_Fire.man": "ad025c3f401346580813788b7093f737672deec6154a29a5fbe9b884199f07f8",
+    "wepppy/wepp/management/data/UnDisturbed/Grass_Moderate_Severity_Fire.man": "63ea9fb24e9276d92fc4c49335223b4957b924e1b63709c5316bb98bd95198aa",
+    "wepppy/wepp/management/data/UnDisturbed/Grass_Low_Severity_Fire.man": "71e00b0e7db08f7041704f64c87120e00d4942628aad49e4f2570db207481ac1",
+    "wepppy/wepp/management/data/ca-disturbed.json": "3d79135a6596959ae9df5f1213cf3a6ed8110829435b42211c814d90c7d88235",
+    "wepppy/wepp/management/data/disturbed.json": "ffec657131c6d7f450e05521992e3d3ac2272178afaa0eb1cd1256548733fb74",
+    "wepppy/wepp/management/data/UnDisturbed/Deciduous_Forest.man": "93bed69706783828ba7812245b5137e4eb65d8aa99c2e3c64caadd8015c9aea6",
+    "wepppy/wepp/management/data/UnDisturbed/Mixed_Forest.man": "c15c09174fa151c3e3c62a4fe13374481a8864879b17f6984f0450336e88ab71",
+    "wepppy/wepp/management/data/eu-corine-disturbed.json": "910f78f3b6aeb4c7bebc6afad83a6bdc2b21fd74a2a9209412b704efaea4b229",
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Tall grass prarie.man": "82a202edae0509e18c0a51952b0ff9fe93f18acc4c16218ea04d0431bc8ba791",
+    "wepppy/wepp/management/data/eu-esdac-disturbed.json": "189395ca4943e8941eca341c5f9ec4cf7f58296f177f41842b09a0bf90c79f9c",
+    "wepppy/wepp/management/data/Forest/DisturbedWEPPManagement/Shrub perennial.man": "aed55cde6bbb8c5c6e4e7ce0d55d631cf83a981d18e15d51c9e633103bb91987",
+    "wepppy/wepp/management/data/GIS/Shrubs.man": "765c36e399288f283aec47beff37e43e465654e523d2af4198611b7d90f9bbdc",
+    "wepppy/wepp/management/data/palouse_map.json": "2ec8265cc1b5866d1e82122879ec6013c8e98b1df275ffa59d197a0d2fcc1123",
+    "wepppy/wepp/management/data/revegetation.json": "86bad55338b6f24bbb85570c46984f5d5d381fd13abc2a3218e69077f39e42a9",
+    "wepppy/wepp/management/data/Revegetation/Forest_Revegetation.man": "b7eca0958601df6c0531a73846aed2d93dc908067df2207b3927a6284063c3b8",
+    "wepppy/wepp/management/data/vi-disturbed.json": "49a58d7d1f5e37996a198e4c690e2384186bd5dd73826301bf4443903cb5afa2",
+    "wepppy/nodb/mods/disturbed/data/extended_land_soil_lookup.csv": "9073c72fa17e975d3507247176ac4e77b7d6099f7e079de209ea7adfc00044e6",
+    "wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv": "bf4b38fbcb16643345b29e24a1ace6afd8409695cf0b27dbbb707e4707620a67"
+  },
+  "forest_source_sha256": {
+    "param.for": "9e8155f3238305f84b6f8a083ac160cd8dff64de7ef1b6a92fa967d11545e321",
+    "depsto.for": "4dd3852c42b38c405e997170630c99eab613afdf4c1e1ff92bdf2d70a10073c8",
+    "frcfac.for": "3a665e06158d47c2f158ed2bf4698938dc292706b12fe002d1f0078fe590b3de",
+    "sndrft.for": "0167622624c139aa5d422d2d4d8a31189f6b4f733d132803e5da6160a6288121",
+    "infpar.for": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352",
+    "scon.for": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+    "mixpeak.for": "a2122a517191cbd0159398fd3ed973fded794a8e282afa22a4894e410917827c",
+    "contin.for": "fe59ce32b2007030e8424be12625af03cf0b71d207e96b92a3ebdd82948b8a03",
+    "tmpadj.for": "40ea90593a2211cb1a3bf4a3a7758f34b49f17053539c55dcc246bb66e9b9016",
+    "grna.for": "59cd0c46c61cbc3f314457eaa2cdfe2cc1350947b30f3b95b3006d6675d3e842",
+    "irs.for": "ad37c257ff80c2131dbc17cc0c8802586ee7324edc190418f1d9dbde56dd3fa1",
+    "soil.for": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e",
+    "rdat.for": "38a243137aeae77abdf9fea51b62b34ff64c10529bde271a703d76ed30505863",
+    "infile.for": "16155c92e65c4418eb8d1d753126899faed0cb0cb8552c28e4dba72c472092fb",
+    "melt.for": "475e6f89ccc6df1e103c1702d083cc47cef742bcba151ec4a05c32c49c04b7aa"
+  }
+}

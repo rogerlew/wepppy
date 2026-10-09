@@ -94,7 +94,7 @@ TEXTURES = ["clay loam", "loam", "sand loam", "silt loam"]
 SEVERITIES = [0, 1, 2, 3]
 SEVERITY_NAMES = {0: "unburned", 1: "low", 2: "moderate", 3: "high"}
 
-# Vegetation types. Deciduous, mixed and young use distinct unburned managements but
+# Vegetation types. Deciduous and mixed use distinct unburned managements but
 # intentionally reuse the generic forest burn-severity classes for this
 # directionality assessment.
 VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass", "young forest"]

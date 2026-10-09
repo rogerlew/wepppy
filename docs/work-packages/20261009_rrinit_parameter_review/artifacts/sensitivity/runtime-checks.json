@@ -1,0 +1,23 @@
+[
+  {
+    "label": "canonical-on-host",
+    "case": "steep/H001_rr0.10000",
+    "returncode": 0,
+    "files": 8,
+    "mismatches": []
+  },
+  {
+    "label": "reference-repeat",
+    "case": "gentle/H044_rr0.06000",
+    "returncode": 0,
+    "files": 8,
+    "mismatches": []
+  },
+  {
+    "label": "mutation-repeat",
+    "case": "gentle/H044_rr0.00600",
+    "returncode": 0,
+    "files": 8,
+    "mismatches": []
+  }
+]

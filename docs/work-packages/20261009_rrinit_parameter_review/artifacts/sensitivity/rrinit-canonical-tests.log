@@ -1,0 +1,122 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/disturbed/test_disturbed_matrix.py --maxfail=1 --basetemp=/wc1/holdouts/rrinit-canonical-261009-20261009
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 99 items
+
+tests/disturbed/test_disturbed_matrix.py F
+
+=================================== FAILURES ===================================
+______ TestDisturbedMatrix.test_hillslope_simulation[clay loam-0-forest] _______
+
+self = <test_disturbed_matrix.TestDisturbedMatrix object at 0x7d19ffb761b0>
+texture = 'clay loam', severity = 0, veg_type = 'forest'
+runs_dir = PosixPath('/wc1/holdouts/rrinit-canonical-261009-20261009/disturbed_matrix0/runs')
+output_dir = PosixPath('/wc1/holdouts/rrinit-canonical-261009-20261009/disturbed_matrix0/output')
+canonical_slope_path = PosixPath('/workdir/wepppy/tests/disturbed/data/canonical_slope.slp')
+test_climate_path = PosixPath('/workdir/wepppy/tests/disturbed/data/test_climate.cli')
+forest_soils_dir = PosixPath('/workdir/wepppy/wepppy/wepp/soils/soilsdb/data/Forest')
+management_data_dir = PosixPath('/workdir/wepppy/wepppy/wepp/management/data')
+lookup_d = {('clay loam', 'agriculture crops'): {'avke': '', 'bd': '', 'keffflag': '0', 'ki': '', ...}, ('clay loam', 'bare'): {'...0', 'ki': '400000', ...}, ('clay loam', 'forest'): {'avke': '35', 'bd': '', 'keffflag': '0', 'ki': '400000', ...}, ...}
+all_results = {('clay loam', 0, 'forest'): HillslopeResult(wepp_id=1, texture='clay loam', severity=0, veg_type='forest', disturbed_...261009-20261009/disturbed_matrix0/runs/p1.err; cmd="/workdir/wepppy/wepp_runner/bin/wepp_261009_hill"; returncode=-8')}
+
+    @pytest.mark.parametrize(
+        "texture,severity,veg_type",
+        list(itertools.product(TEXTURES, SEVERITIES, VEG_TYPES)),
+        ids=lambda x: str(x) if not isinstance(x, tuple) else f"{x[0]}-{SEVERITY_NAMES.get(x[1], x[1])}-{x[2]}".replace(" ", "_"),
+    )
+    def test_hillslope_simulation(
+        self,
+        texture: str,
+        severity: int,
+        veg_type: str,
+        runs_dir: Path,
+        output_dir: Path,
+        canonical_slope_path: Path,
+        test_climate_path: Path,
+        forest_soils_dir: Path,
+        management_data_dir: Path,
+        lookup_d: Dict[Tuple[str, str], Dict[str, Any]],
+        all_results: Dict[Tuple[str, int, str], HillslopeResult],
+    ):
+        """Test a single texture/severity/veg combination."""
+        wepp_id = generate_wepp_id(texture, severity, veg_type)
+        disturbed_class = DISTURBED_CLASSES[(veg_type, severity)]
+    
+        # 1. Prepare slope file
+        prepare_slope(wepp_id, canonical_slope_path, runs_dir)
+    
+        # 2. Prepare climate file
+        prepare_climate(wepp_id, test_climate_path, runs_dir)
+    
+        # 3. Prepare management file
+        prepare_management(
+            wepp_id, veg_type, severity, management_data_dir, runs_dir, SIM_YEARS
+        )
+    
+        # 4. Generate 9002 disturbed soil
+        prepare_soil_9002(
+            wepp_id, texture, veg_type, severity, forest_soils_dir, lookup_d, runs_dir
+        )
+    
+        # 5. Create .run file using standard reveg template (has graphics enabled)
+        create_run_file(wepp_id, SIM_YEARS, runs_dir)
+    
+        # 6. Run WEPP
+        try:
+            success, returned_id, elapsed = run_hillslope(
+                wepp_id=wepp_id,
+                runs_dir=str(runs_dir),
+                wepp_bin=WEPP_BINARY,
+                timeout=300,  # 5 minutes for 100-year simulation
+            )
+            result = HillslopeResult(
+                wepp_id=wepp_id,
+                texture=texture,
+                severity=severity,
+                veg_type=veg_type,
+                disturbed_class=disturbed_class,
+                success=success,
+                elapsed_time=elapsed,
+            )
+        except Exception as e:
+            result = HillslopeResult(
+                wepp_id=wepp_id,
+                texture=texture,
+                severity=severity,
+                veg_type=veg_type,
+                disturbed_class=disturbed_class,
+                success=False,
+                elapsed_time=0.0,
+                error_message=str(e),
+            )
+    
+        # Store result for later analysis
+        all_results[(texture, severity, veg_type)] = result
+    
+        # Assertions
+>       assert result.success, (
+            f"WEPP failed for {texture}/{SEVERITY_NAMES[severity]}/{veg_type}: "
+            f"{result.error_message or 'see error log'}"
+        )
+E       AssertionError: WEPP failed for clay loam/unburned/forest: Error running WEPP hillslope for wepp_id=1; runs_dir=/wc1/holdouts/rrinit-canonical-261009-20261009/disturbed_matrix0/runs; run_file=/wc1/holdouts/rrinit-canonical-261009-20261009/disturbed_matrix0/runs/p1.run; err_file=/wc1/holdouts/rrinit-canonical-261009-20261009/disturbed_matrix0/runs/p1.err; cmd="/workdir/wepppy/wepp_runner/bin/wepp_261009_hill"; returncode=-8
+E       assert False
+E        +  where False = HillslopeResult(wepp_id=1, texture='clay loam', severity=0, veg_type='forest', disturbed_class='forest', success=False...-261009-20261009/disturbed_matrix0/runs/p1.err; cmd="/workdir/wepppy/wepp_runner/bin/wepp_261009_hill"; returncode=-8').success
+
+tests/disturbed/test_disturbed_matrix.py:412: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/disturbed/test_disturbed_matrix.py::TestDisturbedMatrix::test_hillslope_simulation[clay loam-0-forest]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/disturbed/test_disturbed_matrix.py::TestDisturbedMatrix::test_hillslope_simulation[clay loam-0-forest]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 2 warnings in 9.97s =========================
