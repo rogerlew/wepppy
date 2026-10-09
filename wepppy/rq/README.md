@@ -78,6 +78,16 @@ races. The traversal reads one ordered queue list per status calculation and
 does not expose unrelated job metadata or fabricate a cross-queue rank.
 
 ## Quick Start / Examples
+
+### Optional Discord configuration
+
+Discord credentials are optional for task imports, including project forks,
+WEPP, Omni, and batch jobs. If the optional client package is absent, its sender
+is disabled. If the installed client cannot read its credential file because it
+is missing or inaccessible, task imports log `Discord notifications disabled`
+and continue without a sender. A configured client retains its existing behavior.
+This import guard does not change delivery-time network error handling.
+
 ### Run a worker locally
 ```bash
 wctl exec weppcloud bash -lc \

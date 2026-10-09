@@ -1,0 +1,31 @@
+{
+  "outlet": {
+    "matched_days": 4142,
+    "modeled_mean_mm_day": 0.6530283865282472,
+    "observed_mean_mm_day": 2.1574440190729116,
+    "volume_bias_percent": -69.73138673563987,
+    "nse": -0.03785561010360272,
+    "correlation": 0.4823057591878347
+  },
+  "hillslopes": {
+    "matched_days": 4142,
+    "modeled_mean_mm_day": 0.6548550318686625,
+    "observed_mean_mm_day": 2.1574440190729116,
+    "volume_bias_percent": -69.6467196330747,
+    "nse": -0.03979700792487284,
+    "correlation": 0.48048634674588914
+  },
+  "modeled_annual_means_1993_2015_mm": {
+    "Precipitation": 774.0045906172184,
+    "Rain+Melt": 774.3664422955305,
+    "Runoff": 52.487079920475985,
+    "Lateral Flow": 58.99472125207926,
+    "Percolation": 15.417991049130338,
+    "Baseflow": 15.417919155432092,
+    "Aquifer losses": 0.0,
+    "Transpiration": 643.0270591514823,
+    "Evaporation": 3.530961716939534,
+    "ET": 646.5580208684219,
+    "Streamflow": 126.89972032798731
+  }
+}

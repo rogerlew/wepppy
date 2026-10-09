@@ -1,0 +1,14 @@
+{
+  "job_id": "7ededfcb-38d3-401b-b76b-ccfee1e43652",
+  "runid": "cultivated-ubiquity",
+  "status": "failed",
+  "result": null,
+  "started_at": "2026-10-08 23:35:49.444253",
+  "ended_at": "2026-10-08 23:35:50.114095",
+  "description": "wepppy.rq.project_rq.fork_rq('cultivated-ubiquity', 'tacky-seeking', False, True, False)",
+  "elapsed_s": 0.669842,
+  "exc_info": "Traceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/rq/worker.py\", line 1430, in perform_job\n    rv = job.perform()\n         ^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1280, in perform\n    self._result = self._execute()\n                   ^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1317, in _execute\n    result = self.func(*self.args, **self.kwargs)\n             ^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 425, in func\n    return import_attribute(self.func_name)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/utils.py\", line 99, in import_attribute\n    module = importlib.import_module(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/workdir/wepppy/wepppy/rq/project_rq.py\", line 104, in <module>\n    from .wepp_rq import run_wepp_rq\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq.py\", line 91, in <module>\n    from . import wepp_rq_stage_finalize as _stage_finalize\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq_stage_finalize.py\", line 23, in <module>\n    from weppcloud2.discord_bot.discord_client import send_discord_message\n  File \"/workdir/weppcloud2/weppcloud2/discord_bot/discord_client.py\", line 8, in <module>\n    with open(_join(_thisdir, '.bot_token')) as fp:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token'\n",
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

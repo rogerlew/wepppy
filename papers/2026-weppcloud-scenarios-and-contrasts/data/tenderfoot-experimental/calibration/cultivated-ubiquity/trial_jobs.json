@@ -1,0 +1,36 @@
+[
+  {
+    "kcb": 0.8,
+    "fork_request": {
+      "undisturbify": false,
+      "skip_wepp_runs_output": true,
+      "skip_omni_scenarios_contrasts": false
+    },
+    "fork_response": {
+      "job_id": "2b10aba6-39c4-46a9-94e2-e40984b69c45",
+      "new_runid": "overall-thruster",
+      "undisturbify": false,
+      "skip_wepp_runs_output": true,
+      "skip_omni_scenarios_contrasts": false
+    },
+    "fork_job_status": "failed",
+    "failure": "FileNotFoundError: [Errno 2] No such file or directory: '/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token'"
+  },
+  {
+    "kcb": 0.65,
+    "fork_request": {
+      "undisturbify": false,
+      "skip_wepp_runs_output": true,
+      "skip_omni_scenarios_contrasts": false
+    },
+    "fork_response": {
+      "job_id": "7ededfcb-38d3-401b-b76b-ccfee1e43652",
+      "new_runid": "tacky-seeking",
+      "undisturbify": false,
+      "skip_wepp_runs_output": true,
+      "skip_omni_scenarios_contrasts": false
+    },
+    "fork_job_status": "failed",
+    "failure": "FileNotFoundError: [Errno 2] No such file or directory: '/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token'"
+  }
+]

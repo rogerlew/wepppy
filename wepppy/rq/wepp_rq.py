@@ -104,6 +104,9 @@ try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
 except (ModuleNotFoundError, ImportError):
     send_discord_message = None
+except (FileNotFoundError, PermissionError) as exc:
+    logging.getLogger(__name__).warning("Discord notifications disabled (%s)", exc)
+    send_discord_message = None
 
 
 _hostname = socket.gethostname()

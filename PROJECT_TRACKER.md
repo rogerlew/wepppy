@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Blocked (research): [Tenderfoot observed-flow calibration](docs/work-packages/20261008_tenderfoot_calibration/package.md) — baseline diagnosis complete; fork-worker Discord credential import failure prevents isolated ET sensitivity trials.
+
 Active: [Historic PRISM WEPP integration](docs/work-packages/20261008_prism_wepp_integration/package.md) — menu, both spatial methods, forest end-to-end acceptance.
 
 Completed (code/local): [Historic PRISM bulk client](docs/work-packages/20261008_prism_bulk_client/package.md) — native-cell extraction and cache, configured through Docker `.env`.

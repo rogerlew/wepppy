@@ -1,0 +1,169 @@
+{
+  "acquired_date": "2026-10-08",
+  "run_url": "https://wc.openwepp.org/weppcloud/runs/cultivated-ubiquity/disturbed9002_wbt/",
+  "host": "hpc",
+  "source_path": "/tank/kubernetes/weppcloud/weppcloud-wc1/pvc-d4c5528b-3204-438b-909a-61af286d6fea/runs/cu/cultivated-ubiquity",
+  "scope": "Non-atomic read-only copy of selected metadata, observations, output tables, and representative prepared inputs. Raw snapshot ignored by Git; not a complete reproducible WEPP run.",
+  "files": [
+    {
+      "path": "ash.nodb",
+      "bytes": 4037,
+      "sha256": "9da8a84b459daaf9044fe1f6469500b2fb2af86c6bcc72dfebf10efc38c5c77f"
+    },
+    {
+      "path": "ashpost.nodb",
+      "bytes": 331,
+      "sha256": "348cef0d06b42115521fc65ace8e9c6c1fb54ddece59b03758a01c03c07506bb"
+    },
+    {
+      "path": "climate/daymet_1990-2015.parquet",
+      "bytes": 565407,
+      "sha256": "4e5f02ec08773a5f444672ddea1ba4db26c669bd1c66e042f046d0dc7a13ad39"
+    },
+    {
+      "path": "climate/daymet_radiation_toa_normalization_wepp.csv",
+      "bytes": 2341,
+      "sha256": "ea2edf91b51e0df3ae2a1299dea6c51f2bcf44cbb45a667c5a87e10c03b44c24"
+    },
+    {
+      "path": "climate/wepp.cli",
+      "bytes": 665673,
+      "sha256": "21df1426a3b5a4e1b0ddda86cb4d99981b0fdc1d4004c908c63b6e2c790a64fa"
+    },
+    {
+      "path": "climate.nodb",
+      "bytes": 18777,
+      "sha256": "9cc0c37af7598b3ca501667dde95276bb6af9a471e12d1e8dd82387131401ed4"
+    },
+    {
+      "path": "debris_flow.nodb",
+      "bytes": 474,
+      "sha256": "de3e3a2f2a08d229f28103dde0f537ce9fe53383db1c6393f5be9e443d05ec20"
+    },
+    {
+      "path": "disturbed.nodb",
+      "bytes": 689,
+      "sha256": "65eb7610f8a5463697f9823186dd78742b996bbb3ed0ff99a901204dcecde39f"
+    },
+    {
+      "path": "landuse.nodb",
+      "bytes": 5731,
+      "sha256": "9fc9f614e5f99de94ed383e13e34414286c464058fee0b502accdc36739a88bf"
+    },
+    {
+      "path": "observed/Channels-Streamflow_(mm)-Daily.csv",
+      "bytes": 120338,
+      "sha256": "2a0db02c79086db9dfb587753bc54dfef2e849a1808945c869b2f922bc1f02be"
+    },
+    {
+      "path": "observed/Channels-Streamflow_(mm)-Yearly.csv",
+      "bytes": 652,
+      "sha256": "9652b37c5523f8413282b00b52168652846b8f4dd0637498b93330c3f144201b"
+    },
+    {
+      "path": "observed/Hillslopes-Streamflow_(mm)-Daily.csv",
+      "bytes": 120338,
+      "sha256": "6f7e0df431d221e32c9a8dc9c9ab28eab29d8012e7ce8476f5cfa14d313b24a5"
+    },
+    {
+      "path": "observed/Hillslopes-Streamflow_(mm)-Yearly.csv",
+      "bytes": 652,
+      "sha256": "bc5fa9c28e5a96c4d9183af6bfe93b8f2cc5e4e52fe465851ccfa4e0d313532d"
+    },
+    {
+      "path": "observed/observed.csv",
+      "bytes": 159795,
+      "sha256": "f991749cc382df8bb3736975a2890d07f79e407a8f3dc883733f62b4484d8585"
+    },
+    {
+      "path": "observed.nodb",
+      "bytes": 2610,
+      "sha256": "67b7298cda419e0d860fcc9ec73fada62317dd8beb19ed537602e8b21601271c"
+    },
+    {
+      "path": "ron.nodb",
+      "bytes": 1076,
+      "sha256": "c27af9b9926ecad7d3f591b4c211a28176041e37920e07ac0f6a427839ca046d"
+    },
+    {
+      "path": "soils.nodb",
+      "bytes": 42460,
+      "sha256": "fc2ce6e57a1233d416dacd1b600b670c9072d24f104c0e20c2d3313919f894ef"
+    },
+    {
+      "path": "treatments.nodb",
+      "bytes": 406,
+      "sha256": "86ea0d0430fe6164dc7578e13a9ef528475358c322b873bb9ac94a6d3a88f4b9"
+    },
+    {
+      "path": "unitizer.nodb",
+      "bytes": 1075,
+      "sha256": "4df4fc8a42961b956615881dc8e22dd00bd07628eb1b757ff58e10fe026fae64"
+    },
+    {
+      "path": "watershed.nodb",
+      "bytes": 15122,
+      "sha256": "20330f36868cd12c9c2b014939f32454c0ec585ee71320346f47a60e21fc51cb"
+    },
+    {
+      "path": "wepp/output/interchange/chanwb.parquet",
+      "bytes": 141055,
+      "sha256": "dd12fb007dac94f295284e4156aab49b6d66ecc6e9e0fbb09be9141af1cfd643"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "bytes": 2988,
+      "sha256": "416cb214a3c5211715c97caf9d91f34d2d0424799fd9a933032ebeca2adc8a22"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "bytes": 1762,
+      "sha256": "03a2744ff5e7c219dea2f8ffe22b204f4b3bfab425b39ed5e94f5ceed1fa8192"
+    },
+    {
+      "path": "wepp/output/interchange/totalwatsed3.parquet",
+      "bytes": 1339230,
+      "sha256": "b2d569d3bc3f4a890f500f45b5552fc50fc154f418b52f4a0bb1ce715c1c3cb4"
+    },
+    {
+      "path": "wepp/runs/gwcoeff.txt",
+      "bytes": 168,
+      "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+    },
+    {
+      "path": "wepp/runs/p1.cli",
+      "bytes": 665673,
+      "sha256": "118229747573faf5f631d16e4ec417a56bc463b78f9faee40fe61a1cd505b604"
+    },
+    {
+      "path": "wepp/runs/p1.man",
+      "bytes": 4359,
+      "sha256": "df6b087f0c129af197a7843b151af1619ef3ac313aa5bba1c4653f245d7f8c42"
+    },
+    {
+      "path": "wepp/runs/p1.run",
+      "bytes": 244,
+      "sha256": "c8f120994d24bd1b7bb2c6ac9873a727407f1e075cd0c9ca3ff54aa4c86a42d4"
+    },
+    {
+      "path": "wepp/runs/p1.sol",
+      "bytes": 4156,
+      "sha256": "d60b73787aa6415deacd230c54630b2f0588e2c36cb457c35bb8974516993269"
+    },
+    {
+      "path": "wepp/runs/pmetpara.txt",
+      "bytes": 11364,
+      "sha256": "7446f3cd6d5d44fc0c5000f63ddf6bc142d29f52aa896c09d81bbbc76435eaef"
+    },
+    {
+      "path": "wepp/runs/snow.txt",
+      "bytes": 87,
+      "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+    },
+    {
+      "path": "wepp.nodb",
+      "bytes": 2335,
+      "sha256": "19eeede97258fbe21f3d43326065a840d039d2764eb24c948a93b0d91d09337f"
+    }
+  ]
+}
