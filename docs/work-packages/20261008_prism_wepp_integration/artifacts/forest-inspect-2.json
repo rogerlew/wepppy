@@ -1,0 +1,393 @@
+{
+  "phase": "inspect",
+  "mode": 2,
+  "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/chemotherapeutic-scope/disturbed9002_wbt/",
+  "at": "2026-10-08T23:39:21.675Z",
+  "catalog": [
+    {
+      "allowed_locales": [],
+      "blocked_locales": [],
+      "catalog_id": "vanilla_cligen",
+      "climate_mode": 0,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "Baseline stochastic weather generator using nearest station.",
+      "group": "Stochastic",
+      "group_hint": "Long-term average conditions; probability risk assessment",
+      "help_text": "Generates stochastic climates from CLIGEN station statistics.",
+      "inputs": [
+        "stochastic_years",
+        "spatial_mode"
+      ],
+      "label": "Vanilla CLIGEN",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": false,
+      "spatial_method_ids": [
+        "single",
+        "multiple"
+      ],
+      "spatial_modes": [
+        0,
+        1
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [
+        "au",
+        "alaska",
+        "hawaii",
+        "nigeria"
+      ],
+      "catalog_id": "prism_stochastic",
+      "climate_mode": 5,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "Applies PRISM precipitation/elevation adjustments to stochastic climates.",
+      "group": "Stochastic",
+      "group_hint": "Long-term average conditions; probability risk assessment",
+      "help_text": "Recommended for BAER workflows when historic comparison is not required.",
+      "inputs": [
+        "stochastic_years",
+        "spatial_mode"
+      ],
+      "label": "Stochastic PRISM Modified",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": false,
+      "spatial_method_ids": [
+        "single",
+        "multiple"
+      ],
+      "spatial_modes": [
+        0,
+        1
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [
+        "au",
+        "alaska",
+        "hawaii",
+        "nigeria"
+      ],
+      "catalog_id": "observed_daymet",
+      "climate_mode": 9,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "Observed gridded DAYMET dataset (1980–2024) with GRIDMET wind fallback.",
+      "group": "Observed",
+      "group_hint": "Model validation; historical disturbance analysis",
+      "help_text": "Use when observed historical data is required (streamflow calibration, RAP).",
+      "inputs": [
+        "observed_years",
+        "spatial_mode"
+      ],
+      "label": "Observed DAYMET (GRIDMET wind)",
+      "metadata": {
+        "year_bounds": {
+          "max": 2024,
+          "min": 1980
+        }
+      },
+      "mods_required": [],
+      "rap_compatible": true,
+      "spatial_method_ids": [
+        "single",
+        "multiple",
+        "interpolated"
+      ],
+      "spatial_modes": [
+        0,
+        1,
+        2
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [
+        "au",
+        "alaska",
+        "hawaii",
+        "nigeria"
+      ],
+      "catalog_id": "observed_gridmet",
+      "climate_mode": 11,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "Observed gridded GRIDMET dataset (1980–present).",
+      "group": "Observed",
+      "group_hint": "Model validation; historical disturbance analysis",
+      "help_text": "Recommended when real observed meteorology is available (e.g., RAP, streamflow studies).",
+      "inputs": [
+        "observed_years",
+        "spatial_mode"
+      ],
+      "label": "Observed GRIDMET",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": true,
+      "spatial_method_ids": [
+        "single",
+        "multiple",
+        "interpolated"
+      ],
+      "spatial_modes": [
+        0,
+        1,
+        2
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [
+        "us"
+      ],
+      "blocked_locales": [],
+      "catalog_id": "observed_prism_800m",
+      "climate_mode": 16,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "Historic native-cell PRISM daily precipitation, temperatures, dewpoint and solar radiation.",
+      "group": "Observed",
+      "group_hint": "Model validation; historical disturbance analysis",
+      "help_text": "Multiple uses monthly PRISM revision; nearest-cell mode preserves daily cell differences. GRIDMET supplies watershed wind.",
+      "inputs": [
+        "observed_years",
+        "spatial_mode"
+      ],
+      "label": "Observed PRISM 800 m (GRIDMET wind)",
+      "metadata": {
+        "year_bounds": {
+          "max": 2025,
+          "min": 1981
+        }
+      },
+      "mods_required": [],
+      "rap_compatible": true,
+      "spatial_method_ids": [
+        "single",
+        "multiple",
+        "interpolated"
+      ],
+      "spatial_modes": [
+        0,
+        1,
+        2
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [
+        "au",
+        "alaska",
+        "hawaii",
+        "nigeria"
+      ],
+      "catalog_id": "dep_nexrad",
+      "climate_mode": 13,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "NEXRAD breakpoint files (0.01° grid) with optional temperature overrides.",
+      "group": "Observed",
+      "group_hint": "Model validation; historical disturbance analysis",
+      "help_text": "Use for high-resolution breakpoint data (2007–present).",
+      "inputs": [
+        "observed_years",
+        "spatial_mode",
+        "nexrad_overrides"
+      ],
+      "label": "DEP NEXRAD Breakpoint",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": false,
+      "spatial_method_ids": [
+        "single",
+        "multiple"
+      ],
+      "spatial_modes": [
+        0,
+        1
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [
+        "au",
+        "alaska",
+        "hawaii",
+        "nigeria"
+      ],
+      "catalog_id": "future_cmip5",
+      "climate_mode": 3,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "auto",
+      "dependencies": [],
+      "description": "CMIP5-based future climate scenarios (2006–2099).",
+      "group": "Future",
+      "group_hint": "Climate change impact analysis",
+      "help_text": "Experimental future projections; requires specifying start/end years.",
+      "inputs": [
+        "future_years",
+        "spatial_mode"
+      ],
+      "label": "Future CMIP5",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": false,
+      "spatial_method_ids": [
+        "single",
+        "multiple"
+      ],
+      "spatial_modes": [
+        0,
+        1
+      ],
+      "station_method_ids": [
+        "auto",
+        "distance",
+        "multi_factor"
+      ],
+      "station_modes": [
+        -1,
+        0,
+        1
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "none"
+    },
+    {
+      "allowed_locales": [],
+      "blocked_locales": [],
+      "catalog_id": "user_defined_cli",
+      "climate_mode": 12,
+      "default_spatial_method_id": "single",
+      "default_spatial_mode": 0,
+      "default_station_method_id": "user_defined",
+      "dependencies": [],
+      "description": "Upload a custom CLIGEN-formatted `.cli` file.",
+      "group": "User-Defined",
+      "group_hint": "Research experiments/validation",
+      "help_text": "Validates and installs a user-supplied climate file. Hillslope PRISM revision available when spatial mode allows.",
+      "inputs": [
+        "upload",
+        "spatial_mode"
+      ],
+      "label": "User-Defined Climate (.cli)",
+      "metadata": {},
+      "mods_required": [],
+      "rap_compatible": false,
+      "spatial_method_ids": [
+        "single",
+        "multiple"
+      ],
+      "spatial_modes": [
+        0,
+        1
+      ],
+      "station_method_ids": [
+        "user_defined"
+      ],
+      "station_modes": [
+        4
+      ],
+      "support_state": "builder_exposed",
+      "ui_exposed": true,
+      "upload_behaviour": "upload"
+    }
+  ],
+  "selection": "observed_prism_800m"
+}

@@ -303,7 +303,7 @@
     },
     {
       "id": "climate_spatialmode2",
-      "label": "Multiple climates (Interpolated)",
+      "label": "Multiple climates (nearest PRISM cell)" if ns.selected == "observed_prism_800m" else "Multiple climates (Interpolated)",
       "value": "2",
       "selected": spatial_mode == 2,
       "attrs": {

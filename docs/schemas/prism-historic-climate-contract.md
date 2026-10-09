@@ -1,6 +1,6 @@
 # Historic PRISM climate integration
 
-Status: accepted intended behavior; implementation and forest acceptance pending.
+Status: implemented; both multiple methods passed forest artifact and WEPP acceptance on 2026-10-08. Evidence: [forest results](../work-packages/20261008_prism_wepp_integration/artifacts/forest-results.md).
 
 ## Dataset and compatibility
 

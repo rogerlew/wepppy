@@ -6411,7 +6411,7 @@
     },
     {
       "structure_sha256": "545e2197c8a67a88da9c796246a2b0572427c8228bcb0e5d3ccd883f11b320a6",
-      "first_reader_revision": "pending-reader-floor",
+      "first_reader_revision": "6781de988",
       "payload": {
         "schema_version": 3,
         "locale_profile": "continental-us",

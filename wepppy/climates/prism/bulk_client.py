@@ -37,11 +37,15 @@ class _RevisionChanged(PrismFreshnessError):
 
 
 class PrismBulkClient:
+    attempt_directories: list[Path]
+
     def __init__(self, cache_dir=None, *, session=None, lock_timeout=600,
                  poll_seconds=5, job_timeout=600):
         location = cache_dir if cache_dir is not None else os.environ.get('PRISM_CACHE_DIR')
         if not location or not Path(location).is_absolute():
             raise ValueError('Set PRISM_CACHE_DIR to an absolute writable persistent path')
+        # Per-client, per-retrieve evidence; also available when retrieval raises.
+        self.attempt_directories = []
         self.cache = BulkCache(location, lock_timeout=lock_timeout)
         self.transport = BulkTransport(session, poll_seconds=poll_seconds, job_timeout=job_timeout)
 
@@ -52,6 +56,7 @@ class PrismBulkClient:
         Every cache use checks current release manifests. No stale fallback is
         provided. Exact partial-year intervals have separate cache identities.
         """
+        self.attempt_directories = []
         start, end = date.fromisoformat(str(start_date)), date.fromisoformat(str(end_date))
         if start < date(1981, 1, 1) or end < start or end > date.today():
             raise ValueError('Expected ordered dates from 1981 through today; unpublished dates fail upstream')
@@ -86,6 +91,7 @@ class PrismBulkClient:
 
     def _attempt(self, cells, start, end):
         attempt = self.cache.attempt()
+        self.attempt_directories.append(attempt)
         write_json(attempt / 'status.json', dict(state='running', started_utc=now(),
                    cells=[c.id for c in cells], start=str(start), end=str(end), geometry=GEOMETRY))
         try:

@@ -286,6 +286,7 @@ class ClimateMode(IntEnum):
     DepNexrad = 13
     SingleStormBatch = 14 # Single Only
     UserDefinedSingleStorm = 15 # Single Only
+    Prism800m = 16  # Historic native-cell PRISM, all spatial modes
 
     @staticmethod
     def parse(x: Optional[str]) -> 'ClimateMode':
@@ -295,6 +296,8 @@ class ClimateMode(IntEnum):
             return ClimateMode.Vanilla
         elif x == 'observed':
             return ClimateMode.Observed
+        elif x == 'prism_800m':
+            return ClimateMode.Prism800m
         elif x == 'observed_prism':
             return ClimateMode.ObservedPRISM
         elif x == 'future':
@@ -758,6 +761,10 @@ class Climate(NoDbBase):
                 f"({end_year} < {start_year})"
             )
 
+        if getattr(self, "_climate_mode", None) == ClimateMode.Prism800m:
+            from wepppy.climates.prism.wepp_adapter import validate_years
+            validate_years(start_year, end_year)
+
         # Canonicalize persisted controller state after successful coercion.
         self._observed_start_year = start_year
         self._observed_end_year = end_year
@@ -1172,7 +1179,9 @@ class Climate(NoDbBase):
     #
     @property
     def has_climate(self) -> bool:
-        if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+        if (self.climate_spatialmode == ClimateSpatialMode.Multiple or
+                (self.climate_mode == ClimateMode.Prism800m and
+                 self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated)):
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
                    self.cli_fn is not None
@@ -1209,6 +1218,7 @@ class Climate(NoDbBase):
             ClimateMode.Observed,
             ClimateMode.ObservedPRISM,
             ClimateMode.GridMetPRISM,
+            ClimateMode.Prism800m,
             ClimateMode.DepNexrad,
         ):
             assert isint(start_year)
@@ -1221,6 +1231,9 @@ class Climate(NoDbBase):
 
             assert end_year >= start_year
             assert end_year - start_year <= CLIMATE_MAX_YEARS
+            if self.climate_mode == ClimateMode.Prism800m:
+                from wepppy.climates.prism.wepp_adapter import validate_years
+                validate_years(start_year, end_year)
             self._input_years = end_year - start_year + 1
 
         self._observed_start_year = start_year
@@ -1701,7 +1714,9 @@ class Climate(NoDbBase):
         if not self.has_climate:
             raise IndexError
 
-        if self._climate_spatialmode == ClimateSpatialMode.Multiple:
+        if (self._climate_spatialmode == ClimateSpatialMode.Multiple or
+                (self.climate_mode == ClimateMode.Prism800m and
+                 self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated)):
             translator = self.watershed_instance.translator_factory()
             topaz_id = str(translator.top(wepp=int(wepp_id)))
 

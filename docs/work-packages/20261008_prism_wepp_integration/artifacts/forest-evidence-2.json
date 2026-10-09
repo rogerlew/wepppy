@@ -1,0 +1,13 @@
+{
+  "phase": "evidence",
+  "mode": 2,
+  "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/chemotherapeutic-scope/disturbed9002_wbt/",
+  "at": "2026-10-08T23:04:07.071Z",
+  "selection": "observed_prism_800m",
+  "spatialMode": "2",
+  "label": "Multiple climates (nearest PRISM cell)",
+  "browseStatus": 200,
+  "downloadStatus": 200,
+  "source": "climate/prism800m-build-4lij09ez/source/419b134aec9d41e58de2c78a2d830947/bulk.csv.gz",
+  "sha256": "be6cf18054fca3a8d9cdd79d7674259f7c28973a599a1b8ab6510f4d212b1409"
+}

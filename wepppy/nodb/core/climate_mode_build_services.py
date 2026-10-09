@@ -20,7 +20,7 @@ class ClimateModeBuildServices:
             )
 
         if climate.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-            if climate.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM]:
+            if climate.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM, ClimateMode.Prism800m]:
                 raise ValueError(
                     "climate_spatialmode is MultipleInterpolated but climate_mode is not "
                     "ObservedPRISM or GridMetPRISM"
@@ -48,6 +48,11 @@ class ClimateModeBuildServices:
             else:
                 climate._build_climate_observed_daymet(verbose=verbose, attrs=attrs, replace_existing=True)
                 self._run_prism_revision_if_multiple(climate, verbose=verbose)
+
+        elif climate_mode == ClimateMode.Prism800m:
+            from .climate_prism_build import run_prism800m_build
+            run_prism800m_build(climate, attrs=attrs)
+            self._run_prism_revision_if_multiple(climate, verbose=verbose)
 
         elif climate_mode == ClimateMode.Future:
             climate._build_climate_future(verbose=verbose, attrs=attrs)

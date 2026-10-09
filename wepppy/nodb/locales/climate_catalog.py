@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date
 from functools import lru_cache
 import hashlib
 import json
@@ -34,6 +35,7 @@ _BUILDER_EXPOSED_DATASETS = frozenset(
         "prism_stochastic",
         "observed_daymet",
         "observed_gridmet",
+        "observed_prism_800m",
         "dep_nexrad",
         "future_cmip5",
         "user_defined_cli",
@@ -208,6 +210,16 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         rap_compatible=True,
         metadata={"year_bounds": {"min": 1980, "max": DAYMET_LAST_AVAILABLE_YEAR}},
         blocked_locales=_GHCN_ONLY_LOCALES,
+    ),
+    ClimateDataset(
+        catalog_id="observed_prism_800m", climate_mode=16,
+        label="Observed PRISM 800 m (GRIDMET wind)",
+        description="Historic native-cell PRISM daily precipitation, temperatures, dewpoint and solar radiation.",
+        help_text="Multiple uses monthly PRISM revision; nearest-cell mode preserves daily cell differences. GRIDMET supplies watershed wind.",
+        group="Observed", group_hint="Model validation; historical disturbance analysis",
+        allowed_locales=("us",), spatial_modes=(0, 1, 2), default_spatial_mode=0,
+        inputs=("observed_years", "spatial_mode"), rap_compatible=True,
+        metadata={"year_bounds": {"min": 1981, "max": date.today().year - 1}},
     ),
     ClimateDataset(
         catalog_id="observed_gridmet",

@@ -115,7 +115,7 @@ describe("Climate controller", () => {
                 </label>
                 <label class="wc-choice">
                     <input type="radio" name="climate_spatialmode" value="2" data-climate-action="spatial-mode" disabled>
-                    <span>Multiple climates (Interpolated)</span>
+                    <span class="wc-choice__label">Multiple climates (Interpolated)</span>
                 </label>
                 <label class="wc-choice">
                     <input type="radio" name="climate_spatialmode" value="1" data-climate-action="spatial-mode">
@@ -281,7 +281,8 @@ describe("Climate controller", () => {
 
     test.each([
         ["observed_daymet", 9],
-        ["observed_gridmet", 11]
+        ["observed_gridmet", 11],
+        ["observed_prism_800m", 16]
     ])("switching to %s enables interpolated submission and switching back resets it", async (catalogId, mode) => {
         climate.datasetMap[catalogId] = {
             catalog_id: catalogId,
@@ -295,6 +296,9 @@ describe("Climate controller", () => {
         expect(interpolated.disabled).toBe(true);
         climate.handleDatasetChange(catalogId);
         expect(interpolated.disabled).toBe(false);
+        if (catalogId === "observed_prism_800m") {
+            expect(interpolated.closest("label").textContent).toContain("nearest PRISM cell");
+        }
         interpolated.checked = true;
         interpolated.dispatchEvent(new Event("change", { bubbles: true }));
         await Promise.resolve();
@@ -308,6 +312,7 @@ describe("Climate controller", () => {
         climate.handleDatasetChange("dataset_a");
         expect(interpolated.disabled).toBe(true);
         expect(interpolated.checked).toBe(false);
+        expect(interpolated.closest("label").textContent).toContain("Interpolated");
         expect(document.querySelector('input[name="climate_spatialmode"][value="0"]').checked).toBe(true);
     });
 

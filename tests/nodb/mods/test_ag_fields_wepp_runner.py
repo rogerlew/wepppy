@@ -57,9 +57,11 @@ def test_run_wepp_ag_fields_passes_configured_binary_to_subfield_runner(
     assert calls[0][8] == "wepp_dcc52a6"
 
 
+@pytest.mark.parametrize("spatial_mode", [1, 2])
 def test_run_wepp_subfield_reaches_runner_with_explicit_binary(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    spatial_mode: int,
 ) -> None:
     runs_dir = tmp_path / "wepp" / "ag_fields" / "runs"
     slope_dir = tmp_path / "ag_fields" / "sub_fields" / "slope_files"
@@ -70,7 +72,7 @@ def test_run_wepp_subfield_reaches_runner_with_explicit_binary(
     monkeypatch.setattr(
         ag_fields_module.Climate,
         "getInstance",
-        lambda _wd: SimpleNamespace(input_years=1),
+        lambda _wd: SimpleNamespace(input_years=3, climate_mode=ag_fields_module.ClimateMode.Prism800m, climate_spatialmode=spatial_mode),
     )
     monkeypatch.setattr(
         ag_fields_module.Landuse,
@@ -83,15 +85,10 @@ def test_run_wepp_subfield_reaches_runner_with_explicit_binary(
             pass
 
         def build_rotation_stack(self, schedule: list[str], path: str) -> None:
-            assert schedule == ["wheat"]
+            assert schedule == ["wheat", "wheat", "wheat"]
             Path(path).write_text("management", encoding="utf-8")
 
     monkeypatch.setattr(ag_fields_module, "CropRotationManager", DummyRotationManager)
-    monkeypatch.setattr(
-        ag_fields_module,
-        "_template_loader",
-        lambda _name: "{sub_field_id} {man_relpath} {slp_relpath} {cli_relpath} {sol_relpath} {sim_years}",
-    )
 
     runner_calls: list[tuple[int, str, str, bool]] = []
 
@@ -106,7 +103,7 @@ def test_run_wepp_subfield_reaches_runner_with_explicit_binary(
         topaz_id="2",
         wepp_id=3,
         sub_field_id=4,
-        crop_rotation_schedule=["wheat"],
+        crop_rotation_schedule=["wheat", "wheat", "wheat"],
         clip_hillslopes=False,
         clip_hillslope_length=None,
         wepp_bin="/opt/wepp/bin/wepp",
@@ -116,3 +113,13 @@ def test_run_wepp_subfield_reaches_runner_with_explicit_binary(
     assert (runs_dir / "p4.run").is_file()
     assert (runs_dir / "p4.man").is_file()
     assert (runs_dir / "p4.slp").read_text(encoding="utf-8") == "slope"
+
+    parent = tmp_path / "wepp" / "runs" / "p3.cli"
+    parent.parent.mkdir(parents=True)
+    parent.write_bytes(b"distinct parent climate fixture")
+    lines = (runs_dir / "p4.run").read_text().splitlines()
+    reference = [line for line in lines if line.endswith(".cli")]
+    assert reference == ["../../runs/p3.cli"]
+    assert (runs_dir / reference[0]).resolve() == parent.resolve()
+    assert (runs_dir / reference[0]).read_bytes() == parent.read_bytes()
+    assert lines[-2:] == ["3", "0"]

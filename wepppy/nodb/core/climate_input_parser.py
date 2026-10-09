@@ -205,6 +205,7 @@ class ClimateInputParsingService:
             ClimateMode.Observed,
             ClimateMode.ObservedPRISM,
             ClimateMode.GridMetPRISM,
+            ClimateMode.Prism800m,
             ClimateMode.DepNexrad,
         }
         future_required_modes = {

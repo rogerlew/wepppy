@@ -323,12 +323,12 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert fields["observed_start_year"]["required_if"] == {
             "field": "climate_mode",
             "op": "in",
-            "value": [2, 9, 11],
+            "value": [2, 9, 11, 16],
         }
         assert fields["observed_end_year"]["required_if"] == {
             "field": "climate_mode",
             "op": "in",
-            "value": [2, 9, 11],
+            "value": [2, 9, 11, 16],
         }
         assert fields["future_start_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
         assert fields["future_end_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
@@ -697,7 +697,7 @@ def test_build_climate_schema_includes_future_window_fields(monkeypatch: pytest.
     assert request_fields["observed_start_year"]["required_if"] == {
         "field": "climate_mode",
         "op": "in",
-        "value": [2, 9, 11],
+        "value": [2, 9, 11, 16],
     }
     assert request_fields["future_start_year"]["required_if"] == {
         "field": "climate_mode",

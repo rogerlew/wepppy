@@ -1,0 +1,270 @@
+{
+  "job_id": "fdf0cc21-b061-4d9f-aea6-41b74afb70c7",
+  "runid": "chemotherapeutic-scope",
+  "status": "finished",
+  "result": "Unserializable return value",
+  "started_at": "2026-10-08 22:55:27.317630",
+  "ended_at": "2026-10-08 22:55:28.088869",
+  "description": "wepppy.rq.wepp_rq.run_wepp_rq('chemotherapeutic-scope')",
+  "elapsed_s": 0.771239,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {
+    "0": [
+      {
+        "job_id": "21ec64e9-0c87-441b-becb-8791706a48f9",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:55:28.067213",
+        "ended_at": "2026-10-08 22:55:29.081559",
+        "description": "wepppy.rq.wepp_rq._prep_slopes_rq('chemotherapeutic-scope')",
+        "elapsed_s": 1.014346,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "1950a6fc-05ec-4b59-8543-7e7e8e178471",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:55:28.067083",
+        "ended_at": "2026-10-08 22:55:28.546828",
+        "description": "wepppy.rq.wepp_rq._prep_managements_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.479745,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "c42a38b7-1f69-4c12-a9bf-08b4b55a9292",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:55:28.069421",
+        "ended_at": "2026-10-08 22:56:01.345173",
+        "description": "wepppy.rq.wepp_rq._prep_soils_rq('chemotherapeutic-scope')",
+        "elapsed_s": 33.275752,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "9ae7b484-bade-4f4d-9d39-d638adf07837",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:55:28.067369",
+        "ended_at": "2026-10-08 22:55:28.369203",
+        "description": "wepppy.rq.wepp_rq._prep_climates_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.301834,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "93879064-a7b3-4478-abd4-31126643fd6a",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:01.397117",
+        "ended_at": "2026-10-08 22:56:01.981173",
+        "description": "wepppy.rq.wepp_rq._prep_remaining_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.584056,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "1": [
+      {
+        "job_id": "33d3ecbe-f961-44b6-895d-b26ec107c6b5",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:02.021798",
+        "ended_at": "2026-10-08 22:56:02.873946",
+        "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.852148,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "2": [
+      {
+        "job_id": "97c9769f-0bec-472a-a5a5-2efe314bb681",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:02.911072",
+        "ended_at": "2026-10-08 22:56:03.257907",
+        "description": "wepppy.rq.wepp_rq._prep_watershed_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.346835,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "e03238cd-270b-4fb6-a323-c60a39aee1e8",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:02.910982",
+        "ended_at": "2026-10-08 22:56:04.828892",
+        "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('chemotherapeutic-scope')",
+        "elapsed_s": 1.91791,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "4e4eb2fe-6ebc-4ca9-98a0-0125933281cb",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:04.868671",
+        "ended_at": "2026-10-08 22:56:06.039768",
+        "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('chemotherapeutic-scope')",
+        "elapsed_s": 1.171097,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "3": [
+      {
+        "job_id": "75d3e7be-3503-41b0-985e-631daab150f3",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": [
+          true,
+          9.635436534881592
+        ],
+        "started_at": "2026-10-08 22:56:03.293827",
+        "ended_at": "2026-10-08 22:56:12.993428",
+        "description": "wepppy.rq.wepp_rq.run_watershed_rq('chemotherapeutic-scope', wepp_bin='wepp_260430')",
+        "elapsed_s": 9.699601,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "4": [
+      {
+        "job_id": "e106ce7e-2696-49cb-a170-dd6b95246ca7",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:13.033446",
+        "ended_at": "2026-10-08 22:56:13.218631",
+        "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.185185,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "e51edd0c-ae99-4c33-9a8a-42b00614643c",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:13.033866",
+        "ended_at": "2026-10-08 22:56:13.597564",
+        "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.563698,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "13b5e40f-f164-4b29-8aef-545b7813f2c9",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:13.033357",
+        "ended_at": "2026-10-08 22:56:13.842810",
+        "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('chemotherapeutic-scope')",
+        "elapsed_s": 0.809453,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "99295308-ba36-4222-b854-aa189b33ce82",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:13.261638",
+        "ended_at": "2026-10-08 22:56:19.226763",
+        "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('chemotherapeutic-scope')",
+        "elapsed_s": 5.965125,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "6b8d5759-4ceb-4cbd-b9a0-03be1d4190b5",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:19.272683",
+        "ended_at": "2026-10-08 22:56:20.693264",
+        "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('chemotherapeutic-scope')",
+        "elapsed_s": 1.420581,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "5": [
+      {
+        "job_id": "93b52d9c-e1c9-4183-ad89-1f5098310d57",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:20.732326",
+        "ended_at": "2026-10-08 22:56:23.994064",
+        "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('chemotherapeutic-scope')",
+        "elapsed_s": 3.261738,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "6": [
+      {
+        "job_id": "69792c16-f9b2-4683-afd9-c61b0bef5d61",
+        "runid": "chemotherapeutic-scope",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-08 22:56:24.031663",
+        "ended_at": "2026-10-08 22:56:24.134647",
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('chemotherapeutic-scope', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+        "elapsed_s": 0.102984,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ]
+  }
+}

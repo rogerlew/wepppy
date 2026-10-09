@@ -104,9 +104,11 @@ def test_builder_always_materializes_disturbed_and_compatible_mapping(locale):
 
 
 @pytest.mark.parametrize("representation", ["single-ofe", "multiple-ofe"])
-def test_single_inputs_are_independent_creation_capabilities(representation):
+@pytest.mark.parametrize("climate_id", ["vanilla_cligen", "observed_prism_800m"])
+def test_single_inputs_are_independent_creation_capabilities(representation, climate_id):
     candidate = resolve_builder_candidate(parse_builder_selections(_payload(
         single_user_defined_uploads=True, watershed_representation=representation,
+        climate=climate_id,
     )))
     config = parse_config_text(candidate.artifact.config_bytes.decode())
     manifest = json.loads(candidate.artifact.manifest_bytes)
@@ -115,6 +117,7 @@ def test_single_inputs_are_independent_creation_capabilities(representation):
     assert config["watershed"]["mofe_buffer"] is False
     assert manifest["selections"]["single_user_defined_uploads"] is True
     assert config["capabilities"]["wepp_binaries"] == ["wepp_260803"]
+    assert "observed_prism_800m" in config["capabilities"]["climate_datasets"]
     for section in ("capabilities.landuse_methods", "capabilities.soil_builders",
                     "capabilities.landuse_methods_by_representation"):
         assert all("single-user-defined" in methods for methods in config[section].values())

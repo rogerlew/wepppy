@@ -1,0 +1,22 @@
+{
+  "host": "forest",
+  "services": [
+    "rq-engine",
+    "rq-worker",
+    "rq-worker-batch"
+  ],
+  "pre_restart_workers": 11,
+  "pre_restart_states": "all idle",
+  "post_restart_workers": 11,
+  "post_restart_states": "all idle",
+  "rq_engine_health": {
+    "status": "ok",
+    "scope": "rq-engine"
+  },
+  "worker_prism_openet_years": [
+    2019,
+    2021
+  ],
+  "production_hosts_changed": false,
+  "web_container_restarted": false
+}

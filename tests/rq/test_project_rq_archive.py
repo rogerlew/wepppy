@@ -725,3 +725,25 @@ def test_conflicting_directory_modes_reject_before_cleanup(archive_rq_environmen
     with pytest.raises(ValueError, match='Conflicting archive directory modes'):
         project.restore_archive_rq('demo', archive.name)
     assert marker.read_text() == 'existing project'
+
+
+@pytest.mark.parametrize('state', ['working', 'failed', 'complete'])
+def test_prism_source_attempts_survive_archive_restore(archive_rq_environment, state):
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'demo'
+    attempt = root / 'climate/prism800m-build-example'
+    (attempt / 'source/provider').mkdir(parents=True)
+    expected = {
+        'climate/prism800m-build-example/build-status.json': json.dumps({'state': state}).encode(),
+        'climate/prism800m-build-example/source/provider/bulk.csv.gz': b'provider source bytes',
+        'climate/prism800m-build-example/provenance.json': b'{"source_directory":"climate/prism800m-build-example/source/provider"}',
+    }
+    for relative, content in expected.items():
+        (root / relative).write_bytes(content)
+    project.archive_rq('demo', comment='PRISM ' + state)
+    archive = next((root / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as z:
+        for relative, content in expected.items(): assert z.read(relative) == content
+    (attempt / 'source/provider/bulk.csv.gz').unlink()
+    project.restore_archive_rq('demo', archive.name)
+    for relative, content in expected.items(): assert (root / relative).read_bytes() == content

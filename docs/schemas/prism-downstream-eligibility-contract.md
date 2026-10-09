@@ -5,8 +5,9 @@
 Amendment PRISM-DOWNSTREAM-01, approved by the operator on 2026-10-08:
 “my gut is prism should be fine for bot of these. run the follow up check and alignment.”
 This authorizes historic PRISM eligibility for OpenET and AgFields and verification
-of calendar alignment and parent climate consumption. Implementation conformance
-is pending. This contract supplements `prism-historic-climate-contract.md`.
+of calendar alignment and parent climate consumption. Eligibility implementation and calendar/parent-file conformance have been
+validated; live service verification status is recorded separately in the
+alignment work package. This contract supplements `prism-historic-climate-contract.md`.
 
 ## Intended behavior
 

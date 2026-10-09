@@ -176,7 +176,7 @@ _PROFILES = (
         soil_sources=("ssurgo-gnatsgso-2025",),
         landuse_sources=_CONTINENTAL_US_LANDUSE_IDS,
         climate_sources=(
-            "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet",
+            "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet", "observed_prism_800m",
             "dep_nexrad", "future_cmip5", "user_defined_cli",
         ),
         climate_station_databases=(

@@ -45,6 +45,7 @@ OPENET_ALLOWED_CLIMATE_MODES = {
     ClimateMode.ObservedDb,
     ClimateMode.PRISM,
     ClimateMode.GridMetPRISM,
+    ClimateMode.Prism800m,
 }
 
 

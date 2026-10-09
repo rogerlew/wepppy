@@ -1,0 +1,44 @@
+[
+  {
+    "topaz_id": "183",
+    "dataset": "ensemble",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  },
+  {
+    "topaz_id": "183",
+    "dataset": "eemetric",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  },
+  {
+    "topaz_id": "202",
+    "dataset": "ensemble",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  },
+  {
+    "topaz_id": "202",
+    "dataset": "eemetric",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  },
+  {
+    "topaz_id": "381",
+    "dataset": "ensemble",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  },
+  {
+    "topaz_id": "381",
+    "dataset": "eemetric",
+    "months": 36,
+    "null_values": 0,
+    "missing_months": []
+  }
+]

@@ -1,5 +1,10 @@
 # Historic PRISM menu through WEPP on forest
 
+Completed on forest, 2026-10-08 UTC. Both methods passed generated-input/model
+readback; original and both cases retained; target left nearest-cell. Regression
+coverage completed in segments, with bounded compatibility fixes and unrelated
+test-isolation/allowlist observations recorded in artifacts/validation.md.
+
 ## Purpose / Big Picture
 
 Enable users of continental-US projects to select historic 800 m PRISM daily data and choose monthly PRISM revision or nearest native cells per hillslope. Demonstrate generated climate and WEPP results on the user-selected forest run, not only unit tests. This is wired production behavior, not a scaffold.
@@ -7,22 +12,35 @@ Enable users of continental-US projects to select historic 800 m PRISM daily dat
 ## Progress
 
 - [x] Inspect source, stack and target run; forest uses dev Compose and the run exists under /wc1/runs/ch/chemotherapeutic-scope.
-- [ ] Complete independent contract reviews and commit checkpoint ancestor.
-- [ ] Implement catalog/menu, raw-to-CLI adapter, staged builders and regression tests.
-- [ ] Run focused and full gates; restart affected dev services with operator authority.
-- [ ] Exercise menu/RQ climate and WEPP end to end for both methods, inspect artifacts, archive/restore source evidence, review and close.
+- [x] Complete independent contract reviews and commit checkpoint ancestor d3b5958c5; reader floor e25299022 precedes writer exposure.
+- [x] Implement catalog/menu, raw-to-CLI adapter, staged builders and regression tests.
+- [x] Run focused and broad gates; targeted Python, frontend and API checks passed. Full-suite coverage completed in segments; dispositions recorded. Dev services refreshed under existing identities.
+- [x] Exercise menu/RQ climate and WEPP end to end for both methods, inspect artifacts, restore portable source evidence and close independent correctness findings.
+- [x] Record full-suite disposition and close documentation/package.
 
 ## Surprises & Discoveries
 
-ObservedPRISM=9 is Daymet; new PRISM needs a new enum. Existing monthly revision uses native Rust cli_revision. Existing run is stochastic PRISM, single, 50 years, legacy generated seed84568 (explicit override is unset), station wy481175; preserve original configuration/output before testing. No observed year bounds are set. Target has104 hillslopes; use explicit seed84568 for repeatable test cases, retaining the original unset override in backup.
+ObservedPRISM=9 is Daymet; new PRISM needs a new enum. Existing monthly revision uses native Rust cli_revision. Existing run is stochastic PRISM, single, 50 years, legacy generated seed 84568 (explicit override is unset), station wy481175; preserve original configuration/output before testing. No observed year bounds are set. Target has 104 hillslopes; use explicit seed 84568 for repeatable test cases, retaining the original unset override in backup.
+
+Review found that shared same-cell CLI filenames collide under later per-hillslope precipitation scaling. Generate once per cell, then publish separate hillslope files. Diagnostic-only revision status writes must not fail an already committed build. Both fixes have focused regressions (45 tests passed together). Initial host bundle build lacked Jinja2; the canonical container build succeeded. Two initial browser probes stopped on a collapsed seed field before enqueue; expanding its ancestors resolved the probe.
+
+The full suite stopped after 4,964 passes on valid single-input Builder creation:
+adding PRISM also changes that variant's catalog identity. The ordinary-only
+reader floor omitted it. Two independent reviews ratified the bounded correction
+in checkpoint 5b97490e7; aggregate reader floor 6781de988 appends the missing
+climate-only structure, preserving all nonclimate restrictions and prior graphs.
+Builder/capability 94-test and creation/refresh 14-test runs passed. Resume broad
+validation at the failed module; do not repeat unchanged completed slow tests.
 
 ## Decision Log
 
-2026-10-08 UTC user approved the preceding walkthrough and both multiple spatial methods, end-to-end forest execution, and dev stack restart. Use previous completed calendar year as menu maximum, 1981 minimum, explicit failures for incomplete data. Use common watershed GridMET wind and station/seed; new cell mapping does not introduce synthetic spatial randomness. Proposed bounded test years2019–2021 include leap day; finish target in nearest-cell mode with both test cases retained.
+2026-10-08 UTC user approved the preceding walkthrough and both multiple spatial methods, end-to-end forest execution, and dev stack restart. Use previous completed calendar year as menu maximum, 1981 minimum, explicit failures for incomplete data. Use common watershed GridMET wind and station/seed; new cell mapping does not introduce synthetic spatial randomness. Proposed bounded test years 2019–2021 include leap day; finish target in nearest-cell mode with both test cases retained.
+
+2026-10-08: preserve OpenET/AgFields mode eligibility; mode 16 integration there is separate follow-up, not claimed here. Ratified reader-first capability amendment supports the new structure without reinterpreting historical stored graphs.
 
 ## Outcomes & Retrospective
 
-Pending implementation and acceptance.
+Both methods completed all 18 RQ jobs, including watershed WEPP. Numerical readback passed for all 104 hillslopes and 113,984 daily water-balance rows per case. Original run and both case snapshots are retained under the target's archives directory. Nearest-cell mode preserves 24 distinct wet-day calendars across 24 cells. Browser/download, 993-file portable restoration and committed-reader-floor reopening passed; independent review closed all four findings. Aggregate reader floor 6781de988 reopens ordinary/single-input variants with both OFE representations. Full-suite coverage completed via a 4,964-pass prefix, 5,219-pass continuation and 301-pass tail, with overlaps/skips and failed probes documented; no unique-count sum or one-clean-run claim. Detailed evidence and limitations are in artifacts/forest-results.md and artifacts/validation.md. Retain CLIGEN convergence warning, defer OpenET/AgFields mode 16 eligibility, and preserve unrelated concurrent edits.
 
 ## Context and Orientation
 

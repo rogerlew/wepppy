@@ -1651,6 +1651,7 @@ class AgFields(NoDbBase):
             ClimateMode.AGDC,
             ClimateMode.GridMetPRISM,
             ClimateMode.DepNexrad,
+            ClimateMode.Prism800m,
         }
         try:
             start_year, end_year = self._observed_year_bounds()

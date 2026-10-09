@@ -219,6 +219,7 @@ def test_exact_schema_v1_named_preset_projects_only_climate_and_landuse(
                 "prism_stochastic",
                 "observed_daymet",
                 "observed_gridmet",
+                "observed_prism_800m",
                 "dep_nexrad",
                 "future_cmip5",
                 "user_defined_cli",

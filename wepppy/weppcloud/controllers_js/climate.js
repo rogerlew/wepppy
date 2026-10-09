@@ -650,6 +650,19 @@ var Climate = (function () {
                     return;
                 }
                 var value = parseInteger(radio.value, null);
+                if (value === 2) {
+                    var prism = dataset && dataset.catalog_id === "observed_prism_800m";
+                    var label = radio.closest("label");
+                    var text = label && label.querySelector(".wc-choice__label");
+                    var title = prism ? "Multiple climates (nearest PRISM cell)" : "Multiple climates (Interpolated)";
+                    if (text) {
+                        text.textContent = title;
+                    }
+                    radio.setAttribute("data-spatial-help-title", title);
+                    radio.setAttribute("data-spatial-help-body", prism
+                        ? "Use the nearest native PRISM cell for each hillslope. Hillslopes in the same cell share daily weather; no spatial smoothing is applied."
+                        : "Interpolate observed DAYMET/GRIDMET grids for each hillslope (where the selected dataset is available, slower).");
+                }
                 var enabled = value !== null && allowed.indexOf(value) !== -1;
                 toggleChoiceDisabled(radio, !enabled);
                 if (!enabled && value === currentValue) {
@@ -657,6 +670,7 @@ var Climate = (function () {
                 }
             });
 
+            climate.updateSpatialModeHelp(nextValue);
             if (Number.isNaN(currentValue) || nextValue !== currentValue) {
                 climate.setSpatialMode(nextValue, { silent: true });
             } else if (opts.silent) {

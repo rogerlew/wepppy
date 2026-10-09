@@ -1,0 +1,13 @@
+{
+  "mode": 16,
+  "spatial": 2,
+  "observed_years": [
+    2019,
+    2021
+  ],
+  "source_files_match_saved_mode2_archive": 106,
+  "uid": 1000,
+  "gid": 993,
+  "wepp_binary": "wepp_260430_hill",
+  "wepp_binary_sha256": "3b2fdd2b7a9e264b84f1e7b161dfb0730d49d3cb652218139efeb3ba17d7a160"
+}

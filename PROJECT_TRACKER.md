@@ -7,9 +7,11 @@
 
 ## Purpose
 
+Active: [PRISM downstream alignment](docs/work-packages/20261008_prism_openet_agfields_alignment/package.md) — eligibility and bounded calendar/parent-file checks pass; operator confirmed the expired Climate Engine token; renewal and production acquisition recheck are deferred.
+
 Blocked (research): [Tenderfoot observed-flow calibration](docs/work-packages/20261008_tenderfoot_calibration/package.md) — baseline diagnosis complete; fork-worker Discord credential import failure prevents isolated ET sensitivity trials.
 
-Active: [Historic PRISM WEPP integration](docs/work-packages/20261008_prism_wepp_integration/package.md) — menu, both spatial methods, forest end-to-end acceptance.
+Completed (code/forest): [Historic PRISM WEPP integration](docs/work-packages/20261008_prism_wepp_integration/package.md) — both spatial methods passed104-hillslope WEPP acceptance; nearest-cell preserves24 daily storm calendars. Aggregate capability reader floor6781de988.
 
 Completed (code/local): [Historic PRISM bulk client](docs/work-packages/20261008_prism_bulk_client/package.md) — native-cell extraction and cache, configured through Docker `.env`.
 

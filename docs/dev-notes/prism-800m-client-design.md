@@ -2,8 +2,9 @@
 
 Status: bulk client/cache implemented as a separate callable API; validation is
 tracked in the [implementation package](../work-packages/20261008_prism_bulk_client/package.md).
-Climate catalog and WEPP integration remain separate work. The 2026-10-08
-investigation remains immutable feasibility evidence.
+Climate catalog and WEPP integration follow the separate
+[historic PRISM contract](../schemas/prism-historic-climate-contract.md).
+The 2026-10-08 investigation remains immutable feasibility evidence.
 Evidence: [bulk extraction investigation](../investigations/20261008_prism_800m_bulk/findings.md).
 
 ## Accepted scope and cell identity
@@ -49,9 +50,9 @@ values. Use a semantic value checksum when comparing independent extractions:
 CSV generation timestamps can change while all climate values remain equal.
 Do not replace immutable run provenance when a shared cache is refreshed.
 
-The planned variables are `ppt`, `tmin`, `tmax`, `tdmean`, and `soltotal` in SI
+The variables are `ppt`, `tmin`, `tmax`, `tdmean`, and `soltotal` in SI
 units. Wind sourcing, PRISM's 12:00 UTC day boundary, radiation conversion, and
-CLIGEN disaggregation remain separate integration decisions. Existing daily
+CLIGEN disaggregation are specified in the historic PRISM contract. Existing daily
 PRISM and Daymet/GridMET methods must retain their current identities and
 behavior; `ClimateMode.ObservedPRISM` currently routes to Daymet.
 
@@ -140,10 +141,10 @@ minimum temperature above maximum temperature; investigate suspect extremes
 without automatic clipping. Treat CSV rounding as part of source precision
 (precipitation/solar: 0.01; temperatures: 0.1 in the observed CSVs).
 
-Before production wiring, add an active ExecPlan, the relevant climate/UI
-contracts and parameterization ADR, cache/concurrency validation, and artifact
-readback through PRN, CLI, and generated WEPP inputs. This investigation changes
-no run schemas, defaults, numeric formulas, or production behavior.
+Production wiring is tracked in the
+[integration package](../work-packages/20261008_prism_wepp_integration/package.md),
+with a ratified contract, ADR, reader-first capability rollout, cache/concurrency
+validation and generated PRN/CLI/WEPP artifact readback.
 
 
 ## Implemented bulk API and Docker configuration
@@ -186,6 +187,12 @@ cache-hit flag, and the retained freshness-check attempt. Its freshness label
 bulk/grid revision identity. Caller-owned result tables can be modified without
 changing persisted cache records.
 
+`client.attempt_directories` lists only the attempts started by the most recent
+`retrieve` call, including failures; it resets on each call. A consumer may copy
+these directories in `finally` to retain attributable acquisition evidence.
+Successful warm-cache provenance also references older source attempts; copy
+those separately when creating a portable project record.
+
 ## Cache files, failure and recovery
 
 Under `PRISM_CACHE_DIR/v1/<grid-id>/`, `attempts/<uuid>/` contains status, requested
@@ -222,9 +229,46 @@ Explorer temporary directory. A cache cannot prove source scientific accuracy
 or eliminate upstream backend lag.
 
 This shared source cache is not a run artifact or a substitute for run archives.
-Before future WEPP wiring, the consumer must snapshot raw/derived forcing and
-provenance under the normal climate directory and validate downstream CLI/model
-readback and archive restoration. Comparable existing layouts are GridMET/Daymet
-source parquet in `climate/` and visible attempt directories. This client-only
-slice does not create project records, so browser/archive integration is not
-claimed. See [ADR-0081](../adrs/ADR-0081-prism-native-cell-bulk-cache.md).
+The WEPP adapter snapshots raw/derived forcing, source attempts and run-relative
+provenance under `climate/prism800m-build-*/`. These visible directories survive
+rebuilds, including switching datasets, and use normal browser/archive handling.
+The latest flat files support WEPP and diagnostics; each retained attempt records
+working, failed or complete status. A failed Multiple revision leaves the accepted
+centroid intact but the climate unready until hillslope mappings are published.
+See [ADR-0081](../adrs/ADR-0081-prism-native-cell-bulk-cache.md) for acquisition and
+[ADR-0082](../adrs/ADR-0082-prism-historic-wepp-forcing.md) for model conversion.
+
+## Runtime integration and recovery
+
+Deploy readers supporting capability structure
+`2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3`
+and its single-input variant
+`545e2197c8a67a88da9c796246a2b0572427c8228bcb0e5d3ccd883f11b320a6`
+before exposing new CONUS writers (aggregate reader floor `6781de988`;
+ordinary-only floor `e25299022` is insufficient for the variant). Historical project
+graphs keep their authorized dataset envelope until an explicit refresh. Rebuild
+the controller bundle through the normal container tooling when changing the
+menu. A rollback after new graph persistence must retain this reader support.
+
+Acquisition and conversion happen outside the NoDb lock; publication checks the
+captured climate settings and watershed locations against fresh state. Changed
+inputs reject the candidate, retaining its attempt for inspection. Inspect
+`build-status.json`, portable `provenance.json`, raw parquet and conversion CSVs
+before retrying. Do not delete shared cache or run evidence to hide a failure.
+Same-cell generation is deduplicated, while published hillslope CLI files are
+separate so existing spatial precipitation scaling can assign distinct factors.
+
+## OpenET and AgFields downstream eligibility
+
+Historic PRISM mode 16 is accepted by OpenET climate validation and AgFields
+observed-climate readiness; see the
+[downstream contract](../schemas/prism-downstream-eligibility-contract.md).
+OpenET retains its existing observed-year rules, monthly millimeter outputs,
+feature access and Climate Engine credential requirement. A direct OpenET API
+key does not replace `CLIMATE_ENGINE_API_KEY` in the production controller.
+Compare matching Topaz IDs, years and months; do not fill missing ET with zero.
+
+AgFields reads the parent's prepared `wepp/runs/p<wepp_id>.cli` by relative path.
+Both PRISM spatial methods therefore propagate without subfield resampling.
+Annual crop schedules must cover all observed years, and parent soil/climate
+readiness remains independent of climate-mode eligibility.

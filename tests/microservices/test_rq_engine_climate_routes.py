@@ -640,15 +640,16 @@ def test_build_climate_runtime_preflight_error_uses_generic_parse_boundary(
     assert response.json()["error"]["message"] == "Error parsing climate inputs"
 
 
+@pytest.mark.parametrize('mode', [climate_routes.ClimateMode.ObservedPRISM, climate_routes.ClimateMode.Prism800m])
 def test_build_climate_observed_year_bounds_validation_failure_returns_structured_error(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, mode,
 ) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummyClimate:
         run_group = "default"
-        climate_mode = climate_routes.ClimateMode.ObservedPRISM
+        climate_mode = mode
 
         def parse_inputs(self, payload) -> None:
             return None

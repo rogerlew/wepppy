@@ -1,0 +1,44 @@
+[
+  {
+    "spatial": 1,
+    "topaz_id": "183",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  },
+  {
+    "spatial": 1,
+    "topaz_id": "202",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  },
+  {
+    "spatial": 1,
+    "topaz_id": "381",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "183",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "202",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "381",
+    "wepp_months": 36,
+    "satellite_rows": 72,
+    "matched_rows": 72
+  }
+]

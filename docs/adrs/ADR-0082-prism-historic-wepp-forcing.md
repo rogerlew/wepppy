@@ -1,6 +1,6 @@
 # ADR-0082: Historic PRISM forcing and spatial methods
 
-Status: Accepted intended behavior, 2026-10-08; implementation pending.
+Status: Accepted and implemented, 2026-10-08; both multiple methods validated through WEPP on forest.
 
 ## Context
 
@@ -22,4 +22,4 @@ Daily PRISM patterns are retained, within-day storms remain modeled, and wind re
 
 Venue: this Codex/user conversation, 2026-10-08 America/Los_Angeles (exact message clock time unavailable). Participants: user and Codex. Decision owner: user approved the integration walkthrough and execution; implementer: Codex. New derived PRISM forcing replaces no existing dataset behavior. The unchanged PRN writer quantizes precipitation to0.254mm and temperature to1F; record trace-rain zeroing and compare generated values against this quantization before CLI rounding. Dewpoint after monthly revision is recomputed from raw source and revised Tmin, avoiding an excessive centroid floor on cooler hillslopes.
 
-Evidence: [bulk validation](../work-packages/20261008_prism_bulk_client/tracker.md), [integration checkpoint](../work-packages/20261008_prism_wepp_integration/artifacts/20261008_contract_decision.md), [WEPP dewpoint audit](../investigations/20261008_prism_800m_bulk/dewpoint-source-audit.md). Live numerical and execution evidence remains pending. Risks: daily-window mismatch with wind, synthetic within-day storm structure, trace-rain rounding, and retained provider revisions. Roll back the additive runtime integration if generated parity or WEPP execution fails; preserve new capability reader support, archived source and pre-test run snapshot. Do not roll back to a reader that cannot reopen newly persisted capability graphs.
+Evidence: [bulk validation](../work-packages/20261008_prism_bulk_client/tracker.md), [integration checkpoint](../work-packages/20261008_prism_wepp_integration/artifacts/20261008_contract_decision.md), [WEPP dewpoint audit](../investigations/20261008_prism_800m_bulk/dewpoint-source-audit.md), and [forest numerical/execution readback](../work-packages/20261008_prism_wepp_integration/artifacts/forest-results.md). Risks: daily-window mismatch with wind, synthetic within-day storm structure and convergence warnings, trace-rain rounding, and retained provider revisions. Roll back the additive runtime integration if generated parity or WEPP execution fails; preserve new capability reader support, archived source and pre-test run snapshot. Do not roll back to a reader that cannot reopen newly persisted capability graphs.

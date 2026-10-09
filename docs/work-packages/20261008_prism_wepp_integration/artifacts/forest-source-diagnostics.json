@@ -1,0 +1,245 @@
+{
+  "scope": "24 nearest-cell series for2019\u20132021; shared days are not independent observations",
+  "cells": [
+    {
+      "cell": "r691c1863",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 934,
+      "derived_floor_changed_days": 929,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1894.3700000000001,
+      "quantized_precip_mm": 1899.158,
+      "max_raw_daily_precip_mm": 27.98
+    },
+    {
+      "cell": "r691c1864",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 945,
+      "derived_floor_changed_days": 944,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1943.1499999999999,
+      "quantized_precip_mm": 1941.3220000000001,
+      "max_raw_daily_precip_mm": 33.61
+    },
+    {
+      "cell": "r691c1867",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 943,
+      "derived_floor_changed_days": 942,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2226.07,
+      "quantized_precip_mm": 2223.2619999999997,
+      "max_raw_daily_precip_mm": 37.24
+    },
+    {
+      "cell": "r692c1862",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 967,
+      "derived_floor_changed_days": 964,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1875.93,
+      "quantized_precip_mm": 1876.5520000000001,
+      "max_raw_daily_precip_mm": 28.52
+    },
+    {
+      "cell": "r692c1863",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 963,
+      "derived_floor_changed_days": 963,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1894.1,
+      "quantized_precip_mm": 1893.57,
+      "max_raw_daily_precip_mm": 30.21
+    },
+    {
+      "cell": "r692c1864",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 954,
+      "derived_floor_changed_days": 954,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1941.77,
+      "quantized_precip_mm": 1937.004,
+      "max_raw_daily_precip_mm": 35.35
+    },
+    {
+      "cell": "r692c1865",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 933,
+      "derived_floor_changed_days": 933,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2009.83,
+      "quantized_precip_mm": 2009.6480000000001,
+      "max_raw_daily_precip_mm": 37.2
+    },
+    {
+      "cell": "r692c1866",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 939,
+      "derived_floor_changed_days": 941,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2105.54,
+      "quantized_precip_mm": 2102.866,
+      "max_raw_daily_precip_mm": 36.4
+    },
+    {
+      "cell": "r692c1867",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 947,
+      "derived_floor_changed_days": 949,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2226.7,
+      "quantized_precip_mm": 2223.77,
+      "max_raw_daily_precip_mm": 37.26
+    },
+    {
+      "cell": "r693c1862",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 944,
+      "derived_floor_changed_days": 948,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1871.52,
+      "quantized_precip_mm": 1872.996,
+      "max_raw_daily_precip_mm": 29.46
+    },
+    {
+      "cell": "r693c1863",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 947,
+      "derived_floor_changed_days": 944,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1878.75,
+      "quantized_precip_mm": 1878.33,
+      "max_raw_daily_precip_mm": 33.79
+    },
+    {
+      "cell": "r693c1864",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 952,
+      "derived_floor_changed_days": 947,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1914.04,
+      "quantized_precip_mm": 1911.096,
+      "max_raw_daily_precip_mm": 35.6
+    },
+    {
+      "cell": "r693c1865",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 965,
+      "derived_floor_changed_days": 971,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1972.0500000000002,
+      "quantized_precip_mm": 1971.04,
+      "max_raw_daily_precip_mm": 37.65
+    },
+    {
+      "cell": "r693c1866",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 967,
+      "derived_floor_changed_days": 966,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2064.22,
+      "quantized_precip_mm": 2065.782,
+      "max_raw_daily_precip_mm": 36.67
+    },
+    {
+      "cell": "r693c1867",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 945,
+      "derived_floor_changed_days": 946,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2201.3999999999996,
+      "quantized_precip_mm": 2197.608,
+      "max_raw_daily_precip_mm": 37.21
+    },
+    {
+      "cell": "r694c1863",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 953,
+      "derived_floor_changed_days": 950,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1927.01,
+      "quantized_precip_mm": 1924.558,
+      "max_raw_daily_precip_mm": 35.7
+    },
+    {
+      "cell": "r694c1864",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 959,
+      "derived_floor_changed_days": 959,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1955.8899999999999,
+      "quantized_precip_mm": 1955.292,
+      "max_raw_daily_precip_mm": 37.17
+    },
+    {
+      "cell": "r694c1865",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 961,
+      "derived_floor_changed_days": 961,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1995.29,
+      "quantized_precip_mm": 1992.63,
+      "max_raw_daily_precip_mm": 37.67
+    },
+    {
+      "cell": "r694c1866",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 950,
+      "derived_floor_changed_days": 951,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2092.2200000000003,
+      "quantized_precip_mm": 2089.912,
+      "max_raw_daily_precip_mm": 38.41
+    },
+    {
+      "cell": "r694c1867",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 914,
+      "derived_floor_changed_days": 907,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2164.86,
+      "quantized_precip_mm": 2163.318,
+      "max_raw_daily_precip_mm": 37.75
+    },
+    {
+      "cell": "r695c1863",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 917,
+      "derived_floor_changed_days": 916,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 1984.26,
+      "quantized_precip_mm": 1983.486,
+      "max_raw_daily_precip_mm": 36.82
+    },
+    {
+      "cell": "r695c1864",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 923,
+      "derived_floor_changed_days": 924,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2050.1400000000003,
+      "quantized_precip_mm": 2050.034,
+      "max_raw_daily_precip_mm": 37.27
+    },
+    {
+      "cell": "r695c1865",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 931,
+      "derived_floor_changed_days": 929,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2123.3,
+      "quantized_precip_mm": 2125.726,
+      "max_raw_daily_precip_mm": 37.81
+    },
+    {
+      "cell": "r695c1866",
+      "days": 1096,
+      "raw_td_below_raw_tmin_days": 890,
+      "derived_floor_changed_days": 890,
+      "trace_rain_zeroed_days": 0,
+      "raw_precip_mm": 2135.83,
+      "quantized_precip_mm": 2133.092,
+      "max_raw_daily_precip_mm": 38.41
+    }
+  ]
+}

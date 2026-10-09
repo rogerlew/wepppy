@@ -1,0 +1,10 @@
+{
+  "mode": 16,
+  "spatial": 2,
+  "ready": true,
+  "years": [
+    2019,
+    2021
+  ],
+  "outputs_unchanged_since_readback": true
+}

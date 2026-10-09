@@ -1578,11 +1578,12 @@ def test_builder_sbs_update_rejects_unrelated_module_changes(tmp_path, mods):
         preview_project_config_update(tmp_path)
 
 
-def test_single_input_policy_and_sources_survive_config_refresh(tmp_path, monkeypatch):
+@pytest.mark.parametrize("climate_id", ["vanilla_cligen", "observed_prism_800m"])
+def test_single_input_policy_and_sources_survive_config_refresh(tmp_path, monkeypatch, climate_id):
     candidate = resolve_builder_candidate(BuilderSelections(
         locale="continental-us", dem="usgs-ned13-2022", delineation_backend="wbt",
         watershed_representation="multiple-ofe", soil="ssurgo-gnatsgso-2025",
-        wepp_binary="wepp_260803", landuse="nlcd-2019", climate="vanilla_cligen",
+        wepp_binary="wepp_260803", landuse="nlcd-2019", climate=climate_id,
         single_user_defined_uploads=True,
     ))
     materialize_preset_snapshot(tmp_path, candidate.artifact)
@@ -1611,4 +1612,5 @@ def test_single_input_policy_and_sources_survive_config_refresh(tmp_path, monkey
     assert updated['watershed']['mofe_buffer'] is False
     assert 'single-user-defined' in updated['capabilities']['landuse_methods']
     assert 'single-user-defined' in updated['capabilities']['soil_builders']
+    assert 'observed_prism_800m' in updated['capabilities']['climate_datasets']
     assert source.read_bytes() == b'immutable source sentinel'

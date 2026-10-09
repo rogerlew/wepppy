@@ -1,0 +1,18 @@
+Initial regression (before the allowlist changes):
+FAILED test_historic_prism_accepts_calendar_bounds[0]
+ValueError: OpenET requires observed climate modes; got 16.
+
+Focused command:
+wctl run-pytest tests/nodb/mods/openet tests/nodb/mods/test_ag_fields_backend_contract.py tests/nodb/mods/test_ag_fields_wepp_runner.py tests/microservices/test_rq_engine_openet_ts_routes.py tests/microservices/test_rq_engine_ag_fields_routes.py tests/weppcloud/routes/test_run_0_openet_admin_gate.py --maxfail=1
+182 passed, 8 warnings in 12.62s
+
+After extending the runner test to real-template parent references and both spatial methods:
+wctl run-pytest tests/nodb/mods/test_ag_fields_wepp_runner.py
+3 passed, 2 warnings in 9.40s
+
+Full current working tree:
+wctl run-pytest tests --maxfail=1
+10491 passed, 126 skipped, 5482 warnings in 2676.88s (0:44:36)
+
+Changed-file broad-exception gate: PASS after shifting two existing allowlist line references.
+Documentation lint: PASS; no errors or warnings.

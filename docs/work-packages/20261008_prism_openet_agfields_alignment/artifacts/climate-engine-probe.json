@@ -1,0 +1,21 @@
+{
+  "endpoint": "https://api.climateengine.org/timeseries/native/coordinates",
+  "datasets": [
+    "et_ensemble_mad",
+    "et_eemetric"
+  ],
+  "topaz_ids": [
+    "183",
+    "202",
+    "381"
+  ],
+  "years": [
+    2019,
+    2021
+  ],
+  "series_attempted": 6,
+  "http_status": 401,
+  "analysis_error": "OpenET analysis found no cached parquet inputs.",
+  "eligibility_validation": "passed",
+  "production_acquisition": "blocked by upstream authorization"
+}

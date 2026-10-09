@@ -1,0 +1,134 @@
+[
+  {
+    "spatial": 1,
+    "wepp_id": 38,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  },
+  {
+    "spatial": 1,
+    "wepp_id": 42,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  },
+  {
+    "spatial": 1,
+    "wepp_id": 86,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  },
+  {
+    "spatial": 2,
+    "wepp_id": 38,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  },
+  {
+    "spatial": 2,
+    "wepp_id": 42,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  },
+  {
+    "spatial": 2,
+    "wepp_id": 86,
+    "before": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": false,
+      "missing_parent_wepp_ids": []
+    },
+    "after": {
+      "observed_climate": true,
+      "observed_start_year": 2019,
+      "observed_end_year": 2021,
+      "watershed_abstraction": false,
+      "parent_wepp": true,
+      "missing_parent_wepp_ids": []
+    },
+    "full_crop_schedule": "accepted",
+    "missing_2020": "rejected"
+  }
+]

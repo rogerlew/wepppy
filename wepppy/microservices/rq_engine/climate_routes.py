@@ -52,6 +52,7 @@ _OBSERVED_YEAR_REQUIRED_MODES = frozenset(
         ClimateMode.Observed,
         ClimateMode.ObservedPRISM,
         ClimateMode.GridMetPRISM,
+        ClimateMode.Prism800m,
         ClimateMode.DepNexrad,
     )
 )

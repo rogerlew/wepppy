@@ -141,6 +141,38 @@ If you want the shortest defensible answer instead of a full option review:
 - In **Multiple Interpolated** mode (`2`), build uses the GRIDMET interpolated hillslope workflow.
 - Marked RAP-compatible in the current catalog.
 
+## Observed PRISM 800 m (GRIDMET wind)
+
+Use this for continental-US historical modeling when daily rainfall differences
+between native PRISM cells matter. Select complete calendar years from **1981
+through the previous year**. Older stored project capability graphs may need an
+explicit refresh before this option appears.
+
+PRISM supplies daily precipitation, minimum/maximum temperature, dewpoint and
+solar radiation. GRIDMET supplies shared watershed wind, and the selected CLIGEN
+station supplies within-day storm structure. Daily PRISM does not provide
+observed storm duration or intensity.
+
+| Spatial choice | Behavior |
+| --- | --- |
+| Single | Uses the native cell nearest the watershed centroid. |
+| Multiple | Revises centroid daily forcing with existing monthly PRISM hillslope precipitation ratios and temperature offsets. |
+| Multiple climates (nearest PRISM cell) | Uses each hillslope's nearest native cell, with no neighboring-cell averaging or monthly revision. Hillslopes in one cell share unscaled daily weather. |
+
+Existing precipitation scaling options still apply. The observed dewpoint floor
+is retained and recomputed after monthly temperature revision; raw dewpoint stays
+unchanged in source records. The existing PRN format rounds rainfall to0.254mm
+and temperature to whole Fahrenheit degrees, so trace rain can round to zero.
+The CLIGEN quality guard and any convergence warnings remain applicable.
+
+Source parquet, conversion/dewpoint diagnostics and retained build attempts are
+available under `climate/` in the project browser and archives. OpenET and AgFields
+accept this mode. OpenET comparisons use matching hillslope/calendar months within
+available satellite coverage. AgFields uses each subfield parent hillslope's
+prepared climate file and requires crop schedules for the observed years. See the
+[historic PRISM guide](../../../../../docs/ui-docs/prism-historic-climate.md)
+for source inspection and recovery details.
+
 ## DEP NEXRAD Breakpoint
 
 **Suitable for**
@@ -379,7 +411,8 @@ This pattern is used across observed DAYMET, observed GRIDMET, PRISM-observed st
 
 **What it does**
 - Uses dedicated interpolated observed-climate build paths.
-- Supported only for observed DAYMET / observed GRIDMET mode families (`ObservedPRISM` / `GridMetPRISM`).
+- For observed DAYMET / observed GRIDMET, uses interpolation (`ObservedPRISM` / `GridMetPRISM`).
+- For observed PRISM 800 m, the label changes to **Multiple climates (nearest PRISM cell)** and each hillslope uses its nearest native cell without smoothing or monthly revision.
 
 **When to use**
 - When spatial heterogeneity is important and you are on supported observed modes.
@@ -389,7 +422,7 @@ This pattern is used across observed DAYMET, observed GRIDMET, PRISM-observed st
 - In operator experience, this mode has produced some of the best calibrated results for certain Pacific Northwest watersheds.
 - It is often a strong candidate for larger watersheds or watersheds with micro-climate variation.
 
-Select an available observed DAYMET or GRIDMET dataset to enable this option; no page reload is needed. It is disabled for datasets that do not support interpolation.
+Select an available observed DAYMET, GRIDMET or PRISM 800 m dataset to enable this option; no page reload is needed. It is disabled for datasets that do not support this spatial method. The calibration experience above concerns the existing interpolated methods, not a validation claim for the new PRISM method.
 
 ## Recommended spatial-mode decision path
 

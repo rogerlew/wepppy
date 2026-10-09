@@ -1,0 +1,7 @@
+{
+  "reader_revision": "e25299022",
+  "structure": "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3",
+  "stored_config": "new-writer-project.cfg",
+  "reopened_equal": true,
+  "scope": "Isolated persisted Builder config; target project graph was not migrated"
+}

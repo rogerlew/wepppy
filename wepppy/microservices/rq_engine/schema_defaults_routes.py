@@ -1086,14 +1086,14 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
+                    "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                 },
                 "observed_end_year": {
                     "type": "integer",
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
+                    "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                 },
                 "future_start_year": {
                     "type": "integer",
@@ -3563,14 +3563,14 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
+                            "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                         },
                         "observed_end_year": {
                             "type": "integer",
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
+                            "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                         },
                         "future_start_year": {
                             "type": "integer",

@@ -99,6 +99,7 @@ class ClimateMode(IntEnum):
     DepNexrad = 13
     SingleStormBatch = 14
     UserDefinedSingleStorm = 15
+    Prism800m = 16
     @staticmethod
     def parse(x: str | None) -> ClimateMode: ...
 

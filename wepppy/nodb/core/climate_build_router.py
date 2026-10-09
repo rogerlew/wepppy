@@ -50,6 +50,8 @@ def _clear_directory_preserving_symlink_mount(path: str, *, preserve_contents: b
 
         for name in os.listdir(resolved):
             candidate = os.path.join(resolved, name)
+            if name.startswith("prism800m-build-") and os.path.isdir(candidate) and not os.path.islink(candidate):
+                continue
             if os.path.isdir(candidate) and not os.path.islink(candidate):
                 shutil.rmtree(candidate)
             else:
@@ -59,7 +61,17 @@ def _clear_directory_preserving_symlink_mount(path: str, *, preserve_contents: b
     if preserve_contents and os.path.isdir(path):
         return
     if os.path.isdir(path):
-        shutil.rmtree(path)
+        if any(name.startswith("prism800m-build-") for name in os.listdir(path)):
+            for name in os.listdir(path):
+                candidate = os.path.join(path, name)
+                if name.startswith("prism800m-build-") and os.path.isdir(candidate) and not os.path.islink(candidate):
+                    continue
+                if os.path.isdir(candidate) and not os.path.islink(candidate):
+                    shutil.rmtree(candidate)
+                else:
+                    os.unlink(candidate)
+        else:
+            shutil.rmtree(path)
     else:
         os.unlink(path)
 
@@ -92,7 +104,7 @@ class ClimateBuildRouter:
         climate.logger.info("  assert not self.islocked()")
         assert not climate.islocked()
 
-        staged_observed = (
+        staged_observed = climate.climate_mode == ClimateMode.Prism800m or (
             climate.climate_mode in (ClimateMode.GridMetPRISM, ClimateMode.Observed, ClimateMode.ObservedPRISM)
             and climate.climate_spatialmode != ClimateSpatialMode.MultipleInterpolated
         )

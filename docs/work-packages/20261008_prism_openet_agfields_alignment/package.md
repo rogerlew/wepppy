@@ -1,6 +1,7 @@
 # Historic PRISM OpenET and AgFields alignment
 
-Status: active, 2026-10-08 UTC. Owner: Codex with operator authorization.
+Status: eligibility/alignment and full suite validated; Climate Engine credential
+renewal/recheck is a known, deferred external follow-up, 2026-10-09 UTC. Owner: Codex with operator authorization.
 
 Enable historic PRISM mode 16 in two existing downstream climate gates and
 verify monthly OpenET/WEPP dates and AgFields parent climate inheritance for

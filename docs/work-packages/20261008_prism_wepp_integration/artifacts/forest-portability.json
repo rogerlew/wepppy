@@ -1,0 +1,9 @@
+{
+  "archive": "/wc1/runs/ch/chemotherapeutic-scope/archives/prism-integration-climate-portable.zip",
+  "files_restored_byte_identical": 993,
+  "source_partitions_resolved": 72,
+  "cells_read": 24,
+  "cache_environment": "/nonexistent-prism-cache-for-portability-check",
+  "archive_sha256": "317b091c736a610a432473bafdc287dbc519eb0bd97b7c186caa01c9773b78e3",
+  "scope": "Live climate ZIP/readback; canonical project archive/restore covered separately by regression tests"
+}

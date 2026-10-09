@@ -10,25 +10,39 @@ rotations. Verify calendar alignment and inheritance of actual prepared forcing.
 ## Progress
 
 - [x] 2026-10-08: Confirmed both missing mode-16 allowlist entries.
-- [ ] Ratify the contract with two read-only reviews and an ancestor commit.
-- [ ] Add eligibility and regression coverage.
-- [ ] Inspect real PRISM/OpenET/AgFields artifacts and run focused validation.
-- [ ] Update user documentation and record results/limitations.
+- [x] 2026-10-09 02:24 UTC: Two independent PASS reviews; checkpoint 18076eaa9.
+- [x] 2026-10-09 02:27 UTC: Two allowlist additions; 182 focused tests and 3 parent-reference tests pass.
+- [x] 2026-10-09 02:34 UTC: Six native runs, six readiness checks and 432 monthly joins pass.
+- [x] 2026-10-09 UTC: Full suite 10,491 passed/126 skipped; 106 source files match the archive.
+- [ ] Deferred external follow-up: renew the expired Climate Engine token and repeat production acquisition. Operator accepted this gap for commit/push.
+- [x] 2026-10-09 UTC: User/operator docs, two correctness reviews and limitations recorded.
 
 ## Surprises & Discoveries
 
-OpenET uses Climate Engine credentials, not necessarily the direct OpenET API
-key supplied for the earlier study. Inspect credentials without exposing them.
+Climate Engine returned HTTP 401 for all six attempted series. Its configured
+credential is distinct from the working direct OpenET key. Direct API evidence
+will be labeled separately, without changing production providers. A management
+synthesis test fixture failed native WEPP plant-height validation; the probe
+uses the existing one-year corn-no-till management instead, without changing it.
 AgFields references the parent climate by relative path rather than copying it.
 
 ## Decision Log
+
+- 2026-10-09: Operator confirmed the Climate Engine token is expired and authorized
+  commit/push with renewal and acquisition recheck deferred. No credential or
+  provider changes are included.
 
 - 2026-10-08: Preserve existing year handling, feature access and parent sampling;
   scope is source eligibility, not new ET or agricultural parameterization.
 
 ## Outcomes & Retrospective
 
-Pending implementation and artifact checks.
+Eligibility is implemented. Six native AgFields runs and six actual readiness/
+schedule checks pass. Direct OpenET alignment passes: all 216 observations match both spatial methods.
+Full validation passes: 10,491 tests passed and 126 skipped. Forest RQ services
+were refreshed with all workers idle; health and worker climate validation pass.
+Production Climate Engine acquisition remains unverified because its token is
+expired; the operator accepted this known external follow-up for commit/push.
 
 ## Context and Orientation
 
@@ -81,3 +95,6 @@ Retain review, test and alignment evidence under this package's artifacts direct
 
 Use existing Climate, OpenET_TS, AgFields and WEPP parsers. Add no dependencies.
 Revision note: initial bounded follow-up plan created 2026-10-08.
+
+Revision note: full regression and independent artifact audit completed; the
+only remaining milestone requires a valid Climate Engine credential.

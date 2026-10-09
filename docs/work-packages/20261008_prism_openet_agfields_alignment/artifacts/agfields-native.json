@@ -1,0 +1,74 @@
+[
+  {
+    "spatial": 1,
+    "topaz_id": "183",
+    "wepp_id": 38,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "c048241c10cf1acbc4b3d70dd7845c4fe9acc304b3dfce1d6f3cc0809d14be96",
+    "run_cli_reference": "../../runs/p38.cli",
+    "precipitation_mm": 1898.6,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "ffbe23024813c710fe06b1f80b34b21fef5887b578400eff487b39a77834e0b2"
+  },
+  {
+    "spatial": 1,
+    "topaz_id": "202",
+    "wepp_id": 42,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "5699b9842dd71ea2b08210ec8389ac02a351314fb6085df0944c39beb5e32edf",
+    "run_cli_reference": "../../runs/p42.cli",
+    "precipitation_mm": 2009.6,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "6446e2bac787b2f396ab1177397c6debadb6ea3c9fb30dee0c28cf685f3c4f5f"
+  },
+  {
+    "spatial": 1,
+    "topaz_id": "381",
+    "wepp_id": 86,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "64431f16a2ff428d4a10e70a3487880f064a5fd78e180341e262f3a7d9c3574b",
+    "run_cli_reference": "../../runs/p86.cli",
+    "precipitation_mm": 2132.3,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "89607f3c743793f369b45a4b18004fadcecd01914b17497baf1e3de8ce00381a"
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "183",
+    "wepp_id": 38,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+    "run_cli_reference": "../../runs/p38.cli",
+    "precipitation_mm": 1938.1,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "088dfa401f39d42cf9178c9aec33b8682a11cfc58408fe4b7d60edf7b90735af"
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "202",
+    "wepp_id": 42,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "154c5f3809fcb16fac1d8ea69c5c9a63ffd3632b75e80d1e2bfebd1058b9a575",
+    "run_cli_reference": "../../runs/p42.cli",
+    "precipitation_mm": 1973.0,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "607fc0679506ed3d4d4c24149a24a6bb2163e1c0cfeeca65aab9d3eac9423176"
+  },
+  {
+    "spatial": 2,
+    "topaz_id": "381",
+    "wepp_id": 86,
+    "days": 1096,
+    "leap_day": true,
+    "parent_cli_sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+    "run_cli_reference": "../../runs/p86.cli",
+    "precipitation_mm": 2126.6,
+    "management_sha256": "9cbda1c3eb5a9aa403c6bf268b3ed367bf6e81d8ae8dcce6534d205f64f1f802",
+    "water_balance_sha256": "0038b971bb288c92d924306ef3cd502dd5834b24bd8d7edf8fbf7c81f3b2f5a6"
+  }
+]

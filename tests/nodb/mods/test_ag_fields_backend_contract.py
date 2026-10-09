@@ -407,6 +407,7 @@ def test_readiness_requires_observed_bounds_flovec_and_each_parent_wepp_pair(
         ag_fields_module.ClimateMode.AGDC,
         ag_fields_module.ClimateMode.GridMetPRISM,
         ag_fields_module.ClimateMode.DepNexrad,
+        ag_fields_module.ClimateMode.Prism800m,
     ],
 )
 def test_readiness_accepts_supported_observed_climate_modes(

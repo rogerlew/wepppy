@@ -1,0 +1,1120 @@
+{
+  "mode": 1,
+  "years": [
+    2019,
+    2020,
+    2021
+  ],
+  "days": 1096,
+  "hillslopes": 104,
+  "unique_cells": 1,
+  "distinct_wet_day_calendars": 1,
+  "model_water_balance_rows": 113984,
+  "finished_rq_jobs": 18,
+  "uid": 1000,
+  "gid": 993,
+  "cache": "/wc1/cache/prism",
+  "station": "wy481175",
+  "seed": 84568,
+  "wepp_binary": "wepp_260430",
+  "watershed_loss": [
+    {
+      "key": "Total contributing area to outlet",
+      "value": 1036.34,
+      "units": "ha"
+    },
+    {
+      "key": "Avg. Ann. Precipitation volume in contributing area",
+      "value": 6815690.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. irrigation volume in contributing area",
+      "value": 0.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "value": 2743114.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "value": 1374.2,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "value": 122.9,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "value": 1512.8,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "value": 1.5,
+      "units": "tonne/ha/yr"
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "value": 1.01,
+      "units": ""
+    },
+    {
+      "key": "Avg. Ann. Phosphorus discharge from outlet",
+      "value": 0.0,
+      "units": "kg/yr"
+    },
+    {
+      "key": "Avg. Ann. P. delivery per unit area of watershed",
+      "value": 0.0,
+      "units": "kg/ha/yr"
+    }
+  ],
+  "hillslope_checks": [
+    {
+      "topaz_id": "312",
+      "wepp_id": 70,
+      "cli": "_312.cli",
+      "sha256": "f02d2595c1a569608d015b3ab149c7e4e2b8c8bf0ff4d43ff769b4ceab822963",
+      "precip_mm": 2094.3,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1112.3
+    },
+    {
+      "topaz_id": "63",
+      "wepp_id": 11,
+      "cli": "_63.cli",
+      "sha256": "d1dbc27eac623ded4e74bd49e77498636176f5ddb33963c25db445cc07f5be53",
+      "precip_mm": 1864.8000000000002,
+      "wet_days": 628,
+      "runoff_mm": 32.339052,
+      "et_mm": 1376.03
+    },
+    {
+      "topaz_id": "53",
+      "wepp_id": 9,
+      "cli": "_53.cli",
+      "sha256": "7a805f971e1607b609a32717a9685ccff3e444f3c7f9048fbf44924575ceec5f",
+      "precip_mm": 1865.6000000000001,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1318.86
+    },
+    {
+      "topaz_id": "172",
+      "wepp_id": 35,
+      "cli": "_172.cli",
+      "sha256": "80f35f2364b9281a8c38d9a3ef315859919ef7a29d4317282363bf8511a10a25",
+      "precip_mm": 1893.1999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1274.31
+    },
+    {
+      "topaz_id": "371",
+      "wepp_id": 84,
+      "cli": "_371.cli",
+      "sha256": "2293773554709887116c2f8c448ed3cced6476506bad65049df62004051fa9dc",
+      "precip_mm": 2131.0,
+      "wet_days": 628,
+      "runoff_mm": 469.749940298,
+      "et_mm": 733.97
+    },
+    {
+      "topaz_id": "112",
+      "wepp_id": 20,
+      "cli": "_112.cli",
+      "sha256": "341f6ca7bc25fe5b51fb3e1660d0babe3be27c1b864164c252bceddc9cecf822",
+      "precip_mm": 1892.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1734.77
+    },
+    {
+      "topaz_id": "413",
+      "wepp_id": 96,
+      "cli": "_413.cli",
+      "sha256": "963ec00a2df252e0aa705c1c5bd9f53f8943be033a8b1fc118b29fc157465828",
+      "precip_mm": 2170.7000000000003,
+      "wet_days": 628,
+      "runoff_mm": 485.924819306,
+      "et_mm": 760.2
+    },
+    {
+      "topaz_id": "122",
+      "wepp_id": 23,
+      "cli": "_122.cli",
+      "sha256": "b28b1846e4cb0610eb80a2ec65bf8afd2eda9bc152458d63187e837db811f29f",
+      "precip_mm": 1900.4999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1191.6599999999999
+    },
+    {
+      "topaz_id": "223",
+      "wepp_id": 47,
+      "cli": "_223.cli",
+      "sha256": "347a5551fe4797978e28799dd31fc93fd77d4017f2bd08dbe59e06e6a2c91ac1",
+      "precip_mm": 2030.3999999999999,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1185.3799999999999
+    },
+    {
+      "topaz_id": "383",
+      "wepp_id": 88,
+      "cli": "_383.cli",
+      "sha256": "d1f74c30423268dbe9d69f03295a4c7fa7ce796b15f7d2be8e4629cd1fa231ed",
+      "precip_mm": 2115.6,
+      "wet_days": 628,
+      "runoff_mm": 326.585699143,
+      "et_mm": 801.4300000000001
+    },
+    {
+      "topaz_id": "382",
+      "wepp_id": 87,
+      "cli": "_382.cli",
+      "sha256": "c0483b24a4b6555dfbb03ea17db122b5a0020d06ec3023da37b82798bacf08b5",
+      "precip_mm": 2113.7,
+      "wet_days": 628,
+      "runoff_mm": 316.513278067,
+      "et_mm": 819.3199999999999
+    },
+    {
+      "topaz_id": "213",
+      "wepp_id": 45,
+      "cli": "_213.cli",
+      "sha256": "5a14abae904ae5b88c54af4fa245dff7d7489fcd30d23aa134e6ed78b6f413d3",
+      "precip_mm": 2017.3,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1280.8500000000001
+    },
+    {
+      "topaz_id": "343",
+      "wepp_id": 78,
+      "cli": "_343.cli",
+      "sha256": "714176af570d761b89c3f7455bc471da38f2ff9b18bb6969e78db35912cccc74",
+      "precip_mm": 2116.1,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1694.1299999999999
+    },
+    {
+      "topaz_id": "222",
+      "wepp_id": 46,
+      "cli": "_222.cli",
+      "sha256": "7c977bb186e49e55af0927cfc693f17f70381766186059953a1e729ae1f0bf2b",
+      "precip_mm": 2014.3000000000002,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1174.1399999999999
+    },
+    {
+      "topaz_id": "352",
+      "wepp_id": 80,
+      "cli": "_352.cli",
+      "sha256": "6f16910ab9440cdcd213b33f8366b7505ca636fb014be0f221196eff78303cf9",
+      "precip_mm": 2113.2,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1134.09
+    },
+    {
+      "topaz_id": "402",
+      "wepp_id": 92,
+      "cli": "_402.cli",
+      "sha256": "074be3f70193319d5c61dd5624e1ec815961df2e908c2233854ce41e83e9e009",
+      "precip_mm": 2135.6,
+      "wet_days": 628,
+      "runoff_mm": 3.951684,
+      "et_mm": 1121.22
+    },
+    {
+      "topaz_id": "331",
+      "wepp_id": 74,
+      "cli": "_331.cli",
+      "sha256": "7064fed3d7019e741016b3fc4d08910842798c013dfeb232846d38ca43a6c990",
+      "precip_mm": 2134.8,
+      "wet_days": 628,
+      "runoff_mm": 327.85577333000003,
+      "et_mm": 875.05
+    },
+    {
+      "topaz_id": "72",
+      "wepp_id": 12,
+      "cli": "_72.cli",
+      "sha256": "2880621a677493b8bec6f32cedbdfe0445bd0436b33ca24334966d5e1df2e73d",
+      "precip_mm": 1883.4,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1663.9500000000003
+    },
+    {
+      "topaz_id": "171",
+      "wepp_id": 34,
+      "cli": "_171.cli",
+      "sha256": "f069258b4c4ed7c04da4f8d612401c9595cee773423562678aad5f03b5b5936f",
+      "precip_mm": 1886.3999999999999,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1259.92
+    },
+    {
+      "topaz_id": "302",
+      "wepp_id": 67,
+      "cli": "_302.cli",
+      "sha256": "5919f31f29e3a48b067cfe1a2f45e9dfb75d862004ed149ac61696c86948b982",
+      "precip_mm": 2044.5,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1160.45
+    },
+    {
+      "topaz_id": "93",
+      "wepp_id": 17,
+      "cli": "_93.cli",
+      "sha256": "8d8602251cc8691f884a52518037b7bbbcd7d7b8e4baa6d20112d9c98273c9e5",
+      "precip_mm": 1888.9,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1345.91
+    },
+    {
+      "topaz_id": "353",
+      "wepp_id": 81,
+      "cli": "_353.cli",
+      "sha256": "19d6e23ae600fe3cdb0bb233ea1424e62cf22ce57f1ead48d134584feb316491",
+      "precip_mm": 2102.0,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1225.22
+    },
+    {
+      "topaz_id": "401",
+      "wepp_id": 91,
+      "cli": "_401.cli",
+      "sha256": "a837395b5b9e9aec15260c26eaba2dde05eb44686b6502a0dd11ce05397edf89",
+      "precip_mm": 2221.5,
+      "wet_days": 628,
+      "runoff_mm": 93.963213,
+      "et_mm": 1709.1200000000003
+    },
+    {
+      "topaz_id": "332",
+      "wepp_id": 75,
+      "cli": "_332.cli",
+      "sha256": "1207ed1d5b14a8db7f451e4ffd8cb4d9c257d9eb49b841890eaa6a06e4f4776b",
+      "precip_mm": 2144.3,
+      "wet_days": 628,
+      "runoff_mm": 101.40163900000002,
+      "et_mm": 1690.83
+    },
+    {
+      "topaz_id": "31",
+      "wepp_id": 3,
+      "cli": "_31.cli",
+      "sha256": "5997da01234bf9c7d13e81013f57d35092c839ea0939f870b5ce1d8558982752",
+      "precip_mm": 1865.5,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1252.3
+    },
+    {
+      "topaz_id": "73",
+      "wepp_id": 13,
+      "cli": "_73.cli",
+      "sha256": "289dcbed2a4949d6a0575eb5d4cc91aa4f3f6198bd9efec7f452a18c4d84fd32",
+      "precip_mm": 1869.3000000000002,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1303.0
+    },
+    {
+      "topaz_id": "132",
+      "wepp_id": 25,
+      "cli": "_132.cli",
+      "sha256": "047f94f40daa35e854b2f0abda6efeccbe970c59759741fcc6e58af6ad47e91a",
+      "precip_mm": 1908.2,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1317.2799999999997
+    },
+    {
+      "topaz_id": "342",
+      "wepp_id": 77,
+      "cli": "_342.cli",
+      "sha256": "b709720c45ec677e48ad2df9672cbf566f701e61dcebcb19ec9f40d1bf7d20b6",
+      "precip_mm": 2113.9,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1608.18
+    },
+    {
+      "topaz_id": "212",
+      "wepp_id": 44,
+      "cli": "_212.cli",
+      "sha256": "583367f22c0fd0d001d736f9479635248c949d89ff89f256c50b737061b0a4eb",
+      "precip_mm": 2016.4,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1176.04
+    },
+    {
+      "topaz_id": "381",
+      "wepp_id": 86,
+      "cli": "_381.cli",
+      "sha256": "64431f16a2ff428d4a10e70a3487880f064a5fd78e180341e262f3a7d9c3574b",
+      "precip_mm": 2132.3,
+      "wet_days": 628,
+      "runoff_mm": 437.83922989999996,
+      "et_mm": 738.09
+    },
+    {
+      "topaz_id": "62",
+      "wepp_id": 10,
+      "cli": "_62.cli",
+      "sha256": "43b4919f57aade79f97be9ecf2c278d629798e6e6855882125f9cdb30cde8488",
+      "precip_mm": 1871.1000000000001,
+      "wet_days": 628,
+      "runoff_mm": 4.997321,
+      "et_mm": 1189.52
+    },
+    {
+      "topaz_id": "403",
+      "wepp_id": 93,
+      "cli": "_403.cli",
+      "sha256": "1906e3bffb6fb6a28f9c7e173075314af0a112d6bad719de5d80c12c1d341e16",
+      "precip_mm": 2187.1000000000004,
+      "wet_days": 628,
+      "runoff_mm": 2.550215,
+      "et_mm": 1481.8799999999999
+    },
+    {
+      "topaz_id": "293",
+      "wepp_id": 66,
+      "cli": "_293.cli",
+      "sha256": "0fb30fe71f07527c56ec1d508b4d56f3cb843f6e5274b0bd295a5f8edf6eb8ff",
+      "precip_mm": 2099.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1245.0200000000002
+    },
+    {
+      "topaz_id": "303",
+      "wepp_id": 68,
+      "cli": "_303.cli",
+      "sha256": "69314d77a9a3afb7b8a9aa040053c91badbd6f4eea3f11bee80653e23aaf0de8",
+      "precip_mm": 2058.3,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1245.25
+    },
+    {
+      "topaz_id": "292",
+      "wepp_id": 65,
+      "cli": "_292.cli",
+      "sha256": "0d6507d3dca53c059cb2be5dccf41d5aabaffd77fe922a10708639c13f3135d8",
+      "precip_mm": 2129.3999999999996,
+      "wet_days": 628,
+      "runoff_mm": 16.35975,
+      "et_mm": 1090.8000000000002
+    },
+    {
+      "topaz_id": "411",
+      "wepp_id": 94,
+      "cli": "_411.cli",
+      "sha256": "bbb18cf34fb04567801b7488304ad4c27e208d73b8531c88fcf730a93c0bf3aa",
+      "precip_mm": 2163.5,
+      "wet_days": 628,
+      "runoff_mm": 435.596497031,
+      "et_mm": 723.0
+    },
+    {
+      "topaz_id": "103",
+      "wepp_id": 19,
+      "cli": "_103.cli",
+      "sha256": "6d7a3a63416db49593ccb538c70ea9b48b464fc41661a13c3504b3a3e2c5ac7f",
+      "precip_mm": 1921.0,
+      "wet_days": 628,
+      "runoff_mm": 3.151171,
+      "et_mm": 1212.93
+    },
+    {
+      "topaz_id": "173",
+      "wepp_id": 36,
+      "cli": "_173.cli",
+      "sha256": "59c3392c647af7fddbbda4012cc7c05c90478711bddf01ebb305a44b9b50c142",
+      "precip_mm": 1891.5,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1267.46
+    },
+    {
+      "topaz_id": "432",
+      "wepp_id": 100,
+      "cli": "_432.cli",
+      "sha256": "55e305f31d463ea78818580eb6c3cdd05ff1e1573c5ccf71fbde3fc121aaa55c",
+      "precip_mm": 2254.7,
+      "wet_days": 628,
+      "runoff_mm": 106.98572191,
+      "et_mm": 1703.94
+    },
+    {
+      "topaz_id": "392",
+      "wepp_id": 89,
+      "cli": "_392.cli",
+      "sha256": "5b309dd0dff133be02f1f54f33cf72c43a901c12ea3b5c743a1b7c61a6c46cdb",
+      "precip_mm": 2178.7000000000003,
+      "wet_days": 628,
+      "runoff_mm": 49.267128,
+      "et_mm": 1675.46
+    },
+    {
+      "topaz_id": "243",
+      "wepp_id": 53,
+      "cli": "_243.cli",
+      "sha256": "75f20aa387dfffad1388b83fee264e15ce127a11493376ba8a8f204048617d0a",
+      "precip_mm": 2002.8999999999999,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1152.47
+    },
+    {
+      "topaz_id": "152",
+      "wepp_id": 29,
+      "cli": "_152.cli",
+      "sha256": "8fda28c7b597de80ccc7159d5d82b422c4ba12947e95384e12cff31187092963",
+      "precip_mm": 1939.7,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1161.0100000000002
+    },
+    {
+      "topaz_id": "412",
+      "wepp_id": 95,
+      "cli": "_412.cli",
+      "sha256": "b6e65e314c2633b50fd55a8e3c80956ea99984895652c997e8e0222fcfd38e2c",
+      "precip_mm": 2142.5,
+      "wet_days": 628,
+      "runoff_mm": 42.175992,
+      "et_mm": 1333.85
+    },
+    {
+      "topaz_id": "162",
+      "wepp_id": 32,
+      "cli": "_162.cli",
+      "sha256": "6483aade4fa849b66e9492af8a7c6e0ea10f6399c43ed0736d83231ad3522700",
+      "precip_mm": 1945.7999999999997,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1161.24
+    },
+    {
+      "topaz_id": "262",
+      "wepp_id": 57,
+      "cli": "_262.cli",
+      "sha256": "d5e588a782e70b21a8181de3e0bce57479a6bc959bd3f95a2687bf8d24d119e5",
+      "precip_mm": 1964.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1751.5
+    },
+    {
+      "topaz_id": "233",
+      "wepp_id": 50,
+      "cli": "_233.cli",
+      "sha256": "be27535c3b6bca002135082c9e396383d5b0c25c58b1273ec025c089b141075b",
+      "precip_mm": 2034.6999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1170.79
+    },
+    {
+      "topaz_id": "42",
+      "wepp_id": 6,
+      "cli": "_42.cli",
+      "sha256": "9822dd384467c8a618fb7fc28cff249e0e101cf1cada6faf0da47e9f6b1bf5d0",
+      "precip_mm": 1867.8,
+      "wet_days": 628,
+      "runoff_mm": 7.9979969,
+      "et_mm": 1198.21
+    },
+    {
+      "topaz_id": "241",
+      "wepp_id": 51,
+      "cli": "_241.cli",
+      "sha256": "5fac9e2f036b588119c50bc82a3a2cf473fabf09fdf1599479408404a694d77a",
+      "precip_mm": 2064.5,
+      "wet_days": 628,
+      "runoff_mm": 38.369029999999995,
+      "et_mm": 1045.1
+    },
+    {
+      "topaz_id": "322",
+      "wepp_id": 72,
+      "cli": "_322.cli",
+      "sha256": "290cc370a7c39f1ce3d285645f14cf278d3ff3cf3d9c19b04b17eeca40b8dbe6",
+      "precip_mm": 2055.7,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1165.22
+    },
+    {
+      "topaz_id": "282",
+      "wepp_id": 62,
+      "cli": "_282.cli",
+      "sha256": "09715f25f8ba177d4383dbce4a5e4e30c77491870d74bab13d9c524e181bfad5",
+      "precip_mm": 2140.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1109.5600000000002
+    },
+    {
+      "topaz_id": "372",
+      "wepp_id": 85,
+      "cli": "_372.cli",
+      "sha256": "48f636f20299357e0020bfd7e92da7d2881562c8f3f3e7cb25b39cbbe69907c3",
+      "precip_mm": 2104.2999999999997,
+      "wet_days": 628,
+      "runoff_mm": 23.28889,
+      "et_mm": 1089.8
+    },
+    {
+      "topaz_id": "422",
+      "wepp_id": 98,
+      "cli": "_422.cli",
+      "sha256": "7b8ccd3b22ea6702ef09beb3969d3ad54d5e884d4da8a58c4dd222556a05bf80",
+      "precip_mm": 2128.5,
+      "wet_days": 628,
+      "runoff_mm": 84.6173661,
+      "et_mm": 1582.59
+    },
+    {
+      "topaz_id": "313",
+      "wepp_id": 71,
+      "cli": "_313.cli",
+      "sha256": "4f4a3ad689e7f757035570658301ef3653a9226049856231e63f464cb23e894a",
+      "precip_mm": 2111.8,
+      "wet_days": 628,
+      "runoff_mm": 26.0333,
+      "et_mm": 1092.7
+    },
+    {
+      "topaz_id": "183",
+      "wepp_id": 38,
+      "cli": "_183.cli",
+      "sha256": "c048241c10cf1acbc4b3d70dd7845c4fe9acc304b3dfce1d6f3cc0809d14be96",
+      "precip_mm": 1898.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1267.29
+    },
+    {
+      "topaz_id": "242",
+      "wepp_id": 52,
+      "cli": "_242.cli",
+      "sha256": "ca6e82ff42fa39cbfc9ee548287dc1804ec0964a1460103032bb0849798ebc6f",
+      "precip_mm": 2014.7,
+      "wet_days": 628,
+      "runoff_mm": 0.4867204,
+      "et_mm": 1090.13
+    },
+    {
+      "topaz_id": "431",
+      "wepp_id": 99,
+      "cli": "_431.cli",
+      "sha256": "12d475eaeb1a3dda0ed4905a086e6fcc444d4c04c5096ce57734c2dee36fb89c",
+      "precip_mm": 2271.5,
+      "wet_days": 628,
+      "runoff_mm": 486.468946806,
+      "et_mm": 825.8100000000001
+    },
+    {
+      "topaz_id": "192",
+      "wepp_id": 40,
+      "cli": "_192.cli",
+      "sha256": "cc4461aee75784e8dc45a3131c1a276ed777c03cb7f256cf4bb90a681aecbc99",
+      "precip_mm": 2001.9,
+      "wet_days": 628,
+      "runoff_mm": 0.6860383,
+      "et_mm": 1778.8799999999999
+    },
+    {
+      "topaz_id": "33",
+      "wepp_id": 5,
+      "cli": "_33.cli",
+      "sha256": "6541c4c9eb849aac5ababa6c9e2cb39a02ea25baf57bdb312af4f1351077e32b",
+      "precip_mm": 1870.1,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1293.46
+    },
+    {
+      "topaz_id": "123",
+      "wepp_id": 24,
+      "cli": "_123.cli",
+      "sha256": "92395680ca2789e8ab642ae4d34c70552b95bb36cd7e4d4e2cd0a145e8052660",
+      "precip_mm": 1902.7,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1282.78
+    },
+    {
+      "topaz_id": "121",
+      "wepp_id": 22,
+      "cli": "_121.cli",
+      "sha256": "5ca3f08c9c767681316a115dbca2fbfdc8962697dcaaf90897351e7e13391ff1",
+      "precip_mm": 1943.1999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1246.86
+    },
+    {
+      "topaz_id": "363",
+      "wepp_id": 83,
+      "cli": "_363.cli",
+      "sha256": "85f086a4c4ad0a00d8a87e81fe14629acf91aad598cd94952ad9475aaffd6f39",
+      "precip_mm": 2095.2,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1200.62
+    },
+    {
+      "topaz_id": "253",
+      "wepp_id": 55,
+      "cli": "_253.cli",
+      "sha256": "7b500c28d7e0a19d102dda3acafc4f401f4169f107cf7c1b1bea7ed391ea0990",
+      "precip_mm": 1900.4,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1262.69
+    },
+    {
+      "topaz_id": "133",
+      "wepp_id": 26,
+      "cli": "_133.cli",
+      "sha256": "0aedadcf3d4572f949c7592780526db77c14f5a4266a7fd3c5f2a68c9225538f",
+      "precip_mm": 1919.7000000000003,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1327.34
+    },
+    {
+      "topaz_id": "52",
+      "wepp_id": 8,
+      "cli": "_52.cli",
+      "sha256": "2b71bf4d41d6032c1fb6008137d5bfea07bb510d3539c6b1ba5ff1b50b3a9399",
+      "precip_mm": 1879.2,
+      "wet_days": 628,
+      "runoff_mm": 7.145467900000001,
+      "et_mm": 1206.03
+    },
+    {
+      "topaz_id": "323",
+      "wepp_id": 73,
+      "cli": "_323.cli",
+      "sha256": "fcf0426b9e26f753ce542304612be30c49bcf7c4454bc6e50d9dee28f8d59bfc",
+      "precip_mm": 2083.0,
+      "wet_days": 628,
+      "runoff_mm": 7.014565,
+      "et_mm": 1153.8600000000001
+    },
+    {
+      "topaz_id": "113",
+      "wepp_id": 21,
+      "cli": "_113.cli",
+      "sha256": "23d90292d7107edfa96d1db1feafd371436283a9e1efb6b5f6098bed00639972",
+      "precip_mm": 1876.1,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1282.67
+    },
+    {
+      "topaz_id": "43",
+      "wepp_id": 7,
+      "cli": "_43.cli",
+      "sha256": "8155e116f1e02c0cb01cc2977a1410095c4216ea95ab71ebac43839b9de079f6",
+      "precip_mm": 1868.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1357.2
+    },
+    {
+      "topaz_id": "311",
+      "wepp_id": 69,
+      "cli": "_311.cli",
+      "sha256": "b55a72fe758ce2fac6cbe179ea8fd93c8d5bd2c2ba6ba40d5ad8220c7b39d42d",
+      "precip_mm": 2130.5,
+      "wet_days": 628,
+      "runoff_mm": 427.934925098,
+      "et_mm": 739.14
+    },
+    {
+      "topaz_id": "251",
+      "wepp_id": 54,
+      "cli": "_251.cli",
+      "sha256": "a275fdc41d9803a0468c0807d975ab7387910839b5f7f6497e1c283763ff0591",
+      "precip_mm": 1910.5,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1256.22
+    },
+    {
+      "topaz_id": "443",
+      "wepp_id": 104,
+      "cli": "_443.cli",
+      "sha256": "9d633068c8023026ae187f9c639814e65eed6e09a20b571f28dc9d054843485a",
+      "precip_mm": 2257.8,
+      "wet_days": 628,
+      "runoff_mm": 106.93887470000001,
+      "et_mm": 1142.84
+    },
+    {
+      "topaz_id": "81",
+      "wepp_id": 14,
+      "cli": "_81.cli",
+      "sha256": "dbec2007e2ed6f0f7b0da7ff7984753a9c2543447271cdee5e660df0458656cb",
+      "precip_mm": 1906.1999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1270.72
+    },
+    {
+      "topaz_id": "393",
+      "wepp_id": 90,
+      "cli": "_393.cli",
+      "sha256": "f7c6868ef1dca538d5b5fb27fa7427bb5a136c24ab95499cc176816a1354ab35",
+      "precip_mm": 2151.0,
+      "wet_days": 628,
+      "runoff_mm": 21.68219,
+      "et_mm": 1210.66
+    },
+    {
+      "topaz_id": "333",
+      "wepp_id": 76,
+      "cli": "_333.cli",
+      "sha256": "6e7e2e91cd109055ddb6eed2c746a9a9decf43755938b3cbbcee673f98e7da3c",
+      "precip_mm": 2094.5,
+      "wet_days": 628,
+      "runoff_mm": 23.435257,
+      "et_mm": 1141.79
+    },
+    {
+      "topaz_id": "421",
+      "wepp_id": 97,
+      "cli": "_421.cli",
+      "sha256": "5620a528bf287d3d90b39999091ee49e3a6faf272de7f138a13bdd1fb39a7043",
+      "precip_mm": 2141.7,
+      "wet_days": 628,
+      "runoff_mm": 470.00126208800003,
+      "et_mm": 711.55
+    },
+    {
+      "topaz_id": "441",
+      "wepp_id": 102,
+      "cli": "_441.cli",
+      "sha256": "f8449235529b0de372e5eba9c44e418d9bab5f3c7315d851dfb260e7969842b2",
+      "precip_mm": 2265.1,
+      "wet_days": 628,
+      "runoff_mm": 117.526415,
+      "et_mm": 1691.8100000000002
+    },
+    {
+      "topaz_id": "272",
+      "wepp_id": 59,
+      "cli": "_272.cli",
+      "sha256": "38db18cf4cd9ee960b9e5d41b51550223aa59be323747221ccde38f21d63263c",
+      "precip_mm": 2090.0,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1662.45
+    },
+    {
+      "topaz_id": "191",
+      "wepp_id": 39,
+      "cli": "_191.cli",
+      "sha256": "4146665bd5ae6ba2d7f9d028af7cd9f1b93a6c1ebe4f716fd493f719c6260693",
+      "precip_mm": 2007.2,
+      "wet_days": 628,
+      "runoff_mm": 10.6088,
+      "et_mm": 1178.44
+    },
+    {
+      "topaz_id": "442",
+      "wepp_id": 103,
+      "cli": "_442.cli",
+      "sha256": "8d6fe25ba018b213e1a29c5a50aa033a5cc85ce88d5718d14697da85a0b02e9f",
+      "precip_mm": 2218.0,
+      "wet_days": 628,
+      "runoff_mm": 75.534197,
+      "et_mm": 1545.0600000000002
+    },
+    {
+      "topaz_id": "202",
+      "wepp_id": 42,
+      "cli": "_202.cli",
+      "sha256": "5699b9842dd71ea2b08210ec8389ac02a351314fb6085df0944c39beb5e32edf",
+      "precip_mm": 2009.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1169.2
+    },
+    {
+      "topaz_id": "23",
+      "wepp_id": 2,
+      "cli": "_23.cli",
+      "sha256": "dd9634fc3f072e1b416d6686da7bc31f88bd3736ab3d09fb67a1c772076b9c1c",
+      "precip_mm": 1860.8,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1377.79
+    },
+    {
+      "topaz_id": "92",
+      "wepp_id": 16,
+      "cli": "_92.cli",
+      "sha256": "ba1296cab2457f87eafd8890162396c748522de1e25057f0f30b98abc1d7e3e2",
+      "precip_mm": 1895.7,
+      "wet_days": 628,
+      "runoff_mm": 111.71859500000001,
+      "et_mm": 1286.52
+    },
+    {
+      "topaz_id": "143",
+      "wepp_id": 28,
+      "cli": "_143.cli",
+      "sha256": "3942e3da8895e6f339075389ab5cc128aad637435b35729075bff763199f232b",
+      "precip_mm": 1972.6999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.5377196,
+      "et_mm": 1285.18
+    },
+    {
+      "topaz_id": "193",
+      "wepp_id": 41,
+      "cli": "_193.cli",
+      "sha256": "b2080c5272f863d991ce0e3b241a3b79e26c01108b083b192dc8c9835934810d",
+      "precip_mm": 1966.6,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1262.36
+    },
+    {
+      "topaz_id": "153",
+      "wepp_id": 30,
+      "cli": "_153.cli",
+      "sha256": "da1f874ca1c098b4dc98656e9237c17a7ba84d486ecb9b988f467b7f7df4fd27",
+      "precip_mm": 1953.5,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1265.8300000000002
+    },
+    {
+      "topaz_id": "291",
+      "wepp_id": 64,
+      "cli": "_291.cli",
+      "sha256": "e666151604d19a7539d2d1fd200e4ce3527b6bbc6aaf66ec0fff948a2d424837",
+      "precip_mm": 2200.3,
+      "wet_days": 628,
+      "runoff_mm": 457.666010872,
+      "et_mm": 735.7200000000001
+    },
+    {
+      "topaz_id": "232",
+      "wepp_id": 49,
+      "cli": "_232.cli",
+      "sha256": "14cf5e32a6f7ec3a8bd6882af9a06f26c8ab7fb55e78360f08cfdfef68795d04",
+      "precip_mm": 2057.0,
+      "wet_days": 628,
+      "runoff_mm": 20.3467,
+      "et_mm": 1078.8
+    },
+    {
+      "topaz_id": "161",
+      "wepp_id": 31,
+      "cli": "_161.cli",
+      "sha256": "a92888f65e2b2d1c0642fa37c88ec8e2158039057ce02a2de5ab6c8cc4b7880e",
+      "precip_mm": 1990.3000000000002,
+      "wet_days": 628,
+      "runoff_mm": 14.8881,
+      "et_mm": 1081.28
+    },
+    {
+      "topaz_id": "163",
+      "wepp_id": 33,
+      "cli": "_163.cli",
+      "sha256": "9f144cb766070725694bc527ade9bf2ea874646413b6b60dc3fe592d1a4a30a7",
+      "precip_mm": 1972.6,
+      "wet_days": 628,
+      "runoff_mm": 1.581267,
+      "et_mm": 1112.78
+    },
+    {
+      "topaz_id": "83",
+      "wepp_id": 15,
+      "cli": "_83.cli",
+      "sha256": "ce07ffd2efc6306fb0ead4815deeb052883383c120d6e63e527a0635309d1e81",
+      "precip_mm": 1885.4,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1267.73
+    },
+    {
+      "topaz_id": "231",
+      "wepp_id": 48,
+      "cli": "_231.cli",
+      "sha256": "0af6a59c644931b26bc3557bcd81c4b28b802981283cc5655a8b02c9aa2fbf8b",
+      "precip_mm": 2113.6,
+      "wet_days": 628,
+      "runoff_mm": 359.44395546600003,
+      "et_mm": 801.47
+    },
+    {
+      "topaz_id": "283",
+      "wepp_id": 63,
+      "cli": "_283.cli",
+      "sha256": "f32cddc797c48daf81e8edc25a6ae15a69336eca5cedaf30bae7d2b7b2cb0e17",
+      "precip_mm": 2144.8,
+      "wet_days": 628,
+      "runoff_mm": 0.1262501,
+      "et_mm": 1223.25
+    },
+    {
+      "topaz_id": "182",
+      "wepp_id": 37,
+      "cli": "_182.cli",
+      "sha256": "5a0c887307dd20fc5c3c26a381d34bce0278fe571fced164d4edd38747ecaf88",
+      "precip_mm": 1901.3999999999999,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1747.9399999999998
+    },
+    {
+      "topaz_id": "362",
+      "wepp_id": 82,
+      "cli": "_362.cli",
+      "sha256": "12854efe25526398392f8027cf1bd7e51fcb2a97d074e507f6d45a843e8a0279",
+      "precip_mm": 2082.0,
+      "wet_days": 628,
+      "runoff_mm": 5.542058000000001,
+      "et_mm": 1101.0100000000002
+    },
+    {
+      "topaz_id": "281",
+      "wepp_id": 61,
+      "cli": "_281.cli",
+      "sha256": "8f91c7928d5c39149e2c540d225a062b60530caf4f830edfd993341e88840689",
+      "precip_mm": 2217.4,
+      "wet_days": 628,
+      "runoff_mm": 472.51168619400005,
+      "et_mm": 771.9399999999999
+    },
+    {
+      "topaz_id": "273",
+      "wepp_id": 60,
+      "cli": "_273.cli",
+      "sha256": "7e677518327ad40dac9f36c281179904fc91569398b1329149ba29a306f71ec9",
+      "precip_mm": 2079.0,
+      "wet_days": 628,
+      "runoff_mm": 3.67935,
+      "et_mm": 1249.6
+    },
+    {
+      "topaz_id": "433",
+      "wepp_id": 101,
+      "cli": "_433.cli",
+      "sha256": "2ef14069b7b273bdbac58453ce554662c5857085f47ecf0d61548c1014770d35",
+      "precip_mm": 2208.8,
+      "wet_days": 628,
+      "runoff_mm": 85.12533099999999,
+      "et_mm": 1139.11
+    },
+    {
+      "topaz_id": "32",
+      "wepp_id": 4,
+      "cli": "_32.cli",
+      "sha256": "7dfd20a8a973060edf1cd14dc3f0390d6c02c11524012d56c07720c8580f6328",
+      "precip_mm": 1868.3999999999999,
+      "wet_days": 628,
+      "runoff_mm": 1.852896,
+      "et_mm": 1243.21
+    },
+    {
+      "topaz_id": "22",
+      "wepp_id": 1,
+      "cli": "_22.cli",
+      "sha256": "a3d012c0cf7281660187fa6543620616e3ebc778e0676c224803b983aa28baaa",
+      "precip_mm": 1872.4,
+      "wet_days": 628,
+      "runoff_mm": 143.1264612,
+      "et_mm": 1276.72
+    },
+    {
+      "topaz_id": "263",
+      "wepp_id": 58,
+      "cli": "_263.cli",
+      "sha256": "6afec60a0479de3070e7b68b35a1e96990a7dd1668fb1bcd5c440f13ac50b165",
+      "precip_mm": 1955.1,
+      "wet_days": 628,
+      "runoff_mm": 3.680598,
+      "et_mm": 1782.3400000000001
+    },
+    {
+      "topaz_id": "203",
+      "wepp_id": 43,
+      "cli": "_203.cli",
+      "sha256": "31283721d0c91ce066720679edc78d075b3598e95a3435293635c9e4e3cd8a22",
+      "precip_mm": 1999.8000000000002,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1291.51
+    },
+    {
+      "topaz_id": "142",
+      "wepp_id": 27,
+      "cli": "_142.cli",
+      "sha256": "89fc2e2b6141f8abb54a882bb00d4f65e199b20b55ab939e8ff61242742b7b6a",
+      "precip_mm": 1961.1999999999998,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1177.0
+    },
+    {
+      "topaz_id": "102",
+      "wepp_id": 18,
+      "cli": "_102.cli",
+      "sha256": "119eaf16c9a5301a895bf18ac3052dffcc7a6f81acac673dd11fc78d18bb83c1",
+      "precip_mm": 1905.3,
+      "wet_days": 628,
+      "runoff_mm": 0.4355088,
+      "et_mm": 1205.35
+    },
+    {
+      "topaz_id": "351",
+      "wepp_id": 79,
+      "cli": "_351.cli",
+      "sha256": "b7d2819c62e8ab295c52f4e4886f672deb3a5dcf9bdee26070d093b8c789bda3",
+      "precip_mm": 2171.1,
+      "wet_days": 628,
+      "runoff_mm": 289.76219753600003,
+      "et_mm": 884.28
+    },
+    {
+      "topaz_id": "261",
+      "wepp_id": 56,
+      "cli": "_261.cli",
+      "sha256": "4ae6ad39a5197f4f3415956c9faac2f7e2e9f5872e3fe09c4c730c7d93ab14d7",
+      "precip_mm": 2004.9,
+      "wet_days": 628,
+      "runoff_mm": 6.524119,
+      "et_mm": 1824.38
+    }
+  ],
+  "snapshot": "/wc1/runs/ch/chemotherapeutic-scope/archives/prism-integration-mode1-2019-2021"
+}

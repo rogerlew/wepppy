@@ -673,3 +673,59 @@ def test_restored_time_main_source_change_rejects_publication(controllers, monke
         operation()
     assert Path(controller._nodb).read_bytes() == before
     assert output.read_bytes() == previous
+
+
+def test_prism800m_postcommit_diagnostic_failure_keeps_success(controllers,monkeypatch):
+    import pandas as pd
+    from wepppy.nodb.core import climate_observed_build as observed
+    from wepppy.climates.prism import wepp_adapter
+    climate,_=controllers
+    with climate.locked(): climate._climate_mode=ClimateMode.Prism800m
+    pd.DataFrame({'tdmean':[1.]}).to_parquet(Path(climate.cli_dir)/'prism800m-source-ws.parquet')
+    monkeypatch.setattr(helpers,'_retrieve_prism_revision_tiles',lambda *a:None)
+    monkeypatch.setattr(helpers,'_collect_prism_revision_monthlies',lambda *a:([],[],[]))
+    monkeypatch.setattr(helpers,'ClimateFile',lambda path:SimpleNamespace(cli_fn=path,breakpoint=False))
+    monkeypatch.setattr(helpers,'cli_revision',lambda *args:Path(args[-1]).write_text('new hillslope'))
+    monkeypatch.setattr(wepp_adapter,'floor_dewpoint',lambda *a:None)
+    real=observed._write_attempt_status
+    def fail_complete(stage,kind,snapshot,state):
+        if state=='complete':raise OSError('injected diagnostic write failure')
+        return real(stage,kind,snapshot,state)
+    monkeypatch.setattr(observed,'_write_attempt_status',fail_complete)
+    climate._prism_revision()
+    current=Climate.load_detached(climate.wd)
+    assert current.has_climate and current.sub_cli_fns
+    assert (Path(climate.cli_dir)/'_1.cli').read_text()=='new hillslope'
+
+
+def test_prism800m_revision_failure_leaves_centroid_unready(controllers, monkeypatch):
+    import pandas as pd
+
+    climate, _ = controllers
+    with climate.locked():
+        climate._climate_mode = ClimateMode.Prism800m
+        climate.sub_cli_fns = None
+        climate.sub_par_fns = None
+    centroid = Path(climate.cli_path).read_bytes()
+    source = Path(climate.cli_dir) / 'prism800m-source-ws.parquet'
+    pd.DataFrame({'tdmean': [1.]}).to_parquet(source)
+    monkeypatch.setattr(helpers, '_retrieve_prism_revision_tiles', lambda *args: None)
+    monkeypatch.setattr(helpers, '_collect_prism_revision_monthlies', lambda *args: ([], [], []))
+    monkeypatch.setattr(helpers, 'ClimateFile', lambda path: SimpleNamespace(cli_fn=path, breakpoint=False))
+
+    def fail_revision(*args):
+        Path(args[-1]).write_text('incomplete hillslope')
+        raise ValueError('injected revision failure')
+
+    monkeypatch.setattr(helpers, 'cli_revision', fail_revision)
+    with pytest.raises(ValueError, match='injected revision failure'):
+        climate._prism_revision()
+    current = Climate.load_detached(climate.wd)
+    assert not current.has_climate
+    assert current.sub_cli_fns is None and current.sub_par_fns is None
+    assert Path(current.cli_path).read_bytes() == centroid
+    assert not (Path(climate.cli_dir) / '_1.cli').exists()
+    attempts = list(Path(climate.cli_dir).glob('prism800m-build-revision-*'))
+    assert len(attempts) == 1
+    status = json.loads((attempts[0] / 'build-status.json').read_text())
+    assert status['state'] == 'failed'

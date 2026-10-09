@@ -1,0 +1,5 @@
+{
+  "endpoint": "/home/validate_key",
+  "status": 401,
+  "error": "{\"detail\":\"Invalid API token\"}"
+}

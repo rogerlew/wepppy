@@ -1,0 +1,1120 @@
+{
+  "mode": 2,
+  "years": [
+    2019,
+    2020,
+    2021
+  ],
+  "days": 1096,
+  "hillslopes": 104,
+  "unique_cells": 24,
+  "distinct_wet_day_calendars": 24,
+  "model_water_balance_rows": 113984,
+  "finished_rq_jobs": 18,
+  "uid": 1000,
+  "gid": 993,
+  "cache": "/wc1/cache/prism",
+  "station": "wy481175",
+  "seed": 84568,
+  "wepp_binary": "wepp_260430",
+  "watershed_loss": [
+    {
+      "key": "Total contributing area to outlet",
+      "value": 1036.34,
+      "units": "ha"
+    },
+    {
+      "key": "Avg. Ann. Precipitation volume in contributing area",
+      "value": 6815690.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. irrigation volume in contributing area",
+      "value": 0.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "value": 2637868.0,
+      "units": "m^3/yr"
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "value": 1227.7,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "value": 117.2,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "value": 1362.1,
+      "units": "tonne/yr"
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "value": 1.3,
+      "units": "tonne/ha/yr"
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "value": 1.013,
+      "units": ""
+    },
+    {
+      "key": "Avg. Ann. Phosphorus discharge from outlet",
+      "value": 0.0,
+      "units": "kg/yr"
+    },
+    {
+      "key": "Avg. Ann. P. delivery per unit area of watershed",
+      "value": 0.0,
+      "units": "kg/ha/yr"
+    }
+  ],
+  "hillslope_checks": [
+    {
+      "topaz_id": "312",
+      "wepp_id": 70,
+      "cli": "prism800m-hill-312.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1203.6
+    },
+    {
+      "topaz_id": "63",
+      "wepp_id": 11,
+      "cli": "prism800m-hill-63.cli",
+      "sha256": "7239d769546620b825584d4a2b1723f047d54b5773e4a002be5421c47fb9ca73",
+      "precip_mm": 1879.8,
+      "wet_days": 647,
+      "runoff_mm": 27.443716000000002,
+      "et_mm": 1404.39
+    },
+    {
+      "topaz_id": "53",
+      "wepp_id": 9,
+      "cli": "prism800m-hill-53.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1336.49
+    },
+    {
+      "topaz_id": "172",
+      "wepp_id": 35,
+      "cli": "prism800m-hill-172.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1315.19
+    },
+    {
+      "topaz_id": "371",
+      "wepp_id": 84,
+      "cli": "prism800m-hill-371.cli",
+      "sha256": "02fd764d28525d7459914983c98a392b71a950185d683f227497d410e4eeb7f2",
+      "precip_mm": 2133.8,
+      "wet_days": 625,
+      "runoff_mm": 451.64648499,
+      "et_mm": 714.9500000000002
+    },
+    {
+      "topaz_id": "112",
+      "wepp_id": 20,
+      "cli": "prism800m-hill-112.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1752.63
+    },
+    {
+      "topaz_id": "413",
+      "wepp_id": 96,
+      "cli": "prism800m-hill-413.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 367.24072643500006,
+      "et_mm": 890.98
+    },
+    {
+      "topaz_id": "122",
+      "wepp_id": 23,
+      "cli": "prism800m-hill-122.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 4.434392,
+      "et_mm": 1236.1399999999999
+    },
+    {
+      "topaz_id": "223",
+      "wepp_id": 47,
+      "cli": "prism800m-hill-223.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1197.78
+    },
+    {
+      "topaz_id": "383",
+      "wepp_id": 88,
+      "cli": "prism800m-hill-383.cli",
+      "sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+      "precip_mm": 2126.6,
+      "wet_days": 630,
+      "runoff_mm": 364.67803003999995,
+      "et_mm": 785.6800000000001
+    },
+    {
+      "topaz_id": "382",
+      "wepp_id": 87,
+      "cli": "prism800m-hill-382.cli",
+      "sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+      "precip_mm": 2126.6,
+      "wet_days": 630,
+      "runoff_mm": 298.104035952,
+      "et_mm": 793.0400000000001
+    },
+    {
+      "topaz_id": "213",
+      "wepp_id": 45,
+      "cli": "prism800m-hill-213.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1268.18
+    },
+    {
+      "topaz_id": "343",
+      "wepp_id": 78,
+      "cli": "prism800m-hill-343.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1708.11
+    },
+    {
+      "topaz_id": "222",
+      "wepp_id": 46,
+      "cli": "prism800m-hill-222.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1189.89
+    },
+    {
+      "topaz_id": "352",
+      "wepp_id": 80,
+      "cli": "prism800m-hill-352.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1151.02
+    },
+    {
+      "topaz_id": "402",
+      "wepp_id": 92,
+      "cli": "prism800m-hill-402.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1161.79
+    },
+    {
+      "topaz_id": "331",
+      "wepp_id": 74,
+      "cli": "prism800m-hill-331.cli",
+      "sha256": "cadfc4e691cdcfb55ee42d3f7c678655fdedafe8252f7f9365e3941693b7f2e5",
+      "precip_mm": 2104.2,
+      "wet_days": 639,
+      "runoff_mm": 347.44376791999997,
+      "et_mm": 889.26
+    },
+    {
+      "topaz_id": "72",
+      "wepp_id": 12,
+      "cli": "prism800m-hill-72.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1659.77
+    },
+    {
+      "topaz_id": "171",
+      "wepp_id": 34,
+      "cli": "prism800m-hill-171.cli",
+      "sha256": "a14a9b5a2f6724b7db9a7fe6e8ceb9acb853c4b02e92e490e69805bf0227dad8",
+      "precip_mm": 1900.5,
+      "wet_days": 650,
+      "runoff_mm": 0.0,
+      "et_mm": 1294.12
+    },
+    {
+      "topaz_id": "302",
+      "wepp_id": 67,
+      "cli": "prism800m-hill-302.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1171.6299999999999
+    },
+    {
+      "topaz_id": "93",
+      "wepp_id": 17,
+      "cli": "prism800m-hill-93.cli",
+      "sha256": "4f010910be2e53762861dd1a65d24aea031d739868e4baf32b75100446143e3a",
+      "precip_mm": 1912.4,
+      "wet_days": 633,
+      "runoff_mm": 0.0,
+      "et_mm": 1359.58
+    },
+    {
+      "topaz_id": "353",
+      "wepp_id": 81,
+      "cli": "prism800m-hill-353.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1201.6000000000001
+    },
+    {
+      "topaz_id": "401",
+      "wepp_id": 91,
+      "cli": "prism800m-hill-401.cli",
+      "sha256": "f02c6ff49f949c39cabbcac36e55360fc6d89fb0d17700da0ca446a3f2a63cb1",
+      "precip_mm": 2199.2,
+      "wet_days": 627,
+      "runoff_mm": 83.66632000000001,
+      "et_mm": 1672.2199999999998
+    },
+    {
+      "topaz_id": "332",
+      "wepp_id": 75,
+      "cli": "prism800m-hill-332.cli",
+      "sha256": "cadfc4e691cdcfb55ee42d3f7c678655fdedafe8252f7f9365e3941693b7f2e5",
+      "precip_mm": 2104.2,
+      "wet_days": 639,
+      "runoff_mm": 95.5212284,
+      "et_mm": 1671.72
+    },
+    {
+      "topaz_id": "31",
+      "wepp_id": 3,
+      "cli": "prism800m-hill-31.cli",
+      "sha256": "a14a9b5a2f6724b7db9a7fe6e8ceb9acb853c4b02e92e490e69805bf0227dad8",
+      "precip_mm": 1900.5,
+      "wet_days": 650,
+      "runoff_mm": 0.0,
+      "et_mm": 1294.6399999999999
+    },
+    {
+      "topaz_id": "73",
+      "wepp_id": 13,
+      "cli": "prism800m-hill-73.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1333.81
+    },
+    {
+      "topaz_id": "132",
+      "wepp_id": 25,
+      "cli": "prism800m-hill-132.cli",
+      "sha256": "4f010910be2e53762861dd1a65d24aea031d739868e4baf32b75100446143e3a",
+      "precip_mm": 1912.4,
+      "wet_days": 633,
+      "runoff_mm": 0.0,
+      "et_mm": 1333.28
+    },
+    {
+      "topaz_id": "342",
+      "wepp_id": 77,
+      "cli": "prism800m-hill-342.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1610.6500000000003
+    },
+    {
+      "topaz_id": "212",
+      "wepp_id": 44,
+      "cli": "prism800m-hill-212.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1176.31
+    },
+    {
+      "topaz_id": "381",
+      "wepp_id": 86,
+      "cli": "prism800m-hill-381.cli",
+      "sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+      "precip_mm": 2126.6,
+      "wet_days": 630,
+      "runoff_mm": 307.503960036,
+      "et_mm": 790.64
+    },
+    {
+      "topaz_id": "62",
+      "wepp_id": 10,
+      "cli": "prism800m-hill-62.cli",
+      "sha256": "7239d769546620b825584d4a2b1723f047d54b5773e4a002be5421c47fb9ca73",
+      "precip_mm": 1879.8,
+      "wet_days": 647,
+      "runoff_mm": 0.0,
+      "et_mm": 1241.4800000000002
+    },
+    {
+      "topaz_id": "403",
+      "wepp_id": 93,
+      "cli": "prism800m-hill-403.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1539.29
+    },
+    {
+      "topaz_id": "293",
+      "wepp_id": 66,
+      "cli": "prism800m-hill-293.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1199.06
+    },
+    {
+      "topaz_id": "303",
+      "wepp_id": 68,
+      "cli": "prism800m-hill-303.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1243.29
+    },
+    {
+      "topaz_id": "292",
+      "wepp_id": 65,
+      "cli": "prism800m-hill-292.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1078.1599999999999
+    },
+    {
+      "topaz_id": "411",
+      "wepp_id": 94,
+      "cli": "prism800m-hill-411.cli",
+      "sha256": "c68382d72a9af1fa255c30a6bf135d773880a0bc06daf2aa5afc3bf2f27d38b6",
+      "precip_mm": 2164.2,
+      "wet_days": 626,
+      "runoff_mm": 468.69372392099996,
+      "et_mm": 699.7099999999999
+    },
+    {
+      "topaz_id": "103",
+      "wepp_id": 19,
+      "cli": "prism800m-hill-103.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1194.17
+    },
+    {
+      "topaz_id": "173",
+      "wepp_id": 36,
+      "cli": "prism800m-hill-173.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1314.26
+    },
+    {
+      "topaz_id": "432",
+      "wepp_id": 100,
+      "cli": "prism800m-hill-432.cli",
+      "sha256": "4fef0292328758089310653784fe7636011fb0bb82743d8842b863bb78434b94",
+      "precip_mm": 2224.6,
+      "wet_days": 632,
+      "runoff_mm": 88.668626,
+      "et_mm": 1687.3300000000004
+    },
+    {
+      "topaz_id": "392",
+      "wepp_id": 89,
+      "cli": "prism800m-hill-392.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1704.47
+    },
+    {
+      "topaz_id": "243",
+      "wepp_id": 53,
+      "cli": "prism800m-hill-243.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1187.6100000000001
+    },
+    {
+      "topaz_id": "152",
+      "wepp_id": 29,
+      "cli": "prism800m-hill-152.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1181.0700000000002
+    },
+    {
+      "topaz_id": "412",
+      "wepp_id": 95,
+      "cli": "prism800m-hill-412.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1398.44
+    },
+    {
+      "topaz_id": "162",
+      "wepp_id": 32,
+      "cli": "prism800m-hill-162.cli",
+      "sha256": "f4d02498fd6e916a30cd289ea15574ca2127aee614baa4bca16af4ba0328f0bb",
+      "precip_mm": 1926.2000000000003,
+      "wet_days": 640,
+      "runoff_mm": 6.105874,
+      "et_mm": 1204.2599999999998
+    },
+    {
+      "topaz_id": "262",
+      "wepp_id": 57,
+      "cli": "prism800m-hill-262.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1762.0
+    },
+    {
+      "topaz_id": "233",
+      "wepp_id": 50,
+      "cli": "prism800m-hill-233.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1207.82
+    },
+    {
+      "topaz_id": "42",
+      "wepp_id": 6,
+      "cli": "prism800m-hill-42.cli",
+      "sha256": "7239d769546620b825584d4a2b1723f047d54b5773e4a002be5421c47fb9ca73",
+      "precip_mm": 1879.8,
+      "wet_days": 647,
+      "runoff_mm": 0.0,
+      "et_mm": 1223.89
+    },
+    {
+      "topaz_id": "241",
+      "wepp_id": 51,
+      "cli": "prism800m-hill-241.cli",
+      "sha256": "3040efad455c6a18ab23af461885b8b025bf7f6665920df5f745c00d6c8ce027",
+      "precip_mm": 2051.6,
+      "wet_days": 638,
+      "runoff_mm": 19.890159,
+      "et_mm": 1032.7
+    },
+    {
+      "topaz_id": "322",
+      "wepp_id": 72,
+      "cli": "prism800m-hill-322.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1197.46
+    },
+    {
+      "topaz_id": "282",
+      "wepp_id": 62,
+      "cli": "prism800m-hill-282.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 2.295934,
+      "et_mm": 1155.4
+    },
+    {
+      "topaz_id": "372",
+      "wepp_id": 85,
+      "cli": "prism800m-hill-372.cli",
+      "sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+      "precip_mm": 2126.6,
+      "wet_days": 630,
+      "runoff_mm": 28.27071,
+      "et_mm": 1017.01
+    },
+    {
+      "topaz_id": "422",
+      "wepp_id": 98,
+      "cli": "prism800m-hill-422.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 21.264698,
+      "et_mm": 1609.2
+    },
+    {
+      "topaz_id": "313",
+      "wepp_id": 71,
+      "cli": "prism800m-hill-313.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1156.7
+    },
+    {
+      "topaz_id": "183",
+      "wepp_id": 38,
+      "cli": "prism800m-hill-183.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1317.8400000000001
+    },
+    {
+      "topaz_id": "242",
+      "wepp_id": 52,
+      "cli": "prism800m-hill-242.cli",
+      "sha256": "3040efad455c6a18ab23af461885b8b025bf7f6665920df5f745c00d6c8ce027",
+      "precip_mm": 2051.6,
+      "wet_days": 638,
+      "runoff_mm": 0.0,
+      "et_mm": 1083.46
+    },
+    {
+      "topaz_id": "431",
+      "wepp_id": 99,
+      "cli": "prism800m-hill-431.cli",
+      "sha256": "b12bfdf876093d55c8b38b93e69f75b62d41b9fd9cb958bd7593bcb004952fda",
+      "precip_mm": 2224.0,
+      "wet_days": 638,
+      "runoff_mm": 407.757515754,
+      "et_mm": 845.8299999999999
+    },
+    {
+      "topaz_id": "192",
+      "wepp_id": 40,
+      "cli": "prism800m-hill-192.cli",
+      "sha256": "bcceba55ca147e24cdf85befe951751e34ea4937c93408c03d1ac2d4c47aad8c",
+      "precip_mm": 2012.1999999999998,
+      "wet_days": 637,
+      "runoff_mm": 4.555777,
+      "et_mm": 1754.3899999999999
+    },
+    {
+      "topaz_id": "33",
+      "wepp_id": 5,
+      "cli": "prism800m-hill-33.cli",
+      "sha256": "4f27fc952b84f9333be017012218c0d6368921b7eb7e339d603920942786d569",
+      "precip_mm": 1878.6999999999998,
+      "wet_days": 651,
+      "runoff_mm": 0.0,
+      "et_mm": 1372.7199999999998
+    },
+    {
+      "topaz_id": "123",
+      "wepp_id": 24,
+      "cli": "prism800m-hill-123.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1316.0
+    },
+    {
+      "topaz_id": "121",
+      "wepp_id": 22,
+      "cli": "prism800m-hill-121.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1314.9699999999998
+    },
+    {
+      "topaz_id": "363",
+      "wepp_id": 83,
+      "cli": "prism800m-hill-363.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 0.0,
+      "et_mm": 1160.81
+    },
+    {
+      "topaz_id": "253",
+      "wepp_id": 55,
+      "cli": "prism800m-hill-253.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1317.5800000000002
+    },
+    {
+      "topaz_id": "133",
+      "wepp_id": 26,
+      "cli": "prism800m-hill-133.cli",
+      "sha256": "4f010910be2e53762861dd1a65d24aea031d739868e4baf32b75100446143e3a",
+      "precip_mm": 1912.4,
+      "wet_days": 633,
+      "runoff_mm": 0.0,
+      "et_mm": 1360.01
+    },
+    {
+      "topaz_id": "52",
+      "wepp_id": 8,
+      "cli": "prism800m-hill-52.cli",
+      "sha256": "7239d769546620b825584d4a2b1723f047d54b5773e4a002be5421c47fb9ca73",
+      "precip_mm": 1879.8,
+      "wet_days": 647,
+      "runoff_mm": 0.0,
+      "et_mm": 1265.9599999999998
+    },
+    {
+      "topaz_id": "323",
+      "wepp_id": 73,
+      "cli": "prism800m-hill-323.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1219.8500000000001
+    },
+    {
+      "topaz_id": "113",
+      "wepp_id": 21,
+      "cli": "prism800m-hill-113.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1334.28
+    },
+    {
+      "topaz_id": "43",
+      "wepp_id": 7,
+      "cli": "prism800m-hill-43.cli",
+      "sha256": "f7207103c1ad722f1224a25b3e2be2ee6bd86f8d5d4e82d053a142fb0722c021",
+      "precip_mm": 1875.5,
+      "wet_days": 653,
+      "runoff_mm": 0.0,
+      "et_mm": 1413.46
+    },
+    {
+      "topaz_id": "311",
+      "wepp_id": 69,
+      "cli": "prism800m-hill-311.cli",
+      "sha256": "02fd764d28525d7459914983c98a392b71a950185d683f227497d410e4eeb7f2",
+      "precip_mm": 2133.8,
+      "wet_days": 625,
+      "runoff_mm": 456.52728057,
+      "et_mm": 718.21
+    },
+    {
+      "topaz_id": "251",
+      "wepp_id": 54,
+      "cli": "prism800m-hill-251.cli",
+      "sha256": "1fdb3f6b5560955a89347da98ae7799e3e2eebb5dccafc6861abf5baee734e4a",
+      "precip_mm": 1942.6000000000001,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1306.3000000000002
+    },
+    {
+      "topaz_id": "443",
+      "wepp_id": 104,
+      "cli": "prism800m-hill-443.cli",
+      "sha256": "4fef0292328758089310653784fe7636011fb0bb82743d8842b863bb78434b94",
+      "precip_mm": 2224.6,
+      "wet_days": 632,
+      "runoff_mm": 91.67668900000001,
+      "et_mm": 1138.6599999999999
+    },
+    {
+      "topaz_id": "81",
+      "wepp_id": 14,
+      "cli": "prism800m-hill-81.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1306.1399999999999
+    },
+    {
+      "topaz_id": "393",
+      "wepp_id": 90,
+      "cli": "prism800m-hill-393.cli",
+      "sha256": "cadfc4e691cdcfb55ee42d3f7c678655fdedafe8252f7f9365e3941693b7f2e5",
+      "precip_mm": 2104.2,
+      "wet_days": 639,
+      "runoff_mm": 15.10941,
+      "et_mm": 1158.2199999999998
+    },
+    {
+      "topaz_id": "333",
+      "wepp_id": 76,
+      "cli": "prism800m-hill-333.cli",
+      "sha256": "cadfc4e691cdcfb55ee42d3f7c678655fdedafe8252f7f9365e3941693b7f2e5",
+      "precip_mm": 2104.2,
+      "wet_days": 639,
+      "runoff_mm": 14.394287,
+      "et_mm": 1162.74
+    },
+    {
+      "topaz_id": "421",
+      "wepp_id": 97,
+      "cli": "prism800m-hill-421.cli",
+      "sha256": "02fd764d28525d7459914983c98a392b71a950185d683f227497d410e4eeb7f2",
+      "precip_mm": 2133.8,
+      "wet_days": 625,
+      "runoff_mm": 450.37809564900004,
+      "et_mm": 710.8800000000001
+    },
+    {
+      "topaz_id": "441",
+      "wepp_id": 102,
+      "cli": "prism800m-hill-441.cli",
+      "sha256": "f02c6ff49f949c39cabbcac36e55360fc6d89fb0d17700da0ca446a3f2a63cb1",
+      "precip_mm": 2199.2,
+      "wet_days": 627,
+      "runoff_mm": 82.687052,
+      "et_mm": 1664.44
+    },
+    {
+      "topaz_id": "272",
+      "wepp_id": 59,
+      "cli": "prism800m-hill-272.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1665.56
+    },
+    {
+      "topaz_id": "191",
+      "wepp_id": 39,
+      "cli": "prism800m-hill-191.cli",
+      "sha256": "bcceba55ca147e24cdf85befe951751e34ea4937c93408c03d1ac2d4c47aad8c",
+      "precip_mm": 2012.1999999999998,
+      "wet_days": 637,
+      "runoff_mm": 4.257243,
+      "et_mm": 1204.51
+    },
+    {
+      "topaz_id": "442",
+      "wepp_id": 103,
+      "cli": "prism800m-hill-442.cli",
+      "sha256": "f02c6ff49f949c39cabbcac36e55360fc6d89fb0d17700da0ca446a3f2a63cb1",
+      "precip_mm": 2199.2,
+      "wet_days": 627,
+      "runoff_mm": 69.910944,
+      "et_mm": 1510.29
+    },
+    {
+      "topaz_id": "202",
+      "wepp_id": 42,
+      "cli": "prism800m-hill-202.cli",
+      "sha256": "154c5f3809fcb16fac1d8ea69c5c9a63ffd3632b75e80d1e2bfebd1058b9a575",
+      "precip_mm": 1973.0,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1175.49
+    },
+    {
+      "topaz_id": "23",
+      "wepp_id": 2,
+      "cli": "prism800m-hill-23.cli",
+      "sha256": "f7207103c1ad722f1224a25b3e2be2ee6bd86f8d5d4e82d053a142fb0722c021",
+      "precip_mm": 1875.5,
+      "wet_days": 653,
+      "runoff_mm": 0.0,
+      "et_mm": 1416.3200000000002
+    },
+    {
+      "topaz_id": "92",
+      "wepp_id": 16,
+      "cli": "prism800m-hill-92.cli",
+      "sha256": "4f010910be2e53762861dd1a65d24aea031d739868e4baf32b75100446143e3a",
+      "precip_mm": 1912.4,
+      "wet_days": 633,
+      "runoff_mm": 111.079306,
+      "et_mm": 1285.77
+    },
+    {
+      "topaz_id": "143",
+      "wepp_id": 28,
+      "cli": "prism800m-hill-143.cli",
+      "sha256": "154c5f3809fcb16fac1d8ea69c5c9a63ffd3632b75e80d1e2bfebd1058b9a575",
+      "precip_mm": 1973.0,
+      "wet_days": 628,
+      "runoff_mm": 0.5377196,
+      "et_mm": 1285.35
+    },
+    {
+      "topaz_id": "193",
+      "wepp_id": 41,
+      "cli": "prism800m-hill-193.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1318.1399999999999
+    },
+    {
+      "topaz_id": "153",
+      "wepp_id": 30,
+      "cli": "prism800m-hill-153.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 2.442226,
+      "et_mm": 1268.6200000000001
+    },
+    {
+      "topaz_id": "291",
+      "wepp_id": 64,
+      "cli": "prism800m-hill-291.cli",
+      "sha256": "c68382d72a9af1fa255c30a6bf135d773880a0bc06daf2aa5afc3bf2f27d38b6",
+      "precip_mm": 2164.2,
+      "wet_days": 626,
+      "runoff_mm": 459.67038045000004,
+      "et_mm": 713.5
+    },
+    {
+      "topaz_id": "232",
+      "wepp_id": 49,
+      "cli": "prism800m-hill-232.cli",
+      "sha256": "3040efad455c6a18ab23af461885b8b025bf7f6665920df5f745c00d6c8ce027",
+      "precip_mm": 2051.6,
+      "wet_days": 638,
+      "runoff_mm": 7.815576999999999,
+      "et_mm": 1041.08
+    },
+    {
+      "topaz_id": "161",
+      "wepp_id": 31,
+      "cli": "prism800m-hill-161.cli",
+      "sha256": "7f2206927064df2cff059286340e55875c60194cf4cdd38a2d88204160bedc0e",
+      "precip_mm": 1985.2999999999997,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1064.4599999999998
+    },
+    {
+      "topaz_id": "163",
+      "wepp_id": 33,
+      "cli": "prism800m-hill-163.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1162.47
+    },
+    {
+      "topaz_id": "83",
+      "wepp_id": 15,
+      "cli": "prism800m-hill-83.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1271.99
+    },
+    {
+      "topaz_id": "231",
+      "wepp_id": 48,
+      "cli": "prism800m-hill-231.cli",
+      "sha256": "dec9cf4b051fe57e8bf7f98c91e0b07367c6289f7d10545685c96e8d598579fa",
+      "precip_mm": 2126.6,
+      "wet_days": 630,
+      "runoff_mm": 304.50487795000004,
+      "et_mm": 791.1700000000001
+    },
+    {
+      "topaz_id": "283",
+      "wepp_id": 63,
+      "cli": "prism800m-hill-283.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1239.2399999999998
+    },
+    {
+      "topaz_id": "182",
+      "wepp_id": 37,
+      "cli": "prism800m-hill-182.cli",
+      "sha256": "27074ec9bb88abac0d8417406337b0c04518c5db8ae5bb09abb2cbf83d58977c",
+      "precip_mm": 1938.1,
+      "wet_days": 643,
+      "runoff_mm": 0.0,
+      "et_mm": 1766.02
+    },
+    {
+      "topaz_id": "362",
+      "wepp_id": 82,
+      "cli": "prism800m-hill-362.cli",
+      "sha256": "a03875c83c5234d1b9086f0cde6632a363a62b367e4dc0bfc47ae2c03a480bb3",
+      "precip_mm": 1993.1000000000001,
+      "wet_days": 626,
+      "runoff_mm": 0.0,
+      "et_mm": 1166.86
+    },
+    {
+      "topaz_id": "281",
+      "wepp_id": 61,
+      "cli": "prism800m-hill-281.cli",
+      "sha256": "f02c6ff49f949c39cabbcac36e55360fc6d89fb0d17700da0ca446a3f2a63cb1",
+      "precip_mm": 2199.2,
+      "wet_days": 627,
+      "runoff_mm": 375.940747359,
+      "et_mm": 793.6899999999999
+    },
+    {
+      "topaz_id": "273",
+      "wepp_id": 60,
+      "cli": "prism800m-hill-273.cli",
+      "sha256": "918b79355a53549520331dd928c557ad3e5b9b416ef62357dce3673b2d480cbb",
+      "precip_mm": 2067.2,
+      "wet_days": 629,
+      "runoff_mm": 0.0,
+      "et_mm": 1301.8000000000002
+    },
+    {
+      "topaz_id": "433",
+      "wepp_id": 101,
+      "cli": "prism800m-hill-433.cli",
+      "sha256": "cadfc4e691cdcfb55ee42d3f7c678655fdedafe8252f7f9365e3941693b7f2e5",
+      "precip_mm": 2104.2,
+      "wet_days": 639,
+      "runoff_mm": 14.405641000000001,
+      "et_mm": 1169.26
+    },
+    {
+      "topaz_id": "32",
+      "wepp_id": 4,
+      "cli": "prism800m-hill-32.cli",
+      "sha256": "efedfb54171f26b6b02b9042b7f57fad17745d88d8b8d77d4a326dc5f48af392",
+      "precip_mm": 1894.0,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1269.7900000000002
+    },
+    {
+      "topaz_id": "22",
+      "wepp_id": 1,
+      "cli": "prism800m-hill-22.cli",
+      "sha256": "f7207103c1ad722f1224a25b3e2be2ee6bd86f8d5d4e82d053a142fb0722c021",
+      "precip_mm": 1875.5,
+      "wet_days": 653,
+      "runoff_mm": 103.41065001979999,
+      "et_mm": 1328.78
+    },
+    {
+      "topaz_id": "263",
+      "wepp_id": 58,
+      "cli": "prism800m-hill-263.cli",
+      "sha256": "1fdb3f6b5560955a89347da98ae7799e3e2eebb5dccafc6861abf5baee734e4a",
+      "precip_mm": 1942.6000000000001,
+      "wet_days": 645,
+      "runoff_mm": 0.0,
+      "et_mm": 1776.19
+    },
+    {
+      "topaz_id": "203",
+      "wepp_id": 43,
+      "cli": "prism800m-hill-203.cli",
+      "sha256": "154c5f3809fcb16fac1d8ea69c5c9a63ffd3632b75e80d1e2bfebd1058b9a575",
+      "precip_mm": 1973.0,
+      "wet_days": 628,
+      "runoff_mm": 0.0,
+      "et_mm": 1324.9299999999998
+    },
+    {
+      "topaz_id": "142",
+      "wepp_id": 27,
+      "cli": "prism800m-hill-142.cli",
+      "sha256": "ef0d46bba19c9728a61d459fa01d91804e7247b967927d560cb29fa17af0bf7d",
+      "precip_mm": 1957.0,
+      "wet_days": 630,
+      "runoff_mm": 0.0,
+      "et_mm": 1172.73
+    },
+    {
+      "topaz_id": "102",
+      "wepp_id": 18,
+      "cli": "prism800m-hill-102.cli",
+      "sha256": "f4d02498fd6e916a30cd289ea15574ca2127aee614baa4bca16af4ba0328f0bb",
+      "precip_mm": 1926.2000000000003,
+      "wet_days": 640,
+      "runoff_mm": 1.9863591,
+      "et_mm": 1191.87
+    },
+    {
+      "topaz_id": "351",
+      "wepp_id": 79,
+      "cli": "prism800m-hill-351.cli",
+      "sha256": "b41161ad7a89bc6b63ebb7471ae2b42105cbbd28525f8c970c49c8e46c007a0f",
+      "precip_mm": 2090.7,
+      "wet_days": 627,
+      "runoff_mm": 133.48440826900003,
+      "et_mm": 994.96
+    },
+    {
+      "topaz_id": "261",
+      "wepp_id": 56,
+      "cli": "prism800m-hill-261.cli",
+      "sha256": "bcceba55ca147e24cdf85befe951751e34ea4937c93408c03d1ac2d4c47aad8c",
+      "precip_mm": 2012.1999999999998,
+      "wet_days": 637,
+      "runoff_mm": 1.080263,
+      "et_mm": 1828.9599999999998
+    }
+  ],
+  "snapshot": "/wc1/runs/ch/chemotherapeutic-scope/archives/prism-integration-mode2-2019-2021"
+}

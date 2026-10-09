@@ -412,6 +412,7 @@ def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> N
                 "prism_stochastic",
                 "observed_daymet",
                 "observed_gridmet",
+                "observed_prism_800m",
                 "dep_nexrad",
                 "future_cmip5",
                 "user_defined_cli",
@@ -687,7 +688,7 @@ def test_stored_schema_v2_graph_validation_is_independent_of_live_catalogs(
 @pytest.mark.parametrize(
     ("profile_id", "expected_sha256"),
     (
-        ("continental-us", "3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf"),
+        ("continental-us", "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3"),
         ("europe", "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7"),
         ("canada", "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4"),
         ("australia", "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497"),
@@ -725,13 +726,14 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         for record in by_hash.values()
     ]
 
-    assert len(records) == 17
+    assert len(records) == 18
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
         "d68d94816",
         "c1d02d73f",
-        "pending-reader-floor",
+        "e25299022",
+        "6781de988",
     }
     assert all(
         hashlib.sha256(
@@ -761,7 +763,8 @@ def test_amendment5_reader_floor_accepts_prior_and_new_structures(
     expected_records = {prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id],
                         _SINGLE_INPUT_STRUCTURE_HASHES[profile_id]}
     if profile_id == "continental-us":
-        expected_records.add("2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3")
+        expected_records.update({"2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3",
+                                 "545e2197c8a67a88da9c796246a2b0572427c8228bcb0e5d3ccd883f11b320a6"})
     assert set(records) == expected_records
     assert capability_graph_module.capability_structure_sha256(evolved) == (
         _AMENDMENT5_STRUCTURE_HASHES[profile_id]
@@ -782,7 +785,9 @@ def test_amendment5_runtime_writer_emits_new_cataloged_structures() -> None:
         for profile_id in _AMENDMENT5_CLIMATE_DATASETS
     }
 
-    assert emitted == _AMENDMENT5_STRUCTURE_HASHES
+    expected = dict(_AMENDMENT5_STRUCTURE_HASHES)
+    expected["continental-us"] = "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3"
+    assert emitted == expected
 
 
 def test_structure_identity_excludes_project_defaults_and_provider_binary_state() -> None:

@@ -43,6 +43,10 @@ def _spatial_inputs(climate, *, prism=False) -> dict[str, Any]:
             climate_mode=climate.climate_mode,
             climate_spatialmode=climate.climate_spatialmode,
         )
+    if prism:
+        from wepppy.nodb.core.climate import ClimateMode
+        if climate.climate_mode == ClimateMode.Prism800m:
+            inputs["raw_prism"] = file_signature(Path(climate.cli_dir) / "prism800m-source-ws.parquet")
     return inputs
 
 
@@ -180,7 +184,7 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
     from wepppy.nodb.core import climate_build_helpers as helpers
     from wepppy.nodb.core.climate import ClimateMode
 
-    retain_attempt = climate.climate_mode in (ClimateMode.Observed, ClimateMode.ObservedPRISM)
+    retain_attempt = climate.climate_mode in (ClimateMode.Observed, ClimateMode.ObservedPRISM, ClimateMode.Prism800m)
 
     snapshot = _spatial_inputs(climate, prism=True)
     climate_inputs = capture_multiple_build_inputs(climate)
@@ -199,7 +203,8 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
     )
     map_obj = SimpleNamespace(extent=snapshot["extent"], cellsize=snapshot["cellsize"])
     with TemporaryDirectory(
-        prefix="prism-build-" if retain_attempt else ".prism-build-",
+        prefix=("prism800m-build-revision-" if climate.climate_mode == ClimateMode.Prism800m
+                else "prism-build-" if retain_attempt else ".prism-build-"),
         dir=cli_dir, delete=not retain_attempt,
     ) as stage:
         completed = False
@@ -215,6 +220,14 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
                     worker, executor, watershed, cli, stage, ppts, tmaxs, tmins, ppt, tmin, tmax
                 )
                 helpers._wait_for_prism_revision_futures(worker, futures)
+            if climate.climate_mode == ClimateMode.Prism800m:
+                import pandas as pd
+                from wepppy.climates.prism.wepp_adapter import floor_dewpoint
+                shutil.copy2(snapshot["raw_prism"][0], Path(stage) / "prism800m-source-ws.parquet")
+                raw = pd.read_parquet(Path(stage) / "prism800m-source-ws.parquet")
+                for filename in cli_fns.values():
+                    floor_dewpoint(Path(stage) / filename, raw.tdmean,
+                                   Path(stage) / (filename + "-dewpoint.csv"))
             with finalize(climate) as publications:
                 _check_inputs(climate, climate_inputs, snapshot, prism=True)
                 if retain_attempt:
@@ -227,7 +240,13 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
         finally:
             if retain_attempt:
                 if completed:
-                    shutil.rmtree(stage)
+                    if climate.climate_mode == ClimateMode.Prism800m:
+                        try:
+                            _write_attempt_status(stage, "prism800m-revision", climate_inputs, "complete")
+                        except OSError:
+                            climate.logger.exception("Unable to record completed PRISM revision: %s", stage)
+                    else:
+                        shutil.rmtree(stage)
                 else:
                     try:
                         _write_attempt_status(stage, "prism", climate_inputs, "failed")

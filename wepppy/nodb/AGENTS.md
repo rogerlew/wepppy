@@ -22,6 +22,8 @@ Canonical behavioral contract:
   retains burned base classes. Keep the shared suffix helper unchanged for RUSLE.
 * Daymet acquisition artifact ownership follows the “Daymet acquisition source
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
+* Historic PRISM downstream climate eligibility and parent-file inheritance follow
+  `docs/schemas/prism-downstream-eligibility-contract.md`.
 * Applicable current canonical domain and shared/cross-cutting contracts are
   normative for UI-coupled NoDb inputs, mutation, persistence, and reload.
   Historical and archived plans are context only.
