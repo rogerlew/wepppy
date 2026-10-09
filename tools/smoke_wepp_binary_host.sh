@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-RUNS_DIR="${RUNS_DIR:-${REPO_ROOT}/tests/wepp/interchange/fixtures/deductive-futurist/wepp/runs}"
+RUNS_DIR="${RUNS_DIR:-${REPO_ROOT}/tests/wepp_runner/fixtures/hillslope_smoke/runs}"
 CASES="${CASES:-p1}"
 TIMEOUT_SECONDS="${TIMEOUT_SECONDS:-120}"
 

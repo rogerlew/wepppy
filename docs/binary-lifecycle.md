@@ -28,6 +28,14 @@ Automatic reject if:
 
 ## Required Gate
 
+All required release/vendoring gates must be reproducible using committed
+resources, or generated outputs from committed inputs. Private run directories,
+untracked holdouts and host-local datasets cannot be prerequisites. Record the
+source commit for cross-repository fixtures. Preserve external scientific
+studies as supplementary evidence, without making their storage locations
+mandatory. The reconciled-condenser replay is retired. New defect gates require
+a committed bounded reproduction or deterministic generator first.
+
 Run for every candidate vendoring operation:
 
 `tools/check_wepp_binary_provenance.sh <binary> [<binary> ...]`

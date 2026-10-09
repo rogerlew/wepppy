@@ -20,6 +20,12 @@ Applies to:
 - Keep `wepp` / `latest` behavior stable unless the task explicitly requires changing defaults.
 
 ## Required Quality Gate Before Vendoring (Must)
+Required gates must use committed resources or reproducibly generated outputs
+from committed inputs. Do not require private/untracked run directories or
+machine-local holdouts. Cross-repo resources must identify their committed
+source. External scientific comparisons remain supplementary evidence.
+The reconciled-condenser replay is retired, not a vendoring prerequisite.
+
 Before copying any new binary into `wepp_runner/bin`, manual tests in `/workdir/wepp-forest` must pass.
 
 From `/workdir/wepp-forest/src`:
