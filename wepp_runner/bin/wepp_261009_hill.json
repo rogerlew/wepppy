@@ -1,0 +1,45 @@
+{
+  "binary_name": "wepp_261009_hill",
+  "binary_role": "hillslope",
+  "built_utc": "2026-10-09T15:42:49Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "pass_components_reader_required": true,
+    "pass_components_version": 3,
+    "process_mode_pass_pw0_required": true
+  },
+  "paired_interchange": {
+    "pass_components_version": 3,
+    "release_commit": "bd63094",
+    "sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
+    "source_commit": "c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307"
+  },
+  "release_tag": "261009",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "5a01758b7b998d54cccc47d7eea01847b04d866b",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "external_replays": "supplementary evidence; not mandatory gates",
+    "gate_resource_policy": "committed inputs, or outputs reproducibly generated from committed inputs",
+    "hillslope_watchlist": "pass",
+    "host_smoke": "pass",
+    "post_vendor_container_smoke": "pass",
+    "post_vendor_host_smoke": "pass",
+    "post_vendor_provenance": "pass",
+    "post_vendor_tests": "124 passed, 1 skipped",
+    "pytest": "155 passed",
+    "reconciled_condenser": "retired by Roger; reaffirmed 2026-10-09",
+    "same_build_watershed_replay": "pass",
+    "same_build_watershed_scope": "140 fresh hills, 45 years; plain, Roads additive, AgFields weighted native composition"
+  },
+  "wepp_banner_version": "2020.500"
+}
