@@ -127,6 +127,11 @@ must precede full deployment; vendoring alone is not deployment approval.
 
 ## Withdrawn Releases
 
+- `wepp_261007` and `wepp_261007_hill`, including their provenance sidecars,
+  were removed from the WEPPpy vendor set on 2026-10-09 at operator request.
+  The release had not been deployed to wepp.cloud, so direct removal requires
+  no production migration. Existing binary defaults remain unchanged; the
+  release log and completed study artifacts are retained as historical evidence.
 - `wepp_260727` and `wepp_260727_hill` were removed from the WEPPpy vendor set
   on 2026-08-05. Their sidecars select the HBP pass family exclusively, so the
   generated `H*.hbp` files cannot participate in workflows that merge them with
