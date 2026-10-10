@@ -1,0 +1,49 @@
+{
+  "schema": "wepppy-technical-brief-v1",
+  "brief_id": "TB-20261009-RRINIT",
+  "title": "Low-Severity Forest Initial Random Roughness",
+  "author": "Roger Lew",
+  "affiliation": "University of Idaho",
+  "contact": "rogerlew@uidaho.edu",
+  "document_revision": "1",
+  "document_date": "2026-10-10",
+  "change_date": "2026-10-09",
+  "change_commit": "bae734d71165e58d610d5282d41684113b18b4ff",
+  "publication_status": "approved",
+  "approved_by": "Roger Lew",
+  "approved_on": "2026-10-10",
+  "approval_record": "Roger Lew: i approve the technical brief for publication",
+  "previous_document_revision": "0.1 (unpublished review draft)",
+  "pdf_filename": "20261009-rrinit-r1.pdf",
+  "pdf_sha256": "612c14bdfbee0018f2088abbfa2411f7ceb5c22c91b2f47f92478a30bd4f9e75",
+  "pages": 5,
+  "public_path": "/weppcloud/static/reports/wepppy/technical-briefs/20261009-rrinit/20261009-rrinit-r1.pdf",
+  "study_binary": "wepp_261009_hill",
+  "study_binary_sha256": "37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228",
+  "evidence": [
+    {
+      "path": "docs/work-packages/20261009_rrinit_parameter_review/artifacts/low-forest-4v6/comparisons.csv",
+      "sha256": "3f4e109034fea010055e7cce0d1c918996439c1739ab650fcdaeba0d372cb2a0"
+    },
+    {
+      "path": "docs/work-packages/20261009_rrinit_parameter_review/artifacts/low-forest-4v6/identity.json",
+      "sha256": "1d3bb60d657b9abcc78886fa26c2e7e99a244741ca7e79b192a15518f1ac9eab"
+    },
+    {
+      "path": "docs/work-packages/20261009_rrinit_parameter_review/low-forest-4v6-results.md",
+      "sha256": "b48e58098c470bdcd4e1f45e7037611f329b3c2a0a57e0e01465f38b860dcdb9"
+    },
+    {
+      "path": "docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md",
+      "sha256": "1b00e24f624bbceb3485f65b46f49badfe8a1f80b5b3a5e3c08485cc40e2e296"
+    },
+    {
+      "path": "docs/work-packages/20261009_rrinit_parameter_review/assessment.md",
+      "sha256": "babf2ab151748e59eb407414e0f63f1d4df1ef917cbc8f512daee3b79f65fd7e"
+    },
+    {
+      "path": "docs/adrs/ADR-0083-low-severity-forest-initial-random-roughness.md",
+      "sha256": "9ad53dfb68e083bbec00eb93260f85d792f1fdf7df61103c2a08a3f7796930a3"
+    }
+  ]
+}

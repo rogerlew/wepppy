@@ -17,3 +17,13 @@ issued PDFs. Copy approved bytes rather than rebuilding in WEPPpy, update the
 adjacent manifest, and verify the downloaded SHA256 and PDF content type through
 Caddy. Public URLs become available on each host when these files are deployed.
 Document publication does not authorize model deployment or imply peer review.
+
+## Technical Briefs
+
+Approved WEPPpy Technical Briefs use
+`wepppy/technical-briefs/<date-topic>/<date-topic>-r1.pdf` with an adjacent
+`publication-manifest-r1.json`. Authoring sources, templates and guidance live
+in `docs/technical-briefs/` at the repository root. Briefs explain point-in-time
+user-facing changes and are distinct from binary release notes. The first
+RRINIT brief, revision 1, was approved by Roger Lew on 2026-10-10 and is
+published under `wepppy/technical-briefs/20261009-rrinit/`.

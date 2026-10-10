@@ -129,6 +129,12 @@ Explicit custom roughness overrides remain authoritative.
 
 ## Interpreting Results
 
+The [RRINIT Technical Brief, revision 1 (PDF)](/weppcloud/static/reports/wepppy/technical-briefs/20261009-rrinit/20261009-rrinit-r1.pdf)
+explains the October 9, 2026 low-severity forest roughness correction from
+4 to 6 cm, the tested runoff and sediment response, affected mappings and
+what existing projects need to regenerate. It is a point-in-time parameter
+change explanation, not a model-binary release or a guarantee of site accuracy.
+
 See the [current canonical Disturbed rankings report](../../../../tests/disturbed/analysis_results_current.md)
 for the tested runoff, peak-flow and sediment patterns, including exceptions.
 The current report covers `wepp_261010`, 96 cases including young forest, and

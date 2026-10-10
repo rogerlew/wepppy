@@ -1,0 +1,199 @@
+\section{The Change in Brief}
+On October 9, 2026, WEPPpy changed standard low-severity forest initial random
+roughness, \texttt{RRINIT}, from \textbf{4 to 6 cm} (0.04 to 0.06 m).
+This corrects an inconsistency in the burned-forest parameter sequence.
+Targeted tests support more sensible event-level sediment ordering, with
+negligible runoff changes in the tested cases.\cite{adr}
+
+This is a \textbf{WEPPpy parameterization change}, not a change to the
+University of Idaho's \texttt{wepp-forest} equations or binaries. One shared
+management-template field and four corresponding texture rows in the packaged
+extended land/soil lookup changed. Ridge height (\texttt{rhinit}) remains
+4 cm. Cover, soil, routing and other roughness defaults were not changed.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Standard class & Unburned & Low & Moderate & High\\
+\midrule
+Forest & 10 & \textbf{4 $\to$ 6} & 6 & 6\\
+Young forest & 8 & \textbf{4 $\to$ 6} & 6 & 6\\
+Shrub & 6 & 6 & 6 & 6\\
+Tall grass & 2 & 2 & 2 & 2\\
+\bottomrule
+\end{tabular}
+\end{center}
+All values are centimeters of initial random roughness. Deciduous and mixed
+forest share the forest values. Burned young forest uses the shared forest
+templates. These are standard Disturbed mappings, \emph{not universal values
+for every regional or custom mapping}. Shrub/grass burn remapping depends on
+project options. Prescribed fire is separate and unchanged.
+
+\textbf{Who is affected?} Projects preparing inputs from the shared low-severity
+forest template, including the four forest labels above. Other mappings
+selecting that template also inherit the revision. Different templates, custom
+overrides and previously prepared inputs may not.
+
+\clearpage
+\section{Why Roughness Matters}
+Initial random roughness is a modeled surface condition, not ridge height,
+Manning's resistance coefficient, canopy height or litter depth. Measured litter
+thickness should not simply be entered as RRINIT. The initial value also need
+not persist: the model evolves an effective roughness, denoted here by $r$.
+
+The retained code assessment traces roughness into depression storage,
+hydraulic resistance and erosion-related calculations. Thus runoff, peak rates
+and sediment can respond to this single input. The response depends on soil
+state, slope and other inputs, not roughness alone.\cite{assessment}
+
+One existing interrill-delivery factor explains the targeted sediment response:
+\[
+ f_r=\max(0,\min(1,1.14-23r)),\qquad r\text{ in meters}.
+\]
+Its cutoff is approximately 0.049565 m, or 4.96 cm. With effective roughness
+at 4 cm the factor is 0.22; at 6 cm it is zero. Through the existing
+particle-specific delivery calculation this suppresses the interrill
+contribution. \textbf{It does not turn off all erosion.} Rill erosion, transport
+and deposition remain separate processes. This describes an existing algorithm,
+not a new physical law or a code change.
+
+In the tested sandy-loam soil, effective roughness remained at the assigned
+4 or 6 cm for all 36,525 days. In the other soils it declined below the cutoff,
+eventually reaching the model's 0.6 cm floor. This explains why an input revision
+can persist in one fixture but have no reported runoff or sediment effect in
+others. It is not a general classification of field soils by texture.\cite{targeted}
+
+\subsection{Why Not Lower All Values?}
+The preceding 896-run sensitivity study tested four textures, six vegetation
+labels, four severity states and two slope profiles. It compared class-specific
+controls with values from 0.6 to 4 cm. Responses strongly depended on modeled
+soil state. Reducing high-severity forest roughness from 6 to 0.6 cm on the
+sandy-loam 20\% slope increased surface runoff volume by 17.89\% and sediment
+delivery to about 2.91 times the control.\cite{sensitivity}
+
+Those findings did not justify a blanket reduction. The adopted correction
+uses the already established 6 cm burned-forest value for low severity, without
+changing other parameters to compensate. Improved tested ordering supports the
+consistency correction; it does not prove calibration against observations.
+Lower sediment is not a degradation accepted for a neater parameter table.
+
+\clearpage
+\section{What the Targeted Comparison Shows}
+The follow-up used 96 fresh canonical controls and 16 low-burn trials:
+\textbf{112 successful simulations}. Four forest labels share burned templates;
+identical results for a given soil are not independent replications.
+Only RRINIT changed within each paired comparison.\cite{targeted}
+
+All cases used the same frozen \texttt{wepp\_261009\_hill} binary and host runtime,
+synthetic McKenzie Bridge climate (2000--2099; seed 26109), and an 87.9 m by
+102.4 m profile with approximately 38.56\% mean grade. The follow-up did not
+include the gentler profile. Surface runoff here is not routed streamflow;
+hillslope sediment delivery is not channel erosion or watershed outlet sediment.
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Soil fixture & Runoff depth & Sediment delivery & Maximum peak\\
+ & mm / 100 yr & kg / 100 yr & m$^3$/s\\
+\midrule
+Clay loam & 41,620.0 $\to$ same & 111,737.85 $\to$ same & 0.11104 $\to$ same\\
+Loam & 36,859.0 $\to$ same & 21,630.31 $\to$ same & 0.13427 $\to$ same\\
+Sandy loam & 11,975.9 $\to$ same & 819.45 $\to$ 676.12 & 0.17035 $\to$ 0.17038\\
+Silt loam & 25,505.6 $\to$ same & 8,824.65 $\to$ same & 0.12931 $\to$ same\\
+\bottomrule
+\end{tabular}
+\end{center}
+Arrows compare 4 with 6 cm. Runoff depth uses event-by-event (EBE) output;
+sediment and peaks use hillslope PASS output. Unchanged values refer to the
+retained reporting precision, not identical internal states.
+
+\subsection{Sandy-Loam Water and Sediment}
+Higher-precision PASS surface volume changed from 107,491.6793 to
+107,491.6443 m$^3$: only $-0.035$ m$^3$ over 100 years ($-0.0000326$\%).
+All 743 PASS event dates and 808 EBE dates were retained, with no new or lost
+runoff-event dates. Peaks changed on 28 dates; the largest relative change was
+approximately $-0.508$\%, and the 95th-percentile peak was unchanged.
+
+PASS sediment decreased \textbf{17.49\%}, from 9.10 to 7.51 kg/ha/year over
+the 0.900096 ha slope. Delivery decreased on 30 dates, increased on none, and
+became zero on 24 previously positive-delivery dates. Annual totals changed in
+25 of 100 years. This is persistent, event-selective behavior, not uniform
+scaling or proof of physically zero sediment on those days.
+
+The largest event mass decrease was 298.156 to 283.585 kg (4.89\%); another
+event fell from 9.041 kg to zero. Rounded EBE delivery decreased 15.19\%, not
+17.49\%; its kg/m measure differs from concentration-derived PASS mass.
+The existing PASS surface-volume minus EBE depth-equivalent discrepancy changes
+from $-302.9176$ to $-302.9526$ m$^3$. No accounting-closure repair is claimed.
+
+\clearpage
+\section{Rankings, Limits and User Actions}
+\subsection{Improved Events, Not Universal Monotonicity}
+Across the union of 3,465 sandy-loam mature-forest PASS event dates, there were
+17 dates where low-severity sediment exceeded moderate-severity sediment at
+4 cm, and none at 6 cm. Absent EVENT sediment is counted as zero in this
+comparison. After revision, unburned $\leq$ low $\leq$ moderate $\leq$ high
+delivery holds on every compared date.\cite{targeted}
+
+Full-record rankings are distinct: runoff remained ordered in 23 of 24
+soil/vegetation contexts, sediment in 24 of 24, and record maximum peak in
+18 of 24. No full-record ordering failures were introduced or removed.
+Remaining peak/runoff exceptions are not grounds to tune for a monotonic table.
+
+Evidence covers one synthetic climate, four soil fixtures and a steep profile.
+It does not establish field sediment accuracy, watershed outlet response,
+subdaily timing parity, recovery through time or other-climate behavior.
+The parameter study's 261009 identity is retained although that binary was
+subsequently withdrawn. The separately refreshed canonical benchmark uses
+261010; it is not a replacement label for the historical comparison.
+
+\subsection{What Users Should Do}
+\begin{enumerate}
+\item \textbf{Check project inputs.} Low-burn forest should receive 0.06 m when
+the revised shared template is selected and not overridden. Inspect prepared
+\texttt{p*.man} files, not just a class label, displayed table or binary version.
+\item \textbf{Regenerate deliberately.} Existing prepared files, project-local
+managements and exported lookups are not automatically migrated. Regenerate
+intended management artifacts and verify values before rerunning. Preserve
+user-specified overrides.
+\item \textbf{Keep passes compatible.} Watershed reruns require fresh hillslope
+PASS files from the same WEPP build as the watershed executable.
+Do not reuse cross-version passes.
+\item \textbf{Interpret sediment in context.} Lower low-burn delivery may follow
+this correction where effective roughness persists. Unchanged hillslope runoff
+does not prove unchanged outlet sediment or require every small event to
+deliver sediment.
+\end{enumerate}
+
+The extended lookup's four affected texture rows were updated; the base lookup
+has no RRINIT column. Custom managements and generic initial-condition overrides
+retain their precedence. Unrelated template/export discrepancies and regional
+mappings were not normalized by this revision.
+
+Representative observations or independent cases showing unacceptable
+small-event sediment loss or other material regressions would justify review.
+Rollback restores the shared template and all four lookup cells together;
+it does not tune other parameters implicitly. This brief does not rerun projects
+or authorize deployment.
+
+\clearpage
+\section{Decision and Evidence Record}
+The accepted decision is ADR-0083. Implementation: WEPPpy commit
+\par{\small\nolinkurl{bae734d71165e58d610d5282d41684113b18b4ff}}\par
+Study binary SHA256:
+\par{\small\nolinkurl{37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228}}\par
+
+Implementation readback verified one template field and four lookup cells
+changed: \texttt{ini.data.rrinit} in \nolinkurl{Low_Severity_Fire.man}
+and the four corresponding rows in \nolinkurl{extended_land_soil_lookup.csv}.
+All 16 generated low-forest managements parsed to 0.06 m and retained
+0.04 m ridge height. Retained studies preserve setup failures, runtime
+distinctions, controls and input/output receipts; they have not been silently
+regenerated against today's defaults. The canonical climate and deterministic
+generator are committed. No private watershed is a prerequisite for this
+document's compilation or a mandatory publication gate.
+
+For current benchmark expectations, see the
+\href{https://wepp.cloud/weppcloud/usersum/src/tests/disturbed/analysis_results_current.md}{current canonical Disturbed rankings report}.
+Check its version and input identities separately from this point-in-time brief.

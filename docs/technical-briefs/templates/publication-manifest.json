@@ -1,0 +1,15 @@
+{
+  "schema": "wepppy-technical-brief-v1",
+  "brief_id": "TB-YYYYMMDD-TOPIC",
+  "document_revision": "0.1",
+  "document_date": null,
+  "change_date": null,
+  "change_commit": null,
+  "publication_status": "review_draft",
+  "approved_by": null,
+  "approved_on": null,
+  "pdf_filename": null,
+  "pdf_sha256": null,
+  "public_path": null,
+  "evidence": []
+}

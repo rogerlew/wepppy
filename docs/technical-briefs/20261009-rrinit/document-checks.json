@@ -1,0 +1,12 @@
+{
+  "pages": 5,
+  "pdf_sha256": "612c14bdfbee0018f2088abbfa2411f7ceb5c22c91b2f47f92478a30bd4f9e75",
+  "comparison_rows": 16,
+  "status": "author checks passed; Roger Lew approved publication; no independent peer-review certification",
+  "source_hashes": {
+    "content.tex": "08b378517937813ee0f868e501e162354eea75487aad296cb1a9b967c7162e4d",
+    "main.tex": "e9071548ccb5301ad3969f01049f0ef0e17dd4e5493ffcb0c518c219f2430304",
+    "metadata.tex": "687f15318fb09d1d773bf2c00e4c0ab72c91067bbd0191c690571be3377b4ec2",
+    "references.tex": "c39af0081aa2ea5d53f734621e29496f7f91d4069537cf0eaa25aaa9a57acc21"
+  }
+}

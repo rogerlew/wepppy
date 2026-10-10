@@ -1,0 +1,31 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage{amsmath,booktabs,array,fancyhdr}
+\usepackage[hidelinks]{hyperref}
+\input{metadata}
+\hypersetup{pdftitle={WEPPpy Technical Brief: \BriefTitle},
+pdfauthor={\ReportAuthors},pdfsubject={\BriefID; \DocumentStatus}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small WEPPpy Technical Brief}
+\fancyhead[R]{\small \BriefID}
+\fancyfoot[L]{\scriptsize \DocumentStatus}
+\fancyfoot[R]{\scriptsize \thepage}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlength{\emergencystretch}{3em}
+\title{WEPPpy Technical Brief\\[0.3em]\large \BriefTitle}
+\author{\ReportAuthors\\\small \ReportAffiliation\\
+\small \href{mailto:\ReportContact}{\ReportContact}}
+\date{Change: \ChangeDate\\Document: \DocumentDate\quad Revision \DocumentRevision}
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+\textbf{\DocumentStatus}
+
+{\small \textbf{AI authoring disclosure:} \AIDisclosure\par}
+\input{content}
+\input{references}
+\end{document}
