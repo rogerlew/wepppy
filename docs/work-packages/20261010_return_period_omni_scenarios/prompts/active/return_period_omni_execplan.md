@@ -149,3 +149,9 @@ Revision note: created 2026-10-10 to make the user-requested report extension
 reviewable before the required contract ancestor and implementation.
 Updated 2026-10-10 after implementation and reviews to record concrete fixes,
 validation, authorized checkpoint ancestry, and remaining full-suite evidence.
+
+Correction after live-project feedback: READONLY was an invalid completion
+assumption. Operator rejected it; independently reviewed amendment `d89ace269`
+permits artifact-backed discovery with empty metadata and established staging
+from existing outputs on selection. Validate actual unstaged output copies and
+optional Outlet form guard before final handoff.

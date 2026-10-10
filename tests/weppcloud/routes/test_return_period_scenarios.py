@@ -56,10 +56,10 @@ def test_completed_sorted_unready_and_scope_specific(project):
     assert all(item["reason"] for item in selection.completed_return_period_scenarios(root, "roads"))
 
 
-def test_legacy_absence_is_not_modern_empty_or_failed_state(project):
+def test_empty_and_absent_state_use_outputs_but_failed_state_excludes(project):
     root, omni = project
     child = add_scenario(project, readonly=False)
-    assert selection.completed_return_period_scenarios(root, "baseline") == []
+    assert len(selection.completed_return_period_scenarios(root, "baseline")) == 1
     del omni._scenario_run_state
     assert len(selection.completed_return_period_scenarios(root, "baseline")) == 1
     omni._scenario_run_state = [{"scenario": "undisturbed", "status": "failed"}]
@@ -118,3 +118,48 @@ def test_unknown_definition_cannot_supply_paths_or_csv_formulas(project, bad_typ
     omni.scenarios = [{"type": bad_type}]
     with pytest.raises(ValueError, match="Invalid Omni"):
         selection.completed_return_period_scenarios(root, "baseline")
+
+
+def add_preparation_sources(child):
+    for name in ("ebe_pw0.parquet", "totalwatsed3.parquet"):
+        (child / "wepp/output/interchange" / name).write_bytes(b"source output")
+    (child / "_query_engine").mkdir(exist_ok=True)
+    (child / "_query_engine/catalog.json").write_text('{}')
+
+
+def test_unstaged_writable_outputs_are_selectable_without_discovery_writes(project):
+    root, _ = project
+    child = add_scenario(project, readonly=False, ready=False)
+    add_preparation_sources(child)
+    before = sorted(str(path) for path in root.rglob("*"))
+    assert selection.completed_return_period_scenarios(root, "baseline")[0]["reason"] is None
+    assert before == sorted(str(path) for path in root.rglob("*"))
+    (child / "READONLY").touch()
+    assert "preparation" in selection.completed_return_period_scenarios(root, "baseline")[0]["reason"]
+
+
+@pytest.mark.parametrize("relative", ["_query_engine/cache", "climate/wepp_cli.parquet",
+    "wepp/runs/pw0.cli", "wepp/output/interchange/ebe_pw0.parquet",
+    "wepp/output/interchange/return_period_event_ranks.parquet"])
+def test_preparation_rejects_escaping_sources_and_targets(project, tmp_path, relative):
+    root, _ = project
+    child = add_scenario(project, readonly=False, ready=False)
+    add_preparation_sources(child)
+    target = child / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.unlink(missing_ok=True)
+    target.symlink_to(tmp_path / "outside")
+    with pytest.raises(ValueError, match="outside"):
+        selection.completed_return_period_scenarios(root, "baseline")
+
+
+def test_preparation_accepts_shared_project_climate_and_cli(project):
+    root, _ = project
+    child = add_scenario(project, readonly=False, ready=False)
+    add_preparation_sources(child)
+    (root / "climate").mkdir()
+    (root / "climate/source.cli").write_text("shared")
+    (child / "climate").symlink_to(root / "climate", target_is_directory=True)
+    (child / "wepp/runs").mkdir()
+    (child / "wepp/runs/pw0.cli").symlink_to(root / "climate/source.cli")
+    assert selection.completed_return_period_scenarios(root, "baseline")[0]["reason"] is None

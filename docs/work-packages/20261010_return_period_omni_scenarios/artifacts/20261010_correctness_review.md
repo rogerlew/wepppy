@@ -47,3 +47,16 @@ loading, and shared shell were isolated for this local fixture smoke.
 This approves local implementation correctness. Production identity/auth/full
 shell validation and deployment are not claimed. Final gate results are in
 `20261010_validation.md`; broad-suite completion is tracked separately.
+
+## Artifact discovery correction review
+
+Reviewed against `d89ace269`; approved with no unresolved high/medium findings.
+Readonly no longer proves completion. Empty-state artifact-backed children are
+valid; selected writable children prepare missing derived tables through the
+existing reader. Containment includes source and write targets, cache, shared
+climate/CLI inputs; absent optional climate remains valid. Original project data
+is untouched by validation. Outlet initialization requires its form.
+
+Regression evidence: 91 focused tests plus two real staging/partial-staging
+tests; 933 Jest tests. Actual-project copied output produces 16,437 staged events
+and independently verified CSV dates/values. See validation record for limits.

@@ -32,7 +32,7 @@ serializer and preserves numeric values.
 
 Comparison memoization is disabled and staged inputs are checked before report
 loads. There is no queue, subprocess, external dependency, archive exclusion,
-or new persisted report. Unexpected failures retain the diagnostic boundary.
+or new report schema. The correction below permits existing derived assets. Unexpected failures retain the diagnostic boundary.
 
 ## Evidence and residual limits
 
@@ -50,3 +50,16 @@ Post-fix confirmation: reviewer rechecked the final filtered-empty helper,
 calendar-date and per-metric interval changes, and malformed-calendar regression.
 PASS remains unchanged. Reviewer verified all five source/fixture manifest hashes
 match the final files; no new findings.
+
+## Artifact discovery correction review
+
+Reviewed against `d89ace269`; approved with no unresolved high/medium findings.
+Readonly no longer proves completion. Empty-state artifact-backed children are
+valid; selected writable children prepare missing derived tables through the
+existing reader. Containment includes source and write targets, cache, shared
+climate/CLI inputs; absent optional climate remains valid. Original project data
+is untouched by validation. Outlet initialization requires its form.
+
+Regression evidence: 91 focused tests plus two real staging/partial-staging
+tests; 933 Jest tests. Actual-project copied output produces 16,437 staged events
+and independently verified CSV dates/values. See validation record for limits.

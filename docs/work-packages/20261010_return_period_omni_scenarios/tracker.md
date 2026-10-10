@@ -37,3 +37,8 @@ Documentation lint passed; standalone ancestor commit authority is outstanding.
 changes. Implemented and reviewed; explicit-calendar dates, per-metric interval
 sets, filtered-empty groups, and preserved empty-report metadata are covered.
 Configuration screenshot recaptured and visually checked after reviewer note.
+
+2026-10-10 correction: operator rejected READONLY discovery after actual
+`eighty-five-synthetic/undisturbed` false negative. Reviewed ancestor `d89ace269`
+replaces marker-based eligibility with output evidence and normal selected-child
+staging; optional Outlet form guard fixes the separate deck.gl warning.

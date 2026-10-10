@@ -1727,3 +1727,41 @@ def test_return_period_malformed_calendar_is_not_filtered_empty_success(omni_ret
     response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?omni_scenario=undisturbed&exclude_months=1')
     assert response.status_code == 500
     assert captured == {}
+
+
+@pytest.mark.parametrize('partial', [False, True])
+def test_return_period_selection_stages_existing_outputs(omni_return_period_client, partial):
+    import csv
+    import io
+    import shutil
+    import pyarrow.parquet as pq
+    from wepppy.weppcloud.routes.nodb_api.return_period_scenarios import completed_return_period_scenarios
+    from wepppy.wepp.reports import ReturnPeriodDataset
+
+    client, roots, _, _ = omni_return_period_client
+    child = roots[1]
+    (child / 'READONLY').unlink()
+    target = child / 'wepp/output/interchange'
+    (target / 'return_period_event_ranks.parquet').unlink()
+    if not partial:
+        (target / 'return_period_events.parquet').unlink()
+    source = Path(__file__).parents[2] / 'wepp/interchange/fixtures/decimal-pleasing/wepp/output/interchange'
+    for name in ['ebe_pw0.parquet', 'totalwatsed3.parquet']:
+        shutil.copyfile(source / name, target / name)
+    before = sorted(str(p) for p in child.rglob('*'))
+    assert completed_return_period_scenarios(roots[0], 'baseline')[0]['reason'] is None
+    assert before == sorted(str(p) for p in child.rglob('*'))
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string={
+        'omni_scenario': 'undisturbed', 'format': 'csv', 'table': 'runoff',
+        'rec_intervals': '5,2', 'exclude_yr_indxs': '0,1', 'chn_topaz_id_of_interest': '94',
+        'gringorten_correction': 'true', 'exclude_months': ''})
+    assert response.status_code == 200
+    assert pq.read_table(target / 'return_period_events.parquet').num_rows > 0
+    rows = [row for row in csv.DictReader(io.StringIO(response.get_data(as_text=True)))
+            if row['Scenario'] == 'undisturbed']
+    report = ReturnPeriodDataset(child, auto_refresh=False).create_report(
+        [5, 2], exclude_yr_indxs=[0, 1], gringorten_correction=True, topaz_id=94)
+    assert len(rows) == 2
+    for row in rows:
+        event = report.return_periods['Runoff'][int(float(row['Recurrence Interval (years)']))]
+        assert float(row['Runoff (mm)']) == pytest.approx(event['Runoff'])

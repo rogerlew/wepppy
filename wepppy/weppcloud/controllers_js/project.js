@@ -721,7 +721,7 @@ var Project = (function () {
             }
         });
 
-        if (!readonly) {
+        if (!readonly && document.getElementById("set_outlet_form")) {
             try {
                 if (window.Outlet && typeof window.Outlet.getInstance === "function") {
                     var outlet = window.Outlet.getInstance();

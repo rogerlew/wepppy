@@ -16,16 +16,19 @@ single-project; hide extraneous parameters to return to the selected comparison.
 ## Availability and recovery
 
 A project with no completed Omni children shows an empty selection message.
-Completed children with missing report inputs are listed but disabled. Modern
-completion uses the loss output and READONLY finalization marker; supported
-legacy outputs are also recognized. Readiness requires readable child state,
-query catalog, and scoped staged event/rank Parquets. Roads comparisons require
+Completion uses the loss output, with explicit running/failed state excluding
+stale results. Readonly is not a completion or discovery requirement. Readiness
+requires readable child state and query catalog plus scoped staged event/rank
+Parquets or, for writable children, existing EBE/totalwatsed outputs from which
+the normal reader prepares those tables when selected. Discovery never writes
+files. Missing source inputs disable the choice. Readonly children without
+staged tables remain listed with a preparation explanation. Roads comparisons require
 Roads assets in each selected scenario; they never substitute baseline outputs.
 
 If a selected scenario was deleted or became unavailable, refresh the report
 without its `omni_scenario` parameter and select available scenarios. Recover
-missing outputs through the existing Omni execution workflow. Viewing this
-report does not queue recovery or regenerate child assets. Invalid dataset
+missing outputs through the existing Omni execution workflow. Selecting a writable scenario may prepare missing derived report tables from
+existing outputs; it never queues recovery or reruns WEPP. Invalid dataset
 content surfaces the existing report error with diagnostics. Filtered metrics
 or a channel absent in a child display a scenario-specific no-events message.
 

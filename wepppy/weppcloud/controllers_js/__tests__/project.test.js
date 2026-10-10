@@ -279,6 +279,22 @@ describe("Project controller", () => {
         consoleSpy.mockRestore();
     });
 
+    test("report pages do not initialize an absent Outlet control", async () => {
+        window.Outlet = { getInstance: jest.fn(() => { throw new Error("deck missing"); }) };
+        await project.set_readonly(false);
+        expect(window.Outlet.getInstance).not.toHaveBeenCalled();
+        delete window.Outlet;
+    });
+
+    test("pages with Outlet still reset its mode when editing is enabled", async () => {
+        document.body.insertAdjacentHTML("beforeend", '<form id="set_outlet_form"></form>');
+        const setMode = jest.fn();
+        window.Outlet = { getInstance: jest.fn(() => ({ setMode })) };
+        await project.set_readonly(false);
+        expect(setMode).toHaveBeenCalledWith(0);
+        delete window.Outlet;
+    });
+
     test("set_readonly updates controls and emits project:readonly:changed", async () => {
         const handler = jest.fn();
         project.events.on("project:readonly:changed", handler);

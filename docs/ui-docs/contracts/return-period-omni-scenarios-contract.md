@@ -1,6 +1,6 @@
 # Return-period simple report Omni comparisons
 
-Status: artifact-discovery correction approved by operator; implementation pending; not deployed. See
+Status: corrected artifact discovery implemented and locally validated; not deployed. See
 [validation evidence](../../work-packages/20261010_return_period_omni_scenarios/artifacts/20261010_validation.md).
 
 ## Scope and rationale
