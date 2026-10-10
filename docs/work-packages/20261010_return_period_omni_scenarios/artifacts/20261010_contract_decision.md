@@ -73,3 +73,11 @@ Findings and post-fix confirmations are retained in
 [review disposition](20261010_contract_reviews.md).
 Checkpoint ancestor revision: pending explicit commit authority.
 Implementation must not begin until that standalone ancestor commit exists.
+
+Operator granted commit/implementation authority in the follow-up `yes. commit
+and proceed`; initial checkpoint committed as `c5358daa7` before source edits.
+Artifact-path clarification: `OmniArtifactExportService.scenarios_report` accepts
+current `wepp/output/interchange/loss_pw0.out.parquet` and legacy
+`wepp/output/loss_pw0.out.parquet`. The initial contract named only the latter;
+clarify both before implementing current-layout discovery. This preserves the
+approved completed-current-and-legacy scope rather than narrowing it to legacy.

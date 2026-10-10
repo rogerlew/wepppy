@@ -47,8 +47,9 @@ report inputs are unavailable must be disabled with an explanation.
 
 Candidates must derive from configured Omni scenario definitions, using the
 existing scenario-name generator rather than arbitrary directory names.
-Completion requires the established child `wepp/output/loss_pw0.out.parquet`
-artifact. Modern children also require the child `READONLY` finalization marker,
+Completion requires the established child `wepp/output/interchange/loss_pw0.out.parquet`
+artifact (or the supported legacy `wepp/output/loss_pw0.out.parquet` location).
+Modern children also require the child `READONLY` finalization marker,
 which cloning removes before rerunning. Available explicit current-attempt
 running/failure evidence overrides stale artifacts. Existing successful
 `executed`/`skipped` state entries alone are insufficient. Truly absent legacy

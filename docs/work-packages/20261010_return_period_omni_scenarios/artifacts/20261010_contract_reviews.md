@@ -47,3 +47,11 @@ All contract findings resolved and independently confirmed after amendments.
 Documentation lint passes for the contract and package. Production code and
 tests remain unchanged. Commit authority is still required for the standalone
 ancestor; neither review is implementation or deployment approval.
+
+## Artifact-location clarification review
+
+After `c5358daa7`, both independent reviewers approved naming the current
+`wepp/output/interchange/loss_pw0.out.parquet` and legacy loss locations,
+matching `OmniArtifactExportService.scenarios_report`. Both require coverage
+of each location with identical containment; no new findings. Commit this
+clarification before implementing current-layout discovery.
