@@ -11,7 +11,7 @@ Completed (code/local): [Return-period Omni comparisons](docs/work-packages/2026
 — scenario selection, independent dates/values, concatenated CSV; corrected
 artifact discovery requires no readonly marker. Full Python sanity 10,554 passed,
 126 skipped; final correction/source-copy checks and 933 frontend tests pass.
-Independent reviews approved. Not deployed.
+Independent reviews approved. Live on forest; [baseline naming parity](docs/work-packages/20261010_return_period_baseline_label/package.md) verified in HTML/CSV.
 
 Released/vendored: [WEPP 261010](docs/work-packages/20261009_topanga_jan1993_outlier/release-handoff.md). Roger approved the minimal CHRQIN normalization correction after watershed, mutation, disturbed and Cedar verification. Undeployed 261009 binaries/sidecars removed from WEPPpy; historical evidence retained. Forest 163 pass, watchlist 12/12, post-vendor 114 pass/1 existing skip, release matrix 99 pass and report/Usersum 63 pass. Ordinary-event consequences remain disclosed. No production deployment or general default switch.
 
