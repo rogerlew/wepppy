@@ -1,7 +1,6 @@
 # Forest flow-duration validation
 
-Date: 2026-10-10. Checkpoint ancestor: c63f2cc52. Implementation commit recorded
-at handoff. Host: forest; installed wctl preset docker/docker-compose.dev.yml.
+Date: 2026-10-10. Checkpoint ancestor: c63f2cc52. Implementation commit: bd01ed25e. Host: forest; installed wctl preset docker/docker-compose.dev.yml.
 No model output or persisted schema mutations.
 
 ## Source-to-browser evidence
@@ -33,9 +32,9 @@ undisturbed curves, readable axes, controls and per-scenario metadata.
 - Final targeted route/boundary pytest: 32 passed, including filesystem/symlink
   ownership, stale catalogs, malformed real Parquet, shared topology, child URLs
   and terminal Omni-run identifier selection.
-- Full Python suite: running; outcome to be appended before handoff. It began
-  before the final child/coverage corrections; final focused tests cover those
-  corrections directly.
+- Full Python suite: 10,586 passed, 126 skipped, 5,495 warnings in 45m55s.
+  It began before the final child/coverage corrections; final targeted tests
+  cover those corrections directly.
 - `wctl run-npm lint`: existing failure in controllers_js/__tests__/climate.test.js
   line 300, jest/no-conditional-expect. No changes to that test.
 - Scoped Markdown lint and changed broad-exception inventory pass. Code-quality
@@ -46,7 +45,7 @@ The failures are comparison-mode selector/legend and missing raster labels
 Landuse (nlcd.tif), Soils (ssurgo.tif). All three reproduce when browser requests
 for gl-dashboard.js and every gl-dashboard module are served verbatim from
 checkpoint c63f2cc52 via Playwright route interception, against the same authorized
-project and backend. This establishes pre-existing frontend behavior for these
+project and backend. This establishes preexisting frontend behavior for these
 checks; it is not a claim those unrelated failures are repaired. Temporary test
 copies, configuration and the mode 0600 authentication state were removed afterward.
 
@@ -73,3 +72,15 @@ regeneration because source provenance and cache contents are page snapshots.
 
 Independent final correctness, QA and security reviews passed; all six security
 findings are resolved. Retained review artifacts record independent checks.
+
+## Live performance observation
+
+Final authenticated browser run captured all four daily requests: 248–318 ms each,
+1.01–1.56 MB encoded body bytes. Cached outlet/log/all-years
+synchronous redraw took 8.1 ms. The approximate whole-page JS heap snapshot
+was 47.4 MB. Request durations include backend and transport; redraw
+excludes browser paint/compositing. Heap is neither feature-only memory nor peak
+memory. This is a single-project observation, not a latency distribution or a
+large-catalog bound. The smoke asserts finished-request count matches observed
+daily-request count before recording metrics. No request bodies or authentication
+values are retained in this evidence.

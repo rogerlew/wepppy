@@ -3,7 +3,7 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 The operator authorized commit, execution, forest stack restart and integration
-on 2026-10-10. Implementation starts after the reviewed checkpoint ancestor exists. This is the active plan for this package, not other repository plans.
+on 2026-10-10. Implementation starts after the reviewed checkpoint ancestor exists. This completed plan records execution for this package.
 
 ## Purpose / Big Picture
 
@@ -26,7 +26,7 @@ minimized/split/fullscreen host and does not borrow calendar playback behavior.
 - [x] (2026-10-10 UTC) Independent contract reviews passed; checkpoint ancestor c63f2cc52.
 - [x] (2026-10-10 UTC) Implement daily loader, ownership/outlet metadata, renderer and controls.
 - [x] (2026-10-10 UTC) Validate source-to-graph correctness, loader performance, keyboard inspection and isolation.
-- [ ] Complete independent reviews, documentation and delivery evidence; record deployment separately.
+- [x] (2026-10-10 UTC) Complete independent reviews, documentation, forest restart and delivery evidence; full Python gate: 10,586 passed, 126 skipped.
 
 ## Surprises & Discoveries
 
@@ -73,7 +73,9 @@ classification remains open; the dashboard has no existing Unitizer preference s
 
 Implementation is present after checkpoint c63f2cc52. Forest stack was restarted
 with the installed development wctl preset. Targeted tests, independent final
-reviews and browser numerical integration pass. Full Python sanity is running.
+reviews and browser numerical integration pass. Full Python sanity: 10,586 passed,
+126 skipped in 45m55s. Implementation commit: bd01ed25e. Final user steering
+removed the unavailable rain-on-snow control and explanation.
 No model outputs or persisted schemas were changed. All three existing GL smoke
 failures reproduce with checkpoint JavaScript and are documented separately.
 
@@ -166,7 +168,7 @@ render time and memory with source hashes/revision for reproducibility.
 ## Idempotence and Recovery
 
 
-Scaffolding changes documentation only. Planned graph reads existing output;
+The delivered graph reads existing output;
 do not regenerate models or repair source data to make a graph appear. Retry
 failed reads through the existing query path and surface clear graph status.
 Revert only this package's implementation for rollback, preserving unrelated
@@ -204,3 +206,8 @@ supersede earlier proposals; source checks, ADR and independent review remain.
 Revision: final operator decision on 2026-10-10 removes the rain-on-snow control
 and explanation because no verified classifier is available. Updated the durable
 contract, ADR, controls and browser expectation together.
+
+Closeout: 2026-10-10. Full Python and Jest gates passed. Existing frontend lint
+and three preexisting GL smoke failures are retained in the validation artifact;
+the latter reproduce using checkpoint JavaScript. Both new authenticated tests
+pass against forest after restart, including direct-source numerical comparison.

@@ -106,3 +106,33 @@ canonical contract, ADR-0085, user documentation and requirements register agree
 that rain-on-snow exclusion is omitted. No classifier or population logic changed.
 No broad test rerun was needed for this bounded removal; the implementation owner
 is rerunning the live smoke. Final security disposition remains a separate gate.
+
+## Browser performance instrumentation addendum
+
+**QA pass remains.** Inspected the test-only `requestfinished` measurements and
+the explicit redraw/heap snapshot. The installed Playwright type contract
+confirms `timing().responseEnd` is elapsed milliseconds from request start and
+`sizes().responseBodySize` is the encoded response-body byte count. The added
+artifact fields contain aggregate numbers; they do not serialize request bodies,
+headers, cookies or authentication state. No production behavior changes.
+
+Interpret retained measurements with these limits:
+
+- Request duration includes backend and transport work, rather than measuring
+  server execution alone. Encoded body bytes exclude response headers and do
+  not measure decoded JSON size or its memory footprint.
+- `redrawMs` measures one synchronous `graph.render()` call in the final cached
+  outlet/log-x/all-years state. It excludes subsequent browser painting and
+  compositing, initial loading/ranking and a distribution of interaction times.
+- `wholePageUsedHeapBytes` is an optional browser heap snapshot, not the FDC's
+  incremental allocation, peak memory or total browser-process memory. Null is
+  a valid unsupported result. Other dashboard components contribute to it.
+- The listener collects matching finished requests. Following review, the owner
+  added a polled equality check against the recorded request count before
+  `Promise.all`; direct inspection confirms this completeness assertion. A single
+  live project/run remains observational evidence, not a general performance
+  threshold or a large-catalog capacity guarantee.
+
+The orchestrator owns the active browser rerun and retained numerical results;
+this addendum records independent code inspection without claiming that run's
+completion.

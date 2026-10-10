@@ -2,15 +2,16 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-10
-**Active Packages**: 45
+**Active Packages**: 44
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-Validating: [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
+Completed (code/forest): [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
 — implemented daily source radios, linear/log probability, independent Omni
 records and two-year warm-up. Forest restarted; two authenticated integration
-tests and all independent reviews pass. Full Python validation is running.
+tests and all independent reviews pass. Full Python: 10,586 passed, 126 skipped;
+Jest: 951 passed. Rain-on-snow control omitted per operator.
 
 Completed (code/local): [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
 — scenario selection, independent dates/values, concatenated CSV; corrected

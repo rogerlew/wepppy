@@ -79,7 +79,7 @@
         "start": "1982-01-01",
         "end": "2024-12-31",
         "max": 15.734874074074076,
-        "min": 0.000007638888888888888,
+        "min": 7.638888888888888e-06,
         "firstP": 0.006366588145412873,
         "lastP": 99.99363341185459
       }
@@ -122,12 +122,34 @@
         "start": "1980-01-01",
         "end": "2024-12-31",
         "max": 15.734874074074076,
-        "min": 0.000007638888888888888,
+        "min": 7.638888888888888e-06,
         "firstP": 0.006083465141744738,
         "lastP": 99.99391653485826
       }
     ]
   },
   "dailyRequests": 4,
+  "performance": {
+    "redrawMs": 8.099999964237213,
+    "wholePageUsedHeapBytes": 47400000,
+    "dailyQueries": [
+      {
+        "durationMs": 317.688,
+        "responseBodyBytes": 1554725
+      },
+      {
+        "durationMs": 309.073,
+        "responseBodyBytes": 1564348
+      },
+      {
+        "durationMs": 251.561,
+        "responseBodyBytes": 1019544
+      },
+      {
+        "durationMs": 247.822,
+        "responseBodyBytes": 1008770
+      }
+    ]
+  },
   "errors": []
 }

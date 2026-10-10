@@ -1,6 +1,6 @@
 # GL dashboard flow-duration curves
 
-Status: Implemented and validated on forest; full Python gate running, 2026-10-10.
+Status: Completed and live on forest, 2026-10-10. Implementation: bd01ed25e.
 Owner: Codex; decision owner: requesting operator.
 
 ## Purpose and confirmed scope
@@ -18,8 +18,8 @@ Durable requested scope is recorded in the [accepted contract](../../ui-docs/con
 The [requirements register](notes/requirements.md) separates confirmed behavior,
 proposals, and unresolved decisions. [Discovery](notes/discovery.md) records
 source paths, actual-project observations, and scientific references.
-Execute this package's [plan](prompts/active/flow_duration_execplan.md); reviewed
-checkpoint ancestor is c63f2cc52.
+The completed [plan](prompts/completed/flow_duration_execplan.md) records execution
+after reviewed checkpoint ancestor c63f2cc52.
 
 ## Implementation boundary
 

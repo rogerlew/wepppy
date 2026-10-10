@@ -192,6 +192,17 @@ test('flow duration uses daily Omni sources, controls, hover and cached populati
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const requests = [];
+  const dailyTimings = [];
+  page.on('requestfinished', (request) => {
+    if (request.method() === 'POST' && /totalwatsed3|chanwb/.test(request.postData() || '')) {
+      dailyTimings.push(
+        request.sizes().then((sizes) => ({
+          durationMs: request.timing().responseEnd,
+          responseBodyBytes: sizes.responseBodySize,
+        }))
+      );
+    }
+  });
   page.on('request', (request) => {
     if (request.method() === 'POST' && /totalwatsed3|chanwb/.test(request.postData() || ''))
       requests.push(request.postData());
@@ -241,16 +252,27 @@ test('flow duration uses daily Omni sources, controls, hover and cached populati
       });
     }
   }
-  fs.writeFileSync(
-    '/tmp/fdc-browser-evidence.json',
-    JSON.stringify({ hillslope, outlet, allYears, dailyRequests: requests.length, errors }, null, 2)
-  );
+  const performanceEvidence = await page.evaluate(() => {
+    const started = performance.now();
+    window.glDashboardTimeseriesGraph.render();
+    return {
+      redrawMs: performance.now() - started,
+      wholePageUsedHeapBytes: performance.memory?.usedJSHeapSize ?? null,
+    };
+  });
+  await expect.poll(() => dailyTimings.length).toBe(requests.length);
+  performanceEvidence.dailyQueries = await Promise.all(dailyTimings);
+  const evidence = {
+    hillslope,
+    outlet,
+    allYears,
+    dailyRequests: requests.length,
+    performance: performanceEvidence,
+    errors,
+  };
+  fs.writeFileSync('/tmp/fdc-browser-evidence.json', JSON.stringify(evidence, null, 2));
   await testInfo.attach('flow-duration-result', {
-    body: JSON.stringify(
-      { hillslope, outlet, allYears, dailyRequests: requests.length, errors },
-      null,
-      2
-    ),
+    body: JSON.stringify(evidence, null, 2),
     contentType: 'application/json',
   });
   await page.screenshot({ path: '/tmp/fdc-dashboard.png', fullPage: true });

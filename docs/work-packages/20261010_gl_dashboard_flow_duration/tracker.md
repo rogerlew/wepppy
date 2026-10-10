@@ -1,7 +1,7 @@
 # Flow-duration panel tracker
 
-Updated: 2026-10-10. Phase: implementation and forest integration validated;
-full Python suite running. Starting revision: `189d10649`.
+Updated: 2026-10-10. Phase: completed and live on forest.
+Implementation commit: `bd01ed25e`. Starting revision: `189d10649`.
 Checkpoint ancestor: `c63f2cc52`; production edits followed its independent
 contract correctness/security approvals. Security impact: high, reviewed.
 
@@ -20,15 +20,16 @@ contract correctness/security approvals. Security impact: high, reviewed.
 - Correctness, QA and security reviews passed; all six security findings resolved
   and temporary authentication artifacts removed.
 
-## Remaining gate
+## Delivery
 
-Retain final full Python suite outcome, final review addenda and implementation
-commit. See [active plan](prompts/active/flow_duration_execplan.md) and
+All implementation, independent review, forest restart and integration steps
+are complete. See [completed plan](prompts/completed/flow_duration_execplan.md) and
 [validation evidence](artifacts/20261010_validation.md).
 
 ## Validation
 
-951 Jest tests passed; 32 targeted Python tests passed; two authenticated FDC
+Full Python: 10,586 passed, 126 skipped. 951 Jest tests passed; 32 final targeted
+Python tests passed; two authenticated FDC
 browser tests passed. Existing GL suite: 30 passed, 14 skipped, three failures
 reproduced with pre-change `c63f2cc52` JavaScript (raster labels/comparison selector).
 Frontend lint retains the unrelated climate.test.js:300 conditional-expect error.
