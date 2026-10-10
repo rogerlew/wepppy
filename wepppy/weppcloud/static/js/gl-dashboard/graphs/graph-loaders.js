@@ -26,6 +26,7 @@
  *
  * See: wepppy/query_engine/README.md "Querying Omni Scenarios"
  */
+import { createFlowDurationLoader } from './flow-duration-data.js';
 import { GRAPH_CONTEXT_KEYS, SOIL_MEASURES, WATER_MEASURES } from '../config.js';
 import { getState } from '../state.js';
 
@@ -1087,7 +1088,16 @@ export function createGraphLoaders(deps) {
     return withCacheNamespace(key);
   }
 
+  const loadFlowDuration = createFlowDurationLoader({
+    scenarios: omniScenarios, metadata: deps.flowDuration,
+    query: postQueryEngineForScenario,
+    displayName: (scenario) => !scenarioPath(scenario) && deps.flowDuration?.activeScenarioName
+      ? deps.flowDuration.activeScenarioName : scenarioDisplayName(scenario),
+    color: scenarioColor,
+  });
+
   async function loadGraphDataset(key, { force, options } = {}) {
+    if (key === 'flow-duration') return loadFlowDuration(options || getState().flowDuration);
     const cacheKey = graphCacheKey(key, options);
     if (!force && state.graphDataCache[cacheKey]) {
       return state.graphDataCache[cacheKey];

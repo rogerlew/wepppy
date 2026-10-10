@@ -1,0 +1,38 @@
+{
+  "hillslope": [
+    {
+      "scenario": "",
+      "count": 15706,
+      "min": 0.0007549253846763328,
+      "max": 16.665020904025102,
+      "source": "/wc1/runs/ei/eighty-five-synthetic/wepp/output/interchange/totalwatsed3.parquet",
+      "sha256": "6be0e9f532821e39b5a8bec71f3e2b3459c44bd62706ebd06b69291a3df70e0b"
+    },
+    {
+      "scenario": "_pups/omni/scenarios/undisturbed",
+      "count": 15706,
+      "min": 0.0002833884261579743,
+      "max": 15.716981970973942,
+      "source": "/wc1/runs/ei/eighty-five-synthetic/_pups/omni/scenarios/undisturbed/wepp/output/interchange/totalwatsed3.parquet",
+      "sha256": "bacfa1e0f13ed705fd6b56a505b1443a9bfc89bb05f75c6782dceb86cb676504"
+    }
+  ],
+  "outlet": [
+    {
+      "scenario": "",
+      "count": 15706,
+      "min": 0.00027939814814814814,
+      "max": 16.686374421296296,
+      "source": "/wc1/runs/ei/eighty-five-synthetic/wepp/output/interchange/chanwb.parquet",
+      "sha256": "55f8d682236cca0d7e3be93d929de2bb211900946fd9904249e835516475eb2a"
+    },
+    {
+      "scenario": "_pups/omni/scenarios/undisturbed",
+      "count": 15706,
+      "min": 7.638888888888888e-06,
+      "max": 15.734874074074076,
+      "source": "/wc1/runs/ei/eighty-five-synthetic/_pups/omni/scenarios/undisturbed/wepp/output/interchange/chanwb.parquet",
+      "sha256": "39182ad2d511eaca633fe31a29342b3c281447f3351eba1bd061ee47fa24dfa0"
+    }
+  ]
+}

@@ -1,8 +1,7 @@
-# GL dashboard flow-duration panel — draft contract
+# GL dashboard flow-duration panel contract
 
-Status: Draft, 2026-10-10. Requested scope is recorded below; operator choices are
-accepted, while source/classifier verification and independent review remain. Implementation conformance is pending; this document forms part of the
-preimplementation checkpoint.
+Status: Accepted, 2026-10-10. Checkpoint c63f2cc52; implementation and forest
+integration validated. Rain-on-snow classification remains explicitly unavailable.
 
 ## Requested behavior
 
@@ -22,22 +21,22 @@ There shall be no seasonal filters or CSV export. Hover shall expose discharge
 and exceedance probability with scenario identity and units. Provide equivalent
 value access for keyboard/touch users.
 
-An optional rain-on-snow exclusion checkbox is requested; its classification
-contract remains unresolved. Default is unchecked; exclude the same classified dates across scenarios. No unverified proxy
-or arbitrary threshold may be presented as an established event classification.
-Rationale: daily comparisons with familiar warm-up options and direct inspection,
-without the additional seasonal/export controls the operator excluded.
+Rain-on-snow exclusion is omitted because a verified event classifier is not
+available. The operator requested removal of the disabled checkbox and explanation
+on 2026-10-10. Do not show a control that cannot perform the requested filtering.
+A future filter requires a verified classification contract; no proxy or arbitrary
+threshold is accepted by this delivery.
 
 This composes the [controller contract](../controller-contract.md), the
 [dashboard spec](../gl-dashboard.md), module contracts in
 `wepppy/weppcloud/static/js/gl-dashboard/README.md`, and the
 [output-scope contract](../../schemas/output-scope-contract.md).
 
-## Proposals requiring resolution
+## Daily sources
 
-Candidate daily sources are totalwatsed3 `Streamflow` and channel-ledger chanwb
+Daily sources are totalwatsed3 `Streamflow` and channel-ledger chanwb
 `Outflow (m^3)` for the verified watershed outlet. Daily mean discharge is the
-proposed presentation; existing annual outlet summaries, channel water-balance
+presentation; existing annual outlet summaries, channel water-balance
 depth, event peaks and ranked return-period samples are not substitutes.
 
 ## Accepted calculation and interaction decisions
@@ -65,16 +64,16 @@ reload persistence where available, without a new storage mechanism. Map
 scenario selection must not implicitly restrict multi-scenario comparisons.
 Rationale: reuse familiar dashboard behavior and keep first delivery bounded.
 
-## Remaining verification
+## Verification and deferred classification
 
-Verify outlet identity, source lineage and conversion to m³/s; record formulas
-and defaults in a parameterization ADR. Define rain-on-snow classification,
+Outlet identity, source lineage and conversions are verified against the retained
+source oracle; formulas/defaults are governed by ADR-0085. Define rain-on-snow classification,
 shared-mask construction, and event-day versus recession-window exclusion.
 The shared event mask does not require intersecting valid-flow records. Keep
 classification stable across legend visibility changes. Verify query limits,
 cache boundaries, rendering performance and hover/accessibility semantics.
 
-Proposed source-readiness policy preserves valid curves while explaining missing
+Source-readiness policy preserves valid curves while explaining missing
 scenario data, never silently reading the baseline as an absent child's result.
 Readonly is not a completion predicate. Expected absent/empty data must be
 separate from malformed/unauthorized states. Query authorization, containment,
@@ -94,7 +93,7 @@ ancestor before production edits. The operator has authorized execution after th
 
 ## Execution boundary and valid states
 
-Implementation is authorized; conformance remains pending. Daily conversions
+Implementation and forest integration conform to this contract. Daily conversions
 are governed by [ADR-0085](../../adrs/ADR-0085-gl-dashboard-flow-duration.md).
 Expose additive readiness/outlet metadata in the existing authorized dashboard
 bootstrap. For each scenario resolve expected daily file paths inside that exact
@@ -118,10 +117,9 @@ Normal authorization and Query Engine restrictions still apply. Archived outputs
 must be restored through existing workflows before this reader can consume them.
 
 Rain-on-snow classification cannot currently be established from a verified flag.
-For first delivery, show an unchecked disabled checkbox with an explanation;
-no filter is silently applied or represented as working. A future enabled filter
-requires a verified definition and shared excluded-date policy. This follows the
-accepted explicit-unavailability policy without introducing an arbitrary threshold.
+The control and unavailable explanation are omitted, per the operator's final
+interaction decision. A future enabled filter requires a verified definition and
+shared excluded-date policy.
 
 Outlet resolution is read-only: use a registered outlet_top_id if available;
 otherwise a sole registered channel, or the unique network.txt channel absent
@@ -152,3 +150,10 @@ count; all-zero and one-point curves are valid, N=0 has an explanatory empty sta
 
 On a dashboard opened with output_scope=roads, FDC is unavailable with an
 explanation; never silently display baseline curves under a Roads context.
+
+Standalone Omni-child views preserve the same ownership rules. Shared topology
+may resolve to the established parent project only for canonical
+`_pups/omni/scenarios/<name>` lineage. A parent URL with a pup selector passes the
+child scenario to Query Engine; a terminal `;;omni;;<name>` URL already names the
+child endpoint. Labels use the exact child name. Batch-map dashboards do not
+expose this run-specific panel.

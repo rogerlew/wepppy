@@ -30,6 +30,7 @@ const defaultState = {
   graphMode: GRAPH_MODES.MINIMIZED,
   activeGraphKey: null,
   graphDataCache: {},
+  flowDuration: { source: 'hillslope', excludedYears: 2, scale: 'linear' },
   cumulativeMeasure: 'runoff_volume',
   cumulativeScenarioSelections: [],
   hillLossCache: {},

@@ -2,8 +2,8 @@
 
 Updated: 2026-10-10. Daily sampling and filter/interaction scope are confirmed.
 Operator accepted the recommendations below, except date alignment: use each
-scenario’s own available record for performance. Scientific source verification,
-rain-on-snow classification, ADR and independent review remain outstanding.
+scenario’s own available record for performance. Source verification, ADR and independent reviews are complete. Rain-on-snow
+classification is deferred and its control is omitted per the final operator decision.
 
 ## Confirmed
 
@@ -17,7 +17,7 @@ rain-on-snow classification, ADR and independent review remain outstanding.
 | FDC-06 | Year selection matching return periods; default exclude first two years | All years included; Exclude first year; Exclude first two years; Exclude first five years |
 | FDC-07 | No seasonal filters or CSV export | Neither control is included |
 | FDC-08 | Hover information | Discharge value and exceedance probability; include scenario and units |
-| FDC-09 | Optional rain-on-snow exclusion checkbox | Requested direction; detection definition and available inputs must be resolved before wiring |
+| FDC-09 | Omit rain-on-snow exclusion | Operator removed the unavailable control; no verified classifier exists |
 
 
 ## Accepted decisions and remaining verification
@@ -50,7 +50,8 @@ A record exhausted by warm-up yields an explicit empty state, not relaxed filter
 
 ## Rain-on-snow definition to resolve
 
-Checkbox initially unchecked. Use a shared set of excluded dates across scenarios;
+The operator removed the unavailable checkbox on 2026-10-10 to avoid a control
+that cannot filter events. For any future delivery, use shared excluded dates;
 this optional mask does not require a common valid-flow record. Define precipitation
 phase, antecedent snow, thresholds, spatial aggregation, mask membership and
 event-day versus recession-window handling before wiring.

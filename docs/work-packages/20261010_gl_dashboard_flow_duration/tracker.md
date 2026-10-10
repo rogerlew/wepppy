@@ -1,55 +1,47 @@
 # Flow-duration panel tracker
 
-Updated: 2026-10-10 20:28 UTC. Phase: discovery/scaffold complete; decisions open.
-Starting revision: `189d10649`. Security impact: high for future data-query
-implementation; dedicated security review required. No review approval claimed.
+Updated: 2026-10-10. Phase: implementation and forest integration validated;
+full Python suite running. Starting revision: `189d10649`.
+Checkpoint ancestor: `c63f2cc52`; production edits followed its independent
+contract correctness/security approvals. Security impact: high, reviewed.
 
 ## Completed
 
-- Inspected graph registration, loader, palette, state and renderer seams.
-- Verified baseline naming and named colors from active dashboard code.
-- Inspected daily schemas and read actual baseline/Omni source counts.
-- Recorded source distinction, proposed requirements, draft contract and active plan.
+- Accepted daily m³/s, independent scenario records, Weibull ranks, ties/zeros,
+  missing/invalid rules, default two-year exclusion and familiar Year selection.
+- Implemented source radios, linear/log x, stable Omni labels/colors/visibility,
+  hover and keyboard/touch inspection. No CSV or seasonal controls.
+- Verified owned daily files/catalog entries, translated outlet IDs and bounded
+  shared topology, including standalone pup and composite Omni-child views.
+- Forest stack restarted via installed development `wctl restart`; all 25 running
+  services verified, all four configured health checks healthy.
+- Direct-source oracle matched authenticated browser values for both sources,
+  baseline and undisturbed (15,706 eligible days each); both child URL forms passed.
+- Correctness, QA and security reviews passed; all six security findings resolved
+  and temporary authentication artifacts removed.
 
-## Next
+## Remaining gate
 
-Verify source/outlet identity and rain-on-snow classification. Formalize the
-accepted ranking/data-quality policy
-in [research](notes/probability-and-data-quality.md), prepare the ADR and commit
-reviewed ancestor before production edits. Daily resolution, warm-up and export
-questions are answered. See [active plan](prompts/active/flow_duration_execplan.md).
-
-## Decisions and risks
-
-Confirmed by user: Flow duration panel; two source radios; linear/log x-axis;
-Omni naming/color parity. Existing Undisturbed/Burned labels remain canonical.
-Daily sampling, default two-year warm-up, return-period Year selection, no
-seasonal filters, no CSV, and hover values/probability are accepted. Optional
-rain-on-snow exclusion needs a verified definition. Scientific formulas and listed defaults are accepted; verification and review
-remain. No implementation,
-model output mutation, source regeneration, commit/push or deployment performed
-for this scaffold. Main risks: wrong outlet field/ID, daily population truncation,
-zero/missing-day bias, parent-data substitution, unequal periods, and graph
-renderer assumptions about shared year coordinates.
+Retain final full Python suite outcome, final review addenda and implementation
+commit. See [active plan](prompts/active/flow_duration_execplan.md) and
+[validation evidence](artifacts/20261010_validation.md).
 
 ## Validation
 
-Scoped lint passed: 6 package documents, draft contract and PROJECT_TRACKER,
-zero errors/warnings. Whitespace checks passed for these changes. No runtime tests
-needed for documentation-only changes. Actual-source inspection is evidence of
-availability only, not a flow-duration correctness claim.
+951 Jest tests passed; 32 targeted Python tests passed; two authenticated FDC
+browser tests passed. Existing GL suite: 30 passed, 14 skipped, three failures
+reproduced with pre-change `c63f2cc52` JavaScript (raster labels/comparison selector).
+Frontend lint retains the unrelated climate.test.js:300 conditional-expect error.
+Scoped documentation lint and broad-exception check pass. Larger-population
+ranking/caching benchmarks are retained; they are synthetic loader measurements,
+not end-to-end browser performance guarantees.
 
-Follow-up: verified dashboard has no Unitizer preference integration; fixed
-metric labels/conversions are current behavior. D-04 now treats Unitizer/English
-units as additional scope, not an existing mechanism to reuse.
+## Decisions and limits
 
-Operator decision update (2026-10-10): each scenario uses its own available
-eligible record, for performance; no common valid-date intersection. Show each
-period and N. Other recommendations accepted: fixed m³/s, Weibull ranking,
-retained ties/zeros, disclosed missing-day exclusions and invalid-record errors;
-hillslope/linear-x/linear-y defaults; baseline plus available Omni with existing
-visibility behavior; baseline output scope only; existing persistence conventions.
-Rain-on-snow defaults unchecked and uses shared excluded dates when enabled;
-classifier, mask construction and event-window definition remain to verify.
-This optional mask does not impose a shared flow record. These decisions
-supersede earlier proposals; source checks, ADR and independent review remain.
+[Requirements](notes/requirements.md), the canonical FDC contract and ADR-0085
+retain operator decisions and rationale. Each scenario uses its own record for
+performance; periods and N are disclosed. GL has no Unitizer integration; m³/s is
+fixed. Roads output scope is explicitly unavailable. Rain-on-snow control and
+explanation are omitted per the final operator decision; no verified classifier exists.
+No model outputs, schemas, simulations or unrelated working-tree edits changed.
+Source caches/ownership are page-session snapshots; reload after regeneration.

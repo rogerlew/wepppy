@@ -22,10 +22,10 @@ minimized/split/fullscreen host and does not borrow calendar playback behavior.
 - [x] (2026-10-10 20:28 UTC) Read-only source inventory on eighty-five-synthetic plus undisturbed.
 - [x] (2026-10-10 UTC) Scaffold package, draft contract, decision register and validation plan.
 - [x] (2026-10-10 UTC) Record daily/filter/hover decisions and research ranking/data quality.
-- [ ] Settle open data/UX decisions and accept a parameterization ADR.
-- [ ] Obtain independent contract reviews and commit the accepted checkpoint ancestor.
-- [ ] Implement daily-data loader, probability renderer and controls.
-- [ ] Validate source-to-graph correctness, performance, accessibility and isolation.
+- [x] (2026-10-10 UTC) Accept independent records, scientific defaults and ADR-0085; rain-on-snow was initially visibly unavailable (removed by final operator decision).
+- [x] (2026-10-10 UTC) Independent contract reviews passed; checkpoint ancestor c63f2cc52.
+- [x] (2026-10-10 UTC) Implement daily loader, ownership/outlet metadata, renderer and controls.
+- [x] (2026-10-10 UTC) Validate source-to-graph correctness, loader performance, keyboard inspection and isolation.
 - [ ] Complete independent reviews, documentation and delivery evidence; record deployment separately.
 
 ## Surprises & Discoveries
@@ -37,6 +37,11 @@ chanwb contains routed daily outlet volume; chnwb and event peaks mean different
 things. The renderer's existing log toggle applies to boxplot y, and its line
 renderer expects a shared years array. New independent probability coordinates
 need a bounded renderer extension and correct inverse-log hover handling.
+
+Final checks exposed shared parent topology in standalone Omni children, a stale
+activation failure that could clear a newer graph, and coverage labels that could
+omit missing leading days after warm-up. Bounded fixes and regression fixtures
+cover these paths. Source ownership remains exact even with shared topology.
 
 Both actual source files exist for the baseline and undisturbed example, each
 with 16,437 rows across 1980–2024. That project has no zero hillslope-streamflow
@@ -66,10 +71,11 @@ classification remains open; the dashboard has no existing Unitizer preference s
 ## Outcomes & Retrospective
 
 
-Scaffold, source discovery and requested research complete; accepted filter and
-interaction decisions are recorded. No runtime, dataset, simulation or
-deployment changes performed. The next milestone is decision resolution and
-contract ratification, not production edits based on unapproved assumptions.
+Implementation is present after checkpoint c63f2cc52. Forest stack was restarted
+with the installed development wctl preset. Targeted tests, independent final
+reviews and browser numerical integration pass. Full Python sanity is running.
+No model outputs or persisted schemas were changed. All three existing GL smoke
+failures reproduce with checkpoint JavaScript and are documented separately.
 
 ## Context and Orientation
 
@@ -194,3 +200,7 @@ Rain-on-snow defaults unchecked and uses shared excluded dates when enabled;
 classifier, mask construction and event-window definition remain to verify.
 This optional mask does not impose a shared flow record. These decisions
 supersede earlier proposals; source checks, ADR and independent review remain.
+
+Revision: final operator decision on 2026-10-10 removes the rain-on-snow control
+and explanation because no verified classifier is available. Updated the durable
+contract, ADR, controls and browser expectation together.

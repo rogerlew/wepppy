@@ -868,6 +868,9 @@
   .gl-main.graph-focus #gl-graph-canvas {
     height: 100%;
   }
+  .gl-flow-duration-info { padding: 0.5rem 1rem; font-size: 0.85rem; }
+  .gl-flow-duration-info input[type="range"] { width: min(24rem, 90%); }
+  #gl-graph-container:has(.gl-flow-duration-info) { overflow-y: auto; }
 </style>
 {% endblock %}
 
@@ -1040,6 +1043,7 @@
       "mapZoom": map_zoom,
       "climate": climate_context,
       "omniScenarios": omni_scenarios,
+      "flowDuration": flow_duration|default(none),
       "omniContrasts": omni_contrasts,
       "isOmniChild": is_omni_child,
       "mode": dashboard_mode,

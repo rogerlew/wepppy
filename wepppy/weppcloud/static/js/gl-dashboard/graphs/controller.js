@@ -1,3 +1,4 @@
+import { renderFlowDurationControls } from './flow-duration-controls.js';
 import { GRAPH_CONTEXT_KEYS, GRAPH_MODES } from '../config.js';
 
 /**
@@ -25,6 +26,7 @@ export function createGraphController({
   const contrastScenarios = Array.isArray(graphContrastScenarios) ? graphContrastScenarios : [];
   let graphLoaders;
   let activeGraphLoad = null;
+  let activationGeneration = 0;
   const getGraph = typeof timeseriesGraph === 'function' ? timeseriesGraph : () => timeseriesGraph;
 
   const {
@@ -154,22 +156,24 @@ export function createGraphController({
     if (activeGraphLoad && activeGraphLoad.key === key && !options.force) {
       return activeGraphLoad.promise;
     }
+    const generation = ++activationGeneration;
     setValue('activeGraphKey', key);
     ensureGraphExpanded();
+    if (key === 'flow-duration') {
+      getGraph()?.hide();
+      if (graphEmptyEl) { graphEmptyEl.textContent = 'Loading daily flow records…'; graphEmptyEl.style.display = ''; }
+    }
     const keepFocus = options.keepFocus || false;
     const graphOptions = options.graphOptions;
     const loadPromise = (async () => {
       const data = await ensureGraphLoaders().loadGraphDataset(key, { force: options.force, options: graphOptions });
       const stateNow = getState();
-      const stale = stateNow.activeGraphKey !== key;
+      const stale = stateNow.activeGraphKey !== key || generation !== activationGeneration;
+      if (stale) return;
       if (data) {
-        if (stale) {
-          syncGraphLayout();
-          return;
-        }
         if (!keepFocus) {
           setGraphFocus(
-            data.source === OMNI || data.source === CLIMATE_YEARLY || data.source === OPENET_YEARLY
+            data.source === OMNI || data.source === CLIMATE_YEARLY || data.source === OPENET_YEARLY || data.source === 'flow-duration'
           );
         }
         if (key === 'openet-yearly') {
@@ -204,6 +208,7 @@ export function createGraphController({
     try {
       await loadPromise;
     } catch (err) {
+      if (generation !== activationGeneration || getState().activeGraphKey !== key) return;
       // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to activate graph', err);
       getGraph()?.hide();
@@ -654,6 +659,10 @@ export function createGraphController({
       });
 
       details.appendChild(itemList);
+      if (group.key === 'flow-duration') {
+        renderFlowDurationControls(details, { getState, setValue,
+          activate: () => activateGraphItem('flow-duration', { force: true, keepFocus: true }) });
+      }
       if (group.key === 'cumulative') {
         renderCumulativeControls(details);
       }

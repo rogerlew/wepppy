@@ -801,6 +801,7 @@
   if (!omniContrasts.length) {
     graphDefs = graphDefs.filter((group) => group.key !== 'omni-contrasts');
   }
+  if (ctx.mode === 'batch') graphDefs = graphDefs.filter((group) => group.key !== 'flow-duration');
   let baseScenarioLabel = getState().baseScenarioLabel || 'Undisturbed';
   const graphScenarios = [{ name: baseScenarioLabel, path: '' }].concat(
     omniScenarios.map((s, idx) => {
@@ -887,6 +888,7 @@
       graphLoadersModule.createGraphLoaders({
         cacheNamespace: `${ctx.runid || ''}::${ctx.config || ''}`,
         graphScenarios,
+        flowDuration: ctx.flowDuration,
         contrastScenarios: graphContrastScenarios,
         graphCumulativeScenarios,
         postQueryEngine,

@@ -132,3 +132,28 @@ If boxplots/cumulative graphs show identical values for all scenarios:
 - `graphs/graph-loaders.js` - `scenarioPath()` and scenario data loading
 - `wepppy/query_engine/README.md` - Server-side scenario query documentation
 - `wepppy/query_engine/app/server.py` - Server endpoint implementation
+
+## Flow-duration graph
+
+`graphs/flow-duration-data.js` owns daily validation, m³/s conversion, independent
+Weibull populations and page-local raw/ranked caches. Query projections preserve
+nonfinite tokens as VARCHAR; no row limit or common-date join is applied.
+`graphs/flow-duration-controls.js` uses dashboard state for source/year/x-scale.
+`graphs/flow-duration-renderer.js` handles numeric probability axes, inverse-log
+hover, stable legend visibility and keyboard/touch inspection inside the shared
+graph host. It does not reuse calendar years as probability coordinates.
+
+`routes/gl_dashboard_flow_duration.py` supplies read-only source readiness and
+translated outlet IDs through the authorized page bootstrap. Daily files and
+catalog root/entries must belong to the named scenario. Shared topology may
+resolve to its authorized parent project; it must not escape that project.
+Missing optional state never takes down the rest of the dashboard. Source
+replacement during a page session requires reload; bootstrap checks are a
+snapshot, not a query-time race guarantee.
+
+Canonical behavior and rationale:
+[flow-duration contract](../../../../../docs/ui-docs/contracts/gl-dashboard-flow-duration-contract.md).
+Focused tests: `wctl run-npm test -- --runInBand flow-duration` and
+`wctl run-pytest tests/weppcloud/routes/test_gl_dashboard_flow_duration.py`.
+Browser test: `tests/smoke/gl-dashboard-flow-duration.spec.js`; optionally set
+`FDC_ORACLE_PATH` to a direct-source oracle JSON for numerical integration checks.

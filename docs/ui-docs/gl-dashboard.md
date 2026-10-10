@@ -1503,3 +1503,25 @@ This is an existing limitation, not a promise of live refresh or a coherent
 snapshot across independent queries. A future refresh contract must define the
 participating map/graph caches and handling of in-flight queries before adding
 automatic generation changes.
+
+## Daily flow duration
+
+Select **Flow Duration → Flow duration curve** to compare each scenario's own
+daily record. Choose watershed-total **Hillslope streamflow (totalwatsed)** or
+**Channel outlet discharge**. Values are daily means in m³/s; project Unitizer
+preferences do not change this panel. Baseline labels and scenario colors match
+other Omni graphs. Use the legend checkboxes to show or hide curves.
+
+Year selection defaults to **Exclude first two years**, with the same all/first
+1/2/5 options as the return-period report. Each curve shows its own period, valid
+sample count, missing count and zero-flow fraction. Probabilities use Weibull
+ranks; ties and zeros remain in the population. Linear/logarithmic x changes
+presentation only. Hover shows discharge and probability; the inspection slider
+provides the same values for keyboard and touch users.
+
+There are no seasonal filters, rain-on-snow exclusion or CSV export.
+The panel is unavailable in Roads output scope. Missing/invalid scenario sources
+are explained alongside valid curves. Reload after regenerating outputs, restoring
+archived daily files, or repairing a catalog; cached source data lasts for the
+page session. The scientific and data-quality rules are in the
+[flow-duration contract](contracts/gl-dashboard-flow-duration-contract.md).

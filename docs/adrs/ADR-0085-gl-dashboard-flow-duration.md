@@ -1,6 +1,6 @@
 # ADR-0085: Daily flow-duration comparisons
 
-Status: Accepted (implementation pending)
+Status: Accepted and implemented
 Date: 2026-10-10
 
 ## Context and decision
@@ -36,8 +36,9 @@ Common valid-date intersection was rejected by the operator for performance.
 Rank/N and midpoint plotting positions were considered; Weibull is an established
 HEC option and has finite positive positions on log x. Zero removal/filling gaps
 would bias the population. Unitizer integration and Roads are outside first scope.
-No rain-on-snow thresholds are invented: checkbox is unavailable with explanation
-until a verified classifier and shared event-date mask are specified.
+No rain-on-snow thresholds are invented. The operator requested removing the
+disabled control on 2026-10-10 because classification cannot be determined. A
+future filter requires a verified classifier and shared event-date mask.
 
 ## Evidence
 

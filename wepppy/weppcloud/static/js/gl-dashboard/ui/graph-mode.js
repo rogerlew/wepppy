@@ -363,7 +363,7 @@ export function createGraphModeController({
         slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.BOTTOM,
       };
     }
-    if (activeKey === 'cumulative-contribution') {
+    if (activeKey === 'cumulative-contribution' || activeKey === 'flow-duration') {
       return {
         key: GRAPH_CONTEXT_KEYS.CUMULATIVE,
         graphCapable: true,

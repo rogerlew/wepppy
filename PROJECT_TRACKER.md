@@ -7,10 +7,10 @@
 
 ## Purpose
 
-Planning: [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
-— scaffolded source radios, linear/log exceedance x-axis and Omni identity parity;
-daily population, units, period, ranking and export decisions remain open.
-No runtime implementation or deployment.
+Validating: [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
+— implemented daily source radios, linear/log probability, independent Omni
+records and two-year warm-up. Forest restarted; two authenticated integration
+tests and all independent reviews pass. Full Python validation is running.
 
 Completed (code/local): [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
 — scenario selection, independent dates/values, concatenated CSV; corrected

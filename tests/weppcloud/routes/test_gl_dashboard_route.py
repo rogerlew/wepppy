@@ -203,3 +203,19 @@ def test_get_omni_contrasts_returns_none_when_omni_load_fails(
     monkeypatch.setattr(gl_dashboard_module.Omni, "getInstance", _raise)
 
     assert gl_dashboard_module._get_omni_contrasts(str(wd)) is None
+
+
+@pytest.mark.parametrize(("runid", "expected"), [
+    ("parent", False),
+    ("parent;;omni;;undisturbed", True),
+    ("batch;;spring;;project", False),
+    ("batch;;spring;;project;;omni;;undisturbed", True),
+])
+def test_flow_duration_query_child_flag_uses_terminal_omni_segment(gl_dashboard_client, monkeypatch, runid, expected):
+    client, captured, _app = gl_dashboard_client
+    def context(_wd, _scenarios, _scope, *, query_run_is_child):
+        return {"child_endpoint": query_run_is_child}
+    monkeypatch.setattr(gl_dashboard_module, "flow_duration_context", context)
+    response = client.get(f"/runs/{runid}/cfg/gl-dashboard")
+    assert response.status_code == 200
+    assert captured["kwargs"]["flow_duration"]["child_endpoint"] is expected

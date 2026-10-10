@@ -1,6 +1,6 @@
 # GL dashboard flow-duration curves
 
-Status: Open — scoped scaffold, 2026-10-10. Timezone: UTC.
+Status: Implemented and validated on forest; full Python gate running, 2026-10-10.
 Owner: Codex; decision owner: requesting operator.
 
 ## Purpose and confirmed scope
@@ -11,17 +11,17 @@ and logarithmic exceedance-probability x-axes. Support Omni scenarios using the
 same baseline/child labels and scenario colors as existing dashboard graphs.
 Daily sampling, default two-year warm-up exclusion, return-period Year selection
 options, no seasonal filters, no CSV export, and hover discharge/probability are
-confirmed. An optional rain-on-snow exclusion checkbox needs a verified definition.
-The current request is to scaffold and determine requirements, not implement.
+confirmed. Rain-on-snow exclusion is omitted because no verified classifier is available.
+The operator authorized execution, commit, forest restart and integration tests.
 
-Durable requested scope is recorded in the [draft contract](../../ui-docs/contracts/gl-dashboard-flow-duration-contract.md).
+Durable requested scope is recorded in the [accepted contract](../../ui-docs/contracts/gl-dashboard-flow-duration-contract.md).
 The [requirements register](notes/requirements.md) separates confirmed behavior,
 proposals, and unresolved decisions. [Discovery](notes/discovery.md) records
 source paths, actual-project observations, and scientific references.
-Execute this package's [plan](prompts/active/flow_duration_execplan.md) only when
-implementation is requested and its contract checkpoint is accepted.
+Execute this package's [plan](prompts/active/flow_duration_execplan.md); reviewed
+checkpoint ancestor is c63f2cc52.
 
-## Proposed implementation boundary
+## Implementation boundary
 
 Reuse the dashboard graph panel, graph loader/query helpers, state store,
 scenario catalog, display-name helper, palette, and graph layout controls.
@@ -33,8 +33,7 @@ annual summaries, storm peaks, or staged return-period event ranks.
 First delivery is watershed-total hillslope flow versus the watershed channel
 outlet, one selected source at a time. Per-hillslope curves, arbitrary channel
 picking, observed-gage uploads, fitted probability distributions, return-period
-analysis, confidence bands, and Omni contrasts are proposed exclusions, pending
-operator agreement. CSV export and seasonal filters are explicitly excluded.
+analysis, confidence bands, and Omni contrasts are outside this delivery. CSV export and seasonal filters are explicitly excluded.
 
 ## Complexity budget
 
@@ -63,18 +62,16 @@ containment, map selections, and behavior of every existing graph.
 
 Security impact: high under the repository's data-query boundary classification;
 retain a dedicated security review before implementation closeout. Existing
-Query Engine authorization and scenario resolution remain the boundary. The
-scaffold itself changes documentation only; no review approval is claimed.
-Two independent contract reviews and an ancestor checkpoint are required before
-production edits. Correctness review must independently verify valid absent,
+Query Engine authorization and scenario resolution remain the boundary. Independent contract reviews passed and checkpoint c63f2cc52 preceded
+production edits. Final correctness, QA and security reviews passed. Correctness review must independently verify valid absent,
 empty, readonly, partial, legacy, and multi-scenario states.
 
 Generated-artifact validation applies to consuming daily Parquets and producing
 plotted curve data. Retain exact source paths and schemas, projected
 sample values, population/rank oracle, graph payload and browser/hover readback. Include a real project with baseline plus Omni,
 an intermittent/zero-flow fixture, and unequal-record scenarios. Confirm actual
-source ownership for missing-child-data tests. Current claim: discovery and
-scaffold complete; implementation and deployment not started.
+source ownership for missing-child-data tests. Implementation and authenticated source-to-browser validation passed after
+forest restart; see [validation evidence](artifacts/20261010_validation.md).
 
 ## Acceptance and handoff
 
@@ -96,5 +93,6 @@ hillslope/linear-x/linear-y defaults; baseline plus available Omni with existing
 visibility behavior; baseline output scope only; existing persistence conventions.
 Rain-on-snow defaults unchecked and uses shared excluded dates when enabled;
 classifier, mask construction and event-window definition remain to verify.
-This optional mask does not impose a shared flow record. These decisions
-supersede earlier proposals; source checks, ADR and independent review remain.
+This optional mask does not impose a shared flow record. These decisions supersede earlier proposals. Source checks, ADR and independent
+reviews are complete. The operator subsequently requested removing the unavailable rain-on-snow
+control and explanation; both are omitted in this delivery.

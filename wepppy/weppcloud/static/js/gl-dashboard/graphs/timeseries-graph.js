@@ -1,3 +1,4 @@
+import { clearFlowDuration, renderFlowDuration, hoverFlowDuration } from './flow-duration-renderer.js';
 import { DEFAULT_GRAPH_PADDING, GRAPH_MODES } from '../config.js';
 import { getState, setValue } from '../state.js';
 
@@ -86,6 +87,7 @@ export function createTimeseriesGraph(options = {}) {
     },
 
     hide() {
+      clearFlowDuration(this);
       if (this.container) {
         this.container.style.display = 'none';
       }
@@ -204,6 +206,7 @@ export function createTimeseriesGraph(options = {}) {
     },
 
     setData(data) {
+      clearFlowDuration(this);
       const state = getState();
       if (state && state.rapCumulativeMode && data && data.source === 'omni') {
         return;
@@ -267,6 +270,7 @@ export function createTimeseriesGraph(options = {}) {
     render() {
       if (!this.ctx2d || !this._data) return;
       const type = this._data.type || 'line';
+      if (type === 'flow-duration') return renderFlowDuration(this);
       if (type === 'climate-yearly') {
         return this._renderClimateYearly();
       }
@@ -282,6 +286,7 @@ export function createTimeseriesGraph(options = {}) {
     _hasData(data) {
       if (!data) return false;
       const type = data.type || 'line';
+      if (type === 'flow-duration') return true;
       if (type === 'climate-yearly') {
         return data.months && data.months.length && data.years && Object.keys(data.precipSeries || {}).length;
       }
@@ -1079,6 +1084,7 @@ export function createTimeseriesGraph(options = {}) {
 
     _onCanvasHover(e) {
       if (!this._data) return;
+      if (this._data.type === 'flow-duration') return hoverFlowDuration(this, e);
       const type = this._data.type || 'line';
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;

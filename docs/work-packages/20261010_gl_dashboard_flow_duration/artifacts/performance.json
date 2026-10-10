@@ -1,0 +1,22 @@
+[
+  {
+    "scenarios": 20,
+    "years": 45,
+    "sourceRowsPerScenario": 16437,
+    "eligibleRows": 15706,
+    "initialRankingMs": 1003.7162,
+    "cachedScaleMs": 0.20629900000017187,
+    "queries": 20,
+    "heapMb": 87.27322387695312
+  },
+  {
+    "scenarios": 3,
+    "years": 500,
+    "sourceRowsPerScenario": 182622,
+    "eligibleRows": 181891,
+    "initialRankingMs": 1577.1431650000002,
+    "cachedScaleMs": 0.04856499999959851,
+    "queries": 3,
+    "heapMb": 310.8090362548828
+  }
+]

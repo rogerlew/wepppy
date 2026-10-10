@@ -269,6 +269,8 @@ export const LAYER_REGISTRY = {
 };
 
 export const GRAPH_DEFS = [
+  { key: 'flow-duration', title: 'Flow Duration',
+    items: [{ key: 'flow-duration', label: 'Flow duration curve', type: 'flow-duration' }] },
   {
     key: 'climate',
     title: 'Climate Yearly',

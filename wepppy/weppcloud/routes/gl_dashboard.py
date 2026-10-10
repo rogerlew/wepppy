@@ -6,6 +6,7 @@ import logging
 import os
 from flask import current_app
 
+from .gl_dashboard_flow_duration import flow_duration_context
 from ._common import *  # noqa: F401,F403
 from wepppy.nodb.core import Ron, Climate
 from wepppy.nodb.mods.omni import Omni
@@ -200,6 +201,7 @@ def gl_dashboard(runid: str, config: str):
         map_zoom=map_zoom,
         climate_context=climate_context,
         omni_scenarios=omni_scenarios,
+        flow_duration=flow_duration_context(wd, omni_scenarios, output_scope, query_run_is_child=runid.split(";;")[-2:-1] == ["omni"]),
         omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
         output_scope=output_scope,
