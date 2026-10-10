@@ -109,8 +109,16 @@ report error boundary, with diagnostic logging; never substitute baseline data.
 
 With no selections, preserve the existing simple table and CSV columns.
 With selections, prepend a `Scenario` column to every simple metric table and
-its CSV. Label the current project `Current project`; label children with their
-exact scenario names. Render current-project rows first, then selected scenarios
+its CSV. Label the current project `Undisturbed` by default and `Burned` when its
+SBS controller reports a map, matching the GL dashboard baseline convention.
+Use BAER when enabled, otherwise Disturbed, as the dashboard map endpoint does;
+absent optional state and single-input projects use `Undisturbed`. Read existing
+state only; do not create a controller or render a raster to choose a label.
+The dashboard switches after successful map detection; this report uses the
+same registered-map state without depending on browser image loading.
+Label children with their exact scenario names. The operator requested naming
+parity on 2026-10-10; `SBS` was considered but the verified dashboard label is
+`Burned`. Apply the baseline label identically to HTML and CSV. Render current-project rows first, then selected scenarios
 in displayed order, with recurrence intervals descending inside each group.
 Each row contains that scenario's recurrence interval, event date, and metric
 value. Resolve dates against that report's own calendar/display year and `y0`.
