@@ -1,0 +1,15 @@
+{
+  "schema": "wepp-investigation-report-v1",
+  "title": "Small-Mutation Screening of WEPP Hillslope Peak Flow: Remediation Strategies and Validation Findings",
+  "author": "Roger Lew",
+  "document_revision": "0.2",
+  "document_date": "2026-10-06",
+  "pdf_filename": "topanga-small-mutation-census-report.pdf",
+  "pdf_sha256": "e87e63c64af83abc0b5fbe760593c330163f71f7786aac071a3afe890950a00c",
+  "pages": 38,
+  "public_path": "/weppcloud/static/reports/investigations/topanga-small-mutation-census-report.pdf",
+  "source_path": "docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/topanga-small-mutation-census-report.pdf",
+  "handoff_date": "2026-10-10",
+  "handoff_basis": "Roger Lew requested inclusion of the Topanga report alongside the release notes and approved publication of the release notes in WEPPpy.",
+  "scope_note": "Unchanged historical investigation, including earlier candidate limitations. Not final WEPP 261010 validation, independent peer-review certification or model deployment authorization."
+}

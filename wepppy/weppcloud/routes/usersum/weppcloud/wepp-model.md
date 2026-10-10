@@ -1,5 +1,13 @@
 # The WEPP Model
 
+## WEPP Forest Release Notes and Investigations
+
+The University of Idaho maintains the `wepp-forest` fork of WEPP. These reports
+describe that fork, not an upstream USDA WEPP release:
+
+- [WEPP 261010 release notes, revision 1 (PDF)](/weppcloud/static/reports/wepp/release-notes/wepp_261010/wepp_261010_release-notes-r1.pdf): changes after `wepp_260803`, including surface-return peaks, erosion inputs, PASS components, channel-source handling and validation. [Publication manifest](/weppcloud/static/reports/wepp/release-notes/wepp_261010/publication-manifest-r1.json).
+- [Topanga small-mutation census, version 0.2 (PDF)](/weppcloud/static/reports/investigations/topanga-small-mutation-census-report.pdf): October 6, 2026 investigation of peak sensitivity and earlier remediation candidates. Its unresolved candidate results are historical context, not final `wepp_261010` validation.
+
 ## Model Background
 
 The WEPP model is a physically-based hydrology and erosion model (Flanagan and Nearing, 1995; Flanagan et al., 2007), initially developed to be applied at hillslope scales or in small agricultural catchments. The advantage of WEPP is its ability to estimate the spatial and temporal distribution of soil loss or deposition along a hillslope, as well as sediment yield at the bottom of a hillslope. WEPP is based on the fundamentals of hydrology, plant science, hydraulics, and erosion mechanics (Flanagan and Nearing, 1995). For detailed descriptions of model components and processes, refer to the WEPP User Summary (Flanagan and Livingston, 1995) and WEPP Technical Documentation (Flanagan and Nearing, 1995).

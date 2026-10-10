@@ -1,0 +1,26 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261010",
+  "document_revision": "1",
+  "document_date": "2026-10-10",
+  "publication_status": "approved",
+  "approved_on": "2026-10-10",
+  "approval_record": "Roger Lew: I approve the release notes draft for publication in wepppy.",
+  "pdf_filename": "wepp_261010_release-notes-r1.pdf",
+  "pdf_sha256": "d1044748537b1f5e1e32760c7b3d3dcd8e6ba40e8dd200a3abfa8236c2d2727f",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261010/wepp_261010_release-notes-r1.pdf",
+  "pages": 36,
+  "model_source_identity": "7471bb5e981d14d0b8c1cdb88a16af305aed1b67",
+  "binary_sha256": {
+    "wepp_261010": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+    "wepp_261010_hill": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698"
+  },
+  "previous_document_revision": "0.1 (unpublished review draft)",
+  "public_evidence_references": [
+    "USDA NSERL Report 10, chapters 4 and 11",
+    "Wang et al. (2010), WEPP channel-routing implementation",
+    "WEPP 261010 release validation, 2026-10-10",
+    "Retained Topanga, Rattlesnake, Cedar and mutation studies, as described in the report"
+  ],
+  "scope_note": "Owner-approved publication in WEPPpy. No independent peer-review certification, source-license grant, institutional endorsement or deployment authorization."
+}
