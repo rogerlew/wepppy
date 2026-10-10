@@ -2,10 +2,15 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-10
-**Active Packages**: 44
+**Active Packages**: 45
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Planning: [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
+— scaffolded source radios, linear/log exceedance x-axis and Omni identity parity;
+daily population, units, period, ranking and export decisions remain open.
+No runtime implementation or deployment.
 
 Completed (code/local): [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
 — scenario selection, independent dates/values, concatenated CSV; corrected
