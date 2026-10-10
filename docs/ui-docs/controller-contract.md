@@ -291,3 +291,10 @@ the selected single source. Existing authorization, response, persistence and
 controller invariants remain in force. This explicit exception governs where
 earlier unconditional Disturbed statements conflict; no other defaults change.
 Implementation conformance is pending the SUDI-01 checkpoint and validation.
+
+## Report pages and optional Outlet controls
+
+Project readonly presentation on a report page must not initialize Outlet when
+the Outlet form is absent. Reset Outlet mode only on pages hosting its control;
+report unit preferences still initialize normally. This avoids requiring map
+libraries merely to render a report (2026-10-10 observed deck.gl warning).

@@ -1,6 +1,6 @@
 # Return-period simple report Omni comparisons
 
-Status: implemented and locally validated; not deployed. See
+Status: artifact-discovery correction approved by operator; implementation pending; not deployed. See
 [validation evidence](../../work-packages/20261010_return_period_omni_scenarios/artifacts/20261010_validation.md).
 
 ## Scope and rationale
@@ -50,24 +50,32 @@ Candidates must derive from configured Omni scenario definitions, using the
 existing scenario-name generator rather than arbitrary directory names.
 Completion requires the established child `wepp/output/interchange/loss_pw0.out.parquet`
 artifact (or the supported legacy `wepp/output/loss_pw0.out.parquet` location).
-Modern children also require the child `READONLY` finalization marker,
-which cloning removes before rerunning. Available explicit current-attempt
-running/failure evidence overrides stale artifacts. Existing successful
-`executed`/`skipped` state entries alone are insufficient. Truly absent legacy
-run-state metadata may use the established output artifact plus readable report
-sources when no current-attempt evidence contradicts completion. A present-empty
-modern run-state list is not legacy evidence; modern finalization evidence is
-still required. Do not invent or reconstruct unavailable historical job state.
+Readonly is an editing policy, not completion evidence; do not require or change
+`READONLY` to discover a scenario. Absent and present-empty run-state metadata
+both permit artifact-based discovery. Explicit running/failure entries still
+exclude stale output. Successful metadata alone cannot replace model outputs.
+This corrects the observed `eighty-five-synthetic/undisturbed` false negative:
+its watershed completed with loss, EBE, and totalwatsed outputs but no marker or
+staged return-period assets. The operator explicitly rejected readonly-based
+eligibility on 2026-10-10.
 
-Report readiness requires both `return_period_events.parquet` and
-`return_period_event_ranks.parquet` in the selected scope's output/interchange
-directory. Discovery checks these without triggering regeneration; selected
-children also require readable Wepp state (including the existing query catalog
-needed by the report reader). Selected reports must parse the
-datasets through the normal report reader. Missing files disable
-the choice with a reason. Invalid content surfaces the normal report error;
-file presence is not semantic validation. Parent report preparation retains
-its existing behavior. Normal Omni execution owns child asset preparation.
+Discovery remains read-only. Ready staged event/rank Parquets may be read as
+before. For writable children missing staged assets, permit the normal report
+reader to prepare them on selection from existing scoped EBE and totalwatsed
+outputs; do not rerun WEPP. Require readable Wepp state and query catalog.
+Missing source outputs disable the choice with a reason. Readonly children
+remain listed; missing staged assets retain the reader's existing editing-policy
+restriction and are disabled with an explicit preparation explanation. Do not
+change their readonly state. Invalid contents surface the normal report error.
+
+Validate staging source and target paths before enabling preparation: child
+state, query catalog/cache, WEPP runs/output directories stay inside the child; climate
+inputs (including CLI links under WEPP runs) may use established shared links
+inside the parent project. Missing optional climate directories remain valid. Reject
+escaping symlinks including nested climate/CLI inputs and staged output targets.
+Existing derived climate enrichment through the normal reader is permitted
+inside that project boundary. This is an additive derived-artifact operation,
+not a model-input or schema migration. Test source-to-staged-to-CSV propagation.
 
 | Runtime state | Required outcome |
 | --- | --- |
@@ -76,7 +84,10 @@ its existing behavior. Normal Omni execution owns child asset preparation.
 | Completed, report-ready scenarios | Unchecked choices; selected reports use their own data |
 | Legacy completed results without newer run-state metadata | Accept established completion artifacts and readable report sources |
 | Running, failed, or incomplete scenario | Never offer as a completed choice, even when old output files remain |
-| Completed but missing report inputs | List disabled with reason; direct selection returns explicit error |
+| Completed writable child, unstaged but source-ready | Selectable; stage through the existing reader only when selected |
+| Completed readonly child, missing staged assets | List disabled with preparation reason; do not toggle readonly |
+| Completed child missing staging source inputs | List disabled with reason; direct selection returns explicit error |
+| Staging fails or leaves only one derived table | Surface normal error; a later selection retries the existing missing-assets preparation |
 | Valid report with no events after filtering | Show scenario-specific no-events message; do not fabricate zero rows |
 | Deleted or unavailable selection | Explicit error identifying the unavailable selection; no silent omission |
 | Unknown name, traversal, or escaping symlink | HTTP 400; do not read outside the authorized scenario root |
@@ -144,7 +155,9 @@ Include a warmed-cache CTA-to-AM/custom-interval comparison regression, and
 direct root/intermediate-symlink and child-output escape tests alongside a valid
 clone with shared input links.
 Existing scenario outputs remain visible and archived at their existing paths;
-this report adds no storage, archive exclusions, jobs, or model execution.
+this report adds no storage roots, schemas, archive exclusions, jobs, or model
+execution. Generated report/climate assets and refreshed catalog remain at their
+existing locations and retain existing archive behavior.
 Confirm archive/restored fixture discovery without altering archive semantics.
 
 This extension requires no new service, dependency, permission, or deployment
