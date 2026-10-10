@@ -15,7 +15,9 @@ do not guess offsets or drop the marker. Legacy behavior remains unchanged.
 
 ## Native Composition
 
-The matching wepppyo3 reader and combiners are required with wepp_261009.
+The matching wepppyo3 reader and combiners are required with wepp_261010,
+which replaces the undeployed wepp_261009 distribution without changing this
+PASS v3 contract.
 All combined inputs must use the same PASS version and be freshly generated
 with the selected model build. Native composition preserves Vr, Qr, Vs and
 hourly return weights per the wepppyo3 docs/pass-components-v3.md contract.

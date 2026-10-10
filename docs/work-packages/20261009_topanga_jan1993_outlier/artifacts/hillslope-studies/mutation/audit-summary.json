@@ -1,0 +1,214 @@
+{
+  "aggregation": {
+    "baseline_only": 320,
+    "baselines": 280,
+    "eligible": 1088,
+    "event_ledger_sha256": "e192bbc09f4f4a9c46c86796640dbd24a2c7f73c0cda956ae4b6dd7226b35759",
+    "event_pair_rows": 225658,
+    "mutant_only": 296,
+    "paired_rows": 225042,
+    "sediment_ledger_sha256": "cf46792cb06263471b73a0a63fe2e59b81a59e48ca880bcf0dfd6b54e7b62d3b",
+    "sediment_outer_rows": 225658
+  },
+  "all_report_readback_checks": 1368,
+  "candidate_hill_sha256": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a",
+  "complete_model_cases": 1368,
+  "eligible_mutations": 1088,
+  "excluded_mutations": 32,
+  "failed_cases": 0,
+  "figure_statistics": {
+    "1": {
+      "all": {
+        "congruent": 146116,
+        "incongruent_including_ties": 72858,
+        "n": 218974,
+        "outside_2x": 453,
+        "outside_5x": 34,
+        "ties": 104
+      },
+      "by_family": {
+        "cover": {
+          "congruent": 34759,
+          "incongruent_including_ties": 70976,
+          "n": 105735,
+          "outside_2x": 87,
+          "outside_5x": 9,
+          "ties": 42
+        },
+        "ksat": {
+          "congruent": 111357,
+          "incongruent_including_ties": 1882,
+          "n": 113239,
+          "outside_2x": 366,
+          "outside_5x": 25,
+          "ties": 62
+        }
+      },
+      "by_scenario": {
+        "burned": {
+          "congruent": 91763,
+          "incongruent_including_ties": 31473,
+          "n": 123236,
+          "outside_2x": 330,
+          "outside_5x": 22,
+          "ties": 52
+        },
+        "undisturbed": {
+          "congruent": 54353,
+          "incongruent_including_ties": 41385,
+          "n": 95738,
+          "outside_2x": 123,
+          "outside_5x": 12,
+          "ties": 52
+        }
+      },
+      "outside_axis_limits": 86
+    },
+    "2": {
+      "all": {
+        "congruent": 45239,
+        "incongruent_including_ties": 84257,
+        "n": 129496,
+        "outside_2x": 329,
+        "outside_5x": 72,
+        "ties": 71510
+      },
+      "baseline_positive_only": 540,
+      "by_family": {
+        "cover": {
+          "congruent": 30336,
+          "incongruent_including_ties": 34461,
+          "n": 64797,
+          "outside_2x": 32,
+          "outside_5x": 4,
+          "ties": 28410
+        },
+        "ksat": {
+          "congruent": 14903,
+          "incongruent_including_ties": 49796,
+          "n": 64699,
+          "outside_2x": 297,
+          "outside_5x": 68,
+          "ties": 43100
+        }
+      },
+      "by_scenario": {
+        "burned": {
+          "congruent": 35967,
+          "incongruent_including_ties": 43808,
+          "n": 79775,
+          "outside_2x": 187,
+          "outside_5x": 37,
+          "ties": 38745
+        },
+        "undisturbed": {
+          "congruent": 9272,
+          "incongruent_including_ties": 40449,
+          "n": 49721,
+          "outside_2x": 142,
+          "outside_5x": 35,
+          "ties": 32765
+        }
+      },
+      "mutant_positive_only": 583,
+      "outside_axis_limits": 0
+    },
+    "3": {
+      "all": {
+        "congruent": 149394,
+        "incongruent_including_ties": 51590,
+        "n": 200984,
+        "outside_2x": 966,
+        "outside_5x": 209,
+        "ties": 8
+      },
+      "by_family": {
+        "cover": {
+          "congruent": 47463,
+          "incongruent_including_ties": 49320,
+          "n": 96783,
+          "outside_2x": 73,
+          "outside_5x": 17,
+          "ties": 2
+        },
+        "ksat": {
+          "congruent": 101931,
+          "incongruent_including_ties": 2270,
+          "n": 104201,
+          "outside_2x": 893,
+          "outside_5x": 192,
+          "ties": 6
+        }
+      },
+      "by_scenario": {
+        "burned": {
+          "congruent": 97482,
+          "incongruent_including_ties": 12622,
+          "n": 110104,
+          "outside_2x": 575,
+          "outside_5x": 155,
+          "ties": 2
+        },
+        "undisturbed": {
+          "congruent": 51912,
+          "incongruent_including_ties": 38968,
+          "n": 90880,
+          "outside_2x": 391,
+          "outside_5x": 54,
+          "ties": 6
+        }
+      },
+      "ksat_30_100_central": {
+        "burned": {
+          "congruent": 10480,
+          "incongruent_including_ties": 251,
+          "n": 10731,
+          "outside_2x": 0,
+          "outside_5x": 0,
+          "ties": 0
+        },
+        "undisturbed": {
+          "congruent": 3661,
+          "incongruent_including_ties": 190,
+          "n": 3851,
+          "outside_2x": 0,
+          "outside_5x": 0,
+          "ties": 1
+        }
+      },
+      "outside_axis_limits": 179,
+      "surface_return_rows": 157868,
+      "volume_stable_twofold": 540
+    }
+  },
+  "max_peak_rounding_mm_h": 0.0005037813633634869,
+  "max_runoff_rounding_mm": 0.0005066728591884839,
+  "mutated_observer_parity_cases": 8,
+  "plotted_peak_cohort_max_mm_h": {
+    "mutated": 200.8009847486392,
+    "unmutated": 200.75456995982674
+  },
+  "status": "complete; sensitivity experiment, not release acceptance",
+  "tails": {
+    "2": {
+      "mutated_peak_max_mm_h": 51.8516873853514,
+      "no_surface_return": 423,
+      "rows": 966,
+      "surface_return": 543,
+      "unmutated_peak_max_mm_h": 54.20071902335622
+    },
+    "5": {
+      "mutated_peak_max_mm_h": 19.636361503216907,
+      "no_surface_return": 184,
+      "rows": 209,
+      "surface_return": 25,
+      "unmutated_peak_max_mm_h": 17.389759341313038
+    }
+  },
+  "unmutated_controls": 280,
+  "unmutated_observer_parity_cases": 2,
+  "years": [
+    1980,
+    2024
+  ]
+}

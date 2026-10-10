@@ -1,0 +1,8 @@
+{
+  "changed_fortran_files": [
+    "irs.for"
+  ],
+  "reverse_patch_restores_candidate": true,
+  "candidate_irs_sha256": "ad37c257ff80c2131dbc17cc0c8802586ee7324edc190418f1d9dbde56dd3fa1",
+  "observer_irs_sha256": "93b09197ead4aa112e50974fb6073be463923d2a584e4f6ffcfd31cbeb99d5db"
+}

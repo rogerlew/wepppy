@@ -48,6 +48,8 @@ roots:
     title: Workflows and Modules
     collapsible: false
     children:
+      - key: usersum.source.disturbed_rankings
+        doc_id: usersum.source.disturbed_rankings
       - key: usersum.weppcloud.mods_overview
         doc_id: usersum.weppcloud.mods_overview
       - key: usersum.weppcloud.model_guides

@@ -1,0 +1,20 @@
+{
+  "provenance.json": "b40c60c6cec210ad573527f85d9d38642224393974c1e2250250f2aecd9cebc2",
+  "rattlesnake_260803_burned.parquet": "ed0fccbd4153e8d04985a9ef1d416683838d5907a35b80c71a348d9aac11d808",
+  "rattlesnake_260803_burned__return_periods__exclude_yr_indxs=0,1.json": "4af1b6450a0f98f23c78297f718624728ac911af95c13ffd05e93328baf92fbe",
+  "rattlesnake_260803_burned__return_periods__gringorten=True.json": "7135b85cbc423c8090e8328a57a35a45a31779461c4adf7d57d90ee3d7b26d26",
+  "rattlesnake_260803_undisturbed.parquet": "312665e655b5d943676e2af8083ab90063ed905eb29e4242a28e8500753bb4f3",
+  "rattlesnake_260803_undisturbed__return_periods__exclude_yr_indxs=0,1.json": "1066991cc7cb63f7247497706330d6dae8ad817ba492379901b120dc1fe258a3",
+  "rattlesnake_261009_burned.parquet": "4392ea86af21c9df0e102a66503e9a19899e13a7f9cbb02864bb1b4e62e41115",
+  "rattlesnake_261009_burned__return_periods__exclude_yr_indxs=0,1.json": "8bbb285898f1551d5b42ff1ab810bf273bf617c387eabbcad367b86d0dfbfa60",
+  "rattlesnake_261009_burned__return_periods__gringorten=True.json": "91b9a5c8cd1d1027ac17721a662055d02e8361d7a185fc473562d378ac0418c0",
+  "rattlesnake_261009_undisturbed.parquet": "6f37d3a18a611223e764eb8d9cfe3a5730a739522fe1f85a90640ce5a27e98cf",
+  "topanga_gridmet_261009_burned.parquet": "e0119767a25dd700c7493514b029a51bbd5028fffca38412e047425ef2219812",
+  "topanga_gridmet_261009_burned__return_periods__gringorten=True.json": "f9520b2cd92551134389f6bbe93b66fe752397e7409ee6e0c9cadd11aa07f7e8",
+  "topanga_gridmet_261009_burned_channel.parquet": "167d5f7fa29b17be1b0aedfe700d2caa0e47996318432be8ca202a8a68786ac5",
+  "topanga_gridmet_261009_undisturbed.parquet": "f89f0934d8b2e14e9a85e26221b8d1c9e45daa0cfaf15846f2c2381dd454f9d9",
+  "topanga_gridmet_261009_undisturbed_channel.parquet": "3c61c0582c9bc722afb3bdb33f57eb951105f421c649d6edbf0cbb6fe1dda172",
+  "topanga_synthetic_261009_burned.parquet": "cb921d13b71b9292f0c539c29ab239e4d87a8c0efb9ecae267c96e51f506133e",
+  "topanga_synthetic_261009_burned__return_periods__gringorten=True.json": "8d042e5be71324507d6d786b174d576b1220bae98085b22e011dafcfe052d0c1",
+  "topanga_synthetic_261009_undisturbed.parquet": "b25984392a71da1fc2be6ea1b4bf9ba491e670e06828f91b657c6d4b2b8b20ed"
+}

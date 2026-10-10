@@ -1,0 +1,18 @@
+{
+  "ledgers": {
+    "event-pairs.parquet": {
+      "rows": 225658,
+      "exact_numeric_parity": true,
+      "candidate_sha256": "e192bbc09f4f4a9c46c86796640dbd24a2c7f73c0cda956ae4b6dd7226b35759",
+      "release_sha256": "e192bbc09f4f4a9c46c86796640dbd24a2c7f73c0cda956ae4b6dd7226b35759"
+    },
+    "sediment-pairs.parquet": {
+      "rows": 225658,
+      "exact_numeric_parity": true,
+      "candidate_sha256": "cf46792cb06263471b73a0a63fe2e59b81a59e48ca880bcf0dfd6b54e7b62d3b",
+      "release_sha256": "cf46792cb06263471b73a0a63fe2e59b81a59e48ca880bcf0dfd6b54e7b62d3b"
+    }
+  },
+  "runs_compared": 1378,
+  "changed_standard_outputs": []
+}

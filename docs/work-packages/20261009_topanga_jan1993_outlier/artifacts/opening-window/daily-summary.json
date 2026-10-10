@@ -1,0 +1,752 @@
+[
+  {
+    "scenario": "burned",
+    "julian": 10,
+    "hillslopes": 284,
+    "source_runvol_m3": 3399.5480000000002,
+    "source_lateral_m3": 92931.92569999999,
+    "sum_individual_source_peaks_m3s": 0.3338781,
+    "max_source_peak_m3s": 0.048851,
+    "max_peak_wepp_id": 2,
+    "outlet_volume_m3": 98413.23,
+    "outlet_peak_m3s": 1.56417,
+    "timing": {
+      "Time of Conc (hr)": 0.73,
+      "Storm Duration (hr)": 1.3,
+      "Storm Peak (hr)": 1.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 98347.88,
+      "Outflow (m^3)": 98413.23,
+      "Storage (m^3)": 299.88,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.62,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 11,
+    "hillslopes": 284,
+    "source_runvol_m3": 143915.84859999997,
+    "source_lateral_m3": 92353.845,
+    "sum_individual_source_peaks_m3s": 10.3555347,
+    "max_source_peak_m3s": 0.47245,
+    "max_peak_wepp_id": 120,
+    "outlet_volume_m3": 238169.55,
+    "outlet_peak_m3s": 10.25837,
+    "timing": {
+      "Time of Conc (hr)": 0.61,
+      "Storm Duration (hr)": 2.6,
+      "Storm Peak (hr)": 0.03
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 238184.34,
+      "Outflow (m^3)": 238169.55,
+      "Storage (m^3)": 315.33,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.67,
+      "Balance (m^3)": 0.02
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 12,
+    "hillslopes": 284,
+    "source_runvol_m3": 274859.3139,
+    "source_lateral_m3": 115091.45060000001,
+    "sum_individual_source_peaks_m3s": 41.06555584,
+    "max_source_peak_m3s": 0.99987,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 391712.44,
+    "outlet_peak_m3s": 33.28669,
+    "timing": {
+      "Time of Conc (hr)": 0.69,
+      "Storm Duration (hr)": 4.3,
+      "Storm Peak (hr)": 0.86
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 391756.91,
+      "Outflow (m^3)": 391712.44,
+      "Storage (m^3)": 360.38,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.59,
+      "Balance (m^3)": 0.02
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 13,
+    "hillslopes": 284,
+    "source_runvol_m3": 298444.085,
+    "source_lateral_m3": 144621.805,
+    "sum_individual_source_peaks_m3s": 143.2614218,
+    "max_source_peak_m3s": 3.0976,
+    "max_peak_wepp_id": 211,
+    "outlet_volume_m3": 444646.28,
+    "outlet_peak_m3s": 102.18043,
+    "timing": {
+      "Time of Conc (hr)": 0.56,
+      "Storm Duration (hr)": 4.2,
+      "Storm Peak (hr)": 0.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 444696.97,
+      "Outflow (m^3)": 444646.28,
+      "Storage (m^3)": 411.78,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.72,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 14,
+    "hillslopes": 284,
+    "source_runvol_m3": 567314.993,
+    "source_lateral_m3": 158689.0796,
+    "sum_individual_source_peaks_m3s": 104.12582970000001,
+    "max_source_peak_m3s": 2.6008,
+    "max_peak_wepp_id": 211,
+    "outlet_volume_m3": 728222.06,
+    "outlet_peak_m3s": 91.52307,
+    "timing": {
+      "Time of Conc (hr)": 0.43,
+      "Storm Duration (hr)": 3.4,
+      "Storm Peak (hr)": 2.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 728265.19,
+      "Outflow (m^3)": 728222.06,
+      "Storage (m^3)": 455.44,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.56,
+      "Balance (m^3)": 0.03
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 15,
+    "hillslopes": 284,
+    "source_runvol_m3": 97901.38440000001,
+    "source_lateral_m3": 159702.1558,
+    "sum_individual_source_peaks_m3s": 5.275826177999999,
+    "max_source_peak_m3s": 0.25426,
+    "max_peak_wepp_id": 120,
+    "outlet_volume_m3": 259458.38,
+    "outlet_peak_m3s": 6.31288,
+    "timing": {
+      "Time of Conc (hr)": 0.52,
+      "Storm Duration (hr)": 2.8,
+      "Storm Peak (hr)": 0.03
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 259439.7,
+      "Outflow (m^3)": 259458.38,
+      "Storage (m^3)": 437.39,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.61,
+      "Balance (m^3)": -0.02
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 16,
+    "hillslopes": 284,
+    "source_runvol_m3": 279898.4624,
+    "source_lateral_m3": 150936.9956,
+    "sum_individual_source_peaks_m3s": 22.829265590000002,
+    "max_source_peak_m3s": 0.72893,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 432728.5,
+    "outlet_peak_m3s": 21.26492,
+    "timing": {
+      "Time of Conc (hr)": 0.69,
+      "Storm Duration (hr)": 5.4,
+      "Storm Peak (hr)": 2.7
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 432777.28,
+      "Outflow (m^3)": 432728.5,
+      "Storage (m^3)": 487.0,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.84,
+      "Balance (m^3)": 0.02
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 17,
+    "hillslopes": 284,
+    "source_runvol_m3": 426103.346,
+    "source_lateral_m3": 159133.05839999998,
+    "sum_individual_source_peaks_m3s": 145.5682966,
+    "max_source_peak_m3s": 3.3289,
+    "max_peak_wepp_id": 211,
+    "outlet_volume_m3": 587654.44,
+    "outlet_peak_m3s": 106.43185,
+    "timing": {
+      "Time of Conc (hr)": 0.5,
+      "Storm Duration (hr)": 3.7,
+      "Storm Peak (hr)": 2.96
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 587617.69,
+      "Outflow (m^3)": 587654.44,
+      "Storage (m^3)": 451.06,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.81,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 18,
+    "hillslopes": 284,
+    "source_runvol_m3": 68202.4271,
+    "source_lateral_m3": 143040.2447,
+    "sum_individual_source_peaks_m3s": 36.496811300000005,
+    "max_source_peak_m3s": 1.0671,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 213282.16,
+    "outlet_peak_m3s": 76.03957,
+    "timing": {
+      "Time of Conc (hr)": 0.36,
+      "Storm Duration (hr)": 0.4,
+      "Storm Peak (hr)": 0.4
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 213234.52,
+      "Outflow (m^3)": 213282.16,
+      "Storage (m^3)": 403.84,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.42,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 19,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 108133.60089999999,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 110156.74,
+    "outlet_peak_m3s": 1.62068,
+    "timing": {
+      "Time of Conc (hr)": 0.4,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 110086.38,
+      "Outflow (m^3)": 110156.74,
+      "Storage (m^3)": 332.9,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.58,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 20,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 79791.63572,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 81801.86,
+    "outlet_peak_m3s": 1.26435,
+    "timing": {
+      "Time of Conc (hr)": 0.43,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 81739.58,
+      "Outflow (m^3)": 81801.86,
+      "Storage (m^3)": 270.08,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.54,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 21,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 62136.05418,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 63988.34,
+    "outlet_peak_m3s": 0.93796,
+    "timing": {
+      "Time of Conc (hr)": 0.46,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 63946.39,
+      "Outflow (m^3)": 63988.34,
+      "Storage (m^3)": 227.61,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.52,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 22,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 49961.31745,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 51725.71,
+    "outlet_peak_m3s": 0.73444,
+    "timing": {
+      "Time of Conc (hr)": 0.48,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 51694.92,
+      "Outflow (m^3)": 51725.71,
+      "Storage (m^3)": 196.25,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.57,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 23,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 41267.886372,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 42973.39,
+    "outlet_peak_m3s": 0.5944,
+    "timing": {
+      "Time of Conc (hr)": 0.51,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 42950.24,
+      "Outflow (m^3)": 42973.39,
+      "Storage (m^3)": 172.48,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.62,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "burned",
+    "julian": 24,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 34875.192370000004,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 36535.18,
+    "outlet_peak_m3s": 0.49425,
+    "timing": {
+      "Time of Conc (hr)": 0.53,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 36517.51,
+      "Outflow (m^3)": 36535.18,
+      "Storage (m^3)": 154.06,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.75,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 10,
+    "hillslopes": 284,
+    "source_runvol_m3": 2188.879,
+    "source_lateral_m3": 97592.61392999999,
+    "sum_individual_source_peaks_m3s": 0.2552816,
+    "max_source_peak_m3s": 0.048851,
+    "max_peak_wepp_id": 2,
+    "outlet_volume_m3": 101407.09,
+    "outlet_peak_m3s": 1.68719,
+    "timing": {
+      "Time of Conc (hr)": 0.93,
+      "Storm Duration (hr)": 1.3,
+      "Storm Peak (hr)": 1.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 101327.06,
+      "Outflow (m^3)": 101407.09,
+      "Storage (m^3)": 308.94,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.62,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 11,
+    "hillslopes": 284,
+    "source_runvol_m3": 121955.9673,
+    "source_lateral_m3": 100093.3373,
+    "sum_individual_source_peaks_m3s": 6.85477238,
+    "max_source_peak_m3s": 0.4754,
+    "max_peak_wepp_id": 120,
+    "outlet_volume_m3": 223446.73,
+    "outlet_peak_m3s": 7.63265,
+    "timing": {
+      "Time of Conc (hr)": 0.78,
+      "Storm Duration (hr)": 2.6,
+      "Storm Peak (hr)": 0.03
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 223451.77,
+      "Outflow (m^3)": 223446.73,
+      "Storage (m^3)": 314.62,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.67,
+      "Balance (m^3)": 0.02
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 12,
+    "hillslopes": 284,
+    "source_runvol_m3": 250313.9963,
+    "source_lateral_m3": 130271.28659999999,
+    "sum_individual_source_peaks_m3s": 22.255434469999997,
+    "max_source_peak_m3s": 1.0261,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 381705.56,
+    "outlet_peak_m3s": 20.18392,
+    "timing": {
+      "Time of Conc (hr)": 0.7,
+      "Storm Duration (hr)": 4.3,
+      "Storm Peak (hr)": 0.86
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 381768.06,
+      "Outflow (m^3)": 381705.56,
+      "Storage (m^3)": 377.75,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.62,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 13,
+    "hillslopes": 284,
+    "source_runvol_m3": 245536.4636,
+    "source_lateral_m3": 166492.6786,
+    "sum_individual_source_peaks_m3s": 86.69398113,
+    "max_source_peak_m3s": 2.4143,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 413009.06,
+    "outlet_peak_m3s": 62.42821,
+    "timing": {
+      "Time of Conc (hr)": 0.71,
+      "Storm Duration (hr)": 4.2,
+      "Storm Peak (hr)": 0.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 413078.78,
+      "Outflow (m^3)": 413009.06,
+      "Storage (m^3)": 448.22,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.75,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 14,
+    "hillslopes": 284,
+    "source_runvol_m3": 509346.09729999996,
+    "source_lateral_m3": 196495.9976,
+    "sum_individual_source_peaks_m3s": 70.29272938,
+    "max_source_peak_m3s": 1.7374,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 707430.12,
+    "outlet_peak_m3s": 62.27086,
+    "timing": {
+      "Time of Conc (hr)": 0.76,
+      "Storm Duration (hr)": 3.4,
+      "Storm Peak (hr)": 2.04
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 707484.88,
+      "Outflow (m^3)": 707430.12,
+      "Storage (m^3)": 503.5,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.5,
+      "Balance (m^3)": -0.03
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 15,
+    "hillslopes": 284,
+    "source_runvol_m3": 82842.06120000001,
+    "source_lateral_m3": 195498.2636,
+    "sum_individual_source_peaks_m3s": 5.42120094,
+    "max_source_peak_m3s": 0.19936,
+    "max_peak_wepp_id": 120,
+    "outlet_volume_m3": 279669.22,
+    "outlet_peak_m3s": 7.12783,
+    "timing": {
+      "Time of Conc (hr)": 0.68,
+      "Storm Duration (hr)": 2.8,
+      "Storm Peak (hr)": 0.03
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 279666.66,
+      "Outflow (m^3)": 279669.22,
+      "Storage (m^3)": 501.53,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.59,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 16,
+    "hillslopes": 284,
+    "source_runvol_m3": 260678.1512,
+    "source_lateral_m3": 180940.4006,
+    "sum_individual_source_peaks_m3s": 17.79480257,
+    "max_source_peak_m3s": 0.75803,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 443488.47,
+    "outlet_peak_m3s": 18.11747,
+    "timing": {
+      "Time of Conc (hr)": 0.72,
+      "Storm Duration (hr)": 5.4,
+      "Storm Peak (hr)": 2.7
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 443461.31,
+      "Outflow (m^3)": 443488.47,
+      "Storage (m^3)": 475.25,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.88,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 17,
+    "hillslopes": 284,
+    "source_runvol_m3": 374625.08050000004,
+    "source_lateral_m3": 187689.6716,
+    "sum_individual_source_peaks_m3s": 94.70806633,
+    "max_source_peak_m3s": 2.3813,
+    "max_peak_wepp_id": 106,
+    "outlet_volume_m3": 564070.81,
+    "outlet_peak_m3s": 71.8837,
+    "timing": {
+      "Time of Conc (hr)": 0.66,
+      "Storm Duration (hr)": 3.7,
+      "Storm Peak (hr)": 2.96
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 564082.44,
+      "Outflow (m^3)": 564070.81,
+      "Storage (m^3)": 487.62,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.75,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 18,
+    "hillslopes": 284,
+    "source_runvol_m3": 44548.555,
+    "source_lateral_m3": 173633.1056,
+    "sum_individual_source_peaks_m3s": 10.6784741,
+    "max_source_peak_m3s": 0.80955,
+    "max_peak_wepp_id": 105,
+    "outlet_volume_m3": 218608.19,
+    "outlet_peak_m3s": 707.6391,
+    "timing": {
+      "Time of Conc (hr)": 0.62,
+      "Storm Duration (hr)": 0.4,
+      "Storm Peak (hr)": 0.4
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 218807.8,
+      "Outflow (m^3)": 218608.19,
+      "Storage (m^3)": 687.66,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": -0.42,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 19,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 130014.62520000001,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 132228.16,
+    "outlet_peak_m3s": 3.54204,
+    "timing": {
+      "Time of Conc (hr)": 0.38,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 132042.12,
+      "Outflow (m^3)": 132228.16,
+      "Storage (m^3)": 501.05,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.58,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 20,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 91304.40483,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 93600.05,
+    "outlet_peak_m3s": 2.25298,
+    "timing": {
+      "Time of Conc (hr)": 0.42,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 93405.12,
+      "Outflow (m^3)": 93600.05,
+      "Storage (m^3)": 305.58,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.54,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 21,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 67915.57834000001,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 69556.77,
+    "outlet_peak_m3s": 1.18407,
+    "timing": {
+      "Time of Conc (hr)": 0.45,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 69492.74,
+      "Outflow (m^3)": 69556.77,
+      "Storage (m^3)": 241.03,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.52,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 22,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 52330.206940000004,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 53813.02,
+    "outlet_peak_m3s": 0.83185,
+    "timing": {
+      "Time of Conc (hr)": 0.48,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 53774.2,
+      "Outflow (m^3)": 53813.02,
+      "Storage (m^3)": 201.64,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.57,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 23,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 41648.6361,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 43064.42,
+    "outlet_peak_m3s": 0.62575,
+    "timing": {
+      "Time of Conc (hr)": 0.51,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 43036.03,
+      "Outflow (m^3)": 43064.42,
+      "Storage (m^3)": 172.63,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.62,
+      "Balance (m^3)": 0.0
+    }
+  },
+  {
+    "scenario": "undisturbed",
+    "julian": 24,
+    "hillslopes": 284,
+    "source_runvol_m3": 0.0,
+    "source_lateral_m3": 34085.065724,
+    "sum_individual_source_peaks_m3s": 0.0,
+    "max_source_peak_m3s": 0.0,
+    "max_peak_wepp_id": 1,
+    "outlet_volume_m3": 35455.0,
+    "outlet_peak_m3s": 0.49426,
+    "timing": {
+      "Time of Conc (hr)": 0.53,
+      "Storm Duration (hr)": 0.0,
+      "Storm Peak (hr)": 0.0
+    },
+    "reported_channel_ledger": {
+      "Inflow (m^3)": 35433.9,
+      "Outflow (m^3)": 35455.0,
+      "Storage (m^3)": 150.77,
+      "Baseflow (m^3)": 0.0,
+      "Loss (m^3)": 0.75,
+      "Balance (m^3)": 0.0
+    }
+  }
+]

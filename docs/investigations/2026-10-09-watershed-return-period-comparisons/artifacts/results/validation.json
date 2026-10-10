@@ -1,0 +1,87 @@
+{
+  "runs": 8,
+  "rows": 184,
+  "cache_comparisons": 82,
+  "all_cache_comparisons_match": true,
+  "burned_undisturbed_precipitation_matches": true,
+  "source_manifest_verified": true,
+  "calendar_findings": [
+    {
+      "case": "rattlesnake_260803_burned",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "rattlesnake_260803_undisturbed",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "rattlesnake_261009_burned",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "rattlesnake_261009_undisturbed",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "topanga_synthetic_261009_burned",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "topanga_synthetic_261009_undisturbed",
+      "duplicate_rows": 2,
+      "dates": [
+        {
+          "year": 100,
+          "month": 12,
+          "day_of_month": 22
+        }
+      ]
+    },
+    {
+      "case": "topanga_gridmet_261009_burned",
+      "duplicate_rows": 0,
+      "dates": []
+    },
+    {
+      "case": "topanga_gridmet_261009_undisturbed",
+      "duplicate_rows": 0,
+      "dates": []
+    }
+  ],
+  "limitation": "Original records retained without calendar deduplication; no cause adjudication or new model execution"
+}

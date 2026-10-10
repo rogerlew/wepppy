@@ -1,0 +1,8 @@
+{
+  "binaries": {
+    "wepp": "0eb062812786064b230091ac0144f7502bc225964ea982dd76ebfc68abc6b76d",
+    "wepp_hill": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a"
+  },
+  "source_base": "692c225e672844c71114bbdda851625616ebbba9",
+  "change": "CHRQIN excludes qin0(0) only when nt0=0; all positive-time samples remain in normalization"
+}

@@ -1,0 +1,78 @@
+{
+  "aggregation.json": {
+    "bytes": 365,
+    "sha256": "74836e4fd299b075d74ceeaaa7f83137a86e04b348b1f82b7be8fef7e4f75cec"
+  },
+  "all-report-readback.json": {
+    "bytes": 289665,
+    "sha256": "0861942452181bfc450e7629909eed31b1561ed57a4883666d53adbf02c159e4"
+  },
+  "audit-summary.json": {
+    "bytes": 5531,
+    "sha256": "901985d37536c0b8c4ac15775a53f70c004c48a9fe24aac2fb7f908fc3f5870b"
+  },
+  "build.json": {
+    "bytes": 525,
+    "sha256": "7465cd94287f94985a6afe524f0bb16b5d0731d1cf75ff198a53e2b99172d704"
+  },
+  "event-pairs.parquet": {
+    "bytes": 5121306,
+    "sha256": "e192bbc09f4f4a9c46c86796640dbd24a2c7f73c0cda956ae4b6dd7226b35759"
+  },
+  "execution-summary.json": {
+    "bytes": 61,
+    "sha256": "0b58f2435759fb8900675046f97d45ded5fbb75ddb337f1465c15869b3220984"
+  },
+  "figures/figure-1.png": {
+    "bytes": 759591,
+    "sha256": "9cea2c8c78f82f930eb5c65d80fcab337a5986fabdb93a9f439461d342da94e9"
+  },
+  "figures/figure-2.png": {
+    "bytes": 610146,
+    "sha256": "c4c051099dc25dd8a4746bf160c29b10074258758547a3abd1ba9f77c8a11aca"
+  },
+  "figures/figure-3.png": {
+    "bytes": 855375,
+    "sha256": "d7381abeb3501e6db1d5a47adcfa02ba8c5a2041cd489d265de4bda364ec2986"
+  },
+  "figures/figure-statistics.json": {
+    "bytes": 3685,
+    "sha256": "e55f0c7b8d8b27dc119c60aac0928276d88ead5ff4f857cd0c93c2b1ef8e39e7"
+  },
+  "inputs.json": {
+    "bytes": 120789,
+    "sha256": "0714d38e17cc0524094003264ed37e61c62f7bf14c7a89282a423bcbe541b775"
+  },
+  "largest-peak-sensitivities.csv": {
+    "bytes": 5127,
+    "sha256": "a787dc28f3e5b35bbad1198d0d89a864d6a49df5b6c77ccdf4eeae9e9eea1629"
+  },
+  "mutation-parity.json": {
+    "bytes": 1023,
+    "sha256": "f85a843dbf3526ac194065608efc42e80fc816fccc1fd9e6d5aefce38dbb155a"
+  },
+  "parity.json": {
+    "bytes": 1538,
+    "sha256": "ec47b9ee03e54e4fff7e2fdaa5bb89a7f618dac385d1ced1dea97ff511943a88"
+  },
+  "plan.json": {
+    "bytes": 892891,
+    "sha256": "e1eca58fb19f2cc39b11894802aa57dc9cf3a58d56e4cd251ec80ccc39c0fdda"
+  },
+  "preparation.json": {
+    "bytes": 42490,
+    "sha256": "568cc028a841c884e1365ed039bc0ef40aa4a6c408ce955dbed7bf03370e87d6"
+  },
+  "sediment-pairs.parquet": {
+    "bytes": 398047,
+    "sha256": "cf46792cb06263471b73a0a63fe2e59b81a59e48ca880bcf0dfd6b54e7b62d3b"
+  },
+  "tail-context.json": {
+    "bytes": 373,
+    "sha256": "a52d58c83547604913511650db790cd04f2bf27478cc979fe53ac6f9615a0c9a"
+  },
+  "terminal-inventory.csv": {
+    "bytes": 232819,
+    "sha256": "33732cccd905395e6be8b1cb28c98dfc63d08f043b48ee8cdf3ece5c52792c17"
+  }
+}

@@ -1,0 +1,234 @@
+[
+  {
+    "reference": "baseline",
+    "first": "1984-11-25",
+    "last": "1984-12-01",
+    "peak_time_shift_minutes": -1220.0000000000002,
+    "centroid_shift_minutes": -0.6785389502061889,
+    "values": {
+      "baseline": {
+        "volume_m3": 1596966.0,
+        "peak_m3s": 3.94,
+        "first_peak_hour": 81.16666666666667,
+        "peak_tied_samples": 9,
+        "centroid_hour": 86.7836153055231,
+        "median_volume_hour": 86.66666666666667,
+        "first_maximum": "1984-11-28 09:10:00",
+        "last_equal_maximum": "1984-11-28 10:40:00"
+      },
+      "candidate": {
+        "volume_m3": 1597686.0,
+        "peak_m3s": 3.93,
+        "first_peak_hour": 60.833333333333336,
+        "peak_tied_samples": 16,
+        "centroid_hour": 86.77230632301966,
+        "median_volume_hour": 86.66666666666667,
+        "first_maximum": "1984-11-27 12:50:00",
+        "last_equal_maximum": "1984-11-28 10:40:00"
+      }
+    }
+  },
+  {
+    "reference": "baseline",
+    "first": "1996-02-04",
+    "last": "1996-02-10",
+    "peak_time_shift_minutes": -319.9999999999997,
+    "centroid_shift_minutes": -0.9529831605354387,
+    "values": {
+      "baseline": {
+        "volume_m3": 7326312.0,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 59.166666666666664,
+        "peak_tied_samples": 11,
+        "centroid_hour": 87.02992965628546,
+        "median_volume_hour": 86.16666666666667,
+        "first_maximum": "1996-02-06 11:10:00",
+        "last_equal_maximum": "1996-02-06 14:30:00"
+      },
+      "candidate": {
+        "volume_m3": 7338143.999999999,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 53.833333333333336,
+        "peak_tied_samples": 66,
+        "centroid_hour": 87.01404660360987,
+        "median_volume_hour": 86.16666666666667,
+        "first_maximum": "1996-02-06 05:50:00",
+        "last_equal_maximum": "1996-02-06 16:40:00"
+      }
+    }
+  },
+  {
+    "reference": "baseline",
+    "first": "1980-11-04",
+    "last": "1980-11-10",
+    "peak_time_shift_minutes": 270.0,
+    "centroid_shift_minutes": -0.2101890445894128,
+    "values": {
+      "baseline": {
+        "volume_m3": 1522143.0000000002,
+        "peak_m3s": 11.0,
+        "first_peak_hour": 77.66666666666667,
+        "peak_tied_samples": 33,
+        "centroid_hour": 80.86620586896238,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1980-11-07 05:40:00",
+        "last_equal_maximum": "1980-11-07 11:00:00"
+      },
+      "candidate": {
+        "volume_m3": 1525837.2,
+        "peak_m3s": 11.1,
+        "first_peak_hour": 82.16666666666667,
+        "peak_tied_samples": 3,
+        "centroid_hour": 80.86270271821923,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1980-11-07 10:10:00",
+        "last_equal_maximum": "1980-11-07 10:50:00"
+      }
+    }
+  },
+  {
+    "reference": "release",
+    "first": "1984-11-25",
+    "last": "1984-12-01",
+    "peak_time_shift_minutes": 220.00000000000028,
+    "centroid_shift_minutes": 0.0045694123684825,
+    "values": {
+      "release": {
+        "volume_m3": 1598706.0000000002,
+        "peak_m3s": 3.93,
+        "first_peak_hour": 57.166666666666664,
+        "peak_tied_samples": 44,
+        "centroid_hour": 86.77223016614685,
+        "median_volume_hour": 86.66666666666667,
+        "first_maximum": "1984-11-27 09:10:00",
+        "last_equal_maximum": "1984-11-28 10:40:00"
+      },
+      "candidate": {
+        "volume_m3": 1597686.0,
+        "peak_m3s": 3.93,
+        "first_peak_hour": 60.833333333333336,
+        "peak_tied_samples": 16,
+        "centroid_hour": 86.77230632301966,
+        "median_volume_hour": 86.66666666666667,
+        "first_maximum": "1984-11-27 12:50:00",
+        "last_equal_maximum": "1984-11-28 10:40:00"
+      }
+    }
+  },
+  {
+    "reference": "release",
+    "first": "1995-01-10",
+    "last": "1995-01-16",
+    "peak_time_shift_minutes": 190.00000000000028,
+    "centroid_shift_minutes": -0.1121296337726107,
+    "values": {
+      "release": {
+        "volume_m3": 2645057.9999999995,
+        "peak_m3s": 11.4,
+        "first_peak_hour": 77.83333333333333,
+        "peak_tied_samples": 2,
+        "centroid_hour": 88.1729950723198,
+        "median_volume_hour": 86.16666666666667,
+        "first_maximum": "1995-01-13 05:50:00",
+        "last_equal_maximum": "1995-01-13 09:00:00"
+      },
+      "candidate": {
+        "volume_m3": 2642177.9999999995,
+        "peak_m3s": 11.4,
+        "first_peak_hour": 81.0,
+        "peak_tied_samples": 1,
+        "centroid_hour": 88.17112624509025,
+        "median_volume_hour": 86.16666666666667,
+        "first_maximum": "1995-01-13 09:00:00",
+        "last_equal_maximum": "1995-01-13 09:00:00"
+      }
+    }
+  },
+  {
+    "reference": "release",
+    "first": "1994-02-21",
+    "last": "1994-02-27",
+    "peak_time_shift_minutes": -169.99999999999972,
+    "centroid_shift_minutes": 0.4028595426473202,
+    "values": {
+      "release": {
+        "volume_m3": 2814234.0,
+        "peak_m3s": 14.8,
+        "first_peak_hour": 80.33333333333333,
+        "peak_tied_samples": 1,
+        "centroid_hour": 83.3107797716892,
+        "median_volume_hour": 81.83333333333333,
+        "first_maximum": "1994-02-24 08:20:00",
+        "last_equal_maximum": "1994-02-24 08:20:00"
+      },
+      "candidate": {
+        "volume_m3": 2812320.0000000005,
+        "peak_m3s": 14.7,
+        "first_peak_hour": 77.5,
+        "peak_tied_samples": 22,
+        "centroid_hour": 83.31749409739999,
+        "median_volume_hour": 81.83333333333333,
+        "first_maximum": "1994-02-24 05:30:00",
+        "last_equal_maximum": "1994-02-24 09:00:00"
+      }
+    }
+  },
+  {
+    "reference": "baseline",
+    "first": "1996-02-04",
+    "last": "1996-02-08",
+    "peak_time_shift_minutes": -319.9999999999997,
+    "centroid_shift_minutes": -0.288891687427224,
+    "values": {
+      "baseline": {
+        "volume_m3": 6464736.000000001,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 59.166666666666664,
+        "peak_tied_samples": 11,
+        "centroid_hour": 79.98900573820802,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1996-02-06 11:10:00",
+        "last_equal_maximum": "1996-02-06 14:30:00"
+      },
+      "candidate": {
+        "volume_m3": 6476640.000000001,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 53.833333333333336,
+        "peak_tied_samples": 66,
+        "centroid_hour": 79.9841908767509,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1996-02-06 05:50:00",
+        "last_equal_maximum": "1996-02-06 16:40:00"
+      }
+    }
+  },
+  {
+    "reference": "release",
+    "first": "1996-02-04",
+    "last": "1996-02-08",
+    "peak_time_shift_minutes": 20.000000000000146,
+    "centroid_shift_minutes": -1.3658952924402,
+    "values": {
+      "release": {
+        "volume_m3": 6488255.999999999,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 53.5,
+        "peak_tied_samples": 111,
+        "centroid_hour": 80.00695579829157,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1996-02-06 05:30:00",
+        "last_equal_maximum": "1996-02-06 23:50:00"
+      },
+      "candidate": {
+        "volume_m3": 6476640.000000001,
+        "peak_m3s": 24.4,
+        "first_peak_hour": 53.833333333333336,
+        "peak_tied_samples": 66,
+        "centroid_hour": 79.9841908767509,
+        "median_volume_hour": 81.16666666666667,
+        "first_maximum": "1996-02-06 05:50:00",
+        "last_equal_maximum": "1996-02-06 16:40:00"
+      }
+    }
+  }
+]

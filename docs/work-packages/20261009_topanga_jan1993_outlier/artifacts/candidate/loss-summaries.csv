@@ -1,0 +1,133 @@
+site,scenario,version,key,value,units
+topanga,burned,candidate,Total contributing area to outlet,973.31,ha
+topanga,burned,candidate,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,burned,candidate,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,burned,candidate,Avg. Ann. water discharge from outlet,3977988.0,m^3/yr
+topanga,burned,candidate,Avg. Ann. total hillslope soil loss,3234.4,tonne/yr
+topanga,burned,candidate,Avg. Ann. total channel soil loss,143.2,tonne/yr
+topanga,burned,candidate,Avg. Ann. sediment discharge from outlet,3275.0,tonne/yr
+topanga,burned,candidate,Avg. Ann. Sed. delivery per unit area of watershed,3.4,tonne/ha/yr
+topanga,burned,candidate,Sediment Delivery Ratio for Watershed,0.97,
+topanga,burned,candidate,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,burned,candidate,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+topanga,burned,261009,Total contributing area to outlet,973.31,ha
+topanga,burned,261009,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,burned,261009,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,burned,261009,Avg. Ann. water discharge from outlet,3977988.0,m^3/yr
+topanga,burned,261009,Avg. Ann. total hillslope soil loss,3234.4,tonne/yr
+topanga,burned,261009,Avg. Ann. total channel soil loss,142.9,tonne/yr
+topanga,burned,261009,Avg. Ann. sediment discharge from outlet,3274.2,tonne/yr
+topanga,burned,261009,Avg. Ann. Sed. delivery per unit area of watershed,3.4,tonne/ha/yr
+topanga,burned,261009,Sediment Delivery Ratio for Watershed,0.969,
+topanga,burned,261009,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,burned,261009,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+topanga,burned,260803,Total contributing area to outlet,973.31,ha
+topanga,burned,260803,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,burned,260803,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,burned,260803,Avg. Ann. water discharge from outlet,3977992.0,m^3/yr
+topanga,burned,260803,Avg. Ann. total hillslope soil loss,3200.8,tonne/yr
+topanga,burned,260803,Avg. Ann. total channel soil loss,138.9,tonne/yr
+topanga,burned,260803,Avg. Ann. sediment discharge from outlet,3232.9,tonne/yr
+topanga,burned,260803,Avg. Ann. Sed. delivery per unit area of watershed,3.3,tonne/ha/yr
+topanga,burned,260803,Sediment Delivery Ratio for Watershed,0.968,
+topanga,burned,260803,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,burned,260803,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+topanga,undisturbed,candidate,Total contributing area to outlet,973.31,ha
+topanga,undisturbed,candidate,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,undisturbed,candidate,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,undisturbed,candidate,Avg. Ann. water discharge from outlet,3034846.0,m^3/yr
+topanga,undisturbed,candidate,Avg. Ann. total hillslope soil loss,639.7,tonne/yr
+topanga,undisturbed,candidate,Avg. Ann. total channel soil loss,114.6,tonne/yr
+topanga,undisturbed,candidate,Avg. Ann. sediment discharge from outlet,732.0,tonne/yr
+topanga,undisturbed,candidate,Avg. Ann. Sed. delivery per unit area of watershed,0.8,tonne/ha/yr
+topanga,undisturbed,candidate,Sediment Delivery Ratio for Watershed,0.97,
+topanga,undisturbed,candidate,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,undisturbed,candidate,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+topanga,undisturbed,261009,Total contributing area to outlet,973.31,ha
+topanga,undisturbed,261009,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,undisturbed,261009,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,undisturbed,261009,Avg. Ann. water discharge from outlet,3034846.0,m^3/yr
+topanga,undisturbed,261009,Avg. Ann. total hillslope soil loss,639.7,tonne/yr
+topanga,undisturbed,261009,Avg. Ann. total channel soil loss,114.4,tonne/yr
+topanga,undisturbed,261009,Avg. Ann. sediment discharge from outlet,731.9,tonne/yr
+topanga,undisturbed,261009,Avg. Ann. Sed. delivery per unit area of watershed,0.8,tonne/ha/yr
+topanga,undisturbed,261009,Sediment Delivery Ratio for Watershed,0.971,
+topanga,undisturbed,261009,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,undisturbed,261009,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+topanga,undisturbed,260803,Total contributing area to outlet,973.31,ha
+topanga,undisturbed,260803,Avg. Ann. Precipitation volume in contributing area,5957239.0,m^3/yr
+topanga,undisturbed,260803,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+topanga,undisturbed,260803,Avg. Ann. water discharge from outlet,3034852.0,m^3/yr
+topanga,undisturbed,260803,Avg. Ann. total hillslope soil loss,657.5,tonne/yr
+topanga,undisturbed,260803,Avg. Ann. total channel soil loss,107.9,tonne/yr
+topanga,undisturbed,260803,Avg. Ann. sediment discharge from outlet,736.5,tonne/yr
+topanga,undisturbed,260803,Avg. Ann. Sed. delivery per unit area of watershed,0.8,tonne/ha/yr
+topanga,undisturbed,260803,Sediment Delivery Ratio for Watershed,0.962,
+topanga,undisturbed,260803,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+topanga,undisturbed,260803,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,burned,candidate,Total contributing area to outlet,674.43,ha
+rattlesnake,burned,candidate,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,burned,candidate,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,burned,candidate,Avg. Ann. water discharge from outlet,1104972.0,m^3/yr
+rattlesnake,burned,candidate,Avg. Ann. total hillslope soil loss,1942.8,tonne/yr
+rattlesnake,burned,candidate,Avg. Ann. total channel soil loss,61.1,tonne/yr
+rattlesnake,burned,candidate,Avg. Ann. sediment discharge from outlet,1710.9,tonne/yr
+rattlesnake,burned,candidate,Avg. Ann. Sed. delivery per unit area of watershed,2.5,tonne/ha/yr
+rattlesnake,burned,candidate,Sediment Delivery Ratio for Watershed,0.854,
+rattlesnake,burned,candidate,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,burned,candidate,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,burned,261009,Total contributing area to outlet,674.43,ha
+rattlesnake,burned,261009,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,burned,261009,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,burned,261009,Avg. Ann. water discharge from outlet,1104972.0,m^3/yr
+rattlesnake,burned,261009,Avg. Ann. total hillslope soil loss,1942.8,tonne/yr
+rattlesnake,burned,261009,Avg. Ann. total channel soil loss,61.0,tonne/yr
+rattlesnake,burned,261009,Avg. Ann. sediment discharge from outlet,1705.0,tonne/yr
+rattlesnake,burned,261009,Avg. Ann. Sed. delivery per unit area of watershed,2.5,tonne/ha/yr
+rattlesnake,burned,261009,Sediment Delivery Ratio for Watershed,0.851,
+rattlesnake,burned,261009,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,burned,261009,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,burned,260803,Total contributing area to outlet,674.43,ha
+rattlesnake,burned,260803,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,burned,260803,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,burned,260803,Avg. Ann. water discharge from outlet,1104972.0,m^3/yr
+rattlesnake,burned,260803,Avg. Ann. total hillslope soil loss,1937.9,tonne/yr
+rattlesnake,burned,260803,Avg. Ann. total channel soil loss,61.0,tonne/yr
+rattlesnake,burned,260803,Avg. Ann. sediment discharge from outlet,1702.5,tonne/yr
+rattlesnake,burned,260803,Avg. Ann. Sed. delivery per unit area of watershed,2.5,tonne/ha/yr
+rattlesnake,burned,260803,Sediment Delivery Ratio for Watershed,0.852,
+rattlesnake,burned,260803,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,burned,260803,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,undisturbed,candidate,Total contributing area to outlet,674.43,ha
+rattlesnake,undisturbed,candidate,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. water discharge from outlet,624573.0,m^3/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. total hillslope soil loss,1.5,tonne/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. total channel soil loss,36.0,tonne/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. sediment discharge from outlet,30.3,tonne/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. Sed. delivery per unit area of watershed,0.0,tonne/ha/yr
+rattlesnake,undisturbed,candidate,Sediment Delivery Ratio for Watershed,0.81,
+rattlesnake,undisturbed,candidate,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,undisturbed,candidate,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,undisturbed,261009,Total contributing area to outlet,674.43,ha
+rattlesnake,undisturbed,261009,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,undisturbed,261009,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,undisturbed,261009,Avg. Ann. water discharge from outlet,624573.0,m^3/yr
+rattlesnake,undisturbed,261009,Avg. Ann. total hillslope soil loss,1.5,tonne/yr
+rattlesnake,undisturbed,261009,Avg. Ann. total channel soil loss,36.0,tonne/yr
+rattlesnake,undisturbed,261009,Avg. Ann. sediment discharge from outlet,30.3,tonne/yr
+rattlesnake,undisturbed,261009,Avg. Ann. Sed. delivery per unit area of watershed,0.0,tonne/ha/yr
+rattlesnake,undisturbed,261009,Sediment Delivery Ratio for Watershed,0.81,
+rattlesnake,undisturbed,261009,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,undisturbed,261009,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr
+rattlesnake,undisturbed,260803,Total contributing area to outlet,674.43,ha
+rattlesnake,undisturbed,260803,Avg. Ann. Precipitation volume in contributing area,3714733.0,m^3/yr
+rattlesnake,undisturbed,260803,Avg. Ann. irrigation volume in contributing area,0.0,m^3/yr
+rattlesnake,undisturbed,260803,Avg. Ann. water discharge from outlet,624573.0,m^3/yr
+rattlesnake,undisturbed,260803,Avg. Ann. total hillslope soil loss,0.9,tonne/yr
+rattlesnake,undisturbed,260803,Avg. Ann. total channel soil loss,36.0,tonne/yr
+rattlesnake,undisturbed,260803,Avg. Ann. sediment discharge from outlet,29.7,tonne/yr
+rattlesnake,undisturbed,260803,Avg. Ann. Sed. delivery per unit area of watershed,0.0,tonne/ha/yr
+rattlesnake,undisturbed,260803,Sediment Delivery Ratio for Watershed,0.807,
+rattlesnake,undisturbed,260803,Avg. Ann. Phosphorus discharge from outlet,0.0,kg/yr
+rattlesnake,undisturbed,260803,Avg. Ann. P. delivery per unit area of watershed,0.0,kg/ha/yr

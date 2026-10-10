@@ -1,0 +1,4546 @@
+[
+  {
+    "scenario": "burned",
+    "wepp_id": 4,
+    "seconds": 0.7804570099979173,
+    "pass_sha256": "313ebc63bd73f85c8ddaad6717131d880a822fa7ee2db65fcd620e10ea6fbecd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 6,
+    "seconds": 0.7283158510108478,
+    "pass_sha256": "4b15bbe1505047e5dbf7b6d41b5f3605bb3359ec8a1b1c4358803ec465b8bcd4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 3,
+    "seconds": 0.8562412990140729,
+    "pass_sha256": "42ab33fba8d9c5642b410bfb08a7fec1eee8efe00c14446b04a1326d7e8b64db",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 5,
+    "seconds": 1.6720167050079908,
+    "pass_sha256": "a7e8f1e1d6d4e2c6950fb93dab959232d6a291cfefa81ef96d3d61afa98d6f32",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 1,
+    "seconds": 1.2840122840134427,
+    "pass_sha256": "7c64077f634684de0e0ab1479424714c585de346cb8e4381c9faea5990ed8e42",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 7,
+    "seconds": 1.0252634790085722,
+    "pass_sha256": "3cb5b88c5751e3bf3f88f7ffef878c6e5d137d820d5146fa443f6b708688ec81",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 2,
+    "seconds": 2.122914248990128,
+    "pass_sha256": "e0e87e7e7a6e87245c506d874c186eb23da1d5ee212234cfa45afb55be81da5a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 8,
+    "seconds": 1.3783554680121597,
+    "pass_sha256": "e72b1851dfcc410d47579fb79ecd305b47453d0e6ca4f867f5205c7d41bf1380",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 9,
+    "seconds": 0.6775103640102316,
+    "pass_sha256": "d2eed5e31d1430410ac1412bacd6f158bdba52d0934c149bd670f10370f8a891",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 16,
+    "seconds": 0.7619195439910982,
+    "pass_sha256": "f82cf55c561036d37ebeb7a3a6a1803b02f92e1d713b81cee0650ba9d864530b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 10,
+    "seconds": 1.6652449819957837,
+    "pass_sha256": "6a7fb7177b78f9e053661f759d6943bfa3cb6e1d5dd4226f0cf881d6deb677b3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 13,
+    "seconds": 1.376412360026734,
+    "pass_sha256": "b59679b7ad7fd70552043576b7311c6055e1c7a051def345aef2ea5ba362e79d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 15,
+    "seconds": 1.235865107999416,
+    "pass_sha256": "a7a161cbf6c00ab9d49583d514ac20ab0465bbfcfdc741d7d6c896360bad0bef",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 14,
+    "seconds": 0.8570600880193524,
+    "pass_sha256": "d9afe3d4941869675b249ea54efd80e0111c534b212bb81bf61e2ca6c2b3ddc7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 12,
+    "seconds": 1.5312372170155868,
+    "pass_sha256": "f73f2434c81a478ab4265891583addbfa95d68d86e304567c16e13c98f7ae6bc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 11,
+    "seconds": 0.9934951979957987,
+    "pass_sha256": "e9d0d760dec41d4894857d931ef1f5264bb1e134d1b45a8d97f72f59d8a5bfb4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 17,
+    "seconds": 0.6755643720098305,
+    "pass_sha256": "f2db14f478a65552a2ea85d9070959bf9757e49577d14831eae972cdf74ad715",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 21,
+    "seconds": 0.8346449020027649,
+    "pass_sha256": "7d5166891e8e31c5f8e95c7fbdc37ada3babc613d14edf46cfb2675bf5f6a083",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 24,
+    "seconds": 1.0330090450006537,
+    "pass_sha256": "e49f32ed057db985a3bca378e354317a3d1ac2813b8ed81e10934fbbc4484c75",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 22,
+    "seconds": 0.7730934050050564,
+    "pass_sha256": "989f6170ece6703354a27a95c42239c0e0efa93d72d464af14483118cf06d97f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 23,
+    "seconds": 1.432626641006209,
+    "pass_sha256": "e4dc60f23583792a6a8675c614985502893450ddef9a9d7d73ad7094e78239f7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 20,
+    "seconds": 1.1487467680126429,
+    "pass_sha256": "f7b0368e787ffe4c82643b917e9ccdfecb2a0693ee1497ebe34c4428a16ab935",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 19,
+    "seconds": 1.7368388379982207,
+    "pass_sha256": "795fa18ab525619209bbe6c036d772f49b8c6d08d4df8ac51e5c0ccf248ea6be",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 18,
+    "seconds": 0.9302114899910521,
+    "pass_sha256": "bc9e40fb3ecf81d6cb52ad566a2c521b072fe537c72e38c2f143062984d0333c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 27,
+    "seconds": 0.6696678200096358,
+    "pass_sha256": "0c3083f7b075214a789f86c0e289df8139abe9900788c063225207218f487830",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 25,
+    "seconds": 0.8237728079839144,
+    "pass_sha256": "fd92cb7532dc4d2ba3110dd73dc6ffcab8c22514b7df615fb7f162fde0d7568d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 26,
+    "seconds": 0.8168602410005406,
+    "pass_sha256": "b4cabdfe16eb0dd32409edf596c4ee19dbc800db516695f54b95941335f091ca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 28,
+    "seconds": 0.9887816580012441,
+    "pass_sha256": "ef0caed20ad7bfc193a84114c0867deadbf8aaa4efa6b660a2d47c34485cc1bc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 32,
+    "seconds": 1.1579098959919065,
+    "pass_sha256": "d0dcaa670fa335d1a555e03c6e3d20f3be66dbc5e5fb0bd3d5bea551a4be943c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 31,
+    "seconds": 1.771750450017862,
+    "pass_sha256": "119a168734e422ca4a40f1236d8496775d5ab9f069d36fbc4459b4da3aae7e35",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 29,
+    "seconds": 1.4757832409814,
+    "pass_sha256": "890b3fb053e42f2472a28e352009304f9ff97165f134985e7e66fe8b3934c3e8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 30,
+    "seconds": 1.263740042981226,
+    "pass_sha256": "24f4426e3a65778508413fc0fdefd0cb2e23c10f809bdb4d620f53ebf373a744",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 33,
+    "seconds": 0.6748794349841774,
+    "pass_sha256": "d787959819c7cb9ac214c4f1bff39dbe25f1d66aac7a69ab16aa836b6f431df1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 36,
+    "seconds": 0.741139790014131,
+    "pass_sha256": "a49e603e208ebeeeb91321e39f56349cd404a28c50297d34c177a7878f0698e1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 38,
+    "seconds": 1.4106118910131045,
+    "pass_sha256": "7f38d36d294a6ad5b252faeeb1da9d43f1fe26c6d3444c07bfc9d2d0cce90e91",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 40,
+    "seconds": 1.0116434350202326,
+    "pass_sha256": "c3f2720dc527c793a06157c1c826409aba9922ff9e1ec49e1b56cfffca3bd014",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 39,
+    "seconds": 1.083626957028173,
+    "pass_sha256": "2ff7e71f0779a0dd0e7fd147c8324c980de32bed9ca4e36a5b77787557813867",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 34,
+    "seconds": 1.4988750820048153,
+    "pass_sha256": "3840d2a51349264648e46f9be938206319ab272565dc88e3d0218ff27951dc77",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 35,
+    "seconds": 0.890848583978368,
+    "pass_sha256": "d96349a00c61e86fad785e98a25387d2177fb76cd2086531997ed8be8ac13957",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 37,
+    "seconds": 0.801293106022058,
+    "pass_sha256": "da2d0e0457bff25a6836589fd0daf29c4c341bdefb269d6d3dabfa55ef7e99e7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 43,
+    "seconds": 0.7629116919997614,
+    "pass_sha256": "9eba08628be7d2faae2184820f773899e887b291117e0108c7a6f2194de07c70",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 42,
+    "seconds": 0.7256923070235644,
+    "pass_sha256": "607c0a8be77065e5e9e50b6fa1976f12882b4df06b62dc85c9776a5277cb4f08",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 46,
+    "seconds": 1.401782989007188,
+    "pass_sha256": "2bf360a98c594f246618ef428d7e08bcc4f62ae39d9662ecf07677af7db77684",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 45,
+    "seconds": 0.8891704010020476,
+    "pass_sha256": "1f1cea63d32404b2143927261b6fd8f50ab3abb316033a83270c9e52fada46ff",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 44,
+    "seconds": 1.5946064250019845,
+    "pass_sha256": "3bb6578b761bfedb8141261492bcaf524c3a815670ce0cdec8f3ad0baa71094a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 47,
+    "seconds": 1.2956214419973549,
+    "pass_sha256": "41bfb8c7022c7fd62d7d83f83b3c8fd6e27ac9643d26b2a9fb1e0a63ed589295",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 41,
+    "seconds": 1.1223294610099401,
+    "pass_sha256": "d20a68b13b3a9ca30238b3ac8224e50d94eddb10f9002785bb825c802b68648d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 48,
+    "seconds": 1.1626064489828423,
+    "pass_sha256": "6e80bf4bff43fe2acccc9f4236ef1108fa2027c9b7ac793bf458a3978789d27e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 56,
+    "seconds": 0.6772126920113806,
+    "pass_sha256": "ae68d0aafbf9884c66080af1c43a3f6e7a998e44668b36056d33813319b7bca7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 49,
+    "seconds": 0.7794798499962781,
+    "pass_sha256": "6d4805b0e8bfa65b51bf56b0ba3da95128a0161871b0408675afd5abceb9c72a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 55,
+    "seconds": 1.0263449389894959,
+    "pass_sha256": "45236cf74b1be1bc4392e0857dab77d53e8ef3371b6695f1a2067c3fda1a717d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 50,
+    "seconds": 0.8433671719976701,
+    "pass_sha256": "2f94f477c2ef0fab98330f40a5919b4164e7fac4fcca4de6c6e3147d196e590b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 52,
+    "seconds": 1.457926410017535,
+    "pass_sha256": "4c0d84afad942f6301fb2ab78c6ae56dffe355d4f740945c934941da8c964f7d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 51,
+    "seconds": 1.2496836259961128,
+    "pass_sha256": "fb6728b78b4b514213c0f0069eca3abdc7915964208a1eceae28da083afc788c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 53,
+    "seconds": 1.1168041590135545,
+    "pass_sha256": "7589aebff05d971e3773a88ec582743d6dd59f054bb53efe63a9ca0b7317837b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 54,
+    "seconds": 1.3205884310009424,
+    "pass_sha256": "f325f3c2ed57f6170f8f45746738823afea64af4560b944c073273eea33070f7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 57,
+    "seconds": 0.6775895929895341,
+    "pass_sha256": "c84acd4932aa653d9050b7aa04c9e6166f5418ecbd62cbb4b7b498e060c6578b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 58,
+    "seconds": 0.8346565369865857,
+    "pass_sha256": "f874c8b4a0d08aab48d67fca11004480eafee594c9a49c26d4661804a1e03742",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 61,
+    "seconds": 0.7683178470178973,
+    "pass_sha256": "3c2decee38a93ef87c463e862a5fe1874f87cb265dae5df61604914839e6b41f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 64,
+    "seconds": 0.9165272410027683,
+    "pass_sha256": "2ad92d0bf0b2db3a955b3f3f79825bf3e7d2836a5a8b4c70e9b698d93b6a78fd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 60,
+    "seconds": 1.1420169380144216,
+    "pass_sha256": "8a8cba6d54018d7e90cfff4091b5c47161c9195c220b3142c3d1b2b5b4c4aa9e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 62,
+    "seconds": 1.4854436590103433,
+    "pass_sha256": "b0622f154c0a2b3d5ff51fe358dd890ed28498310281880ecb037e62cae7c4f5",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 63,
+    "seconds": 1.1813632160192356,
+    "pass_sha256": "c810442401b8bc44e307ca6b66a60f88845aeed10b44012b7c8e12f10f7acf02",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 59,
+    "seconds": 1.2352033490024041,
+    "pass_sha256": "ddee354a976d138a5f23f37137f684a7c994f5d8b0d9f1b8ea68cba9ef2b91d2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 65,
+    "seconds": 0.682376650016522,
+    "pass_sha256": "1a89d78b768db1a026b16e4b32c3054381422abca2bfb69ec0b6d3e258bd6a10",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 67,
+    "seconds": 1.307400776015129,
+    "pass_sha256": "b0dac1c84f82c8a179aa580862fc5d7bc3f44e6b47c63d73e90c1adf842d3fea",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 68,
+    "seconds": 1.218324740009848,
+    "pass_sha256": "d6e6c0fd10f631d859b7237a26a004a5daa9453b3bccfce14bb5bb348e2b74de",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 66,
+    "seconds": 1.0096238690020982,
+    "pass_sha256": "6daa2ff020593efbd119d6ed47ee2e6a33c81521a19a5293b2340ecd3bea46eb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 69,
+    "seconds": 0.738237426005071,
+    "pass_sha256": "687c322eaec2905fad9f51ee6cbc6c1dbda7d44e9f07aa86e1698fdc115c4290",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 71,
+    "seconds": 0.7756709399982356,
+    "pass_sha256": "88917a5de6e54ce27f3440eac2593b9d3105e6c2ec98c0b53d4ca400a5cf9ee1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 70,
+    "seconds": 1.4262954809819348,
+    "pass_sha256": "e2d1a3fb6910c9d18ddff8fa7592aa212e208c4537ce558a68c40d26544e35dd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 72,
+    "seconds": 1.0826902069966309,
+    "pass_sha256": "55f918299214b7a94c14767825c07f62f57e976b28ab5b6b9e5991cac3168150",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 73,
+    "seconds": 0.664131911995355,
+    "pass_sha256": "8769bb72bdddd84d61d70a2610c1903803daa9363372c0651bc53f25617b6079",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 74,
+    "seconds": 0.8322874949953984,
+    "pass_sha256": "52fd9cae9dc56a0cd97a080935bd462b8cfa65a3351aa998d63055fed0eca22d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 79,
+    "seconds": 1.0923444369982462,
+    "pass_sha256": "e9c631325c10a487e0b0c7813b99206f5478e57c22084550943e14e77dc0404f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 77,
+    "seconds": 1.0278913840011228,
+    "pass_sha256": "ecacb2b3e763c85dddbb2bc7b4336f4e962e19e4c3eb45d266689c9897c826c1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 76,
+    "seconds": 1.162637964996975,
+    "pass_sha256": "4f029198b69c163b8ceb22a5b954ad80c3c879d48123960dacd4bf9316259c44",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 78,
+    "seconds": 1.4109879469906446,
+    "pass_sha256": "5c749f9d1919fa8edf95c9c859a98fe948fe7cc7a77433350e1797ef130d2dfc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 81,
+    "seconds": 0.9574723989935592,
+    "pass_sha256": "7c30a37be1f271002a6207f7e27e99b4ae5fa59195d7d74f0d4bd74cbe8fd513",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 80,
+    "seconds": 0.7802481609978713,
+    "pass_sha256": "ce7e3c4c4818d73f8653b37e4da65f5141c06c6101b3abbaaf56b42cf0910fc8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 75,
+    "seconds": 1.2448942979972344,
+    "pass_sha256": "8e1bdd7e2e51cd23273bf9c9e3db0c9cabf4cbaab3e69ddf56835434e465864e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 87,
+    "seconds": 0.7240989679994527,
+    "pass_sha256": "2aa40ef17c570513892deecec36079f849783b54ae8aad05e9ce28ad1056fa03",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 82,
+    "seconds": 1.108132219989784,
+    "pass_sha256": "5475547f17ae45112acb5574eecb6315ed831d1d1aeefacaf1e9e4ffd93090da",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 84,
+    "seconds": 1.0439334549882915,
+    "pass_sha256": "5616fe0127de661b53276a7140548b9e9508f6ff44802800b433a3977048228a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 89,
+    "seconds": 0.8273389340029098,
+    "pass_sha256": "2dc0d954398e5a237842c69327ec4a5749b63704c6caf1d4a43db10bf2e074b3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 86,
+    "seconds": 0.9766631420061458,
+    "pass_sha256": "88972fd6eb28519f15ac4ae5d21c313bdfca8dd8f577492c6422c823eb852e80",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 88,
+    "seconds": 1.2394622369902208,
+    "pass_sha256": "00b9970e6fab04bcdd8626c679236c693ff7ba57ce28db51dad52dc23f7086ec",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 85,
+    "seconds": 0.8932800159964245,
+    "pass_sha256": "d4756346db080e33c08b77da96cc3703067bd6277c35499f1d7d9589649a8636",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 83,
+    "seconds": 1.374904015014181,
+    "pass_sha256": "dda3082d9749a9a3e3623c2c28b9ff7abb3d0b0b26c7708ba7ba3c18d7bb41e5",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 95,
+    "seconds": 0.6794509770115837,
+    "pass_sha256": "8498124da4b1e72a056bf78bc8746d72b9b0885e867e53f3f2eda1f16cbec39b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 94,
+    "seconds": 0.7896112460002769,
+    "pass_sha256": "3415bc262f1a31aec761d1c1e201d023726d68f026ee5f1dd29f7907053ea9da",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 93,
+    "seconds": 1.543102830008138,
+    "pass_sha256": "1c85f70a25aaf9096facb44aa1b77292ea1f4821c784c505809d0509d733af23",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 96,
+    "seconds": 0.9398232740059029,
+    "pass_sha256": "434eafa8784fb75911d4a0b11e7b732afd7ba9e4e7bab2d8120b85efafe34235",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 92,
+    "seconds": 1.2113990339857992,
+    "pass_sha256": "d88890e772598c43d839012345319d3045965bd0ffe6ec1ef595e5d5e35a7883",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 97,
+    "seconds": 0.8540548119926825,
+    "pass_sha256": "614fbe99d06c98d313737b7d8cf1751688521b29827c9b3fdc687adadac062b5",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 91,
+    "seconds": 1.4472901799890678,
+    "pass_sha256": "4174953722af36dfcd7c2884f10d8da2ac7b758dcee847e6371a178d37c898b5",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 90,
+    "seconds": 1.0675636749947444,
+    "pass_sha256": "b7b23e42a0d0f1a5e52cbf649ea8a9155253c7621f7d9017abe26270d613bd0b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 103,
+    "seconds": 0.744542492000619,
+    "pass_sha256": "ac6a4d67c17db9890beec9c1a2e92b71f69bddeb07b57f8b10ab89200e7869dc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 105,
+    "seconds": 0.993892878992483,
+    "pass_sha256": "d254cab98c7a13eb5cc932aad479baf9954d7a362aa140d5447909a529abd440",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 100,
+    "seconds": 0.9159133759967517,
+    "pass_sha256": "6bf51227b272ca5f0616273f339641ba4ae12971fd5c677e72ced643e48faae1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 98,
+    "seconds": 0.6971185139846057,
+    "pass_sha256": "bb95e215ffda494083fde5fd908966cedcceae947fd404a7c5925d81ef1ddd86",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 102,
+    "seconds": 1.1891923309885897,
+    "pass_sha256": "d42ff30b9a95ceb5fec4125d0a31cc32c440bce143ea97146cfed328ae6181ad",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 104,
+    "seconds": 1.6404187369917054,
+    "pass_sha256": "8e54e8025453631730bbb1a03a60126e3004c033aa532d7f94601a0d85651fc6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 101,
+    "seconds": 1.0821171579882503,
+    "pass_sha256": "0d983bd9bbeb92a0fb983a5f48b488915bad19ce572508a7c6e47ef689af7ed7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 99,
+    "seconds": 1.3565973850199953,
+    "pass_sha256": "83bfdd109ec2cdb153690aba8f35c89e24a83e4e249ff04c2c99e676cb660345",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 108,
+    "seconds": 0.6745964430156164,
+    "pass_sha256": "5860eac047c2212946c8f8d7e029a81c96e1f3381e75039bc9cf0bf94677aa7d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 113,
+    "seconds": 0.7686173660040367,
+    "pass_sha256": "68b063ad3d2f4626ee91d500d5fc8974f9f93e364511babc21a4e1519a076215",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 107,
+    "seconds": 1.172873982024612,
+    "pass_sha256": "c1abbca6981cef08335696f345df1e437498dfb6c1b88513ae425798aa25c696",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 106,
+    "seconds": 0.9958105380064808,
+    "pass_sha256": "ad2e522b7a8cdae8462ffdff8204d2853e7b9317af58d6e4f843ea6eacd8fcbf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 112,
+    "seconds": 1.3817172400013078,
+    "pass_sha256": "6f22960258815f7c9ecccc8209cd21344e3cff12903ede15eeb895aa62123893",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 110,
+    "seconds": 1.2891737309983,
+    "pass_sha256": "f01f8f12c8959848ce73f69d680eb5f2df26c82dfc4ecd881771042e8bc9bf29",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 111,
+    "seconds": 0.9213026149955112,
+    "pass_sha256": "e2ac70ebdc1a3cde251ea7007afb08d78d478e4349ff2306d7b1c2c0574afe25",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 109,
+    "seconds": 0.8364087039954029,
+    "pass_sha256": "e87e6932302299c04b0df7e02052659396df0586d53b8f96b9697224f8ae7a69",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 114,
+    "seconds": 0.7287829419947229,
+    "pass_sha256": "f4338f3f080fe03dc0d0230ee83b167016b948dd8a9d79f75a2587c0daaa2ad1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 118,
+    "seconds": 0.8953617739898618,
+    "pass_sha256": "a8a37b46909d75f4c4b531587982417fa17cd284c652013ad9fa82a7a2ccfa54",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 120,
+    "seconds": 1.5344322219898459,
+    "pass_sha256": "643dae20c8b8225f1ff83ef5c6692b8c3f72e433340f09a64489d83f2cee6eea",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 117,
+    "seconds": 1.141165050008567,
+    "pass_sha256": "eb17d8f3def9b8600a75f8f6c267273fb069aa15942d7a23ba7de3a7b4ec0f72",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 119,
+    "seconds": 0.8279348690120969,
+    "pass_sha256": "f8c1760f58336751da4935b9474c39c70d2ec09f6b45bfae4aa5bbe2a85a157e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 116,
+    "seconds": 0.9789617419883143,
+    "pass_sha256": "38c0065483a455e2d2ac772336c83881e12c79d7860237b77ab3c9f979408e32",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 115,
+    "seconds": 1.0455967779853381,
+    "pass_sha256": "e27dd701cae9f8d5e6534ff48b1ad337755d155be903bb73c3272edf1abac3bf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 121,
+    "seconds": 1.234940392023418,
+    "pass_sha256": "d7c1c1c68c7e26ecbcc0bcfb6f95d8cf45be9943f324901bacd2967d3c6a90fd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 122,
+    "seconds": 0.7266587899939623,
+    "pass_sha256": "5862d15872502cdfaac38fbb2aecfacd2dc6b6a85b9b70c0d47578bce1525db7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 129,
+    "seconds": 0.7811469699954614,
+    "pass_sha256": "c7a6e7273e0dabbb778349023f6a4b93ee16c9c1fcd0989ec8ef10830935a172",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 128,
+    "seconds": 0.8761271589901298,
+    "pass_sha256": "ce7771706e8641bd7e71692e47c0ac1f25b27d3d529b2089ebca925f8f380a52",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 124,
+    "seconds": 1.218495051987702,
+    "pass_sha256": "91b08fa51b6c4e145151465a05a4b0709b573f52e6b27ba63548282dbf852366",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 123,
+    "seconds": 1.5655667719838675,
+    "pass_sha256": "5d3c88bb63965ec2aab74f8fc50e6d5c03e5b5d7684041386169a718bcf61b48",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 127,
+    "seconds": 1.38975467797718,
+    "pass_sha256": "8efef35defbfa0cf0e535613c2ea22abb36563379cfcdcfe034fdbee9e3ba538",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 125,
+    "seconds": 1.0171856950037181,
+    "pass_sha256": "0cfff339b23ca60341eb06859a78942649e463dd07e963c0acb4a72bd6a3424e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 126,
+    "seconds": 0.9395884410187136,
+    "pass_sha256": "797f775259c0072e90353ca485aea50262ffd2a2f767d759b5d81a034d139194",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 130,
+    "seconds": 0.6740046009945218,
+    "pass_sha256": "28be3481f23a9f8d0bdb1387938e0bbc0ad3b34bf71e31fbe25871fa6a62538b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 135,
+    "seconds": 0.9784987239982001,
+    "pass_sha256": "ff72ecf8c84aa9450195af211450719e2c92636fe59a0917338940ac6b909184",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 134,
+    "seconds": 0.7107702970097307,
+    "pass_sha256": "f599fe24420f98f2740d57872e8458434e773a9076404e07f6e9a2ab0e6ed093",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 132,
+    "seconds": 1.152717474004021,
+    "pass_sha256": "eb8cc881605e56e54fa939cedec324e7df78e2d35e7000123de6b6f83261a718",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 133,
+    "seconds": 0.9128306990023702,
+    "pass_sha256": "3056aeecfeb2e37e791bba9d79138f734ad64550443c814fd1ff70bf6bf88e5a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 131,
+    "seconds": 0.8123337959987111,
+    "pass_sha256": "c9aa517e932f9ac1d224fb7ef88a4634ba259d670614da2cce0b0755bbcb6878",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 137,
+    "seconds": 1.0623405109799933,
+    "pass_sha256": "c348ced3f62374482ed6c6a61e5ea42a8290e9a62a7275180c4abf7536bafeb1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 136,
+    "seconds": 1.5482263940211851,
+    "pass_sha256": "d394363f6ee96d876a512b1539e7a8e92ecb4c555ff3938fb8d0839c4eb6ca96",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 140,
+    "seconds": 0.8568721190094948,
+    "pass_sha256": "f85b656bd4f0e2227bcc1195d603f7e4c8994660778ca6b994b532a525493e90",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 145,
+    "seconds": 0.6734058579895645,
+    "pass_sha256": "a0bf6b0ba5793169b218551d162e8130dab1747cf6f68f2b7c6afed7e50b8c6d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 144,
+    "seconds": 0.7813420640013646,
+    "pass_sha256": "a508a551d5baba178d574cd6f1cbc08cee76d91980650c2ae793203a14a7ab52",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 138,
+    "seconds": 1.1321198460063897,
+    "pass_sha256": "ace3a0fcd4677ad54609f8632a229390e4e2a565c0a39b4c120301cfa8c6d672",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 141,
+    "seconds": 0.9656729940033983,
+    "pass_sha256": "2ad66bfa7d5b3f6dd4555107483ce7e6d6ca1551fcac7e73b8f20e6965a72ab4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 139,
+    "seconds": 1.5802784250117838,
+    "pass_sha256": "87e589e082be8f2875078d1b9b99242d3f4172a7fa84af7a5505d32b9b3e0c80",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 143,
+    "seconds": 1.2324951530026738,
+    "pass_sha256": "b91b899368f9ed506b517e9cd0b761a0d97e5f2ddd4971a1fef97248af81ce77",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 142,
+    "seconds": 1.0434675440192223,
+    "pass_sha256": "cb35bd94b2a011c43bedc082b1b19c428ac47a2183beeb4c71fbe69b17783049",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 153,
+    "seconds": 0.7214380130171776,
+    "pass_sha256": "c0529279c153902ab04b4206ef72bdacd7c13ee3015339b8b34e33400b4df75f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 151,
+    "seconds": 1.05235770001309,
+    "pass_sha256": "7f44cf150491fb0d378d9ca8a3ddf4cacfbea34d03421afc2734d9297865e6d6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 147,
+    "seconds": 0.9373028730042279,
+    "pass_sha256": "f07b2e5675cab93d5e8a50679061d1ee6dc6566d4ea9d2aab43c1a30a6d2d648",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 149,
+    "seconds": 1.18813952797791,
+    "pass_sha256": "c43a97a8dac0b64679bd2bf21354e4657f132871d02812e43fbc7d02a2150327",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 146,
+    "seconds": 0.8268076450040098,
+    "pass_sha256": "72960bb46ec2de0d48f1a41ddf2eda4414bc589ec4f4e828ace52cf759e3f08b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 152,
+    "seconds": 1.4880816169898026,
+    "pass_sha256": "c988aa6ea977a78ea523023d26eeaf542d348db9dc3b8027db12ca3f2d5f80d7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 148,
+    "seconds": 1.649125490017468,
+    "pass_sha256": "42db60a8134ea9c77ae01ed354ee9f1d9920f53a0dc927a819951bc615c0e98d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 150,
+    "seconds": 0.8593915069941431,
+    "pass_sha256": "993b895cb52f1814783ada25e4b2f9dbbab87b65e946f8e0029bb719dce52dea",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 159,
+    "seconds": 0.7995087919989601,
+    "pass_sha256": "0f06df5c1f2c542f1d16912f250d5fb05b8a52bdf4d4052e974c20ebdbfd2488",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 157,
+    "seconds": 1.5721900020143948,
+    "pass_sha256": "12193ebffba52efb6eeaf6f06a85f78f3235b6bca5f8b3a804432c8b0f1b6d85",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 155,
+    "seconds": 0.8676312490133569,
+    "pass_sha256": "8210b5ac9d2983ab2a51a9d35279495cfad61d6214eedf8e47c38c2c882c1d14",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 161,
+    "seconds": 0.9680805369862355,
+    "pass_sha256": "4b7f0f93279c3b20dc9d738ee2ef7e0437a445113c691fcb1dc7f74d71fe66d0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 158,
+    "seconds": 0.7200464350171387,
+    "pass_sha256": "42740376684d11251b853a540341d001e0470e30fe950938141dd002b3508c27",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 154,
+    "seconds": 1.2006709830020554,
+    "pass_sha256": "ccc46f528f5bd3770745ace56f3819911ef2dfe8a22ced493a0a0523031d674a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 160,
+    "seconds": 1.0447595109872054,
+    "pass_sha256": "a413359b19caf4321d1b33d6f5fff1a0c2ee517004e38748810cad1a9963c9a9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 156,
+    "seconds": 1.2871133469743654,
+    "pass_sha256": "2e86b48474fde4ab36a937c7f5600a565dc90120a0a0f48fd1d71acc3a1b3f5a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 163,
+    "seconds": 0.7714551679964643,
+    "pass_sha256": "8450cee7196e08ba9f841ae30409d114d88b916e19b1f1c79b76b920c93ed47d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 162,
+    "seconds": 0.7254564109898638,
+    "pass_sha256": "74c32fb89df1ada162f43fffe1face89b281d99fce2979f13477744eaf43135e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 169,
+    "seconds": 0.949015652993694,
+    "pass_sha256": "225fae8e017bca1d275bfed98de70d0d41053c42d0111f6c081cf2bc1857f754",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 167,
+    "seconds": 0.8819583269942086,
+    "pass_sha256": "bcbee49d0f27f056f2db4d6febf8c6fb8da714cbce6ee73ef74221c61142fc30",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 164,
+    "seconds": 1.1537745850218926,
+    "pass_sha256": "629645c4e9d4d3e8e017fe2f018ffc07b9b61cbedac79b8faa5738e90db0c0ca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 168,
+    "seconds": 1.2201490919978824,
+    "pass_sha256": "2e07f37ab594bb43cd40f26837d68acae46e6192a2321dc4df37af64806ee722",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 166,
+    "seconds": 1.287746020971099,
+    "pass_sha256": "44d5c1cc6643244eda34c4517df316caaac61223eaa83612e7c0f6766470e2d4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 165,
+    "seconds": 1.857179238984827,
+    "pass_sha256": "8d6258b1105dbb041ccf375a29dde4ac59c7a01addb684b9f1ebd8045365d455",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 173,
+    "seconds": 0.7287299539893866,
+    "pass_sha256": "8b2668703f6be1f04bee8d06070f1233eb313970608f82be790ed24d024d8ac6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 174,
+    "seconds": 1.0208179239998572,
+    "pass_sha256": "ec19cda5dac971534984bd261e9f96dabdd9e400ad5ba1702286e231b6d4a5a7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 172,
+    "seconds": 0.8391612060077023,
+    "pass_sha256": "7b636d9e94a9a5131f41b3b6a441126ad7fc11154086f8dc39f9618215340505",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 177,
+    "seconds": 0.9165146870072931,
+    "pass_sha256": "2651046e978307f18d771b861251528cc22f9633df7470cd3bfa35562469c991",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 170,
+    "seconds": 1.001589822000824,
+    "pass_sha256": "c5fe18d2b7d974c4daa7a78d7c4878984cd60104b8d948c2bac9b84b4cc624fb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 175,
+    "seconds": 1.133154495008057,
+    "pass_sha256": "e9cfa6d169bd3dbeb71ccbc1380cd7059aec016e0e54e2acaf4e7e676980de58",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 171,
+    "seconds": 1.2163386620231904,
+    "pass_sha256": "060a595cd3b43474e174961134e07b167c55ac6665ba171421dd729de31fe702",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 176,
+    "seconds": 1.2785670800076332,
+    "pass_sha256": "4679b4a9b432f5b78c305b200e10431f71834bfd1022c8b8a2dac666de41dc78",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 180,
+    "seconds": 0.6782778810011223,
+    "pass_sha256": "0937c9b138cee3c0451e79eeda5d84b516429864d203c74f8a32c473a3227d20",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 182,
+    "seconds": 0.7427185900160111,
+    "pass_sha256": "ee4cf82fbc34648284794124b4bdf6c05b3a9d61e6e554bb3fee19ac2aeb09fc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 181,
+    "seconds": 0.8208739399851765,
+    "pass_sha256": "6f69653b1c499340c51685ef36d1e2a01628d8ebfc4a6ec198d4b1cf123071e0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 178,
+    "seconds": 1.064869970025029,
+    "pass_sha256": "5ba0a92a39e7144acc55e4e3e14bc25e012f6f56fbbf9bc802cab4ffbc6b5a0a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 179,
+    "seconds": 0.9105728970025666,
+    "pass_sha256": "90085e60179ed944fcb60e4b7e123955b14c089f6f354c1b18029fec9f3aee74",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 183,
+    "seconds": 1.397627773025306,
+    "pass_sha256": "9e52725e918e86539c5642785111305087f401421a44e573c11b5315eb3041e6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 184,
+    "seconds": 1.4516930670069996,
+    "pass_sha256": "e3debbcedf153c1c3ae3090e2c480f667e1e7a081e4be94356985c8e06d69b2c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 185,
+    "seconds": 1.0910074129933491,
+    "pass_sha256": "b63ba2a51bb7f9ddd9ed7fa8e5a279fc2cdd2dfd326a3761682f7d46bbaed456",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 187,
+    "seconds": 0.6750940589990932,
+    "pass_sha256": "3f8c7882f8ca3717181127b58edbe23ae02b141b0979f84e6e85fb3c0510bee2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 191,
+    "seconds": 0.7294925299938768,
+    "pass_sha256": "12092b861a8e96475f546347c3fab990a500cc354b8a710d8a0279cd1a748c19",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 193,
+    "seconds": 0.889538397983415,
+    "pass_sha256": "f738c3af3e4caf88f10d3f0eb927d9c7ed861f509e03900092bd98bb45be01ab",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 186,
+    "seconds": 1.2046084310277365,
+    "pass_sha256": "f6e42703662403ed00463c2ad6ebd541ccb399da6d34f520df43e119bb336cb1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 188,
+    "seconds": 1.4042387020017486,
+    "pass_sha256": "c7ae206131f8918710b1bba2938c4c35e8b0f253f1d5488d6868d7607076ad8c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 192,
+    "seconds": 1.1115030079963617,
+    "pass_sha256": "486503dcf28b48d8fc7697a68841a837d0edcfd20af9e28c476929b094aa6391",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 189,
+    "seconds": 0.8238399580004625,
+    "pass_sha256": "f9c83462a2b2efed366723839ceb719936a7a8c017bd650fcb5701d931009ad2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 190,
+    "seconds": 1.5944681289838627,
+    "pass_sha256": "24c045bd371e8ccf6bda714d53afed906efc6925542ba1eab19249397d40c346",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 194,
+    "seconds": 0.7285866489983164,
+    "pass_sha256": "016f3897d5faca2d7ea3bfee50527fb8ad44331b3e2a35dd258baf9ed3e493c9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 195,
+    "seconds": 0.8764680140011478,
+    "pass_sha256": "c0345988860e6df1d6d562679720f37f194b98ed796424f371613f7adee58e41",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 201,
+    "seconds": 0.7763285769906361,
+    "pass_sha256": "c4e5ed79d9eed6ff0b662aab36d5f057829795852604c57f15769033eea05102",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 200,
+    "seconds": 1.2204712030070368,
+    "pass_sha256": "d351b5be7a5c56ca7ffb229c04ee7ab6516cdce3870896a32c676fb92a94f406",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 198,
+    "seconds": 1.1398397640150506,
+    "pass_sha256": "4df005ed2377611990c496c7bf921a25f158b69ca5e9bb0ef8b7a516bf9903d9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 197,
+    "seconds": 1.4815223740006331,
+    "pass_sha256": "77747f2b3e1a583f8164e45629ea4b5324b8cb9609b8c957cbfcd6ecee45ec60",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 196,
+    "seconds": 1.3793912100081798,
+    "pass_sha256": "f58c34453475c4022c81b349811634e8dcc0590991e4b1e7c8599bc5010a9f1f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 199,
+    "seconds": 1.0618675959995016,
+    "pass_sha256": "42caac1a98ab6660a9aac34585d0d56db34bd1455dc814c7f1b88b49cf0655c2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 203,
+    "seconds": 0.8126959420042112,
+    "pass_sha256": "990650bbb45c145ab84e87dc4866aa1ae601d98dcfadbc726931c610eef3db5c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 206,
+    "seconds": 0.7228585789853241,
+    "pass_sha256": "40dd3bff7dbc96f0998d61096fd598e00c6edd597be76b460104d8e4d08f9b85",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 209,
+    "seconds": 1.1554663279966917,
+    "pass_sha256": "2bccd129f9e308aeb8ec62e3eae84b8534bf48d0e8e1ea955f44c86ceb64bf33",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 205,
+    "seconds": 0.8726868030207697,
+    "pass_sha256": "164ef70ff5c538351aa86d63bc137d865146fb27459b277d04494f1496886939",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 204,
+    "seconds": 1.0824199229828082,
+    "pass_sha256": "91223dbf1233121f3f07ad46d979fc422ffa30472c40a5ebbeb1782c32a763c0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 208,
+    "seconds": 0.9567642530018929,
+    "pass_sha256": "e794b86d3be2064122416df05bfe95d58554ac97b58767ae4157c3e35c1a782a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 202,
+    "seconds": 1.5304211089969613,
+    "pass_sha256": "2161913bfb51a8ea94b729f228a2c7546b7f290f805456f1122d40a9eb8d479f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 207,
+    "seconds": 1.3942772769951262,
+    "pass_sha256": "3969bad92837e4f660d3738cb3e6a2e3a0922fc2b6abc466f572aba71c8d9fac",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 211,
+    "seconds": 0.6739637620048597,
+    "pass_sha256": "f278d653deb03d2d58aa52cc73349e53b4b2b8686923417e2b603665a8646f56",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 215,
+    "seconds": 0.7848106659948826,
+    "pass_sha256": "946090db45405ee9d2d3333c6a99984659526b79d9a5369d196a2fd9929ebce8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 217,
+    "seconds": 0.8458370059961453,
+    "pass_sha256": "5d8d4dc344ec2d4feed1b6fb81197b006bf3c043beb7884f10000a3186213c9e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 214,
+    "seconds": 1.5405258440005127,
+    "pass_sha256": "2b7a3a6ba7d18a8fc5e3fc75511c77ac3755526782f1eb82a74c840f1bada0a7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 216,
+    "seconds": 1.142465600016294,
+    "pass_sha256": "acadc4bb387e29e86e73b8692c6c51aad5ba33dada38faa48a08ccfd79fbe3a1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 212,
+    "seconds": 0.951586976996623,
+    "pass_sha256": "3442bb5e54d0ec699c72b7695fac05b50ff357dd06ab5a92a31ccd1ecb9e8674",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 210,
+    "seconds": 1.3685448580072261,
+    "pass_sha256": "a09f624db6d953747d4b303e46fa650f1a6ce43517070af1cf989ef521447442",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 213,
+    "seconds": 1.2162279240146745,
+    "pass_sha256": "4c7abd43fa5c79739cea93abec94c2bace4643d4454fa82b52857f2bbfb1a246",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 222,
+    "seconds": 0.9266738760052249,
+    "pass_sha256": "fb088d445f9e6132d1a8a00e72a7e0c7490b6534263eb5b5d5801949abea191f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 223,
+    "seconds": 1.3990826129738707,
+    "pass_sha256": "aaf8a8dc9b1b460d9b1456399402bccf2d6e1ece01c0a8ebdd76ffda70399a0a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 219,
+    "seconds": 1.0405314420058858,
+    "pass_sha256": "f1dff90cebb5c2674fefe53f20e6902bbbcd052caede4ee337ba642452045f35",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 218,
+    "seconds": 1.1824752629909199,
+    "pass_sha256": "79f9894694773aabb59ac72b06e718f5cbe92464f5a231a5c44cece0502f968f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 224,
+    "seconds": 1.261256925005,
+    "pass_sha256": "55bf832047a1b8d8da0a1accdc57db75abedf12f50f5a2c21104cfd7e4bbc9bc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 225,
+    "seconds": 0.7941989449900575,
+    "pass_sha256": "4e40c7cf73f3a60ed92059890eed881ac1f579e749d6e018b889c62d34dadc24",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 221,
+    "seconds": 0.858808193996083,
+    "pass_sha256": "148ef2bd7f0f6420bbb95975cdd5718d16ab5cddc533ac3ad3dcb9cab3fb249e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 220,
+    "seconds": 0.7230713260069024,
+    "pass_sha256": "0fa989375403b2e2b30331a5e47410f4b2524cafe05aa2c748265ce32ca4a48f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 230,
+    "seconds": 0.6731499050220009,
+    "pass_sha256": "52f1d1f1b7303600250bd22ffecb5456f16680ed3656155818aae5cb46a8942a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 229,
+    "seconds": 0.8339569289819337,
+    "pass_sha256": "f08529548f9898b0f0607ec3f24f4b6ae246e29ba7e2cb4061fc3c9d3c79219a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 226,
+    "seconds": 0.7956022099824622,
+    "pass_sha256": "254b481fd6c180762a7ba92f51782350ef745319738c327e3cdfd7cf2a5f2361",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 232,
+    "seconds": 1.3493293110223021,
+    "pass_sha256": "d25e4d52f0830f80d9875cf4861da61fbe6474e52271db8fd6278062946893be",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 228,
+    "seconds": 1.1933583909994923,
+    "pass_sha256": "477a9e327956b6877ce97e12f81572e37c8f3c5a59a01e2a910e6fdf51081309",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 231,
+    "seconds": 1.0320313120028004,
+    "pass_sha256": "fb7c719ef355398248ec9389ce10a623335911296889773f7ae78c2856a59e7c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 227,
+    "seconds": 1.2717353999905754,
+    "pass_sha256": "460c9cb00e15b7461b3ac7a3a8cb1111becced4a74b944ce97b32d3f9df588b7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 233,
+    "seconds": 1.114415652002208,
+    "pass_sha256": "5125173c69304d17e0466795ee1dfc149f547ee124a767e7251a54dd0ddc1706",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 238,
+    "seconds": 0.7785292140033562,
+    "pass_sha256": "e53cc48199ce3e2066ebd028cb636aab3a6b46c3bb00a47c78d12cdc2b380aaf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 235,
+    "seconds": 1.1066739199741278,
+    "pass_sha256": "c3215a8c8a59480169589f5e97585a166f16dd1ac4be474ca5d27455ca29df25",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 240,
+    "seconds": 1.247586929006502,
+    "pass_sha256": "456a8f2aec41ab5544f8886684cbb1943786cf3b8e3675d7c12b6a9184d8efbf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 236,
+    "seconds": 0.9756932269956451,
+    "pass_sha256": "a90c7968884cfee10b704c2f4a79803e60d3fc731e153e31305f7ef3975859b7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 234,
+    "seconds": 0.7374140580068342,
+    "pass_sha256": "546d2779c3b59009790a8a830abee60ebc0549e0e4a3c5fb7f4702c341284f1d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 241,
+    "seconds": 0.8298428920097649,
+    "pass_sha256": "800dfbd7c2a5cc9bbe8421a44b5b02b28cb7a3e285192f5afe72f28af712633d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 239,
+    "seconds": 1.1828286249947269,
+    "pass_sha256": "1fb571930a3e975f85dbf25e86d8e4f7b28b555df56e8a90d195d3706a210f27",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 237,
+    "seconds": 1.492229766008677,
+    "pass_sha256": "90d2a2e5c32673d34042277bf30c8b663540dd19228a4476b952fa4e4f80a9f8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 242,
+    "seconds": 0.6731605280074291,
+    "pass_sha256": "e5a259449c637d85d7585b8e4d0c1e17bcc830ed06c01f528fb8c8844790983e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 243,
+    "seconds": 0.8152471189969219,
+    "pass_sha256": "83c3a96bd1a8d665a9218e7ea25bfb57d1e362aafb43937c5b154b4e7f844fad",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 244,
+    "seconds": 0.7707575770036783,
+    "pass_sha256": "c55ae339d89b92c07cf570c6113ff973026bd6b89be5b7f5037279c7497aa894",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 246,
+    "seconds": 1.1114732040150557,
+    "pass_sha256": "bb430acf1756d3b8fe912095174b6fbc4f98279ea2edde363946b0d70db0a324",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 247,
+    "seconds": 0.9256519079790451,
+    "pass_sha256": "5e15a9c2a3a6c004fad44db41b33dde12fdc2cf2d9270e21e44044690594ffbe",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 249,
+    "seconds": 1.5469492370029911,
+    "pass_sha256": "edf353ad8433cac3f5db91fd8f37f7dacd79cc254e4742e0697028fa03eac27d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 245,
+    "seconds": 1.2984571310225874,
+    "pass_sha256": "0c96c6c42263c20672c408d54f410caa12b7e9cd7cb6e9763beb336af25444e3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 248,
+    "seconds": 1.0004302960005589,
+    "pass_sha256": "f8e1638adc17516c12b8d2fdebb89b6bfd42fcb626c8c268da0cab5185d18c39",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 250,
+    "seconds": 0.7471363340155222,
+    "pass_sha256": "5f1d493b99fca0bbcb2f356e13d59fa83f2173b578b95337ce51bf48a7636983",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 253,
+    "seconds": 0.9610153649991844,
+    "pass_sha256": "9a91ce492a8afd37457b7a9c2f0e5267507848eba7635cabe245ca0c56e5a113",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 254,
+    "seconds": 0.7661673059919849,
+    "pass_sha256": "98687c68aea5cf9e16356a18989e99878ca5646bb57f964266e871767f129eb9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 257,
+    "seconds": 1.1418645319936331,
+    "pass_sha256": "76f027bb5615d7ca9e14a20c44984a37be1b5d0fd0db4aa693a52a2722a8d6ee",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 251,
+    "seconds": 1.4352829099807423,
+    "pass_sha256": "f053cf792a2bed679a675610852e952a3bbb70ed142de88ec9f266bc83f784a5",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 255,
+    "seconds": 1.5522105359996203,
+    "pass_sha256": "2784ef747175aefae816655f59d46ab8b34cfc33126be851287b95d61da6a09e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 256,
+    "seconds": 0.8387645139882807,
+    "pass_sha256": "9a1ed90429dda424447719a6babd1a81be9ab297b495881366940e3fa1e9fd7d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 252,
+    "seconds": 1.071713962010108,
+    "pass_sha256": "d4dd5d23efab803b65ab13c29b766b1a5f75ec74c85d6f55713df51117a16a80",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 260,
+    "seconds": 0.7314667989849113,
+    "pass_sha256": "4174d3b093dca7d443b50459e7080707fc0b6344400b968030e3514d65c907e2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 262,
+    "seconds": 0.926994547015056,
+    "pass_sha256": "fb5a709f2cfb0b947044c50f4b56a9e76d9ec2d4c638472cb8d13efb4f364ce8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 261,
+    "seconds": 1.0155030509922653,
+    "pass_sha256": "fbb4bae6bc442c7ca07ebf9710bcd4e27d23fb5f7e9e6946ff2e5f0752b02ee6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 259,
+    "seconds": 1.0801094439812005,
+    "pass_sha256": "48ecc8368cae258af6855b173e35ed3e95533d7f20688cba4ac08c6dff63ce8f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 263,
+    "seconds": 0.8676443120057229,
+    "pass_sha256": "2e9926c1ecb8d552ca6b284dec1866f6fdce5f9101259c2a5b94fd2e80b1e891",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 264,
+    "seconds": 1.148534075007774,
+    "pass_sha256": "b790c9e14a232966215bb65d3b21702da5629d1fac0f6c071ede04ef8808efad",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 258,
+    "seconds": 1.3622267940081656,
+    "pass_sha256": "2571bb58be03691a46f39b8f678c90bfcb9c32abb88fa903261721235b88cfd6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 265,
+    "seconds": 1.7886644690006506,
+    "pass_sha256": "6392962d3039159849414bf7ebc0506ad3d97f3e97d338486b36da7aacdde3bb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 270,
+    "seconds": 0.7289154549944215,
+    "pass_sha256": "344af8a0f2aaf26bb512b4caf39459622e7c85568a3b6f5214d587ae307a090a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 272,
+    "seconds": 1.0234433049918152,
+    "pass_sha256": "bea5192fdd4fa10ca205262a63cccc34c316b2af7f89aee1602b0472722c87a6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 271,
+    "seconds": 0.8193433089763857,
+    "pass_sha256": "7705d00df4a2367b287dfe2bfb7cd1fe5836db193d722cf1093270dbee50e5d8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 273,
+    "seconds": 1.1707741090212949,
+    "pass_sha256": "689e9a71984db81d6696fc4790933eec7091a06175a8478e14c169bb6b36f3f1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 268,
+    "seconds": 1.291052265005419,
+    "pass_sha256": "9956855c62af4a8e3cd631374b0c4d9d5a90d9e1f58b4cff5e3a82d394917cc9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 267,
+    "seconds": 1.3585737899993546,
+    "pass_sha256": "c00d386fed0dec5399b110acac558f06ccbc86a598d3aa17892ea58b6ad3e605",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 269,
+    "seconds": 0.9015060990059283,
+    "pass_sha256": "2901888a83c88bdbb5db908c7d4cc09f4e030bae0c2e5459292c14713f464ba4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 266,
+    "seconds": 1.1213026460027322,
+    "pass_sha256": "0ea3d01b73506f9b8b24a6bd1aee33693315c92ea38443bf1715c0ed667b616e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 280,
+    "seconds": 0.7266748230031226,
+    "pass_sha256": "6b4e2237aed342416a7d22a870fe79369b8c48c31bc27c28fd95bf9da6754706",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 279,
+    "seconds": 0.8943091410037596,
+    "pass_sha256": "7f51a44e50ea96306c5ec879a24b9bd7efd09cf279539895cb67caa282a57415",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 276,
+    "seconds": 1.128022365999641,
+    "pass_sha256": "fd934b54a9f75b24b57f4465137b22812f384c6cb6821de45790fa5ea34b6087",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 278,
+    "seconds": 1.3626920019742101,
+    "pass_sha256": "c90a5c10e688e1b45b085937985be23320bb7bb24d7e4f9e3ea654e58423032a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 275,
+    "seconds": 1.066791380988434,
+    "pass_sha256": "b08c6af7286490bc4848927b14ee9593c09e28345dd14216deb40901011a5a1b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 274,
+    "seconds": 1.7289134440070484,
+    "pass_sha256": "6c73f1671f962bcb7a4aa2757be1e0c38063688745bac9bce01c2ebb6149c183",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 281,
+    "seconds": 1.202683290001005,
+    "pass_sha256": "f27fa4e0754250e2f910edc2da3d81e259c11c297fa1fe4bfcbd2c3e845eac4a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 277,
+    "seconds": 0.8341729899984784,
+    "pass_sha256": "90a5ce762ecdc61d2a61086e9c389f91264c0cacaca47e2ce5316567146c09a9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 284,
+    "seconds": 0.9260854800231755,
+    "pass_sha256": "d6824c2dbf2bd75f5216efde8a0107c96b17c46bbd6557b521dbc942c75030c8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 282,
+    "seconds": 0.6788475319917779,
+    "pass_sha256": "9f60c07880603ca131627c6eb5c76f5911bd088b48b48c4e4ebcddb46291f1a3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "burned",
+    "wepp_id": 283,
+    "seconds": 0.78307664199383,
+    "pass_sha256": "3bf95c53dbe307b30c4bbdc470caf93da615615f65658737f50fccff4fb6a01a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 3,
+    "seconds": 0.7331810269970447,
+    "pass_sha256": "cd136c4c7d6f4192c10b4b738a65ac2d02e8e8c5ceba5ed17500be5d86ed009f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 4,
+    "seconds": 1.3772473459830508,
+    "pass_sha256": "8267b03106e193ec0476bbfd24d488843e137c0d4bb315b138bad1b73717067a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 6,
+    "seconds": 0.9621289259812329,
+    "pass_sha256": "3d6821a266d4dac3de04e2270be1cc212a4a05637dffe99547bb1157eb560d2a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 5,
+    "seconds": 1.176052865019301,
+    "pass_sha256": "1c3aabbb283b2d1e44837b72b65e8b19ae4c4366b4cdc2b8ec0657882c6e312d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 1,
+    "seconds": 1.100698800990358,
+    "pass_sha256": "f8d336a8bfdcfdaf5a0998e432252e95d7db4533332e3a699b2a9c6160723172",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 7,
+    "seconds": 1.0372504080005456,
+    "pass_sha256": "2310be8d744fa60ed0d3516490f134f14998bd780277cdfcfc54535aa3226c23",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 2,
+    "seconds": 0.9057770200015511,
+    "pass_sha256": "cbf6e7c2dda4bdf8dd59d0fde2c1a36a95654b4d0bd9c63e96461f520cf3051b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 8,
+    "seconds": 0.8282398770097643,
+    "pass_sha256": "7204a46839369174968492573822d88690a315fd3b8acb697c7c9fec5384488b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 14,
+    "seconds": 0.9770904169999994,
+    "pass_sha256": "963e12c33b98b3761c68117d1583a13a18c3d58aaa07e38dd943ce7cbabdb6eb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 9,
+    "seconds": 0.6766229200002272,
+    "pass_sha256": "2c0a43128a89e39c88a101bbfb68882e5f59d1e8b8a5c1e05d30a065e03e431e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 12,
+    "seconds": 0.7107746070250869,
+    "pass_sha256": "d45f6952a360cba9cfe3a74b58ebf53247e38f92c16b56c50146551a5ac56821",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 13,
+    "seconds": 0.8486929530045018,
+    "pass_sha256": "99ebc7f090c9a18de75a3a3bb302177f234b9bda5be36a9634e713d6cce1c223",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 15,
+    "seconds": 0.7735074890078977,
+    "pass_sha256": "de000fbf7fbfd7575039e72d0ac806c4f1ae775f73772201420c7120e854f38b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 16,
+    "seconds": 1.2738444749847986,
+    "pass_sha256": "853dc3fbe06da2f4400590a9792fbf16e13a38039d28716910bf01780eb7fee1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 11,
+    "seconds": 1.512167970999144,
+    "pass_sha256": "929c4e67fee317888bc27468da5f7099cec256488fe68644b1a6b14983b7fa77",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 10,
+    "seconds": 1.1915132910071407,
+    "pass_sha256": "cd8822def854797e765c66dc162c9a926353440f54c76ec963c8b8c021ac8caa",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 17,
+    "seconds": 0.7328037830011453,
+    "pass_sha256": "b6f31b41f8b713cf7839cef5067ceb1f64d8eeb51c4911a63bcd7a7ca6f8b56a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 19,
+    "seconds": 0.8425466830085497,
+    "pass_sha256": "525a27f1151520b40fdc8bd6f0e31506916294788442a5aa0488836f2b9b2ef3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 18,
+    "seconds": 1.3320076650124975,
+    "pass_sha256": "904be48657f2474906b54aa8e1b0a6b4c0541130d3aabe8fef737991b660e8ea",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 22,
+    "seconds": 0.9939355529786553,
+    "pass_sha256": "c1d93260a6bb569e8e921a3f72e2234cd5eaefd19e84865c1767a9acf810b8a6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 21,
+    "seconds": 1.2393575059832074,
+    "pass_sha256": "cd6d895ac5e934c4f4b9c87cf63b98d0d74f18f6c600a6b113581af552cb449d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 24,
+    "seconds": 0.771338785008993,
+    "pass_sha256": "06746a9a9af3adcfe8146a8631f85623fb538b69c0b9384a6f5c1b6ff3de464e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 23,
+    "seconds": 1.705319808999775,
+    "pass_sha256": "3e4d4756b3f2b8e8b964d1b110715195a8474f935584c332305715827c6d75ae",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 20,
+    "seconds": 1.0762454400246497,
+    "pass_sha256": "bbffe993091252a7b94daff48db6427fd156607f25cbb2a9ae1b466bf837c7cc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 25,
+    "seconds": 0.732870539999567,
+    "pass_sha256": "70eb19658b06f0e74d69b9ec116d08b30d7f0774bdca9cdd4612112d0f9cd3cd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 27,
+    "seconds": 0.7979108500003349,
+    "pass_sha256": "ace8119173e2e0b985cb3f8ca21a1d9e3e2c8f4e9b82dd7a7d937933710f36c3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 28,
+    "seconds": 1.2538855399761815,
+    "pass_sha256": "74674a8e93c35c4f68bf3c4c9e2abcaf96a39692351c786661eac6cf73e987a2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 29,
+    "seconds": 1.098420624010032,
+    "pass_sha256": "f38b7796c4905474f109b742bcc4934b4d4da2b45517a3f6ee795ffc7173e591",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 26,
+    "seconds": 0.8782212270016316,
+    "pass_sha256": "55f54e10daae7a2f8cea62000e95193ddb773c7f18d81543d003b71f42b2b755",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 30,
+    "seconds": 1.1646396289870609,
+    "pass_sha256": "363bfc20dfd157b21985b012eed2282de95fb30090aa8a471da4f2530559c0a9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 32,
+    "seconds": 0.9802157369849738,
+    "pass_sha256": "ba8ac925c318cfcdaa13f846d25dda43a6e49aae35897b8051a2702a4e0cd04a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 31,
+    "seconds": 1.322959120006999,
+    "pass_sha256": "87c7508d738bbb7bd7f210d627490d32a45a49718d6412930ce90bbbc043b22c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 33,
+    "seconds": 0.6866499420139007,
+    "pass_sha256": "710ae282696f3a175c65d4021fceca49424feaed8784bd5af3ff2a3cf256907b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 38,
+    "seconds": 0.7843543560011312,
+    "pass_sha256": "099076f272da7e96049137519342c9e3a899f5be4f2b6639dd1be9d6630f058d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 34,
+    "seconds": 1.0566966170154046,
+    "pass_sha256": "8183b03221646a05dbf290681a0f410fce8893bf89d63eb574ffa2af1dca71f3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 35,
+    "seconds": 1.496341582009336,
+    "pass_sha256": "d06c8ae2889379c75cdd5b780652a3d30a73f36df6d27f23884390c10c900068",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 36,
+    "seconds": 1.187641069991514,
+    "pass_sha256": "96a8d5e74c36fd87c41140f1450f65f4f7f801a6bb17e237732d9ee721639484",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 40,
+    "seconds": 0.9485247469856404,
+    "pass_sha256": "8b0e31709f8e019e4af222e5fe1231c8940c59c41d740204e0683dfe0a3a4d76",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 39,
+    "seconds": 0.8302181330218446,
+    "pass_sha256": "ab8b753d02972838a80d4a32cb9d91003413f19cb7635673316f08233d05499f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 37,
+    "seconds": 1.108101843012264,
+    "pass_sha256": "6b8ec8f703dd50ee5bce513cc5574811e1c9373951e055b216bc91d1669b551b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 42,
+    "seconds": 0.6849357349856291,
+    "pass_sha256": "fe0c6085ffea1cd48637c6a07fcb6d628f5b74ab24ead35e2b8a39b8b46f3257",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 43,
+    "seconds": 0.8911730289983097,
+    "pass_sha256": "41fcd4aa5eeefd4dda6177d73464157b09bb94b0689bbd1e245c9e7b7de4bdd2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 45,
+    "seconds": 1.011273758020252,
+    "pass_sha256": "808446f79393f9abaafd1ce2ce1f4e027aa2f34a0294ddc0c63caa383f8a86a9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 44,
+    "seconds": 0.7891088739852421,
+    "pass_sha256": "af83028428e29cec4d12feedfc491028aa60944eee623f553e2bd08bad8c74be",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 46,
+    "seconds": 0.9473309020104352,
+    "pass_sha256": "ad2652b110823cebc565fd2ab9bea496045e972a283ed6f16cecc72d26c5ef60",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 47,
+    "seconds": 1.2963905750075355,
+    "pass_sha256": "ee1146b6cbc0219a9edf04b1b266cdb5c03e9339cf1783eaa4ad5b6244622c47",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 48,
+    "seconds": 1.193154239008436,
+    "pass_sha256": "14f73c14ab55981c2784938bb83f748bf9c2b738b39bcba6b95df15784e2fa30",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 41,
+    "seconds": 1.1388820720021613,
+    "pass_sha256": "b9695bea430a52a077d8df2c06169b9a26e6cf08e7e81e9eb896a5cf3fd6805e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 49,
+    "seconds": 0.6904858130146749,
+    "pass_sha256": "089b2cfe40f5514b1627a4bfd60d971411f3e54ead58ccc53c44c84737308d31",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 50,
+    "seconds": 0.7479239419917576,
+    "pass_sha256": "f3b150189cea5a1bb6f806e85263197a20813366807e33578bea8751c1cfa74d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 51,
+    "seconds": 1.5606255440216046,
+    "pass_sha256": "e20325ea9092df4b727266e290dddb57dbe48543723bfc395c56964a67bf2652",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 52,
+    "seconds": 1.3496060379839037,
+    "pass_sha256": "c7437d6e0d9b85ef19a4a3fced887eb83761326b384fdf030d45c140890b0a15",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 56,
+    "seconds": 0.9315132359915879,
+    "pass_sha256": "096ffdbf6fa81e4370948f80132a4b809ee6c397fd04d21220bf75606eb661f7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 54,
+    "seconds": 0.8699478690105025,
+    "pass_sha256": "8c59a1b9952ef7af7b3feecf1a861eec6294e407bc5d93c1927825cd407c9070",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 53,
+    "seconds": 1.2453436579962727,
+    "pass_sha256": "641e7af15d3d03bafc4966486b14ecc0c218301a5d3eac44161c971e4ecc7d32",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 55,
+    "seconds": 1.165038622013526,
+    "pass_sha256": "b270deb834dd52387387b68f8a82f7eedd7c2db6b6f7843397a17608953a7919",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 57,
+    "seconds": 0.731149824016029,
+    "pass_sha256": "20738f5f0eb8195112cd4bdb5bafe8b38cabb367731c766202baa66a52a3b5e9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 59,
+    "seconds": 0.9512285600067116,
+    "pass_sha256": "9f6595efb71c99c41ed247cb7bca56866a7792d66d21335487e5d48e19ea4f70",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 58,
+    "seconds": 0.7587023700179998,
+    "pass_sha256": "57e786db0e66bbdbf2c39cf4c81735dd4a8d14c676fc0c153cfda9c238e4e0bb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 62,
+    "seconds": 1.0239693030016497,
+    "pass_sha256": "f4175b187d3180e847f844d1a403cbc8be74713fa7c01e39d9368a74b3954596",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 61,
+    "seconds": 1.5054636139830109,
+    "pass_sha256": "d68407159347f1a2ef492c6bba92893754b2a8f2f41e9ff8e9be65a4028dd405",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 60,
+    "seconds": 1.1528792089957278,
+    "pass_sha256": "d0212fa7ff456e4c37fffeb5d7a65fd43fc1d0002b22d1fd4c882d4f36bacb14",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 64,
+    "seconds": 1.3194999079860281,
+    "pass_sha256": "43109b0af9ef543b795ce363993ae75e5c7b3e8dabee77383a9b24cd135d817a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 63,
+    "seconds": 1.3797953419853002,
+    "pass_sha256": "9a2d41f80951d7d031c4873ac50dbc8bbb80e228fa753f164f7455c9112710be",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 65,
+    "seconds": 0.7380472649820149,
+    "pass_sha256": "8f8732f2393092b3be2a29bce06420b18c6e5d384c1e53efc82245772a24359e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 68,
+    "seconds": 1.4301200449990574,
+    "pass_sha256": "50fc78d52f43c703506790cac37cc69a10934dc94f67967327ef1263d8f0ff56",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 70,
+    "seconds": 0.950661504000891,
+    "pass_sha256": "398dc84d861fcbbd0ddaf277075c7814b5b48f2acd7c535942b56f32d7ab5df9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 67,
+    "seconds": 0.8394862999848556,
+    "pass_sha256": "b4b6d93391bf69cd394f57392b281c8e68804a8f85e28a5686a54787238de5fb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 72,
+    "seconds": 1.1431109480035957,
+    "pass_sha256": "77405c395db6470a1ece2216a0c4cfe82072be5265216d8c595a4b362892dc25",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 71,
+    "seconds": 1.2501679450215306,
+    "pass_sha256": "439264e427f815164b9d007f95656e43b8ddecc1ded2934d5c67b9b701703758",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 69,
+    "seconds": 0.8936395090131555,
+    "pass_sha256": "b9871ee537ad776c9b6b1c39f95fded7c22998ed26f6151c9689d5ac9c4135cd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 66,
+    "seconds": 1.3604170249891467,
+    "pass_sha256": "6a2e7023386d45a5257323819e7e71791ed6e867f50b41ec1a9fd914267e3703",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 73,
+    "seconds": 0.6309612540062517,
+    "pass_sha256": "d388a63283174a99e3d90f5b19e9eb3ed587a2bed61a3243a856adc8f7720e9f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 80,
+    "seconds": 1.1777516400034074,
+    "pass_sha256": "d9019481338f7cd0fabce9af23918de996191e916341e4ee1edbe56d659344ca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 74,
+    "seconds": 0.7669071489945054,
+    "pass_sha256": "192d80b2b6b6803c0fae5b7e8be6cdc22ec0e839e141221a5347aeeb80600b71",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 75,
+    "seconds": 0.9990507540060207,
+    "pass_sha256": "010c43488e0800fd98fda06b92286d89a320ec1f7967f84557fecdd40c2f520b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 79,
+    "seconds": 1.2291610540123656,
+    "pass_sha256": "c37c25034961c04c4e758a9561ae399e924bd0538eb40eaa2c0bc52eea2821d4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 76,
+    "seconds": 1.3262888089811895,
+    "pass_sha256": "f7c228761792fbdbbe0ecdb21fec417300009d92139d281af68522b89bc2af86",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 77,
+    "seconds": 1.0873640050122049,
+    "pass_sha256": "a18f6fc13f5fa125ff77cf0c9288bee4d7fef624b33c9c5ddee0405b08d09e9d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 78,
+    "seconds": 0.7195631469949149,
+    "pass_sha256": "a31009f9e88c738e8c0a083c9bd465574f5cd9c7008bfaeed7514c66e3c30b9f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 81,
+    "seconds": 0.9194934299739543,
+    "pass_sha256": "2a991f2c24ce19f38d9c7c985811e5c3b3ba653f48555a47c5608a8f7603086e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 87,
+    "seconds": 0.6927299520175438,
+    "pass_sha256": "3bafff59a7a880b8ab3ade345003573a22d581da590b55f10e945e94fb181e26",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 86,
+    "seconds": 1.0819939989887644,
+    "pass_sha256": "3c3c2c4331e9c3449ab8583f2edcf81132b4ab1cd8632d7473c7f519c5bf15c7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 88,
+    "seconds": 0.7858548249932937,
+    "pass_sha256": "0ec5ee57e848b750c856595fc9bd8de055bb4076101c3f6f4165803f08b816ca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 83,
+    "seconds": 1.2387074049911462,
+    "pass_sha256": "42d22862043e1e6819f6023f0c539405f51abb0e528552102a3e614fd14beb82",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 89,
+    "seconds": 1.2962526560004335,
+    "pass_sha256": "57c309fa8ec0a3546dcd7390a8f8a8c165924cbc06a6bfc71fffc8895d6c5e10",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 82,
+    "seconds": 0.9936488749808632,
+    "pass_sha256": "0dc9a42e9e62edc267217e59382b44aadbbdbc132bacf6af5fb9c4d3c382471e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 85,
+    "seconds": 1.4043289639812429,
+    "pass_sha256": "4478c510205edb3722a3b6591dca2052457e8722031442c10e1d4e03869749fe",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 84,
+    "seconds": 0.8437175779836252,
+    "pass_sha256": "540fa6c8a0c1e0d9b9b516746095ba27f251777389ad172dbf68e4b2ff6a0a77",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 94,
+    "seconds": 0.9689762540219817,
+    "pass_sha256": "093c7219f56cd77867b7f618e9bf29f9069f29d6bfa18f540f992a253cf7a3d4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 92,
+    "seconds": 0.7284277440048754,
+    "pass_sha256": "618248825953401f1981930983e21fbd5004fe1a4ce3c22890d3acd9d606eeb9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 96,
+    "seconds": 0.7989403209940065,
+    "pass_sha256": "420fbad17259bfd3297cbd7b2d8d403863cdde9c159865e4dcbb1e07c4615139",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 97,
+    "seconds": 1.1382077970192768,
+    "pass_sha256": "ebaf6cd1576287e580adc10155e7b79a1c94c7b891cd84d354feb42c65481807",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 95,
+    "seconds": 1.37160673897597,
+    "pass_sha256": "27d0eaa9bf0ef47cc072eaf4869a062c811a9e8557e3dc124887daee0c10cc5d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 90,
+    "seconds": 0.8808166540111415,
+    "pass_sha256": "eebd71d5c41ce602715db7aa79bc4f047e2b7db56fda26b6a65bdb3522cb9959",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 91,
+    "seconds": 1.0604380459990352,
+    "pass_sha256": "46373a48aa4a72c7dd40fb3bcf5744b32a8caec2d8c65c33790be3d8dbd7b356",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 93,
+    "seconds": 1.4351892829872668,
+    "pass_sha256": "eaa4de34116ad4eac4d8d5deadc3ff9e01e6ee568a45585d643d96961b126f16",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 98,
+    "seconds": 0.6227792740100995,
+    "pass_sha256": "a4dcb56076ec3c756f30c2cb533d91a619f1a66e3119ffe4cd42608364f8e4b0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 99,
+    "seconds": 1.5951275389816146,
+    "pass_sha256": "61fea8712209b660c7f3933b09f71ee2a0088c1da36b9340b24fbba9fea6f8ba",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 103,
+    "seconds": 0.7550478820048738,
+    "pass_sha256": "398335f5c8bd9b86c9495c94bb4d47433e6aa0cfce2a3f51049a9e5e618a8ad3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 102,
+    "seconds": 1.3231170159997419,
+    "pass_sha256": "5bf8f25c273fa63f3f29c61c33945a45b70e4eeb2297fed5dd968d706d2c87e1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 105,
+    "seconds": 1.1474697170197032,
+    "pass_sha256": "6bb40155a026eba6b9662c9d640a902cdfd893417a7d2199ecae3b164b43f7ba",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 101,
+    "seconds": 1.0632956420013215,
+    "pass_sha256": "9459c9edc586e6aa97a72f81255fc3be75a7060520d821990c8bb6f9cb37810f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 100,
+    "seconds": 0.9251684220216703,
+    "pass_sha256": "5e79f3da87df6bea39af9b1b04ef7bf6818fbbd494609f1e90aaed602b84688f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 104,
+    "seconds": 0.8519432639877778,
+    "pass_sha256": "8c7d395dc78576c8c88256024f6f13cfb82f94c27d3018f3e8aa281271d1d383",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 106,
+    "seconds": 1.196503897983348,
+    "pass_sha256": "bd13a5e4fd3c8195f65fed3eea63e24b30d39abfd7c8df6bbdfb066603fc025f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 108,
+    "seconds": 0.6772791490075178,
+    "pass_sha256": "ae1e4cd78ada36dab33cee21d5cabebcf6dd2c4daa206c7c4a7098ce25867b7a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 113,
+    "seconds": 0.7799582590232603,
+    "pass_sha256": "51cdbc42f5394be63c5bbfe6c00aee3777b45cb1a21d0239337d9d3235800d4f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 107,
+    "seconds": 1.2246251410106197,
+    "pass_sha256": "61481dc096ce01ef5f4b217701f3167907bdebe7d156b2bed763baf40be49025",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 110,
+    "seconds": 1.1186231359897647,
+    "pass_sha256": "eb50d2d476da8ed1050318fd382d7fea4018c5434985a1424318231437ec73e3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 109,
+    "seconds": 1.3469617170048878,
+    "pass_sha256": "58a9ffd6aa23e1467cb39af8d7bf3480bd034801ad1cb9b823e25ec13e988244",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 112,
+    "seconds": 0.8754815369902644,
+    "pass_sha256": "3208951387d4297db85dc1f66ab0ec0c38a1249d0df8b7efc4857aaf8d4b5919",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 114,
+    "seconds": 1.1309621699911077,
+    "pass_sha256": "58dfc160ad40890f078c1175488bd1e600d14ac3419b59c745f8aa64722b4d5c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 111,
+    "seconds": 0.9875171790190507,
+    "pass_sha256": "e3f8dd7721788eb10d8191302ffb67f89cb384e063d41f3d33483e7948597e84",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 118,
+    "seconds": 0.6789030990039464,
+    "pass_sha256": "a21254d357ea20df96cfb19620dbdbfe2aef80f34e907ab722389a1a61bf63fa",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 116,
+    "seconds": 0.8548753549985122,
+    "pass_sha256": "b3f6f754b4bea202b433142dbd80225e8e61fa61199653a1572b63515911fec3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 119,
+    "seconds": 0.7877603009983432,
+    "pass_sha256": "875d0a1933b134b6e5ccf1846efc283486ad0a2ca4d247f30e8e642c08e3b07c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 121,
+    "seconds": 1.4229077839991078,
+    "pass_sha256": "ca2648fd1280bab69bd7576856b6eba21ae9ad43775777c1aaffe88ff4a0c35e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 122,
+    "seconds": 1.06260491698049,
+    "pass_sha256": "6c17632bb77375028c24bd6d0f80dddcab03336a8eac8a22ff418b6e71e8fcad",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 120,
+    "seconds": 1.148406635998981,
+    "pass_sha256": "95a158d46471a73547c0298c5443f7548b21e7d969c35ef4b6ab2efa00e8e120",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 115,
+    "seconds": 1.7673283879994415,
+    "pass_sha256": "5e1b8e1d198b1b95d0107a534816d8bb3f3ca625ad8f521be77c9d61eb2a47ca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 117,
+    "seconds": 1.3203073419863358,
+    "pass_sha256": "99124389ed47916ffe83a7857e1553c9a376d81522293b6e2e0e62abba6769df",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 124,
+    "seconds": 0.6825467569869943,
+    "pass_sha256": "da138d11fabf2b043f202b818ecdb4d2fc425973809640bb6ec8a8913151cc29",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 130,
+    "seconds": 0.7876243659993634,
+    "pass_sha256": "2d8a3bb1a8cf6ac445e33bc7c1e27064b4112f00feb80fbf599c1aacf391a3da",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 129,
+    "seconds": 1.2347746449813712,
+    "pass_sha256": "f57959ff269c396b5d6fe3b9d74c0262897148804aced23f4c68046306ff4b2e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 126,
+    "seconds": 1.1587324230058584,
+    "pass_sha256": "4bf3128eb018067c887eb8be50e1211582952c22d7f386c234c6c1160ba182ea",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 125,
+    "seconds": 0.9941710529965349,
+    "pass_sha256": "55be15d5166765ace0e121134d22519f0f415272352766567112eaaa7a43102b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 127,
+    "seconds": 1.310889946995303,
+    "pass_sha256": "96a40dd9287ead5512ce213ea686d3e80629428b2a6c189e77aef4a7542281b3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 128,
+    "seconds": 0.8770291079999879,
+    "pass_sha256": "6245f8433c249a844e72da5dd443969d684c0acf0a14cfc425057969d8a412ae",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 123,
+    "seconds": 1.1095543760166038,
+    "pass_sha256": "1acedab04fe47eec4cdb265c4661ec7589d61028fd5c1eaf9aba8f484371e2ed",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 131,
+    "seconds": 0.6322607899783179,
+    "pass_sha256": "1ebd2177c9383c2cc54b7bdac1bf323186c9976b1c782d5054f1484465f8148e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 132,
+    "seconds": 0.7441771010053344,
+    "pass_sha256": "57ab001242bf65d6d1b163f93cbcf3cc644ade8edf0b543fea4b801b7ef3ab08",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 135,
+    "seconds": 0.8144463979988359,
+    "pass_sha256": "b429acaf1cf83ea5bc430136c1d025500fa7a1295ec131e5ed7f319d5ad07de0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 134,
+    "seconds": 0.8999160829989705,
+    "pass_sha256": "0851de7cfdfb5ad4761ac4a069273bf1ee271974f3e0ec8d9b89081a301bb985",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 137,
+    "seconds": 1.1604781099886168,
+    "pass_sha256": "0b1bee78c032b011c934c37247970c41c4d9c3640c05fed21f9341a655025d39",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 133,
+    "seconds": 1.231353292008862,
+    "pass_sha256": "bcb4402538cdcbafc32f07e7adc1eca8254739546cbf36f8ef222713f0f5631e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 138,
+    "seconds": 1.7160528499807697,
+    "pass_sha256": "73e96bd81aa26f0717d0eb71ff4f6850203dc58385bab165bf06fb1da1c5723a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 136,
+    "seconds": 1.0807697570126038,
+    "pass_sha256": "9df58cdf1db7ba90098d546a531cc58038ba5bb9caeedf470fd3fda2eee8d369",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 139,
+    "seconds": 0.7405968789826147,
+    "pass_sha256": "cdc56cb2f6af924d872f96f40d9cc032a6fcb2ac05b2a39b16a88274c9d91779",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 141,
+    "seconds": 0.9509903890138958,
+    "pass_sha256": "9937bc95a1ed7f8c402598c27184c9a988c9c7130ec7090a354127d1a756c856",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 140,
+    "seconds": 0.8147318410046864,
+    "pass_sha256": "5b436e3107159cead813439957379c3e1167fda16877f6af55f7668b4cd52f6d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 144,
+    "seconds": 1.1968386579828802,
+    "pass_sha256": "393b4dc9e6a8b0e75fd3036b563b7e071c1fac195dedff80a0224825bb0076d6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 145,
+    "seconds": 1.015379552001832,
+    "pass_sha256": "8415866955cc893227411dce0907da00d3c5a1ac92a3f3e60f308e6f611dcc1b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 143,
+    "seconds": 0.884567004017299,
+    "pass_sha256": "1ce943bbcc74ec689b1f16fbc67622fe4ebaaa0d68f9b0fcd9b46c2dd1cf9ece",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 146,
+    "seconds": 1.1073019939940423,
+    "pass_sha256": "bde6faf9410c6bf0473a040fa16cd77ae819814aab4884c3430e157aeb299db7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 142,
+    "seconds": 1.8279476870084181,
+    "pass_sha256": "fcade231b72e968f41f7978e0c1c3c2eb3631f08949055abbf4bc33c24c515c4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 147,
+    "seconds": 1.149697738001123,
+    "pass_sha256": "d7959eee5186dd884c7c62ea7c2c46d58cd40b9da8bbeab11ef39c9a61466c19",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 153,
+    "seconds": 0.710744562005857,
+    "pass_sha256": "7c3c4cd5592795d4b30446cde594bbcc5ad69d926fbedf0fc6820ae30cdbb00a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 151,
+    "seconds": 0.6797926900035236,
+    "pass_sha256": "a293882aa5f47151dd981fc10235530c7709301918f415825d2344b10b4f8813",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 148,
+    "seconds": 1.2242215279839002,
+    "pass_sha256": "b3d7c72e5dfa01ae2f436481f561b45a0aaaa38124b7a98392e7c59a82c0ac0b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 152,
+    "seconds": 0.8539186030102428,
+    "pass_sha256": "1d43b3825512c4d14f917df16177daf1dfc5ec598f79d3f163bd52b29e7666e1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 154,
+    "seconds": 1.3349152420123573,
+    "pass_sha256": "2eb906b1cfbe29558ba67f840d7e2beefb08b17190a3dd6062a1aa7589431948",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 149,
+    "seconds": 1.0347705080057494,
+    "pass_sha256": "3d602cea804694c3e502304cdec431315922d1a986bb7a42967f56deba107003",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 150,
+    "seconds": 1.5290199820010457,
+    "pass_sha256": "645db6d1898e626842eb7b6707038b3ab087d78d29c67381192d689970d21aaa",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 158,
+    "seconds": 0.6799090499989688,
+    "pass_sha256": "acd81bbd77b563306df9e2ba149695958ae2bb312d9657c0bdeeb95c53a39bda",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 159,
+    "seconds": 0.8693456929759122,
+    "pass_sha256": "ca9d2ce513ad04e6c3001c6e4808a74b521910f47f09ab1e0a370bedb1e41d76",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 155,
+    "seconds": 0.9708884609863162,
+    "pass_sha256": "05995c9182252f723710e6789c761a5ea96dba7d449b31cfe2f5d947ea134c50",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 162,
+    "seconds": 1.202296995994402,
+    "pass_sha256": "981152bd4d10131d4221f024dcaa9366b7ea0d1e105dcbb86b415be4d34c1c3a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 161,
+    "seconds": 1.1416710319754202,
+    "pass_sha256": "458ed05899bca0e753ab3cbf82b43e7bad2069167978765e97b1b95f5b2f6a6b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 160,
+    "seconds": 0.7857090680045076,
+    "pass_sha256": "4e327e0a06492aee0f3fb11b111408bf112c52c8d89dba867eb94ff9d78aa912",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 157,
+    "seconds": 1.0827870189968962,
+    "pass_sha256": "be29c70f5b270ebda0acc61aaa2cceb0e5176929f18018bc6c2f55320445fa4f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 156,
+    "seconds": 1.2720511250081472,
+    "pass_sha256": "cade43737143662b4ae92d639c5971131b7639015bcbbfbca62b55713b7ff107",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 165,
+    "seconds": 0.6371167829784099,
+    "pass_sha256": "c49f5d80923f6330c374418dcfefa2a09ca9b7cee651b94210b665f84170c1ec",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 170,
+    "seconds": 0.7401966370234732,
+    "pass_sha256": "3b67efcafe60f83b09faa4b46b3eb842b583e4907ad3e7f830342f01a406d7bb",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 163,
+    "seconds": 0.9142091769899707,
+    "pass_sha256": "c9908bc06ac802cc569070bdd730cc046cfb270923f16551097a20e6c515f8a3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 167,
+    "seconds": 1.1802276630187407,
+    "pass_sha256": "6cbdeb99509491dd20fb591516bc6ccab69b4cba78f2a9b8c57f9875db5f6a07",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 166,
+    "seconds": 0.805131569999503,
+    "pass_sha256": "ed88cf35f2ded06d07705063b7ed06b17ba0181930ff0fe739f0f5832ff5ad00",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 169,
+    "seconds": 0.9557479539944325,
+    "pass_sha256": "34e7d5bf895e98dd94ca5e14751074c30c779a6e4ebf64270fbd7fff4560d855",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 164,
+    "seconds": 1.0698435709928162,
+    "pass_sha256": "67059ebd014c8c219377155cdc69b2a47e5bccfc7c341537394813a15369ebcf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 168,
+    "seconds": 1.4513370459899306,
+    "pass_sha256": "9120c27f555c0e860c3cc30af983129933326cc2c2ff15c1dd9733c55c88b6d1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 173,
+    "seconds": 0.6756867250078358,
+    "pass_sha256": "8cdd3d55fc7b74127b7c2416cc71df8723e4c37216306ff614c83dfd08689f84",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 178,
+    "seconds": 0.774631189997308,
+    "pass_sha256": "d492841144b54d8955a13d5459de0051014c74e8c99018c7565f6196cda1a1c4",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 177,
+    "seconds": 0.8350344909995329,
+    "pass_sha256": "dae31c9324a67074f320f2aae9ea282b71eedd8174107b076b1756751d0a9462",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 175,
+    "seconds": 1.4810496970021632,
+    "pass_sha256": "c909d256ba0646bec630b2da8b8a288a974edf2551498891c34ee5c10ef03e58",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 174,
+    "seconds": 1.0333224269852508,
+    "pass_sha256": "5979f0249220628ec4961116e69c915780edda69182017539690057ddc5aae18",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 172,
+    "seconds": 0.9612004060181789,
+    "pass_sha256": "362fd06f4fe7ad2660512d8de18686340c114d8cc3aaabee3001200fae3a560e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 171,
+    "seconds": 1.2529673539975192,
+    "pass_sha256": "6b6958a8b316c6d6dfd9febee4c2305b337767cba4186cda00e56ca52e354ee9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 176,
+    "seconds": 1.3424352900183294,
+    "pass_sha256": "4eee44e7ec7a84c26af3e3c11aa8852c1a195c0991ac6a2272da16f6c62183a8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 185,
+    "seconds": 0.8167460839904379,
+    "pass_sha256": "9f675ffddb2bb57efaaca4021fb3e384d7e9f99533c5de37af05fc9c9dfab518",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 180,
+    "seconds": 0.7628844949940685,
+    "pass_sha256": "6baeba21a5743e5a57779c96ce33a7735c8949721799d687060a8490ff54de85",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 184,
+    "seconds": 1.1270685190102085,
+    "pass_sha256": "fb968a3c963558bc27aebd488a4434e216b3c92d2f646a125913fcbbb0069ca9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 181,
+    "seconds": 0.9494629570108373,
+    "pass_sha256": "d17cdd029b6d3c854c1ed0e1963c555fd3b0191912f37bae60e80e2ffb64a06a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 182,
+    "seconds": 0.7090197299839929,
+    "pass_sha256": "14d1919ad5d14d97815f1fe6621bafde4d65b7f6aaac84c9b4a9fc15dad4bac7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 183,
+    "seconds": 1.5450702219968662,
+    "pass_sha256": "64fe02e303c67f2c6d5f55328eb8c01eb8f1519151df7e81b3645297825e3ee7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 186,
+    "seconds": 1.4060266599990427,
+    "pass_sha256": "e261a31217ab0a9cf689916ed137212d33fe7de98b3856711fa49729737b46d9",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 179,
+    "seconds": 0.6853579890157562,
+    "pass_sha256": "9a2bd4abb599687cd067b8667262c32d00326c2017cb22f952e11cadddfb6c8f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 187,
+    "seconds": 0.625195385015104,
+    "pass_sha256": "41b82fb728a317ac38821ec4fa00ea56bcf84901e24a45b171039bb646db78a2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 193,
+    "seconds": 0.7227517029969022,
+    "pass_sha256": "8aa5d0c5920e27e5c5ad942ac71d2965fce5aa5439acdf1342017707d816e601",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 194,
+    "seconds": 1.2081259450060315,
+    "pass_sha256": "399032fb580a5592c93a4deca7026f3edbcf159d487045e028d090863f50ff0f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 189,
+    "seconds": 1.340222819999326,
+    "pass_sha256": "b5a432744252b89695f2ca7ab6dea0058d97338138a6acb83024bd7430db1184",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 188,
+    "seconds": 1.0601390759984497,
+    "pass_sha256": "599afa407fc4b1e60f0ae3d3b91962d9a563c6e1ad36d58472f811371642331a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 192,
+    "seconds": 0.8343450390093494,
+    "pass_sha256": "f0a2ca5991f5a47f3f3d64fe00b702a7227a1c807be39405e028ebef3f8e22c1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 191,
+    "seconds": 1.502533528022468,
+    "pass_sha256": "239b39045316520656237203e9c8f6f261f4c9ee1f20d42be653d57d8940b97d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 190,
+    "seconds": 0.9862843540031463,
+    "pass_sha256": "e620e6224db2a021cdd1ae4a69a577e1104524e65b44e9000a256e086314db1d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 195,
+    "seconds": 0.6257398609886877,
+    "pass_sha256": "ad5f23071fd10e8b1c47a613f4332b4094242f3a2a5cd7ee52fa383ad4db6f7a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 197,
+    "seconds": 1.4444358279870357,
+    "pass_sha256": "46c7c5c15f578b77073f202d17e9732bc482e2fb69336825349ab1a760bc9386",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 196,
+    "seconds": 1.1154320540081244,
+    "pass_sha256": "817135fe32d296743ed12193e215c08789eb414e065c54b01e48fbe81061d368",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 199,
+    "seconds": 0.8911582080181688,
+    "pass_sha256": "ed4d2c5b1a55ac98707f22c55560b6489aa856841fff7d67609a14e89f62a7e3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 202,
+    "seconds": 0.8111906629928853,
+    "pass_sha256": "5b40345f41ac6fc95dd9082a32debedb61a2f9707e51ad48a7800d7f1131dd82",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 200,
+    "seconds": 1.363004187005572,
+    "pass_sha256": "2b33fc936881ce47bad45339860bcb67a9df2bea915d8c925c349b045325dd63",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 201,
+    "seconds": 0.7250856690225191,
+    "pass_sha256": "795cadbda892d94c94fee22da0f333f48634f23a9513c9fa5f14834e15fd0d14",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 198,
+    "seconds": 0.9752694549970329,
+    "pass_sha256": "885a9efb53e022e9bbbfe266a70c832ea13d575869507f517c306ba85d3d034a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 203,
+    "seconds": 0.6326617040031124,
+    "pass_sha256": "b4dad50eecad638e9f88e19975ac1ed5fcc78dd6558dfbe3461707df39816ef2",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 207,
+    "seconds": 0.8779314720013645,
+    "pass_sha256": "5a707ff87e2cbb6e985aadbc64bc3d803a8a9d192f00f8cf72afa81710df29f8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 210,
+    "seconds": 1.0477443679992575,
+    "pass_sha256": "dfe090a2f1dc601153c55d232cf0eb51d4502591574289d5a12e5ec245ece1bd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 209,
+    "seconds": 1.2139902899798471,
+    "pass_sha256": "dab4906a259b499178017fdf2923849a9f248d272af1a3b4d00915e21bafb991",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 206,
+    "seconds": 0.801762624992989,
+    "pass_sha256": "40bad72712f5ab031bd067a8c7c52ae39b51307040dd19cf7609e2ae5004015d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 204,
+    "seconds": 0.7314658600080293,
+    "pass_sha256": "6fa30a2a376d12588b019956ea5639be5695588d8f1c37fa8a2f30a2bf1c7dd1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 208,
+    "seconds": 1.5592434790160041,
+    "pass_sha256": "d12cbcb5cc83248d31c91b5b10849760b544345d6a13ae59e10194f602e9ef0f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 205,
+    "seconds": 0.9596426030038856,
+    "pass_sha256": "7756eb2d93d3e5801647f5fc2dc59ddcd8cb2b0f69565ea4c41fa775f273bc3e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 211,
+    "seconds": 1.0001987120194826,
+    "pass_sha256": "dde02c94b655776ce4faed65c3f780acbeee3b7969a675b31384a7a90aa3841d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 213,
+    "seconds": 1.136673028988298,
+    "pass_sha256": "ee91a8246ded650116dff1c4ad3b043179ff76ad54e0044128b4ca9de8deccc8",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 212,
+    "seconds": 0.6231830090109725,
+    "pass_sha256": "c4b5cfe6406e77a95bcb0a1aca641503c768b869b440f35db9f16c5a83b75274",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 216,
+    "seconds": 0.7853844740020577,
+    "pass_sha256": "5f0219668f06defbd53ceb75bbfe60464549f73c9102bae10d14b42f6f3c93bc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 215,
+    "seconds": 1.0660495850024745,
+    "pass_sha256": "54af5cbb15e68394bf47dcbdad5c3b38ce34378df7eed47f61eb2a7808caeb5e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 218,
+    "seconds": 1.3281809680047445,
+    "pass_sha256": "2cde2efcab2c506a9c0c83d7bb746d0f47a951cb9a0dd4338a41c9d1816f8b6c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 214,
+    "seconds": 0.6889661500172224,
+    "pass_sha256": "26e4cac8bd0d525325464e1507f76211f96bc9a1a8fc2ff960cc9505fc068789",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 217,
+    "seconds": 0.8877169220068026,
+    "pass_sha256": "afd336a08c816d18bbe22f7b44e8eced444407c60ef7ad02d02e2a4b499c3fab",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 219,
+    "seconds": 0.6820152050058823,
+    "pass_sha256": "7c8aea96e8b0bfa48847d5423f71b3a72a3f0a3271e8627861164554ba73e505",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 224,
+    "seconds": 0.785121679014992,
+    "pass_sha256": "5de15ecffd5698013335f9325e40310cf02d8661d40e8b07eaa0882f4d1ca0c7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 222,
+    "seconds": 1.0968176170135848,
+    "pass_sha256": "5265e305d5751febd4c6650885ea984507caf2466d1a48c1cd2f0fc86025bd0a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 223,
+    "seconds": 0.9651010420056991,
+    "pass_sha256": "f3f6e93b2a122ddcb8c02c9eaa125e958bd3159e686ffda8c61c83247b4e4dc0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 221,
+    "seconds": 1.4001685279945377,
+    "pass_sha256": "2e8a8e69368916bc4148028b549e42b689c64e83a8509df55429a6dc22b6f883",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 220,
+    "seconds": 0.8520775170181878,
+    "pass_sha256": "1dd190b5a7ff9bdf2c0e6c023ab76941485c09d835670efd6acf5d37e78af77c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 226,
+    "seconds": 1.2973573339986615,
+    "pass_sha256": "3e8cb56054342fb86c62d33bc48525d7f1e158cd5d4f7486a0e3fdba74355f16",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 225,
+    "seconds": 1.1872619820060208,
+    "pass_sha256": "4de91ce17186abf601cce504f654bae3b5286de067dd25e729f7752c098a2d12",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 229,
+    "seconds": 0.6247828579798806,
+    "pass_sha256": "2e58222a4fecf0884b3ab282bc3799db25e543f133b144b0521f6af499b32701",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 230,
+    "seconds": 0.7070321990177035,
+    "pass_sha256": "feaedfe388e17106e362b0965f88df2c933188b1f89752ccc361ba5e6c068995",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 228,
+    "seconds": 0.7543317140080035,
+    "pass_sha256": "6cde256ea17bf6379b95a78be67714bdee89624db234703a9a1d052e179514cd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 231,
+    "seconds": 1.2344776970276143,
+    "pass_sha256": "9f2d1bd40799f99a62e88357a270b8de49219e1b6c030954a2d8bc1b356b0328",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 227,
+    "seconds": 1.1878174419980496,
+    "pass_sha256": "b03499b108aa3b9563839bb8395e0fad68bdcbf80e77e05bea9a0fe2d27c62d6",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 232,
+    "seconds": 0.9571556779847015,
+    "pass_sha256": "c9c0fcd89531534407eeda3209e34efdab8a8e00d6990b05591d4beb60bd5b8f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 233,
+    "seconds": 1.37813616998028,
+    "pass_sha256": "ba2b2b809a81ca4590e7f4416260309b55182bc86273c619174c023cab7d2979",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 234,
+    "seconds": 1.443523162015481,
+    "pass_sha256": "28a8d6022c6a9e0e42bde49da4e7fcaf5c96a4602d5a7ace42410d72b919ed10",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 235,
+    "seconds": 0.6850118619913701,
+    "pass_sha256": "79820948826bf5288f90975737b0040bc417641629b18ce3285e2fb6dc4da5ed",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 236,
+    "seconds": 1.0243157759832684,
+    "pass_sha256": "b9eee00f85d08bb431e81631383581b7f0e7c7edf973e76f9ec1ff215c460804",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 241,
+    "seconds": 0.834803200996248,
+    "pass_sha256": "1969f92584da159527057b25967a7c8d56306ab38bfb81daa4a6cbb03b1e5209",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 240,
+    "seconds": 0.7788816599932034,
+    "pass_sha256": "fa7ad85a2a3e2837a1d786bb1635a822fc30b0ec6010cd3dc2ca4ecc1828d0fd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 237,
+    "seconds": 1.1796296190004796,
+    "pass_sha256": "02f4782be8f6c0e81346304cc559215b6623c34aaeb45057ec0c0dbea2e15c5c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 238,
+    "seconds": 1.0865695110114757,
+    "pass_sha256": "737f6e563426ad9195455c6d6025baeb901175fef8e5faefbf0a07ec5d842e0c",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 242,
+    "seconds": 0.8954562260187231,
+    "pass_sha256": "86a1c94cb0930bc41dbecadf52e8ab482539fc10385e44ba53f0485091eb01b7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 239,
+    "seconds": 1.2698635399865452,
+    "pass_sha256": "1c7b98df5e350efc87603984d11ffd9cf26a8854ed0b2682764ef23e3d219676",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 243,
+    "seconds": 0.6773510889906902,
+    "pass_sha256": "d4c9386c0b3e3d792748a24559b7389b5bc934ba83d69e9e622e6556296f2863",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 247,
+    "seconds": 0.7453513679793105,
+    "pass_sha256": "30725694005f48bab2fcbc38f8e154d2a8540288587df8a10a331ca75d2f2906",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 244,
+    "seconds": 0.8865555959928315,
+    "pass_sha256": "3df7be6ec1c0436c680740f90d3b453271e6199ec99c6701bbf636590c2cbe96",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 250,
+    "seconds": 0.7766320350056048,
+    "pass_sha256": "54ad13796137c45370a500c4843d9acd2a3d59a215faab2cd541e9f8fc08c24d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 249,
+    "seconds": 1.225391148997005,
+    "pass_sha256": "0746f102f2f79a7f974f9a9a4318547cca17330b1e62098cdf8ac4fb8bf152f7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 245,
+    "seconds": 1.3661930230155122,
+    "pass_sha256": "be8b5eb8d875aced797b19afc90065e581912acac0d375c4bb84777cb970bdca",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 246,
+    "seconds": 0.9983015410252847,
+    "pass_sha256": "1345b108df7582f081d5177a4d361e959a1e4a49bb1282542381738119c7bc76",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 248,
+    "seconds": 1.4753045519755688,
+    "pass_sha256": "0449f215127ed736720fc3fa53fe052fd575efc97e9fb4a99b19bc1d9ecadf30",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 257,
+    "seconds": 0.8766382360190619,
+    "pass_sha256": "ca3ed0006a374f923e6d38e5a42c6dc8d614f62c6360805fe7f7af81428ff703",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 253,
+    "seconds": 0.6837943610153161,
+    "pass_sha256": "53e0b6dd925bfdcc6a648de1382e48b988659e1ba2700a0654f407108079204a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 255,
+    "seconds": 0.7365021439909469,
+    "pass_sha256": "4ed9e589b0c5f52b26e9745d74268c1946c910d091401f5bf793e0b9515564ce",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 254,
+    "seconds": 1.6943602129758801,
+    "pass_sha256": "e0433abb7b76f9a4a7b60a29b18bc2db781e77111131299f1d35a173487858d3",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 256,
+    "seconds": 1.1411608619964682,
+    "pass_sha256": "8c17064dc242f529350a50fec0f3f94cc474d8db83a876fa077487a4f3240621",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 258,
+    "seconds": 1.2984265249979217,
+    "pass_sha256": "2bd83ad80dce65dfbd2f2184c9da804691a8e5120739fe6355870b277c499fef",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 251,
+    "seconds": 1.0388178149878513,
+    "pass_sha256": "a9321bdec0c898b0679975df28a11d0d4bbdecaead584c888c09016cd6750612",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 252,
+    "seconds": 1.5777505980222486,
+    "pass_sha256": "88bac4960daf426fdc58b1be41d88933d31083649d1cbe27d3fb0d5cafea05e7",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 260,
+    "seconds": 0.7157971110136714,
+    "pass_sha256": "c3f70e19acc4e36f22d37b35fe5bf1ff4dd75781835701310595375a0bb3d29d",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 259,
+    "seconds": 0.6790481310163159,
+    "pass_sha256": "69b5e836bd155add3f62641de396ac8bb78555d120a64437d4e7dafa6d338cdf",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 263,
+    "seconds": 0.8909596000157762,
+    "pass_sha256": "7e1520575e05b142581a44c0fd0b056c628faa604d028f1c767519bdd429a21e",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 264,
+    "seconds": 1.1591803269984666,
+    "pass_sha256": "495c49353ad077eba50a93c6dc4f10ad7f2026c64f3908508d1b532242b7943a",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 266,
+    "seconds": 1.0744897830008995,
+    "pass_sha256": "37d6ef0b0c64debcb6c9a4f7d9dba493a2725173b6dfb571c3146e33a43af89f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 262,
+    "seconds": 1.5989976520068012,
+    "pass_sha256": "9caabec773827917b4e559576fe2fea8fd10667553f47cd438b150ead6c5f354",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 261,
+    "seconds": 1.358282136003254,
+    "pass_sha256": "a4105b0934d77318c095dcaf4ecf62563e34de664f93593506fcc6f95603793b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 265,
+    "seconds": 0.9891300569870509,
+    "pass_sha256": "a151e24c8d3a00d61b0fb6134fd24eb9b32299153370d011d391fcb60bd270dd",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 274,
+    "seconds": 1.1212202280003112,
+    "pass_sha256": "e2ebca4314a23daecb9a44cbf467a6465a89d8372c7f187018f76b3e22890630",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 267,
+    "seconds": 0.7779609790013637,
+    "pass_sha256": "6f6a272c470a92b1f9e636c17f808f1632caa27cdeca51d8b40b66c560680a97",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 272,
+    "seconds": 1.4141036109940615,
+    "pass_sha256": "2216010512105a349a57fe39bbbe8888d4e8be9fc7f2c0c7cd87e0f3737194f0",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 268,
+    "seconds": 1.0002140200231224,
+    "pass_sha256": "7a7c9639d8250a7c891bfa7f35cabda9f0689711969e15d42fc5fa141bf3f640",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 269,
+    "seconds": 0.8291077790199779,
+    "pass_sha256": "ff9f8fb0fe944b056c469064db72ce9c939bca8d25cb34e6b143dc1dac09b235",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 270,
+    "seconds": 1.207198371004779,
+    "pass_sha256": "19b83d3d6795f0f319ac6ee168118414d2efbeff5ab4de13f1a99b8602923043",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 273,
+    "seconds": 1.498383972008014,
+    "pass_sha256": "81a42d8e3d26ae445af427ba855ec979108cddb4ff46e442ade510282f7262b1",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 271,
+    "seconds": 1.3342863069847226,
+    "pass_sha256": "abfcfcaa479e249b6e2e81f10b2f2ecbe4099bd322ea27fbdbb5ff670969aa70",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 277,
+    "seconds": 0.6819027359888423,
+    "pass_sha256": "e16e2258c57a2f0b437aae2921af9ac1ad1fd765f3b5a0cff662bdb336538d8f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 281,
+    "seconds": 0.8009708040044643,
+    "pass_sha256": "e1cce52f76bc6bbae9faabc8fc3b43d4831880cbaf209d3263a538c1bf135e52",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 282,
+    "seconds": 1.4532235890219454,
+    "pass_sha256": "891705eec403c0cfcea7dd23541b746039ae5b857f003e0f3caa3860fd4ab598",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 279,
+    "seconds": 0.9929077769920696,
+    "pass_sha256": "0519a41ede06ca7816201a23e8212f8deffe3cc4ea2714b7b85c33b824182113",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 280,
+    "seconds": 1.0515489239769522,
+    "pass_sha256": "9113f782f98e4d86b94654097e66fb0dbd7f22c8a05e86b31803b7cdb8b09c0b",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 275,
+    "seconds": 0.8762926830095239,
+    "pass_sha256": "c483039385292239bc04b3569eddd82e661a603404e4f3399c2693d2e3c9731f",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 278,
+    "seconds": 1.2714706829865463,
+    "pass_sha256": "9fb04b2067a8c540984f83c1dab313f5bce54f73bfe1dce8ff96d3e6d3397b59",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 276,
+    "seconds": 1.2283666710136458,
+    "pass_sha256": "c5ed66dd9efe73353bb71163356cd9079a4a8292471c22aa11746cea22774358",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 284,
+    "seconds": 0.6217036879970692,
+    "pass_sha256": "d7f9b160301c64f64e89bb73c8999acc57ba52557bb4888fb47b0020400da593",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  },
+  {
+    "scenario": "undisturbed",
+    "wepp_id": 283,
+    "seconds": 0.7571581249940209,
+    "pass_sha256": "b8027d6dc9e011a8defd342b1aaeaa9967cfb429db87d798eb262b21433451fc",
+    "rows": 16437,
+    "parity": "exact selected PASS fields"
+  }
+]

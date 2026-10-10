@@ -1,0 +1,32 @@
+[
+  {
+    "site": "rattlesnake",
+    "scenario": "burned",
+    "hills": 73,
+    "sediment_fields": [
+      "tdet",
+      "tdep",
+      "sedcon_1",
+      "sedcon_2",
+      "sedcon_3",
+      "sedcon_4",
+      "sedcon_5"
+    ],
+    "parity": "exact retained PASS values"
+  },
+  {
+    "site": "rattlesnake",
+    "scenario": "undisturbed",
+    "hills": 73,
+    "sediment_fields": [
+      "tdet",
+      "tdep",
+      "sedcon_1",
+      "sedcon_2",
+      "sedcon_3",
+      "sedcon_4",
+      "sedcon_5"
+    ],
+    "parity": "exact retained PASS values"
+  }
+]

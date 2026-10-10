@@ -1,0 +1,26 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20261009_topanga_jan1993_outlier/upstream_trace.py
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/upstream_trace.py", line 61, in <module>
+    def data_lines(path, element_column):
+        ^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/upstream_trace.py", line 57, in main
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/upstream_trace.py", line 52, in run
+    different=[name for name in common if a[name]!=b[name]]
+           ^^^^^^^^^^^^^
+AssertionError: ('burned', ['ebe_pw0.txt'])

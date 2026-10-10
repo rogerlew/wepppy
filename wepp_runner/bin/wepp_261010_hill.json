@@ -1,0 +1,51 @@
+{
+  "binary_name": "wepp_261010_hill",
+  "binary_role": "hillslope",
+  "built_utc": "2026-10-10T10:13:44Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "pass_components_reader_required": true,
+    "pass_components_version": 3,
+    "process_mode_pass_pw0_required": true
+  },
+  "paired_interchange": {
+    "pass_components_version": 3,
+    "release_commit": "bd63094",
+    "sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
+    "source_commit": "c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307"
+  },
+  "release_tag": "261010",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "7471bb5e981d14d0b8c1cdb88a16af305aed1b67",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "ablation_artifact_policy": "pass",
+    "candidate_executable_equivalence": "identical after removing debug sections and GNU build ID",
+    "disturbed_release_matrix": "99 passed; 96 fresh cases, 768 outputs identical to validated candidate",
+    "external_replays": "supplementary evidence, not required gates",
+    "gate_resource_policy": "committed inputs or reproducible generated outputs only",
+    "hillslope_watchlist": "12 passed",
+    "host_smoke": "pass",
+    "optional_committed_watershed": "unavailable: existing delicate-game fixture lacks pw0.str, pw0.chn and pw0.imp; failed attempt retained",
+    "post_vendor_container_smoke": "pass",
+    "post_vendor_host_smoke": "pass",
+    "post_vendor_provenance": "pass",
+    "post_vendor_tests": "114 passed, 1 existing missing-fixture skip",
+    "production_deployment": "not performed",
+    "pytest": "163 passed; default discovery is maintained tests/",
+    "reconciled_condenser": "retired",
+    "report_and_usersum": "63 passed",
+    "runtime_provenance": "pass",
+    "same_build_watershed_replay": "pass; supplementary 140 fresh hills, 45 years, plain/Roads/AgFields"
+  },
+  "wepp_banner_version": "2020.500"
+}

@@ -1,13 +1,13 @@
 # Disturbed WEPP Test Matrix Implementation Plan
 
-## Current Contract: 2026-10-09
+## Current Contract: 2026-10-10
 
 The canonical matrix now contains **96 cases**: four textures, four severities
 and six vegetation types, including young forest. Historical IDs 1-80 remain
 unchanged; young forest occupies 81-96. Its burned states reuse the forest
 burn templates, matching the standard Disturbed remapper.
 
-The default test binary is wepp_261009; WEPP_DISTURBED_BINARY can explicitly
+The default test binary is wepp_261010; WEPP_DISTURBED_BINARY can explicitly
 select another installed build. Committed shared hourly/snow/ET inputs are
 staged from tests/wepp_runner/fixtures/hillslope_smoke/runs. The model must
 finish successfully and produce PASS/graph outputs. Severity-gradient test
@@ -31,7 +31,45 @@ descriptive; malformed records and duplicate dates fail rather than disappear.
 The old analysis_results.md is not replaced or claimed as current-release evidence.
 
 See the [RRINIT study](../../docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md).
-No production parameter defaults change as part of these harness revisions.
+The later low-burn forest RRINIT correction is adopted under ADR-0083; the
+current published report includes its 6 cm value.
+
+## Report Refresh Contract
+
+`analysis_results_current.md` is the user-facing current report linked from
+Disturbed ENDUSER and registered in Usersum. `analysis_results.md` is historical.
+`analysis_context.md` supplies the reviewed version, parameterization, summary,
+interpretation and limits; the analyzer prepends it to generated tables.
+
+Changes to the selected WEPP build, relevant management/soil/lookup defaults,
+canonical climate/slope or preparation/analysis logic require report review in
+the same change set. Regenerate affected cases and retain unchanged controls
+only when their complete input and build identities still match. Preserve old
+evidence rather than silently relabeling old outputs. If a new report cannot
+be completed, explicitly mark the publication stale instead of calling it current.
+
+For a fresh full-matrix refresh, use an unused temporary root:
+
+```bash
+wctl run-pytest tests/disturbed/test_disturbed_matrix.py --basetemp=/tmp/disturbed-report-YYYYMMDD
+python tests/disturbed/analyze_matrix.py --output-dir /tmp/disturbed-report-YYYYMMDD/disturbed_matrix0/output --context tests/disturbed/analysis_context.md --out tests/disturbed/analysis_results_current.md
+```
+
+Before generating, revise `analysis_context.md` from the new evidence, including
+review date, binary identity, input revision, full-record rank counts, illustrative
+values and limitations. After generating, update
+`analysis_results_current.provenance.json` with the actual case/input/output
+identities and report hash. Its source hashes cover the reviewed templates,
+fixtures, base/extended lookups, preparation helper, context, analyzer and binary.
+The fast freshness check requires only repository files; raw experiment folders
+are supplementary evidence, never a required gate. Do not simply replace hashes
+to silence the check without verifying the outputs used for the report.
+
+Validate the report and its ENDUSER link with the focused matrix and Usersum
+tests, documentation lint and Usersum contract validation. Rebuild the local
+Usersum index with `tools/usersum_docs_tool.py build-index --write --skip-vendor-sync`
+for publication checks; do not sync unrelated vendor documents. No production
+deployment is implied by refreshing documentation.
 
 ## Historical Original Design
 

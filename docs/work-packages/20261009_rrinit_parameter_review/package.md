@@ -7,6 +7,11 @@ Template and four packaged extended-lookup RRINIT values are now 0.06 m.
 See [study results](sensitivity-results.md),
 [initial assessment](assessment.md) and [delegated literature review](literature-review.md).
 
+User-facing publication: [current canonical results](../../../tests/disturbed/analysis_results_current.md),
+linked from Disturbed ENDUSER and registered in Usersum. The
+[refresh contract](../../../tests/disturbed/PLAN.md#report-refresh-contract)
+and repository-only freshness check keep binary/input changes visible.
+
 Follow-up: [low-severity forest 4 versus 6 cm](low-forest-4v6-results.md),
 112 successful simulations. Runoff and full-record rankings are effectively
 unchanged; sandy-loam event-level sediment ordering improves. Roger adopted

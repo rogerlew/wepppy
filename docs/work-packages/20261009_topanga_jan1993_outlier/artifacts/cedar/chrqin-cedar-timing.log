@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/analyze_cedar_candidate.py", line 219, in <module>
+    timing_audit() if args.timing_audit else main()
+    ^^^^^^^^^^^^^^
+  File "/home/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/analyze_cedar_candidate.py", line 192, in timing_audit
+    selections = pd.concat([selections, events.loc[events.kind.eq('retained') & events.first.eq('1996-02-04')]])
+                                                                                ^^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute 'eq'

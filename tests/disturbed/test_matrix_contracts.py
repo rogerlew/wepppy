@@ -93,3 +93,20 @@ def test_historical_invalid_climate_is_rejected_before_simulation():
     from generate_climate_fixture import validate_climate
     with pytest.raises(ValueError, match='Nonfinite'):
         validate_climate(Path(__file__).parent/'data/test_climate.cli')
+
+
+def test_report_preserves_reviewed_context_before_generated_tables():
+    context = '# Reviewed benchmark\n\nBuild and input scope.\n'
+    report = analysis.generate_full_report([], context=context)
+    assert report.startswith(context.strip()+'\n\n## Test Matrix Analysis Results')
+    assert 'Full-Record Totals and One-Sided Events' in report
+
+
+def test_published_report_sources_and_content_are_current():
+    repo = Path(__file__).resolve().parents[2]
+    metadata = json.loads((Path(__file__).parent/'analysis_results_current.provenance.json').read_text())
+    for relative, expected in metadata['sources'].items():
+        actual = hashlib.sha256((repo/relative).read_bytes()).hexdigest()
+        assert actual == expected, f'Review and refresh the canonical report: {relative} changed'
+    report = Path(__file__).parent/'analysis_results_current.md'
+    assert hashlib.sha256(report.read_bytes()).hexdigest() == metadata['report_sha256']

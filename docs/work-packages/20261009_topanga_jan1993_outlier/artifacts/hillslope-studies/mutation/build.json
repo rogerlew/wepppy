@@ -1,0 +1,8 @@
+{
+  "fixed_binary": "/wc1/holdouts/chrqin-mutation-20261010/candidate-src/wepp_hill",
+  "fixed_sha256": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a",
+  "observer_binary": "/wc1/holdouts/chrqin-mutation-20261010/observer-src/wepp_hill",
+  "observer_sha256": "5d2872abfcb3e459062af66af99d36607da9f4cd19b3891b81ad87f9ab406e60",
+  "patch_sha256": "203e0ec9d1ebf0064b9c1095fd03930ed8fbc032663c2313c191c04151c2b832",
+  "source_irs_sha256": "ad37c257ff80c2131dbc17cc0c8802586ee7324edc190418f1d9dbde56dd3fa1"
+}

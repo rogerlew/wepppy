@@ -113,20 +113,27 @@ a separately governed and verified signature over the sidecar.
 
 ## Vendored WEPP Release Log
 
-WEPP 261009 pairs the model with the component-v3 native reader.
+WEPP 261010 pairs the model with the existing component-v3 native reader.
 See [the v3 compatibility contract](schemas/pass-components-v3-contract.md).
 Regenerate every contributing PASS file with the same selected build; do not
 mix legacy and v3 files during Roads or AgFields integration. Existing binary
-defaults remain unchanged. Mutation and disturbed-parameterization studies
-must precede full deployment; vendoring alone is not deployment approval.
+defaults remain unchanged. Mutation, disturbed rankings and Cedar water
+verification are complete for the promoted candidate; vendoring alone is
+not deployment approval. See [ADR-0084](adrs/ADR-0084-chrqin-source-normalization-release.md).
 
 | Date | Release | Source | Binary SHA-256 | Notes |
 | --- | --- | --- | --- | --- |
+| 2026-10-10 | `wepp_261010`, `wepp_261010_hill` | default-branch Forest source `7471bb5e981d14d0b8c1cdb88a16af305aed1b67`; existing paired v3 interchange unchanged | watershed `1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e`; hillslope `d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698` | Promotes validated CHRQIN first-sample normalization fix, retaining hourly MIXPEAK, PASS v3 and channel-state continuation. Replaces never-deployed 261009; historical studies remain unchanged. Forest tests 163 pass; watchlist 12/12; candidate executable equivalence is exact excluding debug/build ID. Fresh 96-case release rankings pass. Detailed post-vendor evidence and limitations are recorded in the Topanga investigation's release handoff. No general default switch or production deployment. |
 | 2026-10-09 | `wepp_261009`, `wepp_261009_hill` | default-branch model source `5a01758b7b998d54cccc47d7eea01847b04d866b`; paired wepppyo3 source `c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307`, artifact commit `bd63094` | watershed `e1b1c244107216ca9edf4ccbaeb8d390e98440418d87beac2d5153b98191c7cc`; hillslope `37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228` | Hourly MIXPEAK, PASS v3 return-support assembly and channel-profile continuation, superseding the experimental 261007 patch bundle. Matching reader and Roads/AgFields composition are required. Forest tests 155 passed; watchlist 12/12; both vendored host/container smokes and provenance pass using committed fixtures. External fresh watershed studies are supplementary, not required gates. Broad WEPPpy sweep was interrupted after 2,375 passes; targeted workflows passed. No default switch or deployment; mutation and disturbed studies remain pre-deployment checks. |
 | 2026-10-07 | `wepp_261007`, `wepp_261007_hill` | `wepp-forest` source commit `669ff4106a4158e49dc79e038026e4d63a489923`, recut and merged to default branch `wepp_260430_negmeltfix_comparator` by `7e49614c` | watershed `ad5ef3e31be7e6da2517567fb211fe350cb7ff0ea9320282368182cb6157127b`; hillslope `cba2927f489a324774180164f1b8065118fb3a1fa6b64737710b46b0f96036df` | Combined channel hydrograph volume repair and surface-return peak estimator release. Vendored sidecars: `7596787c0eafd75cec2c1287d3ac1b8c9ae21d3a696ff049947c851078e5a214` and `678242f7ab030f5b08e8be49945235dafbb95c8de8888db654141cbe24d6b60b`. Source-side evidence: focused tests 7/7, full pytest 92/92, source and release host smoke, hillslope watchlist 12/12, artifact policy, JSON/hash checks, `surpeak_` symbol checks, and system ELF interpreter checks. WEPPpy evidence: provenance, host smoke, and runner/output regressions passed. |
 
 ## Withdrawn Releases
 
+- `wepp_261009` and `wepp_261009_hill`, including their sidecars, were
+  replaced by `wepp_261010` on 2026-10-10 at Roger's explicit request.
+  They were never deployed. No silent alias or production migration is added;
+  local projects selecting 261009 must select 261010 and regenerate matching
+  hillslope passes. Historical provenance and the release-log row are retained.
 - `wepp_261007` and `wepp_261007_hill`, including their provenance sidecars,
   were removed from the WEPPpy vendor set on 2026-10-09 at operator request.
   The release had not been deployed to wepp.cloud, so direct removal requires

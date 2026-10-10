@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20261009_topanga_jan1993_outlier/upstream_trace.py audit
+burned verified: unchanged output bytes and exact outlet EBE/ledger/series rows
+undisturbed verified: unchanged output bytes and exact outlet EBE/ledger/series rows

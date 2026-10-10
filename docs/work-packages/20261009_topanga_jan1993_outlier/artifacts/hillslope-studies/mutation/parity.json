@@ -1,0 +1,32 @@
+[
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "hill": 106,
+    "scenario": "burned",
+    "sha256": {
+      "H106.ebe.dat": "e68d7642045a11008da3dc0620792952bd547a305579653834989b257c48c9a2",
+      "H106.element.dat": "8f4e5637f19b2a80381a2f3d235275e4ed9372787dfa543e43997e747cc04d27",
+      "H106.loss.dat": "cea486415dddc23f99b0294c2017220c9661b5404741d152f7dc865c54741b63",
+      "H106.pass.dat": "ca375895c52711e5f088473fd0f88e9b7c8114af731976b8028abed3170aef03",
+      "H106.plot.dat": "b119efcb9f39b51defb3c1d0e235589e450fae2fa5588747cb567fe4a569a761",
+      "H106.soil.dat": "d9edf5a0cdba9d599f5a3d11a0d7effe11b7058688c039d7dfdd9cbcbd38ab42",
+      "H106.wat.dat": "9b00596dfdb9953a68406936c5891eaab371f5290f459083cfde661318f0678d"
+    }
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "hill": 106,
+    "scenario": "undisturbed",
+    "sha256": {
+      "H106.ebe.dat": "f375e1c42d05d29925baca9b7b9b07697fe5749818b8859e5461c9b3ab432c8a",
+      "H106.element.dat": "2ac5b4a21c3639332ab2ccc4b2d1eb7dfd424bb89adc2401c6c58a31130965f6",
+      "H106.loss.dat": "e472e5df0be0d9184558c85640ddd03e0c9b50f42bb6cd4e9c0239b9199e0561",
+      "H106.pass.dat": "0e1b5b4fcc4a1ecc7b07c7db55771d0b9b9afd084a99ce0e49c85940c41d6e48",
+      "H106.plot.dat": "8fac470d382710b522d0a77f08ce80516fc1b86da6bb7c2e1d81a77948174715",
+      "H106.soil.dat": "3185b2796969ed998a6ff009ee413c4d3a96fd41cec8c3faf8e315091c82f661",
+      "H106.wat.dat": "007118ac9789379f30ff7f5c0dabc9113d1bbe23dc48fa2fa6bddeec6940c06f"
+    }
+  }
+]

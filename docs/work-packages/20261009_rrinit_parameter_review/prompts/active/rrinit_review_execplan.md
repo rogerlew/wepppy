@@ -10,6 +10,18 @@ acceptance and eventual parameter selection remain Roger's decision.
 
 ## Progress
 
+- [x] Preserve the subsequent Rattlesnake and fresh Topanga return-period
+  observations before any January 18, 1993 diagnosis. Separate investigation
+  record contains eight frozen output series, two ranking settings, provenance
+  and reproducible tables. No live-run mutation or new model execution.
+
+- [x] Publish current canonical results for Usersum: select the 96 adopted-default
+  cases from the validated 112 runs, verify their input/output identities, and
+  generate the report at `tests/disturbed/analysis_results_current.md`. Keep
+  `analysis_results.md` historical. Link the report from Disturbed ENDUSER and
+  README, register it in Usersum, and document version/default refresh duties.
+  Validate source-link rendering, publication contracts and documentation.
+
 - [x] Adopt Roger-approved low-severity forest RRINIT 0.04 -> 0.06 m in the
   shared template and four packaged extended-lookup cells. Record ADR-0083;
   validate existing parser/readback and generated management propagation only.
@@ -72,6 +84,18 @@ The bundled extended table disagrees with some current parsed templates.
 
 ## Decision Log
 
+2026-10-09 watershed documentation: Roger requested preservation of encouraging
+Rattlesnake/Topanga comparisons before investigating the GridMET January 1993
+undisturbed spike. Document only; do not start causal diagnosis or implementation.
+See docs/investigations/2026-10-09-watershed-return-period-comparisons/report.md.
+
+2026-10-09 publication: Roger requested a maintained report linked from the
+Disturbed user guide to set expectations. Preserve the historical report;
+publish `analysis_results_current.md` from the validated adopted-default cases.
+Register the report in Usersum's Workflows and Modules section and link it
+from ENDUSER and README. Source/context/report hashes provide a repository-only
+freshness check; no external run folder becomes a required quality gate.
+
 2026-10-09 rationale clarification: Roger rejects sediment-trade-off framing.
 ADR-0083 records correction of a parameterization inconsistency, supported by
 more sensible event-level sediment ordering. Same-date sandy-loam comparison
@@ -116,6 +140,14 @@ Lint the package with wctl doc-lint. Required future gates use committed inputs;
 external scientific studies are supplementary, not hidden dependencies.
 
 ## Outcomes & Retrospective
+
+Current report publication: all 96 selected cases verified against current
+serialized managements and retained input/output receipts. Analyzer emits the
+reviewed user context plus all generated comparison tables. Eighty focused
+matrix/Usersum checks pass, including strict-manifest report access. Usersum
+contracts and scoped documentation lint pass. No new simulations or production
+physics changes; the unrelated full WEPPpy suite was not rerun for this
+documentation/report-publication scope. Local index rebuilt without vendor sync.
 
 Adoption completed: template and four lookup cells now use 0.06 m. Structured
 readback verifies no other production data changes; 16 canonical generated

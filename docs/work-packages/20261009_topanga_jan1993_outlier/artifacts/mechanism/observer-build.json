@@ -1,0 +1,9 @@
+{
+  "binary_sha256": "b635fe7089d56206be9d3d63975c95705cc3029e685ec784bb52ed61bdd846b7",
+  "source_commit": "692c225e672844c71114bbdda851625616ebbba9",
+  "changed_source_sha256": {
+    "wshchr.for": "e5cf3590774dc011f20b27d2e94871f4e3e0da7a83e10f79f136fc9fd5a7518c",
+    "wepp_observe.for": "4a80f4c20fa1eae869e7150410da8f809bf6e9fc60ec7b9ca80e564439896496"
+  },
+  "scope": "observer-only calls and January 16-18, 1993 date filter; no equation/state mutation"
+}

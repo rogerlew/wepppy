@@ -1,0 +1,22 @@
+{
+  "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/topanga-burned-analysis/loss_pw0.out.parquet": "a0d1f6c31bea19918c9c190473e34fe40cd3860bc8cefeaeffe61bd620a5686b",
+  "/wc1/runs/sc/scrawny-relay/wepp/output/interchange/loss_pw0.out.parquet": "bbc1bb3e9f39b7d6edf0cd48cd574ed6d5c0e3934b7bda696b048f80aec01dcb",
+  "/wc1/runs/ei/eighty-five-synthetic/wepp/output/interchange/loss_pw0.out.parquet": "c4a79c8b6bd88d7a5d2d9433ac48c23fc13fc8dbaf4f2f8c4ddcc579b250a1ab",
+  "/home/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/artifacts/260803-comparison/260803-burned-ebe.parquet": "a3e6f22ee9fa910b1b0fef4cf2e6eb6243f44e1ff5c739c30fd98454fcc298c9",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/topanga_gridmet_261009_burned.parquet": "e0119767a25dd700c7493514b029a51bbd5028fffca38412e047425ef2219812",
+  "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/topanga-undisturbed-analysis/loss_pw0.out.parquet": "ebb16efcff89e6c50dffbf1697d5997447032565317bb8aa839f4ef3e49c5f77",
+  "/wc1/runs/sc/scrawny-relay/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.out.parquet": "f22d1cc38df14be5652029a8824b88b3166c77c5c7cfe88e3df40eee65a1ba5a",
+  "/wc1/runs/ei/eighty-five-synthetic/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.out.parquet": "c20819c2a08f02c0b79bfd9d33ad62717f1111a3380e3da6ab1ef4967e6364aa",
+  "/home/workdir/wepppy/docs/work-packages/20261009_topanga_jan1993_outlier/artifacts/260803-comparison/260803-undisturbed-ebe.parquet": "b9720e3d9efddad719ab8ce84f789c39829e60a7cdcd24c18dc8549744a99f4b",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/topanga_gridmet_261009_undisturbed.parquet": "f89f0934d8b2e14e9a85e26221b8d1c9e45daa0cfaf15846f2c2381dd454f9d9",
+  "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/rattlesnake-burned-analysis/loss_pw0.out.parquet": "e72d42a92fc9871b2bdcc3e7f6e6b32d21df4ab8a7583b9eae8d77e9d642261c",
+  "/wc1/runs/an/anisotropic-sassafras/wepp/output/interchange/loss_pw0.out.parquet": "3b0dff45aac506da824c813123dc54117fb8f11516762ca8c9a4da2add56115b",
+  "/wc1/runs/as/ascending-mourner/wepp/output/interchange/loss_pw0.out.parquet": "96c5e5d7301ae4f504beadf7555694ffa308a145a3cf252b5534eb33616ba1b3",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/rattlesnake_260803_burned.parquet": "ed0fccbd4153e8d04985a9ef1d416683838d5907a35b80c71a348d9aac11d808",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/rattlesnake_261009_burned.parquet": "4392ea86af21c9df0e102a66503e9a19899e13a7f9cbb02864bb1b4e62e41115",
+  "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/rattlesnake-undisturbed-analysis/loss_pw0.out.parquet": "009f1d44ae7b9752364577aa44609f90e254f7964567770124c96afe2ea9828f",
+  "/wc1/runs/an/anisotropic-sassafras/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.out.parquet": "fc95e1eb4abf7267bbda3168efdb2c5dbce25abd3d125ba337fa5da8da918825",
+  "/wc1/runs/as/ascending-mourner/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.out.parquet": "453e7a4d6c95d7afb8abdd4f2e314911f6644b99da70ec466ab14257732b00ce",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/rattlesnake_260803_undisturbed.parquet": "312665e655b5d943676e2af8083ab90063ed905eb29e4242a28e8500753bb4f3",
+  "/home/workdir/wepppy/docs/investigations/2026-10-09-watershed-return-period-comparisons/artifacts/snapshot/rattlesnake_261009_undisturbed.parquet": "6f37d3a18a611223e764eb8d9cfe3a5730a739522fe1f85a90640ce5a27e98cf"
+}

@@ -206,6 +206,20 @@ def test_usersum_doc_route_renders_disturbed_enduser_guide(usersum_client) -> No
     assert "wepppy/nodb/mods/disturbed/ENDUSER.md" in body
 
 
+def test_disturbed_guide_links_to_current_rankings_report(usersum_client) -> None:
+    guide = usersum_client.get('/usersum/doc/usersum.source.disturbed')
+    target = '/usersum/doc/usersum.source.disturbed_rankings'
+    assert f'href="{target}"' in guide.get_data(as_text=True)
+    usersum_client.application.config['USERSUM_REQUIRE_MANIFEST_FOR_SRC'] = 'true'
+    report = usersum_client.get(target)
+    assert report.status_code == 200
+    body = report.get_data(as_text=True)
+    assert 'Disturbed Parameterization: Current Canonical Results' in body
+    assert 'wepp_261010' in body
+    assert 'Full-Record Totals and One-Sided Events' in body
+    assert usersum_client.get('/usersum/src/tests/disturbed/analysis_results_current.md').status_code == 200
+
+
 def test_usersum_doc_route_renders_omni_enduser_guide(usersum_client) -> None:
     response = usersum_client.get("/usersum/doc/usersum.source.omni")
     assert response.status_code == 200

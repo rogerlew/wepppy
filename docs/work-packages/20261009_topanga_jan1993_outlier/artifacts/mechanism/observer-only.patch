@@ -1,0 +1,62 @@
+--- a/src/wshchr.for
++++ b/src/wshchr.for
+@@ -389,7 +389,19 @@
+ 	   qs(is,0) = qin(0)+(q1(0,ichan)-qin(0))*float(is)/float(nseg)
+ 	enddo
+ c     Continue the routed profile instead of rebuilding it each day.
++      if(year.eq.1993.and.sdate.ge.16.and.sdate.le.18) then
++        call wepp_observe('JPRE',year,sdate,ielmt,ichan,nseg,
++     1    minval(qs(1:nseg,0)),maxval(qs(1:nseg,0)))
++        call wepp_observe('JIN',year,sdate,ielmt,ichan,nseg,
++     1    maxval(qin(0:ntchr)),maxval(qlat(0:ntchr))*chnl1)
++        call wepp_observe('JBND',year,sdate,ielmt,ichan,nseg,
++     1    qin(0),q1(0,ichan))
++      endif
+       call chrstate(ichan,nt0,nseg,ntchr,1,qs)
++      if(year.eq.1993.and.sdate.ge.16.and.sdate.le.18) then
++        call wepp_observe('JPOST',year,sdate,ielmt,ichan,nseg,
++     1    minval(qs(1:nseg,0)),maxval(qs(1:nseg,0)))
++      endif
+ c -----------------------------------------------------------------
+ c Linear kinematic wave method
+ c
+@@ -510,6 +522,14 @@
+ 		  c1=(dtchr-2.*tk*cx)*c0
+ 		  c2=(dtchr+2.*tk*cx)*c0
+ 	  c3=1.-c1-c2
++      if(year.eq.1993.and.sdate.ge.16.and.sdate.le.18) then
++        call wepp_observe('JC12',year,sdate,ielmt,ichan,nseg,
++     1    c1,c2)
++        call wepp_observe('JC3K',year,sdate,ielmt,ichan,nseg,
++     1    c3,tk)
++        call wepp_observe('JXDT',year,sdate,ielmt,ichan,nseg,
++     1    cx,dtchr)
++      endif
+ 	  do it=1, ntchr
+ 		 qmaxi = max(qin(it-1), q1(it-1,ichan), qin(it))
+            if(mofapp==1) then
+@@ -614,6 +634,13 @@
+ 	endif
+ c
+       call chrstate(ichan,nt0,nseg,ntchr,2,qs)
++      if(year.eq.1993.and.sdate.ge.16.and.sdate.le.18) then
++        call wepp_observe('JEND',year,sdate,ielmt,ichan,nseg,
++     1    minval(qs(1:nseg,ntchr)),
++     1    maxval(qs(1:nseg,ntchr)))
++        call wepp_observe('JQPK',year,sdate,ielmt,ichan,nseg,
++     1    maxval(q1(1:ntchr,ichan)),q1(ntchr,ichan))
++      endif
+ 	sinit(ichan) = sfnl(ichan)
+ 	sfnl(ichan) = aavg * chnl1
+       dd = sfnl(ichan)
+--- a/src/wepp_observe.for
++++ b/src/wepp_observe.for
+@@ -29,6 +29,8 @@
+       obs_on = obs_on_cached
+ 
+       if (.not.obs_on) return
++      if(year.ne.1993) return
++      if(sdate.lt.16.or.sdate.gt.18) return
+       inquire(file='wepp_observe_frost.on',exist=obs_frost_scope)
+       if (obs_frost_scope) then
+         emit_line = .false.

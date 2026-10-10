@@ -1,0 +1,42 @@
+[
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-burned-h106-ksat-minus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-burned-h106-ksat-plus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-burned-h106-cover-minus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-burned-h106-cover-plus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-undisturbed-h106-ksat-minus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-undisturbed-h106-ksat-plus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-undisturbed-h106-cover-minus-b575fde4a28c"
+  },
+  {
+    "byte_identical": true,
+    "canonical_files": 7,
+    "trial_id": "topanga-undisturbed-h106-cover-plus-b575fde4a28c"
+  }
+]

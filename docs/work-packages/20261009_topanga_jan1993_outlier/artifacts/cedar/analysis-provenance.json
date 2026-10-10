@@ -1,0 +1,9 @@
+{
+  "runner_sha256": "b9100ec66c5b212091820720a4c981790180b1db2a591516b8013465fd021389",
+  "helpers": {
+    "deep_candidate_comparison.py": "e117819913dbaa501aec1c46859560a19180558be0f9ec51bb2d49758c1f31a0",
+    "audit_bounded_watershed.py": "327f751c88271e19627f024052d19b7fd3fc20ac72715125c4bd51a867639f85",
+    "audit_reproduction.py": "369fa30ed71377cfc974129f08561cdce0c7eb6d904943f906ce3432b6e0b1b4"
+  },
+  "integration": "Sum of the 144 printed positive-time discharge samples times 600 seconds; unchanged reference convention"
+}

@@ -1,0 +1,13 @@
+{
+  "channel-events-january10-24.csv": "168fd89f975ef5d8a152610a80fe31f27dee69ab8417da53ca372247fb8b063d",
+  "channel-ledgers-january10-24.csv": "a35a167742ed622d428049c0c4c3182b2f97aef496898005d1d2d8276b5cedb7",
+  "channel-series-january10-24.csv": "572e3bb09e9e83dafc6f9f2ab1773c74c07b27e5bc30baf569aeafebfa7f351a",
+  "initial-audit.log": "da2d483fb13587ec20ad12a37d1c0da6e341ec01087053768fc808ddd5c24e72",
+  "january18-peaks.csv": "89eeddc33b8f4e55a6fca11d3c98ada4f9f02fe73cee3770468a0d23f56f4f18",
+  "lower-trunk.png": "69eabc46fd045acb4a4ce5d0375601c9198818799ed51a25fc52ac19e9b52e54",
+  "observer-audit.log": "4f34a70872d701ee5567c232fa55b7080438930645e82a2d9a0e81403f89d87f",
+  "source-hashes.json": "3e111d043b23ddcdf88e9a823a535efff52b09e7d1cab591c3afd48609597b2f",
+  "upstream-audit.json": "1b29f00a66e9a0da596705369d7f0e0c53804abae55bb9721775c88cca79f815",
+  "upstream-selection.json": "94f3959480eb9f2566eda28694499c06498571efa7dba3c8cd0734936b931295",
+  "upstream_runner.py": "177c60f5c0b590d4243283ac5d13a486bc699f95cfa99193073f7768f61e015b"
+}

@@ -1,0 +1,32 @@
+release HILLS 64 /864
+candidate HILLS 64 /864
+release HILLS 128 /864
+candidate HILLS 128 /864
+release HILLS 192 /864
+candidate HILLS 192 /864
+release HILLS 256 /864
+candidate HILLS 256 /864
+candidate HILLS 320 /864
+release HILLS 320 /864
+release HILLS 384 /864
+candidate HILLS 384 /864
+candidate HILLS 448 /864
+release HILLS 448 /864
+release HILLS 512 /864
+candidate HILLS 512 /864
+candidate HILLS 576 /864
+release HILLS 576 /864
+candidate HILLS 640 /864
+release HILLS 640 /864
+candidate HILLS 704 /864
+release HILLS 704 /864
+candidate HILLS 768 /864
+release HILLS 768 /864
+candidate HILLS 832 /864
+release HILLS 832 /864
+candidate WATERSHED START
+release WATERSHED START
+release WATERSHED COMPLETE; FRESH TOTALWATSED CONVERSION
+candidate WATERSHED COMPLETE; FRESH TOTALWATSED CONVERSION
+release COMPLETE
+candidate COMPLETE

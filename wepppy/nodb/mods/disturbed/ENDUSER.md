@@ -129,6 +129,13 @@ Explicit custom roughness overrides remain authoritative.
 
 ## Interpreting Results
 
+See the [current canonical Disturbed rankings report](../../../../tests/disturbed/analysis_results_current.md)
+for the tested runoff, peak-flow and sediment patterns, including exceptions.
+The current report covers `wepp_261010`, 96 cases including young forest, and
+the adopted 6 cm low-burn forest roughness. Its version, inputs and review date
+are stated at the top; these benchmark results set expectations rather than
+guarantee a particular response at your site or in every storm.
+
 The disturbed parameterization is intended to be directionally correct across mixed vegetation and soil settings. In practical terms, that means:
 
 - unburned classes should generally behave less aggressively than burned classes,

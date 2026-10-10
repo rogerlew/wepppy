@@ -1,0 +1,63 @@
+[
+  {
+    "scenario": "burned",
+    "full_series_rows": 2366928,
+    "days_compared": 16437,
+    "printed_daily_maxima_match_control": true,
+    "january18_samples": 144,
+    "maximum_printed_m3s": 76.0,
+    "peak_sample_seconds": [
+      1200.0,
+      1800.0
+    ],
+    "preceding_sample_m3s": 24.4,
+    "following_sample_m3s": 76.0,
+    "minimum_printed_m3s": 0.0,
+    "negative_samples": 0,
+    "discharge_first_12_samples": [
+      24.4,
+      76.0,
+      76.0,
+      11.9,
+      0.0,
+      14.9,
+      0.427,
+      5.49,
+      3.91,
+      0.0,
+      5.0,
+      0.121
+    ],
+    "note": "Printed series uses three significant digits; time is the model daily routing frame. No causal classification."
+  },
+  {
+    "scenario": "undisturbed",
+    "full_series_rows": 2366928,
+    "days_compared": 16437,
+    "printed_daily_maxima_match_control": true,
+    "january18_samples": 144,
+    "maximum_printed_m3s": 708.0,
+    "peak_sample_seconds": [
+      1200.0
+    ],
+    "preceding_sample_m3s": 435.0,
+    "following_sample_m3s": 95.1,
+    "minimum_printed_m3s": 0.0,
+    "negative_samples": 0,
+    "discharge_first_12_samples": [
+      435.0,
+      708.0,
+      95.1,
+      96.3,
+      189.0,
+      0.0,
+      141.0,
+      11.6,
+      75.6,
+      38.9,
+      29.5,
+      59.6
+    ],
+    "note": "Printed series uses three significant digits; time is the model daily routing frame. No causal classification."
+  }
+]

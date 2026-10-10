@@ -2,6 +2,19 @@
 
 ## Progress
 
+Supplemental watershed evidence is preserved separately in the
+[Rattlesnake/Topanga comparison record](../../investigations/2026-10-09-watershed-return-period-comparisons/report.md).
+It includes both Rattlesnake versions, synthetic and GridMET Topanga, and their
+undisturbed scenarios. These are not the canonical hillslope ranking metric.
+January 18, 1993 is an open finding only; diagnosis has not begun.
+
+Publication complete: the [current canonical report](../../../tests/disturbed/analysis_results_current.md)
+is linked from Disturbed ENDUSER and README and registered in Usersum.
+It represents all 96 adopted-default cases, with verified input/output identities,
+reviewed expectations and explicit limitations. Eighty focused checks pass,
+including report freshness and link rendering; documentation and Usersum
+contract validation pass. Historical reports remain preserved. No deployment.
+
 Adoption, 2026-10-09: Roger approved low-severity forest RRINIT 4 -> 6 cm
 with [ADR-0083](../../adrs/ADR-0083-low-severity-forest-initial-random-roughness.md).
 Updated the shared template and all four corresponding extended-lookup rows.

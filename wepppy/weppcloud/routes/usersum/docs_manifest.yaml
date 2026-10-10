@@ -552,6 +552,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.source.features_export
+  - doc_id: usersum.source.disturbed_rankings
+    source: local
+    rel_path: tests/disturbed/analysis_results_current.md
+    title: Disturbed Parameterization - Canonical Results
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.disturbed_rankings
   - doc_id: usersum.source.observed
     source: local
     rel_path: wepppy/nodb/mods/observed/README.md

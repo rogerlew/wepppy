@@ -1,0 +1,24 @@
+--- fixed/irs.for
++++ observer/irs.for
+@@ -856,5 +856,21 @@
+         irfrac = 0.
+       end if
+ c
++c     Offline census observation after final peak/duration bookkeeping.
++      call census_output(year,sdate,nplane,runoff(1),peakro(1),
++     1 surdra)
+       return
+       end
++
++      subroutine census_output(yr,dy,n,r,p,s)
++      integer yr,dy,n,j,lu
++      real r(n),p(n),s(n)
++      open(newunit=lu,file='census.csv',status='unknown',
++     1 position='append',form='formatted')
++      do j=1,n
++        write(lu,1000) yr,dy,j,r(j),p(j),s(j)
++      enddo
++      close(lu)
++ 1000 format(i6,',',i4,',',i4,3(',',es24.16))
++      return
++      end

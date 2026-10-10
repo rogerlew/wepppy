@@ -1,0 +1,206 @@
+{
+  "selected_elements": [
+    404,
+    405,
+    406,
+    407,
+    408,
+    409,
+    410,
+    411,
+    412
+  ],
+  "topology": [
+    {
+      "wepp_id": 404,
+      "hillslopes": [
+        16,
+        17,
+        15
+      ],
+      "upstream_channels": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "wepp_id": 405,
+      "hillslopes": [
+        13,
+        14,
+        12
+      ],
+      "upstream_channels": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "wepp_id": 406,
+      "hillslopes": [
+        0,
+        11,
+        0
+      ],
+      "upstream_channels": [
+        402,
+        403,
+        0
+      ]
+    },
+    {
+      "wepp_id": 407,
+      "hillslopes": [
+        0,
+        0,
+        10
+      ],
+      "upstream_channels": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "wepp_id": 408,
+      "hillslopes": [
+        0,
+        0,
+        0
+      ],
+      "upstream_channels": [
+        404,
+        405,
+        0
+      ]
+    },
+    {
+      "wepp_id": 409,
+      "hillslopes": [
+        8,
+        9,
+        0
+      ],
+      "upstream_channels": [
+        406,
+        407,
+        0
+      ]
+    },
+    {
+      "wepp_id": 410,
+      "hillslopes": [
+        6,
+        7,
+        5
+      ],
+      "upstream_channels": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "wepp_id": 411,
+      "hillslopes": [
+        3,
+        4,
+        0
+      ],
+      "upstream_channels": [
+        408,
+        409,
+        0
+      ]
+    },
+    {
+      "wepp_id": 412,
+      "hillslopes": [
+        1,
+        2,
+        0
+      ],
+      "upstream_channels": [
+        410,
+        411,
+        0
+      ]
+    }
+  ],
+  "mapping": [
+    {
+      "wepp_id": 412,
+      "topaz_id": 24,
+      "chn_enum": 128,
+      "length": 439.7056274847714,
+      "slope_scalar": 0.03271191608054627,
+      "width": 0.5535490372575673
+    },
+    {
+      "wepp_id": 411,
+      "topaz_id": 34,
+      "chn_enum": 127,
+      "length": 247.27922061357856,
+      "slope_scalar": 0.04237857706343227,
+      "width": 0.4657769863768549
+    },
+    {
+      "wepp_id": 410,
+      "topaz_id": 44,
+      "chn_enum": 126,
+      "length": 911.5432893255071,
+      "slope_scalar": 0.23400134608834974,
+      "width": 0.6118012595042125
+    },
+    {
+      "wepp_id": 409,
+      "topaz_id": 54,
+      "chn_enum": 125,
+      "length": 114.8528137423857,
+      "slope_scalar": 0.03295003954476094,
+      "width": 0.324017
+    },
+    {
+      "wepp_id": 408,
+      "topaz_id": 64,
+      "chn_enum": 124,
+      "length": 30.0,
+      "slope_scalar": 0.02084757573902607,
+      "width": 0.324017
+    },
+    {
+      "wepp_id": 407,
+      "topaz_id": 74,
+      "chn_enum": 123,
+      "length": 30.0,
+      "slope_scalar": 0.4580487569173177,
+      "width": 0.324017
+    },
+    {
+      "wepp_id": 406,
+      "topaz_id": 84,
+      "chn_enum": 122,
+      "length": 30.0,
+      "slope_scalar": 0.03719261288642883,
+      "width": 0.324017
+    },
+    {
+      "wepp_id": 405,
+      "topaz_id": 94,
+      "chn_enum": 121,
+      "length": 217.27922061357856,
+      "slope_scalar": 0.3250451152989482,
+      "width": 0.324017
+    },
+    {
+      "wepp_id": 404,
+      "topaz_id": 104,
+      "chn_enum": 120,
+      "length": 84.8528137423857,
+      "slope_scalar": 0.4956724289020932,
+      "width": 0.324017
+    }
+  ]
+}

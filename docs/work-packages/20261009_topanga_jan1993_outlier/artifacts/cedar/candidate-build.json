@@ -1,0 +1,10 @@
+{
+  "wepp": {
+    "source": "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/wepp",
+    "sha256": "0eb062812786064b230091ac0144f7502bc225964ea982dd76ebfc68abc6b76d"
+  },
+  "wepp_hill": {
+    "source": "/wc1/holdouts/chrqin-normalization-candidate-20261009-v2/wepp_hill",
+    "sha256": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a"
+  }
+}

@@ -1,0 +1,9 @@
+site,scenario,baseline,changed_days,max_absolute_shift_seconds,median_absolute_shift_seconds
+topanga,burned,260803,414,35400.0,0.0
+topanga,burned,261009,154,35400.0,0.0
+topanga,undisturbed,260803,791,38400.0,0.0
+topanga,undisturbed,261009,18,5400.0,0.0
+rattlesnake,burned,260803,319,31200.0,0.0
+rattlesnake,burned,261009,184,14400.0,0.0
+rattlesnake,undisturbed,260803,474,40200.0,0.0
+rattlesnake,undisturbed,261009,0,0.0,0.0

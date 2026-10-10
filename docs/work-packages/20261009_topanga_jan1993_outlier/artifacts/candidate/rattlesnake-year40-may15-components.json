@@ -1,0 +1,50 @@
+[
+  {
+    "hillslope": "H12.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H21.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H22.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H28.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H29.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H30.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H31.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H33.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H36.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H40.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H41.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  },
+  {
+    "hillslope": "H8.pass.dat",
+    "source_component_record": "SRC3 40 136 0"
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "hills": 140,
+  "conversion": {
+    "rows_written": 2301180,
+    "candidate_records": 2301180,
+    "accepted_records": 2301180,
+    "rejected_records": 0,
+    "row_groups": 140,
+    "elapsed_ms": 5494,
+    "schema_version": "1",
+    "output_paths": [
+      "/wc1/holdouts/wepp-261010-pass-validation-v2/H.pass.parquet"
+    ]
+  },
+  "fresh_same_build": true,
+  "lanes": {
+    "roads": {
+      "target": "H1.pass.dat",
+      "supplied_volume_m3": 195011.111,
+      "combined_volume_m3": 390022.222,
+      "expected_factor": 2.0,
+      "watershed_completed": true,
+      "output_sha256": "cfbabd6f4a000b1a77cefb6cc516c482b470c7b22252c784324eeeb5c8e19171"
+    },
+    "agfields": {
+      "target": "H1.pass.dat",
+      "supplied_volume_m3": 195011.111,
+      "combined_volume_m3": 195011.111,
+      "expected_factor": 1.0,
+      "watershed_completed": true,
+      "output_sha256": "ffe58c454015546d6820a6dce192fca940fc221c52edf8dbf75509c30c2537f7"
+    }
+  },
+  "scope": "Full-period fresh watershed plus synthetic composition interface replays; not a scenario validation"
+}

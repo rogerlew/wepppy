@@ -1,0 +1,12 @@
+[
+  {
+    "wepp_id": 101,
+    "event_line": "EVENT      1993    18      0.14400E+04 0.26526E+00 0.31813E+00 0.67894E-02 0.27497E+03 0.67082E-02 0.27168E+03 0.00000E+00 0.00000E+00 0.91603E-01      0.53683E+03 0.00000E+00 0.98983E-01 0.18786E+00 0.55598E+00      0.82967E+00 0.27983E+00 0.50700E-01 0.96223E-01 0.28478E+00",
+    "interpretation": "Old full-volume/peak operands through unchanged flat branch; no return component"
+  },
+  {
+    "wepp_id": 234,
+    "event_line": "EVENT      1993    18      0.14400E+04 0.27846E+00 0.37767E+00 0.12166E-01 0.62432E+03 0.42284E-02 0.21698E+03 0.00000E+00 0.00000E+00 0.23521E+00      0.44200E+03 0.00000E+00 0.23930E-01 0.12885E+00 0.16567E+00      0.22933E+00 0.16020E+00 0.33800E-01 0.18200E+00 0.23400E+00",
+    "interpretation": "Old full-volume/peak operands through unchanged flat branch; no return component"
+  }
+]

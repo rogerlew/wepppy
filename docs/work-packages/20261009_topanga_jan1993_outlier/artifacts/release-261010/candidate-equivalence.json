@@ -1,0 +1,16 @@
+{
+  "wepp": {
+    "candidate_sha256": "0eb062812786064b230091ac0144f7502bc225964ea982dd76ebfc68abc6b76d",
+    "release_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+    "normalized_candidate_sha256": "d3b5fb0fb75fa1fbe0777e234388404239dcfd0b88dea09f2c7172a139a59df5",
+    "normalized_release_sha256": "d3b5fb0fb75fa1fbe0777e234388404239dcfd0b88dea09f2c7172a139a59df5",
+    "identical": true
+  },
+  "wepp_hill": {
+    "candidate_sha256": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a",
+    "release_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+    "normalized_candidate_sha256": "5a65377c5f923de3d0fbb9db4e608408fe06f159f6a874f57afafa4c75ceab89",
+    "normalized_release_sha256": "5a65377c5f923de3d0fbb9db4e608408fe06f159f6a874f57afafa4c75ceab89",
+    "identical": true
+  }
+}

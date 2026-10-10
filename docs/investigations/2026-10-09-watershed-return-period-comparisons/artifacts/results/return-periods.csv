@@ -1,0 +1,185 @@
+case,setting,method,years,measure,units,return_years,value,selected_rank,year,month,day,runoff_volume_m3,peak_m3s
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,2,5.439383390964829,50,85,3,17,36647.59,0.46135
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,5,6.448136994130961,20,41,5,2,43444.02,7.06056
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,10,8.241313136816965,10,53,6,28,55525.46,14.90743
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,20,11.49315028766338,5,25,11,24,77434.56,3.05644
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,25,18.752347483904753,4,84,12,5,126343.06,7.8197
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Runoff,mm,50,24.84941709448746,2,84,12,9,167421.78,4.85861
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,9.84958,50,60,7,1,20902.33,9.84958
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,15.38192,20,25,8,20,42497.16,15.38192
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,19.5745,10,56,8,18,28029.64,19.5745
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,27.84298,5,10,6,14,67716.99,27.84298
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,28.58797,4,66,7,13,26896.86,28.58797
+rattlesnake_260803_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,39.31592,2,36,7,22,74769.98,39.31592
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,2,5.436273907311452,49,95,3,19,36626.64,0.43889
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,5,7.098364905701954,19,35,6,4,47824.9,15.70812
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,10,8.392172816059462,9,78,1,20,56541.87,0.93324
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,20,18.752347483904753,4,84,12,5,126343.06,7.8197
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,25,24.16663830654308,3,37,12,9,162821.59,5.36945
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Runoff,mm,50,37.954023519044924,1,22,12,29,255713.45,5.79868
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,9.84958,49,60,7,1,20902.33,9.84958
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,15.38192,19,25,8,20,42497.16,15.38192
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,19.5745,9,56,8,18,28029.64,19.5745
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,27.84298,4,10,6,14,67716.99,27.84298
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,28.58797,3,66,7,13,26896.86,28.58797
+rattlesnake_260803_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,44.5478,1,40,5,15,28250.79,44.5478
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,2,3.8333269206726532,50,78,3,27,25826.86,0.31616
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,5,4.9338006440508,20,85,3,25,33241.25,0.39413
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,10,5.288655809118586,10,6,3,19,35632.07,0.41537
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,20,8.353368834849952,5,84,12,10,56280.43,2.10153
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,25,15.25760400071421,4,84,12,5,102797.39,5.63202
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Runoff,mm,50,20.00409647383945,2,84,12,9,134776.66,3.74594
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,0.31632,50,95,3,22,26802.14,0.31632
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,0.39908,20,85,3,24,34230.01,0.39908
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,0.44478,10,1,1,5,38039.03,0.44478
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,2.28908,5,37,12,9,129486.97,2.28908
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,3.67237,4,35,6,4,23791.98,3.67237
+rattlesnake_260803_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,4.35308,2,22,12,29,210314.7,4.35308
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,2,3.7719298319826056,49,78,3,31,25413.2,0.29566
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,5,4.7430727832267285,19,85,3,26,31956.23,0.38352
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,10,5.200756123715065,9,6,3,17,35039.85,0.41084
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,20,15.25760400071421,4,84,12,5,102797.39,5.63202
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,25,19.218979309808944,3,37,12,9,129486.97,2.28908
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,50,31.215757599769887,1,22,12,29,210314.7,4.35308
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,0.30898,49,6,3,26,25180.39,0.30898
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,0.39513,19,6,3,16,33718.31,0.39513
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,0.45179,9,85,3,18,37113.65,0.45179
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,3.67237,4,35,6,4,23791.98,3.67237
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,3.74594,3,84,12,9,134776.66,3.74594
+rattlesnake_260803_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,5.63202,1,84,12,5,102797.39,5.63202
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,2,5.439260199011021,50,85,3,17,36646.76,0.44417
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,5,6.448136994130961,20,41,5,2,43444.02,7.06231
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,10,8.241313136816965,10,53,6,28,55525.46,14.90743
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,20,11.493271995376782,5,25,11,24,77435.38,3.05706
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,25,18.752351936625974,4,84,12,5,126343.09,6.67263
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Runoff,mm,50,24.849409673285425,2,84,12,9,167421.73,4.65038
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,9.84958,50,60,7,1,20902.33,9.84958
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,15.34344,20,98,7,29,16686.01,15.34344
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,19.5745,10,56,8,18,28029.64,19.5745
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,27.71073,5,10,6,14,67716.99,27.71073
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,28.58797,4,66,7,13,26896.86,28.58797
+rattlesnake_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,39.31592,2,36,7,22,74769.98,39.31592
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,2,5.436273907311452,49,95,3,19,36626.64,0.43894
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,5,7.098364905701954,19,35,6,4,47824.9,14.19279
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,10,8.39006964740226,9,78,1,20,56527.7,0.88325
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,20,18.752351936625974,4,84,12,5,126343.09,6.67263
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,25,24.166616042936973,3,37,12,9,162821.44,5.37648
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,50,37.9540190663237,1,22,12,29,255713.42,5.79178
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,9.84958,49,60,7,1,20902.33,9.84958
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,15.34344,19,98,7,29,16686.01,15.34344
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,19.5745,9,56,8,18,28029.64,19.5745
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,27.71073,4,10,6,14,67716.99,27.71073
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,28.58797,3,66,7,13,26896.86,28.58797
+rattlesnake_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,44.5478,1,40,5,15,28250.79,44.5478
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,2,3.833304657066543,50,78,3,27,25826.71,0.31603
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,5,4.9338006440508,20,85,3,25,33241.25,0.39413
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,10,5.288655809118586,10,6,3,19,35632.07,0.41537
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,20,8.351279024356415,5,84,12,10,56266.35,0.72138
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,25,15.257606969195026,4,84,12,5,102797.41,2.9218
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,50,20.00408905263741,2,84,12,9,134776.61,3.49754
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,0.31603,50,78,3,27,25826.71,0.31603
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,0.39897,20,85,3,22,34293.68,0.39897
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,0.43941,10,25,11,24,20922.65,0.43941
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,2.0471,5,35,6,4,23797.67,2.0471
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,2.29556,4,37,12,9,129486.98,2.29556
+rattlesnake_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,3.49754,2,84,12,9,134776.61,3.49754
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,2,3.7719298319826056,49,78,3,31,25413.2,0.29626
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,5,4.7430727832267285,19,85,3,26,31956.23,0.38352
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,10,5.200756123715065,9,6,3,17,35039.85,0.41084
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,20,15.257606969195026,4,84,12,5,102797.41,2.9218
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,25,19.21898079404935,3,37,12,9,129486.98,2.29556
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,50,31.21575166280826,1,22,12,29,210314.66,4.33284
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,0.30653,49,78,4,4,24538.89,0.30653
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,0.39428,19,85,3,21,33885.9,0.39428
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,0.43941,9,25,11,24,20922.65,0.43941
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,2.29556,4,37,12,9,129486.98,2.29556
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,2.9218,3,84,12,5,102797.41,2.9218
+rattlesnake_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,4.33284,1,22,12,29,210314.66,4.33284
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,2,28.014469036283938,50,37,1,7,272308.94,48.71404
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,5,55.01599878697526,20,22,3,6,534771.81,32.35434
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,10,69.72661721255697,10,59,2,28,677763.38,69.33321
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,20,87.5448559242532,5,28,1,28,850961.94,91.34955
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,25,91.622972345377,4,77,3,17,890602.44,174.41191
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Runoff,mm,50,106.10755548047692,2,63,3,11,1031396.88,115.9113
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,48.3079,50,61,1,19,400088.22,48.3079
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,92.67839,20,6,2,21,765523.88,92.67839
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,118.14108,10,48,12,22,603675.12,118.14108
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,168.86104,5,26,3,9,788691.56,168.86104
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,170.58311,4,42,11,15,227222.45,170.58311
+topanga_synthetic_261009_burned,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,208.3567,2,48,10,27,427961.03,208.3567
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,2,28.014469036283938,49,37,1,7,272308.94,48.71404
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,5,55.26759914173851,19,95,2,4,537217.44,49.50763
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,10,77.67081948142793,9,30,3,1,754983.38,209.79752
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,20,91.622972345377,4,77,3,17,890602.44,174.41191
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,25,92.96522772359808,3,63,3,8,903649.56,61.31579
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Runoff,mm,50,149.3682737332109,1,59,12,19,1451903.88,75.16784
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,48.71404,49,37,1,7,272308.94,48.71404
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,93.4406,19,55,1,31,265126.75,93.4406
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,125.7826,9,61,3,7,567956.5,125.7826
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,170.58311,4,42,11,15,227222.45,170.58311
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,174.41191,3,77,3,17,890602.44,174.41191
+topanga_synthetic_261009_burned,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,209.79752,1,30,3,1,754983.38,209.79752
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,2,24.984072733478225,50,37,1,7,242852.59,9.34063
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,5,51.047678401482806,20,28,1,27,496198.56,36.34161
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,10,68.72524547556719,10,59,2,28,668029.75,38.61629
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,20,88.03097073488287,5,63,3,8,855687.12,38.95191
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,25,90.57242515274723,4,15,2,22,880390.81,39.76041
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Runoff,mm,50,108.54044119155047,2,63,3,11,1055045.25,79.03436
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,2,14.74625,50,94,1,21,236024.3,14.74625
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,5,38.95191,20,63,3,8,855687.12,38.95191
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,10,57.05821,10,48,12,22,579414.62,57.05821
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,20,79.03436,5,63,3,11,1055045.25,79.03436
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,25,111.49062,4,26,3,9,834711.38,111.49062
+topanga_synthetic_261009_undisturbed,full_record_gringorten,cta,100,Peak Discharge,m3/s,50,129.22813,2,48,10,27,351581.03,129.22813
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,2,25.111911428963424,49,96,1,21,244095.22,5.64657
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,5,52.19343565463798,19,21,3,24,507335.66,46.16695
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,10,71.23953405490373,9,30,3,1,692469.38,167.83331
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,20,90.57242515274723,4,15,2,22,880390.81,39.76041
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,25,91.04503831735558,3,77,3,17,884984.75,122.77776
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Runoff,mm,50,151.22707715069646,1,59,12,19,1469972.0,49.46994
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,2,15.16712,49,77,2,3,464361.91,15.16712
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,5,39.76041,19,15,2,22,880390.81,39.76041
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,10,60.89286,9,77,12,24,292528.06,60.89286
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,20,111.49062,4,26,3,9,834711.38,111.49062
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,25,122.77776,3,77,3,17,884984.75,122.77776
+topanga_synthetic_261009_undisturbed,exclude_first_two_weibull,cta,98,Peak Discharge,m3/s,50,167.83331,1,30,3,1,692469.38,167.83331
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Runoff,mm,2,70.7048013848047,22,2023,2,26,687271.62,171.58092
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Runoff,mm,5,88.09641421311775,9,2005,1,9,856323.25,121.98363
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Runoff,mm,10,127.64246895679254,4,1995,1,10,1240722.62,157.38947
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Runoff,mm,20,136.93191108080532,2,2024,2,4,1331018.75,197.28867
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Runoff,mm,25,148.11642094890007,1,2005,1,3,1439735.5,82.33972
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Peak Discharge,m3/s,2,168.93411,22,1997,12,6,287362.44,168.93411
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Peak Discharge,m3/s,5,218.13734,9,2008,1,25,613209.0,218.13734
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Peak Discharge,m3/s,10,243.79057,4,1983,3,1,1259854.12,243.79057
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Peak Discharge,m3/s,20,259.95114,2,2004,12,29,713618.12,259.95114
+topanga_gridmet_261009_burned,full_record_gringorten,cta,45,Peak Discharge,m3/s,25,293.5553,1,1980,2,15,1018651.0,293.5553
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Runoff,mm,2,70.7048013848047,21,2023,2,26,687271.62,171.58092
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Runoff,mm,5,88.09641421311775,8,2005,1,9,856323.25,121.98363
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Runoff,mm,10,127.64246895679254,4,1995,1,10,1240722.62,157.38947
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Runoff,mm,20,136.93191108080532,2,2024,2,4,1331018.75,197.28867
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Runoff,mm,25,148.11642094890007,1,2005,1,3,1439735.5,82.33972
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,2,168.93411,21,1997,12,6,287362.44,168.93411
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,5,218.13734,8,2008,1,25,613209.0,218.13734
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,10,242.98781,4,2023,1,9,903034.75,242.98781
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,20,259.21631,2,2021,12,29,785420.81,259.21631
+topanga_gridmet_261009_burned,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,25,259.95114,1,2004,12,29,713618.12,259.95114
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Runoff,mm,2,65.83819356840162,22,2023,2,26,639966.75,87.00854
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Runoff,mm,5,85.14178514790564,9,1996,2,20,827603.38,100.30402
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Runoff,mm,10,117.46231427383309,4,1995,1,10,1141768.5,125.22477
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Runoff,mm,20,135.04971537230844,2,2024,2,4,1312723.25,146.21204
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Runoff,mm,25,139.86148946934728,1,2005,1,3,1359495.12,47.32393
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Peak Discharge,m3/s,2,118.84573,22,1982,11,30,392149.84,118.84573
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Peak Discharge,m3/s,5,170.68329,9,2021,12,29,638803.06,170.68329
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Peak Discharge,m3/s,10,211.63841,4,1983,3,1,1224751.0,211.63841
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Peak Discharge,m3/s,20,249.90948,2,1980,2,15,1007234.5,249.90948
+topanga_gridmet_261009_undisturbed,full_record_gringorten,cta,45,Peak Discharge,m3/s,25,707.6391,1,1993,1,18,218608.19,707.6391
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Runoff,mm,2,65.83819356840162,21,2023,2,26,639966.75,87.00854
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Runoff,mm,5,85.14178514790564,8,1996,2,20,827603.38,100.30402
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Runoff,mm,10,117.46231427383309,4,1995,1,10,1141768.5,125.22477
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Runoff,mm,20,135.04971537230844,2,2024,2,4,1312723.25,146.21204
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Runoff,mm,25,139.86148946934728,1,2005,1,3,1359495.12,47.32393
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,2,118.84573,21,1982,11,30,392149.84,118.84573
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,5,170.68329,8,2021,12,29,638803.06,170.68329
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,10,189.50896,4,1992,12,7,665161.31,189.50896
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,20,213.37497,2,2004,12,29,712034.44,213.37497
+topanga_gridmet_261009_undisturbed,exclude_first_two_weibull,cta,43,Peak Discharge,m3/s,25,707.6391,1,1993,1,18,218608.19,707.6391

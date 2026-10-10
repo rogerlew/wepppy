@@ -933,9 +933,12 @@ def generate_detailed_texture_markdown(results: List[ComparisonResult]) -> str:
     return "\n".join(lines)
 
 
-def generate_full_report(results: List[ComparisonResult]) -> str:
+def generate_full_report(results: List[ComparisonResult], context: str = "") -> str:
     """Generate the full markdown report."""
     lines = []
+
+    if context.strip():
+        lines.extend([context.strip(), ""])
 
     lines.append("## Test Matrix Analysis Results")
     lines.append("")
@@ -993,6 +996,12 @@ def main():
         default=Path(__file__).parent / "analysis_results_current.md",
         help="Output markdown file"
     )
+    parser.add_argument(
+        "--context",
+        type=Path,
+        default=Path(__file__).parent / "analysis_context.md",
+        help="Reviewed report identity, user interpretation and scope markdown"
+    )
     args = parser.parse_args()
 
     print(f"Loading events from: {args.output_dir}")
@@ -1012,7 +1021,7 @@ def main():
     print(f"Generated {len(results)} comparison results")
 
     # Generate report
-    report = generate_full_report(results)
+    report = generate_full_report(results, context=args.context.read_text())
 
     # Write to file
     with open(args.out, 'w') as f:

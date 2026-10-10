@@ -1,0 +1,16 @@
+{
+  "2": {
+    "mutated_peak_max_mm_h": 51.8516873853514,
+    "no_surface_return": 423,
+    "rows": 966,
+    "surface_return": 543,
+    "unmutated_peak_max_mm_h": 54.20071902335622
+  },
+  "5": {
+    "mutated_peak_max_mm_h": 19.636361503216907,
+    "no_surface_return": 184,
+    "rows": 209,
+    "surface_return": 25,
+    "unmutated_peak_max_mm_h": 17.389759341313038
+  }
+}

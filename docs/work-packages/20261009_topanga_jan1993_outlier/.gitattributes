@@ -1,0 +1,2 @@
+# Preserve hashed scientific evidence and diagnostic transcripts byte-for-byte.
+artifacts/** -text -whitespace

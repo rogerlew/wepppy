@@ -1,0 +1,329 @@
+{
+  "project": "warming-championship; Cedar Creek",
+  "years": [
+    1980,
+    2003
+  ],
+  "days": 8766,
+  "hills": 864,
+  "channels": 371,
+  "timestep_s": 600,
+  "rrinit_cm": 10,
+  "totals": {
+    "baseline": {
+      "hill_stream_m3": 1267735665.2886457,
+      "hill_surface_m3": 192438982.86587,
+      "hill_lateral_m3": 404349515.25679106,
+      "hill_baseflow_m3": 670947167.1659845,
+      "water_m3": 1272337716.46,
+      "sampled_volume_m3": 1266448890.3,
+      "integral_minus_ledger_m3": -5888826.159999995,
+      "ledger_minus_hill_m3": 4602051.1713543665,
+      "sampled_minus_hill_m3": -1286774.9886456283,
+      "abs_daily_integral_ledger_gap_m3": 6441305.439999997,
+      "maximum_sampled_peak_m3s": 50.5,
+      "maximum_reported_peak_m3s": 50.50288
+    },
+    "release": {
+      "hill_stream_m3": 1267735665.6815429,
+      "hill_surface_m3": 192438982.72777,
+      "hill_lateral_m3": 404349515.6909671,
+      "hill_baseflow_m3": 670947167.2628059,
+      "water_m3": 1272337716.29,
+      "sampled_volume_m3": 1267093408.9199998,
+      "integral_minus_ledger_m3": -5244307.369999999,
+      "ledger_minus_hill_m3": 4602050.608456953,
+      "sampled_minus_hill_m3": -642256.7615430471,
+      "abs_daily_integral_ledger_gap_m3": 5849097.910000002,
+      "maximum_sampled_peak_m3s": 46.4,
+      "maximum_reported_peak_m3s": 46.36212
+    },
+    "candidate": {
+      "hill_stream_m3": 1267735665.6815429,
+      "hill_surface_m3": 192438982.72777,
+      "hill_lateral_m3": 404349515.6909671,
+      "hill_baseflow_m3": 670947167.2628059,
+      "water_m3": 1272337711.84,
+      "sampled_volume_m3": 1266461659.92,
+      "integral_minus_ledger_m3": -5876051.919999999,
+      "ledger_minus_hill_m3": 4602046.158456951,
+      "sampled_minus_hill_m3": -1274005.761543048,
+      "abs_daily_integral_ledger_gap_m3": 6380525.059999999,
+      "maximum_sampled_peak_m3s": 46.2,
+      "maximum_reported_peak_m3s": 46.19911
+    }
+  },
+  "candidate_versus": {
+    "baseline": {
+      "totals": {
+        "hill_stream_m3": {
+          "reference": 1267735665.2886457,
+          "candidate": 1267735665.6815429,
+          "delta": 0.3928971290588379,
+          "percent": 3.099203116363469e-08
+        },
+        "hill_surface_m3": {
+          "reference": 192438982.86587,
+          "candidate": 192438982.72777,
+          "delta": -0.13809999823570251,
+          "percent": -7.176300664823998e-08
+        },
+        "hill_lateral_m3": {
+          "reference": 404349515.25679106,
+          "candidate": 404349515.6909671,
+          "delta": 0.4341760277748108,
+          "percent": 1.0737641886748861e-07
+        },
+        "hill_baseflow_m3": {
+          "reference": 670947167.1659845,
+          "candidate": 670947167.2628059,
+          "delta": 0.09682142734527588,
+          "percent": 1.4430567851775322e-08
+        },
+        "water_m3": {
+          "reference": 1272337716.46,
+          "candidate": 1272337711.84,
+          "delta": -4.620000123977661,
+          "percent": -3.631111522572894e-07
+        },
+        "sampled_volume_m3": {
+          "reference": 1266448890.3,
+          "candidate": 1266461659.92,
+          "delta": 12769.620000123978,
+          "percent": 0.0010083012506711952
+        },
+        "integral_minus_ledger_m3": {
+          "reference": -5888826.159999995,
+          "candidate": -5876051.919999999,
+          "delta": 12774.239999995567,
+          "percent": -0.21692336728778017
+        },
+        "ledger_minus_hill_m3": {
+          "reference": 4602051.1713543665,
+          "candidate": 4602046.158456951,
+          "delta": -5.012897415086627,
+          "percent": -0.00010892745926360803
+        },
+        "sampled_minus_hill_m3": {
+          "reference": -1286774.9886456283,
+          "candidate": -1274005.761543048,
+          "delta": 12769.227102580247,
+          "percent": -0.9923434334094594
+        },
+        "abs_daily_integral_ledger_gap_m3": {
+          "reference": 6441305.439999997,
+          "candidate": 6380525.059999999,
+          "delta": -60780.379999998026,
+          "percent": -0.9436034444595176
+        },
+        "maximum_sampled_peak_m3s": {
+          "reference": 50.5,
+          "candidate": 46.2,
+          "delta": -4.299999999999997,
+          "percent": -8.514851485148512
+        },
+        "maximum_reported_peak_m3s": {
+          "reference": 50.50288,
+          "candidate": 46.19911,
+          "delta": -4.30377,
+          "percent": -8.521830834201927
+        }
+      },
+      "daily_fit": {
+        "hill_stream_m3": {
+          "n": 8766,
+          "NSE": 0.9999999999999994,
+          "KGE2009": 0.9999999994861114,
+          "R2": 1.0,
+          "bias_percent": 3.099203116363469e-08,
+          "RMSE": 0.0035061823781302594
+        },
+        "water_m3": {
+          "n": 8766,
+          "NSE": 0.9999996726775455,
+          "KGE2009": 0.9999160075748417,
+          "R2": 0.9999996797053708,
+          "bias_percent": -3.631111522572894e-07,
+          "RMSE": 85.74558531242639
+        },
+        "sampled_volume_m3": {
+          "n": 8766,
+          "NSE": 0.9999962195015244,
+          "KGE2009": 0.9990129116423304,
+          "R2": 0.9999971966059448,
+          "bias_percent": 0.0010083012506711952,
+          "RMSE": 289.66866669008544
+        },
+        "sampled_peak_m3s": {
+          "n": 8766,
+          "NSE": 0.9992699153718672,
+          "KGE2009": 0.98538982876795,
+          "R2": 0.9994730807889205,
+          "bias_percent": -0.2489477133015061,
+          "RMSE": 0.06867121188016544
+        }
+      },
+      "subdaily_fit": {
+        "n": 1262304,
+        "NSE": 0.9993176776007342,
+        "KGE2009": 0.9976150151607114,
+        "R2": 0.9993217643363203,
+        "bias_percent": 0.0010083012506933997,
+        "RMSE": 0.0485197307503351
+      },
+      "changed_sample_days": 3377,
+      "increased_peak_days": 133,
+      "decreased_peak_days": 964,
+      "new_positive_samples": 0,
+      "dry_days": 2909,
+      "dry_sampled_volume_delta_m3": -1679.0400000003,
+      "max_daily_hill_yield_delta_m3": 0.21708829663111828
+    },
+    "release": {
+      "totals": {
+        "hill_stream_m3": {
+          "reference": 1267735665.6815429,
+          "candidate": 1267735665.6815429,
+          "delta": 0.0,
+          "percent": 0.0
+        },
+        "hill_surface_m3": {
+          "reference": 192438982.72777,
+          "candidate": 192438982.72777,
+          "delta": 0.0,
+          "percent": 0.0
+        },
+        "hill_lateral_m3": {
+          "reference": 404349515.6909671,
+          "candidate": 404349515.6909671,
+          "delta": 0.0,
+          "percent": 0.0
+        },
+        "hill_baseflow_m3": {
+          "reference": 670947167.2628059,
+          "candidate": 670947167.2628059,
+          "delta": 0.0,
+          "percent": 0.0
+        },
+        "water_m3": {
+          "reference": 1272337716.29,
+          "candidate": 1272337711.84,
+          "delta": -4.450000047683716,
+          "percent": -3.4974990681391205e-07
+        },
+        "sampled_volume_m3": {
+          "reference": 1267093408.9199998,
+          "candidate": 1266461659.92,
+          "delta": -631748.9999997616,
+          "percent": -0.049858123762025475
+        },
+        "integral_minus_ledger_m3": {
+          "reference": -5244307.369999999,
+          "candidate": -5876051.919999999,
+          "delta": -631744.5499999998,
+          "percent": 12.0462914438213
+        },
+        "ledger_minus_hill_m3": {
+          "reference": 4602050.608456953,
+          "candidate": 4602046.158456951,
+          "delta": -4.45000000204891,
+          "percent": -9.669602489825735e-05
+        },
+        "sampled_minus_hill_m3": {
+          "reference": -642256.7615430471,
+          "candidate": -1274005.761543048,
+          "delta": -631749.0000000009,
+          "percent": 98.36393134767458
+        },
+        "abs_daily_integral_ledger_gap_m3": {
+          "reference": 5849097.910000002,
+          "candidate": 6380525.059999999,
+          "delta": 531427.1499999966,
+          "percent": 9.085625820888277
+        },
+        "maximum_sampled_peak_m3s": {
+          "reference": 46.4,
+          "candidate": 46.2,
+          "delta": -0.19999999999999574,
+          "percent": -0.4310344827586077
+        },
+        "maximum_reported_peak_m3s": {
+          "reference": 46.36212,
+          "candidate": 46.19911,
+          "delta": -0.16300999999999988,
+          "percent": -0.35160169552211906
+        }
+      },
+      "daily_fit": {
+        "hill_stream_m3": {
+          "n": 8766,
+          "NSE": 1.0,
+          "KGE2009": 1.0,
+          "R2": 1.0,
+          "bias_percent": 0.0,
+          "RMSE": 0.0
+        },
+        "water_m3": {
+          "n": 8766,
+          "NSE": 0.9999999992700557,
+          "KGE2009": 0.9999939584837418,
+          "R2": 0.9999999993065596,
+          "bias_percent": -3.497498957116818e-07,
+          "RMSE": 4.048830891498142
+        },
+        "sampled_volume_m3": {
+          "n": 8766,
+          "NSE": 0.9999965072651138,
+          "KGE2009": 0.998391480136513,
+          "R2": 0.9999990774409139,
+          "bias_percent": -0.049858123762025475,
+          "RMSE": 279.12769203351786
+        },
+        "sampled_peak_m3s": {
+          "n": 8766,
+          "NSE": 0.9999862549091102,
+          "KGE2009": 0.9975592749632491,
+          "R2": 0.9999916869541455,
+          "bias_percent": -0.10931710906300074,
+          "RMSE": 0.00930709129842097
+        }
+      },
+      "subdaily_fit": {
+        "n": 1262304,
+        "NSE": 0.9999901102956599,
+        "KGE2009": 0.9981452949616878,
+        "R2": 0.9999934919053419,
+        "bias_percent": -0.04985812376201437,
+        "RMSE": 0.00583801615272151
+      },
+      "changed_sample_days": 3348,
+      "increased_peak_days": 0,
+      "decreased_peak_days": 1038,
+      "new_positive_samples": 0,
+      "dry_days": 2909,
+      "dry_sampled_volume_delta_m3": -1701.6000000002678,
+      "max_daily_hill_yield_delta_m3": 0.0
+    }
+  },
+  "event_screen": {
+    "count": 322,
+    "selection": "260803 daily mean peaks; distance 7 days, prominence 0.1 m3/s; +/-3 days; no baseflow subtraction"
+  },
+  "provenance": {
+    "baseline": {
+      "/wc1/holdouts/channel-discharge-closure-20261007-resolution/A_original/off/output/chan.out": "97b67ea3cc1c9bec3ba6d701091a3253181e9c4c067446534c831b6b399e3d9b",
+      "/wc1/holdouts/channel-discharge-closure-20261007-resolution/A_original/off/output/ebe_pw0.txt": "8b053f27e431974bdc892cacb3602331ade783688f95af3234714cddd4b4a7fe",
+      "/workdir/warming-combined-release-20261007/legacy10/output/interchange/totalwatsed3.parquet": "c2c3fd142e640284b24839f1b4bd252784e282c7d7c675c12e8b4e072b4ecbd8"
+    },
+    "release": {
+      "/wc1/holdouts/chrqin-cedar-20261010/release/off/output/chan.out": "bf3796961b53e253afda026d8e790270b8ca7d3cfcdf406ad17ee2d2c062dca3",
+      "/wc1/holdouts/chrqin-cedar-20261010/release/off/output/ebe_pw0.txt": "77171c5768b718baf6928e28a1d83107e62b4cdd7bd5eda591c6e0268bc394ee",
+      "/wc1/holdouts/chrqin-cedar-20261010/release/yield-optimized/totalwatsed3.parquet": "e8750d422f7a1579a5f3cb30faf58a888773d6041fe96168bab97366a8d900ca"
+    },
+    "candidate": {
+      "/wc1/holdouts/chrqin-cedar-20261010/candidate/off/output/chan.out": "28986996f0619d4d23e1f14778a9dbaae5d32c124d01898e2de3e8be4483bba7",
+      "/wc1/holdouts/chrqin-cedar-20261010/candidate/off/output/ebe_pw0.txt": "0283f8783e4993a2714867ed6eb78a71c7db3d78cc95e3a93b28c4647b1b6cb1",
+      "/wc1/holdouts/chrqin-cedar-20261010/candidate/yield-optimized/totalwatsed3.parquet": "51617e73ed9af41097ef6565ab10e188bc55680e1e6f1da76a060b62bf86258e"
+    }
+  }
+}

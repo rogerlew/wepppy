@@ -1,0 +1,11 @@
+{
+  "candidate": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a",
+  "release": "37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228",
+  "execution_runtime": "Both matrices use the same weppcloud container via wctl",
+  "analysis_runtime": "Host .venv native parser; identical parser for both lanes",
+  "harness": {
+    "tests/disturbed/test_disturbed_matrix.py": "925cd787c670752d242d278411b4240fcf6575e34ac8b2fde7c947dc9f266bfa",
+    "tests/disturbed/conftest.py": "1bd05ae9e935bd80d74fb9b012b99a96390738526679ec6e067ee74e068c280f",
+    "tests/disturbed/analyze_matrix.py": "81700d3785094e1bad737de781fd101ce0d8c771372b89ffda49c95e7e98a63d"
+  }
+}

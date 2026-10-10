@@ -1,0 +1,16 @@
+{
+  "probe_sha256": "19e3fdd0d27d86533e9e2c7ead9fc21c4701588a5a6729dccbd13975620e45a8",
+  "source_sha256": {
+    "chrqin.for": "189d2a4e0ac5529bb2faea0883f3d3fb8c3e8f0a4610e1567de01987221d7fb2",
+    "eqroot.for": "7f2ef9de7bc77c06da6848a5158208fdf57ee373a6b176fec33988d0b1f71770",
+    "mixpass.for": "83b33c45ef5863187d3f15b8e8a3f1dd41fc4c7444051292d00ed248d6f97a66"
+  },
+  "compiler": "/usr/bin/gfortran 13.3.0",
+  "flags": "-fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -no-pie",
+  "linked_objects": [
+    "chrqin.o",
+    "eqroot.o",
+    "mixpass.o"
+  ],
+  "scope": "Actual unchanged production routines, not a surrogate model"
+}

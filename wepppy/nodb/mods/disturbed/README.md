@@ -291,20 +291,22 @@ Those metadata fields alone do not control infiltration in format 9002.
 Any recurrence after a verified rebuild requires a new incident investigation;
 preserve the old inputs/results until corrected outputs have been verified.
 
-## Validation Results (80-Simulation Matrix)
+## Canonical Model Comparisons
 
-An 80-simulation matrix test (4 soil textures × 5 vegetation types × 4 burn severities, 100-year climate) validates the parameterization. Key findings:
+The [current 96-case report](../../../../tests/disturbed/analysis_results_current.md)
+covers `wepp_261010`, six vegetation types including young forest, four soils,
+four severity states and the adopted 6 cm low-burn forest roughness. It uses
+100 finite synthetic climate years on the canonical 87.9 m profile.
 
-1. **Forest-family burned totals remain directionally correct**: Evergreen, deciduous, and mixed forest baselines all show burned totals greater than matched unburned totals for runoff, sediment delivery, and peakflow across low, moderate, and high severity rows.
+Full-record severity ordering holds in 23/24 runoff, 24/24 delivered-sediment
+and 18/24 maximum-peak combinations. Event-level exceptions remain important;
+this is a model behavior benchmark, not observational validation or a universal
+severity-order guarantee. Read the report's scope and interpretation alongside
+its tables. The prior 80-case claims are retained only in the
+[historical report](../../../../tests/disturbed/analysis_results.md).
 
-2. **Deciduous and mixed forest do not require separate burned classes based on this matrix**: Deciduous runoff ratios range from 1.06× to 1.08×, sediment ratios from 15.89× to 178.87×, and peakflow ratios from 1.30× upward. Mixed forest runoff ratios range from 1.05× to 1.08×, sediment ratios from 21.95× to 251.63×, and peakflow ratios from 1.36× upward.
-
-3. **Sediment delivery increases dramatically at high severity**: Forest high severity produces 174× more total sediment than unburned (5,338 vs 30.6 kg/m). Deciduous high severity produces 179×, mixed high severity produces 252×, and shrub high severity produces 23×.
-
-4. **Grass response is muted at low severity**: Tall grass shows high "equal" event counts at low severity (981 of 1,493 matched runoff events), indicating minimal hydrologic impact from low-severity grass fires.
-
-Full results: `tests/disturbed/analysis_results.md`
-Test suite: `tests/disturbed/test_disturbed_matrix.py`
+Maintain this publication using the
+[report refresh contract](../../../../tests/disturbed/PLAN.md#report-refresh-contract).
 
 ## Further Reading
 

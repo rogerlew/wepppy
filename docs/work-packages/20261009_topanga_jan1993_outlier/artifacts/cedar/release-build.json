@@ -1,0 +1,10 @@
+{
+  "wepp": {
+    "source": "/home/workdir/wepp-forest-release-20261009/release/wepp_261009",
+    "sha256": "e1b1c244107216ca9edf4ccbaeb8d390e98440418d87beac2d5153b98191c7cc"
+  },
+  "wepp_hill": {
+    "source": "/home/workdir/wepp-forest-release-20261009/release/wepp_261009_hill",
+    "sha256": "37d8deaf7a4c78e83104db4d896db3ee10b77a5f5d3f3abe5ad718390e2cc228"
+  }
+}

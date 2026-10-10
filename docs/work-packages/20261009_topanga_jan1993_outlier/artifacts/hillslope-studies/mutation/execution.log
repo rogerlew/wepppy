@@ -1,0 +1,433 @@
+complete=25 failed=0 expected=1366
+complete=50 failed=0 expected=1366
+complete=75 failed=0 expected=1366
+complete=100 failed=0 expected=1366
+complete=125 failed=0 expected=1366
+complete=150 failed=0 expected=1366
+complete=175 failed=0 expected=1366
+complete=200 failed=0 expected=1366
+complete=225 failed=0 expected=1366
+complete=250 failed=0 expected=1366
+complete=275 failed=0 expected=1366
+complete=300 failed=0 expected=1366
+complete=325 failed=0 expected=1366
+complete=350 failed=0 expected=1366
+complete=375 failed=0 expected=1366
+complete=400 failed=0 expected=1366
+complete=425 failed=0 expected=1366
+complete=450 failed=0 expected=1366
+complete=475 failed=0 expected=1366
+complete=500 failed=0 expected=1366
+complete=525 failed=0 expected=1366
+complete=550 failed=0 expected=1366
+complete=575 failed=0 expected=1366
+complete=600 failed=0 expected=1366
+complete=625 failed=0 expected=1366
+complete=650 failed=0 expected=1366
+complete=675 failed=0 expected=1366
+complete=700 failed=0 expected=1366
+complete=725 failed=0 expected=1366
+complete=750 failed=0 expected=1366
+complete=775 failed=0 expected=1366
+complete=800 failed=0 expected=1366
+complete=825 failed=0 expected=1366
+complete=850 failed=0 expected=1366
+complete=875 failed=0 expected=1366
+complete=900 failed=0 expected=1366
+complete=925 failed=0 expected=1366
+complete=950 failed=0 expected=1366
+complete=975 failed=0 expected=1366
+complete=1000 failed=0 expected=1366
+complete=1025 failed=0 expected=1366
+complete=1050 failed=0 expected=1366
+complete=1075 failed=0 expected=1366
+complete=1100 failed=0 expected=1366
+complete=1125 failed=0 expected=1366
+complete=1150 failed=0 expected=1366
+complete=1175 failed=0 expected=1366
+complete=1200 failed=0 expected=1366
+complete=1225 failed=0 expected=1366
+complete=1250 failed=0 expected=1366
+complete=1275 failed=0 expected=1366
+complete=1300 failed=0 expected=1366
+complete=1325 failed=0 expected=1366
+complete=1350 failed=0 expected=1366
+{
+  "1": {
+    "all": {
+      "n": 218974,
+      "outside_2x": 453,
+      "outside_5x": 34,
+      "congruent": 146116,
+      "ties": 104,
+      "incongruent_including_ties": 72858
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 95738,
+        "outside_2x": 123,
+        "outside_5x": 12,
+        "congruent": 54353,
+        "ties": 52,
+        "incongruent_including_ties": 41385
+      },
+      "burned": {
+        "n": 123236,
+        "outside_2x": 330,
+        "outside_5x": 22,
+        "congruent": 91763,
+        "ties": 52,
+        "incongruent_including_ties": 31473
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 113239,
+        "outside_2x": 366,
+        "outside_5x": 25,
+        "congruent": 111357,
+        "ties": 62,
+        "incongruent_including_ties": 1882
+      },
+      "cover": {
+        "n": 105735,
+        "outside_2x": 87,
+        "outside_5x": 9,
+        "congruent": 34759,
+        "ties": 42,
+        "incongruent_including_ties": 70976
+      }
+    },
+    "outside_axis_limits": 86
+  },
+  "3": {
+    "all": {
+      "n": 200984,
+      "outside_2x": 966,
+      "outside_5x": 209,
+      "congruent": 149394,
+      "ties": 8,
+      "incongruent_including_ties": 51590
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 90880,
+        "outside_2x": 391,
+        "outside_5x": 54,
+        "congruent": 51912,
+        "ties": 6,
+        "incongruent_including_ties": 38968
+      },
+      "burned": {
+        "n": 110104,
+        "outside_2x": 575,
+        "outside_5x": 155,
+        "congruent": 97482,
+        "ties": 2,
+        "incongruent_including_ties": 12622
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 104201,
+        "outside_2x": 893,
+        "outside_5x": 192,
+        "congruent": 101931,
+        "ties": 6,
+        "incongruent_including_ties": 2270
+      },
+      "cover": {
+        "n": 96783,
+        "outside_2x": 73,
+        "outside_5x": 17,
+        "congruent": 47463,
+        "ties": 2,
+        "incongruent_including_ties": 49320
+      }
+    },
+    "outside_axis_limits": 179,
+    "volume_stable_twofold": 540,
+    "surface_return_rows": 157868,
+    "ksat_30_100_central": {
+      "undisturbed": {
+        "n": 3851,
+        "outside_2x": 0,
+        "outside_5x": 0,
+        "congruent": 3661,
+        "ties": 1,
+        "incongruent_including_ties": 190
+      },
+      "burned": {
+        "n": 10731,
+        "outside_2x": 0,
+        "outside_5x": 0,
+        "congruent": 10480,
+        "ties": 0,
+        "incongruent_including_ties": 251
+      }
+    }
+  },
+  "2": {
+    "all": {
+      "n": 129496,
+      "outside_2x": 329,
+      "outside_5x": 72,
+      "congruent": 45239,
+      "ties": 71510,
+      "incongruent_including_ties": 84257
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 49721,
+        "outside_2x": 142,
+        "outside_5x": 35,
+        "congruent": 9272,
+        "ties": 32765,
+        "incongruent_including_ties": 40449
+      },
+      "burned": {
+        "n": 79775,
+        "outside_2x": 187,
+        "outside_5x": 37,
+        "congruent": 35967,
+        "ties": 38745,
+        "incongruent_including_ties": 43808
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 64699,
+        "outside_2x": 297,
+        "outside_5x": 68,
+        "congruent": 14903,
+        "ties": 43100,
+        "incongruent_including_ties": 49796
+      },
+      "cover": {
+        "n": 64797,
+        "outside_2x": 32,
+        "outside_5x": 4,
+        "congruent": 30336,
+        "ties": 28410,
+        "incongruent_including_ties": 34461
+      }
+    },
+    "outside_axis_limits": 0,
+    "baseline_positive_only": 540,
+    "mutant_positive_only": 583
+  }
+}
+{
+  "status": "complete; sensitivity experiment, not release acceptance",
+  "candidate_hill_sha256": "219be50ac94a7ffa01589eb22251586caea53d5e856f7af0feaea2c12fa6433a",
+  "complete_model_cases": 1368,
+  "unmutated_controls": 280,
+  "eligible_mutations": 1088,
+  "excluded_mutations": 32,
+  "failed_cases": 0,
+  "years": [
+    1980,
+    2024
+  ],
+  "all_report_readback_checks": 1368,
+  "unmutated_observer_parity_cases": 2,
+  "mutated_observer_parity_cases": 8,
+  "max_runoff_rounding_mm": 0.0005066728591884839,
+  "max_peak_rounding_mm_h": 0.0005037813633634869,
+  "plotted_peak_cohort_max_mm_h": {
+    "unmutated": 200.75456995982674,
+    "mutated": 200.8009847486392
+  },
+  "figure_statistics": {
+    "1": {
+      "all": {
+        "n": 218974,
+        "outside_2x": 453,
+        "outside_5x": 34,
+        "congruent": 146116,
+        "ties": 104,
+        "incongruent_including_ties": 72858
+      },
+      "by_scenario": {
+        "undisturbed": {
+          "n": 95738,
+          "outside_2x": 123,
+          "outside_5x": 12,
+          "congruent": 54353,
+          "ties": 52,
+          "incongruent_including_ties": 41385
+        },
+        "burned": {
+          "n": 123236,
+          "outside_2x": 330,
+          "outside_5x": 22,
+          "congruent": 91763,
+          "ties": 52,
+          "incongruent_including_ties": 31473
+        }
+      },
+      "by_family": {
+        "ksat": {
+          "n": 113239,
+          "outside_2x": 366,
+          "outside_5x": 25,
+          "congruent": 111357,
+          "ties": 62,
+          "incongruent_including_ties": 1882
+        },
+        "cover": {
+          "n": 105735,
+          "outside_2x": 87,
+          "outside_5x": 9,
+          "congruent": 34759,
+          "ties": 42,
+          "incongruent_including_ties": 70976
+        }
+      },
+      "outside_axis_limits": 86
+    },
+    "3": {
+      "all": {
+        "n": 200984,
+        "outside_2x": 966,
+        "outside_5x": 209,
+        "congruent": 149394,
+        "ties": 8,
+        "incongruent_including_ties": 51590
+      },
+      "by_scenario": {
+        "undisturbed": {
+          "n": 90880,
+          "outside_2x": 391,
+          "outside_5x": 54,
+          "congruent": 51912,
+          "ties": 6,
+          "incongruent_including_ties": 38968
+        },
+        "burned": {
+          "n": 110104,
+          "outside_2x": 575,
+          "outside_5x": 155,
+          "congruent": 97482,
+          "ties": 2,
+          "incongruent_including_ties": 12622
+        }
+      },
+      "by_family": {
+        "ksat": {
+          "n": 104201,
+          "outside_2x": 893,
+          "outside_5x": 192,
+          "congruent": 101931,
+          "ties": 6,
+          "incongruent_including_ties": 2270
+        },
+        "cover": {
+          "n": 96783,
+          "outside_2x": 73,
+          "outside_5x": 17,
+          "congruent": 47463,
+          "ties": 2,
+          "incongruent_including_ties": 49320
+        }
+      },
+      "outside_axis_limits": 179,
+      "volume_stable_twofold": 540,
+      "surface_return_rows": 157868,
+      "ksat_30_100_central": {
+        "undisturbed": {
+          "n": 3851,
+          "outside_2x": 0,
+          "outside_5x": 0,
+          "congruent": 3661,
+          "ties": 1,
+          "incongruent_including_ties": 190
+        },
+        "burned": {
+          "n": 10731,
+          "outside_2x": 0,
+          "outside_5x": 0,
+          "congruent": 10480,
+          "ties": 0,
+          "incongruent_including_ties": 251
+        }
+      }
+    },
+    "2": {
+      "all": {
+        "n": 129496,
+        "outside_2x": 329,
+        "outside_5x": 72,
+        "congruent": 45239,
+        "ties": 71510,
+        "incongruent_including_ties": 84257
+      },
+      "by_scenario": {
+        "undisturbed": {
+          "n": 49721,
+          "outside_2x": 142,
+          "outside_5x": 35,
+          "congruent": 9272,
+          "ties": 32765,
+          "incongruent_including_ties": 40449
+        },
+        "burned": {
+          "n": 79775,
+          "outside_2x": 187,
+          "outside_5x": 37,
+          "congruent": 35967,
+          "ties": 38745,
+          "incongruent_including_ties": 43808
+        }
+      },
+      "by_family": {
+        "ksat": {
+          "n": 64699,
+          "outside_2x": 297,
+          "outside_5x": 68,
+          "congruent": 14903,
+          "ties": 43100,
+          "incongruent_including_ties": 49796
+        },
+        "cover": {
+          "n": 64797,
+          "outside_2x": 32,
+          "outside_5x": 4,
+          "congruent": 30336,
+          "ties": 28410,
+          "incongruent_including_ties": 34461
+        }
+      },
+      "outside_axis_limits": 0,
+      "baseline_positive_only": 540,
+      "mutant_positive_only": 583
+    }
+  },
+  "aggregation": {
+    "baseline_only": 320,
+    "baselines": 280,
+    "eligible": 1088,
+    "event_ledger_sha256": "e192bbc09f4f4a9c46c86796640dbd24a2c7f73c0cda956ae4b6dd7226b35759",
+    "event_pair_rows": 225658,
+    "mutant_only": 296,
+    "paired_rows": 225042,
+    "sediment_ledger_sha256": "cf46792cb06263471b73a0a63fe2e59b81a59e48ca880bcf0dfd6b54e7b62d3b",
+    "sediment_outer_rows": 225658
+  },
+  "tails": {
+    "2": {
+      "rows": 966,
+      "surface_return": 543,
+      "no_surface_return": 423,
+      "unmutated_peak_max_mm_h": 54.20071902335622,
+      "mutated_peak_max_mm_h": 51.8516873853514
+    },
+    "5": {
+      "rows": 209,
+      "surface_return": 25,
+      "no_surface_return": 184,
+      "unmutated_peak_max_mm_h": 17.389759341313038,
+      "mutated_peak_max_mm_h": 19.636361503216907
+    }
+  }
+}

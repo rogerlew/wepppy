@@ -1,5 +1,9 @@
 ## Test Matrix Analysis Results
 
+For adopted defaults and `wepp_261010`, use the
+[current canonical report](analysis_results_current.md). This older report is
+retained as historical evidence and must not be used to describe current defaults.
+
 **Historical results:** these tables predate the 96-case hourly wepp_261009
 matrix. The old climate fixture has only six years despite its header, and
 the original slope-length description is incorrect. Do not treat these tables

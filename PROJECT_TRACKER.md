@@ -1,11 +1,19 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-09
-**Active Packages**: 43
+**Last Updated**: 2026-10-10
+**Active Packages**: 44
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Released/vendored: [WEPP 261010](docs/work-packages/20261009_topanga_jan1993_outlier/release-handoff.md). Roger approved the minimal CHRQIN normalization correction after watershed, mutation, disturbed and Cedar verification. Undeployed 261009 binaries/sidecars removed from WEPPpy; historical evidence retained. Forest 163 pass, watchlist 12/12, post-vendor 114 pass/1 existing skip, release matrix 99 pass and report/Usersum 63 pass. Ordinary-event consequences remain disclosed. No production deployment or general default switch.
+
+Follow-up complete: [candidate mutation and disturbed rankings](docs/work-packages/20261009_topanga_jan1993_outlier/hillslope-studies.md). All 1368 mutation cases plus ten neutrality controls and 96 disturbed cases per build complete with exact hillslope output parity to wepp_261009. Fresh Figures 1-3 and separate ranking reports retained; subsequent release authorization is recorded in ADR-0084.
+
+Cedar verification complete: [fresh paired 24-year water comparison](docs/work-packages/20261009_topanga_jan1993_outlier/cedar-results.md). All 1728 hillslopes and both watersheds complete; totalwatsed matches 261009 exactly, sampled discharge volume is +0.001008% versus 260803. Remaining accounting gaps and timing ambiguities are disclosed and retained through promotion. No production deployment.
+
+Recorded (research): [Rattlesnake and Topanga return periods](docs/investigations/2026-10-09-watershed-return-period-comparisons/report.md). Eight scenario output series preserved before further diagnosis. Frequent-event comparisons are encouraging; the January 18, 1993 GridMET undisturbed peak remains an open finding. No anomaly investigation or model changes performed in this documentation step.
 
 Ready for decision (research): [RRINIT sensitivity](docs/work-packages/20261009_rrinit_parameter_review/sensitivity-results.md): 896 cases completed; young forest added to the 96-case canonical matrix. Strong soil-state-dependent response; no blanket default revision recommended. Production defaults unchanged.
 

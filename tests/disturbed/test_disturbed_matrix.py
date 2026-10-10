@@ -98,7 +98,7 @@ SEVERITY_NAMES = {0: "unburned", 1: "low", 2: "moderate", 3: "high"}
 # intentionally reuse the generic forest burn-severity classes for this
 # directionality assessment.
 VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass", "young forest"]
-WEPP_BINARY = os.environ.get("WEPP_DISTURBED_BINARY", "wepp_261009")
+WEPP_BINARY = os.environ.get("WEPP_DISTURBED_BINARY", "wepp_261010")
 
 # Simulation years (must match climate file)
 SIM_YEARS = 100

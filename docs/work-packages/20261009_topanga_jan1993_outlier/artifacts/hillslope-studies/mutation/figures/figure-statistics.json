@@ -1,0 +1,165 @@
+{
+  "1": {
+    "all": {
+      "n": 218974,
+      "outside_2x": 453,
+      "outside_5x": 34,
+      "congruent": 146116,
+      "ties": 104,
+      "incongruent_including_ties": 72858
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 95738,
+        "outside_2x": 123,
+        "outside_5x": 12,
+        "congruent": 54353,
+        "ties": 52,
+        "incongruent_including_ties": 41385
+      },
+      "burned": {
+        "n": 123236,
+        "outside_2x": 330,
+        "outside_5x": 22,
+        "congruent": 91763,
+        "ties": 52,
+        "incongruent_including_ties": 31473
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 113239,
+        "outside_2x": 366,
+        "outside_5x": 25,
+        "congruent": 111357,
+        "ties": 62,
+        "incongruent_including_ties": 1882
+      },
+      "cover": {
+        "n": 105735,
+        "outside_2x": 87,
+        "outside_5x": 9,
+        "congruent": 34759,
+        "ties": 42,
+        "incongruent_including_ties": 70976
+      }
+    },
+    "outside_axis_limits": 86
+  },
+  "3": {
+    "all": {
+      "n": 200984,
+      "outside_2x": 966,
+      "outside_5x": 209,
+      "congruent": 149394,
+      "ties": 8,
+      "incongruent_including_ties": 51590
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 90880,
+        "outside_2x": 391,
+        "outside_5x": 54,
+        "congruent": 51912,
+        "ties": 6,
+        "incongruent_including_ties": 38968
+      },
+      "burned": {
+        "n": 110104,
+        "outside_2x": 575,
+        "outside_5x": 155,
+        "congruent": 97482,
+        "ties": 2,
+        "incongruent_including_ties": 12622
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 104201,
+        "outside_2x": 893,
+        "outside_5x": 192,
+        "congruent": 101931,
+        "ties": 6,
+        "incongruent_including_ties": 2270
+      },
+      "cover": {
+        "n": 96783,
+        "outside_2x": 73,
+        "outside_5x": 17,
+        "congruent": 47463,
+        "ties": 2,
+        "incongruent_including_ties": 49320
+      }
+    },
+    "outside_axis_limits": 179,
+    "volume_stable_twofold": 540,
+    "surface_return_rows": 157868,
+    "ksat_30_100_central": {
+      "undisturbed": {
+        "n": 3851,
+        "outside_2x": 0,
+        "outside_5x": 0,
+        "congruent": 3661,
+        "ties": 1,
+        "incongruent_including_ties": 190
+      },
+      "burned": {
+        "n": 10731,
+        "outside_2x": 0,
+        "outside_5x": 0,
+        "congruent": 10480,
+        "ties": 0,
+        "incongruent_including_ties": 251
+      }
+    }
+  },
+  "2": {
+    "all": {
+      "n": 129496,
+      "outside_2x": 329,
+      "outside_5x": 72,
+      "congruent": 45239,
+      "ties": 71510,
+      "incongruent_including_ties": 84257
+    },
+    "by_scenario": {
+      "undisturbed": {
+        "n": 49721,
+        "outside_2x": 142,
+        "outside_5x": 35,
+        "congruent": 9272,
+        "ties": 32765,
+        "incongruent_including_ties": 40449
+      },
+      "burned": {
+        "n": 79775,
+        "outside_2x": 187,
+        "outside_5x": 37,
+        "congruent": 35967,
+        "ties": 38745,
+        "incongruent_including_ties": 43808
+      }
+    },
+    "by_family": {
+      "ksat": {
+        "n": 64699,
+        "outside_2x": 297,
+        "outside_5x": 68,
+        "congruent": 14903,
+        "ties": 43100,
+        "incongruent_including_ties": 49796
+      },
+      "cover": {
+        "n": 64797,
+        "outside_2x": 32,
+        "outside_5x": 4,
+        "congruent": 30336,
+        "ties": 28410,
+        "incongruent_including_ties": 34461
+      }
+    },
+    "outside_axis_limits": 0,
+    "baseline_positive_only": 540,
+    "mutant_positive_only": 583
+  }
+}

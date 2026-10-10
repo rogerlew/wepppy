@@ -1,0 +1,292 @@
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c annchn.for -o annchn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c annout.for -o annout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c appmth.for -o appmth_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c aspect.for -o aspect_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c bgnrnd.for -o bgnrnd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c bighdr.for -o bighdr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mixpeak.for -o mixpeak_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mixpass.for -o mixpass_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c bigout.for -o bigout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c brkpt.for -o brkpt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c case12.for -o case12_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c case34.for -o case34_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chncon.for -o chncon_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chnero.for -o chnero_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chnpar.for -o chnpar_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chnrt.for -o chnrt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chnvar.for -o chnvar_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c close.for -o close_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c conrun.for -o conrun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c const.for -o const_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c contin.for -o contin_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c convrt.for -o convrt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c covcal.for -o covcal_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c crit.for -o crit_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c cross.for -o cross_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c cutgrz.for -o cutgrz_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c dblex.for -o dblex_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c dcap.for -o dcap_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c decomp.for -o decomp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depc.for -o depc_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depend.for -o depend_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depeqs.for -o depeqs_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depirr.for -o depirr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c deplet.for -o deplet_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depos.for -o depos_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c depsto.for -o depsto_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c detach.for -o detach_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c disag.for -o disag_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c drain.for -o drain_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c eatcom.for -o eatcom_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c endchn.for -o endchn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c enddet.for -o enddet_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c endout.for -o endout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c enrcmp.for -o enrcmp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c enrich.for -o enrich_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c enrprt.for -o enrprt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c eplane.for -o eplane_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c eqroot.for -o eqroot_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c erod.for -o erod_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c evap.for -o evap_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c falvel.for -o falvel_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frcfac.for -o frcfac_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frichn.for -o frichn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c fslpar.for -o fslpar_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c fslq.for -o fslq_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furadv.for -o furadv_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furgps.for -o furgps_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furlea.for -o furlea_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furrec.for -o furrec_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furrow.for -o furrow_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c furrun.for -o furrun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c gcurve.for -o gcurve_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c gdmax.for -o gdmax_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c getdat.for -o getdat_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c grna.for -o grna_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c grow.for -o grow_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c growop.for -o growop_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hdepth.for -o hdepth_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hdrive.for -o hdrive_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hr_tmp.for -o hr_tmp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hrtmp.for -o hrtmp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hydchn.for -o hydchn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hydout.for -o hydout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c idat.for -o idat_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impday.for -o impday_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impeo.for -o impeo_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impeos.for -o impeos_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impflo.for -o impflo_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c imphnw.for -o imphnw_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impint.for -o impint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impmai.for -o impmai_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impmon.for -o impmon_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c imppol.f90 -o imppol_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c imppow.f90 -o imppow_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c imppro.for -o imppro_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impreg.for -o impreg_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impris.f90 -o impris_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impsvb.f90 -o impsvb_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impsvd.f90 -o impsvd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c impyr.for -o impyr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c infile.for -o infile_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c infpar.for -o infpar_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c inidat.for -o inidat_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c init1.for -o init1_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c initd.for -o initd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c initgr.for -o initgr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c input.for -o input_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c intrpl.for -o intrpl_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c irflow.for -o irflow_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c irinpt.for -o irinpt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c irprnt.for -o irprnt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c irrig.for -o irrig_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c irs.for -o irs_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c kostia.for -o kostia_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c main.for -o main_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c melt.for -o melt_hill.o
+main.for:324:72:
+
+  324 |                 do 95 j = 1,366
+      |                                                                               1
+Warning: Fortran 2018 deleted feature: Shared DO termination label 95 at (1)
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c monchn.for -o monchn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c monout.for -o monout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mxint.for -o mxint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mxreal.for -o mxreal_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c newrap.for -o newrap_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c newtil.for -o newtil_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c newton.for -o newton_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c nowup.for -o nowup_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c open.for -o open_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c outfil.for -o outfil_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c param.for -o param_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c patrib.for -o patrib_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c peak.for -o peak_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c perc.for -o perc_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c phi.for -o phi_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c print.for -o print_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c profil.for -o profil_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c prtcmp.for -o prtcmp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c psiinv.for -o psiinv_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c psis.for -o psis_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c ptgra.for -o ptgra_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c ptgrp.for -o ptgrp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c purk.for -o purk_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c qinf.for -o qinf_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c radcur.for -o radcur_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rand.for -o rand_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c range.for -o range_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rburn.for -o rburn_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rdat.for -o rdat_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c readin.for -o readin_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c reid.for -o reid_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c res_dp.for -o res_dp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c resup.for -o resup_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rgraze.for -o rgraze_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rgrcur.for -o rgrcur_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rherb.for -o rherb_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rngint.for -o rngint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rochek.for -o rochek_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c root.for -o root_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c route.for -o route_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c rtpart.for -o rtpart_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c runge.for -o runge_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c runout.for -o runout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c scenhd.for -o scenhd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c scon.for -o scon_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c scurv.for -o scurv_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c seddia.for -o seddia_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedia.for -o sedia_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedist.for -o sedist_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedmax.for -o sedmax_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedout.for -o sedout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedseg.for -o sedseg_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sedsta.for -o sedsta_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c shdist.for -o shdist_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c shear.for -o shear_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c shears.for -o shears_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c shield.for -o shield_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sint.for -o sint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sintdp.for -o sintdp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sloss.for -o sloss_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sndrft.for -o sndrft_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c snowd.for -o snowd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c soil.for -o soil_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c spread.for -o spread_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c stmget.for -o stmget_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c stmtim.for -o stmtim_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c strip.for -o strip_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c strout.for -o strout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sumfrc.for -o sumfrc_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sumrnf.for -o sumrnf_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sumrun.for -o sumrun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sunmap.for -o sunmap_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c swu.for -o swu_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c table.for -o table_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c tfail.for -o tfail_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c tilage.for -o tilage_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c tmpadj.for -o tmpadj_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c trcoef.for -o trcoef_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c trncap.for -o trncap_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c trnlos.for -o trnlos_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c undflo.for -o undflo_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c unifor.for -o unifor_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c useout.for -o useout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c verchk.for -o verchk_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c watbal.for -o watbal_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c winit.for -o winit_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c winter.for -o winter_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c winthd.for -o winthd_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshcqi.for -o wshcqi_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshdrv.for -o wshdrv_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshimp.for -o wshimp_hill.o
+wshdrv.for:530:17:
+
+  530 |           tmpsrp(m) = srp ! Surface runoff concentration (mg/l)
+      |                 1
+Warning: Legacy Extension: REAL array index at (1)
+wshdrv.for:531:18:
+
+  531 |           tmpslfp(m) = slfp ! Subsurface lateral flow concentration (mg/l)
+      |                  1
+Warning: Legacy Extension: REAL array index at (1)
+wshdrv.for:532:17:
+
+  532 |           tmpbfp(m) = bfp ! Baseflow concentration (mg/l)
+      |                 1
+Warning: Legacy Extension: REAL array index at (1)
+wshdrv.for:533:17:
+
+  533 |           tmpscp(m) = scp ! Sediment concentration (mg/kg)
+      |                 1
+Warning: Legacy Extension: REAL array index at (1)
+wshdrv.for:529:16:
+
+  529 |           do 225 m = 1, nhill
+      |                1
+Warning: Deleted feature: Loop variable at (1) must be integer
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshini.for -o wshini_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshinp.for -o wshinp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshiqi.for -o wshiqi_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshirs.for -o wshirs_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshout.for -o wshout_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshpas.for -o wshpas_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshpek.for -o wshpek_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshred.for -o wshred_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshrun.for -o wshrun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshscs.for -o wshscs_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshtc.for -o wshtc_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c xcrit.for -o xcrit_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c xinflo.for -o xinflo_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c xmonth.for -o xmonth_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c yalin.for -o yalin_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c yldopt.for -o yldopt_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c pmetcoef.for -o pmetcoef_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c evappm.for -o evappm_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c outeng.for -o outeng_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c hdreng.for -o hdreng_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frsoil.for -o frsoil_hill.o
+hdreng.for:27:11:
+
+   27 |      1    '{Hillslope: Sediment Leaving Profile (lbs/ft)}',
+      |           1
+Warning: Initialization string at (1) was truncated to fit the variable (45/46)
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c psolr.for -o psolr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c tmpcft.for -o tmpcft_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c saxpar.for -o saxpar_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frostn.for -o frostn_hill.o
+frostn.for:255:72:
+
+  255 |                  do 10 j = 1, nfine(i)
+      |                                                                        1
+Warning: Fortran 2018 deleted feature: Shared DO termination label 10 at (1)
+frostn.for:290:72:
+
+  290 |                 do 11 j = 1, jend
+      |                                                                        1
+Warning: Fortran 2018 deleted feature: Shared DO termination label 11 at (1)
+frostn.for:323:72:
+
+  323 |                 do 12 j = jstart, nfine(i)
+      |                                                                        1
+Warning: Fortran 2018 deleted feature: Shared DO termination label 12 at (1)
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c saxfun.for -o saxfun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c tmpfun.for -o tmpfun_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c locate.for -o locate_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frwatc.for -o frwatc_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frzng.for -o frzng_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mltbtm.for -o mltbtm_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c watdst.for -o watdst_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mlttp.for -o mlttp_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c frznw.for -o frznw_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c sheart.for -o sheart_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wshchr.for -o wshchr_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chrstate.for -o chrstate_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c mann.for -o mann_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c chrqin.for -o chrqin_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c wepp_observe.for -o wepp_observe_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c watbal_hourly.for -o watbal_hourly_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c watbalprint.for -o watbalprint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c writeyearlylossbypoint.for -o writeyearlylossbypoint_hill.o
+/usr/bin/gfortran -c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffixed-form -ffixed-line-length-72 -ffpe-trap=invalid,zero,overflow -finit-local-zero -c getfreezecond.for -o getfreezecond_hill.o
+/usr/bin/gfortran annchn_hill.o annout_hill.o appmth_hill.o aspect_hill.o bgnrnd_hill.o bighdr_hill.o mixpeak_hill.o mixpass_hill.o bigout_hill.o brkpt_hill.o case12_hill.o case34_hill.o chncon_hill.o chnero_hill.o chnpar_hill.o chnrt_hill.o chnvar_hill.o close_hill.o conrun_hill.o const_hill.o contin_hill.o convrt_hill.o covcal_hill.o crit_hill.o cross_hill.o cutgrz_hill.o dblex_hill.o dcap_hill.o decomp_hill.o depc_hill.o depend_hill.o depeqs_hill.o depirr_hill.o deplet_hill.o depos_hill.o depsto_hill.o detach_hill.o disag_hill.o drain_hill.o eatcom_hill.o endchn_hill.o enddet_hill.o endout_hill.o enrcmp_hill.o enrich_hill.o enrprt_hill.o eplane_hill.o eqroot_hill.o erod_hill.o evap_hill.o falvel_hill.o frcfac_hill.o frichn_hill.o fslpar_hill.o fslq_hill.o furadv_hill.o furgps_hill.o furlea_hill.o furrec_hill.o furrow_hill.o furrun_hill.o gcurve_hill.o gdmax_hill.o getdat_hill.o grna_hill.o grow_hill.o growop_hill.o hdepth_hill.o hdrive_hill.o hr_tmp_hill.o hrtmp_hill.o hydchn_hill.o hydout_hill.o idat_hill.o impday_hill.o impeo_hill.o impeos_hill.o impflo_hill.o imphnw_hill.o impint_hill.o impmai_hill.o impmon_hill.o imppol_hill.o imppow_hill.o imppro_hill.o impreg_hill.o impris_hill.o impsvb_hill.o impsvd_hill.o impyr_hill.o infile_hill.o infpar_hill.o inidat_hill.o init1_hill.o initd_hill.o initgr_hill.o input_hill.o intrpl_hill.o irflow_hill.o irinpt_hill.o irprnt_hill.o irrig_hill.o irs_hill.o kostia_hill.o main_hill.o melt_hill.o monchn_hill.o monout_hill.o mxint_hill.o mxreal_hill.o newrap_hill.o newtil_hill.o newton_hill.o nowup_hill.o open_hill.o outfil_hill.o param_hill.o patrib_hill.o peak_hill.o perc_hill.o phi_hill.o print_hill.o profil_hill.o prtcmp_hill.o psiinv_hill.o psis_hill.o ptgra_hill.o ptgrp_hill.o purk_hill.o qinf_hill.o radcur_hill.o rand_hill.o range_hill.o rburn_hill.o rdat_hill.o readin_hill.o reid_hill.o res_dp_hill.o resup_hill.o rgraze_hill.o rgrcur_hill.o rherb_hill.o rngint_hill.o rochek_hill.o root_hill.o route_hill.o rtpart_hill.o runge_hill.o runout_hill.o scenhd_hill.o scon_hill.o scurv_hill.o seddia_hill.o sedia_hill.o sedist_hill.o sedmax_hill.o sedout_hill.o sedseg_hill.o sedsta_hill.o shdist_hill.o shear_hill.o shears_hill.o shield_hill.o sint_hill.o sintdp_hill.o sloss_hill.o sndrft_hill.o snowd_hill.o soil_hill.o spread_hill.o stmget_hill.o stmtim_hill.o strip_hill.o strout_hill.o sumfrc_hill.o sumrnf_hill.o sumrun_hill.o sunmap_hill.o swu_hill.o table_hill.o tfail_hill.o tilage_hill.o tmpadj_hill.o trcoef_hill.o trncap_hill.o trnlos_hill.o undflo_hill.o unifor_hill.o useout_hill.o verchk_hill.o watbal_hill.o winit_hill.o winter_hill.o winthd_hill.o wshcqi_hill.o wshdrv_hill.o wshimp_hill.o wshini_hill.o wshinp_hill.o wshiqi_hill.o wshirs_hill.o wshout_hill.o wshpas_hill.o wshpek_hill.o wshred_hill.o wshrun_hill.o wshscs_hill.o wshtc_hill.o xcrit_hill.o xinflo_hill.o xmonth_hill.o yalin_hill.o yldopt_hill.o pmetcoef_hill.o evappm_hill.o outeng_hill.o hdreng_hill.o frsoil_hill.o psolr_hill.o tmpcft_hill.o saxpar_hill.o frostn_hill.o saxfun_hill.o tmpfun_hill.o locate_hill.o frwatc_hill.o frzng_hill.o mltbtm_hill.o watdst_hill.o mlttp_hill.o frznw_hill.o sheart_hill.o wshchr_hill.o chrstate_hill.o mann_hill.o chrqin_hill.o wepp_observe_hill.o watbal_hourly_hill.o watbalprint_hill.o writeyearlylossbypoint_hill.o getfreezecond_hill.o -mcmodel=medium -no-pie -o wepp_hill
