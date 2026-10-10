@@ -1,6 +1,6 @@
 # Return-period simple report Omni comparisons
 
-Status: open; contract checkpoint prepared, implementation pending.
+Status: open; implemented and locally validated; full Python sanity in progress.
 Started: 2026-10-10. Owner: Codex; operator: requesting user.
 
 Add a Configuration collapsible with unchecked completed Omni scenarios and
@@ -23,3 +23,5 @@ Complete independent correctness/security review, focused regression tests,
 frontend checks, full Python sanity, and direct CSV/filesystem evidence.
 
 See [tracker](tracker.md) and [checkpoint](artifacts/20261010_contract_decision.md).
+Local evidence and gate limitations: [validation](artifacts/20261010_validation.md).
+Independent correctness/security reviews approved. Not deployed.

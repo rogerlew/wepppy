@@ -32,12 +32,12 @@
   {{ mapping.get(metric, metric) }}
 {%- endmacro %}
 
-{% macro format_date(entry) -%}
+{% macro format_date(entry, source_report=report) -%}
   {%- set month = entry.mo | int -%}
   {%- set day = entry.da | int -%}
   {%- set display_year = entry.get('calendar_year') if entry.get('calendar_year') is not none else entry.get('display_year') -%}
   {% if display_year is none %}
-    {%- set display_year = entry.year | int + report.y0 - 1 -%}
+    {%- set display_year = entry.year | int + source_report.y0 - 1 -%}
   {% endif %}
   {{ "%02d/%02d/%04d"|format(month, day, display_year | int) }}
 {%- endmacro %}
@@ -95,6 +95,8 @@
                  config=config,
                  format='csv',
                  table=slug,
+                 omni_scenario=selected_omni_scenarios | default([]),
+                 rec_intervals=rec_intervals_param | default(none),
                  extraneous=extraneous_value,
                  gringorten_correction='true' if gringorten_correction else 'false',
                  method=method,
@@ -107,19 +109,25 @@
 {% macro simple_table(key) -%}
   {% set slug = slugify_key(key) %}
   {% set label = display_label(key) %}
-  {% set units = report.units_d.get(key) %}
   {% set table_id = slug ~ '_tbl' %}
-  {% set intervals = report.intervals | sort_numeric(reverse=True) %}
-  {% set dataset = report.return_periods.get(key, {}) %}
+  {% set groups = scenario_reports | default([{'name': 'Current project', 'report': report}]) %}
+  {% set ns = namespace(has_events=false, units=report.units_d.get(key)) %}
+  {% for group in groups %}
+    {% if group.report.return_periods.get(key) %}
+      {% set ns.has_events = true %}
+      {% set ns.units = group.report.units_d.get(key) %}
+    {% endif %}
+  {% endfor %}
   <section class="wc-panel wc-stack">
     <header class="wc-stack">
       <h2 class="wc-heading__subtitle">{{ label }}</h2>
     </header>
-    {% if dataset %}
+    {% if ns.has_events %}
       <div class="wc-table-wrapper wc-table-wrapper--compact">
         <table class="wc-table wc-table--dense wc-table--compact wc-table--striped sortable" id="{{ table_id }}">
           <thead>
             <tr>
+              {% if compare_scenarios %}<th scope="col">Scenario</th>{% endif %}
               <th scope="col">Recurrence interval</th>
               <th scope="col">Date</th>
               <th scope="col">{{ label }}</th>
@@ -127,19 +135,25 @@
           </thead>
           <tbody>
             <tr data-sort-position="top">
+              {% if compare_scenarios %}<td></td>{% endif %}
               <td>years</td>
               <td>mm/dd/yyyy</td>
-              <td>{{ render_units(units) }}</td>
+              <td>{{ render_units(ns.units) }}</td>
             </tr>
-            {% for rec_interval in intervals %}
-              {% if rec_interval in dataset %}
-                {% set entry = dataset[rec_interval] %}
-                <tr>
-                  <td>{{ rec_interval }}</td>
-                  <td>{{ format_date(entry) }}</td>
-                  <td>{{ render_value(entry.get(key), units) }}</td>
-                </tr>
-              {% endif %}
+            {% for group in groups %}
+              {% set dataset = group.report.return_periods.get(key, {}) %}
+              {% set intervals = dataset.keys() if compare_scenarios else group.report.intervals %}
+              {% for rec_interval in intervals | sort_numeric(reverse=True) %}
+                {% if rec_interval in dataset %}
+                  {% set entry = dataset[rec_interval] %}
+                  <tr>
+                    {% if compare_scenarios %}<td>{{ group.name }}</td>{% endif %}
+                    <td>{{ rec_interval }}</td>
+                    <td>{{ format_date(entry, group.report) }}</td>
+                    <td>{{ render_value(entry.get(key), group.report.units_d.get(key)) }}</td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
             {% endfor %}
           </tbody>
         </table>
@@ -152,12 +166,15 @@
           Download CSV
         </button>
       </div>
-    {% else %}
-      <div class="wc-status" data-state="attention">
-        <strong>No events:</strong>
-        No {{ label | lower }} events are available for the current year and month selection.
-      </div>
     {% endif %}
+    {% for group in groups %}
+      {% if not group.report.return_periods.get(key) %}
+        <div class="wc-status" data-state="attention">
+          <strong>No events:</strong>
+          {% if compare_scenarios %}{{ group.name }}: {% endif %}No {{ label | lower }} events are available for the current year and month selection.
+        </div>
+      {% endif %}
+    {% endfor %}
   </section>
 {%- endmacro %}
 
@@ -332,6 +349,36 @@
         {% endfor %}
       </select>
     </label>
+    {% endif %}
+
+    {% if not extraneous %}
+    <details class="wc-collapse" id="omniScenariosCollapse"{% if selected_omni_scenarios %} open{% endif %}>
+      <summary class="wc-collapse__summary">
+        <span class="wc-collapse__icon"></span>
+        <span class="wc-collapse__title">OMNI Scenarios Selection</span>
+      </summary>
+      <div class="wc-collapse__content">
+        {% if omni_scenarios %}
+        <form id="omniScenariosForm" class="wc-stack">
+          <p class="wc-text-muted">Compare the current project with completed scenarios. Each scenario has its own return-period event dates.</p>
+          {% for scenario in omni_scenarios %}
+          <label class="wc-choice wc-choice--checkbox">
+            <input type="checkbox" name="omni_scenario" value="{{ scenario.name }}"{% if scenario.name in selected_omni_scenarios %} checked{% endif %}{% if scenario.reason %} disabled{% endif %}>
+            <span class="wc-choice__body">
+              <span class="wc-choice__label">{{ scenario.name }}</span>
+              {% if scenario.reason %}<span class="wc-choice__description">{{ scenario.reason }}</span>{% endif %}
+            </span>
+          </label>
+          {% endfor %}
+          <div><button type="submit" class="pure-button pure-button-secondary">Run report</button></div>
+        </form>
+        {% else %}
+        <p class="wc-text-muted">No completed Omni scenarios available.</p>
+        {% endif %}
+      </div>
+    </details>
+    {% else %}
+    <p class="wc-text-muted">Omni scenario comparison is available in the simple view. Hide extraneous parameters to select scenarios.</p>
     {% endif %}
 
     <details class="wc-collapse" id="advancedOptionsCollapse">
@@ -516,8 +563,9 @@
     const yearSel = document.getElementById('yearSelection');
     const base = new URL(yearSel ? yearSel.value : window.location.pathname, window.location.href);
     const current = new URL(window.location.href);
-    const params = new URLSearchParams(base.search);
-    current.searchParams.forEach((v, k) => { if (!params.has(k)) params.set(k, v); });
+    const params = new URLSearchParams(current.search);
+    if (base.searchParams.has('exclude_yr_indxs')) params.set('exclude_yr_indxs', base.searchParams.get('exclude_yr_indxs'));
+    else params.delete('exclude_yr_indxs');
     if (checkedMonths.length) params.set('exclude_months', checkedMonths.join(','));
     else params.delete('exclude_months');
     params.set('gringorten_correction', gring ? 'true' : 'false');
@@ -560,14 +608,24 @@
     const sel = document.getElementById('yearSelection');
     if (sel) {
       sel.addEventListener('change', function () {
-        const target = new URL(this.value, window.location.href);
-        const cur = new URL(window.location.href);
-        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest', 'method', 'output_scope']
-          .forEach(k => {
-            if (cur.searchParams.has(k)) target.searchParams.set(k, cur.searchParams.get(k));
-            else target.searchParams.delete(k);
-          });
+        const selected = new URL(this.value, window.location.href);
+        const target = new URL(window.location.href);
+        if (selected.searchParams.has('exclude_yr_indxs')) target.searchParams.set('exclude_yr_indxs', selected.searchParams.get('exclude_yr_indxs'));
+        else target.searchParams.delete('exclude_yr_indxs');
         window.location.href = target.pathname + '?' + target.searchParams.toString();
+      });
+    }
+
+    const omniForm = document.getElementById('omniScenariosForm');
+    if (omniForm) {
+      omniForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const url = new URL(window.location.href);
+        url.searchParams.delete('omni_scenario');
+        omniForm.querySelectorAll('input[name="omni_scenario"]:checked:not(:disabled)').forEach(box => {
+          url.searchParams.append('omni_scenario', box.value);
+        });
+        window.location.href = url.pathname + '?' + url.searchParams.toString();
       });
     }
 

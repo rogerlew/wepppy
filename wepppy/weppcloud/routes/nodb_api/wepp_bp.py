@@ -33,7 +33,7 @@ from wepppy.weppcloud.user_preferences import resolve_unitizer_presentation
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletSummaryReport
-from wepppy.wepp.reports import TotalWatbalReport
+from wepppy.wepp.reports import TotalWatbalReport, ReturnPeriods
 from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.wepp.reports.output_scope import normalize_output_scope, scoped_dataset_path
@@ -44,6 +44,7 @@ from wepppy.query_engine.payload import QueryRequest
 from wepppy.query_engine import run_query
 import json
 from flask import Response, abort
+from .return_period_scenarios import completed_return_period_scenarios
 
 wepp_bp = Blueprint('wepp', __name__)
 
@@ -429,12 +430,17 @@ def _slugify_return_period_key(key: str) -> str:
     return slug or "return-period"
 
 
-def _format_return_period_date(entry, base_year: int) -> str:
+def _format_return_period_date(entry, base_year: int, *, calendar_dates=False) -> str:
     try:
         month = int(entry.get("mo", 0))
         day = int(entry.get("da", 0))
-        year = int(entry.get("year", 0))
-        computed_year = int(base_year) - 1 + year
+        display_year = None
+        if calendar_dates:
+            display_year = entry.get('calendar_year')
+            if display_year is None:
+                display_year = entry.get('display_year')
+        computed_year = (int(display_year) if display_year is not None
+                         else int(base_year) - 1 + int(entry.get("year", 0)))
         return f"{month:02d}/{day:02d}/{computed_year:04d}"
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -449,7 +455,7 @@ def _return_period_column_label(metric_key: str, units: str | None) -> str:
     return label
 
 
-def _build_return_period_simple_dataframe(report, metric_key, unitizer):
+def _build_return_period_simple_dataframe(report, metric_key, unitizer, *, calendar_dates=False):
     dataset = report.return_periods.get(metric_key, {})
     if not dataset:
         return pd.DataFrame()
@@ -463,7 +469,7 @@ def _build_return_period_simple_dataframe(report, metric_key, unitizer):
         rows.append(
             {
                 "Recurrence Interval (years)": float(interval_key),
-                "Date": _format_return_period_date(entry, report.y0),
+                "Date": _format_return_period_date(entry, report.y0, calendar_dates=calendar_dates),
                 column_label: value,
             }
         )
@@ -472,6 +478,29 @@ def _build_return_period_simple_dataframe(report, metric_key, unitizer):
     if df.empty:
         return df
     return _apply_unitizer_preferences(df, unitizer)
+
+
+def _comparison_return_period_report(wepp, options):
+    """Translate expected empty selections only; preserve malformed-data errors."""
+    try:
+        return wepp.report_return_periods(**options)
+    except ValueError as exc:
+        channel = options['chn_topaz_id_of_interest']
+        if channel is not None and str(exc) == f"Topaz ID {channel} not present in staged events":
+            return ReturnPeriods.from_dict(dict(options, intervals=options['rec_intervals']))
+        if str(exc) == 'Unable to determine simulation years for events' and options['exclude_months']:
+            events = pd.read_parquet(
+                Path(wepp.wd) / scoped_dataset_path('wepp/output/interchange/return_period_events.parquet', options['output_scope']),
+                columns=['topaz_id', 'mo'],
+            )
+            if channel is None and not events.empty:
+                channel = min(events['topaz_id'])
+            events = events[events['topaz_id'] == channel]
+            # Verify actual filtering caused the empty result. Do not convert
+            # malformed/absent calendar years into a successful empty report.
+            if not events.empty and events['mo'].isin(options['exclude_months']).all():
+                return ReturnPeriods.from_dict(dict(options, intervals=options['rec_intervals']))
+        raise
 
 
 def _build_return_period_extraneous_dataframe(report, metric_key, unitizer):
@@ -1393,9 +1422,25 @@ def report_wepp_return_periods(runid, config):
     climate = Climate.getInstance(wd)
     rec_intervals = parse_rec_intervals(request, climate.years)
 
+    try:
+        omni_scenarios = completed_return_period_scenarios(wd, output_scope)
+    except ValueError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 400
+        return response
+    requested_scenarios = set(request.args.getlist('omni_scenario'))
+    available_scenarios = {item['name']: item for item in omni_scenarios}
+    for name in requested_scenarios:
+        if name not in available_scenarios or available_scenarios[name]['reason']:
+            response = error_factory(f"Omni scenario '{name}' is unavailable; refresh the scenario selection.")
+            response.status_code = 400
+            return response
+    selected_scenarios = [item for item in omni_scenarios if item['name'] in requested_scenarios]
+    compare_scenarios = bool(selected_scenarios) and not extraneous
+
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
-    report = wepp.report_return_periods(
+    report_options = dict(
         rec_intervals=rec_intervals, 
         exclude_yr_indxs=exclude_yr_indxs,
         method=method, 
@@ -1405,17 +1450,28 @@ def report_wepp_return_periods(runid, config):
         wait_for_inputs=False,
         output_scope=output_scope,
     )
+    if compare_scenarios:
+        # Existing JSON memoization does not distinguish method/interval choices.
+        report_options['meoization'] = False
+    report = (_comparison_return_period_report(wepp, report_options) if compare_scenarios
+              else wepp.report_return_periods(**report_options))
+    scenario_reports = [{'name': 'Current project', 'report': report}]
+    if compare_scenarios:
+        for scenario in selected_scenarios:
+            child_report = _comparison_return_period_report(Wepp.getInstance(scenario['path']), report_options)
+            scenario_reports.append({'name': scenario['name'], 'report': child_report})
 
     translator = Watershed.getInstance(wd).translator_factory()
     unitizer = resolve_unitizer_presentation(wd)
 
     measure_order = list(_RETURN_PERIOD_CORE_METRICS)
-    for key in _RETURN_PERIOD_METRIC_ORDER:
-        if key in report.return_periods and key not in measure_order:
-            measure_order.append(key)
-    for key in report.return_periods.keys():
-        if key not in measure_order:
-            measure_order.append(key)
+    for scenario in scenario_reports:
+        for key in _RETURN_PERIOD_METRIC_ORDER:
+            if key in scenario['report'].return_periods and key not in measure_order:
+                measure_order.append(key)
+        for key in scenario['report'].return_periods:
+            if key not in measure_order:
+                measure_order.append(key)
 
     slug_map = { _slugify_return_period_key(key): key for key in measure_order }
 
@@ -1431,10 +1487,22 @@ def report_wepp_return_periods(runid, config):
 
         if extraneous:
             df = _build_return_period_extraneous_dataframe(report, metric_key, unitizer)
+        elif compare_scenarios:
+            frames = []
+            for scenario in scenario_reports:
+                frame = _build_return_period_simple_dataframe(scenario['report'], metric_key, unitizer, calendar_dates=True)
+                if not frame.empty:
+                    frame.insert(0, 'Scenario', scenario['name'])
+                    frames.append(frame)
+            df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
         else:
             df = _build_return_period_simple_dataframe(report, metric_key, unitizer)
 
         if df.empty:
+            if compare_scenarios:
+                response = error_factory("No return period data available for requested table")
+                response.status_code = 404
+                return response
             abort(404, description="No return period data available for requested table")
 
         return _render_dataframe_csv(
@@ -1452,6 +1520,11 @@ def report_wepp_return_periods(runid, config):
                             unitizer_nodb=unitizer,
                             precisions=wepppy.nodb.unitizer.precisions,
                             report=report,
+                            scenario_reports=scenario_reports,
+                            omni_scenarios=omni_scenarios,
+                            selected_omni_scenarios=[item['name'] for item in selected_scenarios],
+                            compare_scenarios=compare_scenarios,
+                            rec_intervals_param=','.join(str(value) for value in rec_intervals),
                             translator=translator,
                             ron=ron,
                             user=current_user,

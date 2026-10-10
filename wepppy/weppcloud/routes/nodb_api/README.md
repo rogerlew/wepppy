@@ -387,6 +387,12 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/resources/wepp_loss.tif` | `GET` | Ron.plot_dir | Streams raster from `Ron.plot_dir` |
 | `/runs/<string:runid>/<config>/query/bound_coords[/]` | `GET` | Ron.topaz_wd | — |
 
+Return-period simple reports accept repeated `omni_scenario` names for completed
+project children. Selected tables/CSV prepend Scenario and concatenate independently
+ranked dates/values; no selection preserves the existing format. See the
+[usage and implementation note](../../../../docs/dev-notes/weppcloud-return-period-omni.md)
+and [contract](../../../../docs/ui-docs/contracts/return-period-omni-scenarios-contract.md).
+
 ## Developer Notes
 
 ### Adding New Endpoints

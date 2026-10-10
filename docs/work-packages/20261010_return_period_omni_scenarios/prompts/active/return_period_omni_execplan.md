@@ -19,9 +19,10 @@ No selections means the established single-project report.
 - [x] (2026-10-10 17:26 UTC) Inspect route, template, CSV helper, and Omni discovery.
 - [x] (2026-10-10 17:26 UTC) Prepare canonical contract and decision checkpoint.
 - [x] (2026-10-10 UTC) Complete two independent contract reviews and disposition; both approved after fixes.
-- [ ] Obtain commit authority and create standalone checkpoint ancestor.
-- [ ] Implement discovery, independent reports, template, URL round trips, and CSV.
-- [ ] Validate source-to-HTML/CSV semantics and complete final reviews.
+- [x] (2026-10-10 UTC) Operator authorized commit/proceed; checkpoint `c5358daa7` and reviewed path clarification `946ec76fb` committed before corresponding source edits.
+- [x] (2026-10-10 UTC) Implement discovery, independent reports, template, URL round trips, and CSV.
+- [x] (2026-10-10 UTC) Validate source-to-HTML/CSV semantics, 285 focused tests, 931 frontend tests, Chromium smoke; correctness/security reviews approved after fixes.
+- [ ] Record full Python sanity outcome and final handoff.
 
 ## Surprises & Discoveries
 
@@ -34,6 +35,11 @@ Omni finalization can log a return-period refresh failure and continue.
 Report memoization omits method/recurrence intervals from validation and can
 write child JSON even when readonly. Comparison calls must bypass it with
 `meoization=False`; keep the no-selection path unchanged.
+Current completed runs place loss Parquet under `output/interchange`; the
+older root output path remains supported. Report CSV dates and global intervals
+were insufficient for comparisons; honor explicit event years and metric-local
+interval keys. Empty filtered groups require preserving request metadata so
+the next navigation does not discard year selections.
 
 ## Decision Log
 
@@ -46,9 +52,12 @@ and carry selections back to simple mode. Document durable behavior in
 ## Outcomes & Retrospective
 
 
-Prepared contract only. Production code and tests are unchanged. Implementation
-awaits the required reviewed ancestor commit; commit authority is outstanding.
-Both independent contract reviews approved the amended specification.
+Implemented and locally validated, with independent correctness/security review
+approved. Browser smoke uses the real report/CSV workflow with isolated auth,
+NoDb loading, and shell. Full Python sanity remains in progress. Not deployed.
+Frontend lint has an unchanged climate-test error; broad-exception enforcement
+has line-allowlist drift despite unchanged broad-handler count. Details and
+remaining evidence are in `artifacts/20261010_validation.md`.
 
 ## Context and Orientation
 
@@ -138,3 +147,5 @@ Omni completion metadata while validating both modern and legacy valid states.
 
 Revision note: created 2026-10-10 to make the user-requested report extension
 reviewable before the required contract ancestor and implementation.
+Updated 2026-10-10 after implementation and reviews to record concrete fixes,
+validation, authorized checkpoint ancestry, and remaining full-suite evidence.

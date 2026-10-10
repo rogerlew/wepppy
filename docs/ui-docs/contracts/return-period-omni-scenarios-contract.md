@@ -1,6 +1,7 @@
 # Return-period simple report Omni comparisons
 
-Status: intended behavior; implementation conformance pending.
+Status: implemented and locally validated; not deployed. See
+[validation evidence](../../work-packages/20261010_return_period_omni_scenarios/artifacts/20261010_validation.md).
 
 ## Scope and rationale
 
@@ -61,7 +62,8 @@ still required. Do not invent or reconstruct unavailable historical job state.
 Report readiness requires both `return_period_events.parquet` and
 `return_period_event_ranks.parquet` in the selected scope's output/interchange
 directory. Discovery checks these without triggering regeneration; selected
-children also require readable Wepp state. Selected reports must parse the
+children also require readable Wepp state (including the existing query catalog
+needed by the report reader). Selected reports must parse the
 datasets through the normal report reader. Missing files disable
 the choice with a reason. Invalid content surfaces the normal report error;
 file presence is not semantic validation. Parent report preparation retains

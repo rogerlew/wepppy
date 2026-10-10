@@ -1,13 +1,14 @@
 # Return-period Omni comparisons tracker
 
-Updated: 2026-10-10 17:26 UTC.
+Updated: 2026-10-10 17:52 UTC.
 
 ## Status
 
-Contract and active ExecPlan prepared and independently reviewed; production
-implementation pending. Both reviewers approved after documented fixes.
+Implemented and locally validated. Independent contract, correctness, and
+security reviews approved after documented fixes.
 Starting revision: `8b32a5c8c7d7eba52e947c8619b1dff2d8435e77`.
-Contract ancestor: pending explicit commit authority.
+Contract ancestors: `c5358daa7`, reviewed artifact-path clarification `946ec76fb`.
+Operator explicitly authorized committing and proceeding before these commits.
 
 ## Decisions
 
@@ -18,9 +19,10 @@ Current project remains included; simple mode only; no stored schema mutation.
 
 ## Remaining
 
-Commit checkpoint after authority; implement and validate; retain implementation
-correctness and security review. Contract review dispositions are in
-`artifacts/20261010_contract_reviews.md`.
+Finish full Python sanity and final handoff. Review artifacts and validation
+results are under `artifacts/`; 285 focused and 931 frontend tests pass,
+Chromium smoke passes. Frontend lint and broad-exception tooling limitations
+are documented in `artifacts/20261010_validation.md`. Not deployed.
 Execute `prompts/active/return_period_omni_execplan.md`.
 
 ## Notes
@@ -30,3 +32,8 @@ Discovery must distinguish completion from report readiness. No code changed.
 Independent reviews resolved completion, containment, and CSV-label findings;
 comparison cache bypass added to prevent method/interval cache reuse.
 Documentation lint passed; standalone ancestor commit authority is outstanding.
+
+2026-10-10 17:52 UTC: authority granted; checkpoints committed before source
+changes. Implemented and reviewed; explicit-calendar dates, per-metric interval
+sets, filtered-empty groups, and preserved empty-report metadata are covered.
+Configuration screenshot recaptured and visually checked after reviewer note.

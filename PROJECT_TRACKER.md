@@ -8,9 +8,9 @@
 ## Purpose
 
 In progress: [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
-— prepare completed-scenario selection, independent event rows, and concatenated
-CSV for the simple report. Contract reviews approved; implementation awaits
-the required checkpoint commit authority.
+— implemented completed-scenario selection, independent event rows, and
+concatenated CSV for the simple report. Focused/frontend/Chromium checks and
+independent reviews pass; full Python sanity in progress. Not deployed.
 
 Released/vendored: [WEPP 261010](docs/work-packages/20261009_topanga_jan1993_outlier/release-handoff.md). Roger approved the minimal CHRQIN normalization correction after watershed, mutation, disturbed and Cedar verification. Undeployed 261009 binaries/sidecars removed from WEPPpy; historical evidence retained. Forest 163 pass, watchlist 12/12, post-vendor 114 pass/1 existing skip, release matrix 99 pass and report/Usersum 63 pass. Ordinary-event consequences remain disclosed. No production deployment or general default switch.
 

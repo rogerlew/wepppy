@@ -1448,3 +1448,282 @@ def test_checked_project_rejects_disturbed_preview_before_hydration(wepp_client,
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/clay/")
     assert response.status_code == 400
     assert response.get_json()['error']['code'] == 'unsupported_capability'
+
+
+@pytest.fixture
+def omni_return_period_client(wepp_client, monkeypatch):
+    """Real staged datasets/report evaluation/CSV; isolate auth and NoDb loading."""
+    from types import SimpleNamespace
+    import pyarrow as pa
+    import pyarrow.compute as pc
+    import pyarrow.parquet as pq
+    from wepppy.nodb.core.wepp_postprocess_service import WeppPostprocessService
+    from wepppy.weppcloud.routes.nodb_api import return_period_scenarios as selection
+
+    client, _, run_dir = wepp_client
+    root = Path(run_dir)
+    source = Path(__file__).parents[2] / 'wepp/interchange/fixtures/decimal-pleasing/wepp/output/interchange'
+    names = ['undisturbed', 'uniform_low']
+    roots = [root] + [root / '_pups/omni/scenarios' / name for name in names]
+    for index, directory in enumerate(roots):
+        for scope in ['wepp/output', 'wepp/roads/output']:
+            target = directory / scope / 'interchange'
+            target.mkdir(parents=True)
+            for filename in ['return_period_events.parquet', 'return_period_event_ranks.parquet']:
+                table = pq.read_table(source / filename)
+                if index and filename == 'return_period_events.parquet':
+                    for column, values in [('calendar_year', pc.add(table['calendar_year'], index * 20)),
+                                           ('runoff_depth_mm', pc.multiply(table['runoff_depth_mm'], index + 1))]:
+                        table = table.set_column(table.schema.get_field_index(column), column, values)
+                if index and filename == 'return_period_event_ranks.parquet':
+                    values = pc.if_else(pc.equal(table['measure_id'], 'runoff_depth'),
+                                        pc.multiply(table['measure_value'], index + 1), table['measure_value'])
+                    table = table.set_column(table.schema.get_field_index('measure_value'), 'measure_value', values)
+                pq.write_table(table, target / filename)
+            pq.write_table(pa.table({'completed': [True]}), target / 'loss_pw0.out.parquet')
+        (directory / 'wepp.nodb').write_text('NoDb loading isolated; real datasets above')
+        (directory / '_query_engine').mkdir()
+        (directory / '_query_engine/catalog.json').write_text(wepp_module.json.dumps({'root': str(directory), 'files': []}))
+        (directory / 'READONLY').touch()
+    (root / 'omni.nodb').write_text('NoDb loading isolated')
+    omni = SimpleNamespace(scenarios=[{'type': name} for name in names], _scenario_run_state=[])
+    monkeypatch.setattr(selection.Omni, 'getInstance', lambda wd: omni)
+    monkeypatch.setattr(cap_guard, 'current_user', SimpleNamespace(is_authenticated=True))
+    monkeypatch.setattr(wepp_module, 'current_user', SimpleNamespace(is_authenticated=True))
+    monkeypatch.setattr(wepp_module.Climate, 'getInstance', lambda wd: SimpleNamespace(years=11))
+    monkeypatch.setattr(wepp_module.Watershed, 'getInstance', lambda wd: SimpleNamespace(translator_factory=lambda: None))
+    monkeypatch.setattr(wepp_module, 'resolve_unitizer_presentation', lambda wd: SimpleNamespace(preferences=lambda: {}))
+    service = WeppPostprocessService()
+    calls = []
+
+    class Controller:
+        chn_topaz_ids_of_interest = [94]
+
+        def __init__(self, wd):
+            self.wd = wd
+
+        @classmethod
+        def getInstance(cls, wd):
+            return cls(wd)
+
+        def report_return_periods(self, **kwargs):
+            calls.append((self.wd, kwargs.copy()))
+            return service.report_return_periods(self, **kwargs)
+
+    monkeypatch.setattr(wepp_module, 'Wepp', Controller)
+    captured = {}
+
+    def render(template, **context):
+        captured.update(context)
+        return 'rendered'
+
+    monkeypatch.setattr(wepp_module, 'render_template', render)
+    return client, roots, calls, captured
+
+
+@pytest.mark.parametrize('scope', ['baseline', 'roads'])
+@pytest.mark.parametrize('method', ['cta', 'am'])
+def test_return_period_omni_csv_real_datasets(omni_return_period_client, scope, method):
+    import csv
+    import io
+    from wepppy.wepp.reports import ReturnPeriodDataset
+
+    client, roots, calls, captured = omni_return_period_client
+    query = [('omni_scenario', 'uniform_low'), ('omni_scenario', 'undisturbed'),
+             ('omni_scenario', 'undisturbed'), ('rec_intervals', '5,2'),
+             ('method', method), ('output_scope', scope), ('exclude_yr_indxs', '0'),
+             ('exclude_months', '1,2'), ('chn_topaz_id_of_interest', '94'),
+             ('gringorten_correction', 'true')]
+    url = f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods'
+    assert client.get(url, query_string=query).status_code == 200
+    assert captured['selected_omni_scenarios'] == ['undisturbed', 'uniform_low']
+    response = client.get(url, query_string=query + [('format', 'csv'), ('table', 'runoff')])
+    assert response.status_code == 200
+    rows = list(csv.DictReader(io.StringIO(response.get_data(as_text=True))))
+    assert list(rows[0]) == ['Scenario', 'Recurrence Interval (years)', 'Date', 'Runoff (mm)']
+    assert [row['Scenario'] for row in rows] == ['Current project'] * 2 + ['undisturbed'] * 2 + ['uniform_low'] * 2
+    for index, directory in enumerate(roots):
+        expected = ReturnPeriodDataset(directory, auto_refresh=False, output_scope=scope).create_report(
+            [5, 2], exclude_yr_indxs=[0], exclude_months=[1, 2], method=method,
+            gringorten_correction=True, topaz_id=94)
+        for row in rows[index * 2:index * 2 + 2]:
+            entry = expected.return_periods['Runoff'][int(float(row['Recurrence Interval (years)']))]
+            assert float(row['Runoff (mm)']) == pytest.approx(entry['Runoff'])
+            assert row['Date'] == f"{entry['mo']:02d}/{entry['da']:02d}/{entry['calendar_year']:04d}"
+    assert len({row['Date'] for row in rows[::2]}) == 3
+    assert all(options['meoization'] is False for _, options in calls)
+
+
+def test_return_period_comparison_bypasses_warmed_method_interval_cache(omni_return_period_client):
+    import csv
+    import io
+    from wepppy.nodb.core.wepp_postprocess_service import WeppPostprocessService
+    from wepppy.wepp.reports import ReturnPeriodDataset
+    from types import SimpleNamespace
+
+    client, roots, _, _ = omni_return_period_client
+    service = WeppPostprocessService()
+    before = {}
+    for directory in roots:
+        service.report_return_periods(SimpleNamespace(wd=str(directory)), rec_intervals=[10], method='cta',
+                                      gringorten_correction=False)
+        cache = directory / 'wepp/output/return_periods.json'
+        before[cache] = cache.read_bytes()
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string=[
+        ('omni_scenario', 'undisturbed'), ('omni_scenario', 'uniform_low'),
+        ('rec_intervals', '5,2'), ('method', 'am'), ('format', 'csv'), ('table', 'runoff')])
+    assert response.status_code == 200
+    rows = list(csv.DictReader(io.StringIO(response.get_data(as_text=True))))
+    assert {float(row['Recurrence Interval (years)']) for row in rows} == {5, 2}
+    expected = ReturnPeriodDataset(roots[1], auto_refresh=False).create_report([5, 2], method='am', gringorten_correction=False)
+    assert float(rows[2]['Runoff (mm)']) == pytest.approx(expected.return_periods['Runoff'][5]['Runoff'])
+    assert all(path.read_bytes() == contents for path, contents in before.items())
+
+
+def test_return_period_no_selection_and_extraneous_keep_single_report(omni_return_period_client):
+    client, roots, calls, captured = omni_return_period_client
+    url = f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods'
+    response = client.get(url + '?format=csv&table=runoff&rec_intervals=2')
+    assert response.status_code == 200
+    assert not response.get_data(as_text=True).startswith('Scenario,')
+    assert len(calls) == 1
+    calls.clear()
+    assert client.get(url + '?extraneous=true&omni_scenario=undisturbed').status_code == 200
+    assert len(calls) == 1
+    assert captured['selected_omni_scenarios'] == ['undisturbed']
+    assert captured['compare_scenarios'] is False
+    assert calls[0][0] == str(roots[0])
+
+
+@pytest.mark.parametrize('name', ['../outside', 'unknown', 'undisturbed'])
+def test_return_period_unavailable_selection_is_400(omni_return_period_client, name):
+    client, roots, calls, _ = omni_return_period_client
+    (roots[1] / 'wepp/output/interchange/return_period_events.parquet').unlink()
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string={'omni_scenario': name})
+    assert response.status_code == 400
+    assert calls == []
+
+
+def test_return_period_child_missing_channel_has_no_events(omni_return_period_client):
+    import pyarrow.parquet as pq
+    import pyarrow.compute as pc
+    client, roots, _, captured = omni_return_period_client
+    for filename in ['return_period_events.parquet', 'return_period_event_ranks.parquet']:
+        path = roots[1] / 'wepp/output/interchange' / filename
+        table = pq.read_table(path)
+        table = table.set_column(table.schema.get_field_index('topaz_id'), 'topaz_id', pc.add(table['topaz_id'], 10))
+        pq.write_table(table, path)
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?omni_scenario=undisturbed&chn_topaz_id_of_interest=94')
+    assert response.status_code == 200
+    assert captured['scenario_reports'][1]['report'].return_periods == {}
+
+
+@pytest.mark.parametrize('english', [False, True])
+def test_return_period_rendered_csv_link_and_table_agree(omni_return_period_client, monkeypatch, english):
+    import csv
+    import io
+    import re
+    from html import unescape
+    from flask import url_for
+    from jinja2 import Environment, ChoiceLoader, DictLoader, FileSystemLoader
+    from types import SimpleNamespace
+
+    client, _, _, _ = omni_return_period_client
+    preferences = {wepp_module._determine_unitclass('mm'): 'in'} if english else {}
+    monkeypatch.setattr(wepp_module, 'resolve_unitizer_presentation', lambda wd: SimpleNamespace(preferences=lambda: preferences))
+    # Isolate the shared shell; render the actual report and its CSV links.
+    env = Environment(loader=ChoiceLoader([
+        DictLoader({'reports/_base_report.htm': '{% block report_content %}{% endblock %}'}),
+        FileSystemLoader(Path(wepp_module.__file__).parents[2] / 'templates'),
+    ]), autoescape=True)
+    env.filters['sort_numeric'] = lambda values, reverse=False: sorted(values, key=float, reverse=reverse)
+    env.globals.update(url_for=url_for, url_for_run=wepp_module.url_for_run,
+                       unitizer=lambda value, units: str(wepp_module._convert_scalar_to_preference(value, units, preferences)[0]),
+                       unitizer_units=lambda units: wepp_module._convert_scalar_to_preference(1, units, preferences)[1])
+    monkeypatch.setattr(wepp_module, 'render_template', lambda name, **context: env.get_template(name).render(**context))
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string=[
+        ('omni_scenario', 'undisturbed'), ('omni_scenario', 'uniform_low'), ('rec_intervals', '5,2'),
+        ('exclude_yr_indxs', '0,1')])
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    button = re.search(r'<button[^>]*data-report-csv="runoff_tbl"[^>]*>', html).group()
+    csv_url = unescape(re.search(r'data-report-url="([^"]+)"', button).group(1))
+    assert csv_url.count('omni_scenario=') == 2
+    assert 'rec_intervals=5,2' in csv_url or 'rec_intervals=5%2C2' in csv_url
+    csv_response = client.get(csv_url)
+    assert csv_response.status_code == 200
+    rows = list(csv.DictReader(io.StringIO(csv_response.get_data(as_text=True))))
+    table = re.search(r'<table[^>]*id="runoff_tbl".*?</table>', html, re.S).group()
+    cells = [re.findall(r'<td[^>]*>\s*(.*?)\s*</td>', row, re.S)
+             for row in re.findall(r'<tr>(.*?)</tr>', table, re.S)]
+    cells = [row for row in cells if row]
+    assert len(cells) == len(rows) == 6
+    for actual, exported in zip(cells, rows):
+        assert actual[:1] == [exported['Scenario']]
+        assert float(actual[1]) == float(exported['Recurrence Interval (years)'])
+        assert actual[2] == exported['Date']
+        # HTML uses the established two-decimal depth presentation; CSV retains
+        # the full numeric precision for further analysis.
+        assert float(actual[3]) == pytest.approx(float(exported['Runoff (in)' if english else 'Runoff (mm)']), abs=0.005)
+
+
+@pytest.mark.parametrize('year_fields', [{'calendar_year': 2050}, {'calendar_year': None, 'display_year': 2050},
+                                        {'year': None, 'calendar_year': 2050}])
+def test_return_period_comparison_csv_prefers_explicit_event_year(year_fields):
+    from types import SimpleNamespace
+    report = SimpleNamespace(y0=2001, units_d={'Runoff': 'mm'},
+        return_periods={'Runoff': {2: {'mo': 4, 'da': 5, 'year': 2, 'Runoff': 5, **year_fields}}})
+    frame = wepp_module._build_return_period_simple_dataframe(report, 'Runoff', SimpleNamespace(preferences=lambda: {}), calendar_dates=True)
+    assert frame.iloc[0]['Date'] == '04/05/2050'
+
+
+def test_return_period_comparison_all_months_excluded_has_empty_reports(omni_return_period_client):
+    client, _, _, captured = omni_return_period_client
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string={
+        'omni_scenario': 'undisturbed', 'exclude_months': ','.join(map(str, range(1, 13)))})
+    assert response.status_code == 200
+    assert all(not group['report'].return_periods for group in captured['scenario_reports'])
+
+
+@pytest.mark.parametrize(('empty_index', 'remaining_name'), [(0, 'undisturbed'), (1, 'Current project')])
+def test_return_period_comparison_filtered_group_does_not_hide_other_rows(omni_return_period_client, empty_index, remaining_name):
+    import csv
+    import io
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    client, roots, _, captured = omni_return_period_client
+    path = roots[empty_index] / 'wepp/output/interchange/return_period_events.parquet'
+    table = pq.read_table(path)
+    table = table.set_column(table.schema.get_field_index('mo'), 'mo', pa.array([1] * table.num_rows))
+    pq.write_table(table, path)
+    url = f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?omni_scenario=undisturbed&exclude_months=1&exclude_yr_indxs=0&rec_intervals=5,2'
+    assert client.get(url).status_code == 200
+    assert captured['scenario_reports'][empty_index]['report'].return_periods == {}
+    assert captured['scenario_reports'][empty_index]['report'].exclude_yr_indxs == [0]
+    response = client.get(url + '&format=csv&table=runoff')
+    assert response.status_code == 200
+    rows = list(csv.DictReader(io.StringIO(response.get_data(as_text=True))))
+    assert len(rows) == 2
+    assert {row['Scenario'] for row in rows} == {remaining_name}
+
+
+def test_return_period_comparison_empty_csv_has_explicit_404(omni_return_period_client):
+    client, _, _, _ = omni_return_period_client
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods', query_string={
+        'omni_scenario': 'undisturbed', 'exclude_months': ','.join(map(str, range(1, 13))),
+        'format': 'csv', 'table': 'runoff'})
+    assert response.status_code == 404
+
+
+def test_return_period_malformed_calendar_is_not_filtered_empty_success(omni_return_period_client):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    client, roots, _, captured = omni_return_period_client
+    path = roots[1] / 'wepp/output/interchange/return_period_events.parquet'
+    table = pq.read_table(path)
+    for column in ['year', 'calendar_year']:
+        table = table.set_column(table.schema.get_field_index(column), column, pa.nulls(table.num_rows, type=pa.int64()))
+    pq.write_table(table, path)
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?omni_scenario=undisturbed&exclude_months=1')
+    assert response.status_code == 500
+    assert captured == {}

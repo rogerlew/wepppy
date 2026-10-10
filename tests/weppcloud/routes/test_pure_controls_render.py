@@ -4689,6 +4689,34 @@ def test_wepp_return_period_template_reports_empty_core_measures(jinja_env: Envi
     assert 'data-report-table="peak-discharge"' not in rendered
 
 
+def test_return_period_comparison_renders_independent_dates_and_empty_parent(jinja_env: Environment) -> None:
+    jinja_env.filters["sort_numeric"] = lambda values, reverse=False: sorted(values, key=float, reverse=reverse)
+    jinja_env.globals["unitizer"] = lambda value, _units: value
+    jinja_env.globals["unitizer_units"] = lambda units: units
+    parent = SimpleNamespace(return_periods={}, units_d={}, intervals=[5, 2],
+                             exclude_yr_indxs=[0], years=20, num_events=0, y0=2000)
+    child = SimpleNamespace(return_periods={"Runoff": {2: {"mo": 3, "da": 4, "year": 2, "Runoff": 17}}},
+                            units_d={"Runoff": "mm"}, intervals=[5], y0=2010)
+    rendered = jinja_env.get_template("reports/wepp/return_periods.htm").render(
+        report=parent, scenario_reports=[{"name": "Current project", "report": parent},
+                                         {"name": "undisturbed", "report": child}],
+        compare_scenarios=True, selected_omni_scenarios=["undisturbed"],
+        omni_scenarios=[{"name": "undisturbed", "reason": None},
+                        {"name": "uniform_low", "reason": "Required inputs unavailable."}],
+        measure_order=["Runoff"], extraneous=False, gringorten_correction=False,
+        method="cta", exclude_yr_indxs=[0], exclude_months=None, output_scope="baseline",
+        chn_topaz_id_options=[], chn_topaz_id_of_interest=None,
+    )
+    assert '<th scope="col">Scenario</th>' in rendered
+    assert "03/04/2011" in rendered
+    assert 'data-report-table="runoff"' in rendered
+    assert "Current project: No runoff events" in rendered
+    assert re.search(r'name="omni_scenario" value="undisturbed"[^>]*checked', rendered)
+    assert re.search(r'name="omni_scenario" value="uniform_low"[^>]*disabled', rendered)
+    assert "OMNI Scenarios Selection" in rendered
+    assert re.search(r'<option[^>]+exclude_yr_indxs=0&[^>]+selected>\s*Exclude first year', rendered)
+
+
 def test_map_templates_do_not_use_application_role_for_canvas() -> None:
     map_template = (TEMPLATE_ROOT / "controls/map_pure_gl.htm").read_text(encoding="utf-8")
     runs_template = (TEMPLATE_ROOT / "user/runs2.html").read_text(encoding="utf-8")
