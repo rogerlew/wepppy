@@ -22,7 +22,7 @@ CONFIG = "cfg"
 def wepp_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     from types import SimpleNamespace
     monkeypatch.setattr(wepp_module.Ron, "getInstance", lambda wd: SimpleNamespace(
-        config_get_str=lambda section, key, default=None: default))
+        mods=[], config_get_str=lambda section, key, default=None: default))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(wepp_module.wepp_bp)
@@ -1541,7 +1541,7 @@ def test_return_period_omni_csv_real_datasets(omni_return_period_client, scope, 
     assert response.status_code == 200
     rows = list(csv.DictReader(io.StringIO(response.get_data(as_text=True))))
     assert list(rows[0]) == ['Scenario', 'Recurrence Interval (years)', 'Date', 'Runoff (mm)']
-    assert [row['Scenario'] for row in rows] == ['Current project'] * 2 + ['undisturbed'] * 2 + ['uniform_low'] * 2
+    assert [row['Scenario'] for row in rows] == ['Undisturbed'] * 2 + ['undisturbed'] * 2 + ['uniform_low'] * 2
     for index, directory in enumerate(roots):
         expected = ReturnPeriodDataset(directory, auto_refresh=False, output_scope=scope).create_report(
             [5, 2], exclude_yr_indxs=[0], exclude_months=[1, 2], method=method,
@@ -1619,7 +1619,8 @@ def test_return_period_child_missing_channel_has_no_events(omni_return_period_cl
 
 
 @pytest.mark.parametrize('english', [False, True])
-def test_return_period_rendered_csv_link_and_table_agree(omni_return_period_client, monkeypatch, english):
+@pytest.mark.parametrize('has_map', [False, True])
+def test_return_period_rendered_csv_link_and_table_agree(omni_return_period_client, monkeypatch, english, has_map):
     import csv
     import io
     import re
@@ -1629,6 +1630,8 @@ def test_return_period_rendered_csv_link_and_table_agree(omni_return_period_clie
     from types import SimpleNamespace
 
     client, _, _, _ = omni_return_period_client
+    monkeypatch.setattr(wepp_module.nodb_mods.Disturbed, 'tryGetInstance',
+                        lambda wd, **kwargs: SimpleNamespace(has_map=has_map))
     preferences = {wepp_module._determine_unitclass('mm'): 'in'} if english else {}
     monkeypatch.setattr(wepp_module, 'resolve_unitizer_presentation', lambda wd: SimpleNamespace(preferences=lambda: preferences))
     # Isolate the shared shell; render the actual report and its CSV links.
@@ -1653,6 +1656,7 @@ def test_return_period_rendered_csv_link_and_table_agree(omni_return_period_clie
     csv_response = client.get(csv_url)
     assert csv_response.status_code == 200
     rows = list(csv.DictReader(io.StringIO(csv_response.get_data(as_text=True))))
+    assert rows[0]['Scenario'] == ('Burned' if has_map else 'Undisturbed')
     table = re.search(r'<table[^>]*id="runoff_tbl".*?</table>', html, re.S).group()
     cells = [re.findall(r'<td[^>]*>\s*(.*?)\s*</td>', row, re.S)
              for row in re.findall(r'<tr>(.*?)</tr>', table, re.S)]
@@ -1685,7 +1689,7 @@ def test_return_period_comparison_all_months_excluded_has_empty_reports(omni_ret
     assert all(not group['report'].return_periods for group in captured['scenario_reports'])
 
 
-@pytest.mark.parametrize(('empty_index', 'remaining_name'), [(0, 'undisturbed'), (1, 'Current project')])
+@pytest.mark.parametrize(('empty_index', 'remaining_name'), [(0, 'undisturbed'), (1, 'Undisturbed')])
 def test_return_period_comparison_filtered_group_does_not_hide_other_rows(omni_return_period_client, empty_index, remaining_name):
     import csv
     import io
@@ -1765,3 +1769,26 @@ def test_return_period_selection_stages_existing_outputs(omni_return_period_clie
     for row in rows:
         event = report.return_periods['Runoff'][int(float(row['Recurrence Interval (years)']))]
         assert float(row['Runoff (mm)']) == pytest.approx(event['Runoff'])
+
+
+@pytest.mark.parametrize(('mods', 'has_map', 'single_input', 'expected'), [
+    ([], None, False, 'Undisturbed'), (['disturbed'], False, False, 'Undisturbed'),
+    (['disturbed'], True, False, 'Burned'), (['baer', 'disturbed'], True, False, 'Burned'),
+    (['baer', 'disturbed'], False, False, 'Undisturbed'), (['disturbed'], True, True, 'Undisturbed'),
+])
+def test_return_period_baseline_map_labels(monkeypatch, mods, has_map, single_input, expected):
+    from types import SimpleNamespace
+    calls = []
+
+    def load(name):
+        def existing(wd, **kwargs):
+            calls.append((name, wd, kwargs))
+            return None if has_map is None else SimpleNamespace(has_map=has_map)
+        return existing
+
+    monkeypatch.setattr(wepp_module.nodb_mods.Baer, 'tryGetInstance', load('baer'))
+    monkeypatch.setattr(wepp_module.nodb_mods.Disturbed, 'tryGetInstance', load('disturbed'))
+    ron = SimpleNamespace(mods=mods, config_get_str=lambda *args: 'true' if single_input else 'false')
+    assert wepp_module._return_period_baseline_label('/project', ron) == expected
+    assert calls == ([] if single_input else [
+        ('baer' if 'baer' in mods else 'disturbed', '/project', {'allow_nonexistent': False})])

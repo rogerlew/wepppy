@@ -4698,7 +4698,7 @@ def test_return_period_comparison_renders_independent_dates_and_empty_parent(jin
     child = SimpleNamespace(return_periods={"Runoff": {2: {"mo": 3, "da": 4, "year": 2, "Runoff": 17}}},
                             units_d={"Runoff": "mm"}, intervals=[5], y0=2010)
     rendered = jinja_env.get_template("reports/wepp/return_periods.htm").render(
-        report=parent, scenario_reports=[{"name": "Current project", "report": parent},
+        report=parent, scenario_reports=[{"name": "Burned", "report": parent},
                                          {"name": "undisturbed", "report": child}],
         compare_scenarios=True, selected_omni_scenarios=["undisturbed"],
         omni_scenarios=[{"name": "undisturbed", "reason": None},
@@ -4710,7 +4710,7 @@ def test_return_period_comparison_renders_independent_dates_and_empty_parent(jin
     assert '<th scope="col">Scenario</th>' in rendered
     assert "03/04/2011" in rendered
     assert 'data-report-table="runoff"' in rendered
-    assert "Current project: No runoff events" in rendered
+    assert "Burned: No runoff events" in rendered
     assert re.search(r'name="omni_scenario" value="undisturbed"[^>]*checked', rendered)
     assert re.search(r'name="omni_scenario" value="uniform_low"[^>]*disabled', rendered)
     assert "OMNI Scenarios Selection" in rendered

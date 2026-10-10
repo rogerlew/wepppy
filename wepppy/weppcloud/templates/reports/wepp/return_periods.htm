@@ -110,7 +110,7 @@
   {% set slug = slugify_key(key) %}
   {% set label = display_label(key) %}
   {% set table_id = slug ~ '_tbl' %}
-  {% set groups = scenario_reports | default([{'name': 'Current project', 'report': report}]) %}
+  {% set groups = scenario_reports | default([{'name': 'Undisturbed', 'report': report}]) %}
   {% set ns = namespace(has_events=false, units=report.units_d.get(key)) %}
   {% for group in groups %}
     {% if group.report.return_periods.get(key) %}

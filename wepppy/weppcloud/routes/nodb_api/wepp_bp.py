@@ -1372,6 +1372,15 @@ def plot_wepp_streamflow(runid, config):
     )
 
 
+def _return_period_baseline_label(wd, ron):
+    """Match the dashboard's registered SBS-map baseline naming convention."""
+    if single_input_uploads_enabled(ron):
+        return 'Undisturbed'
+    controller = nodb_mods.Baer if 'baer' in ron.mods else nodb_mods.Disturbed
+    sbs = controller.tryGetInstance(wd, allow_nonexistent=False)
+    return 'Burned' if sbs is not None and sbs.has_map else 'Undisturbed'
+
+
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 @authorize_and_handle_with_exception_factory
@@ -1455,7 +1464,8 @@ def report_wepp_return_periods(runid, config):
         report_options['meoization'] = False
     report = (_comparison_return_period_report(wepp, report_options) if compare_scenarios
               else wepp.report_return_periods(**report_options))
-    scenario_reports = [{'name': 'Current project', 'report': report}]
+    baseline_label = _return_period_baseline_label(wd, ron) if compare_scenarios else 'Undisturbed'
+    scenario_reports = [{'name': baseline_label, 'report': report}]
     if compare_scenarios:
         for scenario in selected_scenarios:
             child_report = _comparison_return_period_report(Wepp.getInstance(scenario['path']), report_options)

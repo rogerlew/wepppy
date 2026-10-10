@@ -2,7 +2,8 @@
 
 In the simple Return periods report, open **Configuration → OMNI Scenarios
 Selection**, check completed scenarios, and choose **Run report**. Nothing is
-selected by default. The current project always remains in the comparison.
+selected by default. The current project always remains in the comparison, labeled **Undisturbed**
+or **Burned** when it has an SBS map, matching the GL dashboard.
 Each metric table adds a Scenario column and lists each scenario's own event
 dates and values. A return period need not select the same storm in every run.
 **Download CSV** exports that metric's concatenated rows in the selected units.
