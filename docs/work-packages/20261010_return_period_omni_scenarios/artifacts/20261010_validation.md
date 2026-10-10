@@ -26,7 +26,7 @@ round trip and checks shared-input contents and restored discovery.
 | Frontend lint | Blocked by unchanged climate.test.js:300 conditional expect; changed return_period_inline.test.js lint passes |
 | Controller bundle build | Passed through `wctl exec weppcloud python .../build_controllers_js.py`; no generated bundle diff |
 | Stub hygiene | `wctl check-test-stubs` passed |
-| Full pytest sanity | `wctl run-pytest tests --maxfail=1` running; model matrix in progress |
+| Full pytest sanity | 10,554 passed, 126 skipped, 5,487 warnings in 47m02s |
 | Documentation lint | Contract, package, report note and route README passed; final status edits rechecked before handoff |
 | Broad-exception enforcement | Line-based allowlist drift reports +1; AST verifies 26 broad handlers before and after, none added |
 | Code quality observability | Committed diff observed: route length 113→157 lines; discovery helper remains green |
@@ -58,8 +58,7 @@ Temporary fixture server is stopped after smoke verification.
 ## Completion boundary
 
 Implemented, focused/local browser validated, independent correctness/security
-reviews approved. Full sanity result pending. Not
-deployed; no production scenario outputs changed or repaired.
+reviews approved. Full sanity passed. Not deployed; no production scenario outputs changed or repaired.
 
 ## Correction after actual-project feedback
 
@@ -79,3 +78,9 @@ Correction validation: 91 focused pytest passed; 2 full/partial staging tests
 passed; 933 Jest tests passed; bundle rebuilt. Full frontend lint retains the
 unchanged climate.test.js:300 conditional-expect error. Independent correctness
 and security reviewers approve against the correction ancestor.
+
+Full Python sanity completed: 10,554 passed, 126 skipped, 5,487 warnings in
+2822.38 seconds. It began before the final readonly correction; the correction
+was separately exercised by 91 focused tests, two staging regressions, actual
+project-copy readback, and the final 933-test frontend run. No failures.
+Implementation commits: `d252ff056`, correction `99981ce36`. Not deployed.

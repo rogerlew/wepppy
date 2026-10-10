@@ -22,7 +22,7 @@ No selections means the established single-project report.
 - [x] (2026-10-10 UTC) Operator authorized commit/proceed; checkpoint `c5358daa7` and reviewed path clarification `946ec76fb` committed before corresponding source edits.
 - [x] (2026-10-10 UTC) Implement discovery, independent reports, template, URL round trips, and CSV.
 - [x] (2026-10-10 UTC) Validate source-to-HTML/CSV semantics, 285 focused tests, 931 frontend tests, Chromium smoke; correctness/security reviews approved after fixes.
-- [ ] Record full Python sanity outcome and final handoff.
+- [x] Full sanity: 10,554 passed, 126 skipped; final correction focused/source-copy/frontend checks passed. Handoff recorded.
 
 ## Surprises & Discoveries
 
@@ -54,7 +54,7 @@ and carry selections back to simple mode. Document durable behavior in
 
 Implemented and locally validated, with independent correctness/security review
 approved. Browser smoke uses the real report/CSV workflow with isolated auth,
-NoDb loading, and shell. Full Python sanity remains in progress. Not deployed.
+NoDb loading, and shell. Full Python sanity passed: 10,554 tests, 126 skipped. Not deployed.
 Frontend lint has an unchanged climate-test error; broad-exception enforcement
 has line-allowlist drift despite unchanged broad-handler count. Details and
 remaining evidence are in `artifacts/20261010_validation.md`.
@@ -148,10 +148,15 @@ Omni completion metadata while validating both modern and legacy valid states.
 Revision note: created 2026-10-10 to make the user-requested report extension
 reviewable before the required contract ancestor and implementation.
 Updated 2026-10-10 after implementation and reviews to record concrete fixes,
-validation, authorized checkpoint ancestry, and remaining full-suite evidence.
+validation, authorized checkpoint ancestry, and completed full-suite evidence.
 
 Correction after live-project feedback: READONLY was an invalid completion
 assumption. Operator rejected it; independently reviewed amendment `d89ace269`
 permits artifact-backed discovery with empty metadata and established staging
 from existing outputs on selection. Validate actual unstaged output copies and
 optional Outlet form guard before final handoff.
+
+Final outcome: code/local validation complete in `d252ff056` and `99981ce36`.
+The correction used actual unstaged source copies and proves child CSV dates
+and values without relying on READONLY. 933 frontend tests pass. Known lint
+limitation remains unrelated; deployment was not performed.

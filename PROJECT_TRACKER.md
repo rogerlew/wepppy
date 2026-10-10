@@ -2,15 +2,16 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-10
-**Active Packages**: 45
+**Active Packages**: 44
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-In progress: [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
-— implemented completed-scenario selection, independent event rows, and
-concatenated CSV for the simple report. Focused/frontend/Chromium checks and
-independent reviews pass; full Python sanity in progress. Not deployed.
+Completed (code/local): [Return-period Omni comparisons](docs/work-packages/20261010_return_period_omni_scenarios/package.md)
+— scenario selection, independent dates/values, concatenated CSV; corrected
+artifact discovery requires no readonly marker. Full Python sanity 10,554 passed,
+126 skipped; final correction/source-copy checks and 933 frontend tests pass.
+Independent reviews approved. Not deployed.
 
 Released/vendored: [WEPP 261010](docs/work-packages/20261009_topanga_jan1993_outlier/release-handoff.md). Roger approved the minimal CHRQIN normalization correction after watershed, mutation, disturbed and Cedar verification. Undeployed 261009 binaries/sidecars removed from WEPPpy; historical evidence retained. Forest 163 pass, watchlist 12/12, post-vendor 114 pass/1 existing skip, release matrix 99 pass and report/Usersum 63 pass. Ordinary-event consequences remain disclosed. No production deployment or general default switch.
 

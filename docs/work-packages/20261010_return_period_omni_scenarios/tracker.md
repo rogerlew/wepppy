@@ -1,10 +1,10 @@
 # Return-period Omni comparisons tracker
 
-Updated: 2026-10-10 17:52 UTC.
+Updated: 2026-10-10; closed after full sanity.
 
 ## Status
 
-Implemented and locally validated. Independent contract, correctness, and
+Closed (code/local validation; not deployed). Independent contract, correctness, and
 security reviews approved after documented fixes.
 Starting revision: `8b32a5c8c7d7eba52e947c8619b1dff2d8435e77`.
 Contract ancestors: `c5358daa7`, reviewed artifact-path clarification `946ec76fb`.
@@ -17,13 +17,14 @@ scenario/date/value rows, and concatenated CSV. Durable contract and rationale:
 `docs/ui-docs/contracts/return-period-omni-scenarios-contract.md`.
 Current project remains included; simple mode only; no stored schema mutation.
 
-## Remaining
+## Outcome
 
-Finish full Python sanity and final handoff. Review artifacts and validation
-results are under `artifacts/`; 285 focused and 931 frontend tests pass,
-Chromium smoke passes. Frontend lint and broad-exception tooling limitations
-are documented in `artifacts/20261010_validation.md`. Not deployed.
-Execute `prompts/active/return_period_omni_execplan.md`.
+Implemented in `d252ff056`, corrected in `99981ce36` against contract ancestor
+`d89ace269`. Full Python sanity: 10,554 passed, 126 skipped. Final correction:
+91 focused tests plus 2 staging tests, 933 frontend tests, and actual-project-copy
+CSV validation. Initial Chromium smoke passes. No further implementation work.
+Known unrelated lint and tooling limitations are retained in validation.md.
+Completed plan: `prompts/completed/return_period_omni_execplan.md`.
 
 ## Notes
 
