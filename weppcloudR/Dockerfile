@@ -1,6 +1,6 @@
 FROM rocker/r-ver:4.3.2@sha256:4e32addfc4da3e660f6e0d05ce5e43d3eceb9db58a60b9a142e0dde9a654ead1
 
-ARG ARROW_APT_SOURCE_URL=https://apache.jfrog.io/artifactory/arrow/ubuntu/apache-arrow-apt-source-latest-jammy.deb
+ARG ARROW_APT_SOURCE_URL=https://packages.apache.org/artifactory/arrow/ubuntu/pool/jammy/main/a/apache-arrow-apt-source/apache-arrow-apt-source_25.0.1-1_all.deb
 ARG ARROW_APT_SOURCE_SHA256=9ef1afbcca1705ddd6f358672deb5ba4f858b248144ef6356d4b8f4788ac1fda
 ARG FONTAWESOME_URL=https://use.fontawesome.com/releases/v5.3.1/js/all.js
 ARG FONTAWESOME_SHA256=8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1

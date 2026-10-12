@@ -161,7 +161,8 @@ retain the form and a retryable error. Already accepted versions render the same
 confirmation on initial load. This removes an unnecessary follow-up navigation
 after a completed save; it does not change consent, session/CSRF requirements,
 statement versioning, PowerUser requests, or administrative membership forms.
-Implementation conformance for this October 11 feedback amendment is pending.
+The October 11 feedback amendment is implemented and verified locally; deployment
+is tracked separately.
 
 Restricted-feature renderers and dynamic sections must distinguish readable from actionable state. Disable or omit mutation controls with a clear reason, preserve accessible labels, and enforce the same denial server-side. Disabled JavaScript is presentation, not authorization. Newly exposed inspect-only restricted-feature reads must not initialize their optional controllers or execute restricted scientific analysis; unrelated anonymous functionality is unchanged.
 

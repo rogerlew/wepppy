@@ -79,8 +79,13 @@ test('feature groups: real session, database, acknowledgment and removal', async
     await user.getByRole('button', { name: 'Accept internal access statement' }).press('Enter');
     expect((await (await acknowledged).json()).result.changed).toBe(true);
     expect((await (await user.request.get(`${baseURL}/test-feature-access-decision`)).json()).allowed).toBe(true);
-    await user.getByRole('link', { name: 'Refresh access status' }).click();
     await expect(user.getByText('You have accepted this version.')).toBeVisible();
+    await expect(user.getByText('You have accepted this version.')).toBeFocused();
+    await expect(user.getByRole('button', { name: 'Accept internal access statement' })).toHaveCount(0);
+    await expect(user.getByRole('checkbox', { name: 'I have read and understand the internal access statement.' })).toHaveCount(0);
+    await expect(user.locator('[data-internal-access] [data-access-refresh]')).toHaveCount(0);
+    await expect(user.getByText(/membership current; acknowledgment complete/)).toBeVisible();
+    await scan(user, 'profile-accepted');
     await root.getByLabel('Person (account ID)').selectOption(String(credentials.collaborator.id));
     await root.getByLabel('Feature group', { exact: true }).selectOption('ag_fields');
     await root.getByLabel('Decision', { exact: true }).selectOption('remove');

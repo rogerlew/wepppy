@@ -149,7 +149,9 @@ Profile shows only the current person's memberships and current acknowledgment.
 It presents the policy's Internal Collaborator Onboarding text as version
 `internal-2026-10-01`. Change the version when the statement changes and retain
 historical acceptance rows. Checking the statement and submitting records acceptance
-for the current account only. No other person's audit reasons are exposed.
+for the current account only. On confirmed success, the form immediately becomes
+“You have accepted this version.” and current-membership acknowledgment labels
+update without refreshing. Errors retain the form for retry. No other person's audit reasons are exposed.
 A persistence failure displays a reference ID and explicit unavailable status
 without disabling ordinary Profile functions. Existing Dev/Root operational
 paths do not acquire an acknowledgment requirement; group-only features do.

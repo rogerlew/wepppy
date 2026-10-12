@@ -68,14 +68,29 @@
                 if (!body || typeof body.message !== "string" || !body.message.trim()) {
                     throw new Error("Unable to save. Reload and retry.");
                 }
+                if (formKind === "acknowledgment" && (!body.result ||
+                    body.result.statement_kind !== "internal" ||
+                    body.result.statement_version !== form.dataset.statementVersion ||
+                    typeof body.result.changed !== "boolean")) {
+                    throw new Error("Unable to save. Reload and retry.");
+                }
                 status.className = "wc-alert wc-alert--success";
-                status.textContent = body.message;
-                form.querySelector("[data-access-refresh]").hidden = false;
+                if (formKind === "acknowledgment") {
+                    status.textContent = "You have accepted this version.";
+                    form.closest("[data-internal-access]").querySelectorAll("[data-internal-membership-status]")
+                        .forEach(function (label) {
+                            label.textContent = "membership current; acknowledgment complete";
+                        });
+                    form.replaceWith(status);
+                } else {
+                    status.textContent = body.message;
+                    form.querySelector("[data-access-refresh]").hidden = false;
+                }
             } catch (error) {
                 status.className = "wc-alert wc-alert--danger";
                 status.textContent = error.message || "Unable to save. Check your connection and retry.";
             } finally {
-                button.disabled = false;
+                if (button.isConnected) { button.disabled = false; }
                 status.focus();
             }
         });

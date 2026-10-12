@@ -12,17 +12,21 @@ const script = fs.readFileSync(
     "utf8"
 );
 
-function installForm() {
+function installForm(kind = "poweruser") {
     document.head.innerHTML = '<meta name="csrf-token" content="csrf-123">';
     document.body.innerHTML = `
-        <form action="/access/poweruser" data-feature-access-form="poweruser"
+        <section data-internal-access>
+        <span data-internal-membership-status>membership current; actions await acknowledgment</span>
+        <span data-expired-membership>membership expired</span>
+        <form action="/access/poweruser" data-feature-access-form="${kind}"
               data-statement-version="v1">
           <input type="checkbox" name="needs_poweruser" checked>
           <input type="checkbox" name="accepts_training" checked>
           <p data-access-status hidden tabindex="-1"></p>
           <button type="submit">Save</button>
-          <a data-access-refresh hidden>Refresh</a>
+          ${kind === "acknowledgment" ? "" : '<a data-access-refresh hidden>Refresh</a>'}
         </form>
+        </section>
     `;
     HTMLFormElement.prototype.reportValidity = jest.fn(() => true);
     window.eval(script);
@@ -70,5 +74,41 @@ describe("feature access forms", () => {
         expect(status.className).toBe("wc-alert wc-alert--success");
         expect(status.textContent).toBe("Access request saved.");
         expect(form.querySelector("[data-access-refresh]").hidden).toBe(false);
+    });
+
+    test.each([true, false])("acknowledgment completes in place when changed=%s", async (changed) => {
+        window.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ message: "Internal access statement accepted.", result: {
+                statement_kind: "internal", statement_version: "v1", changed
+            } })
+        });
+        const form = installForm("acknowledgment");
+        const status = form.querySelector("[data-access-status]");
+        await submitAndFlush(form);
+        expect(document.querySelector("form")).toBeNull();
+        expect(document.querySelector("[data-access-refresh]")).toBeNull();
+        expect(status.textContent).toBe("You have accepted this version.");
+        expect(document.activeElement).toBe(status);
+        expect(document.querySelector("[data-internal-membership-status]").textContent)
+            .toBe("membership current; acknowledgment complete");
+        expect(document.querySelector("[data-expired-membership]").textContent).toBe("membership expired");
+        await submitAndFlush(form);
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    test.each([
+        { ok: false, body: { error: { message: "Please retry." } } },
+        { ok: true, body: { message: "Saved", result: { statement_kind: "internal", statement_version: "old", changed: true } } },
+        { ok: true, body: { message: "Saved" } }
+    ])("failed acknowledgment retains retryable controls: %j", async ({ ok, body }) => {
+        window.fetch = jest.fn().mockResolvedValue({ ok, json: async () => body });
+        const form = installForm("acknowledgment");
+        await submitAndFlush(form);
+        expect(form.isConnected).toBe(true);
+        expect(form.querySelector("button").disabled).toBe(false);
+        expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+        expect(document.querySelector("[data-internal-membership-status]").textContent)
+            .toContain("await acknowledgment");
     });
 });
