@@ -15,7 +15,7 @@ A Portland group member should open the existing Portland collection links and s
 - [x] M1: Implement per-run group read authorization across the consumed surfaces and validate it directly.
 - [x] M2: Prepare and validate legacy artifacts on a copied run; define repeatable bounded repair.
 - [x] M3: Wire Deck.gl collection entry, generator, and old-link compatibility.
-- [ ] M4: Complete regression, browser, artifact, correctness, and security gates.
+- [x] M4: Complete regression, browser, artifact, correctness, and security gates; retain the unrelated baseline frontend lint failure.
 - [ ] M5: Complete authorized deployment, affected-run repair, live validation, and observation.
 
 ## Surprises & Discoveries
@@ -34,10 +34,12 @@ Local source now confirms `routes/locations.py:portland_index` requires `Portlan
 
 2026-10-12 08:21 UTC, Codex: target faithful migration of the combined workflow onto existing Deck.gl components, not a new service or forced BatchRunner migration. Scaffold completion is separate from implemented, wired, validated, deployed, and repaired status. Preserve data/display semantics; any parameterization change needs an ADR.
 
+2026-10-12, forest handoff: preserve the existing legacy migration notice and its Load Without Migrating choice. Combined preparation remains additive and does not imply full-project migration. Accept the unchanged climate-test lint defect as a recorded baseline limitation; keep production identity/member acceptance in M5. ADR-0087 records the reviewed finite pointer-duration choice.
+
 ## Outcomes & Retrospective
 
 
-Forest implementation and all 63 copied-run native preparations are complete. Each preparation records writer identity; 919 original file hashes match production and 24,669 hillslope rows match source values exactly. Code reviews closed all high/medium findings; final browser and regression gates are in progress. Production remains unchanged. See tracker.md for current results and the rollout handoff for later, separately authorized production work.
+Forest implementation and all 63 copied-run native preparations are complete. Each preparation records writer identity; 919 original file hashes match production and 24,669 hillslope rows match source values exactly. Independent reviews approve forest readiness with no unresolved high/medium findings. All nine collection browser checks passed; full Python passed 10,620 tests with 126 skips, and Jest passed 965 tests / 118 suites. Repository npm lint retains the unchanged climate.test.js conditional-expect defect; changed GL modules pass direct lint. Production remains unchanged. See tracker.md for current results and the rollout handoff for later, separately authorized production work.
 
 ## Context and Orientation
 
@@ -148,4 +150,6 @@ Revision note (2026-10-12 forest implementation): M0–M3 complete. All 63 origi
 
 Revision note (2026-10-12 final mouse acceptance): actual picking found the correct polygon, but Deck/Mjolnir measured synchronous software-GPU picking (~2.5 seconds) as gesture duration and rejected it against the 250 ms tap limit. A scoped five-second click recognizer setting passed experimental picking, pan, zoom and share checks. The independent correctness reviewer approved this finite allowance over an unlimited cutoff; no distance/drag/double-click setting changes. Final served-code audit passed in 2.0 minutes, including unchanged selection after dragging, pan/zoom/share, artifact byte parity and all-nine native sample parity. ADR-0087 records the UI-only threshold choice.
 
-Revision note (2026-10-12 regression follow-up): the initial broad run stopped after8,764 passes/126 skips because a new test patched a stale parent-module reference. New route fixtures now use importlib.import_module consistently. The full WEPPcloud group additionally exposed its old standalone Portland render fixture missing the new collection-URL context; supplied the real catalog URL builder without changing assertions. All1,969 WEPPcloud tests now pass. Required full-repository rerun remains in progress; all browser/access, artifact and role-restoration receipts are retained.
+Revision note (2026-10-12 regression follow-up): the initial broad run stopped after 8,764 passes/126 skips because a new test patched a stale parent-module reference. New route fixtures now use importlib.import_module consistently. The full WEPPcloud group additionally exposed its old standalone Portland render fixture missing the new collection-URL context; supplied the real catalog URL builder without changing assertions. All 1,969 WEPPcloud tests now pass. Required full-repository rerun passed 10,620 tests / 126 skips; all browser/access, artifact and role-restoration receipts are retained.
+
+Revision note (forest handoff): M0–M4 are complete. Candidate `9c8293008` contains the runtime changes; follow-up documentation/evidence and a bounded drilldown smoke branch do not alter runtime. All 63 preparations and 919 original files passed identity/parity review. The sample run shell opens through the existing migration notice and Load Without Migrating under independent Admin; full production member/report acceptance remains M5. Exact dev-agent roles are restored and stored browser credentials deleted. No production writes or push occurred. Repository npm lint fails the preexisting unchanged climate controller test; that receipt is retained rather than reported as a pass.

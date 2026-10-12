@@ -1,10 +1,10 @@
 # Portland production rollout handoff
 
-Forest implementation is under final validation. This document prepares the production work; no production deployment or data mutation has been performed. The requesting operator owns scheduling and the seven-day post-deployment observation window.
+Forest implementation is ready for rollout. This document prepares the production work; no production deployment or data mutation has been performed. The requesting operator owns scheduling and the seven-day post-deployment observation window.
 
 ## Candidate and evidence
 
-Accepted contract ancestor: `d75460acc`. The final implementation revision will be recorded in the package tracker. Evidence under `evidence/` includes production inventory, 63 current forest preparation manifests with writer content hashes, 919 unchanged source-file hashes, exact native/source parity for 24,669 hillslope rows, browser acceptance, and canonical archive/restore byte parity. Independent implementation reviews record closed high/medium code findings.
+Accepted contract ancestor: `d75460acc`. Implementation candidate: `9c8293008` (core implementation `c1e919210`, followed by a static map-attribution link) — local commits; full-repository regression passed (10,620 tests, 126 skipped). Runtime file hashes are retained in `evidence/runtime-source-identity.json`. Evidence under `evidence/` includes production inventory, 63 current forest preparation manifests with writer content hashes, 919 unchanged source-file hashes, exact native/source parity for 24,669 hillslope rows, browser acceptance, and canonical archive/restore byte parity. Independent implementation reviews approve forest readiness with no unresolved high/medium findings. Jest passed 965 tests / 118 suites, and changed GL modules pass direct ESLint. The repository frontend lint command fails its preexisting `controllers_js/__tests__/climate.test.js:300` conditional expect; the file is unchanged from the contract ancestor. This baseline defect is retained in `evidence/frontend-lint.log`. Dev-agent roles are restored and saved browser credentials removed.
 
 ## Required work on wepp.cloud
 
@@ -16,6 +16,8 @@ Accepted contract ancestor: `d75460acc`. The final implementation revision will 
 6. Retain exact deployed revision, command receipts, source/output hashes, native writer identity, HTTP/query/browser results and operator identity context without credentials. Update M5 and observe existing collection/query readiness errors for seven days. No temporary bypass needs retirement.
 
 ## Stop or rollback conditions
+
+The sample forest watershed link reached the existing legacy migration notice. Its **Load Without Migrating** link rendered the run title and WEPP section under the restored dev-agent's independent Admin grant; original source hashes stayed unchanged. This proves sample navigation, not every legacy report/control or PortlandGroup-only full-run UI. Include that identity and destination check in production acceptance. Do not run broad project migrations as an implicit part of combined-map preparation.
 
 Stop if native/source values disagree, any requested watershed is silently omitted, original files/markers change, unknown derived output exists, a user gains unrelated private access, or normal browse/query access regresses. Missing production-equivalent identity/mount evidence blocks rollout completion.
 

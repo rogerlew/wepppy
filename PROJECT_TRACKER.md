@@ -7,11 +7,12 @@
 
 ## Purpose
 
-Forest validation: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)
+Forest ready for rollout: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)
 — existing PortlandGroup access, bounded per-run authorization, legacy artifact
 preparation, and Deck.gl collection/generator repair implemented after reviewed
-checkpoint d75460acc. All 63 copies match original LOSS values; final browser/tests
-are in progress. Production deployment and repair remain pending.
+checkpoint d75460acc. All nine collections/63 copies pass browser and native-value
+checks; Python 10,620 passed/126 skipped, Jest 965 passed. Independent reviews
+approve; preexisting climate-test lint failure recorded. Production remains M5.
 
 Completed (code/forest): [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
 — implemented daily source radios, linear/log probability, independent Omni

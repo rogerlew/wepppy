@@ -8,6 +8,8 @@ Select soil loss, runoff, subsurface runoff, baseflow, or available phosphorus. 
 
 A missing optional phosphorus result disables that choice while retaining the other results. An incomplete required dataset produces a visible collection error; the viewer does not silently omit a watershed. Contact the project maintainer to prepare missing legacy results. Loading the page never runs conversion or changes a project.
 
+A watershed link may reach the existing **Migration Required** screen for a legacy project. Its **Load Without Migrating** link opens the existing run interface without running a migration. Combined-map preparation does not migrate the full project; full report/control readiness remains a separate legacy-project concern.
+
 ## Developer contract
 
 [PCV-01](../ui-docs/contracts/combined-watershed-viewer-contract.md) defines admission, compatibility, exact measures and acceptance. `utils/portland_collections.json` is the explicit, reviewed Portland resource association and landing-page link source. It is not a prefix-based permission. `utils/portland_collections.py` checks current Flask-Security roles and independent grants. Ordinary downstream ownerless-run access remains unchanged.

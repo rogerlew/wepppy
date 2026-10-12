@@ -1,0 +1,18 @@
+{
+  "runid": "portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200",
+  "cfg": "portland-snow",
+  "status": 200,
+  "title": "portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200",
+  "identity": "restored dev-agent baseline; independent Admin grant",
+  "migrationGate": true,
+  "usedExistingLoadWithoutMigrating": true,
+  "weppSectionVisible": true,
+  "original_source_hashes_unchanged_after_navigation": true,
+  "anonymous_request": {
+    "status": 200,
+    "title": "Verification Required",
+    "acceptance": false,
+    "note": "Standard verification screen; not evidence of a rendered run page."
+  },
+  "scope": "One sample run shell under independent Admin. Full report/control and PortlandGroup-only run UI acceptance remain production checks."
+}

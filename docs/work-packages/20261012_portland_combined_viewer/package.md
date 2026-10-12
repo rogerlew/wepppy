@@ -1,6 +1,6 @@
 # Portland group access and combined watershed viewer
 
-**Status**: Open — forest implementation complete; final validation in progress (2026-10-12)
+**Status**: Open — forest ready for rollout; production M5 pending (2026-10-12)
 **Created**: 2026-10-12 08:21 UTC  
 **Security impact**: high; independent security and correctness reviews required
 
@@ -33,7 +33,7 @@ New queues, services, datastores, dependencies, privileges, protocols, and deplo
 
 Target: **faithful extraction** of the existing collection workflow onto the current renderer/data path, with the operator's group-access correction. The implementation is wired on forest; production rollout is a separate milestone. Preserve runoff, subsurface runoff, baseflow, loss, available phosphorus, English/SI units, ranges, title, bounds, and run-specific drilldown. Source behavior is in `combined_ws_viewer.htm`, `combined_ws_viewer2.htm`, and `combined_watershed_viewer_generator.py` under `wepppy/weppcloud/`.
 
-Generated-output and browser evidence are required. Distinguish implemented, wired, locally validated, environment validated, deployed, repaired, and incident resolved. The current claim is implemented and forest environment validated for all nine collections, with final broad-test, identity and provenance receipts still being completed. No production repair or incident-resolution claim is made.
+Generated-output and browser evidence are required. Distinguish implemented, wired, locally validated, environment validated, deployed, repaired, and incident resolved. The current claim is implemented and forest environment validated for all nine collections, with completed browser, broad-test, identity and provenance receipts. The repository frontend lint command retains an unrelated preexisting conditional-expect error; changed GL modules pass their direct lint gate. No production repair or incident-resolution claim is made.
 
 ## Generated artifact validation and compatibility plan
 
@@ -43,18 +43,18 @@ Trace the requested collection through reloaded run association/configuration, g
 
 ## Success criteria
 
-- [ ] A current PortlandGroup member can open all nine linked collections; the seven-run current-condition map displays correct results and drilldown.
-- [ ] Every collection entry validates each requested run; unrelated private and mixed unauthorized collections are rejected. Downstream consumers preserve existing independent grants, including the confirmed ownerless legacy access, without a new data embargo.
-- [ ] Removal of membership ends group-derived access without requiring a process restart; independently granted access remains valid.
-- [ ] Public and ordinary single-run/BatchRunner dashboard behavior remains compatible; no runs become public as a workaround.
-- [ ] Old URLs retain selected variable, units, ranges, title, and location; generator loads empty and handles invalid submissions with actionable errors.
-- [ ] Missing optional phosphorus is handled explicitly; missing required artifacts cannot appear as a successful empty/zero-valued map.
-- [ ] Actual generated artifacts and all nine scenario links pass production-equivalent validation; authorized deployment and post-deploy recovery evidence are retained separately.
-- [ ] Independent correctness and security reviews have no unresolved medium/high findings; canonical docs and module docs reflect delivered behavior.
+- [x] A current PortlandGroup member can open all nine linked collections; the seven-run current-condition map displays correct results and drilldown.
+- [x] Every collection entry validates each requested run; unrelated private and mixed unauthorized collections are rejected. Downstream consumers preserve existing independent grants, including the confirmed ownerless legacy access, without a new data embargo.
+- [x] Removal of membership ends group-derived access without requiring a process restart; independently granted access remains valid.
+- [x] Public and ordinary single-run/BatchRunner dashboard behavior remains compatible; no runs become public as a workaround.
+- [x] Old URLs retain selected variable, units, ranges, title, and location; generator loads empty and handles invalid submissions with actionable errors.
+- [x] Missing optional phosphorus is handled explicitly; missing required artifacts cannot appear as a successful empty/zero-valued map.
+- [ ] Production deployment, live identity/mount acceptance and post-deploy recovery/observation evidence (M5). Forest artifacts and all nine scenario links are validated.
+- [x] Independent correctness and security reviews have no unresolved medium/high findings; canonical docs and module docs reflect delivered behavior.
 
 ## Security and review gates
 
-High impact: private-resource authorization, session/token transport, arbitrary run-list input, and query/file surfaces. [Implementation security review](artifacts/2026-10-12_implementation_security_review.md) and [implementation correctness review](artifacts/2026-10-12_implementation_correctness_review.md) close all high/medium code findings; final environment evidence remains pending. Accepted contract ancestor: `d75460acc`. Two independent contract reviews and the required ancestor commit preceded runtime edits under `docs/standards/contract-first-change-standard.md`. [Contract decision](artifacts/2026-10-12_contract_decision.md) records accepted intent and the resolved access matrix.
+High impact: private-resource authorization, session/token transport, arbitrary run-list input, and query/file surfaces. [Implementation security review](artifacts/2026-10-12_implementation_security_review.md) and [implementation correctness review](artifacts/2026-10-12_implementation_correctness_review.md) approve forest rollout readiness with no unresolved high/medium findings; production acceptance remains M5. Accepted contract ancestor: `d75460acc`. Two independent contract reviews and the required ancestor commit preceded runtime edits under `docs/standards/contract-first-change-standard.md`. [Contract decision](artifacts/2026-10-12_contract_decision.md) records accepted intent and the resolved access matrix.
 
 ## Hardening signals and recovery
 

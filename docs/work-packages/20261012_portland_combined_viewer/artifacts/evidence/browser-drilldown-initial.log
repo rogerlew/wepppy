@@ -1,0 +1,44 @@
+
+> weppcloud-static@0.1.0 smoke
+> playwright test --config=playwright.config.mjs combined-viewer.spec.js
+
+
+Running 1 test using 1 worker
+
+(node:3835806) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3835806) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance (27.8s)
+
+
+  1) [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance ──
+
+    Error: expect(page).toHaveTitle(expected) failed
+
+    Expected: "portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200"
+    Received: "Migration Status – portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200"
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toHaveTitle" with timeout 15000ms
+        19 × unexpected value "Migration Status – portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200"
+
+
+      143 |     const response = await page.goto(destination);
+      144 |     expect(response.status()).toBe(200);
+    > 145 |     await expect(page).toHaveTitle(runid);
+          |                        ^
+      146 |     await expect(page.locator('#wepp')).toBeVisible();
+      147 |     console.log('Authenticated run drilldown:', JSON.stringify({
+      148 |       runid, cfg: 'portland-snow', status: response.status(), title: await page.title(),
+        at /home/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/combined-viewer.spec.js:145:24
+
+    Error Context: test-results/combined-viewer-Portland-collection-browser-acceptance-runs0/error-context.md
+
+  1 failed
+    [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance ───
+
+To open last HTML report run:
+
+  npx playwright show-report

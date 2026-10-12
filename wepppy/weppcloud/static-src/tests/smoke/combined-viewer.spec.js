@@ -136,6 +136,26 @@ function url(item) {
 test('Portland collection browser acceptance', async ({ page, browser }, info) => {
   test.setTimeout(1800000);
   page.setDefaultTimeout(30000);
+  if (process.env.PCV_AUTH_MODE === 'drilldown') {
+    await login(page);
+    const runid = catalog.collections[0].ws[0].runid;
+    const destination = `${base}/weppcloud/runs/${runid}/portland-snow/`;
+    const response = await page.goto(destination);
+    expect(response.status()).toBe(200);
+    const migrationGate = (await page.title()).startsWith('Migration Status');
+    if (migrationGate) {
+      await page.getByRole('link', {name: 'Load Without Migrating', exact: true}).click();
+    }
+    await expect(page).toHaveTitle(runid);
+    await expect(page.locator('#wepp')).toBeVisible();
+    console.log('Authenticated run drilldown:', JSON.stringify({
+      runid, cfg: 'portland-snow', status: response.status(), title: await page.title(),
+      identity: 'restored dev-agent baseline; independent Admin grant',
+      migrationGate, usedExistingLoadWithoutMigrating: migrationGate,
+      weppSectionVisible: true,
+    }));
+    return;
+  }
   if (process.env.PCV_AUTH_MODE === 'audit') {
     const context = await browser.newContext({storageState: path.join(repo,'docker/secrets/pcv-member-session.json')});
     const auditPage = await context.newPage();

@@ -6,7 +6,7 @@
     "wepppy/weppcloud/routes/combined_watershed_viewer.py": "7cb18e865d25812255fbe228dc8da32d441d1200589751eeb36187c8984453b0",
     "wepppy/weppcloud/routes/locations.py": "10bf9af74a71484d0f130ec5e7f50fe575949dd25f41b51a56909ce87ab7963b",
     "wepppy/weppcloud/templates/bounds_ws_viewer.htm": "5917c5a9cfbf4c9d194b9660d48bce943383be79975bfe4c453b34fc65898e7a",
-    "wepppy/weppcloud/templates/combined_ws_viewer.htm": "34df385034f355c160c5ed80394738ce96226aea57320bc7f0d87944a4c1da08",
+    "wepppy/weppcloud/templates/combined_ws_viewer.htm": "785fccd5c2e51e8a2ee109d0c142222411da471aed9954afa4c531e45bf86aa0",
     "wepppy/weppcloud/templates/combined_ws_viewer_url_gen.htm": "0b17831b2976b71c3876c1a54e78dad00438b15363bdd8c36e9e43d2e19ce32b",
     "wepppy/weppcloud/templates/locations/portland/index.htm": "5104dcfca7938028a7e278fd4798983f64475a624c4e6e08a26aca9a2a6086bd",
     "wepppy/weppcloud/static/js/gl-dashboard/combined-viewer.js": "1d4849371b2ec9990f62cec00a1511fe5c62e0ecd5e1b547b132ecf87a16de6b",
@@ -14,5 +14,8 @@
     "wepppy/weppcloud/utils/portland_collections.py": "19b831093cc01099277b2409e4feccc3bbf32a248f9c2f09e97318b9c63eb5be",
     "wepppy/weppcloud/utils/portland_collections.json": "ba17fd8b1ff4b7f5ec4de11558ca0ded39af86b98d7f8734b58adf66f06db12c",
     "wepppy/weppcloud/static/js/gl-dashboard/map/controller.js": "9a47337685a5fb65dcbbd206ab3e87b0fe48893bcf9c5821fbfb5cd3654b4961"
-  }
+  },
+  "implementation_revision": "9c8293008",
+  "followup": "Static OpenStreetMap attribution link added after browser acceptance; no data/access/interaction logic changed.",
+  "implementation_base": "c1e919210"
 }
