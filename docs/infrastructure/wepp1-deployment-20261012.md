@@ -188,3 +188,35 @@ production remains a human browser check; endpoint and artifact checks do not
 claim that witness. Backup, restore rehearsal, rollback tags and operational
 logs remain retained outside git at the paths above. The migration target error
 and subsequent successful restore validation remain recorded in Progress.
+
+## Authorized one-time seed/backfill
+
+The operator subsequently requested seed/backfill on wepp1. Populate only the
+additive catalog from existing registrations and authoritative source files,
+using the existing seed/sweep services with at most 50 rows and two readers per
+batch. Preserve legacy reads and current producer/scheduler configuration:
+this request populates the snapshot but does not authorize read cutover or
+claim ongoing notification freshness. No project files or registrations change.
+Validate the initial 50, then continue bounded batches, retain source omission
+and transient-failure manifests, compare source values to SQL, and report final
+coverage. Existing fleet origin/mount evidence applies while identities remain
+unchanged; no worker restart or queue clearing is needed. Stop on unexpected
+SQL failures or stalled progress; retain committed batches for resumability.
+
+Completed 2026-10-12 07:44:02 UTC (00:44:02 America/Los_Angeles). The pilot
+seed/reconcile classified 50 rows and all 50 source comparisons matched.
+The continuation used 673 bounded sweeps through the same maintenance service,
+under the existing web runtime identity `1002:130`, without restarting services.
+All 33,699 registrations now have classified catalog rows: 14,767 ready,
+18,930 missing Ron sources and two invalid Ron sources. Pending, dirty,
+unreconciled and transient-failure counts are zero. Missing/invalid entries were
+classified, not repaired or deleted. Fifty comparisons sampled across the ready
+rows also matched, giving 100 successful comparison observations overall.
+
+Restricted host evidence in `/var/tmp/wepp1-deploy-20261012` includes
+`catalog-backfill.py`, `catalog-backfill.log`, `catalog-backfill.exit` (zero),
+`catalog-backfill-summary.json`, `catalog-omissions.json`, and
+`catalog-comparisons.json`. The manifest retains registration IDs, source states
+and bounded diagnostics, rather than raw source contents. Continuous catalog
+notifications/sweeps and read cutover remain unactivated; this backfill is a
+point-in-time snapshot, not proof of ongoing freshness or read-promotion readiness.
