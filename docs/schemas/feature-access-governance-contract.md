@@ -151,6 +151,18 @@ The Profile page provides the short PowerUser statement, the two yes/no answers,
 
 An administrative group page provides membership add/remove with a required reason, optional review/expiry fields, and history. It does not expose other users' audit notes to public viewers. Users can inspect their own group status and complete the internal acknowledgment without a second maintainer approval.
 
+After a successful current-version internal acknowledgment response, Profile
+must immediately replace the acknowledgment checkbox and submit button with
+“You have accepted this version.” Update any displayed current-membership
+acknowledgment status in place. No refresh link or second click is required.
+The confirmation remains accessible as a focused, politely announced status.
+Only a confirmed successful response permits this transition; failed requests
+retain the form and a retryable error. Already accepted versions render the same
+confirmation on initial load. This removes an unnecessary follow-up navigation
+after a completed save; it does not change consent, session/CSRF requirements,
+statement versioning, PowerUser requests, or administrative membership forms.
+Implementation conformance for this October 11 feedback amendment is pending.
+
 Restricted-feature renderers and dynamic sections must distinguish readable from actionable state. Disable or omit mutation controls with a clear reason, preserve accessible labels, and enforce the same denial server-side. Disabled JavaScript is presentation, not authorization. Newly exposed inspect-only restricted-feature reads must not initialize their optional controllers or execute restricted scientific analysis; unrelated anonymous functionality is unchanged.
 
 The complete surface inventory must cover direct actions and retained-result delivery through browse/download, query-engine/MCP, exports, archives, forks, child-run URLs and orchestration reads. Shared results remain readable regardless of feature maturity or internal reason. Mixed bundles and queries still obey existing resource privacy, sensitive-file and containment boundaries. Remove feature-derived read gates after the FA-02 checkpoint; do not lock a project merely because it contains a restricted feature.
