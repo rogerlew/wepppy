@@ -1,6 +1,6 @@
 # SA-01 validation
 
-Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy implementation: `a20089d63` plus the supported-input catalog correction below. Final broad Python result is pending.
+Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candidate: `e6004b118` (implementation `a20089d63` plus catalog correction). Final broad Python result is pending.
 
 ## Completed checks
 
@@ -9,6 +9,8 @@ Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy implementation:
 | `PYO3_PYTHON=/usr/bin/python3.12 cargo test -p wepp_interchange_rust` | 107 unit + 17 integration passed; includes three new kernel tests. |
 | `wctl run-pytest tests/nodb/test_soil_anisotropy.py tests/docker/unit/test_wepppyo3_interchange_startup_contract.py` | 44 passed, 44.01s. |
 | Corrected Jinja eligibility/read-only tests | 4 passed, 203 deselected. |
+| Explicit crossing-horizon generated-file cases | 2 passed, 34 deselected, 9.00s; added after the broad run collected its tests, run separately. |
+| Existing advanced-options input-catalog contract test | 1 passed after both keys were registered. |
 | `wctl run-npm test` | 968 tests, 118 suites passed. |
 | `SMOKE_SOIL_ANISOTROPY=true wctl run-npm smoke soil-anisotropy.spec.js` | 1 passed, 17.5s; retained browser receipt, log and screenshot. |
 | `wctl run-stubtest wepppy.wepp.soils.utils.wepp_soil_util` | Passed. |

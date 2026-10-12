@@ -167,6 +167,23 @@ def test_native_values_reach_all_prepared_ofes(tmp_path, version):
 
 
 @pytest.mark.parametrize('uploaded', [False, True])
+def test_crossing_horizon_receives_lower_value_without_splitting(tmp_path, uploaded):
+    from wepppy.wepp.soils.utils import WeppSoilUtil
+    source = _soil_source(tmp_path)
+    soil = WeppSoilUtil(str(source))
+    for ofe in soil.obj['ofes']:
+        ofe['horizons'][1]['solthk'] = 600
+    soil.write(str(source))
+    original = source.read_bytes()
+    _mofe_files(tmp_path)
+    dst = _prepare(tmp_path, source, options=(25, 3), uploaded=uploaded)
+    for ofe in WeppSoilUtil(str(dst)).obj['ofes']:
+        assert [h['solthk'] for h in ofe['horizons']] == [100, 600, 800]
+        assert [h['anisotropy'] for h in ofe['horizons']] == [25, 3, 3]
+    assert source.read_bytes() == original
+
+
+@pytest.mark.parametrize('uploaded', [False, True])
 def test_clipping_precedes_classification_and_blank_retains_zero(tmp_path, uploaded):
     from wepppy.wepp.soils.utils import WeppSoilUtil
     source = _soil_source(tmp_path)
