@@ -28,6 +28,39 @@ Lemhi was evaluated as a possible host for I-CREWS WEPPcloud workers and found t
 
 Full feasibility analysis: [lemhi-rq-workers.md](lemhi-rq-workers.md). Summary justification: [procurement-request.md § Lemhi (C3+3) Feasibility Assessment](procurement-request.md#lemhi-c33-feasibility-assessment).
 
+## Deployment Decisions — October 12, 2026
+
+The servers have arrived. Roger selected Ubuntu Server 26.04 LTS hosts with
+RKE2 and GitOps, using the 26.04.1 installation image and current updates.
+This starts the new deployment on the current LTS instead of installing an
+older release with an earlier upgrade requirement. Ubuntu 26.04 is listed in
+the [RKE2 1.35 support matrix](https://www.suse.com/suse-rke2/support-matrix/all-supported-versions/rke2-v1-35/);
+pin the exact RKE2 version during deployment. See the
+[Ubuntu release list](https://ubuntu.com/project/docs/release-team/list-of-releases/).
+The deployment reuses the WEPPcloud Kubernetes work in `open-wepp-org`. Ubuntu is the
+selected host baseline rather than a SELinux-oriented distribution; RCDS
+support for RHEL with SELinux has not been established. Both hosts will have
+ZFS storage and NFS shares, providing a shared-access mechanism in addition to
+local storage.
+
+The absence of a fault-tolerant embedded-etcd control plane with only two
+servers is accepted for this deployment. Exact control-plane placement,
+run-data ownership, NFS mount topology, and recovery procedures remain to be
+specified; automatic failover is not established by this decision.
+
+These decisions supersede the Compose deployment choice below and the earlier
+claims of uninterrupted operation after either host fails. The remaining
+May plan is historical planning context pending a topology revision.
+
+The operator-supplied Exxact quote 177336-4 (July 31, 2026) specifies two
+TensorEX TS2-104170012 systems, each with dual onboard 10GBase-T RJ45 ports,
+a dedicated management port, a 960 GB M.2 NVMe boot drive, and eight 22 TB
+SATA data drives. This supersedes the earlier procurement document's
+1 GbE, 480 GB boot-drive, and SAS-drive specifications. Verify the installed
+inventory at handoff. A direct private 10 GbE link for NFS and replication
+is proposed for discussion with Benji; cabling and subnet allocation remain
+unconfirmed.
+
 ## Deployment Plan
 
 The I-CREWS deployment uses the same operating pattern as the existing WEPPcloud production stack: Docker Compose, Caddy reverse proxy, Redis-backed RQ job queues, stateless workers reading and writing local storage. No new application architecture is required.
