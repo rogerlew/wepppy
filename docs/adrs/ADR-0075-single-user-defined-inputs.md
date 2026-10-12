@@ -2,6 +2,11 @@
 
 ## Status
 
+CBEXEC-01 (2026-10-12) amends the initial binary pin: compatible installed
+releases declare native-input support in paired sidecars after equivalent
+reader acceptance. See [executable selection](../schemas/wepp-executable-selection-contract.md).
+This preserves all input-format, geometry and excluded-feature restrictions.
+
 Accepted product direction, 2026-09-25; independent reviews and local native
 acceptance passed for SUDI-01, SUDI-02 and SUDI-03. Not deployed.
 

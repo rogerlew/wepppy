@@ -441,8 +441,8 @@ route tokens. The initial matrix is:
 | Locale | `continental-us`: explicit `[general] locales = ["us"]` and existing continental-US units/map behavior |
 | DEM | `usgs-ned1-2024`: `dem_db = "ned1/2024"`, default 30 m; `usgs-ned13-2022`: `dem_db = "ned13/2022"`, default 10 m |
 | Delineation | `topaz`; `wbt` |
-| Representation | `single-ofe`: `[wepp] multi_ofe = false`; `multiple-ofe`: `[wepp] multi_ofe = true`, exposed by Builder V1 only with `wbt` and `wepp_260803` |
-| WEPP binary | Every value returned by `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()`; `wepp_260803` is the default and the only value eligible for Multiple OFE |
+| Representation | `single-ofe`: `[wepp] multi_ofe = false`; `multiple-ofe`: `[wepp] multi_ofe = true`, requires `wbt` and paired release-sidecar MOFE support under CBEXEC-01 |
+| WEPP binary | Every value returned by `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()`, filtered by required release capabilities; `wepp_260803` remains the default |
 | Soils | `ssurgo-gnatsgso-2025`: `soils_db = "ssurgo/gNATSGSO/2025"`, existing gridded mode |
 | Land use | `nlcd-2019`: `landuse_db = "nlcd/2019"`, existing gridded mode and general mapping |
 | Climate | `vanilla_cligen`; `prism_stochastic`; `observed_daymet`; `observed_gridmet` |
@@ -451,7 +451,8 @@ route tokens. The initial matrix is:
 
 The supported Single OFE tuples are the cross-product of two DEMs, both
 delineation backends, and every binary returned by the canonical provider on
-that deployment. WBT, Multiple OFE, and `wepp_260803` adds two tuples. Provider
+that deployment. Each provider binary declaring paired MOFE support adds WBT
+Multiple OFE tuples for both DEMs under CBEXEC-01. Provider
 output is deployment availability, not a promise that different hosts expose
 identical historical binaries. Dataset and binary identifiers MUST be verified
 against deployed services, mounts, and role-resolved executables at the Forest
@@ -632,6 +633,11 @@ clients may continue to parse the compatibility response but cannot create
 WP12C runs. An absent locale graph, an unknown graph key, or a dataset selected
 from a different locale MUST fail before run creation or mutation.
 
+[CBEXEC-01](wepp-executable-selection-contract.md) governs release-sidecar
+capabilities and the live executable-selection exception for existing projects.
+It replaces the original release-name MOFE pin without changing other project
+capability authority. Implementation conformance is pending its checkpoint.
+
 The Builder MUST obtain its WEPP binary choices from
 `get_linux_wepp_bin_opts()` when loading the runtime registry, without a second
 hard-coded binary allowlist. It MUST preserve the provider's complete unique
@@ -649,7 +655,7 @@ regular executable rather than a symlink. A missing, unreadable, non-regular,
 or non-executable role target invalidates Builder binary availability
 atomically; the loader MUST NOT omit only that value.
 
-The complete unique provider output and every component target identity MUST
+The complete unique provider output, effective release-sidecar capabilities and every component target identity MUST
 participate in the opaque `registry_revision`. If either changes between
 description and creation, creation MUST return the standard stale-schema 409
 without creating a project, and the user must reload and review the new list.
@@ -762,10 +768,12 @@ help but MUST NOT replace understandable labels.
 - Selecting a DEM MUST set and display that DEM's associated default cell size.
 - Backend, representation, WEPP binary, and mod choices MUST update dependent
   availability when their registered constraints require it. Multiple OFE MUST
-  be available only with WhiteboxTools and `wepp_260803`. Changing the backend
-  from WBT MUST visibly clear Multiple OFE. Changing the binary away from
-  `wepp_260803` MUST visibly clear Multiple OFE. Selecting Multiple OFE MUST
-  visibly select its sole compatible binary rather than retain an invalid value.
+  be available only with WhiteboxTools and paired sidecar MOFE support under
+  CBEXEC-01. Changing the backend from WBT or selecting a binary without that
+  support MUST visibly clear Multiple OFE. Switching between MOFE-capable
+  releases MUST preserve Multiple OFE. Selecting Multiple OFE MUST retain the
+  current binary when compatible; any necessary replacement must be visible
+  and explained, never a forced switch to one hard-coded release.
 - The UI MUST NOT merely hide an invalid submitted value and allow it to remain
   in the payload.
 - When an upstream change invalidates a downstream selection, the UI MUST clear
@@ -1204,6 +1212,11 @@ never redefined or removed. Unknown self-consistent graphs fail closed.
 The structural payload contains the locale ID; every non-runtime axis; all
 climate, landuse, soil, mod, and representation relations; all per-dataset
 method defaults; and normalized allowed delineation/representation pairs. It
+derives those geometry pairs independently of executable feature availability
+under CBEXEC-01, including WBT/Multiple OFE when those axes exist even if no
+current binary has a compatible tuple. Existing accepted payload bytes remain
+unchanged; no structural identity is redefined.
+It
 MUST exclude project selection defaults in `capability_defaults`,
 `provider_revision`, `wepp_binaries`, `wepp_binary_revisions`, and the binary
 member of model tuples. These exclusions distinguish immutable envelope/method-
@@ -1226,8 +1239,16 @@ deployment, and Forest evidence before its refresh writer is exposed.
 The WEPP provider axis remains dynamic and is validated by immutable shape and
 policy: stable binary ID grammar, role-resolved digest grammar, exhaustive
 binary revision keys, Single-OFE TOPAZ/WBT tuples for every stored binary, and
-exactly one Multiple-OFE tuple, `wbt|multiple-ofe|wepp_260803`. A stored graph
-does not need to match the current provider's binary population.
+zero or more Multiple-OFE tuples whose backend is WBT and whose binary belongs
+to the stored axis. Historical graphs containing only the260803 MOFE tuple
+remain valid. Saved tuple parsing does not consult live sidecars; current
+Builder composition and runtime new selections enforce CBEXEC-01 declarations.
+A stored graph does not need to match the current provider's binary population.
+Under CBEXEC-01 a deployment without declared MOFE support retains ordinary
+Single-OFE availability: its geometry axes remain intact, but Multiple OFE has
+no selectable executable tuple. Structural identity uses the supported
+backend/representation geometry independently of executable availability;
+TOPAZ/single, WBT/single and WBT/multiple remain the accepted geometry pairs.
 
 ## 9. Capability Contract
 
@@ -1332,7 +1353,8 @@ that `mod_conflicts` MAY contain an empty list. Each per-source default MUST be
 a member of that source's adjacency list. Relation sections MUST reject orphan
 keys, missing keys, duplicate values, unknown axes, and values outside their
 axes. Every model tuple member MUST exist in its axis, every advertised axis
-value MUST participate in at least one valid tuple where applicable, and the
+value MUST participate in at least one valid tuple where applicable, except
+that Multiple OFE may have no tuple when no binary declares support (CBEXEC-01). The
 global defaults MUST identify one advertised valid tuple. Stable IDs MUST match
 the closed ASCII grammar `[a-z][a-z0-9_-]{0,127}`; therefore `:` and `|` cannot
 occur in them. Mod relation tokens use the closed `<axis>:<stable-id>` grammar.
@@ -1372,6 +1394,12 @@ rejected before mutation or enqueue even when present in the project-wide
 landuse-method union.
 
 For flattened projects:
+
+The following stored-authority rules apply to all non-binary axes. CBEXEC-01
+explicitly exempts executable availability: UI, submission and schema surfaces
+use the current installed compatible binary provider while preserving stored
+backend/representation geometry. Creation-time executable identity remains
+provenance and MUST NOT pin future reruns to a stale installed-binary list.
 
 - UI option lists MUST be derived from the resolved capability section.
 - Server mutation/build endpoints MUST validate new selections against the same

@@ -1,5 +1,15 @@
 # WEPP run input contract
 
+## Executable selection (CBEXEC-01)
+
+[WEPP executable selection](wepp-executable-selection-contract.md) governs
+current installed-release choices for Config Builder reruns. New selections
+must satisfy paired sidecar capabilities; stored creation-time binary lists
+do not block newer releases. Omission preserves the current choice. Validation
+precedes mutation/enqueue, and saved selection survives normal NoDb reload.
+No automatic rerun, executable-default change or project-config migration.
+Implementation conformance is pending.
+
 ## kslast omission
 
 Accepted and Forest conformance validated 2026-09-19; production rollout is

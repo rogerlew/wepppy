@@ -26,13 +26,15 @@ not leak into legacy, preset or unchecked authority. Refresh preserves the flag,
 source metadata and policy, including graph relations and config congruence.
 No existing-project conversion or runtime flag-toggle interface is introduced.
 
-Initial checked-project binary support is `wepp_260803`, the current Builder
-default, with both vendored roles identified by their release sidecars (source
-commit `f24c957e3633898e0fd4cbbea5ae08c781f29dba`). Checked review/create rejects
-other binaries with supported-binary guidance; the stored graph and runtime
-selection gates preserve this restriction. Unchecked/legacy binary choices are
-unchanged. Additional binaries require equivalent native-reader certification,
-not name/date inference. Validate that each prepared hillslope has at most32
+Initial checked-project binary support was `wepp_260803` (source commit
+`f24c957e3633898e0fd4cbbea5ae08c781f29dba`). CBEXEC-01 replaces that name pin
+with paired `features.single_user_defined_inputs_supported=true` release
+declarations under [WEPP executable selection](wepp-executable-selection-contract.md).
+New selections use currently installed certified releases, including261010
+after native-reader acceptance, without refreshing stored project configuration.
+Additional binaries require equivalent native-reader certification and explicit
+sidecars, never name/date inference. Non-binary restrictions remain unchanged.
+Implementation conformance is pending. Validate that each prepared hillslope has at most32
 OFEs (this hillslope role's mxplan); report unsupported topology before execution
 without silently merging/truncating OFEs. Preserve supported non-buffer geometry.
 

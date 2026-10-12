@@ -2,6 +2,13 @@
 
 ## Scope
 
+Release-sidecar MOFE and uploaded-input compatibility declarations follow
+[CBEXEC-01](schemas/wepp-executable-selection-contract.md). Metadata-only remints
+verify binary identity and preserve original build provenance; they are not
+new executable builds. Sidecar capability changes must participate in Builder
+registry freshness. The release generator on wepp-forest's default branch is
+the source of vendored declarations.
+
 Lifecycle policy for vendored watershed/hillslope binaries in `wepp_runner/bin`
 and the Linux CLIGEN 5.3.2 executable in
 `wepppy/climates/cligen/bin/cligen532`.
