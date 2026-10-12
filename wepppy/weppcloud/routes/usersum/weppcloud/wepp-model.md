@@ -5,7 +5,7 @@
 The University of Idaho maintains the `wepp-forest` fork of WEPP. These reports
 describe that fork, not an upstream USDA WEPP release:
 
-- [WEPP 261010 release notes, revision 1 (PDF)](/weppcloud/static/reports/wepp/release-notes/wepp_261010/wepp_261010_release-notes-r1.pdf): changes after `wepp_260803`, including surface-return peaks, erosion inputs, PASS components, channel-source handling and validation. [Publication manifest](/weppcloud/static/reports/wepp/release-notes/wepp_261010/publication-manifest-r1.json).
+- [WEPP 261010 release notes, revision 2 (PDF)](/weppcloud/static/reports/wepp/release-notes/wepp_261010/wepp_261010_release-notes-r2.pdf): changes after `wepp_260803`, including surface-return peaks, erosion inputs, PASS components, channel-source handling and validation. Revision 2 adds Topanga/Rattlesnake 2- and 5-year runoff, sediment and peak-flow comparisons. [Publication manifest](/weppcloud/static/reports/wepp/release-notes/wepp_261010/publication-manifest-r2.json). [Previous revision 1](/weppcloud/static/reports/wepp/release-notes/wepp_261010/wepp_261010_release-notes-r1.pdf).
 - [Topanga small-mutation census, version 0.2 (PDF)](/weppcloud/static/reports/investigations/topanga-small-mutation-census-report.pdf): October 6, 2026 investigation of peak sensitivity and earlier remediation candidates. Its unresolved candidate results are historical context, not final `wepp_261010` validation.
 
 ## WEPPpy Technical Briefs
