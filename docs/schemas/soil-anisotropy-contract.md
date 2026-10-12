@@ -1,6 +1,6 @@
 # Soil anisotropy advanced options (SA-01)
 
-Status: accepted contract checkpoint; implementation conformance pending.
+Status: implemented and artifact-validated on forest; production rollout pending. Broad gate results and limitations are retained in the work package.
 
 ## User inputs and eligibility
 

@@ -12,7 +12,8 @@ Users preparing MOFE models with hourly water balance/deep seepage can optionall
 - [x] M0: Finalize horizon semantics, canonical contract/ADR and two independent reviews; commit standalone checkpoint.
 - [x] M1: Add and test Rust in-memory anisotropy kernel, rebuild affected native extension.
 - [x] M2: Wire saved inputs, eligibility, single-read preparation and UI; add regression tests.
-- [ ] M3: Validate actual generated files, source/read-write parity, browser controls and broad gates; independent final review and handoff.
+- [x] M3a: Validate generated files, source/read-write parity, live browser/API controls and independent implementation review.
+- [x] M3b: Execute broad Python gate, investigate its unrelated timing failure, complete remaining coverage and retain final evidence with limitations.
 
 ## Surprises & Discoveries
 
@@ -20,13 +21,17 @@ Current advanced soil preparation is Python `WeppSoilUtil`, not Rust. Both `prep
 
 A forest service restart exposed the required native startup SHA pin: the new binary was rejected until `docker/wepppyo3-interchange-preflight.py` was paired with its hash. The affected idle services were restored after updating the pin. This is part of the release, not a bypass. A template regression check also exposed an existing Jinja loop-scope bug dropping `extra_control_class`; the numeric macro now preserves that documented argument so project read-only applies. Independent review caught and closed upload error translation and concurrent read-only/hourly-toggle issues.
 
+The full suite caught omitted supported-input catalog entries even though the runtime parser already accepted the fields. Both keys are now declared and the existing contract test passes. The disposable forest fixture has bounded synthetic terrain/climate descriptors, not a complete watershed: real invalid-input HTTP checks therefore use the shared prep-only handler; the Run request is intercepted only for serialization. Existing READONLY changes enqueue manifest jobs, so browser validation must wait for completion before reversing them.
+
 ## Decision Log
 
 2026-10-12, operator/Codex: add optional controls with the requested ranges and MOFE/hourly eligibility. Keep defaults unchanged. Reuse the owned native extension and apply a narrow in-memory operation instead of porting the entire parser. Eliminate evidenced duplicate source reads without moving historical parameter formulas into a new implementation. Bottom-depth classification is the stated implementation assumption; no operator correction was received during discovery. It avoids changing layer geometry.
 
 ## Outcomes & Retrospective
 
-M0–M2 are implemented on forest. Contract ancestor `a94028e78` has both required reviews. Actual generated two-OFE soils have 25/25/3 at 100/500/800 mm, unchanged source bytes and one source read/one destination write. Final browser and broad gates remain in progress; no production deployment or push.
+Runtime candidate `e6004b118` and native `822b6fe` are implemented on forest. Contract ancestor `a94028e78` has both required reviews; final code/browser review has no open SA-01 findings. Actual generated two-OFE soils have 25/25/3 at 100/500/800 mm, unchanged source bytes and one source read/one destination write. Browser/API/download acceptance passes. Test-only commit `2da8e9298` additionally verifies crossing horizons without splitting (two passes after broad collection). The broad Python command recorded 10,461 passes/126 skips and one unchanged run-catalog latency failure (58.39 ms added p95 against 50 ms); the entire failed module and remaining files then passed (207 cases). The failure cause is unproven and the original gate is not represented as clean. Forest acceptance is complete with documented lint/typing/isolation limitations; no production deployment or push.
+
+An additional bounded job executed the existing soil-preparation worker on forest's actual default RQ queue. Final output bytes equal direct preparation, and normal worker ownership/permissions and unchanged source are retained in `artifacts/rq-native-validation.json`. No new production enqueue site, queue dependency or model execution was introduced.
 
 ## Context and Orientation
 

@@ -1,6 +1,6 @@
 # MOFE soil anisotropy advanced options
 
-Status: implemented on forest; final acceptance in progress. Owner: requesting operator; implementer: Codex.
+Status: forest implementation and acceptance complete; rollout pending. Owner: requesting operator; implementer: Codex. See [validation](artifacts/validation.md) for the broad-run timing failure, successful remaining-coverage rerun and existing lint/typing limitations.
 
 Add optional upper (1–100) and lower (1–10) horizon anisotropy overrides in WEPP Advanced Options / Soil Options. Editing requires MOFE plus hourly water balance/deep seepage (`run_wepp_ui`). Warn that values above 10 can cause numerical instabilities. Preserve existing soil values when unset. Native Rust owns the new depth classification and value validation, using the already parsed in-memory soil without another file pass.
 

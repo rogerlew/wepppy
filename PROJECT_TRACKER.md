@@ -7,7 +7,7 @@
 
 ## Purpose
 
-In progress: [MOFE soil anisotropy advanced options](docs/work-packages/20261012_soil_anisotropy/package.md) — Rust overrides and single-read preparation implemented on forest; browser/artifact acceptance passes, final broad gate pending.
+Forest complete: [MOFE soil anisotropy advanced options](docs/work-packages/20261012_soil_anisotropy/package.md) — Rust overrides and single-read preparation pass browser/live-worker artifact acceptance; broad-run catalog timing failure passes on rerun with remaining coverage. Validation limitations retained; paired Python/native rollout pending.
 
 Forest ready for rollout: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)
 — existing PortlandGroup access, bounded per-run authorization, legacy artifact

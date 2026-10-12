@@ -1,0 +1,26 @@
+{
+  "job_id": "sa-anisotropy-2b884af8a0bc4215915fd8910a90faa4",
+  "status": "finished",
+  "worker_name": "98fd830d4cf84dc091817a886e2eff16",
+  "origin": "default",
+  "function": "wepppy.nodb.core.wepp.prep_multi_ofe_hillslope",
+  "output_uid": 1000,
+  "output_gid": 993,
+  "output_mode": "0o644",
+  "ratios": [
+    [
+      25.0,
+      25.0,
+      3.0
+    ],
+    [
+      25.0,
+      25.0,
+      3.0
+    ]
+  ],
+  "prepared_sha256": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828",
+  "source_sha256": "7f6efd4c102c0b17aafd85b448dfebf27bbf31ce186576358f07ac86b6052880",
+  "byte_identical_to_direct_prep": true,
+  "scope": "Existing prep_multi_ofe_hillslope on actual forest default RQ worker; no model execution."
+}

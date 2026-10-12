@@ -1,6 +1,6 @@
 # SA-01 validation
 
-Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candidate: `e6004b118` (implementation `a20089d63` plus catalog correction). Final broad Python result is pending.
+Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candidate: `e6004b118` (implementation `a20089d63` plus catalog correction); `2da8e9298` adds crossing-horizon tests. Forest acceptance is complete with the gate limitations below; no production rollout or push.
 
 ## Completed checks
 
@@ -10,6 +10,8 @@ Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candida
 | `wctl run-pytest tests/nodb/test_soil_anisotropy.py tests/docker/unit/test_wepppyo3_interchange_startup_contract.py` | 44 passed, 44.01s. |
 | Corrected Jinja eligibility/read-only tests | 4 passed, 203 deselected. |
 | Explicit crossing-horizon generated-file cases | 2 passed, 34 deselected, 9.00s; added after the broad run collected its tests, run separately. |
+| `wctl run-pytest tests --maxfail=1` | 10,461 passed, 126 skipped, 1 failed in 2647.41s; unchanged run-catalog timing assertion exceeded its limit. Retained in `python-gate.json`. |
+| Failed module and all remaining collected files | 207 passed, 8 warnings in 61.53s; exact selection in `python-gate-selection.json`. Includes successful rerun of the timing assertion. |
 | Existing advanced-options input-catalog contract test | 1 passed after both keys were registered. |
 | `wctl run-npm test` | 968 tests, 118 suites passed. |
 | `SMOKE_SOIL_ANISOTROPY=true wctl run-npm smoke soil-anisotropy.spec.js` | 1 passed, 17.5s; retained browser receipt, log and screenshot. |
@@ -17,6 +19,7 @@ Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candida
 | `wctl check-test-stubs` | Passed. |
 | Controller build via `wctl exec weppcloud python /workdir/wepppy/wepppy/weppcloud/controllers_js/build_controllers_js.py` | Passed; generated bundle contains the new eligibility controller. |
 | Forest native startup preflight | Passed; exact release origin and SHA agree with `native-build.json`. |
+| Actual forest default RQ worker preparation | Passed; `rq-native-validation.json` records identical prepared bytes, unchanged source and normal UID/GID/mode. |
 | Changed broad-exception enforcement | Passed; existing prep-service allowlist line numbers moved by three, no new catch. |
 | Package/contract/ADR/user/developer documentation lint | Passed. |
 
@@ -24,9 +27,13 @@ Native commit: `822b6fe`. Contract ancestor: `a94028e78`. WEPPpy runtime candida
 
 `forest-validation.py` invokes real locked Wepp persistence, the actual `_prep_multi_ofe` method and worker, Rust kernel and soil writer using bounded synthetic terrain/climate descriptors on a disposable forest project. `forest-validation.json` records two OFEs with 25/25/3 at 100/500/800 mm, exactly one source read and one destination write, and unchanged source SHA. `prepared-p1.sol` is the output. Regression tests additionally cover ordinary/uploaded/symbolic preparations, formats 7778/9001/9002/9003/9005, clipping, unsupported formats, clearing, invalid values and effective-hourly overrides.
 
+`rq-native-validation.py` submits the existing `prep_multi_ofe_hillslope` function to forest's default queue with effective saved overrides and a 120-second timeout. `rq-native-verify.py <job_id>` checks terminal success, parses every OFE, compares the complete file bytes with direct preparation, verifies the original source SHA, and records ownership. Job `sa-anisotropy-2b884af8a0bc4215915fd8910a90faa4` passed under the real worker, output UID 1000/GID 993/mode 0644. This exercises the live worker/native/filesystem boundary; it does not execute the WEPP model. The first probe passed numeric checks but differed only in the provenance comment (`25` versus saved `25.0`); the retained submit script now reads the real effective saved values and the final bytes match exactly.
+
 The browser uses the existing dev-agent account without role changes. It proves visible/editable eligible inputs, actual Run-form serialization, specific HTTP 400 rejection of out-of-range/inactive overrides through the shared prep-only payload handler, unchanged saved values after reload, real hourly saves and reload, real asynchronous READONLY jobs, non-MOFE disabled controls, and normal project download whose SHA equals the preparation artifact. The Run enqueue request is intercepted: this does not claim a model execution or full hydrologic validation. Original project inputs and production runs are untouched.
 
 ## Limits and resolved validation friction
+
+The final broad Python command was not clean: the run-catalog READONLY notification test measured 58.39 ms added p95 latency against a 50 ms limit. Independent review confirmed that the test and measured path are unchanged by SA-01 and do not exercise anisotropy. The entire failing module plus every remaining collected file passed on rerun (207 cases), completing remaining coverage without changing code or thresholds. This does not establish the latency cause or erase the original failure. Two crossing-horizon cases added after broad collection also passed separately. No further full-suite repetition was necessary for unchanged runtime code.
 
 `wctl run-npm lint` remains blocked by the preexisting `controllers_js/__tests__/climate.test.js:300` conditional-expect error. The changed controller/tests produce no lint error. Core stubtest cannot complete because of existing NoDb/third-party typing errors; the new fixed-length tuple error was corrected, and the final core run reports no anisotropy helper error. Do not represent either broad gate as passing.
 

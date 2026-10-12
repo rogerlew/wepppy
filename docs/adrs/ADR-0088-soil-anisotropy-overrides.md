@@ -1,6 +1,6 @@
 # ADR-0088: Optional depth-specific soil anisotropy
 
-Status: accepted contract checkpoint; implementation pending.
+Status: accepted and implemented on forest; production rollout pending.
 
 ## Context and decision provenance
 
@@ -20,6 +20,6 @@ The requested capability supports explicit user parameter experiments without ch
 
 ## Evidence and consequences
 
-[SA-01](../schemas/soil-anisotropy-contract.md) is normative; [work package](../work-packages/20261012_soil_anisotropy/package.md) retains discovery, reviews and actual generated-output evidence. Existing functions are `prep_soil`, `prep_multi_ofe_hillslope`, and `WeppSoilUtil`. Native runtime conformance remains pending until a rebuilt module is exercised from forest.
+[SA-01](../schemas/soil-anisotropy-contract.md) is normative; [work package](../work-packages/20261012_soil_anisotropy/package.md) retains discovery, reviews and actual generated-output evidence. Existing functions are `prep_soil`, `prep_multi_ofe_hillslope`, and `WeppSoilUtil`. Forest direct and live RQ preparation exercise the rebuilt native module and produce identical soil files with unchanged sources. Browser checks verify eligibility, validation errors and normal output download. These establish software conformance, not hydrologic stability.
 
 Risk: changed horizontal/vertical conductivity ratios can change model results or destabilize integration. Warn without clamping accepted values. Validate all values and format compatibility before writing a prepared soil. Clearing overrides and rebuilding restores original source ratios. Rollback must pair Python and native code; no original soil mutation or production migration is authorized.

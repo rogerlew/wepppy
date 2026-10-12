@@ -1,0 +1,28 @@
+{
+  "runtime_candidate": "e6004b118",
+  "test_only_followup": "2da8e9298",
+  "native_revision": "822b6fe",
+  "command": "wctl run-pytest tests --maxfail=1",
+  "exit_code": 1,
+  "passed": 10461,
+  "failed": 1,
+  "skipped": 126,
+  "warnings": 5494,
+  "seconds": 2647.41,
+  "failed_node": "tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[readonly]",
+  "baseline_p95_seconds": 0.0003441370208747685,
+  "catalog_p95_seconds": 0.05873387499013916,
+  "added_p95_seconds": 0.05838973796926439,
+  "maximum_added_p95_seconds": 0.05,
+  "review": "Measured path and its test are unchanged by SA-01; cause of latency excess is not established.",
+  "remaining_coverage_selection": "python-gate-selection.json",
+  "crossing_horizon_cases": "Two additional cases added after full collection passed separately.",
+  "remaining_coverage_result": {
+    "exit_code": 0,
+    "passed": 207,
+    "warnings": 8,
+    "seconds": 61.53,
+    "includes_failed_module": true,
+    "includes_all_remaining_collected_files": true
+  }
+}
