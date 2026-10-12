@@ -7,6 +7,8 @@
 
 ## Purpose
 
+In progress: [MOFE soil anisotropy advanced options](docs/work-packages/20261012_soil_anisotropy/package.md) — optional depth-specific Rust overrides and soil-preparation I/O verification; contract checkpoint in preparation.
+
 Forest ready for rollout: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)
 — existing PortlandGroup access, bounded per-run authorization, legacy artifact
 preparation, and Deck.gl collection/generator repair implemented after reviewed

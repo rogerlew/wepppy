@@ -287,3 +287,13 @@ opted-in projects; retain their source/config archives and restore compatible co
 before processing them. Do not silently reinterpret mode5 as an older mode.
 
 User, operator, and developer usage guidance: [Single User-Defined inputs](../dev-notes/single-user-defined-inputs.md).
+
+## Optional MOFE anisotropy exception (SA-01)
+
+[SA-01](soil-anisotropy-contract.md) permits explicitly requested bounded
+per-horizon anisotropy overrides on prepared copies of eligible7778/9002 inputs.
+Unset overrides preserve supplied values. Uploaded7777 and2006-family inputs
+retain their version/profile fields and cannot accept per-horizon overrides;
+fail explicitly without migration. Original uploads remain unchanged. Native
+validation and parsing share one source read. All other SUDI requirements remain
+in force; this exception does not advance unrelated SUDI milestones.

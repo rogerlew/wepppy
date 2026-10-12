@@ -123,3 +123,11 @@ contrast selection, tracked-job conflicts, contrast batching and dependency
 serialization remain the aggregate resource controls. Validate actual
 serialized jobs and their `job_info` tree in a disposable real Redis queue, then
 remove and verify removal of every validation job and queue.
+
+## Soil anisotropy (SA-01)
+
+[Soil anisotropy advanced options](soil-anisotropy-contract.md) defines optional
+upper/lower overrides, omission/clearing, MOFE/hourly eligibility, finite bounds
+and prepared-artifact requirements. Validate submitted overrides before other
+parser mutations. No other input default, routine toggle, authorization or
+persistence behavior changes. Implementation conformance pending its checkpoint.
