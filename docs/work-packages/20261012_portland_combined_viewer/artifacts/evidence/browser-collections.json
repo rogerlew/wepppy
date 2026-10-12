@@ -1,0 +1,218 @@
+[
+  {
+    "title": "Portland Current Conditions",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 10352.32,
+        "Subrunoff Volume": 5631.65,
+        "Baseflow Volume": 222874.32,
+        "Soil Loss": 0,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 0,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.17,
+        "Particulate Pollutant": 0,
+        "Total Pollutant": 1.17,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_CurCond.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_CurCond.202203.cl532.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_CurCond.202203.cl532.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_CurCond.202203.cl532.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_CurCond.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_CurCond.202203.cl532.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Current+Conditions&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland Current Conditions GRIDMET",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_CurCond.202203.cl532_gridmet.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 105480.24,
+        "Subrunoff Volume": 20014.47,
+        "Baseflow Volume": 280147.73,
+        "Soil Loss": 25.7,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 25.76,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.8,
+        "Particulate Pollutant": 0.03,
+        "Total Pollutant": 1.82,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_CurCond.202203.cl532_gridmet.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_CurCond.202203.cl532_gridmet.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_CurCond.202203.cl532_gridmet.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_CurCond.202203.cl532_gridmet.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_CurCond.202203.cl532_gridmet.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_CurCond.202203.cl532_gridmet.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_CurCond.202203.cl532_gridmet.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Current+Conditions+GRIDMET&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland Current Conditions Future Climate",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_CurCond.202203.cl532_future.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 140644.52,
+        "Subrunoff Volume": 23824.6,
+        "Baseflow Volume": 270470.94,
+        "Soil Loss": 34.11,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 34.13,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.87,
+        "Particulate Pollutant": 0.03,
+        "Total Pollutant": 1.9,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_CurCond.202203.cl532_future.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_CurCond.202203.cl532_future.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_CurCond.202203.cl532_future.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_CurCond.202203.cl532_future.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_CurCond.202203.cl532_future.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_CurCond.202203.cl532_future.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_CurCond.202203.cl532_future.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Current+Conditions+Future+Climate&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland SimFire - Eagle",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_SimFire_Eagle.202203.cl532.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 36948.37,
+        "Subrunoff Volume": 2916.21,
+        "Baseflow Volume": 216437.26,
+        "Soil Loss": 25019.17,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 25019.07,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.2,
+        "Particulate Pollutant": 25.02,
+        "Total Pollutant": 26.22,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_SimFire_Eagle.202203.cl532.chn_cs200%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_SimFire_Eagle.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_SimFire_Eagle.202203.cl532.chn_cs110%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_SimFire_Eagle.202203.cl532.chn_cs140%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_SimFire_Eagle.202203.cl532.chn_cs160%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_SimFire_Eagle.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_SimFire_Eagle.202203.cl532.chn_cs50%22%2C%22cfg%22%3A%22portland-simfire-eagle-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+SimFire+-+Eagle&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland SimFire -Norse",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_SimFire_Norse.202203.cl532.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 31254.08,
+        "Subrunoff Volume": 3450.12,
+        "Baseflow Volume": 216971.78,
+        "Soil Loss": 1274.07,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 1274.14,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.19,
+        "Particulate Pollutant": 1.27,
+        "Total Pollutant": 2.47,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_SimFire_Norse.202203.cl532.chn_cs200%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_SimFire_Norse.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_SimFire_Norse.202203.cl532.chn_cs110%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_SimFire_Norse.202203.cl532.chn_cs140%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_SimFire_Norse.202203.cl532.chn_cs160%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_SimFire_Norse.202203.cl532.chn_cs150%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_SimFire_Norse.202203.cl532.chn_cs50%22%2C%22cfg%22%3A%22portland-simfire-norse-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+SimFire+-Norse&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland High Severity Fire",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_HighSevS.202203.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 36948.37,
+        "Subrunoff Volume": 2916.21,
+        "Baseflow Volume": 216437.26,
+        "Soil Loss": 25019.17,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 25019.07,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.2,
+        "Particulate Pollutant": 25.02,
+        "Total Pollutant": 26.22,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_HighSevS.202203.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_HighSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_HighSevS.202203.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_HighSevS.202203.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_HighSevS.202203.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_HighSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_HighSevS.202203.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+High+Severity+Fire&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland Moderate Severity Fire",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_ModSevS.202203.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 31254.08,
+        "Subrunoff Volume": 3450.12,
+        "Baseflow Volume": 216971.78,
+        "Soil Loss": 1274.07,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 1274.14,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.19,
+        "Particulate Pollutant": 1.27,
+        "Total Pollutant": 2.47,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_ModSevS.202203.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_ModSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_ModSevS.202203.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_ModSevS.202203.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_ModSevS.202203.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_ModSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_ModSevS.202203.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Moderate+Severity+Fire&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland Low Severity Fire",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_LowSevS.202203.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 23526.41,
+        "Subrunoff Volume": 4656.19,
+        "Baseflow Volume": 218080.46,
+        "Soil Loss": 236.16,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 236.16,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.18,
+        "Particulate Pollutant": 0.24,
+        "Total Pollutant": 1.42,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_LowSevS.202203.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_LowSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_LowSevS.202203.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_LowSevS.202203.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_LowSevS.202203.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_LowSevS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_LowSevS.202203.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Low+Severity+Fire&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  },
+  {
+    "title": "Portland Prescribed Fire",
+    "status": "7 watersheds · 2741 hillslopes loaded.",
+    "sample": {
+      "runid": "portland_BRnearMultnoma_PrescFireS.202203.chn_cs200",
+      "topaz": "611",
+      "row": {
+        "Type": "Hill",
+        "wepp_id": 133,
+        "Runoff Volume": 30238.86,
+        "Subrunoff Volume": 4506.18,
+        "Baseflow Volume": 209242.66,
+        "Soil Loss": 292.96,
+        "Sediment Deposition": 0,
+        "Sediment Yield": 292.96,
+        "Hillslope Area": 10.71,
+        "Solub. React. Pollutant": 1.15,
+        "Particulate Pollutant": 0.29,
+        "Total Pollutant": 1.45,
+        "WeppID": 133
+      }
+    },
+    "share": "https://wc.bearhive.duckdns.org/weppcloud/combined_ws_viewer/?ws=%5B%7B%22runid%22%3A%22portland_BRnearMultnoma_PrescFireS.202203.chn_cs200%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_FirCreek_PrescFireS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_LittleSandy_PrescFireS.202203.chn_cs110%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_NorthFork_PrescFireS.202203.chn_cs140%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_SouthFork_PrescFireS.202203.chn_cs160%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_CedarCreek_PrescFireS.202203.chn_cs150%22%2C%22cfg%22%3A%22portland-snow%22%7D%2C%7B%22runid%22%3A%22portland_BlazedAlder_PrescFireS.202203.chn_cs50%22%2C%22cfg%22%3A%22portland-snow%22%7D%5D&center=%5B45.436756308219316%2C-121.98875427246095%5D&zoom=10&title=Portland+Prescribed+Fire&varname=loss&units=English&varopts=%7B%22runoff%22%3A0.5%2C%22subrunoff%22%3A0.5%2C%22baseflow%22%3A0.5%2C%22loss%22%3A4000%2C%22phosphorus%22%3A0.1%7D"
+  }
+]

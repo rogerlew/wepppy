@@ -1,0 +1,36 @@
+{
+  "revocation": {
+    "operation": "revoke",
+    "before": [
+      "Dev",
+      "PortlandGroup",
+      "User"
+    ],
+    "after": [
+      "Dev",
+      "User"
+    ]
+  },
+  "restoration": {
+    "operation": "restore",
+    "before": [
+      "Dev",
+      "User"
+    ],
+    "after": [
+      "Admin",
+      "Dev",
+      "PowerUser",
+      "Root",
+      "User"
+    ]
+  },
+  "same_session_status": {
+    "member": 200,
+    "revoked": 403,
+    "restored_independent_admin": 200
+  },
+  "relogin_between_checks": false,
+  "original_roles_restored": true,
+  "scope": "forest dev-agent only"
+}

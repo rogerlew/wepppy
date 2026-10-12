@@ -11,10 +11,10 @@ A Portland group member should open the existing Portland collection links and s
 
 
 - [x] (2026-10-12 08:21 UTC) Scaffold package and capture operator's group-access intent; identify local `PortlandGroup` landing-page role.
-- [ ] M0: Refresh evidence, settle resource association/compatibility matrix, prepare canonical amendments, obtain two independent reviews, and record accepted checkpoint ancestor.
-- [ ] M1: Implement per-run group read authorization across the consumed surfaces and validate it directly.
-- [ ] M2: Prepare and validate legacy artifacts on a copied run; define repeatable bounded repair.
-- [ ] M3: Wire Deck.gl collection entry, generator, and old-link compatibility.
+- [x] M0: Refresh evidence, settle resource association/compatibility matrix, prepare canonical amendments, obtain two independent reviews, and record accepted checkpoint ancestor.
+- [x] M1: Implement per-run group read authorization across the consumed surfaces and validate it directly.
+- [x] M2: Prepare and validate legacy artifacts on a copied run; define repeatable bounded repair.
+- [x] M3: Wire Deck.gl collection entry, generator, and old-link compatibility.
 - [ ] M4: Complete regression, browser, artifact, correctness, and security gates.
 - [ ] M5: Complete authorized deployment, affected-run repair, live validation, and observation.
 
@@ -25,7 +25,7 @@ The October 10 investigation reported all 63 runs in nine Portland collection li
 
 `combined_ws_viewer2` uses Leaflet.glify, not Deck.gl. Its introduction is commit `9e3c54dad` (2025-08-25). The generator still targets original Leaflet. Commit `97ae54748` (2026-05-03) added public-only validation; `f80bc5325` (2025-10-15) migrated old runoff visualization endpoints to query-engine. The generator's extent expansion assigns old bounds instead of the new outer bounds. Existing Deck.gl batch support requires a BatchRunner collection rather than arbitrary legacy IDs.
 
-Local source now confirms `routes/locations.py:portland_index` requires `PortlandGroup`. This established role must not be conflated with the newer feature-action groups. The authoritative association between this role and specific runs is not yet established.
+Local source now confirms `routes/locations.py:portland_index` requires `PortlandGroup`. This established role must not be conflated with the newer feature-action groups. The nine retained landing-page collections now supply the explicit63-ID server catalog reviewed at checkpoint `d75460acc`.
 
 ## Decision Log
 
@@ -37,7 +37,7 @@ Local source now confirms `routes/locations.py:portland_index` requires `Portlan
 ## Outcomes & Retrospective
 
 
-Scaffold only. No runtime edit, production reinspection, generated-data repair, membership change, independent implementation review, or deployment has occurred in this session. Documentation validation results belong in tracker.md. The principal lesson from diagnosis is that entry authorization and downstream data compatibility require separate proof.
+Forest implementation and all 63 copied-run native preparations are complete. Each preparation records writer identity; 919 original file hashes match production and 24,669 hillslope rows match source values exactly. Code reviews closed all high/medium findings; final browser and regression gates are in progress. Production remains unchanged. See tracker.md for current results and the rollout handoff for later, separately authorized production work.
 
 ## Context and Orientation
 
@@ -116,7 +116,7 @@ After contract approval and implementation, use canonical checks:
     wctl run-pytest tests --maxfail=1
     wctl doc-lint --path docs/work-packages/20261012_portland_combined_viewer
 
-Add exact converter, query-engine test, and authenticated Playwright commands to this section as their existing supported interfaces are established in M0/M2. Read `tests/AGENTS.md` and the Playwright smoke AGENTS before authoring/running those checks. Expected result is passing checks plus an actual populated map; record skips or unavailable environments rather than claiming conformance. No runtime suite is needed for the scaffold-only turn.
+Add exact converter, query-engine test, and authenticated Playwright commands to this section as their existing supported interfaces are established in M0/M2. Read `tests/AGENTS.md` and the Playwright smoke AGENTS before authoring/running those checks. Expected result is passing checks plus an actual populated map; record skips or unavailable environments rather than claiming conformance. Use the retained focused and broad suite receipts for forest readiness.
 
 ## Validation and Acceptance
 
@@ -133,7 +133,7 @@ Keep existing branch and unrelated changes. No membership changes or PUBLIC mark
 ## Artifacts and Notes
 
 
-Use `artifacts/` for sanitized production observations, collection manifest, contract reviews/ancestor record, compatibility plan, generated-content comparisons, browser evidence, and rollout/recovery records. The precreated correctness/security files are pending review templates, not approvals. Never store passwords, session cookies, tokens, or broad user-account dumps. Root tracker and package tracker must link the final evidence.
+Use `artifacts/` for sanitized production observations, collection manifest, contract reviews/ancestor record, compatibility plan, generated-content comparisons, browser evidence, and rollout/recovery records. The original correctness/security checklists are historical scaffold templates; their successor implementation reviews carry current verdicts. Never store passwords, session cookies, tokens, or broad user-account dumps. Root tracker and package tracker must link the final evidence.
 
 ## Interfaces and Dependencies
 
@@ -143,3 +143,9 @@ Reuse Flask's existing route/identity system, `get_wd`, established PortlandGrou
 Revision note (2026-10-12 08:21 UTC): initial scaffold records the operator's group-access correction and separates entry authorization, data readiness, rendering, and deployment proof. No implementation milestone has started.
 
 Revision note (2026-10-12 16:40 UTC): forest execution authorized. Fresh inventory confirms all 63 runs are ownerless; PCV-01 preserves their existing downstream visibility while repairing bounded collection admission. Reuse focused Deck.gl components rather than the full batch dashboard.
+
+Revision note (2026-10-12 forest implementation): M0–M3 complete. All 63 original preparations were rolled back using verified manifests, their evidence directories retained, and regenerated with the final atomic-publication helper and content-addressed native/Python writer identity. Repeated Topaz polygon fragments are valid; identifier mappings must still be bijective and complete. Review-driven fixes also retain required variables when optional phosphorus is absent, disable controls during loading, return readiness errors for undelineated runs, restrict rollback output names, and remove bounds-viewer remote payload/HTML injection paths.
+
+Revision note (2026-10-12 final mouse acceptance): actual picking found the correct polygon, but Deck/Mjolnir measured synchronous software-GPU picking (~2.5 seconds) as gesture duration and rejected it against the 250 ms tap limit. A scoped five-second click recognizer setting passed experimental picking, pan, zoom and share checks. The independent correctness reviewer approved this finite allowance over an unlimited cutoff; no distance/drag/double-click setting changes. Final served-code audit passed in 2.0 minutes, including unchanged selection after dragging, pan/zoom/share, artifact byte parity and all-nine native sample parity. ADR-0087 records the UI-only threshold choice.
+
+Revision note (2026-10-12 regression follow-up): the initial broad run stopped after8,764 passes/126 skips because a new test patched a stale parent-module reference. New route fixtures now use importlib.import_module consistently. The full WEPPcloud group additionally exposed its old standalone Portland render fixture missing the new collection-URL context; supplied the real catalog URL builder without changing assertions. All1,969 WEPPcloud tests now pass. Required full-repository rerun remains in progress; all browser/access, artifact and role-restoration receipts are retained.

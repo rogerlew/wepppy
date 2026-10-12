@@ -139,6 +139,8 @@ def test_bounds_ws_viewer_accepts_only_public_runs(monkeypatch: pytest.MonkeyPat
     _install_public_stub(monkeypatch, module, {"run-a", "run-b"})
     monkeypatch.setattr(module, "current_user", SimpleNamespace(is_authenticated=False), raising=False)
 
+    generator = importlib.import_module("wepppy.weppcloud.combined_watershed_viewer_generator")
+    monkeypatch.setattr(generator, 'collection_metadata', lambda ids, **kw: {'ws': [{'runid': r, 'cfg': 'actual'} for r in ids]})
     ws = json.dumps([{"runid": "run-a"}, {"runid": "run-b"}])
     with app.test_client() as client:
         response = client.get(f"/bounds_ws_viewer?ws={ws}")
@@ -163,3 +165,84 @@ def test_combined_ws_viewer_omitted_ws_keeps_existing_behavior(monkeypatch: pyte
     payload = response.get_json()
     assert payload is not None
     assert payload["template_name"] == "combined_ws_viewer.htm"
+
+
+def test_empty_generator_renders_form(monkeypatch):
+    module = _load_module()
+    app = _build_app(module)
+    _install_template_stub(monkeypatch, module)
+    with app.test_client() as client:
+        response = client.get('/combined_ws_viewer/url_generator')
+    assert response.status_code == 200
+    assert response.json['url'] is None
+
+
+def test_member_catalog_grant_is_bounded_and_live(monkeypatch):
+    from wepppy.weppcloud.utils.portland_collections import can_read_collection_run, portland_runids
+    from wepppy.weppcloud.utils import helpers
+    monkeypatch.setattr(helpers, 'get_run_owners_lazy', lambda runid: [])
+    roles = {'PortlandGroup'}
+    user = SimpleNamespace(id=51, is_authenticated=True, is_active=True, has_role=lambda role: role in roles)
+    run = next(iter(portland_runids()))
+    assert can_read_collection_run(run, user, public=False)
+    assert not can_read_collection_run('portland_unregistered-private', user, public=False)
+    roles.clear()
+    assert not can_read_collection_run(run, user, public=False)
+    assert can_read_collection_run(run, user, public=True)
+
+
+def test_portland_member_can_enter_collection_but_not_mixed(monkeypatch):
+    module = _load_module()
+    from wepppy.weppcloud.utils.portland_collections import portland_runids
+    from wepppy.weppcloud.utils import helpers
+    generator = importlib.import_module("wepppy.weppcloud.combined_watershed_viewer_generator")
+    monkeypatch.setattr(helpers, 'get_run_owners_lazy', lambda runid: [])
+    app = _build_app(module)
+    _install_template_stub(monkeypatch, module)
+    _install_public_stub(monkeypatch, module, set())
+    user = SimpleNamespace(id=51, is_authenticated=True, is_active=True, has_role=lambda role: role == 'PortlandGroup')
+    monkeypatch.setattr(module, 'current_user', user)
+    monkeypatch.setattr(generator, 'collection_metadata', lambda ids, **kw: {'ws': [{'runid': r} for r in ids]})
+    run = next(iter(portland_runids()))
+    with app.test_client() as client:
+        assert client.get('/combined_ws_viewer', query_string={'ws': json.dumps([{'runid':run}])}).status_code == 200
+        assert client.get('/combined_ws_viewer', query_string={'ws': json.dumps([{'runid':run}, {'runid':'unrelated-private'}])}).status_code == 403
+
+
+@pytest.mark.parametrize('query', ['center=[91,0]', 'center=null', 'zoom=NaN', 'varopts={"loss":0}', 'units=foo', 'varname=foo'])
+def test_display_settings_rejected(monkeypatch, query):
+    module = _load_module()
+    app = _build_app(module)
+    with app.test_client() as client:
+        response = client.get('/combined_ws_viewer?' + query)
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize('endpoint', ['bounds_ws_viewer', 'combined_ws_viewer', 'combined_ws_viewer2'])
+def test_external_collection_payload_rejected(endpoint):
+    module = _load_module()
+    with _build_app(module).test_client() as client:
+        assert client.get('/' + endpoint, query_string={'data_uri': 'data:application/json,{}'}).status_code == 400
+
+
+def test_admitted_unready_collection_returns_readiness_error(monkeypatch):
+    module = _load_module()
+    _install_public_stub(monkeypatch, module, {'unfinished'})
+    monkeypatch.setattr(module, 'current_user', SimpleNamespace(is_authenticated=False))
+    generator = importlib.import_module("wepppy.weppcloud.combined_watershed_viewer_generator")
+    def unavailable(*args, **kwargs):
+        raise ValueError('map extent is not ready')
+    monkeypatch.setattr(generator, 'collection_metadata', unavailable)
+    with _build_app(module).test_client() as client:
+        assert client.get('/combined_ws_viewer', query_string={'ws': '[{"runid":"unfinished"}]'}).status_code == 409
+        assert client.post('/combined_ws_viewer/url_generator', data={'runids':'unfinished'}).status_code == 409
+
+
+@pytest.mark.parametrize('grant', ['owner', 'Admin', 'Root', 'public'])
+def test_existing_independent_grants_remain_valid(monkeypatch, grant):
+    from wepppy.weppcloud.utils.portland_collections import can_read_collection_run
+    from wepppy.weppcloud.utils import helpers
+    monkeypatch.setattr(helpers, 'get_run_owners_lazy', lambda _: [SimpleNamespace(id=51)] if grant == 'owner' else [])
+    user = SimpleNamespace(id=51, is_authenticated=grant != 'public', is_active=True,
+                           has_role=lambda role: role == grant)
+    assert can_read_collection_run('unrelated-run', user, public=grant == 'public')

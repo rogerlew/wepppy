@@ -1,0 +1,15 @@
+{
+  "library": "Deck.gl9.4.0 via existing ^9 CDN",
+  "renderer": "Chromium headless SwiftShader",
+  "native_pointer_down_up_ms": 0.3,
+  "synchronous_recognizer_delta_ms": 2479,
+  "async_recognizer_delta_ms": [
+    2346,
+    2337,
+    2436
+  ],
+  "default_click_limit_ms": 250,
+  "scoped_click_limit_ms": 5000,
+  "experimental_audit": "passed picking,pan,zoom,share and artifact/query parity; diagnostics removed before final audit",
+  "scope": "UI gesture only; unchanged distance,pan,double-click defaults"
+}

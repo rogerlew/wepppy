@@ -3109,6 +3109,8 @@ def test_regional_templates_render_exact_anonymous_creation_contract(
     section: str,
     configs: list[str],
 ) -> None:
+    from wepppy.weppcloud.utils.portland_collections import collection_urls
+
     anon_user = SimpleNamespace(
         has_role=lambda role: False,
         roles=[],
@@ -3123,6 +3125,7 @@ def test_regional_templates_render_exact_anonymous_creation_contract(
         cap_asset_base_url="/cap/assets",
         cap_site_key="regional-site-key",
         rq_engine_token=None,
+        portland_collection_urls=collection_urls('/mock/combined_ws_viewer/'),
     )
 
     creation_forms = re.findall(

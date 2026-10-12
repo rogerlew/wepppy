@@ -1,0 +1,25 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: d75460acc
+Merge base: d75460acc4d73d0d890019f332b8c1965bf6362a
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 5
+
+Files:
+  A wepppy/weppcloud/combined_viewer_preparation.py
+  M wepppy/weppcloud/combined_watershed_viewer_generator.py
+  M wepppy/weppcloud/routes/combined_watershed_viewer.py
+  M wepppy/weppcloud/routes/locations.py
+  A wepppy/weppcloud/utils/portland_collections.py
+
+Per-file delta (unsuppressed broad catches):
+  A wepppy/weppcloud/combined_viewer_preparation.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/combined_watershed_viewer_generator.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/combined_watershed_viewer.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/locations.py (base=0 current=0 delta=+0)
+  A wepppy/weppcloud/utils/portland_collections.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

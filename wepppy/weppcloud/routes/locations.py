@@ -61,6 +61,7 @@ def joh_map():
 @locations_bp.route('/locations/portland-municipal/')
 @roles_required('PortlandGroup')
 def portland_index():
+    from wepppy.weppcloud.utils.portland_collections import collection_urls
     try:
         rq_engine_token = _issue_rq_engine_token()
         cap_base_url = (current_app.config.get("CAP_BASE_URL") or os.getenv("CAP_BASE_URL", "/cap")).rstrip("/")
@@ -71,6 +72,7 @@ def portland_index():
         cap_site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY", "")
         return render_template(
             'locations/portland/index.htm',
+            portland_collection_urls=collection_urls(url_for('combined_watershed_viewer.combined_ws_viewer')),
             user=current_user,
             rq_engine_token=rq_engine_token,
             cap_base_url=cap_base_url,
@@ -80,7 +82,7 @@ def portland_index():
     except auth_tokens.JWTConfigurationError as exc:
         current_app.logger.exception("Failed to issue rq-engine token for portland interface")
         return exception_factory(f"JWT configuration error: {exc}")
-    except Exception:
+    except Exception:  # broad-except: Existing route boundary logs and translates unexpected failures.
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/locations.py:83", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory()

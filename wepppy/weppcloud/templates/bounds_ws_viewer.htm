@@ -14,28 +14,8 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
 <script type="text/javascript">
-const site_prefix = "{{ site_prefix }}";
-
-function getURLParameter(name) {
-    const params = new URLSearchParams(window.location.search);
-    const value = params.get(name);
-    return value === null ? undefined : value;
-}
-
-function decodeJsonParam(value) {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    const raw = String(value);
-    try {
-        return JSON.parse(raw);
-    } catch (err) {
-        return raw;
-    }
-}
+const collection = {{ collection | tojson }};
+const site_prefix = collection.sitePrefix;
 
 async function fetchJson(url) {
     const response = await fetch(url, { credentials: 'same-origin' });
@@ -92,50 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let data;
     let popup;
 
-    const dataUri = getURLParameter("data_uri");
-
-    if (dataUri !== undefined) {
-        try {
-            const payload = await fetchJson(dataUri);
-            if (payload) {
-                center = payload.center;
-                zoom = payload.zoom;
-                ws = payload.ws;
-                title = payload.title;
-            }
-            await callback();
-        } catch (error) {
-            console.error(error);
-        }
-
-    } else {
-        const centerParam = getURLParameter("center");
-        if (centerParam === undefined) {
-            center = [39.0, -99.0];
-        } else {
-            center = decodeJsonParam(centerParam);
-        }
-
-        const zoomParam = getURLParameter("zoom");
-        if (zoomParam === undefined) {
-            zoom = 5;
-        } else {
-            zoom = decodeJsonParam(zoomParam);
-        }
-
-        ws = getURLParameter("ws");
-        if (ws !== undefined) {
-            ws = decodeJsonParam(ws);
-        }
-
-        title = getURLParameter("title");
-        if (title !== undefined && title !== null) {
-            title = String(title);
-        }
-
-        await callback();
-
-    }
+    ({center, zoom, ws, title} = collection);
+    await callback();
 
     async function callback() {
         if (!center || zoom === undefined) {
@@ -166,7 +104,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 container.style.width = '500px';
                 container.style.height = '40px';
 
-                container.innerHTML = '<h4 style="text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;">' + title + '</h4>';
+                const heading = document.createElement('h4');
+                heading.textContent = title;
+                container.append(heading);
                 return container;
             },
             onRemove: function (map) {
@@ -185,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 polys[runid] = {};
 
                 try {
-                    const response = await fetchJson(site_prefix + "/runs/" + runid + "/cfg/resources/bound.json");
+                    const response = await fetchJson(`${site_prefix}/runs/${encodeURIComponent(runid)}/${encodeURIComponent(cfg)}/resources/bound.json`);
                     if (!response || !response.features || !response.features.length) {
                         throw new Error('Missing bound geometry');
                     }
@@ -198,9 +138,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     if (popup !== undefined) {
                                         popup.remove();
                                     }
-                                    const content =
-                                        '<h5>' + runid + '</h5>' +
-                                        '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
+                                    const content = document.createElement('div');
+                                    const heading = document.createElement('h5');
+                                    heading.textContent = runid;
+                                    const link = document.createElement('a');
+                                    link.textContent = 'View Watershed Run';
+                                    link.href = `${site_prefix}/runs/${encodeURIComponent(runid)}/${encodeURIComponent(cfg)}/`;
+                                    content.append(heading, link);
 
                                     popup = L.popup()
                                         .setLatLng(ev.latlng)
@@ -213,7 +157,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     polys[runid].name = response.name;
                     polys[runid].addTo(map);
-                    ctrls.addOverlay(polys[runid], runid);
+                    const label = document.createElement('span');
+                    label.textContent = runid;
+                    ctrls.addOverlay(polys[runid], label.innerHTML);
                 } catch (error) {
                     console.log(error);
                 }

@@ -1,0 +1,427 @@
+{
+  "collections": [
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_CurCond.202203.cl532.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_CurCond.202203.cl532.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_CurCond.202203.cl532.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_CurCond.202203.cl532.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_CurCond.202203.cl532.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_CurCond.202203.cl532.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Current Conditions"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_CurCond.202203.cl532_gridmet.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_CurCond.202203.cl532_gridmet.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_CurCond.202203.cl532_gridmet.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_CurCond.202203.cl532_gridmet.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_CurCond.202203.cl532_gridmet.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_CurCond.202203.cl532_gridmet.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_CurCond.202203.cl532_gridmet.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Current Conditions GRIDMET"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_CurCond.202203.cl532_future.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_CurCond.202203.cl532_future.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_CurCond.202203.cl532_future.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_CurCond.202203.cl532_future.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_CurCond.202203.cl532_future.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_CurCond.202203.cl532_future.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_CurCond.202203.cl532_future.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Current Conditions Future Climate"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_SimFire_Eagle.202203.cl532.chn_cs200",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_FirCreek_SimFire_Eagle.202203.cl532.chn_cs150",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_LittleSandy_SimFire_Eagle.202203.cl532.chn_cs110",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_NorthFork_SimFire_Eagle.202203.cl532.chn_cs140",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_SouthFork_SimFire_Eagle.202203.cl532.chn_cs160",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_CedarCreek_SimFire_Eagle.202203.cl532.chn_cs150",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_SimFire_Eagle.202203.cl532.chn_cs50",
+          "cfg": "portland-simfire-eagle-snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland SimFire - Eagle"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_SimFire_Norse.202203.cl532.chn_cs200",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_FirCreek_SimFire_Norse.202203.cl532.chn_cs150",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_LittleSandy_SimFire_Norse.202203.cl532.chn_cs110",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_NorthFork_SimFire_Norse.202203.cl532.chn_cs140",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_SouthFork_SimFire_Norse.202203.cl532.chn_cs160",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_CedarCreek_SimFire_Norse.202203.cl532.chn_cs150",
+          "cfg": "portland-simfire-eagle-snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_SimFire_Norse.202203.cl532.chn_cs50",
+          "cfg": "portland-simfire-eagle-snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland SimFire -Norse"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_HighSevS.202203.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_HighSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_HighSevS.202203.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_HighSevS.202203.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_HighSevS.202203.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_HighSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_HighSevS.202203.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland High Severity Fire"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_ModSevS.202203.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_ModSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_ModSevS.202203.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_ModSevS.202203.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_ModSevS.202203.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_ModSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_ModSevS.202203.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Moderate Severity Fire"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_LowSevS.202203.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_LowSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_LowSevS.202203.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_LowSevS.202203.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_LowSevS.202203.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_LowSevS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_LowSevS.202203.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Low Severity Fire"
+    },
+    {
+      "zoom": 10,
+      "center": [
+        45.436756308219316,
+        -121.98875427246095
+      ],
+      "ws": [
+        {
+          "runid": "portland_BRnearMultnoma_PrescFireS.202203.chn_cs200",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_FirCreek_PrescFireS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_LittleSandy_PrescFireS.202203.chn_cs110",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_NorthFork_PrescFireS.202203.chn_cs140",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_SouthFork_PrescFireS.202203.chn_cs160",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_CedarCreek_PrescFireS.202203.chn_cs150",
+          "cfg": "portland-wepp_bd16b69_snow"
+        },
+        {
+          "runid": "portland_BlazedAlder_PrescFireS.202203.chn_cs50",
+          "cfg": "portland-wepp_bd16b69_snow"
+        }
+      ],
+      "units": "English",
+      "varopts": {
+        "runoff": 0.5,
+        "subrunoff": 0.5,
+        "baseflow": 0.5,
+        "phosphorus": 0.1,
+        "loss": 4000
+      },
+      "varname": "loss",
+      "title": "Portland Prescribed Fire"
+    }
+  ]
+}

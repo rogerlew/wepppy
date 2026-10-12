@@ -1,0 +1,85 @@
+
+> weppcloud-static@0.1.0 smoke
+> playwright test --config=playwright.config.mjs combined-viewer.spec.js
+
+
+Running 1 test using 1 worker
+
+(node:2992573) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2992573) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Checking collection: Portland Current Conditions
+Checking result: Portland Current Conditions loss
+Checking result: Portland Current Conditions runoff
+Checking result: Portland Current Conditions subrunoff
+Checking result: Portland Current Conditions baseflow
+Checking result: Portland Current Conditions phosphorus
+Verified collection: Portland Current Conditions
+Checking collection: Portland Current Conditions GRIDMET
+Checking result: Portland Current Conditions GRIDMET loss
+Checking result: Portland Current Conditions GRIDMET runoff
+Checking result: Portland Current Conditions GRIDMET subrunoff
+Checking result: Portland Current Conditions GRIDMET baseflow
+Checking result: Portland Current Conditions GRIDMET phosphorus
+Verified collection: Portland Current Conditions GRIDMET
+Checking collection: Portland Current Conditions Future Climate
+Checking result: Portland Current Conditions Future Climate loss
+Checking result: Portland Current Conditions Future Climate runoff
+Checking result: Portland Current Conditions Future Climate subrunoff
+Checking result: Portland Current Conditions Future Climate baseflow
+Checking result: Portland Current Conditions Future Climate phosphorus
+Verified collection: Portland Current Conditions Future Climate
+Checking collection: Portland SimFire - Eagle
+Checking result: Portland SimFire - Eagle loss
+Checking result: Portland SimFire - Eagle runoff
+Checking result: Portland SimFire - Eagle subrunoff
+Checking result: Portland SimFire - Eagle baseflow
+Checking result: Portland SimFire - Eagle phosphorus
+Verified collection: Portland SimFire - Eagle
+Checking collection: Portland SimFire -Norse
+Checking result: Portland SimFire -Norse loss
+Checking result: Portland SimFire -Norse runoff
+Checking result: Portland SimFire -Norse subrunoff
+Checking result: Portland SimFire -Norse baseflow
+Checking result: Portland SimFire -Norse phosphorus
+Verified collection: Portland SimFire -Norse
+Checking collection: Portland High Severity Fire
+Checking result: Portland High Severity Fire loss
+Checking result: Portland High Severity Fire runoff
+Checking result: Portland High Severity Fire subrunoff
+Checking result: Portland High Severity Fire baseflow
+Checking result: Portland High Severity Fire phosphorus
+Verified collection: Portland High Severity Fire
+Checking collection: Portland Moderate Severity Fire
+Checking result: Portland Moderate Severity Fire loss
+Checking result: Portland Moderate Severity Fire runoff
+Checking result: Portland Moderate Severity Fire subrunoff
+Checking result: Portland Moderate Severity Fire baseflow
+Checking result: Portland Moderate Severity Fire phosphorus
+Verified collection: Portland Moderate Severity Fire
+Checking collection: Portland Low Severity Fire
+Checking result: Portland Low Severity Fire loss
+Checking result: Portland Low Severity Fire runoff
+Checking result: Portland Low Severity Fire subrunoff
+Checking result: Portland Low Severity Fire baseflow
+Checking result: Portland Low Severity Fire phosphorus
+Verified collection: Portland Low Severity Fire
+Checking collection: Portland Prescribed Fire
+Checking result: Portland Prescribed Fire loss
+Checking result: Portland Prescribed Fire runoff
+Checking result: Portland Prescribed Fire subrunoff
+Checking result: Portland Prescribed Fire baseflow
+Checking result: Portland Prescribed Fire phosphorus
+Verified collection: Portland Prescribed Fire
+Browse/download byte parity: combined-viewer-preparation/manifest.json
+Browse/download byte parity: wepp/output/interchange/loss_pw0.hill.parquet
+  ✓  1 [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance (9.9m)
+
+  Slow test file: [runs0] › tests/smoke/combined-viewer.spec.js (9.9m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 passed (9.9m)
+
+To open last HTML report run:
+
+  npx playwright show-report

@@ -102,3 +102,5 @@ Each ADR should normally include:
 - `ADR-0081`: [Historic PRISM Native-Cell Bulk Cache](ADR-0081-prism-native-cell-bulk-cache.md) (Accepted for standalone client delivery, 2026-10-08)
 
 - [ADR-0082](ADR-0082-prism-historic-wepp-forcing.md): Historic PRISM forcing and spatial methods.
+
+- [ADR-0087](ADR-0087-combined-viewer-pointer-duration.md): Combined viewer pointer-duration allowance.

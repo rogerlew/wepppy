@@ -1,0 +1,19 @@
+
+> weppcloud-static@0.1.0 smoke
+> playwright test --config=playwright.config.mjs combined-viewer.spec.js
+
+
+Running 1 test using 1 worker
+
+(node:3419321) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3419321) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Same-session role check: {"mode":"restored","status":200}
+  ✓  1 [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance (6.1s)
+
+  1 passed (7.4s)
+
+To open last HTML report run:
+
+  npx playwright show-report

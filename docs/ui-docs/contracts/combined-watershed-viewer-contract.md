@@ -2,13 +2,13 @@
 
 ## Status and authority
 
-Prepared 2026-10-12 for the operator-authorized forest repair. Implementation is pending the reviewed checkpoint. The operator requires existing PortlandGroup members to see the Portland collections and authorized forest execution, stack restarts, and dev-agent permission changes. Production deployment and production data writes remain outside this execution authorization.
+Prepared 2026-10-12 for the operator-authorized forest repair. Implementation follows accepted checkpoint `d75460acc`; forest validation and separately authorized production rollout are tracked in the Portland work package. The operator requires existing PortlandGroup members to see the Portland collections and authorized forest execution, stack restarts, and dev-agent permission changes. Production deployment and production data writes remain outside this execution authorization.
 
 ## Collection admission
 
 The existing `PortlandGroup` Flask-Security role grants collection read access to exactly the 63 run IDs registered in the server-owned Portland collection catalog extracted from the nine existing Portland interface links. The catalog is version controlled; maintenance adds/removes explicit IDs and is reviewed as a resource-access change. No prefix, submitted config, feature-mod flag, or JWT group string establishes that association. Membership is evaluated from the current authenticated account on each collection request. No new feature-action group is introduced.
 
-Each run must independently be PUBLIC, be in the Portland catalog for a current PortlandGroup member, or be explicitly owned by the authenticated caller or admitted by existing Admin/Root roles. The ordinary ownerless-run rule is not a collection-entry grant: anonymous admission to this entry remains PUBLIC-only. Reject the whole requested collection when any run is unauthorized. Bounds viewer and URL generator use the same admission. Membership grants no mutations, membership administration, unrelated private runs, or public publication.
+Each run must independently be PUBLIC, be in the Portland catalog for a current PortlandGroup member, or be explicitly owned by the authenticated caller or admitted by existing Admin/Root roles. The ordinary ownerless-run rule is not a collection-entry grant: anonymous admission to this entry remains PUBLIC-only. Reject the whole requested collection when any run is unauthorized. Bounds viewer and URL generator use the same admission. Bounds retains its bounds display with server-resolved configuration and safe DOM rendering; `data_uri` indirection is rejected because it bypasses inspection of the explicit run list. Membership grants no mutations, membership administration, unrelated private runs, or public publication.
 
 ## Existing resource visibility and downstream consumers
 
@@ -35,6 +35,8 @@ Legacy display factors remain 25.4 mm per inch and 1.12085 kg/ha per lb/acre; ra
 Prepare derived artifacts offline, starting with a forest copy. Preserve source NoDb/model outputs and PUBLIC markers. Record source hashes, exact writer revision, new paths and semantic comparisons before rollout. No new scientific schema/formula or model rerun is authorized. Use existing Parquet schemas when needed; existing geometry properties or NoDb summaries may provide the WEPP-to-Topaz mapping if they suffice, avoiding unnecessary conversion. Query-engine must consume exact validated files. Keep provenance/failure evidence and prepared artifacts inspectable under normal authorized browse/archive tooling; do not introduce hidden-only project state.
 
 Preparation must be repeatable, refuse unexpected existing outputs, record before/after hashes, and remove only package-created files on rollback. Missing required source data is an explicit failure. A live collection must display all requested watersheds or an explicit incomplete/error state, not partial success.
+
+Stationary pointer releases may select a hillslope for up to five seconds; movement/drag thresholds and double-click behavior remain Deck defaults. The focused viewer uses Deck's documented click-recognizer time option because measured synchronous picking of dense legacy geometry on a software GPU took about 2.5 seconds, which otherwise counted against the default 250 ms gesture limit. This is a finite UI allowance, not a model/display parameter change; stalls longer than five seconds still require keyboard hillslope selection. Other dashboards retain their default recognizer settings. Decision provenance: [ADR-0087](../../adrs/ADR-0087-combined-viewer-pointer-duration.md).
 
 ## Acceptance
 

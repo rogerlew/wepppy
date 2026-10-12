@@ -24,6 +24,16 @@
 - **map/raster-utils.js** — GeoTIFF/SBS loaders, gdalinfo fetch; sitePrefix-aware.
 - **gl-dashboard.js** — Orchestrator wiring: imports, DI, DOM lookups, event binding, initializeDashboard, global hooks.
 
+## Combined watershed collection entry
+
+`combined-viewer.js` is the focused DOM/Deck.gl controller for the two combined
+viewer URL variants. `combined-viewer-data.js` handles native averaged LOSS
+queries, complete WEPP/Topaz joins, unit conversion and share URLs. These reuse
+`map/controller.js`, `map/basemap-controller.js`, `batch-keys.js` and the existing
+colormaps without coupling arbitrary legacy collections to BatchRunner state.
+Keep the loaded FeatureCollection identity stable across color/unit updates so
+Deck.gl can reuse geometry. See the [operator and contract guide](../../../../../docs/dev-notes/combined-watershed-viewer.md).
+
 ## Critical Conventions
 - All fetches honor `ctx.sitePrefix` (browse/gdalinfo/query-engine) to avoid missing-run errors.
 - `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
@@ -157,3 +167,5 @@ Focused tests: `wctl run-npm test -- --runInBand flow-duration` and
 `wctl run-pytest tests/weppcloud/routes/test_gl_dashboard_flow_duration.py`.
 Browser test: `tests/smoke/gl-dashboard-flow-duration.spec.js`; optionally set
 `FDC_ORACLE_PATH` to a direct-source oracle JSON for numerical integration checks.
+
+The shared map controller accepts optional `eventRecognizerOptions` at Deck construction. Only the standalone combined viewer supplies a five-second stationary-click allowance for measured software-GPU picking delays; other callers preserve Deck defaults. See the combined-viewer contract for the gesture rationale and keyboard alternative.

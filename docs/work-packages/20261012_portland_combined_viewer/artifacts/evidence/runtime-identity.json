@@ -1,0 +1,85 @@
+{
+  "production_read_only": {
+    "path": "/geodata/weppcloud_runs/portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200",
+    "uid": 1002,
+    "gid": 130,
+    "groups": [
+      130
+    ],
+    "paths": [
+      {
+        "relative": ".",
+        "mode": "0o777",
+        "uid": 1002,
+        "gid": 130,
+        "write": true
+      },
+      {
+        "relative": "wepp/output",
+        "mode": "0o777",
+        "uid": 1002,
+        "gid": 130,
+        "write": true
+      },
+      {
+        "relative": "READONLY",
+        "mode": "0o777",
+        "uid": 1002,
+        "gid": 130,
+        "write": true
+      }
+    ]
+  },
+  "production_umask": "0022",
+  "forest_writer": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0022"
+  },
+  "forest_reader": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0022"
+  },
+  "isolated_production_identity_preparation": {
+    "run": "pcv-production-identity-check",
+    "status": "complete",
+    "validation": {
+      "rows": 1134,
+      "min_area_ha": 0.09,
+      "max_area_ha": 82.26,
+      "comparison": "exact source-decimal equality",
+      "geometry_join": "complete one-to-one"
+    }
+  },
+  "cross_identity_readback": {
+    "reader_uid": 1000,
+    "reader_gid": 993,
+    "writer_uid": 1002,
+    "writer_gid": 130,
+    "rows": 1134,
+    "parquet_readable": true,
+    "writer": {
+      "python_writer_sha256": "c2eed0ad152eed2a2a637661d9e663dcbc1705b6050f802f08d974d0b3902914",
+      "preparation_sha256": "71f9a2e5f922bc7f830670a27bd55bee8057a812e7c3ed1c660df040e8383b2b",
+      "native_sha256": {
+        "climate/cli_revision_rust.so": "98988e98022d1bdf56865c044c544830c3d4d639a0e6279c9ac6c6c15e70118c",
+        "raster_characteristics/raster_characteristics_rust.so": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54",
+        "roads_flowpath/roads_flowpath_rust.so": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+        "sbs_map/sbs_map_rust.so": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45",
+        "swat_interchange/swat_interchange_rust.so": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275",
+        "swat_utils/swat_utils_rust.so": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676",
+        "watershed_abstraction/watershed_abstraction_rust.so": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80",
+        "wepp_interchange/wepp_interchange_rust.so": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
+        "wepp_viz/wepp_viz_rust.so": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+      }
+    }
+  },
+  "scope": "Isolated forest source copy prepared under production UID/GID1002:130, then read by forest web UID/GID1000:993; production remains read-only. Actual production mount/native/image parity remains rollout preflight."
+}

@@ -1,6 +1,6 @@
 # Portland group access and combined watershed viewer
 
-**Status**: Open — forest implementation authorized (2026-10-12)  
+**Status**: Open — forest implementation complete; final validation in progress (2026-10-12)
 **Created**: 2026-10-12 08:21 UTC  
 **Security impact**: high; independent security and correctness reviews required
 
@@ -31,9 +31,9 @@ New queues, services, datastores, dependencies, privileges, protocols, and deplo
 
 ## Implementation fidelity and evidence
 
-Target: **faithful extraction** of the existing collection workflow onto the current renderer/data path, with the operator's group-access correction. This documentation scaffold is not an implementation surrogate and cannot close runtime scope. Preserve runoff, subsurface runoff, baseflow, loss, available phosphorus, English/SI units, ranges, title, bounds, and run-specific drilldown. Source behavior is in `combined_ws_viewer.htm`, `combined_ws_viewer2.htm`, and `combined_watershed_viewer_generator.py` under `wepppy/weppcloud/`.
+Target: **faithful extraction** of the existing collection workflow onto the current renderer/data path, with the operator's group-access correction. The implementation is wired on forest; production rollout is a separate milestone. Preserve runoff, subsurface runoff, baseflow, loss, available phosphorus, English/SI units, ranges, title, bounds, and run-specific drilldown. Source behavior is in `combined_ws_viewer.htm`, `combined_ws_viewer2.htm`, and `combined_watershed_viewer_generator.py` under `wepppy/weppcloud/`.
 
-Generated-output and browser evidence are required. Distinguish implemented, wired, locally validated, environment validated, deployed, repaired, and incident resolved. The highest current claim is prior diagnosis; it needs fresh retained evidence.
+Generated-output and browser evidence are required. Distinguish implemented, wired, locally validated, environment validated, deployed, repaired, and incident resolved. The current claim is implemented and forest environment validated for all nine collections, with final broad-test, identity and provenance receipts still being completed. No production repair or incident-resolution claim is made.
 
 ## Generated artifact validation and compatibility plan
 
@@ -54,7 +54,7 @@ Trace the requested collection through reloaded run association/configuration, g
 
 ## Security and review gates
 
-High impact: private-resource authorization, session/token transport, arbitrary run-list input, and query/file surfaces. [Security review](artifacts/2026-10-12_security_review.md) and [correctness review](artifacts/2026-10-12_correctness_review.md) are pending, not approvals. Prepare two independent contract reviews and the required ancestor commit before runtime edits under `docs/standards/contract-first-change-standard.md`. [Contract decision draft](artifacts/2026-10-12_contract_decision.md) records the accepted intent and unresolved policy details.
+High impact: private-resource authorization, session/token transport, arbitrary run-list input, and query/file surfaces. [Implementation security review](artifacts/2026-10-12_implementation_security_review.md) and [implementation correctness review](artifacts/2026-10-12_implementation_correctness_review.md) close all high/medium code findings; final environment evidence remains pending. Accepted contract ancestor: `d75460acc`. Two independent contract reviews and the required ancestor commit preceded runtime edits under `docs/standards/contract-first-change-standard.md`. [Contract decision](artifacts/2026-10-12_contract_decision.md) records accepted intent and the resolved access matrix.
 
 ## Hardening signals and recovery
 
@@ -62,8 +62,10 @@ Prior signatures: combined-viewer HTTP 403 with `Forbidden`, loss/runoff HTTP 40
 
 ## Dependencies, ownership, and documentation
 
-Owner: requesting operator; implementation: next assigned maintainer. Reviewers must be independent of the relevant change author. Coordinate with [feature access governance](../20261001_feature_access_governance/package.md) without extending its feature-action scope or claiming its milestones complete. Production copies, a real PortlandGroup account, a nonmember account, and approved deployment are later validation dependencies.
+Owner: requesting operator; implementation: Codex on forest. Reviewers must be independent of the relevant change author. Coordinate with [feature access governance](../20261001_feature_access_governance/package.md) without extending its feature-action scope or claiming its milestones complete. The 63 copied runs and a real forest account exercise the member/nonmember transitions. Production rollout still requires an approved window and production-account acceptance.
 
 Applicable authorities include `docs/schemas/feature-access-governance-contract.md`, `docs/schemas/weppcloud-browse-auth-contract.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/schemas/output-scope-contract.md`, `docs/schemas/nodb-persistence-concurrency-contract.md`, and `docs/ui-docs/controller-contract.md`; inventory additional query-engine identity contracts before the checkpoint. Promote the bounded collection contract into `docs/ui-docs/contracts/combined-watershed-viewer-contract.md` before implementation. Reconcile `docs/dev-notes/endpoint_security_notes.md` with it.
 
-Parameterization change: none planned; preserve conversions and display defaults. If that changes, an ADR is required before merge. Deliverables are the contract/checkpoint, bounded authorization and collection UI, conversion evidence, regression/browser tests, operator recovery instructions, and review/deployment records. No closure or shipping claim at scaffold stage.
+Scientific parameterization is unchanged; conversions and display defaults are preserved. The bounded UI click-duration change is documented in [ADR-0087](../../adrs/ADR-0087-combined-viewer-pointer-duration.md). Deliverables are the contract/checkpoint, bounded authorization and collection UI, conversion evidence, regression/browser tests, operator recovery instructions, and review/deployment records. Production acceptance remains M5.
+
+Forest operations and later production steps: [user/developer/operator guide](../../dev-notes/combined-watershed-viewer.md) and [rollout handoff](artifacts/rollout-handoff.md).

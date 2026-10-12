@@ -1,46 +1,41 @@
 # Tracker — Portland combined watershed viewer
 
-**Started / last updated**: 2026-10-12 08:21 UTC  
-**Phase**: M0 contract checkpoint preparation; forest execution authorized  
-**Security**: high; reviews pending  
-**Next milestone**: M0 evidence refresh and contract checkpoint preparation
+**Last updated**: 2026-10-12, forest execution
+
+**Phase**: M0–M3 complete; M4 final environment validation. Production remains unchanged.
 
 ## Task board
 
-- [x] Capture operator's Portland group-access correction and reject public publication as a workaround.
-- [x] Create package, active ExecPlan, decision draft, and pending review artifacts.
-- [ ] M0: Refresh production evidence, identify authoritative Portland resource association, inventory all access/consumer surfaces, and prepare canonical amendments.
-- [ ] M0: Obtain two independent contract reviews; record accepted ancestor revision before code edits (commit authority not supplied by scaffold request).
-- [ ] M1: Implement bounded group read access and direct positive/negative tests.
-- [ ] M2: Prove legacy conversion compatibility on one copied run; prepare audited artifact repair for all affected collections.
-- [ ] M3: Wire Deck.gl collections, repair generator, and preserve old URLs.
-- [ ] M4: Complete unit/integration/browser checks and independent correctness/security reviews.
-- [ ] M5: Separately authorized deploy, affected-run repair, live verification, and observation window.
+- [x] M0: Refresh all 63 production runs and HTTP evidence; preserve existing ownerless downstream visibility.
+- [x] M0: Canonical PCV-01 contract, two independent approvals, accepted ancestor `d75460acc` before runtime edits.
+- [x] M1: Current PortlandGroup membership plus explicit server catalog; public/owner/admin grants preserved; mixed/private denial.
+- [x] M2: Copy63 runs; native averaged LOSS and catalog preparation with manifest, atomic publication and bounded rollback.
+- [x] M3: Deck.gl collection rendering, actual config/complete composite joins, old-link compatibility, generator and safe bounds viewer.
+- [ ] M4: Complete browser/identity, full regression and final independent evidence reviews.
+- [ ] M5: Separately authorized production deployment/preparation, live parity and seven-day observation.
 
-## Decisions
+## Decisions and discoveries
 
-**2026-10-12 08:21 UTC** — Operator intent is Portland group access. Local source identifies existing `PortlandGroup`; use current membership, an authoritative resource association, and per-run checks. No PUBLIC marker changes or inferred prefix grants. Rationale and rejected alternatives: [package: Accepted intent and rationale](package.md#accepted-intent-and-rationale).
+Operator authorized forest implementation, required local commits, stack restarts and dev-agent permissions. Production mutation is excluded. PCV-01 records the admission/compatibility contract; the [decision record](artifacts/2026-10-12_contract_decision.md) retains checkpoint rationale. Existing downstream ownerless access remains unchanged, and no PUBLIC markers are created.
 
-**2026-10-12 08:21 UTC** — Scaffold only. No canonical policy amendment, checkpoint approval, implementation, commit, run conversion, or deployment is claimed. The [decision draft](artifacts/2026-10-12_contract_decision.md) is not an accepted ancestor.
+Legacy geometry has repeated polygon fragments for one Topaz hillslope. Preserve every fragment while requiring unique complete WEPP/Topaz mappings. Native averaged LOSS already has positive hectare areas: no model rerun, additional watershed converter or schema/formula change is needed. Missing optional phosphorus preserves required variables.
 
-## Risks and open evidence
+Independent reviews found and closed unsafe legacy bounds HTML/remote payload handling, forged rollback targets, interrupted publication recovery, incomplete mapping, missing optional phosphorus and missing-map readiness. Controls remain disabled during incomplete loading. Stable Deck.gl data identity avoids repeat geometry processing on color/unit changes.
 
-The October 10 production investigation is summarized in the ExecPlan but raw transcripts were not retained in this package. Revalidate against the deployed revision. A reliable Portland run association, actual membership records, ordinary owner/public behavior, query-engine transport, optional phosphorus availability, and converter compatibility remain to be demonstrated. Do not assume every ownerless legacy run is intended to become private.
+## Evidence and validation
 
-## Verification and review
+- [Production inventory](artifacts/evidence/production-inventory.jsonl): deployed revision `84337c967136c6bc50f357fb600c0a44534edf2f`,63 ownerless/non-PUBLIC runs, all LOSS text present, native hill Parquet absent.
+- [Forest preparations](artifacts/evidence/forest-preparation.jsonl): all 63 complete; exact source-decimal equality for 24,669 hillslope rows; complete geometry joins and content-addressed writer identity.
+- [Source parity](artifacts/evidence/source-parity.json): all 919 original file hashes match fresh read-only production hashes. READONLY preserved.
+- [Archive/restore](artifacts/evidence/archive-restore.json): canonical writer and restore on isolated real copied run, every file byte-identical; queue/status adapters isolated.
+- Python focused:32 passed; JS data cases:9 passed. Final frontend lint and full Jest:965 tests/118 suites passed. Focused stub/isolation checks pass (random-order plugin unavailable). The first broad Python run stopped after8,764 passes/126 skips on a stale-module fixture import; the corrected full WEPPcloud group passes1,969 tests and the full repository rerun is in progress. The existing regional-template render fixture also now supplies the new server-generated collection URLs.
+- [Browser log](artifacts/evidence/browser-member.log), [map screenshot](artifacts/evidence/current-conditions.png): use the final completed receipt for readiness, not intermediate output.
+- [Correctness](artifacts/2026-10-12_implementation_correctness_review.md) and [security](artifacts/2026-10-12_implementation_security_review.md): no unresolved high/medium code findings; final evidence review pending.
 
-Scaffold checks (2026-10-12 UTC): `wctl doc-lint` validated all six package files and PROJECT_TRACKER.md with zero errors/warnings; `uk2us` preview found no package spelling changes; `git diff --check` passed. Runtime checks: not run; documentation-only task.
+Final browser audit passed picking, drag-selection preservation, pan/zoom/share, final artifact downloads and all-nine native sample parity. Same stored session returned member200, revoked403, and restored independentAdmin200. Original dev-agent roles are restored and saved browser credentials removed. The owner fixture returned409 readiness after admission; the real PUBLIC fixture returned200. UI gesture rationale is recorded in ADR-0087.
 
-[Correctness review](artifacts/2026-10-12_correctness_review.md): pending. [Security review](artifacts/2026-10-12_security_review.md): pending. Contract reviews and accepted ancestor revision: absent. Before closeout retain focused and broad Python results, frontend lint/tests, authenticated browser evidence, exact generated-content comparisons, production-equivalent identities/mounts, rollout/rollback record, and observation results.
-
-## Hardening signal log
-
-Prior baseline: 403 at collection entry; 404 at legacy value endpoints; 400 at empty generator. Post-change: not measured. Temporary mitigations: none. Observe authorized rendering and unauthorized rejection together; do not count an HTTP 200 shell as restored service.
+Initial incomplete-run browser attempt showed a visible collection error, not a partial map. An earlier browser run was interrupted to load final review fixes and regenerate writer-provenance evidence; it is not counted as a pass. The first preparation's conservative fragment check failed before publication; verified rollback and retained staging preceded correction. Subsequent review regeneration retains earlier manifests in visible run-local evidence directories.
 
 ## Handoff
 
-Execute [the active plan](prompts/active/portland_combined_viewer_execplan.md) under the operator’s forest authorization. Start with M0; preserve the distinct contract-commit gate. Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective in the plan and this tracker at every milestone. Do not mark the package complete on documentation or local tests alone.
-
-## Execution update — 2026-10-12 16:40 UTC
-
-Forest implementation, required local commits, restarts, and dev-agent permission adjustments are now authorized. Production writes/deploy remain excluded. Fresh read-only wepp1 inventory confirms all 63 runs exist and are ownerless/non-PUBLIC with loss text and no loss Parquet. Preserve their existing ordinary data visibility; collection admission is the bounded correction. Contract reviews are underway.
+Continue M4 of [the active ExecPlan](prompts/active/portland_combined_viewer_execplan.md). Final handoff must record member/same-session revocation and independent grants, normal artifact browse/download, completed test counts, restored dev-agent roles, exact candidate revision and reviewer disposition. Follow the [rollout handoff](artifacts/rollout-handoff.md) for later production work and [operator guide](../../dev-notes/combined-watershed-viewer.md) for preparation/recovery. Keep M5 open until production acceptance and observation are evidenced.

@@ -1,0 +1,9 @@
+
+> weppcloud-static@0.1.0 lint
+> eslint --config .eslintrc.cjs --resolve-plugins-relative-to . "../controllers_js/**/*.js"
+
+
+/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/climate.test.js
+  300:13  error  Avoid calling `expect` conditionally`  jest/no-conditional-expect
+
+✖ 1 problem (1 error, 0 warnings)

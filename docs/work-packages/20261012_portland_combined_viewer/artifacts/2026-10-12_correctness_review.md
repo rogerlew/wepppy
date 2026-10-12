@@ -1,5 +1,7 @@
 # Correctness and User-Experience Review — Portland combined viewer
 
+> Historical scaffold checklist, superseded by the [implementation correctness review](2026-10-12_implementation_correctness_review.md). Pending fields below describe the original planning checkpoint; use the implementation review and package tracker for current release disposition.
+
 ## Metadata
 
 Prepared: 2026-10-12 08:21 UTC. Reviewer: unassigned, independent. Scope: collection/generator workflow and legacy artifact-to-map path. Starting revision: `dc6f3879e3372fa35062708b2c2f0caeb7eba18e`; candidate/accepted contract revisions: pending. Related: [security review](2026-10-12_security_review.md), [decision draft](2026-10-12_contract_decision.md).

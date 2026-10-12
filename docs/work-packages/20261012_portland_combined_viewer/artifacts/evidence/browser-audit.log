@@ -1,0 +1,25 @@
+
+> weppcloud-static@0.1.0 smoke
+> playwright test --config=playwright.config.mjs combined-viewer.spec.js
+
+
+Running 1 test using 1 worker
+
+(node:3384746) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3384746) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Independent live grants: {"owner":{"runid":"grating-implementation","status":409},"public":{"runid":"appreciated-hole-in-the-wall","status":200}}
+Picking polygon interior: {"box":{"x":40,"y":251.796875,"width":1200,"height":468},"pickPoint":[747.6179793394791,174.94244793558028]}
+Visible polygon mouse picking passed
+Final artifact byte parity: combined-viewer-preparation/manifest.json a624b842fe549db4066f73c9ff7e07f103c4b24075c3718950eb73c267d794f5
+Final artifact byte parity: wepp/output/interchange/loss_pw0.hill.parquet 91b097e55cb3ce893d155eab1d131da8d893763863af5bc7c9af9dc1b722f532
+Final regenerated native samples match all nine browser-rendered samples
+Member landing links, same-origin URLs, mixed denial, aliases, payload rejection, CSRF, map picking, pan/zoom and share verified
+  ✓  1 [runs0] › tests/smoke/combined-viewer.spec.js:136:1 › Portland collection browser acceptance (2.0m)
+
+  1 passed (2.0m)
+
+To open last HTML report run:
+
+  npx playwright show-report

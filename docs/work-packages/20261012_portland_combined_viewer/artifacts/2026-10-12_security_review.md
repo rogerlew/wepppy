@@ -1,5 +1,7 @@
 # Security Review — Portland combined viewer
 
+> Historical scaffold checklist, superseded by the [implementation security review](2026-10-12_implementation_security_review.md). Pending fields below describe the original planning checkpoint; use the implementation review and package tracker for current release disposition.
+
 ## Metadata
 
 - Package: `docs/work-packages/20261012_portland_combined_viewer/`.

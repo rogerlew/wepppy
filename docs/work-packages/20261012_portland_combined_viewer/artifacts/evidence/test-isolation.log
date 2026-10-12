@@ -1,0 +1,13 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && /opt/venv/bin/python tools/check_test_isolation.py tests/weppcloud/routes/test_combined_watershed_viewer_security.py --quick
+⚠️  No randomization plugin detected; running without shuffle support.
+🔍 Test Isolation Check
+=====================================================================
+
+Running 2 iterations with random ordering...
+  ✓ Seed 42: All tests passed
+  ✓ Seed 123: All tests passed
+
+Checking file isolation...
+  ✓ /workdir/wepppy/tests/weppcloud/routes/test_combined_watershed_viewer_security.py - Isolated OK
+
+✅ No isolation issues detected.
