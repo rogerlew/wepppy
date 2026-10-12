@@ -45,3 +45,5 @@ Focused checks cover route admission, generator bounds/encoding, the real native
 ## Dense-map pointer interaction
 
 The combined viewer allows a stationary press/release lasting up to five seconds to select a hillslope. Deck includes synchronous picking time in its gesture duration; forest Chromium software rendering measured about 2.5 seconds for these legacy polygons. The scoped setting preserves drag-distance, pan and double-click behavior and leaves other dashboards unchanged. Very slow devices can use the keyboard hillslope selector if a pick exceeds five seconds. No numeric result, range or model parameter changes.
+
+The map displays OpenStreetMap attribution below the canvas; retain this credit when changing the basemap presentation.
