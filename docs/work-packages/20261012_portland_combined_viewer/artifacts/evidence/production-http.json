@@ -1,0 +1,19 @@
+[
+  {
+    "label": "collection",
+    "status": 403
+  },
+  {
+    "label": "empty generator",
+    "status": 400
+  },
+  {
+    "label": "loss",
+    "status": 404
+  },
+  {
+    "label": "geometry",
+    "status": 200,
+    "url": "https://wepp.cloud/weppcloud/runs/portland_BRnearMultnoma_CurCond.202203.cl532.chn_cs200/portland-snow/resources/subcatchments.json"
+  }
+]

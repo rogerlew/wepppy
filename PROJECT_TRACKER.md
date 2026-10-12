@@ -1,11 +1,16 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-10
-**Active Packages**: 44
+**Last Updated**: 2026-10-12
+**Active Packages**: 45
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Scaffolded: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)
+— existing PortlandGroup access, bounded per-run authorization, legacy artifact
+preparation, and Deck.gl collection/generator repair. Implementation and deployment
+have not started; contract checkpoint and independent reviews remain pending.
 
 Completed (code/forest): [GL dashboard flow-duration curves](docs/work-packages/20261010_gl_dashboard_flow_duration/package.md)
 — implemented daily source radios, linear/log probability, independent Omni

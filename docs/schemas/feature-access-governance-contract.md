@@ -263,3 +263,7 @@ automatic approval time and role association together. Repeats are idempotent,
 unrelated roles remain, and an existing PowerUser receives no fabricated
 historical acceptance. Self-service adds no internal group membership or
 private Batch/Culvert access.
+
+## Portland collection read admission (PCV-01)
+
+[The combined viewer contract](../ui-docs/contracts/combined-watershed-viewer-contract.md) restores the existing PortlandGroup role's read admission for the explicit Portland collection catalog. It does not introduce a feature-action entitlement, migrate membership, grant mutations, or alter ordinary ownerless/public resource visibility. Its reviewed checkpoint and forest implementation are separate from FA-01/FA-02 milestones.
