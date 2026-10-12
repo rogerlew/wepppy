@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docker/wepppyo3-interchange-preflight.py
+>>> WEPPpyo3 interchange import OK: /workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so
+>>> WEPPpyo3 interchange SHA256: 103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from wepppy.nodb.single_input_policy import require_wepp_input_policy
+from .soil_anisotropy import parse_anisotropy_inputs
 from typing import TYPE_CHECKING, Any
 
 from wepppy.all_your_base import isfloat, isint
@@ -30,6 +31,7 @@ def _coerce_optional_bool(value: Any) -> bool | None:
 
 class WeppInputParser:
     def parse(self, wepp: "Wepp", kwds: dict[str, Any]) -> None:
+        anisotropy = parse_anisotropy_inputs(wepp, kwds)
         requested_binary = kwds.get("wepp_bin")
         if isinstance(requested_binary, (list, tuple, set)):
             requested_binary = next((item for item in requested_binary if item not in (None, "")), None)
@@ -172,3 +174,6 @@ class WeppInputParser:
             # parse_inputs runs inside Wepp.parse_inputs() lock scope.
             # Setting the @nodb_setter property here would attempt to re-lock.
             wepp._delete_after_interchange = bool(delete_after_interchange)
+
+        for name, value in anisotropy.items():
+            setattr(wepp, "_" + name, value)

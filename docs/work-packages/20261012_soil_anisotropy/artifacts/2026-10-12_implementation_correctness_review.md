@@ -1,0 +1,51 @@
+# SA-01 implementation correctness review
+
+Initial independent review: 2026-10-12 20:27 UTC, `contract_correctness` agent.
+
+Rechecked 2026-10-12 20:44 UTC. **All four findings are resolved; no open high/medium implementation finding remains.** Code correctness and bounded forest browser/artifact acceptance pass the reviewed scope. The broad Python gate remains pending. This is not a deployment or scientific-stability approval.
+
+Accepted contract ancestor: `a94028e78f2603c937d0aba5f177ad270af4acbc`, committed 2026-10-12 20:18:20 UTC. Reviewed the subsequent uncommitted WEPPpy implementation and sibling wepppyo3 changes based on `bd630941e9f5d45b926291429ccc87c7cc92bae7`. Runtime code was not edited by this reviewer. Unrelated i-crews documentation was excluded.
+
+## Findings
+
+| ID | Severity | Evidence and impact | Disposition |
+| --- | --- | --- | --- |
+| SA-I01 | Medium | Moving preserved-upload validation into `_parse_sol()` placed `SingleInputError` and source-read failures inside the constructor's generic exception wrapper, losing existing validation type/code/status and filesystem error semantics. Surface: `wepppy/wepp/soils/utils/wepp_soil_util.py`, constructor/parser boundary. | Resolved: source snapshot and preserved validation now occur before the existing parser wrapper. Reviewer directly obtained `SingleInputError`, `invalid_single_input`, status 400 from an invalid preserved file. Real constructor/source-error regression added. |
+| SA-I02 | Medium | `wepppy/weppcloud/controllers_js/wepp.js:set_run_wepp_routine()` restores `hourlyCheckbox.disabled` from a pre-request snapshot. If the project becomes READONLY while the hourly save is pending, its completion re-enables the hourly checkbox. Actual controller plus existing `Project.applyReadonlyState` probe reproduced disabled `true` becoming `false` despite current read-only state. | Resolved: completion reads the current project read-only toggle when present; prior disabled state is used only when the toggle is absent. Independent actual-controller/helper overlap recheck leaves hourly disabled and numeric input read-only while retaining acknowledged hourly state. Focused regression added. |
+| SA-I03 | Medium | The new template supplied `extra_control_class="disable-readonly"`, but existing `numeric_field` accumulated classes inside a Jinja loop whose assignments were locally scoped. The rendered anisotropy inputs lacked the required class and therefore missed the existing project read-only mechanism. | Resolved: a bounded macro conformance fix concatenates the split classes outside the loop. Reviewer rendered all four MOFE/hourly states through actual Jinja; both controls now carry the class and have correct disabled eligibility. |
+| SA-I04 | Low | The new native function was imported but initially absent from the release wrapper's explicit `__all__`. | Resolved: public export list now includes `soil_anisotropy_values`. |
+
+The numeric-field repair restores its existing documented argument behavior; it introduces no new parameter or authorization rule. Existing shared-macro/template regressions should remain part of validation because other numeric fields also use this argument.
+
+## Direct probes and confirmed behavior
+
+- Actual forest native import returned `[[25,25,25,4]]` for depths `[100,500,500,800]`, upper 25 and lower unset. A later OFE with decreasing depths raised `ValueError` before returning replacements. Rust builds a separate result and does not mutate caller input or open soil files.
+- Reviewer loaded the soil utility from checkpoint `a94028e78` separately from the current module and compared symbolic preparation of a real two-OFE fixture. Legacy constructor flags plus migration and current cached-snapshot recomputation plus migration produced identical complete OFE/horizon dictionaries, restrictive layer and format. This checks against the prior implementation, not only two paths through the changed class.
+- Invalid preserved-file construction retains `SingleInputError` with its original code/status after SA-I01. Temporary source fixtures were removed by their temporary-directory scope.
+- Real Jinja render for `(multi_ofe, hourly)` values `(false,false)`, `(false,true)`, `(true,false)` and `(true,true)` emits two inputs with `disable-readonly`, enabled only in the last state. The empty lower value and populated upper value retain the nullable numeric contract.
+- The SA-I02 probe used actual `dom.js`, `events.js`, `forms.js`, `wepp.js` and the unchanged read-only helper body from `project.js`, with only network/control-base adapters isolated. A pending hourly save followed by applying READONLY left the numeric input read-only but re-enabled the hourly checkbox when the promise completed.
+- The identical probe against the corrected controller returned `hourlyDisabled=true`, `numberReadonly=true`, and acknowledged `savedHourly="true"`. It now preserves both the successful routine state and the independently changed project restriction.
+
+## Contract conformance and remaining evidence
+
+Request parsing distinguishes omission, single scalar/blank, explicit null, booleans, multiple values and nonfinite/out-of-range numbers. It validates submitted anisotropy before existing parser mutations and applies saved values inside the existing Wepp lock. Preparation revalidates active saved values; inactive malformed state is ignored without erasing it. Effective hourly state is passed from `prep_hillslopes()` through `_prep_multi_ofe()` into worker arguments, including explicit false/true overrides. Non-MOFE preparation receives no anisotropy override.
+
+The worker applies anisotropy after initial saturation, kslast, minimum-depth extension and maximum-depth clipping, before its single soil write. Native finite bounds, positive/nondecreasing depths, exact 500 mm cutoff and per-class original-value preservation match SA-01. Source zero and ratios outside new override limits remain unchanged where the class is unset. Format checks explicitly reject active overrides for preserved 7777/2006-family inputs without migrating them. Supported ordinary per-horizon formats include 9001.
+
+The single-read strategy preserves the source snapshot for uploaded validation and parsing, and reuses it for symbolic parsing with existing formula flags. No Python numerical fallback or second file transformation is present. Stub declarations and public NoDb helper exports were updated.
+
+## Final delta review and validation scope
+
+Native commit `822b6fe1200d980e9eb434547097c976eafcc38f` is clean. Reviewer independently hashed its installed shared object and three source files; all match `native-build.json`. The paired startup pin and its existing literal test both use SHA-256 `103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633`. Reviewer ran the actual preflight in the running forest web container and confirmed the required mounted release origin and hash. Updating the pin retains the existing fail-closed startup contract. The operator guide correctly requires paired native/Python deployment and rollback; no production rollout is inferred.
+
+The explicit two-element return in `effective_anisotropy()` preserves its order, validation and inactive behavior while satisfying the fixed tuple annotation. The five exception-allowlist updates advance only existing catch locations by three lines; reviewer confirmed those exact catch locations. No catch or exception policy was added.
+
+The retained disposable-run preparation receipt reports real locked persistence, reload, actual MOFE worker/native/writer execution, two OFEs with ratios 25/25/3, unchanged source SHA, one source read and one destination write. Terrain/climate descriptors are bounded synthetic fixtures, and no model was executed. `prepared-p1.sol` is retained. The new facade regression runs actual workers for saved hourly state, explicit false and explicit true overrides.
+
+Inspected final receipts: 44 targeted Python tests pass, all 968 Jest tests in 118 suites pass, native crate tests pass 107 unit plus 17 integration cases, soil utility stubtest passes and test-stub completeness passes. The broad Python rerun remains active. Its superseded first run used an already-collected old pin assertion and is not a passing gate. Core NoDb stubtest remains blocked by broader mypy build errors; the new anisotropy tuple error is absent from its final log. Frontend lint remains red on the unchanged `climate.test.js:300` conditional expectation; it must not be reported as passing.
+
+Browser acceptance passes. The earlier READONLY restoration failure was an existing 409 response when the test reversed state while the asynchronous manifest job was active. The smoke now polls each returned job ID through the normal authenticated job-status API until finished before reversal; production project-controller behavior is unchanged. The opt-in smoke targets the disposable fixture, restores its writable state and verifies real hourly saves/reload, saved inactive values, READONLY disable/restore, non-MOFE disablement and form serialization. It intercepts the Run request without enqueueing a model; the separate preparation receipt proves generated output. Failed-hourly-save rollback and overlapping READONLY/hourly completion are covered by controller tests and the independent actual-helper probe, respectively.
+
+Reviewer inspected `browser-validation.json`, the successful `/tmp/sa-browser-final.log` and `soil-options.png`. Both fields, depth classification help and instability warning are visible without menu obstruction. The normal authenticated download hashes to `7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828`, matching the preparation receipt and the independently hashed retained file. The final log reports one passing test in 17.2 seconds, matching the receipt; `/tmp/sa-browser.log` is an earlier successful run.
+
+Final handoff still requires the broad-suite result. Residual risks are production identity/mount/native pairing at rollout and scientific stability: the required numerical-instability warning is not a substitute for model validation. Browser validation uses the authorized development account and does not claim a full model execution or independent non-admin authorization audit.

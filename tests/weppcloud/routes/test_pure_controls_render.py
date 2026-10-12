@@ -5072,3 +5072,21 @@ def test_uploaded_landuse_report_selects_accepted_source(jinja_env):
     assert '<option value="single-user-defined" selected>' in html
     assert '&lt;source&gt;.MAN' in html
     assert '<option value="first" ' in html
+
+
+@pytest.mark.parametrize('multi_ofe,hourly,enabled', [(False, False, False), (False, True, False), (True, False, False), (True, True, True)])
+def test_soil_anisotropy_template_eligibility(jinja_env, multi_ofe, hourly, enabled):
+    rendered = jinja_env.get_template('controls/wepp_pure_advanced_options/soil_anisotropy.htm').render(
+        wepp=SimpleNamespace(multi_ofe=multi_ofe, run_wepp_ui=hourly,
+                             soil_anisotropy_upper=25.0, soil_anisotropy_lower=None))
+    inputs = re.findall(r'<input\b[^>]*>', rendered)
+    upper = next(tag for tag in inputs if 'id="soil_anisotropy_upper"' in tag)
+    lower = next(tag for tag in inputs if 'id="soil_anisotropy_lower"' in tag)
+    assert 'value="25.0"' in upper
+    assert 'value=""' in lower
+    assert ('disabled="disabled"' in upper) is not enabled
+    assert ('disabled="disabled"' in lower) is not enabled
+    assert 'min="1"' in upper and 'min="1"' in lower
+    assert 'max="100"' in upper and 'max="10"' in lower
+    assert 'disable-readonly' in upper
+    assert 'Values above 10 can cause numerical instabilities.' in rendered

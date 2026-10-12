@@ -1,0 +1,15 @@
+{
+  "eligibleEditable": true,
+  "submitted": [
+    30.5,
+    4
+  ],
+  "hourlyDisableReload": true,
+  "readonly": true,
+  "nonMofeDisabled": true,
+  "preparedDownloadSha256": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828",
+  "modelEnqueued": false,
+  "command": "SMOKE_SOIL_ANISOTROPY=true wctl run-npm smoke soil-anisotropy.spec.js",
+  "result": "1 passed (17.2s)",
+  "scope": "Real forest login, form serialization (Run request intercepted), real hourly saves/reload, real READONLY RQ jobs, normal artifact download, non-MOFE GET. No model execution."
+}

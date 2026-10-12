@@ -1,0 +1,19 @@
+{
+  "base_native_revision": "bd63094",
+  "contract_ancestor": "a94028e78",
+  "build_command": "PYO3_PYTHON=/usr/bin/python3.12 cargo build --release -p wepp_interchange_rust",
+  "sha256": "103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633",
+  "previous_sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
+  "native_revision": "822b6fe1200d980e9eb434547097c976eafcc38f",
+  "source_sha256": {
+    "wepp_interchange/src/soil_anisotropy.rs": "5411feb17504c48919d770358c88cbfc520e58bc246cb020878950351a6a3623",
+    "wepp_interchange/src/lib.rs": "6a1cf5f3b85ed078f395b6a1e5e10969c8da53c4980a4b540828e539990fdb4a",
+    "release/linux/py312/wepppyo3/wepp_interchange/__init__.py": "f5f3f060d601c3410972b776745e9dbd90218384a6f520be484000ede5128615"
+  },
+  "startup_pin": "docker/wepppyo3-interchange-preflight.py",
+  "forest_startup_preflight": "passed",
+  "rust_tests": {
+    "unit": 107,
+    "integration": 17
+  }
+}

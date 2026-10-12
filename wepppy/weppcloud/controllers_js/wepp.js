@@ -527,7 +527,23 @@ var Wepp = (function () {
                 });
         };
 
+        function syncAnisotropyControls(pending) {
+            var section = dom.qs("[data-wepp-anisotropy]", formElement);
+            if (!section) { return; }
+            var enabled = section.dataset.multiOfe === "true" && section.dataset.hourly === "true";
+            section.querySelectorAll("input").forEach(function (input) {
+                input.disabled = Boolean(pending) || !enabled;
+            });
+        }
+
         wepp.set_run_wepp_routine = function (routine, state) {
+            var anisotropySection = routine === "wepp_ui" ? dom.qs("[data-wepp-anisotropy]", formElement) : null;
+            var hourlyCheckbox = anisotropySection ? dom.qs("#checkbox_hourly_seepage", formElement) : null;
+            var checkboxWasDisabled = hourlyCheckbox ? hourlyCheckbox.disabled : false;
+            if (anisotropySection) {
+                syncAnisotropyControls(true);
+                if (hourlyCheckbox) { hourlyCheckbox.disabled = true; }
+            }
             var taskMsg = "Setting " + routine + " (" + state + ")";
             if (statusAdapter && typeof statusAdapter.html === "function") {
                 statusAdapter.html(taskMsg + "...");
@@ -544,6 +560,9 @@ var Wepp = (function () {
                         wepp.pushResponseStacktrace(wepp, response);
                         return;
                     }
+                    if (anisotropySection) {
+                        anisotropySection.dataset.hourly = state ? "true" : "false";
+                    }
                     var message = taskMsg + "... Success";
                     if (statusAdapter && typeof statusAdapter.html === "function") {
                         statusAdapter.html(message);
@@ -552,6 +571,16 @@ var Wepp = (function () {
                 })
                 .catch(function (error) {
                     wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                })
+                .finally(function () {
+                    if (anisotropySection) {
+                        if (hourlyCheckbox) {
+                            hourlyCheckbox.checked = anisotropySection.dataset.hourly === "true";
+                            var readonlyToggle = dom.qs('[data-project-toggle="readonly"]');
+                            hourlyCheckbox.disabled = readonlyToggle ? Boolean(readonlyToggle.checked) : checkboxWasDisabled;
+                        }
+                        syncAnisotropyControls(false);
+                    }
                 });
         };
 

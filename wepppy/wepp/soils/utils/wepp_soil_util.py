@@ -227,11 +227,12 @@ class WeppSoilUtil(object):
         """
         self._preserve_input_format = preserve_input_format
         if preserve_input_format:
-            from pathlib import Path
-            from wepppy.wepp.single_input import validate_soil_text
             if compute_erodibilities or compute_conductivity or not fn.endswith('.sol'):
                 raise ValueError("Preserved inputs require .sol text without recomputation")
-            validate_soil_text(Path(fn).read_text(), max_ofes=32)
+            from wepppy.wepp.single_input import validate_soil_text
+            with open(fn) as fp:
+                self._source_lines = fp.readlines()
+            validate_soil_text(''.join(self._source_lines), max_ofes=32)
 
         self.compute_erodibilities = compute_erodibilities
         self.compute_conductivity = compute_conductivity
@@ -250,8 +251,10 @@ class WeppSoilUtil(object):
 
     def _parse_sol(self, fn: str) -> None:
         """Populate ``self.obj`` from a raw WEPP ``.sol`` file."""
-        with open(fn) as fp:
-            lines = fp.readlines()
+        if not hasattr(self, '_source_lines'):
+            with open(fn) as fp:
+                self._source_lines = fp.readlines()
+        lines = self._source_lines
 
         if getattr(self, '_preserve_input_format', False):
             lines = [L.strip() for L in lines]
@@ -450,6 +453,33 @@ class WeppSoilUtil(object):
                     res_lyr=res_lyr)
 
         self.obj = soil
+
+    def recompute_wepp_parameters(self) -> None:
+        """Reparse the original in-memory snapshot with the legacy formula flags."""
+        if self._preserve_input_format:
+            raise ValueError("Preserved inputs prohibit parameter recomputation")
+        self.compute_erodibilities = True
+        self.compute_conductivity = True
+        if self.fn.endswith('.sol'):
+            self._parse_sol(self.fn)
+
+    def modify_anisotropy(self, upper: Optional[float], lower: Optional[float]) -> None:
+        """Apply SA-01 in Rust after depth edits, before the sole soil write."""
+        if upper is None and lower is None:
+            return
+        if self.datver not in (7778, 9001, 9002, 9003, 9005):
+            raise ValueError(f"Soil version {self.datver} does not support per-horizon anisotropy overrides")
+        from wepppyo3.wepp_interchange import soil_anisotropy_values
+        values = soil_anisotropy_values([
+            [(horizon['solthk'], horizon['anisotropy']) for horizon in ofe['horizons']]
+            for ofe in self.obj['ofes']
+        ], upper, lower)
+        for ofe, ratios in zip(self.obj['ofes'], values):
+            for horizon, ratio in zip(ofe['horizons'], ratios):
+                horizon['anisotropy'] = ratio
+        self.obj['header'].append(
+            f'SA-01 anisotropy: bottom depth <=500 mm upper={upper}, >500 mm lower={lower}; None preserves source'
+        )
 
     def modify_initial_sat(self, initial_sat: float) -> None:
         """Set the initial saturation across all OFEs to ``initial_sat``."""

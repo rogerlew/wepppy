@@ -9,14 +9,16 @@ Users preparing MOFE models with hourly water balance/deep seepage can optionall
 ## Progress
 
 - [x] Inspect Python soil preparation and sibling wepppyo3 repository.
-- [ ] M0: Finalize horizon semantics, canonical contract/ADR and two independent reviews; commit standalone checkpoint.
-- [ ] M1: Add and test Rust in-memory anisotropy kernel, rebuild affected native extension.
-- [ ] M2: Wire saved inputs, eligibility, single-read preparation and UI; add regression tests.
+- [x] M0: Finalize horizon semantics, canonical contract/ADR and two independent reviews; commit standalone checkpoint.
+- [x] M1: Add and test Rust in-memory anisotropy kernel, rebuild affected native extension.
+- [x] M2: Wire saved inputs, eligibility, single-read preparation and UI; add regression tests.
 - [ ] M3: Validate actual generated files, source/read-write parity, browser controls and broad gates; independent final review and handoff.
 
 ## Surprises & Discoveries
 
 Current advanced soil preparation is Python `WeppSoilUtil`, not Rust. Both `prep_soil` and `prep_multi_ofe_hillslope` mutate one object and write once, but symbolic values cause a second parse. Preserved uploaded native soils also read once for validation and again for parsing. Existing generated defaults use a different shallow-layer cutoff; the new optional 500 mm override must not change unset defaults.
+
+A forest service restart exposed the required native startup SHA pin: the new binary was rejected until `docker/wepppyo3-interchange-preflight.py` was paired with its hash. The affected idle services were restored after updating the pin. This is part of the release, not a bypass. A template regression check also exposed an existing Jinja loop-scope bug dropping `extra_control_class`; the numeric macro now preserves that documented argument so project read-only applies. Independent review caught and closed upload error translation and concurrent read-only/hourly-toggle issues.
 
 ## Decision Log
 
@@ -24,7 +26,7 @@ Current advanced soil preparation is Python `WeppSoilUtil`, not Rust. Both `prep
 
 ## Outcomes & Retrospective
 
-Discovery complete; runtime untouched. Acceptance and final native source/binary provenance remain outstanding.
+M0–M2 are implemented on forest. Contract ancestor `a94028e78` has both required reviews. Actual generated two-OFE soils have 25/25/3 at 100/500/800 mm, unchanged source bytes and one source read/one destination write. Final browser and broad gates remain in progress; no production deployment or push.
 
 ## Context and Orientation
 

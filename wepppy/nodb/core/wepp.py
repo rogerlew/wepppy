@@ -651,11 +651,8 @@ def prep_soil(args: Tuple[Any, ...]) -> Tuple[str, float]:
     if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
         # Match legacy Tenerife template processing:
         # WeppSoilUtil(..., compute_erodibilities=True, compute_conductivity=True).to7778()
-        soilu = WeppSoilUtil(
-            src_fn,
-            compute_erodibilities=True,
-            compute_conductivity=True,
-        ).to7778()
+        soilu.recompute_wepp_parameters()
+        soilu = soilu.to7778()
     soilu.modify_initial_sat(initial_sat)
 
     if kslast is not None:
@@ -729,11 +726,8 @@ def prep_multi_ofe_hillslope(
         preserve_input_format = bool(args[15]) if len(args) > 15 else False
         soilu = WeppSoilUtil(soil_src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))
         if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
-            soilu = WeppSoilUtil(
-                soil_src_fn,
-                compute_erodibilities=True,
-                compute_conductivity=True,
-            ).to7778()
+            soilu.recompute_wepp_parameters()
+            soilu = soilu.to7778()
         soilu.modify_initial_sat(initial_sat)
 
         if kslast is not None:
@@ -745,6 +739,9 @@ def prep_multi_ofe_hillslope(
         if clip_soils:
             soilu.clip_soil_depth(clip_soils_depth)
 
+        anisotropy = args[16] if len(args) > 16 else (None, None)
+        if any(value is not None for value in anisotropy):
+            soilu.modify_anisotropy(*anisotropy)
         soilu.write(soil_dst_fn)
 
     man_fn = f'hill_{topaz_id}.mofe.man'
@@ -2106,9 +2103,11 @@ class Wepp(NoDbBase):
                 else:
                     shutil.copyfile(projected_src_fn, dst_fn)
 
-    def _prep_multi_ofe(self, translator, max_workers: Optional[int] = None):
+    def _prep_multi_ofe(self, translator, max_workers: Optional[int] = None, *, wepp_ui: Optional[bool] = None):
         require_wepp_input_policy(self)
         self.logger.info('    Prepping _prep_multi_ofe... ')
+        from .soil_anisotropy import effective_anisotropy
+        anisotropy = effective_anisotropy(self, wepp_ui)
         wd = self.wd
 
         climate = self.climate_instance
@@ -2172,6 +2171,7 @@ class Wepp(NoDbBase):
                     modify_kslast_pars,
                     single_input_uploads_enabled(self),
                     single_input_uploads_enabled(self) and int(soils.mode) == 5,
+                    anisotropy,
                 )
             )
 
@@ -2946,6 +2946,14 @@ class Wepp(NoDbBase):
         p.wait()
 
         assert _exists(loss_grid_wgs)
+
+    @property
+    def soil_anisotropy_upper(self) -> Optional[float]:
+        return getattr(self, '_soil_anisotropy_upper', None)
+
+    @property
+    def soil_anisotropy_lower(self) -> Optional[float]:
+        return getattr(self, '_soil_anisotropy_lower', None)
 
     @property
     def kslast(self) -> Optional[float]:

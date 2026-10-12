@@ -13,7 +13,7 @@ from typing import Sequence
 
 DEFAULT_RELEASE_ROOT = Path("/workdir/wepppyo3/release/linux/py312")
 EXPECTED_INTERCHANGE_SHA256 = (
-    "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8"
+    "103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633"
 )
 
 

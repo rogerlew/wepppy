@@ -397,6 +397,10 @@ Adjusts soil profile depth constraints and initial soil saturation before runs a
 | **Clip Soils Minimum Depth** | Enables minimum depth enforcement. |
 | **Soils Minimum Depth (mm)** | Raises shallow profiles so minimum depth is met. |
 | **Initial soil saturation (fraction)** | Initial saturation assigned across prepared soil profiles. |
+| **Upper horizon anisotropy (bottom depth ≤50 cm)** | Optional horizontal/vertical conductivity ratio, 1–100. |
+| **Lower horizon anisotropy (bottom depth >50 cm)** | Optional horizontal/vertical conductivity ratio, 1–10. |
+
+Anisotropy fields are editable only for MOFE with hourly water balance and deep seepage enabled. Blank fields retain the source soil values. Classification uses each horizon's bottom depth after depth clipping/extension; a horizon crossing 50 cm uses the lower value, without splitting the horizon. Disabling hourly mode retains saved overrides but does not apply them. Uploaded formats without per-horizon anisotropy (including 7777 and 2006) cannot accept these overrides; preparation reports an error instead of changing their format.
 
 ### Modeling impact
 
@@ -413,6 +417,7 @@ Adjusts soil profile depth constraints and initial soil saturation before runs a
 
 - If both min/max clipping are enabled, minimum depth must be <= maximum depth.
 - Large `initial_sat` shifts can dominate first-event calibration and mask other parameter effects.
+- Anisotropy values above 10 can cause numerical instabilities. Accepted values are not a guarantee of stable or physically appropriate results.
 
 ## 11) Phosphorus
 

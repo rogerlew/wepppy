@@ -62,7 +62,10 @@ class WeppPrepService:
                 reveg = True
 
         if wepp.multi_ofe:
-            wepp._prep_multi_ofe(translator, max_workers=max_workers)
+            if wepp_ui is None:
+                wepp._prep_multi_ofe(translator, max_workers=max_workers)
+            else:
+                wepp._prep_multi_ofe(translator, max_workers=max_workers, wepp_ui=wepp_ui)
         else:
             if slp_relpath == "":
                 wepp._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)

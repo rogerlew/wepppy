@@ -751,11 +751,7 @@
 {% endif %}
 {% set control_classes = ['wc-field__control', 'wc-field__control--number'] %}
 {% if extra_control_class %}
-  {% for cls in extra_control_class.split() %}
-    {% if cls %}
-      {% set control_classes = control_classes + [cls] %}
-    {% endif %}
-  {% endfor %}
+  {% set control_classes = control_classes + extra_control_class.split() %}
 {% endif %}
 {% if attrs.pop('class', None) %}
   {# external class overrides are discouraged; use extra_control_class instead #}

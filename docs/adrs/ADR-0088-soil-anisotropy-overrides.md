@@ -6,7 +6,7 @@ Status: accepted contract checkpoint; implementation pending.
 
 Decision venue: user/Codex workspace conversation, 2026-10-12, America/Los_Angeles. Participants: requesting operator and Codex. Decision owner: requesting operator; implementer: Codex. No additional meeting participants or scientific validation are inferred.
 
-The operator requested MOFE-only controls for hourly water balance and deep seepage, upper horizons with a 50 cm threshold and ratios1–100, lower horizons1–10, a warning above 10, and a Rust implementation with read-once/write-once preparation.
+The operator requested MOFE-only controls for hourly water balance and deep seepage, upper horizons with a 50 cm threshold and ratios 1–100, lower horizons 1–10, a warning above 10, and a Rust implementation with read-once/write-once preparation.
 
 ## Decision
 

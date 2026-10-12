@@ -12,6 +12,55 @@ describe("Wepp controller", () => {
     let statusStreamMock;
     let wepp;
 
+    test("anisotropy follows acknowledged hourly state and preserves read-only", async () => {
+        const upper = document.querySelector('[name="soil_anisotropy_upper"]');
+        const lower = document.querySelector('[name="soil_anisotropy_lower"]');
+        const checkbox = document.getElementById("checkbox_hourly_seepage");
+        let complete;
+        postJsonMock.mockImplementationOnce(() => new Promise((resolve) => { complete = resolve; }));
+        checkbox.checked = true;
+        const pending = wepp.set_run_wepp_routine("wepp_ui", true);
+        expect(upper.disabled).toBe(true);
+        expect(checkbox.disabled).toBe(true);
+        complete({ body: { Content: { routine: "wepp_ui", state: true } } });
+        await pending;
+        expect(upper.disabled).toBe(false);
+        upper.readOnly = true;
+        postJsonMock.mockRejectedValueOnce(new Error("save failed"));
+        checkbox.checked = false;
+        await wepp.set_run_wepp_routine("wepp_ui", false);
+        expect(checkbox.checked).toBe(true);
+        expect(upper.disabled).toBe(false);
+        expect(upper.readOnly).toBe(true);
+        await wepp.set_run_wepp_routine("wepp_ui", false);
+        expect(upper.disabled).toBe(true);
+        expect(lower.disabled).toBe(true);
+        expect(upper.value).toBe("25");
+    });
+
+    test("hourly acknowledgement cannot enable anisotropy outside MOFE", async () => {
+        document.querySelector("[data-wepp-anisotropy]").dataset.multiOfe = "false";
+        await wepp.set_run_wepp_routine("wepp_ui", true);
+        expect(document.querySelector('[name="soil_anisotropy_upper"]').disabled).toBe(true);
+    });
+
+    test("hourly completion preserves a newly read-only project", async () => {
+        const readonly = document.createElement("input");
+        readonly.type = "checkbox";
+        readonly.dataset.projectToggle = "readonly";
+        document.body.appendChild(readonly);
+        let complete;
+        postJsonMock.mockImplementationOnce(() => new Promise((resolve) => { complete = resolve; }));
+        const pending = wepp.set_run_wepp_routine("wepp_ui", true);
+        readonly.checked = true;
+        document.getElementById("checkbox_hourly_seepage").disabled = true;
+        document.querySelector('[name="soil_anisotropy_upper"]').readOnly = true;
+        complete({ body: { Content: { state: true } } });
+        await pending;
+        expect(document.getElementById("checkbox_hourly_seepage").disabled).toBe(true);
+        expect(document.querySelector('[name="soil_anisotropy_upper"]').readOnly).toBe(true);
+    });
+
     beforeEach(async () => {
         jest.resetModules();
 
@@ -38,6 +87,11 @@ describe("Wepp controller", () => {
                 <button type="button" data-wepp-action="run"></button>
                 <button type="button" data-wepp-action="prep-watershed"></button>
                 <input type="checkbox" data-wepp-routine="pmet">
+                <input id="checkbox_hourly_seepage" type="checkbox" data-wepp-routine="wepp_ui">
+                <div data-wepp-anisotropy data-multi-ofe="true" data-hourly="false">
+                    <input name="soil_anisotropy_upper" value="25" disabled>
+                    <input name="soil_anisotropy_lower" value="3" disabled>
+                </div>
                 <select id="reveg_scenario" data-wepp-role="reveg-scenario">
                     <option value="">Observed</option>
                     <option value="user_cover_transform">User cover</option>
