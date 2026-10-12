@@ -150,6 +150,23 @@ async function setReadonly(page, state) {
   }, jobId), {timeout:60000}).toBe('finished');
 }
 
+async function expectRejectedOverride(page, value) {
+  const response = await page.evaluate(async (upper) => {
+    try {
+      const result = await window.WCHttp.postJsonWithSessionToken(
+        // Prep-only uses the same payload handler without model-ready watershed admission.
+        window.url_for_run('prep-wepp-watershed', {prefix:'/rq-engine/api'}),
+        {soil_anisotropy_upper:upper}
+      );
+      return {status:result.status, body:result.body};
+    } catch (error) {
+      return {status:error.status, body:error.body};
+    }
+  }, value);
+  expect(response.status).toBe(400);
+  expect(response.body.error.message).toContain(value === 101 ? 'soil_anisotropy_upper' : 'require MOFE');
+}
+
 test('soil anisotropy forest acceptance', async ({ page }) => {
   test.skip(process.env.SMOKE_SOIL_ANISOTROPY !== 'true', 'Requires the disposable SA-01 forest fixture.');
   test.setTimeout(240000);
@@ -182,15 +199,19 @@ test('soil anisotropy forest acceptance', async ({ page }) => {
   await expect.poll(() => payload).toBeTruthy();
   expect(Number(payload.soil_anisotropy_upper)).toBe(30.5);
   expect(Number(payload.soil_anisotropy_lower)).toBe(4);
+  await page.unroute('**/rq-engine/api/runs/**/run-wepp');
+  await expectRejectedOverride(page, 101);
   const hourly = page.locator('#checkbox_hourly_seepage');
   await page.locator('#wepp_hourly_seepage').evaluate((node) => {node.open=true;});
   await hourly.uncheck();
   await expect(hourly).toBeEnabled();
   await expect(upper).toBeDisabled();
   await expect(lower).toBeDisabled();
+  await expectRejectedOverride(page, 25);
   await page.reload();
   await expect(upper).toBeDisabled();
   await expect(upper).toHaveValue('25.0');
+  await expect(lower).toHaveValue('3.0');
   await hourly.evaluate((input) => {
     for (let node = input.parentElement; node; node = node.parentElement) {
       if (node.tagName === 'DETAILS') node.open = true;
@@ -217,5 +238,5 @@ test('soil anisotropy forest acceptance', async ({ page }) => {
   expect(createHash('sha256').update(bytes).digest('hex')).toBe(receipt.prepared_sha256);
   await page.goto(base+'/weppcloud/runs/grating-implementation/disturbed9002/?skip_migration_check=true');
   await expect(page.locator('#soil_anisotropy_upper')).toBeDisabled();
-  console.log('SA-01 browser acceptance:',JSON.stringify({eligibleEditable:true,submitted:[30.5,4],hourlyDisableReload:true,readonly:true,nonMofeDisabled:true,preparedDownloadSha256:receipt.prepared_sha256,modelEnqueued:false}));
+  console.log('SA-01 browser acceptance:',JSON.stringify({eligibleEditable:true,submitted:[30.5,4],invalidAndInactiveHttp400:true,hourlyDisableReload:true,readonly:true,nonMofeDisabled:true,preparedDownloadSha256:receipt.prepared_sha256,modelEnqueued:false}));
 });

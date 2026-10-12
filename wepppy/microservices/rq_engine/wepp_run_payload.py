@@ -87,6 +87,8 @@ SUPPORTED_WEPP_RUN_FORM_FIELDS: set[str] = {
     "clip_soils_minimum_depth",
     "rosetta_wc_fc_from_disturbed_bd_override",
     "initial_sat",
+    "soil_anisotropy_upper",
+    "soil_anisotropy_lower",
     "clip_hillslopes",
     "hillslope_clip_length",
     "clip_hillslope_length",

@@ -5,14 +5,14 @@
 
 Running 1 test using 1 worker
 
-(node:44009) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:96553) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:44009) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:96553) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-SA-01 browser acceptance: {"eligibleEditable":true,"submitted":[30.5,4],"hourlyDisableReload":true,"readonly":true,"nonMofeDisabled":true,"preparedDownloadSha256":"7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828","modelEnqueued":false}
-  ✓  1 [runs0] › tests/smoke/soil-anisotropy.spec.js:153:1 › soil anisotropy forest acceptance (15.6s)
+SA-01 browser acceptance: {"eligibleEditable":true,"submitted":[30.5,4],"invalidAndInactiveHttp400":true,"hourlyDisableReload":true,"readonly":true,"nonMofeDisabled":true,"preparedDownloadSha256":"7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828","modelEnqueued":false}
+  ✓  1 [runs0] › tests/smoke/soil-anisotropy.spec.js:170:1 › soil anisotropy forest acceptance (16.0s)
 
-  1 passed (17.2s)
+  1 passed (17.5s)
 
 To open last HTML report run:
 
