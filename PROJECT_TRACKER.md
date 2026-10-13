@@ -369,7 +369,7 @@ Feedback mechanisms:
 
 ### EDDE v2 client and climate-workflow feasibility
 
-**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) recommends holding production integration; independent review findings resolved; broad regression gate remains open.
+**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) recommends holding production integration; independent review findings resolved; broad regression gate remains open. A midpoint repair for generic PRISM inversions passed the retained failure cases and is proposed in ADR-0092; production writers remain unchanged.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_feasibility/package.md)
 **Scope**: Bounded API client, actual U.S./Canadian location queries, grid eligibility, data-quality and acquisition study, executable CLIGEN workflows, and Multiple PRISM where available. Multiple Interpolated excluded initially. Evidence-based disposition gates integration.
 

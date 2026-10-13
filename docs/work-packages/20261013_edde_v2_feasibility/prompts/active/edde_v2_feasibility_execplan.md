@@ -9,6 +9,7 @@ A researcher will query real U.S. and Canadian points from the public EDDE v2 ar
 
 ## Progress
 
+- [x] Operator follow-up: evaluate a concrete PRISM inversion patch using retained failing climates, quantify daily/monthly/signal changes, validate fresh WEPP consumption, and identify all production writer paths before proposing a formula change.
 
 - [x] (2026-10-13 21:20 UTC) Planning documents committed as `03435abc5`; inspect existing clients, CLIGEN replay, PRISM revision, study fixtures, and running dev stack.
 - [x] (2026-10-13 22:00 UTC) M1: Implement bounded public-archive discovery, native-grid eligibility, daily point extraction, CLI, and meaningful offline tests; retain live inventory and acquisition evidence.
@@ -24,6 +25,8 @@ The first daily file inspected is NETCDF3_CLASSIC, despite the registry descript
 Live inventory found MPI future daily coverage ending in 2099 and NorESM SSP2-4.5 ending in 2079, with no NorESM SSP3-7.0 directory. Use 2060–2079 for matched model comparisons, and retain MPI 2080–2099 as a distinct late-century experiment. Topanga's three sampled hillslopes and Miami select ocean-mask cells; eight Canadian cities select valid land cells. A 465-point-day precipitation comparison establishes same-labeled 00–23 UTC daily aggregation (maximum error 1.22e-6 mm). Pilot climate generation and 59 fresh WEPP runs passed; one PRISM target was rejected for daily temperature inversion, without clamping. The operator continued after the pending independent-review request; correctness and security reviewers were then engaged. Their concrete findings prompted rejection of invalid PRISM source files, protection of existing companion provenance, suppression of ambient netrc authentication, and additional seasonal wet-day/extreme diagnostics.
 
 ## Decision Log
+
+Operator follow-up: investigate how to patch PRISM inversions. Start with midpoint projection of inverted adjusted extrema; compare one-sided clamp and swapping. This is a bounded formula evaluation in retained study artifacts, not authorization to silently change unrelated weather fields. Production daily Rust, Python breakpoint, public PRISM, and EDDE paths must be identified.
 
 Operator follow-up (2026-10-13): document PRISM inversions instead of treating them as a separate EDDE integration blocker. Code inspection and retained normals establish a generic independent-offset mechanism; other-dataset occurrence frequency is unmeasured. No executable change was requested or made.
 
@@ -87,3 +90,5 @@ Final implementation and retained evidence were committed as `5dd665305`. Indepe
 Scope clarification revision: corrected the handoff framing so diagnostic historical runs and known CLIGEN behavior do not expand the requested future-climate feature. Report, package scopes, durable contract, and trackers now record that distinction. Documentation lint passed; no executable behavior changed.
 
 PRISM clarification revision: report and authoritative scope now distinguish the generic spatialization limitation from EDDE-specific findings, following operator direction to document it. Current experimental rejection remains explicit.
+
+Patch investigation outcome: midpoint projection repaired all 15 observed inversions in three climates; all three passed fresh 20-year WEPP consumption. All 21 previously accepted revisions remain numerically unchanged. ADR-0092 proposes the formula and coordinated Rust/Python implementation; this evaluation does not modify production climate writers. Monthly perturbation and exact written/consumed evidence are retained under artifacts/prism-inversion-patch-*.

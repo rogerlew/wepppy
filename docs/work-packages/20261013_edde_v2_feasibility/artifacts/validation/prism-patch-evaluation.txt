@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20261013_edde_v2_feasibility/artifacts/evaluate_prism_inversion_patch.py
+Validated 24 revisions; 15 corrected days; 3 fresh WEPP runs

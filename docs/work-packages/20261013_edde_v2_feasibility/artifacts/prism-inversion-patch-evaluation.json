@@ -1,0 +1,2520 @@
+{
+  "status": "complete",
+  "scope": "candidate evaluation only; production writers unchanged",
+  "environment": "development weppcloud container",
+  "uid": 1000,
+  "gid": 993,
+  "scratch": "/tmp/prism-inversion-evaluation-cbzg2y_s",
+  "source_archive_sha256": "a109049f7e2c7699e9db149d2176266fbf659b68c224f0d208daa1edd1a294bb",
+  "fixture_sha256": "866b6a6bb4bfd1530f5aad88901d634627f1881a68f24aa1f803ae83364dd627",
+  "script_sha256": "9840b977437210db12ede6adbf6834fd8b5ef5cf29545e2d130c790650d5871d",
+  "candidate": "midpoint only on inverted adjusted extrema",
+  "records": [
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "output_sha256": "6f9173b224ce1054b812b35d7a45ae407fe91616048143844003db87808c855e",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "output_sha256": "58de2615d2801eabc1c480d181643c2d46642f28a052506f0549c19e35df3564",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "output_sha256": "ed36b574ff8e63f9f2720328c5d53531333c211b17df834cb5eb1cd4b4387e35",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "output_sha256": "45e0b5744a1e9257f0414c09c46cf7853c07c5946e6fc636a8f88e8ee4ad67d4",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "output_sha256": "3fbb8b14f060e0ff685ed1317822ab768d7a6db0b14463c8d1c0ccc2891f392e",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "output_sha256": "2572efef46894589d3f6c56ed249a0faf71150ef01aa166454e747eaf1bf743c",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "output_sha256": "2075ad92ae5466cec29083482c68f3a912b1106161d46ea5a9d5003d94d667c8",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "output_sha256": "d9f12119a1cc25b361af02fd58aef45ac71b220eee01a3c9756438ac7f340950",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "days": 7305,
+      "corrected_days": 5,
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "output_sha256": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36",
+      "maximum_midpoint_correction_c": 0.050000000000000155,
+      "maximum_one_sided_or_swap_correction_c": 0.10000000000000031,
+      "maximum_written_midpoint_change_c": 0.04999999999999999,
+      "maximum_calendar_month_written_temperature_change_c": 0.0033333333333333327,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 3.581364595565021e-19,
+          "tmin_c": -3.581364595565021e-19,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 8.333333333333359e-05,
+          "tmin_c": -8.333333333333359e-05,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": -0.00016666666666666663
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h1153",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "output_sha256": "065a5f82d76e492da28389056fdcc86c6d9611d3f7145d363f6d6b4873d6f0bf",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h122",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "output_sha256": "e1f3dd239422aa4ea1c13b34aa60ea6da0cf01f4c381ce37903cf2e933723e10",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h2196",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "output_sha256": "7e81c1fa647bb9e780424609a51626552fc9abedeb01ef65c9f3dc7a76e9f94d",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h72",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "output_sha256": "9168c89e22c1c728e2136010ab9df9e851f9833ed9b69049a72d68dba8168560",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h78",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "output_sha256": "cf52da121ceaece7f8ef80107dbd9129f185c019420b084b019d07f95c0b93f8",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "days": 7305,
+      "corrected_days": 8,
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "output_sha256": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325",
+      "maximum_midpoint_correction_c": 0.25,
+      "maximum_one_sided_or_swap_correction_c": 0.5,
+      "maximum_written_midpoint_change_c": 0.05000000000000002,
+      "maximum_calendar_month_written_temperature_change_c": 0.009677419354838712,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 3.581364595565021e-19,
+          "tmin_c": -3.581364595565021e-19,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.00035398230088495527,
+          "tmin_c": -0.00035398230088495527,
+          "serialized_tmax_c": 0.0003539823008849561,
+          "serialized_tmin_c": -0.00035398230088495565
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0008064516129032258,
+          "tmin_c": -0.0008064516129032258,
+          "serialized_tmax_c": 0.000967741935483871,
+          "serialized_tmin_c": -0.0006451612903225806
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "output_sha256": "9cd3dd57b2301dda603c94da28d603707d8b41c244d62c53d684f6fe7961214d",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "output_sha256": "02e46b12951d35be2acd37c7f9dd22b55b9dc2e3c63f544e5c848e41c4cd02b0",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "output_sha256": "3dd5420cd6da3ba7e9a3913cc5cc5ed06cbc5ebd32cd5581ac154b621dc047f8",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "output_sha256": "60ea9b6a05696ed9f6e3938c2461f952acfce8b42a80b772f1f35f5250b7f580",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "output_sha256": "5728e270cb6bee03c0b3683419d1822d1bf66c2cfbeb2fc5b549a40d406c14d5",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "output_sha256": "9899d264c79d5cba8ac186f17cf2fe0a7fdcda176e2efcff00ad93937f16506c",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 3.552713678800501e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "output_sha256": "9ae94d5b0af46ea4e603ffb57a6ac88df4ceb2dc83ac5de8cd6586cfd0cefb72",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "days": 7305,
+      "corrected_days": 0,
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "output_sha256": "c613b4b77f02927cd9b8090ad9713d7b7fb13bc29af7a8113723fa3a70920235",
+      "maximum_midpoint_correction_c": 0.0,
+      "maximum_one_sided_or_swap_correction_c": 0.0,
+      "maximum_written_midpoint_change_c": 1.7763568394002505e-15,
+      "maximum_calendar_month_written_temperature_change_c": 0.0,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        }
+      ]
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "days": 7305,
+      "corrected_days": 2,
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "output_sha256": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582",
+      "maximum_midpoint_correction_c": 0.25,
+      "maximum_one_sided_or_swap_correction_c": 0.5,
+      "maximum_written_midpoint_change_c": 0.04999999999999993,
+      "maximum_calendar_month_written_temperature_change_c": 0.009677419354838708,
+      "monthly_corrections": [
+        {
+          "month": 1,
+          "tmax_c": 8.953411488912553e-20,
+          "tmin_c": -8.953411488912553e-20,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 2,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 3,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 4,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 5,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 6,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 7,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 8,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 9,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 10,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 11,
+          "tmax_c": 0.0,
+          "tmin_c": 0.0,
+          "serialized_tmax_c": 0.0,
+          "serialized_tmin_c": 0.0
+        },
+        {
+          "month": 12,
+          "tmax_c": 0.0004032258064516129,
+          "tmin_c": -0.0004032258064516129,
+          "serialized_tmax_c": 0.0004838709677419354,
+          "serialized_tmin_c": -0.00032258064516129043
+        }
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.6208081770455465,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1417.65,
+      "annual_runoff_mm": 99.022020581215,
+      "annual_et_mm": 793.5615,
+      "annual_deep_percolation_mm": 50.326425811195,
+      "annual_lateral_mm": 464.1785000000001,
+      "minimum_soil_water_mm": 92.1,
+      "maximum_swe_mm": 1256.1,
+      "outputs": {
+        "H132.element.dat": "4e0a8ca5faaec8b6d028b3edca72914ba8f5fe139b419930b08c1bdd23ce7617",
+        "H132.soil.dat": "8a9ae8d5f8648125be074be3d4d5dbcb20dc7a27057bc47918da47e6438c7816",
+        "H132.ebe.dat": "d1d36e3e91887bf2bbc8b2555e878d50aabfc16346043f0872265005d7b99e1f",
+        "H132.loss.dat": "a93b300a701b75a58595e1e03d82570da6b0ae66ab450b8f1670d80acf8f6366",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "11070dfaa0696f51ff7201f0838b82b2311079572e401c16ed541d78276bb11d",
+        "H132.pass.dat": "54b801b62d0aeb19d3ae85e64ed528ff5ddda1ceac2173ac0273989101193279"
+      }
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7214127130573615,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1403.94,
+      "annual_runoff_mm": 51.848243131699995,
+      "annual_et_mm": 741.6065,
+      "annual_deep_percolation_mm": 55.50781541215001,
+      "annual_lateral_mm": 542.027,
+      "minimum_soil_water_mm": 91.83,
+      "maximum_swe_mm": 1180.32,
+      "outputs": {
+        "H132.element.dat": "b155b1daf81d341998a78b67eeab44566009114c3579356122d13f12ad107520",
+        "H132.soil.dat": "e1ec32d4a684850bac8d1c2fc911bc514f0b0363fa08c96b6d964f1789fccedd",
+        "H132.ebe.dat": "c6fd52f501cc6b8e9af66f9232f9b51332fa8dd4d6e5248aa5176fb0347aee74",
+        "H132.loss.dat": "3f68a2ac401c534dd6c538f3facf62582366c3d4a3760b823d878562a47ec41b",
+        "H132.plot.dat": "e3100b2db855b2f5ba5629579fb0eb2ba6416d96095f0b9a56ef1b1debeafe44",
+        "H132.wat.dat": "b491f9d1b7477ebcfa1441aad54c577c3c6c17af532a5c0f227ae90a8c9994ad",
+        "H132.pass.dat": "bea37ce4e0f3ab78de7e1e4acde011c14e44fae2fa513b3f764617e437c0ab89"
+      }
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7212215720210224,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1344.345,
+      "annual_runoff_mm": 91.30912337625,
+      "annual_et_mm": 781.7315000000001,
+      "annual_deep_percolation_mm": 44.816512985550006,
+      "annual_lateral_mm": 432.3715,
+      "minimum_soil_water_mm": 91.61,
+      "maximum_swe_mm": 1184.84,
+      "outputs": {
+        "H132.element.dat": "ea773a8ba3e75f177e98bf844eef09ef7e91e28881478559fd81d6528a4b71e0",
+        "H132.soil.dat": "7e97b5105a562358ce340587280244a953d30412d799b31ed991cdfbab3d28da",
+        "H132.ebe.dat": "cff8bfd97497c28979cdabab60538561efa67c88689c5cc6ebcc88f5090b96a8",
+        "H132.loss.dat": "f953fd6a32faa46fec045cb5fc8ee207f752ef5a04157cd886799de0ccfd3fad",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "743653fba5138801ccde0f7e159b3955c7e9199a3e7360bc951b8bd13d5b3078",
+        "H132.pass.dat": "06d84aab96043d36c23c4fc7a188c59d2ca54da88d1d4f3bf54a3929dc6ed0af"
+      }
+    }
+  ],
+  "evidence": {
+    "path": "prism-inversion-patch-evidence.tar.gz",
+    "sha256": "b4ab7bacbbf76d14a3fdbe6d10033e831f92798cdd3020fd588d149d186900e1",
+    "bytes": 2092381
+  }
+}
