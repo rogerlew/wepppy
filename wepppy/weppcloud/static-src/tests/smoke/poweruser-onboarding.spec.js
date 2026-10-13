@@ -102,6 +102,7 @@ test('retained Forest presentation, guide and panel readback', async ({browser})
     const ordinary=await pageFor('populated');
     await ordinary.goto(root+'/runs');
     await expect(ordinary.getByRole('heading',{name:'Advanced features'})).toBeVisible();
+    await ordinary.evaluate(() => window.scrollTo(0,0));
     await ordinary.screenshot({path:path.join(evidence,'forest-runs-discovery.png'),fullPage:true});
     const noticeHeight=(await ordinary.locator('[aria-labelledby="advanced-features-heading"]').boundingBox()).height;
     await ordinary.setViewportSize({width:390,height:1000});
@@ -127,6 +128,7 @@ test('retained Forest presentation, guide and panel readback', async ({browser})
     await panel.locator('summary').click();
     await expect(panel.getByRole('heading',{name:'Core resources'})).toBeVisible();
     await panel.locator('summary').click();
+    await panel.locator('.wc-modal__body').evaluate(body => {body.scrollTop=0;});
     await panel.screenshot({path:path.join(evidence,'forest-poweruser-panel.png')});
     fs.writeFileSync(path.join(evidence,'forest-presentation-readback.json'),JSON.stringify({desktop_width:1440,
       populated_notice:true,notice_height_desktop:noticeHeight,narrow_notice_width:390,
