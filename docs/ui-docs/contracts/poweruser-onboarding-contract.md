@@ -1,6 +1,6 @@
 # PowerUser discovery and onboarding (PUUX-01)
 
-Status: operator authorized execution 2026-10-13; independent contract reviews passed; implementation pending.
+Status: implemented and validated on Forest 2026-10-13; independent reviews retained in PUUX-01. Production rollout is separate.
 
 ## Discovery and audience
 
@@ -81,3 +81,19 @@ readback. Static screenshots and role mocks alone cannot prove the grant path.
 Shared presentation authority: docs/ui-docs/controller-contract.md. Permission
 and transport authority: docs/schemas/feature-access-governance-contract.md.
 Feature registry role/maturity/prerequisite rules are unchanged.
+
+## Delivery and recovery
+
+The getting-started guide must be registered in both the usersum manifest and
+navigation tree under Advanced and Operations. The runtime prefers its generated
+documentation index; source registration alone does not update an existing
+index. During rollout, rebuild it in the application environment using
+`tools/usersum_docs_tool.py build-index --write --skip-vendor-sync --require-vendor-files`
+and refresh web processes through the canonical deployment tooling. Verify the
+Profile guide link returns 200 for an ordinary authenticated user. This prevents
+a stale catalog from leaving a successfully activated user with a dead help link.
+
+The frontend uses direct `static/js/feature_access.js`; no controller bundle,
+database migration or role backfill is introduced. Rollback restores paired
+presentation assets and catalog content while preserving legitimate grants and
+acceptance history. Production deployment remains separate from Forest validation.

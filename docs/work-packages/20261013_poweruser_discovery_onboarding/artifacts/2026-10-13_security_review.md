@@ -1,182 +1,158 @@
 # Security Review - PowerUser discovery and onboarding (PUUX-01)
 
-Status: **pending — scaffold only; no review performed or approval granted.**
+## Findings and disposition
 
-> Use this template when a work package has security impact beyond routine correctness/QA checks.
-> Link this artifact from the package tracker and closeout notes.
+No implementation security findings were identified. Unresolved findings:
+**high 0, medium 0, low 0**. No risk acceptance is requested.
 
-## Metadata
+**Security gate: pass for the Forest-validated candidate.** The reviewed scope
+is ready for canonical operator rollout; this sign-off is not production
+deployment authorization or evidence of production verification. Integration QA
+is implementation-agent work; no third independent QA review is claimed.
 
-- **Package**: `docs/work-packages/20261013_poweruser_discovery_onboarding/`
-- **Reviewer**: [Name/agent]
-- **Date**: YYYY-MM-DD
-- **Scope reviewed**: [Files/routes/services]
-- **Commit/branch context**: [SHA or branch]
-- **Related artifacts**:
-  - Code review: `docs/work-packages/.../artifacts/..._code_review.md`
-  - QA review: `docs/work-packages/.../artifacts/..._qa_review.md`
+## Scope and authority
 
-## Security Triage Decision
+- Reviewer: independent `contract_security` agent (security reviewer role).
+- Reviewed at: 2026-10-13 19:07 UTC.
+- Contract checkpoint: `2f9f944433147ee497e3c6115c25d96cc9e0b71c`.
+- Final candidate: `3df2ec482edf52c3ea3d565a025ecca8432b9715`;
+  runtime changes remain at `ed80608fe` (includes `175f235a0`).
+- Canonical behavior: [PowerUser onboarding contract](../../../ui-docs/contracts/poweruser-onboarding-contract.md)
+  and [contract decision](2026-10-13_contract_decision.md).
+- Related reviews: [contract reviews](2026-10-13_contract_reviews.md),
+  [correctness review](2026-10-13_correctness_review.md), and
+  [validation evidence](2026-10-13_validation.md).
 
-- **Security impact level**: `none | low | high`
-- **Dedicated security review required**: `yes | no`
-- **Triage rationale**: [Why this package does/does not change attack surface]
-- **Threat model assumptions**:
-  - [Assumption 1]
-  - [Assumption 2]
-  - [Assumption 3]
-- **Valid states that controls must preserve**: [Absent/empty/populated/legacy
-  states from the correctness review]
+The operator authorized full PUUX-01 implementation and validation on Forest.
+The review covers role-sensitive Runs/Profile/panel/report presentation, shared
+feature-access JavaScript, registered help content, tests, and the bounded
+Forest evidence drivers. It excludes production operations. The separate
+PUUX-01A Dashboard navigation review is retained in its own artifact.
 
-## Findings
+Security triage is **high; dedicated review required** because the changed
+client completion flow handles session-authenticated privilege activation.
+The backend grant API, statement version, role registry, route authorization,
+and persistence implementation are unchanged.
 
-| ID | Severity | Surface | Description | Evidence | Required action | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| SEC-01 | High/Medium/Low | [surface name] | [what can go wrong] | [file/test/log reference] | [specific fix] | Open/Resolved/Accepted-risk |
+## Surface checks
 
-Risk acceptance authority: `Accepted-risk` requires security reviewer recommendation plus explicit package owner acknowledgment in Sign-off.
+| Surface | Result and concrete evidence |
+| --- | --- |
+| Valid-state noninterference | Runs discovery uses `current_user`, not the selected catalog owner. Empty and populated Runs, table/map mode, ordinary and Dev-only accounts, literal PowerUser, Admin/Root without PowerUser, legacy grants without acceptance, and feature-store errors are represented in presentation tests. Admin/Root receive existing-access explanation, not a fabricated PowerUser grant or acceptance. Store `error_id` remains the first Profile branch. |
+| Authentication and authorization | No diff to `routes/user.py`, `utils/feature_access_web.py`, or feature-registry authorization. Existing active-session provenance and current-account grant boundaries remain authoritative. Report panel trigger now shares the existing PowerUser/Admin/Root guard. Resource calls, project actions, read-only checks, and role guards inside the panel are preserved. Ordinary Dashboard access from PUUX-01A remains intact. |
+| CSRF and request integrity | `static/js/feature_access.js` retains same-origin session credentials, CSRF header, endpoint, and payload fields. The two affirmative inputs and `poweruser-2026-10-01` statement remain unchanged. Actual Forest requests rejected missing CSRF (400), stale statement (409), and anonymous submission. The anonymous receipt proves denial, not a separately isolated session-provenance branch. |
+| Activation response and navigation | Client success requires the existing nonempty message plus `result.status === "granted"`, boolean `role_changed`, and matching statement version. Failed or malformed responses remain errors. Completed controls are removed before reloading the fixed server-rendered Profile link; same-path/same-fragment navigation explicitly reloads. Destination origin is checked; no response-supplied redirect is followed. The retained refresh link uses the same handler. |
+| Rendered output and error handling | Messages use `textContent`; destinations use existing template URL helpers. There is no new HTML insertion, arbitrary fetch target, deserialization, or shell input. Explicit retry/refresh/sign-in guidance remains reachable after failures. Heading focus and narrow-screen evidence support the intended completion feedback. |
+| Internal access isolation | Existing membership display and voluntary acknowledgment are wrapped in Details without changing their payloads or grant rules. No-membership state remains valid; existing/expired memberships retain visibility. Forest grant readback proves zero internal memberships and no internal acknowledgment after PowerUser activation; internal batch access remains denied (403). |
+| Secrets and validation identities | Browser sessions lived only in ignored `docker/secrets/puux-browser*.json` fixtures with restricted file permissions. Retained browser/DB JSON includes IDs and nonsecret assertions, not cookie values. Preparation created disposable `puux-…@example.test` accounts and only the populated account's association to the existing disposable project. Existing account permissions are unchanged. Cleanup validated exact identity/email and bounded project associations; all 18 accounts are inactive, their stored sessions and project associations removed, authentication uniquifiers rotated, and all 3 acceptance rows retained. |
+| Documentation visibility | `docs_manifest.yaml` registers only the new authenticated-user guide (`min_role: user`); `nav_tree.yaml` adds its matching entry only under Advanced and Operations. Protected navigation sections are unchanged. The guide documents existing feature access and recovery without granting access. Forest served-guide readback returns 200. |
+| Data integrity and concurrency | No grant transaction, acceptance schema, NoDb locking, Redis contract, or model writer changes. Actual DB readback confirms one acceptance after duplicate submission and unchanged legacy acceptance state. Legitimate role grants and acceptance history must survive deployment rollback and disposable-account cleanup. |
+| Files, queues, subprocesses, and network | No production filesystem/run-tree path, output writer, queue edge, worker command, external integration, or outbound destination changes. No additional path or queue gate is applicable to this presentation-only implementation. |
+| Agent tooling, CI/CD, and dependencies | No runtime tool permission, CI workflow, service identity, dependency, or deployment topology change. Review used local source and retained Forest evidence; no production access or mutation was performed. |
+| Observability and recovery | Client failures remain explicit and the existing backend audit/acceptance records remain intact. Browser navigation and independent DB readback corroborate activation instead of relying on a success message alone. Validation documents source rollback and separate production rollout through canonical operator tooling. |
 
-## Verdict
+## Evidence reviewed
 
-- **Gate status**: `pass | fail`
-- **Unresolved findings**:
-  - High: [count]
-  - Medium: [count]
-  - Low: [count]
-- **Release recommendation**: [ship/ship-with-conditions/hold]
+The independent reviewer inspected source, test assertions, retained logs, and
+nonsecret receipts. Test execution and live browser actions were performed by
+the implementation agent; no additional adversarial probes were needed.
 
-## Surface Checks
+- [Forest browser receipt](forest-onboarding-browser.json): real activation,
+  actual Profile navigation and focus, notice removal, builder access,
+  legacy/Admin/Root/Dev presentation, and denial cases described above.
+- [Independent Forest DB receipt](forest-grant-readback.json): account 2249 has
+  PowerUser/User and exactly one current-version acceptance after duplicate
+  submission; no internal grant/acknowledgment. Other role fixtures retain their
+  original role/acceptance states.
+- [Final presentation readback](forest-presentation-readback.json): served guide
+  HTTP 200, reachable voluntary internal acknowledgment, compact 136px desktop
+  notice and 390px visibility, panel task headings, and functional Details.
+- [Disposable-account cleanup](forest-account-cleanup.json): all 18 account IDs
+  deactivated, stored sessions absent and test-run associations removed;
+  acceptance count remains 3 before and after cleanup. The cleanup driver checks
+  the actual database and session store before writing the receipt.
+- [Source identity](source-identity.json): independently recalculated all 20
+  listed file hashes with zero mismatches; the recorded served JavaScript hash
+  matches the source hash. The `ed80608fe` to `3df2ec482` delta contains only two
+  explicit viewer/Profile test-fixture corrections and screenshot positions.
+- `tests/weppcloud/routes/test_poweruser_onboarding_presentation.py` and the
+  complete controls render checks: **228 passed** (`/tmp/puux-render-final.log`).
+- Focused feature-access JavaScript: **16 passed**
+  (`/tmp/puux-js-final2.log`); complete frontend suite: **118 suites, 980 tests
+  passed** (`/tmp/puux-npm-final.log`).
+- Usersum manifest/navigation, index construction, route and shell checks:
+  **64 passed** (`/tmp/puux-usersum-final.log`).
+- The `ed80608fe` follow-up changes only Runs notice markup/classes and adds
+  browser presentation assertions; its role condition and fixed Profile link
+  are unchanged. Reviewed independently with no security findings.
+- [Broad coverage accounting](broad-coverage.json) and
+  [retained check output](automated-checks.txt): **10,723 distinct passed,
+  126 skipped**, completed in segments, not a clean single full-suite run.
+  The initial missing-viewer fixture was corrected. An unchanged OpenET JWT
+  admission assertion returned 401 instead of 403 in reduced collection, then
+  all 52 module tests passed in isolation. Inspection confirms existing
+  collection-time canonical `sys.modules` replacement in `test_auth_tokens.py`;
+  order sensitivity is plausible, not conclusively established. An unchanged
+  catalog latency assertion measured 57.4ms against 50ms, then all 24 module
+  tests passed on rerun. The final 183-test segment passed. None of these
+  admission or latency implementations was changed by PUUX.
+- `git diff --check`: passed. Existing feature-access server authorization and
+  mutation implementations are absent from the implementation diff.
+- Frontend lint has an unrelated existing failure at
+  `controllers_js/__tests__/climate.test.js:300`
+  (`jest/no-conditional-expect`); that file is unchanged. This is a disclosed
+  validation limitation, not a PUUX security finding.
 
-### 0) Valid-State Non-Interference and User Experience
+## Final evidence checklist
 
-- [ ] The linked correctness review enumerates absent, empty, populated,
-  supported legacy, and hostile states.
-- [ ] Every security control preserves all valid states and their contracted
-  user-visible outcomes.
-- [ ] Expected absence of optional state is not rejected merely because a
-  containment helper expects a preexisting object.
-- [ ] Every new user-reachable exception is limited to a malformed or hostile
-  state, or is explicitly authorized by the canonical contract.
-- [ ] At least one direct, unmocked test exercises the changed security
-  boundary for both a valid state and a hostile state.
-- [ ] Security approval does not claim or replace correctness/UX approval.
+- [x] Contract and implementation reviewed independently against the bounded
+  operator-authorized behavior.
+- [x] Actual authenticated Forest grant and negative requests observed.
+- [x] Durable acceptance and role state independently read from Forest DB.
+- [x] Valid legacy/Admin/Root/Dev and empty/populated states checked.
+- [x] Shared internal-access and membership client behavior covered by focused
+  tests; no corresponding backend authorization changes.
+- [x] Guide registration and protected navigation preservation checked.
+- [x] Final served guide/panel presentation receipt inspected.
+- [x] All 18 disposable identities deactivated, their test-run associations and
+  stored sessions removed, authentication uniquifiers rotated, and acceptance
+  history retained; cleanup receipt inspected.
+- [x] Broad Python suite outcome recorded and failures triaged with limitations.
+- [x] Implementation-agent integration QA and source/evidence binding inspected.
+- [x] Completed independent correctness/UX disposition inspected before final
+  security sign-off; no separate independent QA gate is claimed.
 
-### 1) Auth, Session, and Authorization
+The independent correctness artifact passed at 19:06 UTC for the same candidate.
+Its resolved same-fragment recovery, error guidance, guide registration, and
+notice-layout findings are supported by the focused tests and final live
+readbacks. No unresolved correctness finding prevents this security sign-off.
 
-- [ ] Entry points enforce expected authn/authz checks for changed routes/services.
-- [ ] Role checks and scope checks are explicit, least-privilege, and regression-tested.
-- [ ] Session/JWT token validation paths preserve canonical contracts.
-- [ ] CSRF protections are preserved for browser session mutation paths.
-- [ ] Cross-service auth token mint/verify flows are not widened unintentionally.
-- [ ] Error paths do not disclose token contents or auth internals.
+## Artifact observability and residual scope
 
-### 2) Secrets and Credential Handling
+This change produces no scientific/run-tree artifact, input intermediate,
+archive member, or new artifact writer. Native writer, failure-retention, and
+archive/restore gates are therefore not applicable; no observability exception
+is requested. The changed user workflow persists existing role/acceptance
+records, which are covered by live Profile rendering and independent DB
+readback. Evidence artifacts remain in this package.
 
-- [ ] No new plaintext secrets in repository files, env defaults, or docs examples.
-- [ ] `*_FILE` secret-file contract is preserved where applicable.
-- [ ] No secrets passed in argv, query params, or logs.
-- [ ] Added/changed services mount only required secrets (least privilege).
-- [ ] Rotation and rollback behavior are documented for new secret dependencies.
-- [ ] Changed code avoids fallback wrappers that silently skip missing secrets.
+The durable contract's Delivery and recovery section requires the existing
+usersum index rebuild, canonical web refresh, and an ordinary authenticated
+guide-200 check during rollout. Paired presentation/catalog rollback preserves
+legitimate role grants and acceptance history. This accurately records the
+observed stale-index failure and its bounded recovery.
 
-### 3) Input Validation and Output Safety
-
-- [ ] Untrusted input is validated at boundaries (types, ranges, enum membership).
-- [ ] File/path inputs block traversal and out-of-scope path access.
-- [ ] Rendered output paths avoid unsafe HTML/markdown/script injection.
-- [ ] URL fetch/download flows enforce allowlist or explicit safety constraints.
-- [ ] Unsafe deserialization and shell interpolation patterns are absent.
-- [ ] Failing validation returns explicit contract-compliant errors.
-
-### 4) File System and Run-Tree Boundaries
-
-- [ ] Writes remain inside intended run roots (`/wc1/runs/...`) and approved paths.
-- [ ] No new path joins allow escaping run scope via symlink or relative path tricks.
-- [ ] Export/download paths avoid leaking unrelated files.
-- [ ] Temporary files and artifacts are cleaned up or intentionally retained with policy.
-- [ ] Permissions for generated files/directories are least-privilege.
-
-### 5) Queue, Worker, and Subprocess Surfaces
-
-- [ ] Enqueue sites and dependency edges remain intentional and documented.
-- [ ] Worker task inputs are validated before shell/subprocess/file operations.
-- [ ] Subprocess invocation avoids shell injection and unbounded command composition.
-- [ ] Queue cancellation/retry paths cannot bypass auth or data ownership boundaries.
-- [ ] `wctl check-rq-graph` has been run when queue wiring changed.
-- [ ] Failure handling preserves canonical response/error contracts.
-
-### 6) Agentic Tooling and MCP Surfaces
-
-- [ ] Agent/tool calls do not grant broader permissions than the parent request needs.
-- [ ] No path for implicit privilege escalation through subagents or helper tools.
-- [ ] MCP/tool tokens and credentials are scoped and not leaked in logs/artifacts.
-- [ ] Tool execution constraints are explicit when running commands or file writes.
-- [ ] Guardrails block unauthorized network egress or public artifact publication.
-
-### 7) Network and External Integrations
-
-- [ ] New outbound calls are justified, constrained, and observable.
-- [ ] Timeouts/retries avoid denial-of-service amplification and unsafe fallback loops.
-- [ ] Internal-only endpoints are not exposed through new proxy/route changes.
-- [ ] Rate limits/throttles are considered for high-cost or abuse-prone endpoints.
-- [ ] External dependency trust assumptions are documented.
-
-### 8) CI/CD and Supply Chain
-
-- [ ] Self-hosted runner access scope is unchanged or tightened.
-- [ ] Workflow token permissions are minimal for changed jobs.
-- [ ] Build/test scripts avoid exposing credentials in logs.
-- [ ] New third-party dependencies passed precedent and risk checks.
-- [ ] Pinned versions/digests are used where policy requires.
-
-### 9) Data Integrity, Locking, and Concurrency
-
-- [ ] NoDb lock/dump contracts are preserved (`dump_and_unlock`, lock scope).
-- [ ] Cross-process shared state updates remain atomic and auditable.
-- [ ] Redis keyspaces and TTL behavior are unchanged unless explicitly planned.
-- [ ] Concurrent mutation paths include regression coverage for race conditions.
-- [ ] Recovery after partial failure leaves state consistent and diagnosable.
-
-### 10) Logging, Monitoring, and Incident Readiness
-
-- [ ] Logs include enough context for incident triage without exposing secrets.
-- [ ] Security-relevant events have observable signals (auth failures, denials, exfil attempts).
-- [ ] New error handlers do not swallow exceptions silently.
-- [ ] Alerting/operational checks are updated for new high-risk surfaces.
-- [ ] Rollback and containment steps are documented for the changed scope.
-
-## Validation Evidence
-
-- Automated checks run:
-  - `wctl run-pytest [target]`
-  - `wctl check-rq-graph` (if queue wiring touched)
-  - `wctl run-npm lint && wctl run-npm test` (if frontend changed)
-  - `wctl doc-lint --path [changed docs]` (if docs changed)
-- Manual checks run:
-  - [Check name] - [result]
-  - [Check name] - [result]
-
-## Residual Risk
-
-- **Accepted residual risks**:
-  - [risk + justification + owner]
-- **Follow-up packages/issues**:
-  - [link/path + scope]
+No new security residual risk was identified within the candidate. Browser
+fixtures exercise real sessions and mutations but bypass password/CAP login;
+this review makes no claim about that unchanged login experience, participant
+usability outcomes, or production deployment. Segmented Python completion and
+the unchanged lint failure limit a general regression-cleanliness claim; they
+do not establish a PUUX security defect. The existing auth-test module isolation
+issue is a scoped follow-up, not an authorization change in this package.
 
 ## Sign-off
 
-- **Security reviewer**: [name/agent], YYYY-MM-DD
-- **Package owner**: [name/agent], YYYY-MM-DD
-
-## Artifact Observability Gate (Required)
-
-Follow [artifact observability](../../../standards/artifact-observability-standard.md).
-Reject hidden-only/download-only project records or unapproved exclusions.
-
-- [ ] Comparable module and canonical artifact inventory are named.
-- [ ] Inputs, intermediates, failure evidence, provenance and outputs are visible
-  through established project tools under normal project authorization.
-- [ ] Real writer/failure tests prove retention; canonical archive/restore tests
-  prove member coverage and byte equality; live browser/download evidence exists.
-- [ ] Any exception has explicit operator approval, exact scope and a canonical
-  decision. Safety/atomicity arguments alone do not override observability.
+Independent security review: `contract_security`, 2026-10-13 19:07 UTC,
+**pass; high 0, medium 0, low 0 unresolved security findings**. Final disposition
+follows the completed independent correctness/UX review and the implementation
+agent's integration QA. No production operation was performed by this reviewer.

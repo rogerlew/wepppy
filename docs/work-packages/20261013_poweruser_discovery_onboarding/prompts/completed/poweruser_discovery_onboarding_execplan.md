@@ -1,7 +1,6 @@
-```md
 # Make PowerUser discovery and onboarding useful from Runs
 
-This is the active PUUX-01 ExecPlan, maintained under docs/prompt_templates/codex_exec_plans.md. Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective are living sections. The operator authorized execution on 2026-10-13. Execute this package on master; no production deployment is included.
+Completed 2026-10-13: this is the PUUX-01 ExecPlan, maintained under docs/prompt_templates/codex_exec_plans.md. Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective are living sections. The operator authorized execution on 2026-10-13. Execute this package on master; no production deployment is included.
 
 ## Purpose / Big Picture
 
@@ -11,15 +10,17 @@ An ordinary signed-in user should discover advanced capabilities on Runs, unders
 
 - [x] (2026-10-13 17:42 UTC) Static source review and operator Runs-page decision captured in package and contract-decision artifact.
 - [x] (2026-10-13 17:42 UTC) Scaffold and independent-review gates prepared; no runtime files changed.
-- [x] PUUX-01A bounded GL Dashboard move implemented after checkpoint 5528224f6; 229 existing tests and 20 rendered cases pass. No broader onboarding work executed.
-- [ ] M0: amend current contracts, complete two independent contract reviews and commit the standalone checkpoint.
-- [ ] M1: implement Runs discovery and complete Profile activation journey.
-- [ ] M2: improve internal-access presentation, panel orientation and documentation; align report trigger.
-- [ ] M3: complete focused and broad checks, Forest evidence and final independent reviews.
+- [x] PUUX-01A bounded GL Dashboard move implemented after checkpoint 5528224f6; 229 existing tests and 20 rendered cases pass. Before M0, no broader onboarding work had been executed.
+- [x] M0: amend current contracts, complete two independent contract reviews and commit the standalone checkpoint.
+- [x] M1: implement Runs discovery and complete Profile activation journey.
+- [x] M2: improve internal-access presentation, panel orientation and documentation; align report trigger.
+- [x] M3: focused checks, segmented broad coverage, real Forest evidence, cleanup and final independent reviews complete.
 
 ## Surprises & Discoveries
 
-The active Runs template is wepppy/weppcloud/templates/user/runs2.html, rendered by routes/user.py:runs. Main run navigation and panel markup require PowerUser, Admin or Root, but templates/reports/_base_report.htm currently emits the panel trigger unconditionally. A Dev role alone does not permit the panel, even though Dev can use Config Builder and API tokens. Profile's feature_access.js also handles internal acknowledgment and membership administration; changing the common success branch carelessly would affect those workflows.
+At initial inspection, the active Runs template was wepppy/weppcloud/templates/user/runs2.html, rendered by routes/user.py:runs. Main run navigation and panel markup require PowerUser, Admin or Root, but templates/reports/_base_report.htm emitted the panel trigger unconditionally. A Dev role alone does not permit the panel, even though Dev can use Config Builder and API tokens. Profile's feature_access.js also handles internal acknowledgment and membership administration; changing the common success branch carelessly would affect those workflows.
+
+Live guide readback found that usersum requires both manifest and navigation registration, plus rebuilding its generated index. The guide is registered in Advanced and Operations; protected navigation is unchanged. Screenshot review found the generic panel minimum height made the discovery notice unnecessarily tall; the existing compact notice component resolves this without global CSS changes.
 
 ## Decision Log
 
@@ -31,7 +32,7 @@ The active Runs template is wepppy/weppcloud/templates/user/runs2.html, rendered
 
 ## Outcomes & Retrospective
 
-Scaffolding is complete. Contract ratification, implementation, tests and deployment have not occurred. Static evidence supports a report-trigger inconsistency but is not proof of an authorization bypass or measured user failure. Final human usability claims require observed users; browser conformance alone establishes the rendered interaction behavior.
+Contract checkpoint 2f9f94443 and M0–M3 are complete. Reviewed candidate 3df2ec482 retains runtime ed80608fe. Forest activation, durable grant, guide/panel readback, served-asset parity and disposable-account cleanup pass. Broad coverage totals 10,723 distinct passes/126 skips across segments; frontend totals 980 passes. Two old viewer-context fixtures were corrected. Existing JWT order sensitivity, catalog latency variability and climate-test lint are documented rather than hidden. Delivery requires rebuilding the generated usersum catalog. Independent reviews approve the bounded change; panel desktop whitespace is a nonblocking layout follow-up. Production deployment has not occurred. Static evidence supports a report-trigger inconsistency but is not proof of an authorization bypass or measured user failure. Final human usability claims require observed users; browser conformance alone establishes the rendered interaction behavior.
 
 ## Context and Orientation
 
@@ -91,4 +92,3 @@ Retain contract decisions/reviews, final correctness/security artifacts, nonsecr
 ## Interfaces and Dependencies
 
 Reuse the existing Flask routes, server-generated url_for links, Pure UI macros and feature_access.js handler. Preserve POST /profile/poweruser payload and response contracts, statement versioning, current-user identity, CSRF and duplicate handling. No queue, dependency, public API or privilege expansion. Profile section anchors and presentation selectors may be added under the reviewed presentation contract; they do not become authorization checks.
-```

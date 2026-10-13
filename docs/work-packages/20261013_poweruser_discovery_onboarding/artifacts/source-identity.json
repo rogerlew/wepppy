@@ -1,0 +1,32 @@
+{
+  "candidate": "3df2ec482edf52c3ea3d565a025ecca8432b9715",
+  "runtime_commit": "ed80608fe",
+  "contract_checkpoint": "2f9f944433147ee497e3c6115c25d96cc9e0b71c",
+  "recorded_utc": "2026-10-13T19:04:12.976599+00:00",
+  "source_sha256": {
+    "tests/weppcloud/routes/test_feature_access_routes.py": "8ad8ba5911c335451f52b691d1fdf15ac7f8b83b6cb598b9c8c7bb1146a0ca18",
+    "tests/weppcloud/routes/test_poweruser_onboarding_presentation.py": "2aa3e5cac0136926b3fbe937acb27e5b08a8368de2a47d44726eaec1f97ad2da",
+    "tests/weppcloud/routes/test_pure_controls_render.py": "c9fff82c567c1ea7463e042584030add339bdb0372e07ce8f24019ba82a0176f",
+    "tests/weppcloud/routes/test_runs_catalog_contract.py": "4c5311ffe580784330fc4684537b563884081bf1eaa9de10f5a2487816a44e02",
+    "tests/weppcloud/test_run_catalog_reader.py": "f1aa3efd2fdc30dcc91e7254258a521e3f07468654d5c38fc88af09b8dde4122",
+    "wepppy/weppcloud/controllers_js/__tests__/feature_access.test.js": "56723cacc9a59518141fefe333145f8573be9d079b7551fda0c53e24626ea1bd",
+    "wepppy/weppcloud/routes/usersum/docs_manifest.yaml": "ea8cc043de42043432206be1ac702b898b69b526966270e21b677b49a421be0c",
+    "wepppy/weppcloud/routes/usersum/nav_tree.yaml": "b198788e3e8938279f13a09914aa845ffd22cac225e74caba287af1dfac8133f",
+    "wepppy/weppcloud/routes/usersum/weppcloud/clearing-locks.md": "4901a360311f40346568885210166f19097b5a76f7633a2dae478bf18a3153f2",
+    "wepppy/weppcloud/routes/usersum/weppcloud/poweruser-getting-started.md": "12d946cde7bccb0a2297619ab15cfdc0ade86af16f459d450c02615de86c3d6e",
+    "wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md": "08fe938a6b37f2bcbfcb6bcd28a04653c4db41056d2240d9c9f00932f5a42293",
+    "wepppy/weppcloud/static-src/tests/smoke/feature-access.spec.js": "4030b1110cb2f941398534939b75ae1bee64f40cf1d8ca15a3c25b657edc8ccf",
+    "wepppy/weppcloud/static-src/tests/smoke/poweruser-onboarding.spec.js": "3ace630c30181c76da774ac4b5d45f5aaaf25ef1cfb5ad5cc9031c7ea4d52e6b",
+    "wepppy/weppcloud/static/js/feature_access.js": "e8d0450eb6a157d9b7b8398f3c17184dbe62c6699ee725320642e4fa904ddfd6",
+    "wepppy/weppcloud/templates/controls/poweruser_panel.htm": "2f0bb661b5eabccdbcdf92cee50e040f768fadff620378b579d10c664c04b398",
+    "wepppy/weppcloud/templates/header/_run_header_fixed.htm": "83544195c131946c205ce373ee1a5db4a4242c25ba0c66a98f86911f66443ff9",
+    "wepppy/weppcloud/templates/reports/_base_report.htm": "ad7e26654e7a3977843bfd0c0d73095e16f7f118cf56f030f229c7fc4a13ad8d",
+    "wepppy/weppcloud/templates/user/_internal_access.html": "1576a3ee9475b1620254da835b923c54bd041273b5dce2ca1639d5473b6ea566",
+    "wepppy/weppcloud/templates/user/_poweruser_access.html": "6e2891695f08a905ef1cbc9fb3e257c51f2740236c82f7660afab70a2e9cdfc3",
+    "wepppy/weppcloud/templates/user/runs2.html": "9d566d14e7d13449c66e5e9b699bb16a86f42580862eae031fb16c5d5d77765a"
+  },
+  "served_feature_access_js_sha256": "e8d0450eb6a157d9b7b8398f3c17184dbe62c6699ee725320642e4fa904ddfd6",
+  "served_asset_matches_source": true,
+  "environment": "Forest",
+  "production_deployed": false
+}

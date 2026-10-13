@@ -1,0 +1,96 @@
+{
+  "states": {
+    "ordinary": {
+      "id": 2249,
+      "roles": [
+        "PowerUser",
+        "User"
+      ],
+      "poweruser": {
+        "has_role": true,
+        "accepted": true
+      },
+      "poweruser_acceptances": 1,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 0
+    },
+    "populated": {
+      "id": 2250,
+      "roles": [
+        "User"
+      ],
+      "poweruser": {
+        "has_role": false,
+        "accepted": false
+      },
+      "poweruser_acceptances": 0,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 1
+    },
+    "legacy": {
+      "id": 2251,
+      "roles": [
+        "PowerUser",
+        "User"
+      ],
+      "poweruser": {
+        "has_role": true,
+        "accepted": false
+      },
+      "poweruser_acceptances": 0,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 0
+    },
+    "admin": {
+      "id": 2252,
+      "roles": [
+        "Admin",
+        "User"
+      ],
+      "poweruser": {
+        "has_role": false,
+        "accepted": false
+      },
+      "poweruser_acceptances": 0,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 0
+    },
+    "root": {
+      "id": 2253,
+      "roles": [
+        "Root",
+        "User"
+      ],
+      "poweruser": {
+        "has_role": false,
+        "accepted": false
+      },
+      "poweruser_acceptances": 0,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 0
+    },
+    "dev": {
+      "id": 2254,
+      "roles": [
+        "Dev",
+        "User"
+      ],
+      "poweruser": {
+        "has_role": false,
+        "accepted": false
+      },
+      "poweruser_acceptances": 0,
+      "internal_acknowledged": false,
+      "internal_memberships": 0,
+      "runs": 0
+    }
+  },
+  "duplicate_grant_did_not_duplicate_acceptance": true,
+  "statement_version": "poweruser-2026-10-01",
+  "database_readback": "real Forest account database"
+}

@@ -1,0 +1,63 @@
+puux-js-final2
+Test Suites: 1 passed, 1 total
+Tests:       16 passed, 16 total
+Time:        0.98 s, estimated 1 s
+
+puux-npm-final
+Test Suites: 118 passed, 118 total
+Tests:       980 passed, 980 total
+Time:        7.375 s
+
+puux-render-final
+collected 228 items
+======================= 228 passed, 6 warnings in 21.97s =======================
+
+puux-compact
+collected 36 items
+======================= 36 passed, 22 warnings in 26.71s =======================
+
+puux-usersum-final
+collected 64 items
+======================= 64 passed, 4 warnings in 10.92s ========================
+
+puux-catalog-fixture
+collected 3 items
+======================== 3 passed, 4 warnings in 7.80s =========================
+
+puux-full
+collected 10848 items / 1 skipped
+FAILED tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_page_renders_canonical_ordinary_contract
+=== 1 failed, 10011 passed, 126 skipped, 5454 warnings in 2647.20s (0:44:07) ===
+
+puux-remaining
+collected 712 items / 1 skipped
+FAILED tests/weppcloud/test_feature_access.py::test_openet_signed_token_live_membership_admission
+pytest summary: 1 failed, 411 passed, 1 skipped, 49 warnings in 62.86s (0:01:02)
+
+puux-remaining2
+collected 249 items / 1 skipped
+FAILED tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[ttl]
+============= 1 failed, 53 passed, 1 skipped, 8 warnings in 33.97s =============
+
+puux-access-isolated
+collected 52 items
+======================= 52 passed, 6 warnings in 43.70s ========================
+
+puux-catalog-isolated
+collected 24 items
+======================= 24 passed, 8 warnings in 37.36s ========================
+
+puux-remaining-final
+collected 183 items / 1 skipped
+================= 183 passed, 1 skipped, 8 warnings in 37.89s ==================
+
+Frontend lint limitation:
+
+> weppcloud-static@0.1.0 lint
+> eslint --config .eslintrc.cjs --resolve-plugins-relative-to . "../controllers_js/**/*.js"
+
+
+/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/climate.test.js
+  300:13  error  Avoid calling `expect` conditionally`  jest/no-conditional-expect
+
+✖ 1 problem (1 error, 0 warnings)

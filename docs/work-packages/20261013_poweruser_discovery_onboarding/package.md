@@ -1,6 +1,6 @@
 # PowerUser discovery and onboarding (PUUX-01)
 
-Status: execution authorized 2026-10-13; M0 contract review in progress. PUUX-01A dashboard navigation implemented and locally validated.
+Status: **Closed 2026-10-13 — Forest implementation and validation complete. Production rollout remains separate.**
 Owner: WEPPcloud maintainer. Primary users: signed-in users discovering advanced workflows and newly activated PowerUsers.
 
 ## Problem and outcome
@@ -31,7 +31,7 @@ Reuse Flask/Jinja, shared Pure UI components, current feature-access endpoints a
 
 ## Security impact and review gate
 
-Triage: **high** because role-sensitive discovery, onboarding success handling and privileged-panel entry points are touched, even though authority is intentionally unchanged. Dedicated independent security and correctness/UX reviews are required. A security PASS cannot substitute for evidence that ordinary, empty-account and legacy states work. Review artifacts are scaffolded and explicitly pending; no approval is claimed.
+Triage: **high** because role-sensitive discovery, onboarding success handling and privileged-panel entry points are touched, even though authority is intentionally unchanged. Dedicated independent security and correctness/UX reviews are required. A security PASS cannot substitute for evidence that ordinary, empty-account and legacy states work. Independent correctness/UX and security reviews are retained below; no production deployment authority is implied.
 
 ## Milestones and success criteria
 
@@ -44,15 +44,34 @@ Acceptance: a regular user with zero or populated runs can find the notice, expl
 
 ## Evidence and rollout
 
-No WEPP output writer or run schema changes are intended, so a new native model simulation is not an acceptance gate. The relevant chain is rendered notice → real authenticated POST → durable role/acceptance readback → fresh Profile/Runs rendering → destination authorization. If generated frontend assets change, rebuild and verify the actual served asset. Use a disposable ordinary account for activation, plus existing legacy and privileged states; never remove a live user's roles to manufacture a fixture. Retain revision, identity class, screenshots and nonsecret results under artifacts. Highest current claim: broader onboarding remains scaffolded; PUUX-01A is locally validated by existing tests and direct template rendering.
+No WEPP output writer or run schema changes are intended, so a new native model simulation is not an acceptance gate. The relevant chain is rendered notice → real authenticated POST → durable role/acceptance readback → fresh Profile/Runs rendering → destination authorization. If generated frontend assets change, rebuild and verify the actual served asset. Use a disposable ordinary account for activation, plus existing legacy and privileged states; never remove a live user's roles to manufacture a fixture. Retain revision, identity class, screenshots and nonsecret results under artifacts. Highest completion claim: Forest implementation and served-browser/durable-database validation complete. Candidate `3df2ec482` contains runtime `ed80608fe` and final test-fixture/evidence corrections. Broad coverage completed in segments: 10,723 distinct passed, 126 skipped; frontend 118 suites/980 tests passed. Existing lint and test-order/timing limitations are retained in the validation receipt.
 
 Forest validation and production deployment are separate. Inspect the canonical deployment entry point before any later rollout proposal. No wepp.cloud changes are authorized by this scaffold. Rollback restores paired templates/JS/docs; it must not erase valid role grants or acknowledgment records.
 
 ## Execution and references
 
-- [ExecPlan](prompts/active/poweruser_discovery_onboarding_execplan.md)
+- [ExecPlan](prompts/completed/poweruser_discovery_onboarding_execplan.md)
 - [Tracker](tracker.md)
 - [Contract decision and state matrix](artifacts/2026-10-13_contract_decision.md)
 - [Correctness review gate](artifacts/2026-10-13_correctness_review.md)
 - [Security review gate](artifacts/2026-10-13_security_review.md)
 - Current authority: `docs/schemas/feature-access-governance-contract.md`, `docs/ui-docs/controller-contract.md`, `wepppy/weppcloud/feature_registry/specification.md` and registry YAML. Related governance history is `docs/work-packages/20261001_feature_access_governance/`; do not amend it to define current rules.
+
+## Closure and follow-ups
+
+Delivered the Runs notice, clear immediate Profile activation and real refresh,
+legacy/Admin/Root distinctions, secondary internal-access details, task-first
+panel, guarded report trigger and registered getting-started guide. All 18
+disposable Forest identities are inactive; sessions and temporary project
+associations were removed while all three acceptance records were retained.
+
+See [validation and rollout](artifacts/2026-10-13_validation.md),
+[source identity](artifacts/source-identity.json) and
+[broad coverage accounting](artifacts/broad-coverage.json). Production rollout
+must rebuild the usersum index and verify the served guide as specified in the
+canonical contract's Delivery and recovery section. No migration or backfill.
+
+Nonblocking follow-ups: existing JWT test-module replacement/order sensitivity,
+catalog timing stability, preexisting climate-test lint, existing narrow Runs
+search/table/theme overflow, and using the panel's unused desktop grid columns.
+No human-participant usability metrics are claimed.

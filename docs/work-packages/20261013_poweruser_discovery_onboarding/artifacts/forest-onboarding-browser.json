@@ -1,0 +1,26 @@
+{
+  "ordinary_user_id": 2249,
+  "populated_user_id": 2250,
+  "empty_runs_discovery": true,
+  "populated_runs_discovery": true,
+  "table_map_notice": true,
+  "grant_status": 200,
+  "duplicate_role_changed": false,
+  "actual_profile_navigation": true,
+  "same_fragment_focus": true,
+  "new_poweruser_builder_access": true,
+  "notice_removed_after_activation": true,
+  "internal_batch_denied": 403,
+  "missing_csrf_denied": 400,
+  "stale_statement_denied": 409,
+  "anonymous_submission_denied": true,
+  "role_matrix": [
+    "ordinary",
+    "legacy",
+    "admin",
+    "root",
+    "dev"
+  ],
+  "narrow_viewport": 390,
+  "existing_account_roles_changed": false
+}

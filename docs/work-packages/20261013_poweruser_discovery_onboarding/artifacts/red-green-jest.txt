@@ -1,0 +1,164 @@
+Before production changes: new regression tests
+===============================================
+npm warn "feature_access.test.js" is being parsed as a normal command line argument.
+npm warn Unknown cli config "--runInBand". This will stop working in the next major version of npm.
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs feature_access.test.js
+
+FAIL ../controllers_js/__tests__/feature_access.test.js
+  feature access forms
+    ✓ treats a non-JSON 200 response as a failure (53 ms)
+    ✓ treats a non-JSON 500 response as a failure (44 ms)
+    ✕ confirmed grant refreshes even at the same fragment: true (20 ms)
+    ✕ confirmed grant refreshes even at the same fragment: false (9 ms)
+    ✕ malformed grant cannot activate or navigate: undefined (11 ms)
+    ✕ malformed grant cannot activate or navigate: {"status":"pending","role_changed":true,"statement_version":"v1"} (7 ms)
+    ✕ malformed grant cannot activate or navigate: {"status":"granted","role_changed":"yes","statement_version":"v1"} (7 ms)
+    ✕ malformed grant cannot activate or navigate: {"status":"granted","role_changed":true,"statement_version":"old"} (7 ms)
+    ✓ acknowledgment completes in place when changed=true (13 ms)
+    ✓ acknowledgment completes in place when changed=false (8 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":false,"body":{"error":{"message":"Please retry."}}} (7 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":true,"body":{"message":"Saved","result":{"statement_kind":"internal","statement_version":"old","changed":true}}} (6 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":true,"body":{"message":"Saved"}} (6 ms)
+
+  ● feature access forms › confirmed grant refreshes even at the same fragment: true
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      71 |         const form = installForm();
+      72 |         await submitAndFlush(form);
+    > 73 |         expect(form.isConnected).toBe(false);
+         |                                  ^
+      74 |         expect(document.querySelector("[data-access-status]").textContent).toBe("PowerUser access granted.");
+      75 |         expect(document.querySelector("[data-access-refresh]").hidden).toBe(false);
+      76 |         expect(navigation.reload).toHaveBeenCalledTimes(1);
+
+      at controllers_js/__tests__/feature_access.test.js:73:34
+
+  ● feature access forms › confirmed grant refreshes even at the same fragment: false
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      71 |         const form = installForm();
+      72 |         await submitAndFlush(form);
+    > 73 |         expect(form.isConnected).toBe(false);
+         |                                  ^
+      74 |         expect(document.querySelector("[data-access-status]").textContent).toBe("PowerUser access granted.");
+      75 |         expect(document.querySelector("[data-access-refresh]").hidden).toBe(false);
+      76 |         expect(navigation.reload).toHaveBeenCalledTimes(1);
+
+      at controllers_js/__tests__/feature_access.test.js:73:34
+
+  ● feature access forms › malformed grant cannot activate or navigate: undefined
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "wc-alert wc-alert--danger"
+    Received: "wc-alert wc-alert--success"
+
+      90 |         expect(form.isConnected).toBe(true);
+      91 |         expect(form.querySelector("button").disabled).toBe(false);
+    > 92 |         expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+         |                                                                      ^
+      93 |         expect(navigation.reload).not.toHaveBeenCalled();
+      94 |         expect(navigation.assign).not.toHaveBeenCalled();
+      95 |     });
+
+      at controllers_js/__tests__/feature_access.test.js:92:70
+
+  ● feature access forms › malformed grant cannot activate or navigate: {"status":"pending","role_changed":true,"statement_version":"v1"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "wc-alert wc-alert--danger"
+    Received: "wc-alert wc-alert--success"
+
+      90 |         expect(form.isConnected).toBe(true);
+      91 |         expect(form.querySelector("button").disabled).toBe(false);
+    > 92 |         expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+         |                                                                      ^
+      93 |         expect(navigation.reload).not.toHaveBeenCalled();
+      94 |         expect(navigation.assign).not.toHaveBeenCalled();
+      95 |     });
+
+      at controllers_js/__tests__/feature_access.test.js:92:70
+
+  ● feature access forms › malformed grant cannot activate or navigate: {"status":"granted","role_changed":"yes","statement_version":"v1"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "wc-alert wc-alert--danger"
+    Received: "wc-alert wc-alert--success"
+
+      90 |         expect(form.isConnected).toBe(true);
+      91 |         expect(form.querySelector("button").disabled).toBe(false);
+    > 92 |         expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+         |                                                                      ^
+      93 |         expect(navigation.reload).not.toHaveBeenCalled();
+      94 |         expect(navigation.assign).not.toHaveBeenCalled();
+      95 |     });
+
+      at controllers_js/__tests__/feature_access.test.js:92:70
+
+  ● feature access forms › malformed grant cannot activate or navigate: {"status":"granted","role_changed":true,"statement_version":"old"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "wc-alert wc-alert--danger"
+    Received: "wc-alert wc-alert--success"
+
+      90 |         expect(form.isConnected).toBe(true);
+      91 |         expect(form.querySelector("button").disabled).toBe(false);
+    > 92 |         expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+         |                                                                      ^
+      93 |         expect(navigation.reload).not.toHaveBeenCalled();
+      94 |         expect(navigation.assign).not.toHaveBeenCalled();
+      95 |     });
+
+      at controllers_js/__tests__/feature_access.test.js:92:70
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 7 passed, 13 total
+Snapshots:   0 total
+Time:        0.924 s, estimated 1 s
+Ran all test suites matching feature_access.test.js.
+
+Final JavaScript checks
+=======================
+npm warn "feature_access.test.js" is being parsed as a normal command line argument.
+npm warn Unknown cli config "--runInBand". This will stop working in the next major version of npm.
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs feature_access.test.js
+
+PASS ../controllers_js/__tests__/feature_access.test.js
+  feature access forms
+    ✓ treats a non-JSON 200 response as a failure (57 ms)
+    ✓ treats a non-JSON 500 response as a failure (55 ms)
+    ✓ confirmed grant refreshes even at the same fragment: true (34 ms)
+    ✓ confirmed grant refreshes even at the same fragment: false (16 ms)
+    ✓ malformed grant cannot activate or navigate: undefined (10 ms)
+    ✓ malformed grant cannot activate or navigate: {"status":"pending","role_changed":true,"statement_version":"v1"} (7 ms)
+    ✓ malformed grant cannot activate or navigate: {"status":"granted","role_changed":"yes","statement_version":"v1"} (8 ms)
+    ✓ malformed grant cannot activate or navigate: {"status":"granted","role_changed":true,"statement_version":"old"} (9 ms)
+    ✓ membership administration keeps its refresh and server feedback (15 ms)
+    ✓ Profile fragment focuses the onboarding heading (5 ms)
+    ✓ network failure keeps retry and does not activate (8 ms)
+    ✓ acknowledgment completes in place when changed=true (12 ms)
+    ✓ acknowledgment completes in place when changed=false (10 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":false,"body":{"error":{"message":"Please retry."}}} (7 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":true,"body":{"message":"Saved","result":{"statement_kind":"internal","statement_version":"old","changed":true}}} (6 ms)
+    ✓ failed acknowledgment retains retryable controls: {"ok":true,"body":{"message":"Saved"}} (8 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        0.98 s, estimated 1 s
+Ran all test suites matching feature_access.test.js.
