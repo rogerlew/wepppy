@@ -103,6 +103,11 @@ test('retained Forest presentation, guide and panel readback', async ({browser})
     await ordinary.goto(root+'/runs');
     await expect(ordinary.getByRole('heading',{name:'Advanced features'})).toBeVisible();
     await ordinary.screenshot({path:path.join(evidence,'forest-runs-discovery.png'),fullPage:true});
+    const noticeHeight=(await ordinary.locator('[aria-labelledby="advanced-features-heading"]').boundingBox()).height;
+    await ordinary.setViewportSize({width:390,height:1000});
+    await expect(ordinary.getByRole('link',{name:'Explore PowerUser access'})).toBeVisible();
+    await ordinary.screenshot({path:path.join(evidence,'forest-runs-discovery-narrow.png'),fullPage:true});
+    await ordinary.setViewportSize({width:1440,height:1000});
     await ordinary.goto(root+'/profile#poweruser-access-heading');
     await ordinary.locator('[data-internal-access] summary').click();
     await expect(ordinary.getByRole('checkbox',{name:'I have read and understand the internal access statement.'})).toBeVisible();
@@ -124,7 +129,8 @@ test('retained Forest presentation, guide and panel readback', async ({browser})
     await panel.locator('summary').click();
     await panel.screenshot({path:path.join(evidence,'forest-poweruser-panel.png')});
     fs.writeFileSync(path.join(evidence,'forest-presentation-readback.json'),JSON.stringify({desktop_width:1440,
-      populated_notice:true,guide_http_status:200,voluntary_internal_acknowledgment_reachable:true,
+      populated_notice:true,notice_height_desktop:noticeHeight,narrow_notice_width:390,
+      guide_http_status:200,voluntary_internal_acknowledgment_reachable:true,
       panel_task_headings:true,technical_details_initially_closed:true,technical_details_expand:true},null,2)+'\n');
   } finally {await Promise.all(contexts.map(c=>c.close()));}
 });
