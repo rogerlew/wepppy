@@ -180,11 +180,14 @@ def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
     app.jinja_loader = DictLoader({"user/runs2.html": template.read_text(),
                                   "base_pure.htm": '{% block body %}{% endblock %}{% block script_extras %}{% endblock %}'})
     app.jinja_env.globals["static_url"] = lambda path: "/static/" + path
-    monkeypatch.setattr(routes, "current_user", SimpleNamespace(id=1))
+    viewer = SimpleNamespace(id=1, is_authenticated=True, has_role=lambda role: False)
+    monkeypatch.setattr(routes, "current_user", viewer)
+    app.jinja_env.globals["current_user"] = viewer
     monkeypatch.setattr(routes, "_is_admin_runs_viewer", lambda: False)
     for path, endpoint in (("/runs", "runs"), ("/runs/catalog", "runs_catalog"), ("/runs/map-data", "runs_map_data")):
         app.add_url_rule(path, "user." + endpoint, getattr(routes, endpoint).__wrapped__)
     app.add_url_rule("/runs/users", "user.runs_users", lambda: {})
+    app.add_url_rule("/profile", "user.profile", lambda: "")
     app.add_url_rule("/docs/<doc_id>", "usersum.view_doc", lambda doc_id: doc_id)
     server = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
