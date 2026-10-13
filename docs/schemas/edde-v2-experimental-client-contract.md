@@ -2,6 +2,8 @@
 
 ## Status and scope
 
+The intended application method is future climate only. Historical extraction/replay remains available for diagnostic comparisons and future-signal validation, not an additional historical application mode. Existing CLIGEN guard failures and format quantization are known behavior; the EDDE integration must preserve and report them without treating their resolution as a new prerequisite.
+
 This additive research interface is not wired into WEPPcloud. It supports reproducible feasibility experiments, not a claim of unbiased or complete future weather. The [feasibility package](../work-packages/20261013_edde_v2_feasibility/package.md) owns study evidence; this document owns the durable interface. Scientific transformations and limitations are recorded in [ADR-0091](../adrs/ADR-0091-edde-v2-experimental-daily-replay.md).
 
 ## Acquisition and eligibility

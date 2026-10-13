@@ -2,6 +2,10 @@
 
 **Study date**: 2026-10-13 UTC. **Disposition**: extraction and experimental daily replay are feasible; **hold WEPPcloud production integration** pending the scientific and integration gates below. No application mode, locale capability, NoDb state, RQ wiring, or deployment was changed.
 
+## Scope clarification
+
+The operator clarified that the application scope is future climate only. Historical EDDE runs are diagnostic baselines for source assessment and future-change checks, not a proposed historical climate method. Existing CLIGEN quality-guard failures and PRN/CLI quantization are known limitations; retain their reporting and current safeguards, but do not require this package to solve them as new integration blockers. This clarification does not approve a bias correction or decide how future auxiliary fields or PRISM temperature inversions should be handled.
+
 ## What was executed
 
 The new public-S3 client queried 15 eligible U.S./Canadian locations across 120 model-years: both models in 1995–2014, both models' SSP2-4.5 in 2060–2079, and MPI SSP2-4.5/SSP3-7.0 in 2080–2099. A separate [native metadata audit](artifacts/native-metadata-audit.json) checked all 4,320 monthly objects: grid axes/CRS, both published time encodings, source units, and manifest endpoints agree. All 657,450 point-days passed completeness, finiteness, precipitation nonnegativity, and temperature-order checks. [Source quality](artifacts/source-quality.json) and [reproducible evidence archive index](artifacts/evidence-index.json).
@@ -63,9 +67,9 @@ This establishes a bounded batch path, not interactive latency. Existing asynchr
 
 ## Required handoff gates
 
-1. Decide and validate historical bias treatment and preservation of future signals before presenting a production impact method. Raw replay is not recommended for general adoption.
+1. Document the interpretation of raw future projections and their model-bias limitations. Historical comparisons are supporting diagnostics, not an in-scope historical method or an automatic requirement to build bias correction. Any proposed adjustment requires a separate scientific decision and future-signal validation.
 2. Decide how to derive or validate future storm structure, radiation, wind, and dewpoint. Hourly fields and 5-minute precipitation exist in inspected inventories; this study did not build full-period source-derived auxiliary weather.
-3. Resolve or explicitly support selected-station/seed CLIGEN quality failures, and adopt an explicit scientific policy for PRISM temperature inversions. Do not bypass, clamp, or silently relocate.
+3. Adopt an explicit policy for PRISM temperature inversions. Preserve existing CLIGEN failure reporting and rounding behavior as known limitations; resolving those existing limitations is not a new EDDE integration prerequisite. Do not bypass, clamp, or silently relocate.
 4. Confirm project-level eligibility and actual Canadian project/locale acceptance in the integration environment. The current Canadian consumer runs use a U.S. hillslope fixture.
 5. Resolve the existing broad-suite regression gate before package closeout. Independent correctness and security reviews assess the bounded research implementation separately from scientific production adoption; their artifacts are linked below.
 

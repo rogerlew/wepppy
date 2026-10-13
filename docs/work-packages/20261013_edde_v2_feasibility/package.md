@@ -9,6 +9,8 @@ Evaluate EPA Dynamically Downscaled Ensemble version 2 (EDDE v2) as a future-cli
 
 ## Scope and decisions
 
+The operator clarified that the application scope is future climate only. Historical EDDE runs are diagnostic baselines for source assessment and future-change checks, not a proposed historical climate method. Existing CLIGEN quality-guard failures and PRN/CLI quantization are known limitations; retain their reporting and current safeguards, but do not require this package to solve them as new integration blockers. This clarification does not approve a bias correction or decide how future auxiliary fields or PRISM temperature inversions should be handled.
+
 These are the operator's 2026-10-13 planning decisions and the authoritative scope while this package is open. Promote accepted runtime contracts outside work packages before closure.
 
 - Scope availability by locale, then validate each project's actual location against the selected dataset grid and data availability. Locale membership alone is insufficient: Canadian coverage is partial. Evaluate U.S. and Canadian locales first; determine exact supported locale identifiers from repository configuration and evidence.

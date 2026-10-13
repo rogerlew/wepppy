@@ -25,6 +25,8 @@ Live inventory found MPI future daily coverage ending in 2099 and NorESM SSP2-4.
 
 ## Decision Log
 
+On 2026-10-13 the operator clarified future-climate-only application scope and identified CLIGEN guard/quantization limitations as already known. Historical runs remain diagnostic evidence; solving existing CLIGEN limitations is not a new integration prerequisite. Preserve current safeguards and failure reporting. Bias interpretation, future auxiliary-field assumptions, and PRISM inversion policy remain separate questions; no new correction was authorized.
+
 
 On 2026-10-13 the operator authorized commitment and end-to-end execution of the feasibility package. No UI integration or deployment is authorized by this package. Use public anonymous S3 over the existing requests and netCDF4 dependencies; add no dependencies. Reject unsupported requests explicitly. Preserve source units/calendar in raw extraction and put any CLIGEN conversions in a separately documented adapter.
 
@@ -79,3 +81,5 @@ Use existing `requests`, `netCDF4`, `numpy`, `pandas`, and `pyproj` for HTTP, Ne
 The 120-model-year study completed 657,450 point-days and 69 successful full-period WEPP executions. Ten of 42 CLIGEN attempts and three of 24 PRISM attempts were explicitly rejected; the 59-run pilot and development-container single/PRISM consumer checks succeeded. Historical biases and station-derived auxiliary weather prevent general production adoption. The full regression gate failed an unchanged SBS metadata expectation after 1,265 passes and 28 skips; isolated reproduction confirms it. A continuation ended without a final summary at approximately 34%, so it is incomplete coverage, not a passing gate. Final focused validation and independent reviews are recorded in the report. Initial plan authored 2026-10-13.
 
 Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package remains open for the documented broad-suite regression gate, not additional data acquisition or integration work.
+
+Scope clarification revision: corrected the handoff framing so diagnostic historical runs and known CLIGEN behavior do not expand the requested future-climate feature. Report, package scopes, durable contract, and trackers now record that distinction. Documentation lint passed; no executable behavior changed.
