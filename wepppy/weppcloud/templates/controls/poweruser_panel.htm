@@ -190,39 +190,10 @@
       </button>
     </header>
     <div class="wc-modal__body">
+      <p>{{ usersum_doc_link('weppcloud', 'poweruser-getting-started.md', 'Getting started with PowerUser tools') }}</p>
       <div class="pu-modal__grid">
-        <section class="pu-modal__column" aria-labelledby="puResourcesColumnA">
-          <h3 class="pu-modal__section-title" id="puResourcesColumnA">Core resources</h3>
-          {{ resource_block('ron', 'Ron', 'ron.nodb', 'ron.log') }}
-          {{ resource_block('topaz', 'Topaz', 'topaz.nodb', 'topaz.log') }}
-          {{ resource_block('watershed', 'Watershed', 'watershed.nodb', 'watershed.log') }}
-          {{ resource_block('landuse', 'Landuse', 'landuse.nodb', 'landuse.log', 'rhem' not in ron.mods) }}
-          {{ resource_block('shrubland', 'Shrubland', 'shrubland.nodb', 'shrubland.log', 'shrubland' in ron.mods) }}
-          {{ resource_block('rangeland_cover', 'Rangeland Cover', 'rangeland_cover.nodb', 'rangeland_cover.log', 'rangeland_cover' in ron.mods) }}
-          {{ resource_block('soils', 'Soils', 'soils.nodb', 'soils.log') }}
-          {{ resource_block('climate', 'Climate', 'climate.nodb', 'climate.log') }}
-        </section>
-
-        <section class="pu-modal__column" aria-labelledby="puResourcesColumnB">
-          <h3 class="pu-modal__section-title" id="puResourcesColumnB">Extended resources</h3>
-          {{ resource_block('rhem', 'RHEM', 'rhem.nodb', 'rhem.log', 'rhem' in ron.mods) }}
-          {{ resource_block('rhempost', 'RHEM Post', 'rhempost.nodb', 'rhempost.log', 'rhem' in ron.mods) }}
-          {{ resource_block('wepp', 'WEPP', 'wepp.nodb', 'wepp.log') }}
-          {{ resource_block('wepppost', 'WEPP Post', 'wepppost.nodb', 'wepppost.log') }}
-          {{ resource_block('observed', 'Observed', 'observed.nodb', 'observed.log') }}
-          {{ resource_block('unitizer', 'Unitizer', 'unitizer.nodb', 'unitizer.log') }}
-          {{ resource_block('baer', 'BAER', 'baer.nodb', 'baer.log', 'baer' in ron.mods) }}
-          {{ resource_block('disturbed', 'Disturbed', 'disturbed.nodb', 'disturbed.log', 'disturbed' in ron.mods) }}
-          {{ resource_block('rred', 'RRED', 'rred.nodb', 'rred.log', 'rred' in ron.mods) }}
-          {{ resource_block('lt', 'Long Term', 'lt.nodb', 'lt.log', 'lt' in ron.mods) }}
-          {{ resource_block('ash', 'Ash', 'ash.nodb', 'ash.log', 'ash' in ron.mods) }}
-          {{ resource_block('ashpost', 'Ash Post', 'ashpost.nodb', 'ashpost.log', 'ash' in ron.mods) }}
-          {{ resource_block('debris_flow', 'Debris Flow', 'debris_flow.nodb', 'debris_flow.log', 'debris_flow' in ron.mods) }}
-          {{ resource_block('omni', 'Omni', 'omni.nodb', 'omni.log', 'omni' in ron.mods) }}
-        </section>
-
         <section class="pu-modal__column" aria-labelledby="puBrowseColumn">
-          <h3 class="pu-modal__section-title" id="puBrowseColumn">Browse &amp; data</h3>
+          <h3 class="pu-modal__section-title" id="puBrowseColumn">Inspect inputs and outputs</h3>
           <ul class="pu-link-list">
             <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('') }}">/</a></li>
             {% if 'rred' in ron.mods %}
@@ -255,7 +226,7 @@
         </section>
 
         <section class="pu-modal__column" aria-labelledby="puActionsColumn">
-          <h3 class="pu-modal__section-title" id="puActionsColumn">Actions</h3>
+          <h3 class="pu-modal__section-title" id="puActionsColumn">Analyze and troubleshoot</h3>
           <div class="pu-action-list">
             {% if storm_event_analyzer_ready|default(false) %}
             <a class="pure-button pure-button-secondary"
@@ -285,6 +256,7 @@
                     data-project-action="clear-locks">
               Clear Locks
             </button>
+            <p>Clear stale locks only when a lock error blocks progress. This is not a routine preparation step. {{ usersum_doc_link('weppcloud', 'clearing-locks.md', 'Read the lock-recovery guidance') }}</p>
             {% if ron.profile_recorder_assembler_enabled and current_user.has_role('PowerUser') %}
               <button type="button"
                       class="pure-button pure-button-secondary"
@@ -348,6 +320,42 @@
           {% endif %}
         </section>
       </div>
+      <details class="wc-stack">
+        <summary>Technical details: saved state and logs</summary>
+        <p>Inspect the saved controller state (NoDb) and diagnostic logs for individual project components.</p>
+        <div class="pu-modal__grid">
+        <section class="pu-modal__column" aria-labelledby="puResourcesColumnA">
+          <h3 class="pu-modal__section-title" id="puResourcesColumnA">Core resources</h3>
+          {{ resource_block('ron', 'Ron', 'ron.nodb', 'ron.log') }}
+          {{ resource_block('topaz', 'Topaz', 'topaz.nodb', 'topaz.log') }}
+          {{ resource_block('watershed', 'Watershed', 'watershed.nodb', 'watershed.log') }}
+          {{ resource_block('landuse', 'Landuse', 'landuse.nodb', 'landuse.log', 'rhem' not in ron.mods) }}
+          {{ resource_block('shrubland', 'Shrubland', 'shrubland.nodb', 'shrubland.log', 'shrubland' in ron.mods) }}
+          {{ resource_block('rangeland_cover', 'Rangeland Cover', 'rangeland_cover.nodb', 'rangeland_cover.log', 'rangeland_cover' in ron.mods) }}
+          {{ resource_block('soils', 'Soils', 'soils.nodb', 'soils.log') }}
+          {{ resource_block('climate', 'Climate', 'climate.nodb', 'climate.log') }}
+        </section>
+
+        <section class="pu-modal__column" aria-labelledby="puResourcesColumnB">
+          <h3 class="pu-modal__section-title" id="puResourcesColumnB">Extended resources</h3>
+          {{ resource_block('rhem', 'RHEM', 'rhem.nodb', 'rhem.log', 'rhem' in ron.mods) }}
+          {{ resource_block('rhempost', 'RHEM Post', 'rhempost.nodb', 'rhempost.log', 'rhem' in ron.mods) }}
+          {{ resource_block('wepp', 'WEPP', 'wepp.nodb', 'wepp.log') }}
+          {{ resource_block('wepppost', 'WEPP Post', 'wepppost.nodb', 'wepppost.log') }}
+          {{ resource_block('observed', 'Observed', 'observed.nodb', 'observed.log') }}
+          {{ resource_block('unitizer', 'Unitizer', 'unitizer.nodb', 'unitizer.log') }}
+          {{ resource_block('baer', 'BAER', 'baer.nodb', 'baer.log', 'baer' in ron.mods) }}
+          {{ resource_block('disturbed', 'Disturbed', 'disturbed.nodb', 'disturbed.log', 'disturbed' in ron.mods) }}
+          {{ resource_block('rred', 'RRED', 'rred.nodb', 'rred.log', 'rred' in ron.mods) }}
+          {{ resource_block('lt', 'Long Term', 'lt.nodb', 'lt.log', 'lt' in ron.mods) }}
+          {{ resource_block('ash', 'Ash', 'ash.nodb', 'ash.log', 'ash' in ron.mods) }}
+          {{ resource_block('ashpost', 'Ash Post', 'ashpost.nodb', 'ashpost.log', 'ash' in ron.mods) }}
+          {{ resource_block('debris_flow', 'Debris Flow', 'debris_flow.nodb', 'debris_flow.log', 'debris_flow' in ron.mods) }}
+          {{ resource_block('omni', 'Omni', 'omni.nodb', 'omni.log', 'omni' in ron.mods) }}
+        </section>
+
+        </div>
+      </details>
     </div>
     <footer class="wc-modal__footer">
       <span class="pu-modal__footer-doc">

@@ -225,6 +225,15 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.weppcloud.observed_model_fitting
+  - doc_id: usersum.weppcloud.poweruser_getting_started
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/poweruser-getting-started.md
+    title: Getting Started with PowerUser Access
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.poweruser_getting_started
   - doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/profile-jwt-dataset-access-python-r.md

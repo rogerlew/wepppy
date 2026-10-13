@@ -90,6 +90,10 @@ def access_client(monkeypatch):
     def home():
         return 'home'
 
+    @app.get('/config-builder', endpoint='weppcloud_site.config_builder')
+    def builder():
+        return 'builder'
+
     @app.get('/diagnostics', endpoint='weppcloud_site.diagnostics')
     def diagnostics():
         return 'diagnostics'
@@ -332,7 +336,7 @@ def test_legacy_poweruser_is_preserved_without_fabricated_acceptance(access_clie
     profile = access_client[1].get('/profile')
     assert profile.status_code == 200
     assert 'PowerUser access is active.' in profile.text
-    assert 'predates the current self-service statement' in profile.text
+    assert 'No action is required' in profile.text
     with access_client[2].connect() as connection:
         assert connection.scalar(sa.select(sa.func.count()).select_from(acceptances)) == 0
 

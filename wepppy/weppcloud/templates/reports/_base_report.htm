@@ -124,7 +124,9 @@
                  data-open-tab-pref>
                 GL Dashboard
               </a>
-              <button type="button" class="pure-button" data-modal-open="puModal">PowerUser</button>
+              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
+              <button type="button" class="pure-button" data-modal-open="puModal">PowerUser Panel</button>
+              {% endif %}
               {% if 'disturbed' in (ron.mods or []) %}
               <button type="button" class="pure-button" data-modal-open="disturbedModal">Disturbed</button>
               {% endif %}

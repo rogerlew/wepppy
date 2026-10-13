@@ -6,6 +6,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
+let navigation;
 
 const script = fs.readFileSync(
     path.resolve(__dirname, "../../static/js/feature_access.js"),
@@ -15,21 +17,25 @@ const script = fs.readFileSync(
 function installForm(kind = "poweruser") {
     document.head.innerHTML = '<meta name="csrf-token" content="csrf-123">';
     document.body.innerHTML = `
+        <h2 id="poweruser-access-heading" tabindex="-1">PowerUser access</h2>
         <section data-internal-access>
         <span data-internal-membership-status>membership current; actions await acknowledgment</span>
         <span data-expired-membership>membership expired</span>
         <form action="/access/poweruser" data-feature-access-form="${kind}"
               data-statement-version="v1">
+          ${kind === "membership" ? '<select name="operation"><option value="remove">Remove</option></select><input name="user_id" value="42"><input name="group_key" value="ag_fields"><input name="reason" value="Reviewed removal">' : ''}
           <input type="checkbox" name="needs_poweruser" checked>
           <input type="checkbox" name="accepts_training" checked>
           <p data-access-status hidden tabindex="-1"></p>
           <button type="submit">Save</button>
-          ${kind === "acknowledgment" ? "" : '<a data-access-refresh hidden>Refresh</a>'}
+          ${kind === "acknowledgment" ? "" : '<a href="/profile#poweruser-access-heading" data-access-refresh hidden>Refresh</a>'}
         </form>
         </section>
     `;
     HTMLFormElement.prototype.reportValidity = jest.fn(() => true);
-    window.eval(script);
+    navigation = { href: "http://localhost/profile#poweruser-access-heading", origin: "http://localhost", hash: "#poweruser-access-heading", reload: jest.fn(), assign: jest.fn() };
+    vm.runInNewContext(script, { document, window: { location: navigation }, URL,
+        FormData: window.FormData, fetch: (...args) => window.fetch(...args) });
     return document.querySelector("form");
 }
 
@@ -55,25 +61,66 @@ describe("feature access forms", () => {
 
         const status = form.querySelector("[data-access-status]");
         expect(status.className).toBe("wc-alert wc-alert--danger");
-        expect(status.textContent).toBe("Unable to save. Reload and retry.");
+        expect(status.textContent).toContain("Unable to save. Reload and retry.");
         expect(form.querySelector("[data-access-refresh]").hidden).toBe(true);
         expect(form.querySelector("button[type=submit]").disabled).toBe(false);
     });
 
-    test("shows the server message after a valid JSON success", async () => {
-        window.fetch = jest.fn().mockResolvedValue({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({ message: "Access request saved." })
-        });
+    test.each([true, false])("confirmed grant refreshes even at the same fragment: %s", async (role_changed) => {
+        window.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({
+            message: "PowerUser access granted.", result: {status: "granted", role_changed, statement_version: "v1"}
+        }) });
         const form = installForm();
-
         await submitAndFlush(form);
+        expect(form.isConnected).toBe(false);
+        expect(document.querySelector("[data-access-status]").textContent).toBe("PowerUser access granted.");
+        expect(document.querySelector("[data-access-refresh]").hidden).toBe(false);
+        expect(navigation.reload).toHaveBeenCalledTimes(1);
+        document.querySelector("[data-access-refresh]").click();
+        expect(navigation.reload).toHaveBeenCalledTimes(2);
+        await submitAndFlush(form);
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+    });
 
-        const status = form.querySelector("[data-access-status]");
-        expect(status.className).toBe("wc-alert wc-alert--success");
-        expect(status.textContent).toBe("Access request saved.");
+    test.each([
+        undefined,
+        {status: "pending", role_changed: true, statement_version: "v1"},
+        {status: "granted", role_changed: "yes", statement_version: "v1"},
+        {status: "granted", role_changed: true, statement_version: "old"}
+    ])("malformed grant cannot activate or navigate: %j", async (result) => {
+        window.fetch = jest.fn().mockResolvedValue({ok: true, json: async () => ({message: "Saved", result})});
+        const form = installForm();
+        await submitAndFlush(form);
+        expect(form.isConnected).toBe(true);
+        expect(form.querySelector("button").disabled).toBe(false);
+        expect(form.querySelector("[data-access-status]").className).toBe("wc-alert wc-alert--danger");
+        expect(navigation.reload).not.toHaveBeenCalled();
+        expect(navigation.assign).not.toHaveBeenCalled();
+    });
+
+    test("membership administration keeps its refresh and server feedback", async () => {
+        window.fetch = jest.fn().mockResolvedValue({ok: true, json: async () => ({message: "Membership removed."})});
+        const form = installForm("membership");
+        await submitAndFlush(form);
+        expect(form.isConnected).toBe(true);
+        expect(form.querySelector("[data-access-status]").textContent).toBe("Membership removed.");
         expect(form.querySelector("[data-access-refresh]").hidden).toBe(false);
+        expect(JSON.parse(window.fetch.mock.calls[0][1].body)).toEqual({operation:"remove", user_id:42, group_key:"ag_fields", reason:"Reviewed removal"});
+        expect(navigation.reload).not.toHaveBeenCalled();
+    });
+
+    test("Profile fragment focuses the onboarding heading", () => {
+        installForm();
+        expect(document.activeElement).toBe(document.getElementById("poweruser-access-heading"));
+    });
+
+    test("network failure keeps retry and does not activate", async () => {
+        window.fetch = jest.fn().mockRejectedValue(new Error("Network unavailable"));
+        const form = installForm();
+        await submitAndFlush(form);
+        expect(form.querySelector("button").disabled).toBe(false);
+        expect(document.activeElement).toBe(form.querySelector("[data-access-status]"));
+        expect(navigation.reload).not.toHaveBeenCalled();
     });
 
     test.each([true, false])("acknowledgment completes in place when changed=%s", async (changed) => {

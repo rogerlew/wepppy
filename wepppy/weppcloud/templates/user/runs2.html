@@ -67,6 +67,14 @@
     </div>
   </header>
 
+  {% if current_user.is_authenticated and not (current_user.has_role('PowerUser') or current_user.has_role('Admin') or current_user.has_role('Root')) %}
+  <section class="wc-panel wc-stack" aria-labelledby="advanced-features-heading">
+    <h2 id="advanced-features-heading">Advanced features</h2>
+    <p>Explore PowerUser tools for custom project configurations, project troubleshooting, and API access. Enable access from your profile after reviewing the responsibilities.</p>
+    <p><a href="{{ url_for('user.profile') }}#poweruser-access-heading">Explore PowerUser access</a></p>
+  </section>
+  {% endif %}
+
   <section class="wc-panel wc-stack">
     <div id="runs-table-view" role="tabpanel" aria-labelledby="runs-tab-table">
       <div class="wc-map-controls">

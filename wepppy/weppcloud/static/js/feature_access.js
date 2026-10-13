@@ -1,6 +1,8 @@
 /* Session/CSRF forms for feature membership and current-user acknowledgment. */
 (function () {
     "use strict";
+    var heading = document.getElementById("poweruser-access-heading");
+    if (heading && window.location.hash === "#poweruser-access-heading") { heading.focus(); }
     document.querySelectorAll("[data-feature-access-form]").forEach(function (form) {
         var formKind = form.dataset.featureAccessForm;
         var membership = formKind === "membership";
@@ -8,6 +10,26 @@
         var dates = form.querySelector("[data-access-dates]");
         var status = form.querySelector("[data-access-status]");
         var button = form.querySelector("button[type=submit]");
+        function refreshProfile() {
+            var destination = new URL(refreshLink.href, window.location.href);
+            if (destination.origin !== window.location.origin) {
+                throw new Error("Reload Profile to check your access status.");
+            }
+            var current = new URL(window.location.href);
+            if (current.pathname === destination.pathname && current.search === destination.search) {
+                window.location.hash = destination.hash;
+                window.location.reload();
+            } else {
+                window.location.assign(destination.href);
+            }
+        }
+        var refreshLink = form.querySelector("[data-access-refresh]");
+        if (formKind === "poweruser" && refreshLink) {
+            refreshLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                refreshProfile();
+            });
+        }
         function updateDates() {
             if (dates) {
                 dates.disabled = operation.value === "remove";
@@ -74,6 +96,12 @@
                     typeof body.result.changed !== "boolean")) {
                     throw new Error("Unable to save. Reload and retry.");
                 }
+                if (formKind === "poweruser" && (!body.result ||
+                    body.result.status !== "granted" ||
+                    typeof body.result.role_changed !== "boolean" ||
+                    body.result.statement_version !== form.dataset.statementVersion)) {
+                    throw new Error("Unable to save. Reload and retry.");
+                }
                 status.className = "wc-alert wc-alert--success";
                 if (formKind === "acknowledgment") {
                     status.textContent = "You have accepted this version.";
@@ -82,6 +110,19 @@
                             label.textContent = "membership current; acknowledgment complete";
                         });
                     form.replaceWith(status);
+                } else if (formKind === "poweruser") {
+                    var refresh = form.querySelector("[data-access-refresh]");
+                    var destination = new URL(refresh.href, window.location.href);
+                    if (destination.origin !== window.location.origin) {
+                        throw new Error("Reload Profile to check your access status.");
+                    }
+                    status.textContent = body.message;
+                    refresh.hidden = false;
+                    var completed = document.createElement("div");
+                    completed.append(status, refresh);
+                    form.replaceWith(completed);
+                    // A hash-only assignment does not refresh server-rendered roles.
+                    refreshProfile();
                 } else {
                     status.textContent = body.message;
                     form.querySelector("[data-access-refresh]").hidden = false;
@@ -89,6 +130,9 @@
             } catch (error) {
                 status.className = "wc-alert wc-alert--danger";
                 status.textContent = error.message || "Unable to save. Check your connection and retry.";
+                if (formKind === "poweruser") {
+                    status.textContent += " Reload Profile and retry; sign in again if your session has expired.";
+                }
             } finally {
                 if (button.isConnected) { button.disabled = false; }
                 status.focus();

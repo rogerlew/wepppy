@@ -5,6 +5,11 @@
   {% if internal_access.error_id %}
     <p class="wc-alert wc-alert--warning" role="status">Feature access status is temporarily unavailable. Reload to retry. Reference: {{ internal_access.error_id }}</p>
   {% else %}
+    {% if not internal_access.memberships %}
+    <p>Some research features require separate approval. PowerUser access does not grant internal feature permissions.</p>
+    {% endif %}
+    <details{% if internal_access.memberships %} open{% endif %}>
+      <summary>Internal feature memberships and acknowledgment</summary>
     <p>Membership applies only to the listed feature. It does not grant technical roles or access to unrelated features. Project permissions and feature availability still apply.</p>
     <ul>{% for member in internal_access.memberships %}
       <li>{{ member.label }}:
@@ -26,5 +31,6 @@
       <noscript><p>JavaScript is required to record acknowledgment.</p></noscript>
     </form>
     {% endif %}
+    </details>
   {% endif %}
 </section>

@@ -1,25 +1,38 @@
 {% import "controls/_pure_macros.html" as ui %}
 <section aria-labelledby="poweruser-access-heading" class="wc-stack">
-  <h2 id="poweruser-access-heading">PowerUser access</h2>
+  <h2 id="poweruser-access-heading" tabindex="-1">PowerUser access</h2>
   {% if internal_access.error_id %}
     <p class="wc-alert wc-alert--warning" role="status">PowerUser status is temporarily unavailable. Reload to retry. Reference: {{ internal_access.error_id }}</p>
-  {% elif internal_access.poweruser.has_role %}
+  {% elif internal_access.poweruser.has_role or user.has_role('Admin') or user.has_role('Root') %}
+    {% if internal_access.poweruser.has_role %}
     <p role="status">PowerUser access is active.</p>
     {% if internal_access.poweruser.accepted %}
       <p>You have accepted the current PowerUser training statement ({{ internal_access.poweruser_version }}).</p>
     {% else %}
-      <p>Your access predates the current self-service statement; no acceptance of this version is recorded.</p>
+      <p>Your existing PowerUser access remains active. No action is required; this statement version has not been recorded for your account.</p>
+    {% endif %}
+    {% else %}
+    <p>Your existing {{ 'Root' if user.has_role('Root') else 'Admin' }} role already provides these tools. No action is required.</p>
     {% endif %}
     <p>PowerUser access does not authorize internal feature actions or private Batch/Culvert data.</p>
+    <ul>
+      <li><a href="{{ url_for('weppcloud_site.config_builder') }}">Open Config Builder</a> to create a custom project configuration.</li>
+      <li><a href="{{ url_for('user.runs') }}">Go to Runs</a> and open a project, then choose More → PowerUser Panel.</li>
+      <li>{{ usersum_doc_link('weppcloud', 'poweruser-getting-started.md', 'PowerUser getting-started guide') }}</li>
+    </ul>
   {% else %}
+    <p>PowerUser access enables advanced tools for custom project configurations, project inspection and troubleshooting, and personal API tokens. Some features also require a compatible project or separate approval.</p>
+    <p>{{ usersum_doc_link('weppcloud', 'poweruser-getting-started.md', 'Explore PowerUser tools and your first steps') }}</p>
+    <p>Access is enabled immediately after you confirm both statements below. There is no manual approval wait.</p>
+    <h3>Responsibilities</h3>
     <p>{{ internal_access.poweruser_statement }}</p>
     <p>Version: {{ internal_access.poweruser_version }}</p>
     <form class="pure-form pure-form-stacked" action="{{ url_for('user.poweruser_onboarding') }}" method="post" data-feature-access-form="poweruser" data-statement-version="{{ internal_access.poweruser_version }}">
       {{ ui.checkbox_field('needs_poweruser', 'Do you need PowerUser access?', attrs={'required': true}) }}
       {{ ui.checkbox_field('accepts_training', 'I have read and understand the PowerUser training statement.', attrs={'required': true}) }}
       <p class="wc-alert" data-access-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
-      <button type="submit" class="pure-button pure-button-primary">Request PowerUser access</button>
-      <a href="{{ url_for('user.profile') }}" data-access-refresh hidden>Refresh access status</a>
+      <button type="submit" class="pure-button pure-button-primary">Enable PowerUser access</button>
+      <a href="{{ url_for('user.profile') }}#poweruser-access-heading" data-access-refresh hidden>Refresh access status</a>
       <noscript><p>JavaScript is required to submit PowerUser onboarding.</p></noscript>
     </form>
   {% endif %}

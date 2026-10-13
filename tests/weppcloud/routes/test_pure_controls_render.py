@@ -2377,7 +2377,9 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
 
 def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: Environment) -> None:
     template = jinja_env.get_template("reports/_base_report.htm")
+    poweruser = SimpleNamespace(has_role=lambda role: role == "PowerUser", roles=["PowerUser"], is_authenticated=True)
     rendered = template.render(
+        user=poweruser, current_user=poweruser,
         ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config", name="", scenario=""),
         request=SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"}),
     )

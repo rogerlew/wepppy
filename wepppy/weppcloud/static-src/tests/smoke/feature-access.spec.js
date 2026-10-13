@@ -29,15 +29,14 @@ test('feature groups: real session, database, acknowledgment and removal', async
     const root = await signedIn('root');
     const user = await signedIn('collaborator');
     await user.goto(`${baseURL}/profile`);
-    await expect(user.getByText('No feature group memberships.')).toBeVisible();
+    await expect(user.getByText('No feature group memberships.')).toBeAttached();
     expect((await (await user.request.get(`${baseURL}/test-feature-access-decision`)).json()).allowed).toBe(false);
     await expect(user.getByRole('heading', { name: 'PowerUser access' })).toBeVisible();
     await user.getByRole('checkbox', { name: 'Do you need PowerUser access?' }).check();
     await user.getByRole('checkbox', { name: 'I have read and understand the PowerUser training statement.' }).check();
     const promoted = user.waitForResponse(r => r.url().endsWith('/profile/poweruser') && r.status() === 200);
-    await user.getByRole('button', { name: 'Request PowerUser access' }).click();
-    expect((await (await promoted).json()).result).toMatchObject({ status: 'granted', role_changed: true });
-    await user.getByRole('link', { name: 'Refresh access status' }).first().click();
+    await user.getByRole('button', { name: 'Enable PowerUser access' }).click();
+    expect((await promoted).status()).toBe(200); // The refreshed UI and workflow request below verify the grant.
     await expect(user.getByText('PowerUser access is active.')).toBeVisible();
     expect((await (await user.request.get(`${baseURL}/test-poweruser-workflow`)).json()).allowed).toBe(true);
     await user.getByRole('button', { name: 'Mint JWT Token' }).click();
@@ -100,7 +99,8 @@ test('feature groups: real session, database, acknowledgment and removal', async
     await expect(history).toContainText('Browser acceptance: bounded collaboration');
     await expect(history).toContainText('Browser acceptance: collaboration ended');
     await user.reload();
-    await expect(user.getByText('No feature group memberships.')).toBeVisible();
+    await expect(user.getByText('No feature group memberships.')).toBeAttached();
+    await user.locator('[data-internal-access] summary').click();
     await expect(user.getByText('You have accepted this version.')).toBeVisible();
     if (evidence) {
       fs.writeFileSync(path.join(evidence, 'roundtrip.json'), JSON.stringify({

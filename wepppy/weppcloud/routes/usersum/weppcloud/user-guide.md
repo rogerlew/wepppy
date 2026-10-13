@@ -110,6 +110,10 @@ release can remain visible but unavailable as a new selection.
 
 ---
 
+## PowerUser tools
+
+From **Runs**, select **Explore PowerUser access**, or open **Profile → PowerUser access**. Read the responsibilities and confirm both statements to enable access immediately. Profile then links to Config Builder, Runs, and the [PowerUser getting-started guide](poweruser-getting-started.md). Existing PowerUsers and users whose Admin/Root role already provides the tools do not need to activate again. Internal research features still require separate permission.
+
 ## GL Dashboard
 
 Open **More → GL Dashboard** from a project or its report pages to explore the
