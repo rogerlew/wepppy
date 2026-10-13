@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Active: [Selected onboarding audit corrections](docs/work-packages/20261013_onboarding_audit_corrections/package.md) — D01/D02/D13/D14/D18; reviewed SBS admission contract checkpoint precedes implementation.
+
 Completed (Forest): [PowerUser discovery and onboarding](docs/work-packages/20261013_poweruser_discovery_onboarding/package.md) — Runs discovery, immediate Profile activation, panel orientation, report guard and guide verified at `3df2ec482`. Real grant/DB/browser and cleanup evidence retained; 10,723 distinct Python tests pass across segments, 980 frontend tests pass. Existing lint/order/timing limitations documented. Permissions unchanged; production rollout and push remain separate.
 
 Forest acceptance passed: [WEPP executable capabilities](docs/work-packages/20261012_wepp_executable_capabilities/package.md) — vendored native sidecars for260803/261010; Builder and existing projects use live compatible releases. Browser, native worker, download and archive/restore checks pass; segmented broad regression coverage complete, with known lint/optional-WBT limitations retained.

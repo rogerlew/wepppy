@@ -42,3 +42,19 @@ authentication, run ownership, upload limits and cleanup containment.
 Source-grid export must not use the separate WGS display NoData sentinel: a valid
 source value of 255 remains classifiable. Noninteger or nonfinite metadata must
 not be truncated into an unrelated integer class when passed to Rust.
+
+## Unknown palette colors
+
+Accepted 2026-10-13; implementation conformance pending. A readable color table
+MUST NOT cause upload rejection solely because none of its colors match known
+burn classes. Known colors retain their existing classifications; unknown
+colors remain unassigned and available for explicit user mapping. Existing
+unassigned export/NoData behavior remains; do not infer unburned or numeric
+severity classes for unknown palette entries. Original source masks remain.
+
+No-color-table rasters retain numeric classification. Invalid projection,
+noninteger values, excessive classes, unreadable rasters/palettes and required
+native failures remain errors. Recognition metadata such as color_table_valid
+is diagnostic, not an admission requirement. Rationale: an unknown palette is
+editable user input, not raster corruption; rejecting it prevents the existing
+manual classification workflow. See ADR-0090.
