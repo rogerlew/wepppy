@@ -4921,7 +4921,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "classification_type": "integer_class_raster",
                             "required_integer_values": True,
                             "max_unique_classes": 256,
-                            "color_table_mode": "optional_but_if_present_must_map_known_severity",
+                            "color_table_mode": "optional_unknown_colors_unassigned",
                         },
                     }
                 ],

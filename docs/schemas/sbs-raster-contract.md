@@ -45,11 +45,11 @@ not be truncated into an unrelated integer class when passed to Rust.
 
 ## Unknown palette colors
 
-Accepted 2026-10-13; implementation conformance pending. A readable color table
+Implemented and regression-checked 2026-10-13. A readable color table
 MUST NOT cause upload rejection solely because none of its colors match known
 burn classes. Known colors retain their existing classifications; unknown
-colors remain unassigned and available for explicit user mapping. Existing
-unassigned export/NoData behavior remains; do not infer unburned or numeric
+colors remain unassigned and available for explicit user mapping. Display remains the distinct Unassigned state under ADR-0045; existing
+unassigned model export/NoData behavior remains; do not infer unburned or numeric
 severity classes for unknown palette entries. Original source masks remain.
 
 No-color-table rasters retain numeric classification. Invalid projection,

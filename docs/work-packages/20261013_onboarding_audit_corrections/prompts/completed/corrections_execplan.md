@@ -9,9 +9,9 @@ The operator selected D01/D02/D13/D14/D18 from docs/investigations/20261013_prim
 ## Progress
 
 - [x] Inspect current behavior and capture operator decisions.
-- [ ] Review and commit contract checkpoint.
-- [ ] Implement bounded changes and regressions.
-- [ ] Validate artifacts, update dispositions and close out.
+- [x] Review and commit contract checkpoint.
+- [x] Implement bounded changes and regressions.
+- [x] Validate artifacts, update dispositions and close out.
 
 ## Plan of work and milestones
 
@@ -27,7 +27,7 @@ No persisted keys or raster format changes. Existing recognized palettes, numeri
 
 ## Surprises & Discoveries
 
-The existing classifier already supports unknown colors; admission was stricter than the supported interactive correction path. The native palette summary's color_table_valid describes recognition, not raster structural validity.
+The existing classifier already supports unknown colors; admission was stricter than the supported interactive correction path. The native palette summary's color_table_valid describes recognition, not raster structural validity. ADR-0045 distinguishes visible Unassigned from source NoData; model exports retain 255. A test assumption about numeric source-NoData display entries was corrected to the existing nv encoding, with no producer change.
 
 ## Decision Log
 
@@ -35,7 +35,7 @@ The existing classifier already supports unknown colors; admission was stricter 
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation.
+Implemented selected D01/D02/D13/D14/D18 after checkpoint b4be200b4. Final focused validation: 182 passed/1 skipped with direct native raster artifact assertions; config readback and documentation/catalog checks pass. Other 13 audit dispositions remain open. No production rollout or new AgFields scientific validation claimed.
 
 ## Recovery and dependencies
 

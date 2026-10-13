@@ -1045,6 +1045,56 @@ class TestSBSMapSanityCheck(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertIn('valid color table', message)
         
+    def test_unknown_palette_admission_export_and_explicit_mapping(self):
+        """Unknown colors stay unmapped through native export until assigned."""
+        for known_rgb, known_class in ((None, 255), ((255, 0, 0), 3), ((0, 115, 74), 0)):
+            with self.subTest(known_rgb=known_rgb):
+                filename = os.path.join(self.temp_dir, f"palette_{known_class}.tif")
+                output = os.path.join(self.temp_dir, f"palette_{known_class}_4class.tif")
+                unknown = (123, 45, 67)
+                other = known_rgb or (17, 29, 43)
+                ct = gdal.ColorTable()
+                ct.SetColorEntry(0, (*unknown, 255))
+                ct.SetColorEntry(1, (*other, 255))
+                ct.SetColorEntry(2, (19, 31, 47, 255))
+                GeoTiffTestHelper.create_geotiff(
+                    filename, np.array([[0, 1, 2]], dtype=np.uint8),
+                    color_table=ct, nodata_val=2,
+                )
+                self.assertEqual(sbs_map_sanity_check(filename)[0], 0)
+                sbs = SoilBurnSeverityMap(filename)
+                self.assertIsNotNone(sbs.ct)
+                self.assertIsNone(sbs.color_map[unknown])
+                self.assertEqual(sbs.class_pixel_map['0'], '255')
+                display_table = output.replace('.tif', '_colors.txt')
+                sbs._write_color_table(display_table)
+                with open(display_table) as fp:
+                    display_colors = {line.split()[0]: line.split()[1:] for line in fp}
+                self.assertEqual(display_colors['0'], ['128', '0', '152', '255'])
+                self.assertNotIn('2', display_colors)
+                self.assertEqual(display_colors['nv'], ['0', '0', '0', '0'])
+                sbs.export_4class_map(output)
+                ds = gdal.Open(output)
+                np.testing.assert_array_equal(
+                    ds.GetRasterBand(1).ReadAsArray(), [[255, known_class, 255]],
+                )
+                self.assertEqual(ds.GetRasterBand(1).GetNoDataValue(), 255)
+                ds = None
+
+                # Reassign the unknown color, retaining a source NoData pixel
+                # even when its palette color is explicitly assigned high.
+                mapping = dict(sbs.color_map)
+                mapping[unknown] = 'low'
+                mapping[(19, 31, 47)] = 'high'
+                remapped = SoilBurnSeverityMap(filename, color_map=mapping)
+                remapped_output = output.replace('.tif', '_remapped.tif')
+                remapped.export_4class_map(remapped_output)
+                ds = gdal.Open(remapped_output)
+                np.testing.assert_array_equal(
+                    ds.GetRasterBand(1).ReadAsArray(), [[1, known_class, 255]],
+                )
+                ds = None
+
     def test_sanity_check_valid_no_color_table(self):
         """Test sanity check passes for valid non-color table map."""
         filename = os.path.join(self.temp_dir, 'valid_no_ct.tif')

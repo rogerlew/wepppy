@@ -169,7 +169,7 @@ Purpose: run and monitor the per-sub-field simulations.
 - Primary button "Run WEPP on Sub-fields" enqueues the RQ job wrapping `run_wepp_ag_fields`.
 - Blocked chips, checked in order: stage 2 incomplete → "Build sub-fields first." Stage 3 incomplete → "Map all crops to managements first (N unmapped)." Parent WEPP hillslope artifacts missing (`wepp/runs/p*.sol`/`.cli`) → "Run the watershed WEPP hillslopes first — sub-fields reuse their soil and climate files."
 - "Run options" collapsible: a "WEPP Exec" select populated from the same installed-binary list as the main WEPP control, and a content-width "Clear previous runs and outputs" button wrapping `clear_ag_field_wepp_runs`/`clear_ag_field_wepp_outputs` (confirmation via status chip, not a modal — it only deletes regenerable artifacts). Do not expose the executor worker count in this UI.
-- The AgFields executable is independent of the parent watershed WEPP executable and is persisted in `ag_fields.nodb`. New projects created from `ag-fields.cfg` default to the capacity-32 `wepp_260714` executable; historical projects retain their persisted executable until a user makes an AgFields selection. The selected executable is submitted with the run request and is the value propagated to every sub-field hillslope process.
+- The AgFields executable is independent of the parent watershed WEPP executable and is persisted in `ag_fields.nodb`. New projects created from `ag-fields.cfg` default to `wepp_261010` (ADR-0089); historical projects retain their persisted executable until a user makes an AgFields selection. The selected executable is submitted with the run request and is the value propagated to every sub-field hillslope process.
 - Progress streams to the status panel (the backend already logs "(k/N) sub_field_id=… completed"). No separate progress widget in v1.
 - On success: success chip with run count and links — browse `wepp/ag_fields/output/`, and a pointer to Features Export for `AgFields Spatial` / `AgFields Metrics` layers.
 - A single sub-field failure aborts the run (backend cancels pending sub-fields; already-running ones finish): the stacktrace panel shows the failing sub-field; the status chip must name the failed `sub_field_id` and its parent `field_id`.
@@ -322,9 +322,9 @@ The backend-readiness and acceptance follow-up packages established the behavior
 10. **2017.1 truncation:** `first_year_only=False` remains fixed and is not exposed in v1.
 11. **Logging:** duplicate-field warnings use `logger.warning`.
 12. **Boundary CRS handling:** exact project-UTM coordinates, WGS84, and correctly declared projected CRSs are accepted; ambiguous projected coordinates are rejected with project EPSG/bounds diagnostics.
-13. **Management synthesis:** `ManagementRotationSynth(..., mode="stack-and-merge")` preserves the crop timeline and existing setup-year/spring-fall composition while reusing structurally identical definitions and remapping references. It fails before writing when more than WEPP's 20 referenced plant scenarios remain.
+13. **Management synthesis:** `ManagementRotationSynth(..., mode="stack-and-merge")` preserves the crop timeline and existing setup-year/spring-fall composition while reusing structurally identical definitions and remapping references. It fails before writing when more than WEPP's 32 distinct referenced yearly scenarios remain.
 14. **Residue placeholder normalization:** archive ingestion applies the ADR-0016 `0.00001 m` floor only to proven residue-only plants with `hmax <= 0`, preserves archived 2017.1 sources, leaves active crops unchanged, and records additive provenance.
-15. **AgFields-owned executable:** `[ag_fields] bin` initializes new-project state independently of parent WEPP; `ag-fields.cfg` sets `wepp_dcc52a6`, while historical NoDb payloads without the field retain the parent-WEPP fallback until an AgFields run selection is submitted.
+15. **AgFields-owned executable:** `[ag_fields] bin` initializes new-project state independently of parent WEPP; `ag-fields.cfg` sets `wepp_261010`, while historical NoDb payloads without the field retain the parent-WEPP fallback until an AgFields run selection is submitted.
 16. **Preflight freshness:** additive Redis timestamp `run_ag_fields` is invalidated by input/artifact mutations and job starts, stamped only on successful Stage 4 completion, and exposed as checklist key `ag_fields` with the 🌽 TOC emoji.
 
 ## 11. Accessibility
@@ -354,6 +354,6 @@ The 2026-07-10 walkthrough on `sacral-self-discipline` exercised all four stages
 ## 13. Known Limitations and Deferred Decisions
 
 1. **Duplicate `field_id` values remain non-blocking.** They are reported as a data-quality warning. Promote them to a blocking upload error only with evidence that real joins require that stricter contract.
-2. **Historical executable fallback is intentionally additive.** An AgFields NoDb created before `_wepp_bin` was introduced displays the parent WEPP executable until the user submits an AgFields run selection; new `ag-fields.cfg` projects start with `wepp_dcc52a6`.
+2. **Historical executable fallback is intentionally additive.** An AgFields NoDb created before `_wepp_bin` was introduced displays the parent WEPP executable until the user submits an AgFields run selection; new `ag-fields.cfg` projects start with `wepp_261010`.
 3. **Worker tuning is API-only compatibility.** The browser uses automatic sizing and sends no `max_workers`; API callers may provide 1-16. Larger or non-positive values are rejected instead of clamped.
 4. **Controller splitting is deferred.** The single controller shares one snapshot, modal, and job lifecycle. Reassess its module boundary only if observed maintenance friction justifies the churn.

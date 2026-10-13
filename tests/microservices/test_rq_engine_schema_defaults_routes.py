@@ -998,6 +998,12 @@ def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.Monke
     assert response.status_code == 200
     operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
     assert "rq_engine_upload_sbs" in operation_ids
+    upload = next(op for op in response.json()["operations"]
+                  if op["operation_id"] == "rq_engine_upload_sbs")
+    semantics = upload["file_fields"][0]["value_semantics"]
+    assert semantics["color_table_mode"] == "optional_unknown_colors_unassigned"
+    assert semantics["required_integer_values"] is True
+    assert semantics["max_unique_classes"] == 256
     assert "rq_engine_build_rusle" in operation_ids
 
 

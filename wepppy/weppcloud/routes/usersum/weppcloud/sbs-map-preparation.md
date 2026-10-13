@@ -10,7 +10,7 @@ WEPPcloud recognizes the current interagency color-table values:
 - High severity: `#A80000`
 - Masked / unmappable: `#FFFFFF`
 
-Masked/unmappable cells are treated as NoData and appear transparent on maps.
+Source NoData cells appear transparent on maps. Unrecognized palette colors are displayed as **Unassigned**, distinct from transparent NoData; four-class model exports use NoData for unassigned pixels. A readable color table is accepted even when none of its colors match known burn classes. Those colors stay unassigned until you assign them in the interface; they are not automatically treated as unburned.
 Earlier supported SBS palettes remain readable. Colors must match a recognized
 RGB value exactly; WEPPcloud does not guess a class from a similar color.
 

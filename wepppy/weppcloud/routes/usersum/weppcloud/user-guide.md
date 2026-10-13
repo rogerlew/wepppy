@@ -30,16 +30,18 @@ WEPPcloud supports a mix of core models, optional modules, interface-specific wo
 
 - **[WEPP](models/wepp/ENDUSER.md)** — the core hydrology and erosion model used to simulate runoff, hillslope erosion, channel processes, and sediment delivery.
 - **[Ash Transport (WATAR)](models/ash-transport/ENDUSER.md)** — post-fire ash and contaminant transport modeling for watershed-scale ash and water-quality assessment after wildfire.
-- **[Debris Flow](models/debris-flow/ENDUSER.md)** — post-fire debris-flow probability and volume estimation using watershed properties, burn severity, soils, slope, and precipitation inputs.
+- **[Debris Flow (Cannon)](models/debris-flow/ENDUSER.md)** — post-fire debris-flow probability and volume estimation using watershed properties, burn severity, soils, slope, and precipitation inputs.
+- **[Post-fire Debris Flow (Staley)](../../../../nodb/mods/postfire_debris_flow/ENDUSER.md)** — estimates debris-flow likelihood and the rainfall intensity corresponding to 50% likelihood using Staley et al. (2017) M1 and M3 models; does not estimate volume or runout. Available as a preview workflow.
+- **[Geneva](../../../../nodb/mods/geneva/specification.md)** — event rainfall-runoff modeling using Curve Number and unit hydrograph methods to compare storm runoff and hydrographs, including post-fire conditions.
 - **[Gridded RUSLE](models/gridded-rusle/ENDUSER.md)** — gridded RUSLE factor and annual detachment mapping for spatial erosion-potential analysis.
 - **[Culvert Modeling (API)](models/culvert-modeling/ENDUSER.md)** — an API-backed culvert and hydroenforcement workflow used to condition terrain and drainage paths around engineered crossings.
-- **[Roads](models/roads/ENDUSER.md)** — road and stream-crossing erosion analysis integrated with the watershed workflow.
+- **[WEPPcloud Roads](models/roads/ENDUSER.md)** — road-network runoff and sediment-delivery analysis integrated with an existing watershed run, with road scenario results kept separate from baseline outputs.
 - **[Revegetation](models/revegetation/ENDUSER.md)** — a WEPPcloud interface and scenario workflow for modeling post-fire vegetation recovery and cover-transform effects before running WEPP.
 - **[RHEM](models/rhem/ENDUSER.md)** — the Rangeland Hydrology and Erosion Model interface for rangeland runoff and erosion analysis.
-- **[Agricultural Fields (AgFields API)](models/agricultural-fields/ENDUSER.md)** — an API-backed workflow for modeling mapped crop fields and generating field- or sub-field-scale WEPP results.
+- **[Agricultural Fields (AgFields)](models/agricultural-fields/ENDUSER.md)** — a workflow with a web UI controller and API support for uploading mapped crop fields, configuring crop rotations, building sub-fields, and generating field- or sub-field-scale WEPP results.
 - **[WEPP-SWAT+](models/wepp-swat/ENDUSER.md)** — a combined workflow that extends WEPP results with optional SWAT+ channel-routing steps.
 - **[WEPP DSS Export for HEC-RAS](models/hec-dss-export/ENDUSER.md)** — export of WEPP channel and outlet time series to HEC-DSS for downstream HEC workflows such as HEC-RAS.
-
+- **[PATH-CE](../path/quick-start.md)** — cost-effective post-fire mulch treatment selection using completed OMNI scenarios and contrasts to meet hillslope sediment-yield and watershed outlet sediment-discharge targets.
 ### Who develops WEPPcloud?
 
 WEPPcloud was developed primarily for forestry applications as a joint effort between the University of Idaho and the USDA Forest Service Rocky Mountain Research Station. Additional contributions come from USDA Agricultural Research Service (ARS), Swansea University, and Michigan Technological University. The European interface was funded in part by the European Union's Horizon 2020 research and innovation program (grant agreement No. 10100389).
@@ -125,7 +127,7 @@ outputs. The link follows your **Open links in new tabs** preference.
 
 WEPPcloud collects only the information necessary to operate the platform and support your work.
 
-**Account data.** When you register or sign in via OAuth, WEPPcloud stores your name and email address. If you use OAuth (Google, GitHub, or ORCID), WEPPcloud receives only the profile information needed to identify your account. Your OAuth provider password is never transmitted to or stored by WEPPcloud.
+**Account data.** When you register or sign in via OAuth, WEPPcloud stores your name and email address. If you use OAuth (Google or GitHub), WEPPcloud receives only the profile information needed to identify your account. Your OAuth provider password is never transmitted to or stored by WEPPcloud.
 
 **Run data.** Watershed delineations, model inputs, simulation outputs, and uploaded files (such as burn severity maps) are stored on WEPPcloud servers for as long as the project exists. Run data includes geographic coordinates of your watershed area.
 

@@ -1,4 +1,4 @@
-# WEPPcloud FAQ (Legacy Draft)
+# WEPPcloud FAQ
 
 ## How do you calibrate the WEPP model?
 
@@ -55,6 +55,15 @@ Particle size of the bed, critical shear, bank/bed erodibility, and depth to an 
 
 The model provides exceedance probabilities by repeatedly running the model under the same vegetative and soil conditions with multiple weather realizations. Historically this has been described as 100 realizations per condition. Using these realizations, exceedance probabilities and return periods are calculated for magnitude events (for example, 2-year return period). Each year following disturbance or treatment may have unique vegetation and soil conditions, and each condition is evaluated with multiple weather scenarios to produce probabilistic outputs.
 
+## How can I model multiple scenarios for a watershed?
+
+Use **OMNI Scenarios** for coordinated treatment comparisons, or **fork the project** when each alternative needs independent settings.
+
+- **[OMNI Scenarios](../../../../nodb/mods/omni/ENDUSER.md)** is appropriate for comparing burn severity, an undisturbed baseline, mulching, thinning, or prescribed fire within the same watershed. OMNI uses the **same climate and WEPP Advanced Options across scenario runs**, helping isolate the effects of disturbance or treatment. Add alternatives in the OMNI Scenario Builder, run them, and review the combined scenario reports. Use OMNI Contrasts when you also need to evaluate treatment on selected hillslopes or areas.
+- **Forking** creates a separate project from an existing run. Use it when alternatives need different climate inputs, WEPP Advanced Options, or other settings that must vary independently. Fork the baseline for each alternative, give each copy a descriptive name, change its settings, rebuild affected inputs, and rerun WEPP. Changes in a fork do not update the source project, and forks are not automatically collected into OMNI's scenario reports.
+
+For example, compare three mulch rates under the same weather with OMNI; compare different climate datasets or soil parameter settings with separate forks. Keep a record of the settings changed in each fork so the comparison remains interpretable.
+
 ## What is the largest size watershed someone should run with WEPP?
 
 Current recommended guidance is to stay below 2500 hillslopes and about 50 square miles (or less) per watershed run.
@@ -70,14 +79,18 @@ If the objective is hillslope erosion mapping rather than outlet sediment load o
 
 ## Can WEPP predict debris flows or landslides?
 
-The WEPPcloud watershed interface can estimate debris-flow probability and magnitude after wildfire using the Cannon et al. (2010) model. Caution is recommended because empirical parameters may not be appropriate for all watersheds.
+WEPPcloud provides two empirical post-fire debris-flow workflows alongside WEPP:
 
-The USGS provides current post-fire debris-flow hazard information for the US:  
+- **[Post-fire debris flow (Staley)](../../../../nodb/mods/postfire_debris_flow/ENDUSER.md)** uses the Staley et al. (2017) M1 and M3 models to estimate debris-flow likelihood for specified rainfall and the rainfall intensity corresponding to 50% likelihood. M1 is the default and recommended model; M3 is an alternative when continuous dNBR is unavailable. This preview workflow does not estimate debris-flow volume, runout, or inundation.
+- **[Debris Flow Analysis (Cannon)](models/debris-flow/ENDUSER.md)** uses Cannon et al. (2010) to estimate probability and volume for storm scenarios.
+
+These are screening estimates conditional on the rainfall and watershed inputs, not annual debris-flow probabilities. Review each model's geographic scope, required inputs, and limitations before interpreting results.
+
+The USGS provides post-fire debris-flow hazard information for the US:
 <https://www.usgs.gov/programs/landslide-hazards/science/postfire-debris-flow-hazards>
 
 WEPP does not predict landslides directly. Related tools historically referenced include LISA and D-LISA on the Forest Service WEPP site:  
 <https://forest.moscowfsl.wsu.edu/engr/slopesw.html>
-
 ## What is the difference between all these WEPP Tools (ERMiT, Disturbed WEPP, FSWEPP, GEOWEPP, QWEPP, WEPPcloud)?
 
 These tools share WEPP heritage, but they are not equivalent in model generation, preprocessing, or watershed workflow:

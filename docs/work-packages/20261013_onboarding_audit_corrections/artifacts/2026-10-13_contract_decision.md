@@ -15,3 +15,5 @@ Regression evidence: actual GDAL GeoTIFF with unknown/mixed palette through nati
 Reviews: independent correctness and security reviews PASS in correctness-review.md and security-review.md. Resolved findings: distinguish omitted from explicitly empty mapping; align schema discovery metadata and Disturbed troubleshooting. No unresolved findings.
 
 Schema discovery must publish color_table_mode as optional_unknown_colors_unassigned instead of optional_but_if_present_must_map_known_severity, retaining the existing key and matching the accepted admission semantics. Update associated expectations and user troubleshooting; this is descriptive metadata, not a new upload mode.
+
+Final clarification: ADR-0045 remains unchanged authority for visible Unassigned (#800098) versus transparent source NoData. Model/four-class exports continue to encode unassigned as255; documentation must distinguish display from export. No display implementation changes are needed.

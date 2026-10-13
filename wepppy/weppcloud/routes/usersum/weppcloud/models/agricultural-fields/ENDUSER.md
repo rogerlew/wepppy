@@ -97,11 +97,11 @@ This lookup is where many "the model ran but the management is wrong" problems a
 
 ### WEPP executable
 
-Stage 4's **Run options** includes a **WEPP Exec** selection. Agricultural projects default to `wepp_dcc52a6`, and you should leave it there: it is the executable validated end-to-end against imported agricultural rotations. Newer WEPP executables have aborted partway through multi-year agricultural simulations on these same inputs, so a different selection is a deliberate modeling decision, not a routine upgrade.
+Stage 4's **Run options** includes a **WEPP Exec** selection. New agricultural projects default to `wepp_261010`. Existing projects retain their saved selection; changing the default does not migrate them. Review and rerun your simulations when changing executable versions, because results can change.
 
 Two things follow from this:
 
-- The AgFields executable is independent of the parent watershed's WEPP executable. It is normal for the watershed to run a newer build while the sub-fields run `wepp_dcc52a6`.
+- The AgFields executable is independent of the parent watershed's WEPP executable. The watershed and sub-fields can retain different saved selections; review both when comparing results.
 - Your selection is saved with the project, so sub-field results remain attributable to the executable that produced them.
 
 Projects created before this default existed inherit the parent watershed executable until you set **WEPP Exec** once in Stage 4.
@@ -166,7 +166,7 @@ Current simplifications to keep in mind:
 7. Run the parent watershed WEPP hillslopes if they are not already complete.
    AgFields reuses their soil and climate files, so the final stage explains this prerequisite when it is missing.
 
-8. Expand **Run options**, confirm **WEPP Exec** is `wepp_dcc52a6` (see "WEPP executable" above), and select **Run WEPP on Sub-fields**.
+8. Expand **Run options**, review **WEPP Exec** (new-project default `wepp_261010`) (see "WEPP executable" above), and select **Run WEPP on Sub-fields**.
    Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. A current successful run shows a 🌽 beside **Agricultural Fields** in the project navigation; changing AgFields inputs or rebuilding an upstream project input clears that completion state until AgFields runs successfully again. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
 
 ## What Outputs To Look At
@@ -192,8 +192,8 @@ A large difference between two sub-fields in the same mapped field usually means
 - The uploaded GeoJSON must carry both usable geometry and a usable rotation table.
 - `field_id` is required and should be stable and effectively unique for interpretation to remain clear.
 - Crop names must match `rotation_lookup.tsv`; near-matches are still mismatches.
-- WEPP accepts at most 20 plant scenarios in one management rotation. AgFields consolidates duplicate plant and operation definitions automatically, so typical multi-year rotations fit comfortably, but a rotation drawing on very many distinct managements can still exceed the limit. When that happens the run fails before simulation with an error identifying the rotation, rather than producing partial results.
-- Sub-field simulations run the executable selected in Stage 4 (default `wepp_dcc52a6`), which may differ from — and produce different numbers than — the parent watershed executable.
+- AgFields management synthesis permits up to 32 distinct referenced yearly scenarios; the separate field-aware routing planner limit is 20 OFEs. AgFields consolidates duplicate plant and operation definitions automatically, so typical multi-year rotations fit comfortably, but a rotation drawing on very many distinct managements can still exceed the limit. When that happens the run fails before simulation with an error identifying the rotation, rather than producing partial results.
+- Sub-field simulations run the executable selected in Stage 4 (new-project default `wepp_261010`), which may differ from — and produce different numbers than — the parent watershed executable.
 - Sub-fields are representative hydrologic units, not full operational replicas of every within-field feature.
 - Results inherit the strengths and weaknesses of the underlying watershed, soils, climate, and management data.
 

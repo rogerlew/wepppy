@@ -15,3 +15,15 @@ Acceptance requires real native raster artifacts for all-unknown and mixed palet
 The requested AgFields default is a new-project literal change. Existing persisted selections and historical fallback remain unchanged. Config parser/readback evidence is appropriate; no claim of scientific parity between executables is authorized or established.
 
 No unresolved correctness findings block the contract checkpoint. This approval is not an implementation or production rollout approval.
+
+## Final implementation review
+
+Reviewed the working-tree implementation after checkpoint `b4be200b4`, excluding the generated usersum index. Runtime changes remain bounded: admission changes only the readable/unrecognized-palette return path; native summary calls and structural validation remain in place. Schema discovery now describes the accepted state. AgFields changes only the requested default literal and associated help/documentation, preserving existing saved state.
+
+The real GeoTIFF regression covers all-unknown, mixed high/unknown and unburned/unknown palettes, native four-class output, source NoData preservation and explicit RGB remapping. The display-table assertions preserve ADR-0045: unknown pixels use opaque purple Unassigned, whereas source NoData is transparent. Model sentinel `255` and four-class NoData do not replace the distinct display state.
+
+Review follow-ups were resolved: the large-fixture native-summary oracle was restored because native diagnostic semantics did not change, the remaining outdated AgFields capacity description was corrected, and new prose now separates map Unassigned from export NoData. ORCID deferral remains documentation-only, access requests name Mariana Dobre without implying automatic approval, and the FAQ is no longer labeled a draft.
+
+Observed validation receipts: the initial targeted raster/upload set passed 103 tests with one skip, and schema discovery passed 79 tests. The combined final run passed 182 tests with one skip and eight warnings in 13.37 seconds (`/tmp/onboarding-final-tests.log`). This includes native raster artifacts, generated display-table assertions, native failure cases, upload routes and schema discovery. An intermediate new display assertion incorrectly expected a numeric source-NoData entry; it was corrected to assert the actual established representation (numeric entry absent, `nv` transparent). The producer was unchanged. This test-assumption failure is distinct from the initial expected red admission failures.
+
+Final implementation correctness: PASS, with no unresolved findings. The optional large-fixture suite remains skipped; no full-repository or live-production workflow validation is claimed.

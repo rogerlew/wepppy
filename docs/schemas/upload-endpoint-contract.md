@@ -94,7 +94,7 @@ colors section: structurally valid rasters with readable but unrecognized
 palette colors are accepted for explicit class assignment. A palette need not
 contain a recognized low/moderate/high color. This does not relax upload size,
 extension, authorization, containment, projection, integer/class-count or native
-error requirements. Implementation conformance pending, 2026-10-13.
+error requirements. Implemented and regression-checked 2026-10-13.
 
 Schema discovery reports `color_table_mode: optional_unknown_colors_unassigned`;
 the existing key is retained, and its value describes this admission behavior.

@@ -195,7 +195,7 @@ The lookup table can also be used as a calibration harness. When that table is e
 
 | Problem | What it usually means | What to check |
 | --- | --- | --- |
-| The map fails validation | The SBS raster is missing projection metadata, uses non-integer values, has too many classes, or has an unrecognized color table | Reproject to a valid projected coordinate system, export as a single-band integer GeoTIFF, and review [SBS Map Utilities](../baer/README.sbs_map.md) |
+| The map fails validation | The SBS raster is missing projection metadata, uses non-integer values, has too many classes, or cannot be read | Reproject to a valid projected coordinate system, export as a single-band integer GeoTIFF, and review [SBS Map Utilities](../baer/README.sbs_map.md) |
 | Burn appears in areas that should be outside the mapped footprint | Hillslopes with no valid SBS pixels should remain unburned; if burned classes appear broadly, verify the SBS coverage/extent and nodata handling | Confirm the normalized SBS map footprint and class coverage. Nodata/off-map hillslopes are expected to map to `No Burn` (`130`) |
 | Results do not change much after applying disturbance | The watershed may be mostly unburned, the dominant class may still be unburned on many hillslopes, shrub/grass burning may be disabled, or the watershed may still infiltrate enough water to limit large runoff and erosion changes even under burned parameterization | Check the normalized SBS map, hillslope coverage, the shrub/grass settings, and whether local soils and slopes are likely to remain infiltration-dominated |
 | Results change too much | High-severity area may be overrepresented or the lookup table may have been edited aggressively | Review the disturbed land-soil lookup table and compare against project defaults |
@@ -207,3 +207,5 @@ The lookup table can also be used as a calibration harness. When that table is e
 - [Disturbed Land Soil Lookup](../../../weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md)
 - [SBS Map Utilities](../baer/README.sbs_map.md)
 - [Soil File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md)
+
+Unrecognized colors in a readable SBS palette do not cause upload rejection. They remain visibly Unassigned on the map until you map them to burn classes in the interface; four-class model exports use NoData for those pixels. Review assignments before building model inputs.

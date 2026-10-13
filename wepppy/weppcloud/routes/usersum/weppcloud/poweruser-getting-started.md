@@ -46,6 +46,8 @@ Review inputs, assumptions and outputs before relying on results.
 
 PowerUser does not grant access to unrelated private projects or permission to
 operate internal research features. Those features require separate approval.
+Request access from [Mariana Dobre](mailto:mdobre@uidaho.edu), naming the
+feature and describing your intended use. Sending a request does not grant access.
 If you have no internal memberships, the statement remains available under
 **Profile → Internal feature access → Internal feature memberships and acknowledgment**;
 accepting it alone grants no membership. Assigned memberships that need your

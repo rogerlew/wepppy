@@ -57,6 +57,12 @@ PowerUser activation does not satisfy internal acknowledgment or add membership.
 Store failure remains an explicit unavailable state, not an empty membership
 interpretation. Preserve operational-role exceptions.
 
+User-facing internal-access request guidance directs users to Mariana Dobre
+(`mdobre@uidaho.edu`) with the feature and intended use. A request does not
+grant membership. Operator decision, 2026-10-13: provide a concrete human
+contact instead of leaving users without a next step; no request form or
+automatic approval is introduced.
+
 ## Panel orientation and consistency
 
 Use PowerUser Panel consistently for its trigger, title and help. Both run and

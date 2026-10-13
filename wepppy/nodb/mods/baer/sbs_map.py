@@ -505,7 +505,8 @@ def sbs_map_sanity_check(fname: str) -> tuple[int, str]:
     if ct_summary["has_color_table"]:
         if ct_summary["color_table_valid"]:
             return 0, "Map has valid color table"
-        return 1, "Map has no valid color table"
+        # Palette recognition is editable; native read failures still propagate.
+        return 0, "Map has unassigned color table entries"
     return 0, "Map has valid classes"
 
 

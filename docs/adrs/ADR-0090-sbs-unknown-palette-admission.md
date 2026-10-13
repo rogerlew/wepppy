@@ -1,6 +1,6 @@
 # ADR-0090: sbs unknown palette admission
 
-Status: accepted; implementation pending. Date: 2026-10-13.
+Status: accepted; implemented 2026-10-13. Date: 2026-10-13.
 
 ## Decision and rationale
 

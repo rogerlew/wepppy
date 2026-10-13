@@ -1,0 +1,74 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/baer/test_sbs_map_extended.py -k unknown_palette_admission --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 44 items / 43 deselected / 1 selected
+
+tests/nodb/mods/baer/test_sbs_map_extended.py .
+
+=================================== FAILURES ===================================
+_ TestSBSMapSanityCheck.test_unknown_palette_admission_export_and_explicit_mapping (known_rgb=None) _
+
+self = <test_sbs_map_extended.TestSBSMapSanityCheck testMethod=test_unknown_palette_admission_export_and_explicit_mapping>
+
+    def test_unknown_palette_admission_export_and_explicit_mapping(self):
+        """Unknown colors stay unmapped through native export until assigned."""
+        for known_rgb, known_class in ((None, 255), ((255, 0, 0), 3), ((0, 115, 74), 0)):
+            with self.subTest(known_rgb=known_rgb):
+                filename = os.path.join(self.temp_dir, f"palette_{known_class}.tif")
+                output = os.path.join(self.temp_dir, f"palette_{known_class}_4class.tif")
+                unknown = (123, 45, 67)
+                other = known_rgb or (17, 29, 43)
+                ct = gdal.ColorTable()
+                ct.SetColorEntry(0, (*unknown, 255))
+                ct.SetColorEntry(1, (*other, 255))
+                ct.SetColorEntry(2, (19, 31, 47, 255))
+                GeoTiffTestHelper.create_geotiff(
+                    filename, np.array([[0, 1, 2]], dtype=np.uint8),
+                    color_table=ct, nodata_val=2,
+                )
+>               self.assertEqual(sbs_map_sanity_check(filename)[0], 0)
+E               AssertionError: 1 != 0
+
+tests/nodb/mods/baer/test_sbs_map_extended.py:1064: AssertionError
+_ TestSBSMapSanityCheck.test_unknown_palette_admission_export_and_explicit_mapping (known_rgb=(0, 115, 74)) _
+
+self = <test_sbs_map_extended.TestSBSMapSanityCheck testMethod=test_unknown_palette_admission_export_and_explicit_mapping>
+
+    def test_unknown_palette_admission_export_and_explicit_mapping(self):
+        """Unknown colors stay unmapped through native export until assigned."""
+        for known_rgb, known_class in ((None, 255), ((255, 0, 0), 3), ((0, 115, 74), 0)):
+            with self.subTest(known_rgb=known_rgb):
+                filename = os.path.join(self.temp_dir, f"palette_{known_class}.tif")
+                output = os.path.join(self.temp_dir, f"palette_{known_class}_4class.tif")
+                unknown = (123, 45, 67)
+                other = known_rgb or (17, 29, 43)
+                ct = gdal.ColorTable()
+                ct.SetColorEntry(0, (*unknown, 255))
+                ct.SetColorEntry(1, (*other, 255))
+                ct.SetColorEntry(2, (19, 31, 47, 255))
+                GeoTiffTestHelper.create_geotiff(
+                    filename, np.array([[0, 1, 2]], dtype=np.uint8),
+                    color_table=ct, nodata_val=2,
+                )
+>               self.assertEqual(sbs_map_sanity_check(filename)[0], 0)
+E               AssertionError: 1 != 0
+
+tests/nodb/mods/baer/test_sbs_map_extended.py:1064: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SUBFAILED(known_rgb=None) tests/nodb/mods/baer/test_sbs_map_extended.py::TestSBSMapSanityCheck::test_unknown_palette_admission_export_and_explicit_mapping
+SUBFAILED(known_rgb=(0, 115, 74)) tests/nodb/mods/baer/test_sbs_map_extended.py::TestSBSMapSanityCheck::test_unknown_palette_admission_export_and_explicit_mapping
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 2 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+============ 2 failed, 1 passed, 43 deselected, 2 warnings in 9.33s ============

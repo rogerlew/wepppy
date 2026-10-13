@@ -106,3 +106,6 @@ Each ADR should normally include:
 - [ADR-0087](ADR-0087-combined-viewer-pointer-duration.md): Combined viewer pointer-duration allowance.
 
 - [ADR-0088: Optional depth-specific soil anisotropy](ADR-0088-soil-anisotropy-overrides.md)
+
+- [ADR-0089: AgFields WEPP 261010 default](ADR-0089-agfields-wepp-261010-default.md)
+- [ADR-0090: SBS unknown palette admission](ADR-0090-sbs-unknown-palette-admission.md)

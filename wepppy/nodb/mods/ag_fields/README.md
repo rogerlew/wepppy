@@ -99,7 +99,7 @@ ag.polygonize_sub_fields()
 #   ag.write_rotation_lookup(rows)
 # - Optionally populate wd/ag_fields/plant_files/ with:
 #   ag.handle_plant_file_db_upload("plant_db.zip")
-ag.wepp_bin = "wepp_260714"
+ag.wepp_bin = "wepp_261010"
 ag.run_wepp_ag_fields()
 
 # 7) Run one routing scheme (omitting scheme selects concept_2)
@@ -291,7 +291,7 @@ queued run starts.
 - **Legacy artifact name**: `fields.WGS.geojson` is the established canonical basename, but boundary ingestion preserves the uploaded coordinate values until rasterization; the basename does not guarantee WGS84 coordinates.
 - **Peridot prerequisites**: Peridot’s sub-field abstraction asserts `wd/dem/wbt/flovec.tif` and `wd/ag_fields/field_boundaries.tif` exist.
 - **Sub-field flowpath schema**: Peridot writes `field_flowpaths.csv` with parent `topaz_id` and flowpath-record `flowpath_topaz_id`. WEPPpy normalizes that table to `ag_fields/sub_fields/field_flowpaths.parquet` and keeps compatibility for historical CSVs where pandas read the old duplicate header as `topaz_id.1`.
-- **WEPP executable**: `[ag_fields] bin` supplies the new-project default independently of `[wepp] bin`; `ag-fields.cfg` uses `wepp_260714`, whose synchronized hillslope management capacity is 32. Historical NoDb payloads without `_wepp_bin` fall back to the parent Wepp controller until the user selects an AgFields executable.
+- **WEPP executable**: `[ag_fields] bin` supplies the new-project default independently of `[wepp] bin`; `ag-fields.cfg` uses `wepp_261010` (ADR-0089). The management synthesis limit remains 32 referenced yearly scenarios. Historical NoDb payloads without `_wepp_bin` fall back to the parent Wepp controller until the user selects an AgFields executable.
 - **Concurrency**: `run_wepp_ag_fields()` runs sub-fields in a `ThreadPoolExecutor`. The UI uses automatic sizing; API callers may still pass `max_workers`.
 
 ## Further reading

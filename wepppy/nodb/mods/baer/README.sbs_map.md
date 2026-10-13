@@ -52,7 +52,7 @@ Use this section when preparing an SBS file for upload to wepp.cloud, especially
 - Ensure the file has a valid spatial reference (projection metadata). If uncertain, reproject to a local UTM CRS.
 - Use one of these data styles:
   - Integer classes without a color table (for example `0,1,2,3` or BARC-style `0..255`), or
-  - A color-table raster whose colors match known SBS severity colors.
+  - A readable color-table raster; recognized colors are assigned automatically and unknown colors require explicit assignment.
 
 ### Practical workflow (QGIS/ArcGIS style)
 
@@ -60,7 +60,7 @@ Use this section when preparing an SBS file for upload to wepp.cloud, especially
 2. Reproject to your local UTM zone if needed. Use nearest-neighbor resampling.
 3. Convert/export as an integer raster (`Byte` or another integer type) and preserve NoData where possible.
 4. Save as GeoTIFF and keep the layer as one band.
-5. If you use a color table, make sure at least one burn class color (`low`, `mod`, or `high`) is a recognized SBS color.
+5. If you use a color table, review automatic assignments after upload and explicitly assign unknown colors before modeling.
 6. Upload to wepp.cloud; if validation fails, use the message table below.
 
 ### Common validation messages and fixes
@@ -70,7 +70,7 @@ Use this section when preparing an SBS file for upload to wepp.cloud, especially
 | `Map contains an invalid projection. Try reprojecting to UTM.` | CRS metadata is missing or invalid. | Reproject to a valid projected CRS (typically UTM), then export again. |
 | `Map has non-integer classes` | Pixel values contain decimals/floats. | Reclassify or round to integer class values and export as integer raster. |
 | `Map has more than 256 classes` | Too many unique pixel values were detected. | Reclassify to a smaller set of thematic classes (for example 4-class or BARC-style). |
-| `Map has no valid color table` | A color table exists, but recognized SBS colors were not found. | Fix/remap the palette to known SBS colors, or remove the color table and use numeric classes. |
+| `Map has unassigned color table entries` | Admission succeeds, but no burn colors were recognized. | Assign the colors to burn classes in the interface; unknown pixels remain Unassigned on the display and NoData in model exports until assigned. |
 
 ## API
 
@@ -121,7 +121,8 @@ The lookup accepts multiple aliases per class. Representative examples:
 | `high` | `255,0,0`, `204,121,167` |
 
 Validation rule used by `sbs_map_sanity_check`:
-- A color table is considered valid when at least one of `low`, `mod`, or `high` is recognized.
+- A readable color table is accepted even when no colors are recognized. Unknown colors remain visibly Unassigned on the map and use NoData in four-class model exports until explicitly mapped; they are not guessed as unburned.
+- The native `color_table_valid` summary still reports whether at least one `low`, `mod`, or `high` color is recognized; it is diagnostic and no longer gates admission. Projection, integer/class-count checks and native read failures still apply.
 
 ### 4-Class Export Palette
 

@@ -1,6 +1,6 @@
 # ADR-0089: agfields wepp 261010 default
 
-Status: accepted; implementation pending. Date: 2026-10-13.
+Status: accepted; implemented 2026-10-13. Date: 2026-10-13.
 
 ## Decision and rationale
 
