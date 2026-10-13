@@ -25,6 +25,8 @@ Live inventory found MPI future daily coverage ending in 2099 and NorESM SSP2-4.
 
 ## Decision Log
 
+Operator follow-up (2026-10-13): document PRISM inversions instead of treating them as a separate EDDE integration blocker. Code inspection and retained normals establish a generic independent-offset mechanism; other-dataset occurrence frequency is unmeasured. No executable change was requested or made.
+
 On 2026-10-13 the operator clarified future-climate-only application scope and identified CLIGEN guard/quantization limitations as already known. Historical runs remain diagnostic evidence; solving existing CLIGEN limitations is not a new integration prerequisite. Preserve current safeguards and failure reporting. Bias interpretation, future auxiliary-field assumptions, and PRISM inversion policy remain separate questions; no new correction was authorized.
 
 
@@ -83,3 +85,5 @@ The 120-model-year study completed 657,450 point-days and 69 successful full-per
 Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package remains open for the documented broad-suite regression gate, not additional data acquisition or integration work.
 
 Scope clarification revision: corrected the handoff framing so diagnostic historical runs and known CLIGEN behavior do not expand the requested future-climate feature. Report, package scopes, durable contract, and trackers now record that distinction. Documentation lint passed; no executable behavior changed.
+
+PRISM clarification revision: report and authoritative scope now distinguish the generic spatialization limitation from EDDE-specific findings, following operator direction to document it. Current experimental rejection remains explicit.

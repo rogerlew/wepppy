@@ -26,7 +26,7 @@ M1–M3 executed: 120 model-years, 657,450 point-days, 69 successful full-period
 
 ### Blocked
 
-The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Production integration is held for future-projection interpretation, projected auxiliary weather, PRISM inversion policy, and actual Canadian project acceptance; see report.
+The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Production integration is held for future-projection interpretation, projected auxiliary weather, PRISM limitation documentation, and actual Canadian project acceptance; see report.
 
 ## Decisions log
 
@@ -53,3 +53,5 @@ Measured coverage, endpoint, quality, acquisition, and generated-artifact eviden
 **2026-10-13 22:40 UTC:** Operator continued after the pending independent-review request. Correctness and security reviewers identified invalid PRISM source acceptance, companion provenance overwrite, and ambient netrc authentication; guards and regression coverage now address them. Added 36 seasonal PRISM wet-day/extreme comparisons. Planning commit remains `03435abc5`; implementation/evidence committed as `5dd665305` after both independent reviews passed. Study execution is complete, package remains open only for declared gates.
 
 **Operator scope clarification (2026-10-13):** The operator clarified that the application scope is future climate only. Historical EDDE runs are diagnostic baselines for source assessment and future-change checks, not a proposed historical climate method. Existing CLIGEN quality-guard failures and PRN/CLI quantization are known limitations; retain their reporting and current safeguards, but do not require this package to solve them as new integration blockers. This clarification does not approve a bias correction or decide how future auxiliary fields or PRISM temperature inversions should be handled. See package **Scope and decisions** and report **Scope clarification**.
+
+**Operator PRISM clarification (2026-10-13):** Document inversions as a generic independent-temperature-offset limitation, not a separate EDDE integration blocker. The retained January/December Cascade normal pair shrinks daily range by 0.5 C. Other-dataset occurrence frequency remains unmeasured. Runtime behavior is unchanged; the experimental adapter still rejects affected revisions.
