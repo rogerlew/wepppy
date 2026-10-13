@@ -109,3 +109,5 @@ Each ADR should normally include:
 
 - [ADR-0089: AgFields WEPP 261010 default](ADR-0089-agfields-wepp-261010-default.md)
 - [ADR-0090: SBS unknown palette admission](ADR-0090-sbs-unknown-palette-admission.md)
+
+- [ADR-0092: PRISM temperature inversion midpoint repair](ADR-0092-prism-temperature-inversion-midpoint-proposal.md) (Accepted for implementation, 2026-10-13; conformance pending).

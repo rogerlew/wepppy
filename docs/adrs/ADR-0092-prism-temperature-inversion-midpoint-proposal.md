@@ -1,12 +1,12 @@
-# ADR-0092: Proposed midpoint repair for PRISM temperature inversions
+# ADR-0092: Midpoint repair for PRISM temperature inversions
 
 ## Status
 
-Proposed; evaluated on retained EDDE climates. No production parameterization change is made by this ADR or its study script.
+Accepted for implementation, 2026-10-13; production conformance pending. The operator accepted the evaluated midpoint recommendation and requested an implementation work-package and ADR. The [PRISM temperature-ordering package](../work-packages/20261013_prism_temperature_ordering/package.md) owns execution; this ADR owns the numerical decision. Acceptance does not claim installed code or deployment. The stable filename retains its original proposal suffix.
 
 ## Decision provenance
 
-Decision venue: operator/Codex conversation, 2026-10-13, America/Los_Angeles; records use UTC. Participants: repository operator and Codex. Decision owner: operator for scientific adoption; Codex proposes the bounded implementation. Implementer: Codex, candidate evaluation only. Operator request: “we should figure out how to patch this.” This supersedes documentation-only investigation scope, without claiming explicit operator selection of a numerical formula.
+Decision venue: operator/Codex conversation, 2026-10-13, America/Los_Angeles; records use UTC. Participants: repository operator and Codex. Decision owner: repository operator. Implementer: Codex for the completed candidate evaluation; execution assigned through the linked package. The initial request was “we should figure out how to patch this.” After reviewing the midpoint rule and measured results, the operator replied “okay. author a work-package to carry out theh fix. we should also do an adr”. This accepts the midpoint design for implementation planning; execution and deployment are not claimed by the authoring turn.
 
 ## Context
 
@@ -14,7 +14,7 @@ PRISM spatialization adds separate monthly normal differences to daily Tmax and 
 
 The deployed daily climate writer is Rust `wepppyo3/cli_revision/src/lib.rs:rust_cli_revision`, called by `wepppy/nodb/core/climate_build_helpers.py:cli_revision`. Breakpoint files use the Python branch of that helper. The public Python `wepppy/climates/prism/__init__.py:prism_revision` and experimental `wepppy/climates/edde/cligen.py:revise_prism` are separate paths. A complete fix must give all four paths the same rule without replacing the owned Rust writer with Python postprocessing.
 
-## Proposed transformation
+## Decision
 
 Keep existing PRISM adjustments. For adjusted extrema `a = Tmax` and `b = Tmin`, leave the pair unchanged if `b <= a`. Otherwise set both to `a/2 + b/2`, before existing CLI serialization. Reject nonfinite input; do not use this rule to conceal invalid source metadata or unrelated failures. Equality is allowed; add no arbitrary positive minimum daily range.
 
@@ -35,7 +35,7 @@ Monthly Tmax/Tmin means are no longer exactly the original additive-offset targe
 
 The [candidate evaluation](../work-packages/20261013_edde_v2_feasibility/artifacts/evaluate_prism_inversion_patch.py) uses hash-verified source archives and frozen hillslopes, creates new standalone output directories, and compares repaired and unrepaired files through the same serializer. It checks unchanged valid days and non-temperature fields, exact dates, ordered finite temperatures, daily midpoint, monthly mean drift, and fresh WEPP consumption of all previously rejected cases. Results: 24 revisions checked; 15 corrected days in three formerly rejected climates; all three repaired climates pass fresh 20-year WEPP execution. All 21 prior accepted revision DataFrames match exactly. Maximum per-extreme repair is 0.25 C before output rounding. The largest written calendar-month mean perturbation is 0.00968 C; the largest 20-year monthly mean perturbation is 0.000968 C. The previously validated historical/future pairs are unaffected; missing Cascade historical generation prevents equivalent paired claims there. Results belong to the candidate, not to the unchanged production writers.
 
-Before production adoption, amend the canonical spatialization contract and implement the rule in the Rust writer and all Python paths. Add parity tests for valid, equal, inverted, negative-temperature, rounding-boundary, and nonfinite cases; verify daily and breakpoint outputs through their real serializers. Retain correction counts/magnitudes in normal workflow observability without inventing a new hidden artifact location or changing public return types casually. The EDDE manifest should identify the repair and its measured effects. Run existing regression gates and an actual generated-to-consumed WEPP artifact check with the built Rust extension.
+Before implementation, complete the reviewed contract ancestor checkpoint described in the linked package and amend the canonical spatialization contract and implement the rule in the Rust writer and all Python paths. Add parity tests for valid, equal, inverted, negative-temperature, rounding-boundary, and nonfinite cases; verify daily and breakpoint outputs through their real serializers. Retain correction counts/magnitudes in normal workflow observability without inventing a new hidden artifact location or changing public return types casually. The EDDE manifest should identify the repair and its measured effects. Run existing regression gates and an actual generated-to-consumed WEPP artifact check with the built Rust extension.
 
 ## Risk and rollback
 
