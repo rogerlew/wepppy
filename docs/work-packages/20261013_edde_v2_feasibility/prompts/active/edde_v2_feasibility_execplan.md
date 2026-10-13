@@ -77,3 +77,5 @@ Use existing `requests`, `netCDF4`, `numpy`, `pandas`, and `pyproj` for HTTP, Ne
 
 
 The 120-model-year study completed 657,450 point-days and 69 successful full-period WEPP executions. Ten of 42 CLIGEN attempts and three of 24 PRISM attempts were explicitly rejected; the 59-run pilot and development-container single/PRISM consumer checks succeeded. Historical biases and station-derived auxiliary weather prevent general production adoption. The full regression gate failed an unchanged SBS metadata expectation after 1,265 passes and 28 skips; isolated reproduction confirms it. A continuation ended without a final summary at approximately 34%, so it is incomplete coverage, not a passing gate. Final focused validation and independent reviews are recorded in the report. Initial plan authored 2026-10-13.
+
+Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package remains open for the documented broad-suite regression gate, not additional data acquisition or integration work.

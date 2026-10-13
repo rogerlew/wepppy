@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-10-13T22:56:25Z`
+- Generated (UTC): `2026-10-13T22:59:12Z`
 - Base ref: `03435abc5`
 
 ## Threshold Bands
@@ -35,7 +35,16 @@
 
 ## Changed Files
 
-_No changed-file analysis available (base ref missing or no analyzable files changed)._
+- Files analyzed: `6`; highest severity red: `0`, yellow: `1`; worsened metric entries: `0` (exceptions: `0`, actionable: `0`)
+
+| File | Lang | Highest | Key Metric Deltas |
+| --- | --- | --- | --- |
+| `tests/climates/test_edde_client.py` | `python` | `green` | python_file_sloc n/a->155 (new, green)<br>python_function_len n/a->24 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/climates/test_edde_cligen.py` | `python` | `green` | python_file_sloc n/a->106 (new, green)<br>python_function_len n/a->39 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/climates/edde/__init__.py` | `python` | `green` | python_file_sloc n/a->3 (new, green)<br>python_function_len n/a->n/a (n/a, unknown)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/climates/edde/__main__.py` | `python` | `green` | python_file_sloc n/a->40 (new, green)<br>python_function_len n/a->36 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/climates/edde/client.py` | `python` | `yellow` | python_file_sloc n/a->270 (new, green)<br>python_function_len n/a->90 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/climates/edde/cligen.py` | `python` | `green` | python_file_sloc n/a->158 (new, green)<br>python_function_len n/a->60 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 
 ## Hotspots (Current Tree)
 
