@@ -1,6 +1,6 @@
 # EDDE v2 client and climate-workflow feasibility
 
-**Status**: Open — scoped, implementation not started (2026-10-13)
+**Status**: Open — study executed; broad regression gate remains unresolved (2026-10-13)
 **Timezone**: UTC
 
 ## Overview
@@ -54,19 +54,19 @@ Reuse the current Python climate-client, CLIGEN, PRISM, local cache, and WEPP ex
 
 ## Generated artifact validation and success criteria
 
-- [ ] Repeatable live extraction for actual U.S. and Canadian locations, plus explicit rejection of invalid/outside-grid requests; exact source keys, metadata, checksums, and timestamps retained.
-- [ ] Historical quality and future-signal assessments across available driving models, scenarios, and representative windows; limitations and justified tolerances retained.
-- [ ] Raw extraction to normalized input to CLIGEN-consumed input to fresh `.cli` file traced with semantic readback, binary identity, seed, and reproducible commands.
-- [ ] Single-location and Multiple PRISM climate artifacts exercised in fresh WEPP runs using the exact generated input; date/units, hillslope assignments, water-balance diagnostics, and output plausibility checked against explicit criteria.
-- [ ] Representative actual-project geometry used in isolated scratch copies; source projects remain untouched. Record runtime identity/environment and highest supported claim; no deployment claim follows from local success.
-- [ ] Conditional-go/no-go dispositions identify failed or untested criteria rather than checking them off. Successor implementation requires the applicable gates to pass.
+- [x] Repeatable live extraction for actual U.S. and Canadian locations, plus explicit rejection of invalid/outside-grid requests; exact source keys, metadata, checksums, and timestamps retained.
+- [x] Historical quality and future-signal assessments across available driving models, scenarios, and representative windows; limitations and justified tolerances retained.
+- [x] Raw extraction to normalized input to CLIGEN-consumed input to fresh `.cli` file traced with semantic readback, binary identity, seed, and reproducible commands.
+- [x] Single-location and Multiple PRISM climate artifacts exercised in fresh WEPP runs using the exact generated input; date/units, hillslope assignments, water-balance diagnostics, and output plausibility checked against explicit criteria.
+- [x] Representative actual-project geometry used in isolated scratch copies; source projects remain untouched. Record runtime identity/environment and highest supported claim; no deployment claim follows from local success.
+- [x] Conditional-go/no-go dispositions identify failed or untested criteria rather than checking them off. Successor implementation requires the applicable gates to pass.
 - [ ] Focused tests and `wctl run-pytest tests --maxfail=1` pass for substantive implementation; documentation lint and correctness/security findings closed before implementation closeout.
 
 Before any project-data/schema mutation, write a compatibility and regression plan. Preserve source data and existing field names; validate propagation to exact WEPP-consumed artifacts under `wepp/runs/` when applicable. Follow `docs/standards/generated-artifact-validation-standard.md` and `docs/standards/artifact-observability-standard.md`.
 
 ## Parameterization and review gates
 
-**Parameterization change expected**: yes; **ADR required**: yes before merge of formulas, thresholds, unit conversions, spatial revision, or bias treatment. ADR not yet authored because those choices remain feasibility questions. Capture operator provenance and scientific rationale per `docs/standards/parameterization-adr-standard.md`.
+**Parameterization change expected**: yes; **ADR required**: yes before merge of formulas, thresholds, unit conversions, spatial revision, or bias treatment. [ADR-0091](../../adrs/ADR-0091-edde-v2-experimental-daily-replay.md) records accepted experimental transformations; production scientific policy remains deferred. Capture operator provenance and scientific rationale per `docs/standards/parameterization-adr-standard.md`.
 
 **Security impact**: high for implementation because the client adds external egress/file acquisition and exercises executable boundaries. **Dedicated security review required**: yes, under `artifacts/<date>_security_review.md` using the repository template. Review bounded requests, source/path validation, cache integrity, and executable arguments. Planning-only documentation introduces no runtime attack surface. Require a separate correctness artifact for production-bound behavior and no unresolved medium/high findings at closeout.
 
@@ -81,4 +81,6 @@ Before any project-data/schema mutation, write a compatibility and regression pl
 
 ## Current outcome
 
-Scoped only. No API client, climate implementation, quality acceptance, or rollout has been completed by this planning change.
+[Report and disposition](report.md): research extraction/replay is feasible; hold production integration. Completed 120 model-years/657,450 point-days, historical Daymet comparison, 42 full-period CLIGEN attempts (32 successful, ten quality-guard rejections), 24 PRISM attempts (21 successful, three inversion rejections), 69 successful 20-year WEPP runs, and actual-input development-container acceptance. These results support tested combinations only. No algorithmic bypass or corrective scientific policy was silently introduced.
+
+Focused tests, API stubtest, and stub hygiene pass. The full-suite attempt exposed a preexisting SBS metadata assertion failure, reproduced in isolation; the continuation ended without a final result and independent reviews are recorded separately. Final focused validation passes 25 tests. The package stays open for the broad regression gate; study execution is complete. User-requested planning commit: `03435abc5`.

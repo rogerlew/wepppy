@@ -1,0 +1,40 @@
+[
+  {
+    "model": "WRF-MPI",
+    "eligible": true,
+    "name": "north-edge",
+    "longitude": -134.2437135697333,
+    "latitude": 56.09933804390585,
+    "row": 431,
+    "col": 50,
+    "cell_longitude": -134.24368286132812,
+    "cell_latitude": 56.099327087402344,
+    "projected_distance_m": 1.9756335239481576e-09,
+    "edge_cells": 0
+  },
+  {
+    "model": "WRF-MPI",
+    "eligible": false,
+    "name": "outside-north",
+    "reason": "outside-north: outside EDDE cell-face bounds"
+  },
+  {
+    "model": "WRF-Nor",
+    "eligible": true,
+    "name": "north-edge",
+    "longitude": -134.2437135697333,
+    "latitude": 56.09933804390585,
+    "row": 431,
+    "col": 50,
+    "cell_longitude": -134.24368286132812,
+    "cell_latitude": 56.099327087402344,
+    "projected_distance_m": 1.9756335239481576e-09,
+    "edge_cells": 0
+  },
+  {
+    "model": "WRF-Nor",
+    "eligible": false,
+    "name": "outside-north",
+    "reason": "outside-north: outside EDDE cell-face bounds"
+  }
+]

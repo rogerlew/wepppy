@@ -1,0 +1,7 @@
+# Complete raw point records are retained in point-data.tar.gz with a SHA-256 index.
+/queries/
+/reference/
+/auxiliary-pr.csv
+/auxiliary-rsds.csv
+/auxiliary-td.csv
+/auxiliary-wspds.csv

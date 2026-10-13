@@ -369,13 +369,13 @@ Feedback mechanisms:
 
 ### EDDE v2 client and climate-workflow feasibility
 
-**Status**: Scoped 2026-10-13; implementation not started.
+**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) recommends holding production integration; independent review findings resolved; broad regression gate remains open.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_feasibility/package.md)
 **Scope**: Bounded API client, actual U.S./Canadian location queries, grid eligibility, data-quality and acquisition study, executable CLIGEN workflows, and Multiple PRISM where available. Multiple Interpolated excluded initially. Evidence-based disposition gates integration.
 
 ### EDDE v2 WEPPcloud integration
 
-**Status**: Backlog; depends on accepted feasibility evidence.
+**Status**: Backlog; feasibility holds production adoption on bias/auxiliary-weather policy, CLIGEN quality failures, PRISM inversions, and independent review.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_weppcloud_integration/package.md)
 **Scope**: Locale-scoped availability plus per-project eligibility, validated source/scenario/period controls, existing climate orchestration, provenance, and actual-project acceptance. Single and Multiple PRISM only initially.
 

@@ -1,0 +1,23 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 69cfd68aacbcdaa1f3381cc285422e222ca37d28
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 4
+
+Files:
+  A wepppy/climates/edde/__init__.py
+  A wepppy/climates/edde/__main__.py
+  A wepppy/climates/edde/client.py
+  A wepppy/climates/edde/cligen.py
+
+Per-file delta (unsuppressed broad catches):
+  A wepppy/climates/edde/__init__.py (base=0 current=0 delta=+0)
+  A wepppy/climates/edde/__main__.py (base=0 current=0 delta=+0)
+  A wepppy/climates/edde/client.py (base=0 current=0 delta=+0)
+  A wepppy/climates/edde/cligen.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

@@ -1,0 +1,144 @@
+[
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.1757996000000004,
+      "tmax": 0.3220700000000306,
+      "tmin": 0.3221000000000117
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "group": "cryptic-beechnut",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   10.0000000      SDlevel=   55.8589211      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   20.0000000      SDlevel=   59.2247963      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   10.0000000      SDlevel=   59.0167160      Days:          27\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.'"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17340089999999986,
+      "tmax": 0.3221000000000114,
+      "tmin": 0.32198000000003013
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "group": "cryptic-beechnut",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   20.0000000      SDlevel=   59.2089157      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   10.0000000      SDlevel=   56.0077477      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   10.0000000      SDlevel=   55.8589211      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   20.0000000      SDlevel=   59.2247963      Days:          27\\n Failed SN SD test.\\n Parm:Precip. Amt.    Month:           7  Year:        2013  Mlevel=   10.0000000      SDlevel=   59.0167160      Days:          27\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.'"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17418200000000006,
+      "tmax": 0.32210000000001315,
+      "tmin": 0.3220700000000303
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17421299999999995,
+      "tmax": 0.3219200000000111,
+      "tmin": 0.3222000000000431
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "site": "cryptic-beechnut-h132",
+    "arm": "prism",
+    "status": "rejected",
+    "error": "PRISM revision would invert temperature extrema on 5 days; first=2062-04-02, maximum inversion=0.100 C"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.1730835000000006,
+      "tmax": 0.3222000000000431,
+      "tmin": 0.3216999999999981
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17271699999999868,
+      "tmax": 0.32130000000004166,
+      "tmin": 0.3210600000000223
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "site": "cryptic-beechnut-h132",
+    "arm": "prism",
+    "status": "rejected",
+    "error": "PRISM revision would invert temperature extrema on 2 days; first=2075-01-18, maximum inversion=0.500 C"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17298584,
+      "tmax": 0.3213499999999726,
+      "tmin": 0.32167000000001733
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 7305,
+    "maximum_source_error": {
+      "prcp": 0.17315199999999997,
+      "tmax": 0.3214699999999553,
+      "tmin": 0.3215500000000361
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "site": "cryptic-beechnut-h132",
+    "arm": "prism",
+    "status": "rejected",
+    "error": "PRISM revision would invert temperature extrema on 8 days; first=2080-12-14, maximum inversion=0.500 C"
+  }
+]

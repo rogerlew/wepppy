@@ -2,10 +2,10 @@
 
 ## Quick status
 
-**Started / last updated**: 2026-10-13 21:15 UTC  
-**Current phase**: Scoped; ready for an implementation ExecPlan  
+**Started / last updated**: 2026-10-13 22:58 UTC
+**Current phase**: Study executed; M4 delivery, broad regression gate open
 **Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
-**Plan**: [Package scope and acceptance](package.md). Execution plan to be authored before implementation.
+**Plan**: [Package scope and acceptance](package.md). [Active ExecPlan](prompts/active/edde_v2_feasibility_execplan.md).
 
 ## Task board
 
@@ -15,18 +15,18 @@
 
 ### Ready / backlog
 
-- [ ] M1: Author ExecPlan; inventory source records; build bounded client and query command.
-- [ ] M2: Retain actual-location coverage matrix, historical quality study, and acquisition benchmarks.
-- [ ] M3: Implement and validate single-location CLIGEN and Multiple PRISM workflows.
+- [x] M1: Author ExecPlan; inventory source records; build bounded client and query command.
+- [x] M2: Retain actual-location coverage matrix, historical quality study, and acquisition benchmarks.
+- [x] M3: Implement and validate single-location CLIGEN and Multiple PRISM workflows.
 - [ ] M4: Complete reviews, scientific ADRs, and evidence-based integration disposition.
 
 ### In progress
 
-None; this session scopes future work only.
+M1–M3 executed: 120 model-years, 657,450 point-days, 69 successful full-period WEPP runs, and 59 pilot runs. Ten CLIGEN and three full-period PRISM rejections remain explicit. M4 independent correctness/security findings resolved; 25 focused tests pass.
 
 ### Blocked
 
-No external blocker established. Data access cost, scientific quality, and CLIGEN mapping remain feasibility questions.
+The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Production integration is held for bias treatment, projected auxiliary weather, CLIGEN/PRISM failure policies, and actual Canadian project acceptance; see report.
 
 ## Decisions log
 
@@ -34,16 +34,20 @@ No external blocker established. Data access cost, scientific quality, and CLIGE
 
 ## Risks and open questions
 
-Source completeness and future endpoint, usable domain boundaries, model bias, CLIGEN storm construction, preservation of future signals under PRISM revision, and bounded multidecade acquisition all need retained evidence. Do not resolve these by undocumented defaults or silent fallback.
+Measured coverage, endpoint, quality, acquisition, and generated-artifact evidence are in report.md and indexed archives. Scientific policies and actual Canadian project acceptance remain unresolved; no undocumented defaults or silent fallback are authorized.
 
 ## Verification
 
 - [ ] Applicable package success criteria and generated-artifact chain passed.
-- [ ] Parameterization ADRs accepted before merging affected implementation.
-- [ ] Correctness/security review artifacts complete with no unresolved medium/high findings.
+- [x] Parameterization ADR-0091 records accepted research transformations and deferred production policies.
+- [x] Correctness/security review artifacts complete with no unresolved medium/high findings.
 - [ ] Required implementation tests and actual-project acceptance recorded.
-- [ ] Durable contracts promoted before closure; package and root tracker updated.
+- [x] Durable experimental contract promoted; package and root tracker updated.
 
 ## Progress notes
 
 **2026-10-13 21:15 UTC:** Created package and tracker; implementation remains unstarted. Documentation validation is recorded in the planning handoff. No test or artifact acceptance is claimed for future code.
+
+**2026-10-13 21:56 UTC:** Initial planning committed `03435abc5`. Live inventory limits NorESM SSP2-4.5 to 2079 and shows no NorESM SSP3-7.0. Topanga sampled cells are ocean-mask exclusions. Daily precipitation matches same-labeled hourly sums within 1.22e-6 mm over 465 point-days. Pilot: 19 focused tests pass, 59 fresh WEPP cases pass, one PRISM temperature inversion rejected. Full suite and multi-year studies remain running.
+
+**2026-10-13 22:40 UTC:** Operator continued after the pending independent-review request. Correctness and security reviewers identified invalid PRISM source acceptance, companion provenance overwrite, and ambient netrc authentication; guards and regression coverage now address them. Added 36 seasonal PRISM wet-day/extreme comparisons. Planning commit remains `03435abc5`; final implementation/evidence commit follows review closeout. Study execution is complete, package remains open only for declared gates.

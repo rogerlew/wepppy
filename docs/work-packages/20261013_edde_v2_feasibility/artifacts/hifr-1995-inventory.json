@@ -1,0 +1,74 @@
+[
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-01.raw.nc",
+    "size": 8888540828,
+    "etag": "\"18d319c3492c00a5fa8c92323a963d2a-1060\"",
+    "modified": "2025-03-27T20:24:07.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-02.raw.nc",
+    "size": 8028553244,
+    "etag": "\"83bc48a6ff4db6ad0b381cd28ddec8ee-958\"",
+    "modified": "2025-03-27T20:24:13.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-03.raw.nc",
+    "size": 8888540828,
+    "etag": "\"ed5b9a01c91fe1a5f88175e846097de9-1060\"",
+    "modified": "2025-03-27T20:24:30.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-04.raw.nc",
+    "size": 8601878300,
+    "etag": "\"e54223f41abca9b40fe857270113cd79-1026\"",
+    "modified": "2025-03-27T20:24:48.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-05.raw.nc",
+    "size": 8888540828,
+    "etag": "\"9a02bd686ecc4661e540f0dfe77fd10a-1060\"",
+    "modified": "2025-03-27T20:24:55.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-06.raw.nc",
+    "size": 8601878300,
+    "etag": "\"202bcc1d1a536016a66709a6f589c4d0-1026\"",
+    "modified": "2025-03-27T20:25:00.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-07.raw.nc",
+    "size": 8888540828,
+    "etag": "\"afc2ab36a9185747ed4ae3a0585c2a82-1060\"",
+    "modified": "2025-03-27T20:25:01.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-08.raw.nc",
+    "size": 8888540828,
+    "etag": "\"1369fc4193b004046325039bf6084666-1060\"",
+    "modified": "2025-03-27T20:25:25.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-09.raw.nc",
+    "size": 8601878300,
+    "etag": "\"9e6f1f7547821b3a47edb0e734100d82-1026\"",
+    "modified": "2025-03-27T20:25:41.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-10.raw.nc",
+    "size": 8888540828,
+    "etag": "\"6c18868982c73fee36d0109bf2cfd2e9-1060\"",
+    "modified": "2025-03-27T20:25:49.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-11.raw.nc",
+    "size": 8601878300,
+    "etag": "\"8e2c6a7e5198f12359c85476a3f331ce-1026\"",
+    "modified": "2025-03-27T20:25:52.000Z"
+  },
+  {
+    "key": "EDDE_V2/hifr/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.5min.NA12.1995-12.raw.nc",
+    "size": 8888540828,
+    "etag": "\"53180d388d73c04e35ad9dc708759386-1060\"",
+    "modified": "2025-03-27T20:25:55.000Z"
+  }
+]

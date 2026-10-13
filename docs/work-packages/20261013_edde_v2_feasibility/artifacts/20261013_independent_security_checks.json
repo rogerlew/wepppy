@@ -1,0 +1,65 @@
+{
+  "reviewer": "independent security reviewer agent",
+  "checked_utc": "2026-10-13T22:56:09.934555+00:00",
+  "base_commit": "03435abc5",
+  "scope": "uncommitted feasibility changes; trusted local research only",
+  "source_sha256": {
+    "wepppy/climates/edde/client.py": "d91247a2a8a7362617d4344a74090b78b6e1804261f05a43a8f3064ff4e36ef0",
+    "wepppy/climates/edde/cligen.py": "9ca2c1b83c9ca3619e994ecda432927eb8d91e9d9d55b57191a17f444d400205",
+    "wepppy/climates/edde/__main__.py": "993d43373e6a330d334e16173c74c9dec6f835d6daafc361bd5523daeec24cdb",
+    "tests/climates/test_edde_client.py": "c15db4b42d1d89d612a222c10a8d272fc46bc5b909d4b906f242e8ad992ba614",
+    "tests/climates/test_edde_cligen.py": "e5234c3e1a18b6cf80378a6eec94aedf2f8a651999cf39ebc8638f6d83551871",
+    "docs/work-packages/20261013_edde_v2_feasibility/artifacts/reference.py": "114a0cad38deac7cca666c07c97d34ef070b931c951a9ec186f7617680b9cc6b"
+  },
+  "ambient_credentials": {
+    "pre_fix_reproduction": "Synthetic NETRC for public S3 endpoint produced Authorization during request preparation; no network used.",
+    "post_fix": "trust_env=False; focused regression passed; real Daymet request with synthetic NETRC verified absence of Authorization before send."
+  },
+  "live_s3_container": {
+    "trust_env": false,
+    "static_objects": 3,
+    "land_mask_objects": 1,
+    "weather_bytes_downloaded": 0
+  },
+  "live_daymet_host": {
+    "synthetic_netrc_only": true,
+    "authorization_present": false,
+    "redirects_allowed": false,
+    "trust_env": false,
+    "csv_bytes": 389542,
+    "manifest_created": true,
+    "temporary_directory_removed": true
+  },
+  "focused_tests": {
+    "command": "wctl run-pytest tests/climates/test_edde_client.py tests/climates/test_edde_cligen.py",
+    "passed": 25,
+    "warnings": 2,
+    "log": "validation/security-focused.txt"
+  },
+  "archives": [
+    {
+      "path": "point-data.tar.gz",
+      "sha256": "ebc92cffacfe82148b119892f21e2fef442aca757b4b678076249e14651ddfc4",
+      "bytes": 12153138,
+      "members": 276,
+      "hash_verified": true,
+      "safe_regular_members": true
+    },
+    {
+      "path": "generated-climates.tar.gz",
+      "sha256": "a109049f7e2c7699e9db149d2176266fbf659b68c224f0d208daa1edd1a294bb",
+      "bytes": 24190306,
+      "members": 352,
+      "hash_verified": true,
+      "safe_regular_members": true
+    },
+    {
+      "path": "wepp-evidence.tar.gz",
+      "sha256": "116ef15c755e9480cb5b70372c21de14fd1a3ddf2b6ff7317bec463d4639abac",
+      "bytes": 2015879,
+      "members": 900,
+      "hash_verified": true,
+      "safe_regular_members": true
+    }
+  ]
+}

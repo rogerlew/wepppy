@@ -1,0 +1,107 @@
+{
+  "source_sha256": "374f1a80023c6dcf8681b75c333e42983cec9e6a446c129bb76a42f445c8cb28",
+  "source_path": "/home/workdir/wepppy-scratch/prism-stochastic-dewpoint-20261008/prism-normal-ppt-01.zip",
+  "records": [
+    {
+      "point": "hand-to-mouth-drought-h27",
+      "january_ppt_valid": true,
+      "value_mm": 110.42389678955078
+    },
+    {
+      "point": "hand-to-mouth-drought-h113",
+      "january_ppt_valid": true,
+      "value_mm": 108.38089752197266
+    },
+    {
+      "point": "hand-to-mouth-drought-h74",
+      "january_ppt_valid": true,
+      "value_mm": 118.25389862060547
+    },
+    {
+      "point": "apostolic-saw-h1153",
+      "january_ppt_valid": true,
+      "value_mm": 145.7509002685547
+    },
+    {
+      "point": "apostolic-saw-h122",
+      "january_ppt_valid": true,
+      "value_mm": 149.9290008544922
+    },
+    {
+      "point": "apostolic-saw-h2196",
+      "january_ppt_valid": true,
+      "value_mm": 203.212890625
+    },
+    {
+      "point": "cryptic-beechnut-h72",
+      "january_ppt_valid": true,
+      "value_mm": 157.26390075683594
+    },
+    {
+      "point": "cryptic-beechnut-h78",
+      "january_ppt_valid": true,
+      "value_mm": 161.62889099121094
+    },
+    {
+      "point": "cryptic-beechnut-h132",
+      "january_ppt_valid": true,
+      "value_mm": 168.3118896484375
+    },
+    {
+      "point": "Vancouver",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Calgary",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Edmonton",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Winnipeg",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Toronto",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Montreal",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Quebec",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Halifax",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Yellowknife",
+      "january_ppt_valid": false,
+      "value_mm": null
+    },
+    {
+      "point": "Phoenix",
+      "january_ppt_valid": true,
+      "value_mm": 23.170000076293945
+    },
+    {
+      "point": "Miami",
+      "january_ppt_valid": true,
+      "value_mm": 55.88189697265625
+    }
+  ],
+  "limitation": "One-month precipitation grid is an exclusion probe; a pass does not establish all-variable/year-round PRISM eligibility"
+}

@@ -1,0 +1,229 @@
+{
+  "status": "complete",
+  "environment": "existing development Compose weppcloud container; no production rollout",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.41",
+  "umask": "0022",
+  "git_revision": "03435abc5154ad7aa77ee6868abf49cd70c4f6c0",
+  "source_hashes": {
+    "wepppy/climates/edde/client.py": "54c36691bb2877f8520cb60f101d36ab6379156258724ae420bb1917a143c0d8",
+    "wepppy/climates/edde/cligen.py": "31e9e7a38d7b93074ad7fc188f9bb000c5c66726cb0c16bf0e9e6c641c54889e",
+    "wepppy/climates/edde/__init__.py": "c1bcd1238d26d9bea19f0618b3b657d7bf8d91ebc4e21f1612d79bef2764f743",
+    "wepppy/climates/edde/__main__.py": "993d43373e6a330d334e16173c74c9dec6f835d6daafc361bd5523daeec24cdb"
+  },
+  "fixture_sha256": "866b6a6bb4bfd1530f5aad88901d634627f1881a68f24aa1f803ae83364dd627",
+  "root": "/tmp/edde-acceptance-yjpdowdh",
+  "generation": {
+    "prcp": 0.15992431999999998,
+    "tmax": 0.3047999999999771,
+    "tmin": 0.32042999999996447
+  },
+  "revision": {
+    "status": "complete",
+    "source_sha256": "6ade52e17bdc77551c5a33051ab101351cf4494eafc5bf94a79aa65309da60be",
+    "output_sha256": "f17680ec99cea58373de53b54d1465d79db3e4f1c2792a6b2cdec4a9b8dcdaa0",
+    "reference": {
+      "ppt": [
+        149.93,
+        138.02,
+        148.31,
+        118.33,
+        97.88,
+        69.49,
+        15.71,
+        19.27,
+        35.87,
+        105.69,
+        145.33,
+        152.22
+      ],
+      "tmax": [
+        2.1,
+        4.1,
+        7.5,
+        11.0,
+        15.7,
+        19.7,
+        25.8,
+        25.9,
+        20.8,
+        13.0,
+        5.4,
+        1.3
+      ],
+      "tmin": [
+        -3.7,
+        -3.1,
+        -1.2,
+        1.0,
+        4.7,
+        7.7,
+        12.1,
+        12.5,
+        9.2,
+        3.8,
+        -0.8,
+        -4.2
+      ],
+      "provenance": {
+        "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+        "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+        "period": "1991-2020",
+        "resolution": "800m",
+        "site": "apostolic-saw-h122",
+        "sampling": "native cell",
+        "units": {
+          "ppt": "mm/month",
+          "tmax": "C",
+          "tmin": "C"
+        }
+      }
+    },
+    "target": {
+      "ppt": [
+        145.75,
+        128.16,
+        136.07,
+        113.63,
+        94.24,
+        64.01,
+        14.64,
+        17.73,
+        32.2,
+        97.09,
+        146.17,
+        150.25
+      ],
+      "tmax": [
+        2.5,
+        4.7,
+        9.1,
+        12.4,
+        17.1,
+        21.0,
+        27.0,
+        27.2,
+        22.0,
+        14.0,
+        6.8,
+        1.8
+      ],
+      "tmin": [
+        -4.7,
+        -4.2,
+        -2.4,
+        0.2,
+        3.5,
+        6.2,
+        8.9,
+        8.8,
+        5.8,
+        1.4,
+        -1.7,
+        -5.0
+      ],
+      "provenance": {
+        "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+        "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+        "period": "1991-2020",
+        "resolution": "800m",
+        "site": "apostolic-saw-h1153",
+        "sampling": "native cell",
+        "units": {
+          "ppt": "mm/month",
+          "tmax": "C",
+          "tmin": "C"
+        }
+      }
+    },
+    "maximum_rounding_error": {
+      "prcp": 0.0498165810711666,
+      "tmax": 7.105427357601002e-15,
+      "tmin": 1.7763568394002505e-15
+    }
+  },
+  "executions": [
+    {
+      "arm": "single",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.721772265038453,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p1153.slp": "ed7a286f0e27208b848bed522eaf1e661efcf119f153b0d356e96db5855aabf1",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p1153.man": "2d2fa9161f4511b9a8d70a3fbbe0501b07a37d58c5212fe4d5a4e9915e3cc927",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p1153.cli": "6ade52e17bdc77551c5a33051ab101351cf4494eafc5bf94a79aa65309da60be",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p1153.sol": "5955e09d495496fbd898cfa75f129dcd4578c4765e8c1fe102163237c16c1152",
+        "p1153.run": "9f83ac8909648458ce2a1f17e74e14dea36b700ec72554e2333c84933585b3a3",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "days": 366,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1262.1999999999998,
+      "annual_runoff_mm": 0.0,
+      "annual_et_mm": 758.3399999999999,
+      "annual_deep_percolation_mm": 65.7743374,
+      "annual_lateral_mm": 288.7,
+      "minimum_soil_water_mm": 43.82,
+      "maximum_swe_mm": 149.77,
+      "outputs": {
+        "H1153.wat.dat": "3ee2b9ec7b65df120b8882a6e3192b99cecba35645d474712260fa7109b765dd",
+        "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+        "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1153.element.dat": "eda088af045fc13b066c872e93d14e9b9bac448c59f0562d0c48c0eb1165e505",
+        "H1153.pass.dat": "7e3a958de74434a32da31e846aa70e470da9efba3b444633cd959f37b00bee1e",
+        "H1153.soil.dat": "9aa90234057143142cab0d1aaf75dc31038dd8df40af4f03490a2fc47513186b",
+        "H1153.loss.dat": "59f2fbc2faf8d87938ce56f08bab2faabb5a69ae1aa6733275fd0d3a9d36e5d2"
+      }
+    },
+    {
+      "arm": "prism",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7223306130617857,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p1153.slp": "ed7a286f0e27208b848bed522eaf1e661efcf119f153b0d356e96db5855aabf1",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p1153.man": "2d2fa9161f4511b9a8d70a3fbbe0501b07a37d58c5212fe4d5a4e9915e3cc927",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p1153.cli": "f17680ec99cea58373de53b54d1465d79db3e4f1c2792a6b2cdec4a9b8dcdaa0",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p1153.sol": "5955e09d495496fbd898cfa75f129dcd4578c4765e8c1fe102163237c16c1152",
+        "p1153.run": "9f83ac8909648458ce2a1f17e74e14dea36b700ec72554e2333c84933585b3a3",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "days": 366,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1206.8000000000002,
+      "annual_runoff_mm": 0.0,
+      "annual_et_mm": 741.0699999999999,
+      "annual_deep_percolation_mm": 64.40529615999999,
+      "annual_lateral_mm": 262.49,
+      "minimum_soil_water_mm": 43.84,
+      "maximum_swe_mm": 134.93,
+      "outputs": {
+        "H1153.wat.dat": "ec1df2c93f1f0210b807b1f014a43608ca950329fc57e7b014f96b20880970bb",
+        "H1153.plot.dat": "1414c75098dcb843888d0b22e099f4d014629a09a66e192469f6026e2bb6cae9",
+        "H1153.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1153.element.dat": "8ea8388d8e0cbba1b05501b2e44ee3e3307bac3ea765b01f5e7c778aaa685779",
+        "H1153.pass.dat": "afa9ed63387e992cce7c4df5c88ff918400296d52862766baaab179e9f56d807",
+        "H1153.soil.dat": "a889afe35d5c12289ccc5c3f001e9eeace3c45483239d52073198c0a029c96d8",
+        "H1153.loss.dat": "da46399ebd9716c5a9ab46bedf8381cfcae3a78ec968da1b328ee76cf18977f1"
+      }
+    }
+  ]
+}

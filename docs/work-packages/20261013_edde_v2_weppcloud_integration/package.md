@@ -1,6 +1,6 @@
 # EDDE v2 WEPPcloud integration
 
-**Status**: Backlog — gated on feasibility (2026-10-13)
+**Status**: Backlog — feasibility recommends holding production integration (2026-10-13)
 **Timezone**: UTC
 
 ## Overview
@@ -12,6 +12,10 @@ Expose a validated EDDE v2 future-climate method in WEPPcloud after the [feasibi
 The operator's 2026-10-13 decision is to separate data/workflow feasibility from application integration. The feasibility package's **Scope and decisions** section governs scientific and spatial scope until its accepted contracts are promoted. Locale-level method availability is the first filter; per-project validation against the selected grid, required locations, and available records is mandatory. Neither locale membership nor a bounding rectangle is proof of eligibility.
 
 Offer the validated single-location workflow and Multiple PRISM where PRISM coverage and the feasibility evidence support it. Multiple Interpolated is outside the initial scope because finer spatial detail is not established for the 12 km source. Show explicit explanations for unavailable methods or spatializations; do not silently switch modes. Preserve the distinction between historical model simulations, future projections, and observations.
+
+## Feasibility handoff (2026-10-13)
+
+The [feasibility report](../20261013_edde_v2_feasibility/report.md) demonstrates a reusable extraction client and successful experimental CLIGEN/WEPP paths, but recommends holding general production integration. Resolve historical bias treatment, unvalidated station-derived auxiliary weather, selected-station/seed CLIGEN quality failures, and PRISM daily temperature inversions before enabling a future-climate method. Independent correctness/security sign-off is pending. Exact current source availability is narrower than the registry summary: NorESM has SSP2-4.5 only, through 2079; MPI has both scenarios through 2099. Locale candidates are `us`, `canada`, and separately evaluated legacy `bc-ca`; none is enabled by the feasibility change.
 
 ## Entry gate
 

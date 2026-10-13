@@ -1,0 +1,1402 @@
+[
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Vancouver",
+    "station": "wa450729.par",
+    "station_distance_km": 42.86637543058792,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['could not produce desired level of quality']; log_tail='  ********************************************************************\\n\\n\\n wa450729.par                                                                                                                                                                                                                                                    \\n daily.prn                                                                                                                                                                                                                                                       \\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.'"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Calgary",
+    "station": "mt242301.par",
+    "station_distance_km": 246.88529128005456,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17425539999999984,
+        "tmax": 0.32089999999997154,
+        "tmin": 0.3218400000000159
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.871359151904471,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "3e1d63de571094af3333477f2ce26fac8a2a5e9f8839f8d426223fb3a8dd12c6",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 747.785,
+      "annual_runoff_mm": 14.820369525,
+      "annual_et_mm": 666.7470000000001,
+      "annual_deep_percolation_mm": 37.89477775095,
+      "annual_lateral_mm": 27.852000000000004,
+      "minimum_soil_water_mm": 236.74,
+      "maximum_swe_mm": 192.46,
+      "outputs": {
+        "H122.pass.dat": "9ad2be163d4164cfa473121667582020844291e71bd98bb04f2f8814d196d00b",
+        "H122.element.dat": "a5d4f72e3504aa0d845897d83b3cc8b4e39aa999045ad7ea24e8b0af51fac48d",
+        "H122.plot.dat": "2a69dc610cb0add8c35ee3b87dfc18130faa48aea45728a50ff9c6aed8ddc24b",
+        "H122.loss.dat": "12779a10d8b7a8488ac8909af1eb2314c63bcad4cdc02f5ad87d33ebda909e6a",
+        "H122.soil.dat": "f4d6542f4a81207ccf4ec646a1476b6fb6f20bc91688891caa3461f3bf0ac7c5",
+        "H122.ebe.dat": "995e2c334002550bf8319d4617ab6aa3415a47a0a7b5d6bd0dd4f1b2ac925535",
+        "H122.wat.dat": "4725f94675cd0b79ea7c28e6aeb8994de69ed41f6f393e9dd07e17853e1b50ca"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Edmonton",
+    "station": "mt242301.par",
+    "station_distance_km": 510.28812123530355,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17589100000000002,
+        "tmax": 0.322019999999986,
+        "tmin": 0.32222000000004947
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.120466817985289,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "8e2301ae6c1320c190536b6b1d85a7424a09a9178a818065e3ce4e1d13db057f",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 711.8699999999999,
+      "annual_runoff_mm": 8.49629706,
+      "annual_et_mm": 433.8755,
+      "annual_deep_percolation_mm": 77.84292767679999,
+      "annual_lateral_mm": 183.3935,
+      "minimum_soil_water_mm": 228.26,
+      "maximum_swe_mm": 152.83,
+      "outputs": {
+        "H122.pass.dat": "7ee7431d2cac12807b9f313a759f2ab8b7b30b859bd361fe079f2b6ddf572829",
+        "H122.element.dat": "3624bbd624915098a3d97118e3c68fd275905965ced58f627a3127a996407628",
+        "H122.plot.dat": "9b9d286d20f9013cef713f48e24a7ed885ddfb1083d7784ed90819b4988217a9",
+        "H122.loss.dat": "6aa6ceb85b50dfaecfa0ef503031a7c5644e38efad31f518ecff952329157030",
+        "H122.soil.dat": "78cb1253b9ff059a1ed7e9c418061fe00a1be2b3061d4ce229398d5b9ce58205",
+        "H122.ebe.dat": "50716c8ce758a1c688d7f3f2ff14b2e221282249b503bd65975ad6f2ade94ef7",
+        "H122.wat.dat": "e7580933d6d70e90c6c9905708694c4ed3834b76a35dd02695e54be39b33f623"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Winnipeg",
+    "station": "nd326947.par",
+    "station_distance_km": 105.9343171031796,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17277984999999998,
+        "tmax": 0.32149999999999146,
+        "tmin": 0.32209999999995453
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.022338347043842,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "c8fb308b540de257f88de04c801f88191e942e777412745430afe6b6a7198c13",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 788.72,
+      "annual_runoff_mm": 40.913904224,
+      "annual_et_mm": 401.49,
+      "annual_deep_percolation_mm": 80.75373582199998,
+      "annual_lateral_mm": 259.7205,
+      "minimum_soil_water_mm": 243.69,
+      "maximum_swe_mm": 269.3,
+      "outputs": {
+        "H122.pass.dat": "8764b1e655b9c5f0a2b63911f77f8bacb530ed6805d94f77f0b59797058c4b70",
+        "H122.element.dat": "95bf5bd83e033df76cee92c9dad8f6b154b80d767224b3ae7fd3c08b070937be",
+        "H122.plot.dat": "4f89f97685362d096c8a30fb78741d2aafe95c43f22310180b4daff780dee424",
+        "H122.loss.dat": "7fb40f93a06dc30ab56e8cf5804b78ba0f614e1f25636c5883b31d0ef2e26238",
+        "H122.soil.dat": "6efe384ff6f648334eeda3c7bdce3dbb8554f78527cbbc3bd17b7cd76cd9750e",
+        "H122.ebe.dat": "422ac5c2946b15c89f83bb93f6efe8a202596f0803eafecb4696de1ad5a8bff4",
+        "H122.wat.dat": "558a98063a85656a514751761218305987d4a1cd0a0e4830fe5a41a7502778a4"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Toronto",
+    "station": "ny301012.par",
+    "station_distance_km": 95.79816675059914,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17298775,
+        "tmax": 0.32173000000003604,
+        "tmin": 0.3222000000000431
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.2224670469295233,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "58b2e8fd5f389d4aec160bef092fce0a43ca5f5374fccad05a910846f5024e28",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1221.225,
+      "annual_runoff_mm": 38.039853752560006,
+      "annual_et_mm": 929.0300000000001,
+      "annual_deep_percolation_mm": 81.67930743484999,
+      "annual_lateral_mm": 166.236,
+      "minimum_soil_water_mm": 249.86,
+      "maximum_swe_mm": 402.77,
+      "outputs": {
+        "H122.pass.dat": "be924e77c2fc55dacfd84aa58540bcacdfef43e62544ffe0ed695fbaddbdcfb0",
+        "H122.element.dat": "d82fc70a91d9f715ae719e648279298bd7b983016d9e351e90cb04bd876a7873",
+        "H122.plot.dat": "0bcfe377cfa1940a72188ac0a079df730b7a0300b1d4e0fa8eea4c6e6e3dd2cc",
+        "H122.loss.dat": "5cc3ced516d8a780dfeb911f13b96733a75a7f4839d8c5f7c96a9761c0303f50",
+        "H122.soil.dat": "013c0bb8d7ddc26041cb61cd2651ce8cec5eafbbdc792338da7ac0eb84390c4b",
+        "H122.ebe.dat": "96766db3fd1a7c0409fb28b54fdc8d9e85132ac3870f2909e5a9d259bde41c10",
+        "H122.wat.dat": "808c21cff5c8a4f4877e21b2f694db0ad3533e6a18f87c74cd2045f160c33e51"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Montreal",
+    "station": "ny301966.par",
+    "station_distance_km": 87.52715580937902,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17477399999999932,
+        "tmax": 0.32198000000003013,
+        "tmin": 0.3221999999999866
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.2216727240011096,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "20c8c98dbaf4ba9ddcba3d622dffc888db677207fc8f0a4776296b49e6f1f2cc",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1489.6899999999998,
+      "annual_runoff_mm": 119.8008319475,
+      "annual_et_mm": 763.7059999999999,
+      "annual_deep_percolation_mm": 89.37008891999999,
+      "annual_lateral_mm": 495.429,
+      "minimum_soil_water_mm": 359.9,
+      "maximum_swe_mm": 662.64,
+      "outputs": {
+        "H122.pass.dat": "ae599419c5742f4ae40d3eed8276e3466f1180b3a547b44aa7dae8a5867028d3",
+        "H122.element.dat": "eb57a6885dd95197dee95d28f519e55c1759af848e2470db42c8b2c7ec6842a3",
+        "H122.plot.dat": "498a2804c79f1aab0ff08071e21b8a99060e8900e1a664959caadcd0268f353f",
+        "H122.loss.dat": "d76b39b3e823a113b9ba9681c84ba1a5e587704df46db10eeb9a57e319a412a5",
+        "H122.soil.dat": "b03f5cf31942a2dad1f03ec04ad4d0ffa42191c68aec782b4c4e168bf7cff8e2",
+        "H122.ebe.dat": "400afb378f92c34425ae1ff57920b1ec2ad50c0272d67b927bf8b662c75a793f",
+        "H122.wat.dat": "fda57b6505fef7be85f954eb33c5a15888a160cc8e194a7e3d1d92f4137e6b0a"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Quebec",
+    "station": "me174086.par",
+    "station_distance_km": 149.81726356435226,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17668459999999975,
+        "tmax": 0.32183000000001094,
+        "tmin": 0.32186000000002224
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.474392928997986,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "73b61312a383e2834d5cae957b3fe0c336c8cc28810d35704452936f2b25cbd4",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1701.2599999999998,
+      "annual_runoff_mm": 198.886562868,
+      "annual_et_mm": 676.0815,
+      "annual_deep_percolation_mm": 89.41265212499998,
+      "annual_lateral_mm": 713.5084999999999,
+      "minimum_soil_water_mm": 366.28,
+      "maximum_swe_mm": 719.23,
+      "outputs": {
+        "H122.pass.dat": "9e3dd76b8c237a9ff6e9957a427da7a01c4fd1fcd55546dd19668ad17e75c762",
+        "H122.element.dat": "2d154e3560242cbe3a342654414eda6c151be062d591626df925273c76e53098",
+        "H122.plot.dat": "cf49d7de9e9278f1fc74f5ef0b683bce25e89407279089739a5614fdd387fe32",
+        "H122.loss.dat": "02c52bf1224af086c6ee3d18825a9cd23f7bd85a34e83a3a36bec0e6f72d2f6a",
+        "H122.soil.dat": "6c2b52a339e32a80334d8fc04b5ac4e4cb95ca95bf9934d352a73ffa47152871",
+        "H122.ebe.dat": "1cc878bb78955670484a5c8e0f3b4002df1eb347ceb4671db63e1ac697dd17b3",
+        "H122.wat.dat": "7c3029de9b6f069c482ac36191df51b6eb4260a36c75917fd39758ccf2b8c2ba"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "point": "Halifax",
+    "station": "me179891.par",
+    "station_distance_km": 306.71464063458984,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17281227,
+        "tmax": 0.32131999999999294,
+        "tmin": 0.3219599999999673
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.3226249599829316,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "fb5188dbdb698d3b68f6633ad3ac937dc035e9f8b7b1c9d068ef9fbbf4308188",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1682.56,
+      "annual_runoff_mm": 132.02346147525,
+      "annual_et_mm": 716.2365,
+      "annual_deep_percolation_mm": 89.41265212499998,
+      "annual_lateral_mm": 722.225,
+      "minimum_soil_water_mm": 400.12,
+      "maximum_swe_mm": 479.73,
+      "outputs": {
+        "H122.pass.dat": "66d85956a78d4f271a85d35b94bb97dd0fbf817c80c44e69a963b2ff56d4f371",
+        "H122.element.dat": "6d9e6e70db007fcb3953e9a161ec7cd64b252030babc11f92d624d668b912b7c",
+        "H122.plot.dat": "381d0ac3f4a685008ed66585c65decc008052138542aade0c9c47e9c37af578f",
+        "H122.loss.dat": "a6b272f64920fc9e11f852e54b05d8efaaa8eef452db7f2b477dd8cc2e1006d0",
+        "H122.soil.dat": "1fb34460d676e77135f5738842d18eab6fd94a791b04ca89187c503f312f951d",
+        "H122.ebe.dat": "445c7cc8fbbebcd0b2336d4b78b59c8bfb03eb829fc0848edf0eaad93fc3dd3c",
+        "H122.wat.dat": "ec9d437dc7764705148d6759b09712055cc8f08747e8ff403f73bf19b898b23e"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Vancouver",
+    "station": "wa450729.par",
+    "station_distance_km": 42.86637543058792,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17292861999999998,
+        "tmax": 0.3218699999999668,
+        "tmin": 0.32158000000001685
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.3736220479477197,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "1622e1e5ce790180284312998fdb16ebbeabb5d360da533dbeac785bbe710146",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1776.225,
+      "annual_runoff_mm": 174.10598450499998,
+      "annual_et_mm": 804.611,
+      "annual_deep_percolation_mm": 88.099945153,
+      "annual_lateral_mm": 686.201,
+      "minimum_soil_water_mm": 226.32,
+      "maximum_swe_mm": 212.0,
+      "outputs": {
+        "H122.pass.dat": "0f2bd7d0e61b47884191c7c689568750753db29a36df164a321babda8fdbd0dc",
+        "H122.element.dat": "284176889f436653152b988a2a917c0a207bf04b39746ffe8cd147a2b7e881d9",
+        "H122.plot.dat": "61e797713f3066d4727291fe569163958856799b2ba9451e5d51bb47ae2f1c2e",
+        "H122.loss.dat": "44908e01379688d66cb20365a04e4c94e7d1ebb259dd39bf880f0e1fbb80186d",
+        "H122.soil.dat": "3c2fea1545ae5345ced76a41a45dfa3ad662855197f8f097592975fdefe2f235",
+        "H122.ebe.dat": "153d7f07826016c7f1922a68166791c5eca9b4e716362d08e4be885546eb6dbf",
+        "H122.wat.dat": "039447dd8028825bd53ae7f969df947dca344fee822f657a4b77a0e872b7e05e"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Calgary",
+    "station": "mt242301.par",
+    "station_distance_km": 246.88529128005456,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           7  Year:        2079  Mlevel=   40.0000000      SDlevel=   95.9685059      Days:         620\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.'"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Edmonton",
+    "station": "mt242301.par",
+    "station_distance_km": 510.28812123530355,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           7  Year:        2079  Mlevel=   40.0000000      SDlevel=   95.9685059      Days:         620\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.'"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Winnipeg",
+    "station": "nd326947.par",
+    "station_distance_km": 105.9343171031796,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17297057999999998,
+        "tmax": 0.32124999999999915,
+        "tmin": 0.3221700000000055
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.1735992419999093,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "a7a1ad66a522ee128ab1c87a48541b5e5454f12d3532e245ca7022b439a2db8d",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 891.0150000000001,
+      "annual_runoff_mm": 41.35075849233,
+      "annual_et_mm": 766.9069999999999,
+      "annual_deep_percolation_mm": 47.21053734544999,
+      "annual_lateral_mm": 33.2105,
+      "minimum_soil_water_mm": 229.66,
+      "maximum_swe_mm": 294.0,
+      "outputs": {
+        "H122.pass.dat": "bf03ff7fe9ab9b66536f19d94c01539260a1fe1cb88b05fea5146390f7ead805",
+        "H122.element.dat": "6245be60ce3c5715afd0196f3526766af3e1e0d521569bcbd301114d2b7a48d3",
+        "H122.plot.dat": "c68fa1aeafca45aa6f0847e54a870559d740029eb94793298b159d4e36915d57",
+        "H122.loss.dat": "e415985a1a820ff589e4b3a49672b02621be36ec866141756479cb5bd8f6e3fd",
+        "H122.soil.dat": "457c5c1cbb708cb0245e4b887c05a98c55258f6de1ead46e4e503c4807e7f2e6",
+        "H122.ebe.dat": "10d17e55ec9c0526b232887e7b3c8b9ea95917474ed392cdee2992f1f5d261f0",
+        "H122.wat.dat": "79e4351179db4200074b83653329c8ead077ada59b5a36222e6b2f83c3eba292"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Toronto",
+    "station": "ny301012.par",
+    "station_distance_km": 95.79816675059914,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17498799999999903,
+        "tmax": 0.32222000000005124,
+        "tmin": 0.32200000000003826
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.222632349934429,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "0cdc74b1d67721e49d03e34a5a32d53b6cfa7a40d44a01aa8e612f2b5184fd4b",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1338.5049999999999,
+      "annual_runoff_mm": 50.7793370634,
+      "annual_et_mm": 980.6290000000001,
+      "annual_deep_percolation_mm": 83.83913343649999,
+      "annual_lateral_mm": 218.22199999999998,
+      "minimum_soil_water_mm": 253.57,
+      "maximum_swe_mm": 323.15,
+      "outputs": {
+        "H122.pass.dat": "8cd3faed2f2cf39546ea846ddb513fd949adb3b7c4700aca0ae2217bd4611a69",
+        "H122.element.dat": "892f38616b2f1da4626ba6a63bf936003344fd33cf2f6f1ac97db54386d7cf99",
+        "H122.plot.dat": "882657e0c828d1cad9d55715bf299d425c78c1c59dd7f1690e36e0b7c690344a",
+        "H122.loss.dat": "c89d74bacef2e583cdf6a457f737dea78c0c4034b7c5c74a10cbdf636da31c38",
+        "H122.soil.dat": "37719ff812023c0b557cd4f8a983df43b96114f1c213402837b9aedd0b1736d9",
+        "H122.ebe.dat": "d112ed6fde9c3e81c7f41e139c516cf2f4306e2e1bcefa216d45eebefe622e09",
+        "H122.wat.dat": "3464e33ab78fed7396b2fa8ea26d79da0329f20f2a57b8c08d34205d73b403bf"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Montreal",
+    "station": "ny301966.par",
+    "station_distance_km": 87.52715580937902,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17460940000000047,
+        "tmax": 0.3221700000000055,
+        "tmin": 0.32219999999998805
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.2733045789645985,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "db28e313f500f100e20490330533b4951a21a77b97eff09673980f7f646c9b1c",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1633.4199999999998,
+      "annual_runoff_mm": 87.175593715735,
+      "annual_et_mm": 809.5914999999999,
+      "annual_deep_percolation_mm": 89.19299136449999,
+      "annual_lateral_mm": 623.6189999999999,
+      "minimum_soil_water_mm": 315.5,
+      "maximum_swe_mm": 473.54,
+      "outputs": {
+        "H122.pass.dat": "f071e520e8a5ffb10553b49dd517d92cf4ab0e82d02c42f871efa12c8f9dd48b",
+        "H122.element.dat": "299ee150244ffe8df1b94f2ef2c867531b917dd411231c1dc1b565de39ea78a4",
+        "H122.plot.dat": "a5ffb3d81e2b8a705398db9ffb43b8711921c4a667f8a5971ede2f45b0ad3a37",
+        "H122.loss.dat": "71568eb574bfe39dfd3bc9cecec9e6a3df6c77a18e361d1f9ea3099778196398",
+        "H122.soil.dat": "7b8242e74473857833361b72ed4802651f49b1e10f1429bfda0dd72d942ef07a",
+        "H122.ebe.dat": "6a74650e6f4b41f2e0ee36d9ce6b87e1e0e10baabe26d4adc6b1f28874b811bb",
+        "H122.wat.dat": "44dd6230ecbc782d2f78b76d3778d34ed57f1866ae2b7141cfc22e633ac9e169"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Quebec",
+    "station": "me174086.par",
+    "station_distance_km": 149.81726356435226,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17662349999999982,
+        "tmax": 0.3210000000000033,
+        "tmin": 0.32177000000004874
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.222936442005448,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "6fb5e6ed52dbbcc460a3791e5a24c4fbdca37d4352ae7a4bb24c1b919b3ae6de",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1809.075,
+      "annual_runoff_mm": 189.267697063685,
+      "annual_et_mm": 726.7814999999999,
+      "annual_deep_percolation_mm": 89.14257827499998,
+      "annual_lateral_mm": 779.318,
+      "minimum_soil_water_mm": 348.87,
+      "maximum_swe_mm": 567.57,
+      "outputs": {
+        "H122.pass.dat": "5e9f825f07cd403d07e64d09e63e39c373c8fc02e1bd5631e7deecc119bd60e1",
+        "H122.element.dat": "123bd37b74b6091e1ea14d2b39aeb6aaab7708a028a13237a00a61ffd0d1d21c",
+        "H122.plot.dat": "0e432da9b8fafdcceabb50b00b2b2294f7320242bcd8cae9ef013af4021f96fe",
+        "H122.loss.dat": "b87671e1a4029ddb7184bbec290a4333d9d2ecf6f66dee78e455241c1ea4d2f0",
+        "H122.soil.dat": "ea2b0b93cbac079969fe087abeae0e947128ea7d790de8856713d36529e2f152",
+        "H122.ebe.dat": "be6137e035a1b2070dbebdf3670e4905d3c60308aeab89d1299af2dd21d062df",
+        "H122.wat.dat": "4978d5b7bf45632837d9fb227321832da6697feaf85b0799b3af154d458b2ce0"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "point": "Halifax",
+    "station": "me179891.par",
+    "station_distance_km": 306.71464063458984,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           4  Year:        2079  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         600'"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Vancouver",
+    "station": "wa450729.par",
+    "station_distance_km": 42.86637543058792,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['could not produce desired level of quality']; log_tail='  ********************************************************************\\n\\n\\n wa450729.par                                                                                                                                                                                                                                                    \\n daily.prn                                                                                                                                                                                                                                                       \\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         100\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.'"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Calgary",
+    "station": "mt242301.par",
+    "station_distance_km": 246.88529128005456,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17552500000000038,
+        "tmax": 0.3222000000000449,
+        "tmin": 0.3218399999999857
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 3.1716552029829472,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "83c3b10fa5e8475be8086f5bb3011c0aa7e2b28d078367bee226115c26728716",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 761.6899999999999,
+      "annual_runoff_mm": 7.430406700000001,
+      "annual_et_mm": 702.7879999999999,
+      "annual_deep_percolation_mm": 35.72583676736999,
+      "annual_lateral_mm": 17.569,
+      "minimum_soil_water_mm": 228.97,
+      "maximum_swe_mm": 112.4,
+      "outputs": {
+        "H122.pass.dat": "0b8e74886097e647ab5d9fe23d1286fd902caa8075842da9bcce4d90ad6e8908",
+        "H122.element.dat": "1f588d68bcbdf1c1b84fb0e8b98d8cb5422e7a60cf4f375fae524958d5a37bb2",
+        "H122.plot.dat": "cbbfcdb97b0b458392b6d4b247ee6226717e2a41931ff863ed0d859882094e19",
+        "H122.loss.dat": "44c6ee21d6585b0e073046060e0ccbb2611e4dcc27599263f1819bb35fcc2059",
+        "H122.soil.dat": "0bac4e1f5361ae0f3632a898a83d1277b2860c91e0a6f3d69ccfbc94e3e95365",
+        "H122.ebe.dat": "12a344d653491884fa06f242d7a7cb9b24461fbaf4da35a15e02420aa1f98276",
+        "H122.wat.dat": "101916e6b461e736834cc3972525c47069a6dadbee0b3a553e50738dc9106164"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Edmonton",
+    "station": "mt242301.par",
+    "station_distance_km": 510.28812123530355,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17298584,
+        "tmax": 0.32199999999997964,
+        "tmin": 0.3220199999999863
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.821581349009648,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "b777c886d7ec4108e6ec22d395eda5b282a9e653f7a7d4e6a7a326949fe5d77d",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 768.0,
+      "annual_runoff_mm": 5.5359721,
+      "annual_et_mm": 493.53950000000003,
+      "annual_deep_percolation_mm": 72.11098297699998,
+      "annual_lateral_mm": 188.04149999999998,
+      "minimum_soil_water_mm": 235.77,
+      "maximum_swe_mm": 169.18,
+      "outputs": {
+        "H122.pass.dat": "ce393a7d797f9dfa6ea9cacfd211a229567f41af6eb54ba07d916910c9506b2d",
+        "H122.element.dat": "5aff7031d687c31f7c318ba2a8cba29f48d77c998ad81f44fc0e6138545579b1",
+        "H122.plot.dat": "7552a5da2f75703c941f1123c943ca303287b08e250e5593cd6cf0f7eb599552",
+        "H122.loss.dat": "0e64947c2dd3baed78c17d1792167ee37b3d85656300e1aa886953b3ccba9e5b",
+        "H122.soil.dat": "010f9a2f3a1c490cdc8cd0e2c6377c4c94f86de6756e319f109dbe4869f80352",
+        "H122.ebe.dat": "9791508c6703d42d7f15fa5a068433b6d686f6400b122a89e48431ca13420be6",
+        "H122.wat.dat": "3c25aff542fa92ce76b58a832b4536056c0d1847030fc70e29ebd17a1018bfce"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Winnipeg",
+    "station": "nd326947.par",
+    "station_distance_km": 105.9343171031796,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.1729248,
+        "tmax": 0.3221700000000055,
+        "tmin": 0.32201999999998776
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.771898099919781,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "5065a740e799b1c8484c5bd7773b257c922aea93e484bc6e50bb2b1911413507",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 567.5450000000001,
+      "annual_runoff_mm": 8.479111963045002,
+      "annual_et_mm": 353.6625,
+      "annual_deep_percolation_mm": 77.64724938749998,
+      "annual_lateral_mm": 123.44300000000001,
+      "minimum_soil_water_mm": 241.48,
+      "maximum_swe_mm": 187.7,
+      "outputs": {
+        "H122.pass.dat": "07c93373ad8b0f4f408711cc31b1bdcb7c6011d208c4566863f747b4c6bd36d1",
+        "H122.element.dat": "4db51b5edaa1d57c1b15fd8ec1a5fbe250f1a91873e5d7d5182ccc61e4a603e7",
+        "H122.plot.dat": "483ff16bffb92e48c3f472eadcf9b698992acc92799e933763a6af53fdcbf613",
+        "H122.loss.dat": "191644a474a1cb6a1368602e29fc72406fd061b4cde4e5c84f7013043321ea93",
+        "H122.soil.dat": "de2ad872abc4c6bcc3b0e125035cc061079dea13803df3268b01459f98766da1",
+        "H122.ebe.dat": "4d64e8a7607d177a8fd31bffe50a0b5400cec2abf27666209710cefa397b98ad",
+        "H122.wat.dat": "6733bf25c78cc2a22fa270d64e213787fe647e687a4e5804eb4863b691b804dc"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Toronto",
+    "station": "ny301012.par",
+    "station_distance_km": 95.79816675059914,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17413329999999982,
+        "tmax": 0.32152999999997434,
+        "tmin": 0.32216000000003076
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.822019914048724,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "8640224ed964b6e669f8b249829a5234839df1a92f57d6904b6b4d283abb4fa1",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1017.8650000000001,
+      "annual_runoff_mm": 9.783191405055002,
+      "annual_et_mm": 881.7275,
+      "annual_deep_percolation_mm": 52.22702282304999,
+      "annual_lateral_mm": 67.95150000000001,
+      "minimum_soil_water_mm": 240.32,
+      "maximum_swe_mm": 280.15,
+      "outputs": {
+        "H122.pass.dat": "9e8266b1e989c8b0de6eb4157fff4d5235edf3f691c91310721b49cc860a869b",
+        "H122.element.dat": "5774be9f19c098ccd5cd8749f081a92224a1962f83284322ad72a1aeecf684fe",
+        "H122.plot.dat": "17b70987e22046764e3979dd9ae3b8b36277e3f7fcd24c87f269e403faba4a4f",
+        "H122.loss.dat": "980392dfad51594c47907fcd8f5051795b12e1b57f7529152edb5d30b6072ef9",
+        "H122.soil.dat": "b578368621d6ef9ad33c3cbf49998891f3ebdf7e2453c6ab2f0efa63f1da353e",
+        "H122.ebe.dat": "3be42fa32393c98be4fefa0c1e1b8fedd52cc5b21f14c409e0ad566bd2928e35",
+        "H122.wat.dat": "a541ee327cf6d74d52148b8594e8281b509f5be2dd52cba2287cbb860dfadd7b"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Montreal",
+    "station": "ny301966.par",
+    "station_distance_km": 87.52715580937902,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.1750670000000003,
+        "tmax": 0.3222000000000431,
+        "tmin": 0.3221600000000304
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.972456671996042,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "f9ea7874982503d5c3c490cacc0b2ffdf0cc1d46d78f587a2fea681df6d2fccf",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1259.29,
+      "annual_runoff_mm": 45.072895185,
+      "annual_et_mm": 856.2185000000002,
+      "annual_deep_percolation_mm": 83.48089288274998,
+      "annual_lateral_mm": 251.154,
+      "minimum_soil_water_mm": 263.68,
+      "maximum_swe_mm": 406.77,
+      "outputs": {
+        "H122.pass.dat": "96ee520724adb155f9bac202bd6da6d103285ba2aac67e43c2f8f713e9e0d213",
+        "H122.element.dat": "74abbd1e09d0c945abdeaeca7c5b092c20d754cdbf77ad0b71303eed148b2128",
+        "H122.plot.dat": "de690c0bb4c1bcc37a989db639a2e35dfca8503a3f4a042812691e443180fd36",
+        "H122.loss.dat": "1992af8dda8e79b4fe1d92ba1438aed226993f86509b2b324aca6ab9b0c26636",
+        "H122.soil.dat": "7bdfd8f3c56c327e6040f67b7369f9df2a904db9e683b3a5e8317a51ac33b627",
+        "H122.ebe.dat": "3db52f4283708cdc926e57eae1a8b3a348cd8e332a55614df6553c3ee32ee375",
+        "H122.wat.dat": "5ee06d0b4480bfdbd4fc9b6d0a087ededce2db6d6bbd660ac24555714ec7e016"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Quebec",
+    "station": "me174086.par",
+    "station_distance_km": 149.81726356435226,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17662349999999982,
+        "tmax": 0.32222000000004947,
+        "tmin": 0.32209999999995453
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.871935222996399,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "78af9c286f770a76331678d0e4179192226ba8b515de69af5c5dd12190d7cb74",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1486.83,
+      "annual_runoff_mm": 86.940114993,
+      "annual_et_mm": 709.244,
+      "annual_deep_percolation_mm": 89.41265212499998,
+      "annual_lateral_mm": 575.9069999999999,
+      "minimum_soil_water_mm": 367.69,
+      "maximum_swe_mm": 535.57,
+      "outputs": {
+        "H122.pass.dat": "1697ca787df1ed8add9f28997ecab47bb021d3f33fef988d499c2568943a56d4",
+        "H122.element.dat": "7bde653a3ec567b0b4eb8e7a85c4cf430370751f785e13fca82ea7fae8c0f1c3",
+        "H122.plot.dat": "21f8f728da614afff7050915b5ed4705d86160e52fb59f78fcc830819f6f8611",
+        "H122.loss.dat": "df763de9550989f738bec17e3fd7ddc53cda5cdbc3367dcc2eb8fa0a6bbefb54",
+        "H122.soil.dat": "83f1d9178279bd565af0ceb706ab8c77a6275b5903a78c76cdf5fd87285b3e7b",
+        "H122.ebe.dat": "203b7fdc1bb111272daf0a1e1d726fa7549ff8b5727e752c4bc1036923a07d7d",
+        "H122.wat.dat": "8f7d1c6c3d27ae294396aff6926f19a9bd5b2a648474a944d3dd754329fb7544"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "point": "Halifax",
+    "station": "me179891.par",
+    "station_distance_km": 306.71464063458984,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17613530000000033,
+        "tmax": 0.3220499999999674,
+        "tmin": 0.321670000000017
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.87201007490512,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "be67ff83bfc27139591563a57af0510bfb34f3d6abb0a82e88dbdd9f6449ded4",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1507.475,
+      "annual_runoff_mm": 68.52400334079,
+      "annual_et_mm": 752.7275,
+      "annual_deep_percolation_mm": 89.39850634049999,
+      "annual_lateral_mm": 573.4385,
+      "minimum_soil_water_mm": 347.44,
+      "maximum_swe_mm": 436.55,
+      "outputs": {
+        "H122.pass.dat": "5cc6e76b424bb085a8a01547c3a70097c5ac86b6dea710c8a8f71ad164cc5667",
+        "H122.element.dat": "9533418324ac87508d38ded3ff9f64bc952d5e0de340f89b36840a1c5fed422e",
+        "H122.plot.dat": "27a132e2ae29fac56218ffeb05860ed2fed214d245ce6639b23672146128b417",
+        "H122.loss.dat": "5433db8916771d4c8166ff30906a08d3b72344d27dce7da892c443476ce0be57",
+        "H122.soil.dat": "7ad7c1e5214b8cd002ac1f35be123727b5070e385ab1298a8f16d6e5772ffc4b",
+        "H122.ebe.dat": "705dbd7bd90111d3b2703fdc261fd9ccb0f215b40a60025a0dacc9b387a8576b",
+        "H122.wat.dat": "c2fed403d4019907b94a3e07962338cdfae9a080cbfe03ec95a2a64fbb991404"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Vancouver",
+    "station": "wa450729.par",
+    "station_distance_km": 42.86637543058792,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.1765319999999999,
+        "tmax": 0.32180000000002984,
+        "tmin": 0.3215199999999978
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.8216493600048125,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "4a300af8d4b157aa95e35dd7815fd0aaa1cb50f44c3a57d6b53eae88e4982a74",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1572.36,
+      "annual_runoff_mm": 88.42454203964999,
+      "annual_et_mm": 842.9935000000002,
+      "annual_deep_percolation_mm": 80.70322851799999,
+      "annual_lateral_mm": 548.904,
+      "minimum_soil_water_mm": 225.01,
+      "maximum_swe_mm": 95.8,
+      "outputs": {
+        "H122.pass.dat": "ef2adc22d183eaa4d7f24dc7d79d514709e3b0271d0e2fb29228d629bb8728a3",
+        "H122.element.dat": "28c49f28408a9907bc251bf422d952a4afb82a929d670c09f810988ab3a63794",
+        "H122.plot.dat": "ee8fc6374a8bda699062821fdf0c714778e3d2069d9283fae0b91bd19e408de8",
+        "H122.loss.dat": "2c7597e8aa6e2856fdb9b1935d9d07bd575ea141159db1c84e07563c587c9ac9",
+        "H122.soil.dat": "78e78b34cc9cf6d49e5f53bede9f0ff6feab76a268a176ba542e3af14ac5933f",
+        "H122.ebe.dat": "e537a3e7d9db049b97d5bd6b0b6f7617cb3156100d15db4251b8eb4a70a261a2",
+        "H122.wat.dat": "ff82a0815db0c8d8364942f430e2780f73ec90a3c3e94d9212890f28d51afdd5"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Calgary",
+    "station": "mt242301.par",
+    "station_distance_km": 246.88529128005456,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           7  Year:        2079  Mlevel=   40.0000000      SDlevel=   95.9685059      Days:         620'"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Edmonton",
+    "station": "mt242301.par",
+    "station_distance_km": 510.28812123530355,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' Tdew -10 rangecheck executed.\\n Tdew -10 rangecheck executed.\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2079  N:         129\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           7  Year:        2079  Mlevel=   40.0000000      SDlevel=   95.9685059      Days:         620\\nSTOP Normal program termination'"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Winnipeg",
+    "station": "nd326947.par",
+    "station_distance_km": 105.9343171031796,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17395020000000017,
+        "tmax": 0.32210000000001315,
+        "tmin": 0.3220800000000068
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.72156943497248,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "a5fc886344d629271c05ae8517a0caf9e731ceb955df978fd2b0c3c72d1c544c",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 706.5799999999999,
+      "annual_runoff_mm": 5.666061211934999,
+      "annual_et_mm": 685.1614999999999,
+      "annual_deep_percolation_mm": 14.7242041608,
+      "annual_lateral_mm": 3.6769999999999996,
+      "minimum_soil_water_mm": 234.47,
+      "maximum_swe_mm": 168.7,
+      "outputs": {
+        "H122.pass.dat": "92f87952796d1db0cd8da90bd2aacc90958b4f6f93ba7d83f90d887364da1aa3",
+        "H122.element.dat": "cfe2213eb76119d735c05bbaa5b396705a803ed774d3ba5389fcd254bc2a66bb",
+        "H122.plot.dat": "2115178cbad82019b7547326ec21fceed5edb0810fcd8e22d902ea97313fff01",
+        "H122.loss.dat": "8b79d9783eef31a938a73e3bcf890f47948d478133c517585f13ebb96062c8f5",
+        "H122.soil.dat": "60cfa1b607770010c3a48007ab719d76736984d54a71ec718c0ecba30d8d1641",
+        "H122.ebe.dat": "f813b6399d3e1b8df8d476bf3abbc31278d776282cd3b754126979d82dafde90",
+        "H122.wat.dat": "1556be01a84e07264e0773d85556ca5adbc5834277988ded1852d3082c646ce2"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Toronto",
+    "station": "ny301012.par",
+    "station_distance_km": 95.79816675059914,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.1730347000000001,
+        "tmax": 0.3220999999999563,
+        "tmin": 0.3216700000000188
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.8719662979710847,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "aea9f88fa5bc27b01fe44e2939b0cf5835824845f8222e6810b34bca3ddababf",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1207.8849999999998,
+      "annual_runoff_mm": 15.986015680564998,
+      "annual_et_mm": 1014.149,
+      "annual_deep_percolation_mm": 65.87810444523998,
+      "annual_lateral_mm": 114.11500000000001,
+      "minimum_soil_water_mm": 239.39,
+      "maximum_swe_mm": 130.74,
+      "outputs": {
+        "H122.pass.dat": "4bc468fb602b5ccb667088041d71048b926b6947e950873a793fc49a4cd12791",
+        "H122.element.dat": "5c40ea5f7161819dd8f5700aa7663859d79a99624cf84a3d4aa85b3b4541d890",
+        "H122.plot.dat": "cc162dc7afc1853f77a919783bc9ea4a72cb0f8eac39aae8af1d6ab35e5cd466",
+        "H122.loss.dat": "606e025bd5d8c697e2825d05ab7889aca31ae2ef4abbe9f91d621942bbe4c849",
+        "H122.soil.dat": "88bf6171d83d27640defc111f875c83bfec23f288ed1c534babb3a38100a9a5b",
+        "H122.ebe.dat": "962b467a1239bcee634daa14716d7f7ae6fcf5758da053cd0716ee6e7697c051",
+        "H122.wat.dat": "2c95d06911bd4a88a39e4ed025439006afa5de893e6fc0142cf8d5ee83226319"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Montreal",
+    "station": "ny301966.par",
+    "station_distance_km": 87.52715580937902,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.1721191000000002,
+        "tmax": 0.32222000000005124,
+        "tmin": 0.32140000000001656
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.922420906019397,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "261a32b95a422ced237e64eb71fe5a5e0190a2b11fc5cc095c6988bf5835647f",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1440.1799999999998,
+      "annual_runoff_mm": 41.026583602365,
+      "annual_et_mm": 904.0615,
+      "annual_deep_percolation_mm": 89.41265212499998,
+      "annual_lateral_mm": 391.1755,
+      "minimum_soil_water_mm": 382.14,
+      "maximum_swe_mm": 347.65,
+      "outputs": {
+        "H122.pass.dat": "a958d34d3da045907ab1b2ed6f68455eee5e8d0a9a22ba8f764c29cf1b60a4a2",
+        "H122.element.dat": "451bd88c724224bc4536c94ad4ed7915a1ecaf1620f967d549b73977acb405ed",
+        "H122.plot.dat": "1f46edeb27b0fc2710949c48c600eece1a1a31fc57e2c8db6721eab32c137290",
+        "H122.loss.dat": "9d1e36bf4e8b0fafc2449a1929c69fb2304dcbaf5dff2a99d49c16c0aa62513a",
+        "H122.soil.dat": "79f24e77458e1dbfb2d60edd54a2eed20dd9d2fe5386ae909b64d5b306f08807",
+        "H122.ebe.dat": "9e21397c68b935aa4be26568747a1fe9ca07ba65f808ecfe7dfb9e5b2f493d95",
+        "H122.wat.dat": "fd204ac0c5dddc0daedf93869a6a45baaa81bc28ff3d7ffa044432d112c6d504"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Quebec",
+    "station": "me174086.par",
+    "station_distance_km": 149.81726356435226,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "generation": {
+      "days": 7305,
+      "maximum_source_error": {
+        "prcp": 0.17692870000000038,
+        "tmax": 0.3218000000000302,
+        "tmin": 0.3220400000000492
+      }
+    },
+    "execution": {
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.9218720209319144,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "p122.sol": "7f2410e450bb58fc97f7a397a9229c4d4827c4aac944dea3f6344cbd0695a9f7",
+        "pmetpara.txt": "fe516ba77b952aab148fd1871e104379131b1d23925d6997107ff177b2f31f79",
+        "p122.run": "01e4909e943528062fd366f00e40c1b2e90c167687a889a0a45e36a7e2143d24",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "chntyp.txt": "0b3d0680ed25145e15a1ab13d12b272183861cb9ced6afa522e97c9590f6675d",
+        "p122.slp": "693353911165d0ba8e64dc2ccc59bd18d16fdbbcbbe04a5cc9d725bc106a98fc",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.cli": "304bdd2b1215f6b9457c93a21b66e8735056dc0a0727465b4b7aba320d572785",
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p122.man": "535c80cb85639dba183b3f72c37c46ddda29d83a99368b04981238ac57833cc6"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1637.2,
+      "annual_runoff_mm": 113.78877099995,
+      "annual_et_mm": 766.1205,
+      "annual_deep_percolation_mm": 89.41265212499998,
+      "annual_lateral_mm": 647.3205,
+      "minimum_soil_water_mm": 366.26,
+      "maximum_swe_mm": 597.83,
+      "outputs": {
+        "H122.pass.dat": "b1971db89a904100774f3e705b60f95a05cc25dbc4d216dc30e6ad072e3f9eab",
+        "H122.element.dat": "ebce53b4693c951fd176662972857f1e735b30ec1724b9713166d0a30145338a",
+        "H122.plot.dat": "9eb166f74c454e5d2381c19b08d0ecca90b540b07d5df42872d9602e1adcc6db",
+        "H122.loss.dat": "9a61fe68240df707de2affb558025b5abceaad77b2ec6067c787b7600c2e649a",
+        "H122.soil.dat": "028eebd80dfd31ccb11c6a000bfc61dc1d84f296257771ffa07d98913c782972",
+        "H122.ebe.dat": "788c9bebb7050c3efeee78a557f871bfb6ced9544b773f2442fc03311b84064f",
+        "H122.wat.dat": "312920f85e7226429ed9eccd3cf4ac74db1a942efb0a826323c23f8d7cdd710d"
+      }
+    },
+    "status": "complete"
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "point": "Halifax",
+    "station": "me179891.par",
+    "station_distance_km": 306.71464063458984,
+    "limitation": "U.S. station auxiliary weather and frozen U.S. hillslope; not a Canadian watershed acceptance test",
+    "status": "rejected",
+    "error": "cligen run_observed quality guard tripped; cli_fn=wepp.cli; prn_fn=daily.prn; markers=['failed sn sd test', 'could not produce desired level of quality']; log_tail=' FAILED K-S -- Parm:Wind Dir.       Mon:           4  Year:        2078  N:         420\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           4  Year:        2078  Mlevel=   1.00000000      SDlevel=   100.000000      Days:         570\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2079  N:         184\\n*** ERROR *** Could not produce desired level of quality in\\n                    << Precip. Amt.    >> random deviates.\\n Failed SN SD test.\\n Parm:Temp. Dew Pt.   Month:           4  Year:        2079  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         600'"
+  }
+]

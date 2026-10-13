@@ -1,0 +1,86 @@
+[
+  {
+    "source": {
+      "key": "EDDE_V2/hourly/WRF-MPI/Historical/1985-2014/1995/pr.Historical.mpi.EDDE-WRF.1hr.NA12.1995-01.raw.nc",
+      "size": 742547324,
+      "etag": "\"2b6fe5f166c063a5394159d25e0f37bc-89\"",
+      "modified": "2025-05-20T22:30:51.000Z"
+    },
+    "sha256": "f5d9b8bc606118001bfbb44a6892a58774e84c1a7ee3d3655b74abf49f27377b",
+    "downloaded_utc": "2026-10-13T21:50:04.417677+00:00",
+    "cache_hit": false,
+    "transferred_bytes": 742547324,
+    "seconds": 22.570801027002744,
+    "variable": "pr",
+    "netcdf_variable": "PRECIP",
+    "units": "kg m-2",
+    "long_name": "precipitation (mm)",
+    "cell_methods": "area: sum",
+    "first": "1995-01-01 00:00:00",
+    "last": "1995-01-31 23:00:00",
+    "count": 744
+  },
+  {
+    "source": {
+      "key": "EDDE_V2/hourly/WRF-MPI/Historical/1985-2014/1995/rsds.Historical.mpi.EDDE-WRF.1hr.NA12.1995-01.raw.nc",
+      "size": 742547372,
+      "etag": "\"23cc2539aba8889c5e6f1b0971527892-89\"",
+      "modified": "2025-05-20T22:33:43.000Z"
+    },
+    "sha256": "2883430c20cd8b6ab633f9dfccb3910352e17991b39a3de5a5e176b4a192193a",
+    "downloaded_utc": "2026-10-13T21:50:45.500809+00:00",
+    "cache_hit": false,
+    "transferred_bytes": 742547372,
+    "seconds": 40.96888154000044,
+    "variable": "rsds",
+    "netcdf_variable": "SWDNB",
+    "units": "W m-2",
+    "long_name": "downward shortwave radiation at the surface",
+    "cell_methods": "area: point",
+    "first": "1995-01-01 00:00:00",
+    "last": "1995-01-31 23:00:00",
+    "count": 744
+  },
+  {
+    "source": {
+      "key": "EDDE_V2/hourly/WRF-MPI/Historical/1985-2014/1995/td.Historical.mpi.EDDE-WRF.1hr.NA12.1995-01.raw.nc",
+      "size": 742547384,
+      "etag": "\"2adc00753b637bb76d54ebab2c5967d6-89\"",
+      "modified": "2025-05-20T22:34:29.000Z"
+    },
+    "sha256": "340b893e943a03301e45f02d27b8ca1c852c1deab41a33f9bad3878797322a22",
+    "downloaded_utc": "2026-10-13T21:51:16.592776+00:00",
+    "cache_hit": false,
+    "transferred_bytes": 742547384,
+    "seconds": 30.979117261013016,
+    "variable": "td",
+    "netcdf_variable": "DEWPT",
+    "units": "K",
+    "long_name": "2-m dew point temperature",
+    "cell_methods": "area: point",
+    "first": "1995-01-01 00:00:00",
+    "last": "1995-01-31 23:00:00",
+    "count": 744
+  },
+  {
+    "source": {
+      "key": "EDDE_V2/hourly/WRF-MPI/Historical/1985-2014/1995/wspds.Historical.mpi.EDDE-WRF.1hr.NA12.1995-01.raw.nc",
+      "size": 742547308,
+      "etag": "\"0f35dce00d6980eccdb8a6f048367c9e-89\"",
+      "modified": "2025-05-20T22:38:48.000Z"
+    },
+    "sha256": "9db16f72317f9048fdbdb1d8252fef30ec5eaa5c6fe201f19144c85856412884",
+    "downloaded_utc": "2026-10-13T21:51:52.208677+00:00",
+    "cache_hit": false,
+    "transferred_bytes": 742547308,
+    "seconds": 35.508331607910804,
+    "variable": "wspds",
+    "netcdf_variable": "WSPD10",
+    "units": "m/s",
+    "long_name": "10-m wind speed",
+    "cell_methods": "area: point",
+    "first": "1995-01-01 00:00:00",
+    "last": "1995-01-31 23:00:00",
+    "count": 744
+  }
+]

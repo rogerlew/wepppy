@@ -1,0 +1,281 @@
+{
+  "cold_seconds": 72.01796907105017,
+  "warm_seconds": 7.505973188090138,
+  "cold_transferred_bytes": 1165002364,
+  "warm_transferred_bytes": 0,
+  "source_bytes": 1162004772,
+  "point_days": 5475,
+  "peak_rss_kib": 733736,
+  "direct_parity": [
+    {
+      "point": "apostolic-saw-h1153",
+      "variable": "prday",
+      "max_decimal_readback_error": 7.379150375186327e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h122",
+      "variable": "prday",
+      "max_decimal_readback_error": 2.734375001978151e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h2196",
+      "variable": "prday",
+      "max_decimal_readback_error": 4.492187528626346e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h72",
+      "variable": "prday",
+      "max_decimal_readback_error": 8.593749996066435e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h78",
+      "variable": "prday",
+      "max_decimal_readback_error": 8.593749996066435e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h132",
+      "variable": "prday",
+      "max_decimal_readback_error": 8.593749996066435e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Vancouver",
+      "variable": "prday",
+      "max_decimal_readback_error": 4.726562501389253e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Calgary",
+      "variable": "prday",
+      "max_decimal_readback_error": 1.5624999960550667e-08,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Edmonton",
+      "variable": "prday",
+      "max_decimal_readback_error": 9.765625019753088e-08,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Winnipeg",
+      "variable": "prday",
+      "max_decimal_readback_error": 2.6641845707331413e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Toronto",
+      "variable": "prday",
+      "max_decimal_readback_error": 2.460937498227622e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Montreal",
+      "variable": "prday",
+      "max_decimal_readback_error": 4.5117187497112354e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Quebec",
+      "variable": "prday",
+      "max_decimal_readback_error": 3.3593750004001777e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Halifax",
+      "variable": "prday",
+      "max_decimal_readback_error": 4.6875000059287686e-07,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Phoenix",
+      "variable": "prday",
+      "max_decimal_readback_error": 1.2304687473374543e-06,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h1153",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4160156240450306e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h122",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.1474609380002221e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h2196",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.3525390613722266e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h72",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4062499985811883e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h78",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4062499985811883e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h132",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4062499985811883e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Vancouver",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.1572265634640644e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Calgary",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.5039062475352694e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Edmonton",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.1572265634640644e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Winnipeg",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.5087890631093615e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Toronto",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.5185546885732037e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Montreal",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4892578121816769e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Quebec",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.3183593750909495e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Halifax",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.333007810444542e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Phoenix",
+      "variable": "tsmax",
+      "max_decimal_readback_error": 1.4892578121816769e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h1153",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.401367188691438e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h122",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.0253906225443643e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "apostolic-saw-h2196",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.4892578121816769e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h72",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.4257812495088729e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h78",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.4257812495088729e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "cryptic-beechnut-h132",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.4257812495088729e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Vancouver",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.3867187476535037e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Calgary",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.1523437478899723e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Edmonton",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 7.104492198095613e-06,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Winnipeg",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.4746093768280844e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Toronto",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.2451171869543032e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Montreal",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.464843751364242e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Quebec",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.2939453142735147e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Halifax",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.3867187476535037e-05,
+      "native_float32_equal": true
+    },
+    {
+      "point": "Phoenix",
+      "variable": "tsmin",
+      "max_decimal_readback_error": 1.3525390613722266e-05,
+      "native_float32_equal": true
+    }
+  ]
+}

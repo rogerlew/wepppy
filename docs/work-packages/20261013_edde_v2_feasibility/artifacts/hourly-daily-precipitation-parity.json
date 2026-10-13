@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp_shift_hours": 0,
+    "matched_days": 465,
+    "max_error_mm": 1.2199999943618423e-06,
+    "mean_error_mm": 4.706384473168529e-08
+  },
+  {
+    "timestamp_shift_hours": -1,
+    "matched_days": 450,
+    "max_error_mm": 2.35198969338,
+    "mean_error_mm": 0.12791462095953957
+  },
+  {
+    "timestamp_shift_hours": 1,
+    "matched_days": 450,
+    "max_error_mm": 3.059997799999998,
+    "mean_error_mm": 0.1605505093278822
+  }
+]

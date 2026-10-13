@@ -1,0 +1,140 @@
+[
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 365,
+    "maximum_source_error": {
+      "prcp": 0.17243651999999998,
+      "tmax": 0.317259999999953,
+      "tmin": 0.31880000000004394
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "Historical",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 365,
+    "maximum_source_error": {
+      "prcp": 0.17133789,
+      "tmax": 0.3161299999999656,
+      "tmin": 0.319550000000028
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 365,
+    "maximum_source_error": {
+      "prcp": 0.16816405999999998,
+      "tmax": 0.32159999999996813,
+      "tmin": 0.31936999999996907
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "Historical",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 365,
+    "maximum_source_error": {
+      "prcp": 0.17298584,
+      "tmax": 0.3182600000000434,
+      "tmin": 0.32140000000001656
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.15992431999999998,
+      "tmax": 0.3047999999999771,
+      "tmin": 0.32042999999996447
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP2-4.5",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.17216187,
+      "tmax": 0.31597000000002673,
+      "tmin": 0.30854000000000514
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.16288451999999998,
+      "tmax": 0.31489999999999974,
+      "tmin": 0.3201800000000272
+    }
+  },
+  {
+    "model": "WRF-Nor",
+    "scenario": "SSP2-4.5",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.16723899999999858,
+      "tmax": 0.32130000000004166,
+      "tmin": 0.3084200000000239
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "group": "apostolic-saw",
+    "point": "apostolic-saw-h122",
+    "station_distance_km": 18.516801518177406,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.15667719999999985,
+      "tmax": 0.3114500000000149,
+      "tmin": 0.3097499999999851
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "group": "cryptic-beechnut",
+    "point": "cryptic-beechnut-h78",
+    "station_distance_km": 37.098472299983705,
+    "days": 366,
+    "maximum_source_error": {
+      "prcp": 0.17251590000000006,
+      "tmax": 0.3165800000000232,
+      "tmin": 0.3210300000000412
+    }
+  },
+  {
+    "model": "WRF-MPI",
+    "scenario": "SSP3-7.0",
+    "site": "cryptic-beechnut-h132",
+    "arm": "prism",
+    "status": "rejected",
+    "error": "PRISM revision would invert temperature extrema"
+  }
+]

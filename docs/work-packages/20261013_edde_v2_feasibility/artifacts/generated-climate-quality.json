@@ -1,0 +1,578 @@
+[
+  {
+    "path": "workflows-full/WRF-MPI/SSP2-4.5/cryptic-beechnut/climate/wepp.cli",
+    "sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1507,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.24,
+    "maximum_source_error": {
+      "prcp": 0.17421299999999995,
+      "tmax": 0.3219200000000111,
+      "tmin": 0.3222000000000431
+    },
+    "source_wet_days": 4476,
+    "cli_wet_days": 3673
+  },
+  {
+    "path": "workflows-full/WRF-MPI/SSP2-4.5/apostolic-saw/climate/wepp.cli",
+    "sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1254,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.3,
+    "maximum_source_error": {
+      "prcp": 0.17418200000000006,
+      "tmax": 0.32210000000001315,
+      "tmin": 0.3220700000000303
+    },
+    "source_wet_days": 4233,
+    "cli_wet_days": 3608
+  },
+  {
+    "path": "workflows-full/WRF-MPI/Historical/apostolic-saw/climate/wepp.cli",
+    "sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1303,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.6999999999999997,
+    "min_duration_wet_h": 0.24,
+    "maximum_source_error": {
+      "prcp": 0.1757996000000004,
+      "tmax": 0.3220700000000306,
+      "tmin": 0.3221000000000117
+    },
+    "source_wet_days": 4306,
+    "cli_wet_days": 3620
+  },
+  {
+    "path": "workflows-full/WRF-MPI/SSP3-7.0/cryptic-beechnut/climate/wepp.cli",
+    "sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1495,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.19999999999999996,
+    "min_duration_wet_h": 0.22,
+    "maximum_source_error": {
+      "prcp": 0.17315199999999997,
+      "tmax": 0.3214699999999553,
+      "tmin": 0.3215500000000361
+    },
+    "source_wet_days": 4312,
+    "cli_wet_days": 3508
+  },
+  {
+    "path": "workflows-full/WRF-MPI/SSP3-7.0/apostolic-saw/climate/wepp.cli",
+    "sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1264,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.32,
+    "maximum_source_error": {
+      "prcp": 0.17298584,
+      "tmax": 0.3213499999999726,
+      "tmin": 0.32167000000001733
+    },
+    "source_wet_days": 4174,
+    "cli_wet_days": 3519
+  },
+  {
+    "path": "workflows-full/WRF-Nor/SSP2-4.5/cryptic-beechnut/climate/wepp.cli",
+    "sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1503,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.19999999999999996,
+    "min_duration_wet_h": 0.21,
+    "maximum_source_error": {
+      "prcp": 0.17271699999999868,
+      "tmax": 0.32130000000004166,
+      "tmin": 0.3210600000000223
+    },
+    "source_wet_days": 4382,
+    "cli_wet_days": 3591
+  },
+  {
+    "path": "workflows-full/WRF-Nor/SSP2-4.5/apostolic-saw/climate/wepp.cli",
+    "sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1261,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.6999999999999997,
+    "min_duration_wet_h": 0.29,
+    "maximum_source_error": {
+      "prcp": 0.1730835000000006,
+      "tmax": 0.3222000000000431,
+      "tmin": 0.3216999999999981
+    },
+    "source_wet_days": 4395,
+    "cli_wet_days": 3710
+  },
+  {
+    "path": "workflows-full/WRF-Nor/Historical/apostolic-saw/climate/wepp.cli",
+    "sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1304,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.26,
+    "maximum_source_error": {
+      "prcp": 0.17340089999999986,
+      "tmax": 0.3221000000000114,
+      "tmin": 0.32198000000003013
+    },
+    "source_wet_days": 4260,
+    "cli_wet_days": 3602
+  },
+  {
+    "path": "canadian-full/WRF-MPI/SSP2-4.5/Quebec/climate/wepp.cli",
+    "sha256": "6fb5e6ed52dbbcc460a3791e5a24c4fbdca37d4352ae7a4bb24c1b919b3ae6de",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 4716,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.31,
+    "maximum_source_error": {
+      "prcp": 0.17662349999999982,
+      "tmax": 0.3210000000000033,
+      "tmin": 0.32177000000004874
+    },
+    "source_wet_days": 5473,
+    "cli_wet_days": 4540
+  },
+  {
+    "path": "canadian-full/WRF-MPI/SSP2-4.5/Montreal/climate/wepp.cli",
+    "sha256": "db28e313f500f100e20490330533b4951a21a77b97eff09673980f7f646c9b1c",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3476,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7999999999999998,
+    "min_duration_wet_h": 0.34,
+    "maximum_source_error": {
+      "prcp": 0.17460940000000047,
+      "tmax": 0.3221700000000055,
+      "tmin": 0.32219999999998805
+    },
+    "source_wet_days": 5498,
+    "cli_wet_days": 4546
+  },
+  {
+    "path": "canadian-full/WRF-MPI/SSP2-4.5/Vancouver/climate/wepp.cli",
+    "sha256": "1622e1e5ce790180284312998fdb16ebbeabb5d360da533dbeac785bbe710146",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 2533,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -1.1000000000000005,
+    "min_duration_wet_h": 0.35,
+    "maximum_source_error": {
+      "prcp": 0.17292861999999998,
+      "tmax": 0.3218699999999668,
+      "tmin": 0.32158000000001685
+    },
+    "source_wet_days": 4206,
+    "cli_wet_days": 3621
+  },
+  {
+    "path": "canadian-full/WRF-MPI/SSP2-4.5/Winnipeg/climate/wepp.cli",
+    "sha256": "a7a1ad66a522ee128ab1c87a48541b5e5454f12d3532e245ca7022b439a2db8d",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 5064,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7000000000000001,
+    "min_duration_wet_h": 0.26,
+    "maximum_source_error": {
+      "prcp": 0.17297057999999998,
+      "tmax": 0.32124999999999915,
+      "tmin": 0.3221700000000055
+    },
+    "source_wet_days": 5104,
+    "cli_wet_days": 3929
+  },
+  {
+    "path": "canadian-full/WRF-MPI/SSP2-4.5/Toronto/climate/wepp.cli",
+    "sha256": "0cdc74b1d67721e49d03e34a5a32d53b6cfa7a40d44a01aa8e612f2b5184fd4b",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1991,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.34,
+    "maximum_source_error": {
+      "prcp": 0.17498799999999903,
+      "tmax": 0.32222000000005124,
+      "tmin": 0.32200000000003826
+    },
+    "source_wet_days": 5086,
+    "cli_wet_days": 3962
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Quebec/climate/wepp.cli",
+    "sha256": "73b61312a383e2834d5cae957b3fe0c336c8cc28810d35704452936f2b25cbd4",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 4971,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.36,
+    "maximum_source_error": {
+      "prcp": 0.17668459999999975,
+      "tmax": 0.32183000000001094,
+      "tmin": 0.32186000000002224
+    },
+    "source_wet_days": 5625,
+    "cli_wet_days": 4596
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Halifax/climate/wepp.cli",
+    "sha256": "fb5188dbdb698d3b68f6633ad3ac937dc035e9f8b7b1c9d068ef9fbbf4308188",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3236,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5999999999999996,
+    "min_duration_wet_h": 0.29,
+    "maximum_source_error": {
+      "prcp": 0.17281227,
+      "tmax": 0.32131999999999294,
+      "tmin": 0.3219599999999673
+    },
+    "source_wet_days": 5875,
+    "cli_wet_days": 4194
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Montreal/climate/wepp.cli",
+    "sha256": "20c8c98dbaf4ba9ddcba3d622dffc888db677207fc8f0a4776296b49e6f1f2cc",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3721,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.19999999999999996,
+    "min_duration_wet_h": 0.37,
+    "maximum_source_error": {
+      "prcp": 0.17477399999999932,
+      "tmax": 0.32198000000003013,
+      "tmin": 0.3221999999999866
+    },
+    "source_wet_days": 5672,
+    "cli_wet_days": 4602
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Calgary/climate/wepp.cli",
+    "sha256": "3e1d63de571094af3333477f2ce26fac8a2a5e9f8839f8d426223fb3a8dd12c6",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3959,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.24,
+    "maximum_source_error": {
+      "prcp": 0.17425539999999984,
+      "tmax": 0.32089999999997154,
+      "tmin": 0.3218400000000159
+    },
+    "source_wet_days": 4663,
+    "cli_wet_days": 3662
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Edmonton/climate/wepp.cli",
+    "sha256": "8e2301ae6c1320c190536b6b1d85a7424a09a9178a818065e3ce4e1d13db057f",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3969,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.6999999999999993,
+    "min_duration_wet_h": 0.24,
+    "maximum_source_error": {
+      "prcp": 0.17589100000000002,
+      "tmax": 0.322019999999986,
+      "tmin": 0.32222000000004947
+    },
+    "source_wet_days": 5263,
+    "cli_wet_days": 3979
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Winnipeg/climate/wepp.cli",
+    "sha256": "c8fb308b540de257f88de04c801f88191e942e777412745430afe6b6a7198c13",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 5023,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.26,
+    "maximum_source_error": {
+      "prcp": 0.17277984999999998,
+      "tmax": 0.32149999999999146,
+      "tmin": 0.32209999999995453
+    },
+    "source_wet_days": 5248,
+    "cli_wet_days": 3835
+  },
+  {
+    "path": "canadian-full/WRF-MPI/Historical/Toronto/climate/wepp.cli",
+    "sha256": "58b2e8fd5f389d4aec160bef092fce0a43ca5f5374fccad05a910846f5024e28",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 1982,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.31,
+    "maximum_source_error": {
+      "prcp": 0.17298775,
+      "tmax": 0.32173000000003604,
+      "tmin": 0.3222000000000431
+    },
+    "source_wet_days": 5201,
+    "cli_wet_days": 3988
+  },
+  {
+    "path": "canadian-full/WRF-Nor/SSP2-4.5/Quebec/climate/wepp.cli",
+    "sha256": "304bdd2b1215f6b9457c93a21b66e8735056dc0a0727465b4b7aba320d572785",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 4939,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7000000000000001,
+    "min_duration_wet_h": 0.34,
+    "maximum_source_error": {
+      "prcp": 0.17692870000000038,
+      "tmax": 0.3218000000000302,
+      "tmin": 0.3220400000000492
+    },
+    "source_wet_days": 5278,
+    "cli_wet_days": 4421
+  },
+  {
+    "path": "canadian-full/WRF-Nor/SSP2-4.5/Montreal/climate/wepp.cli",
+    "sha256": "261a32b95a422ced237e64eb71fe5a5e0190a2b11fc5cc095c6988bf5835647f",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3424,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5999999999999996,
+    "min_duration_wet_h": 0.32,
+    "maximum_source_error": {
+      "prcp": 0.1721191000000002,
+      "tmax": 0.32222000000005124,
+      "tmin": 0.32140000000001656
+    },
+    "source_wet_days": 5133,
+    "cli_wet_days": 4323
+  },
+  {
+    "path": "canadian-full/WRF-Nor/SSP2-4.5/Vancouver/climate/wepp.cli",
+    "sha256": "4a300af8d4b157aa95e35dd7815fd0aaa1cb50f44c3a57d6b53eae88e4982a74",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 2377,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -1.1999999999999993,
+    "min_duration_wet_h": 0.45,
+    "maximum_source_error": {
+      "prcp": 0.1765319999999999,
+      "tmax": 0.32180000000002984,
+      "tmin": 0.3215199999999978
+    },
+    "source_wet_days": 4358,
+    "cli_wet_days": 3749
+  },
+  {
+    "path": "canadian-full/WRF-Nor/SSP2-4.5/Winnipeg/climate/wepp.cli",
+    "sha256": "a5fc886344d629271c05ae8517a0caf9e731ceb955df978fd2b0c3c72d1c544c",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 5059,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.24,
+    "maximum_source_error": {
+      "prcp": 0.17395020000000017,
+      "tmax": 0.32210000000001315,
+      "tmin": 0.3220800000000068
+    },
+    "source_wet_days": 5282,
+    "cli_wet_days": 4057
+  },
+  {
+    "path": "canadian-full/WRF-Nor/SSP2-4.5/Toronto/climate/wepp.cli",
+    "sha256": "aea9f88fa5bc27b01fe44e2939b0cf5835824845f8222e6810b34bca3ddababf",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 2165,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5,
+    "min_duration_wet_h": 0.31,
+    "maximum_source_error": {
+      "prcp": 0.1730347000000001,
+      "tmax": 0.3220999999999563,
+      "tmin": 0.3216700000000188
+    },
+    "source_wet_days": 4820,
+    "cli_wet_days": 3855
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Quebec/climate/wepp.cli",
+    "sha256": "78af9c286f770a76331678d0e4179192226ba8b515de69af5c5dd12190d7cb74",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 5324,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7000000000000001,
+    "min_duration_wet_h": 0.42,
+    "maximum_source_error": {
+      "prcp": 0.17662349999999982,
+      "tmax": 0.32222000000004947,
+      "tmin": 0.32209999999995453
+    },
+    "source_wet_days": 5213,
+    "cli_wet_days": 4278
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Halifax/climate/wepp.cli",
+    "sha256": "be67ff83bfc27139591563a57af0510bfb34f3d6abb0a82e88dbdd9f6449ded4",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3308,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.8000000000000007,
+    "min_duration_wet_h": 0.3,
+    "maximum_source_error": {
+      "prcp": 0.17613530000000033,
+      "tmax": 0.3220499999999674,
+      "tmin": 0.321670000000017
+    },
+    "source_wet_days": 5585,
+    "cli_wet_days": 4078
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Montreal/climate/wepp.cli",
+    "sha256": "f9ea7874982503d5c3c490cacc0b2ffdf0cc1d46d78f587a2fea681df6d2fccf",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3589,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -1.0,
+    "min_duration_wet_h": 0.32,
+    "maximum_source_error": {
+      "prcp": 0.1750670000000003,
+      "tmax": 0.3222000000000431,
+      "tmin": 0.3221600000000304
+    },
+    "source_wet_days": 5098,
+    "cli_wet_days": 4249
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Calgary/climate/wepp.cli",
+    "sha256": "83c3b10fa5e8475be8086f5bb3011c0aa7e2b28d078367bee226115c26728716",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 3935,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7000000000000002,
+    "min_duration_wet_h": 0.29,
+    "maximum_source_error": {
+      "prcp": 0.17552500000000038,
+      "tmax": 0.3222000000000449,
+      "tmin": 0.3218399999999857
+    },
+    "source_wet_days": 4889,
+    "cli_wet_days": 3797
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Edmonton/climate/wepp.cli",
+    "sha256": "b777c886d7ec4108e6ec22d395eda5b282a9e653f7a7d4e6a7a326949fe5d77d",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 4146,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.5999999999999996,
+    "min_duration_wet_h": 0.21,
+    "maximum_source_error": {
+      "prcp": 0.17298584,
+      "tmax": 0.32199999999997964,
+      "tmin": 0.3220199999999863
+    },
+    "source_wet_days": 5652,
+    "cli_wet_days": 4491
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Winnipeg/climate/wepp.cli",
+    "sha256": "5065a740e799b1c8484c5bd7773b257c922aea93e484bc6e50bb2b1911413507",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 5074,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.8,
+    "min_duration_wet_h": 0.25,
+    "maximum_source_error": {
+      "prcp": 0.1729248,
+      "tmax": 0.3221700000000055,
+      "tmin": 0.32201999999998776
+    },
+    "source_wet_days": 5095,
+    "cli_wet_days": 3647
+  },
+  {
+    "path": "canadian-full/WRF-Nor/Historical/Toronto/climate/wepp.cli",
+    "sha256": "8640224ed964b6e669f8b249829a5234839df1a92f57d6904b6b4d283abb4fa1",
+    "days": 7305,
+    "negative_precipitation": 0,
+    "inverted_temperature": 0,
+    "dewpoint_above_tmin_days": 2225,
+    "dewpoint_above_tmax_days": 0,
+    "max_dewpoint_above_tmax_c": -0.7000000000000002,
+    "min_duration_wet_h": 0.25,
+    "maximum_source_error": {
+      "prcp": 0.17413329999999982,
+      "tmax": 0.32152999999997434,
+      "tmin": 0.32216000000003076
+    },
+    "source_wet_days": 4798,
+    "cli_wet_days": 3758
+  }
+]

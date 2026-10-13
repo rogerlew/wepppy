@@ -1,0 +1,42 @@
+{
+  "records": [
+    {
+      "group": "apostolic-saw",
+      "point": "apostolic-saw-h122",
+      "period": "1995-01",
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "cli_sha256": "e131640c6c210cda48b83792b3b5cd305a137bdc9c1c7a8c0f521880fe1b559f",
+      "rsds_source_mean": 161.16217343440448,
+      "rsds_cligen_mean": 95.0,
+      "td_source_mean": -12.69074301075267,
+      "td_cligen_mean": -11.67741935483871,
+      "wspds_source_mean": 7.125476156276882,
+      "wspds_cligen_mean": 3.5483870967741944
+    },
+    {
+      "group": "cryptic-beechnut",
+      "point": "cryptic-beechnut-h78",
+      "period": "1995-01",
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "cli_sha256": "1051c340c90841a35e19d884f7e5eb8f1dd64acb3f4d74835df9d51912434ad0",
+      "rsds_source_mean": 169.39581125567753,
+      "rsds_cligen_mean": 100.35483870967742,
+      "td_source_mean": -15.006882473118253,
+      "td_cligen_mean": -14.383870967741936,
+      "wspds_source_mean": 5.6834228255645165,
+      "wspds_cligen_mean": 3.8483870967741933
+    }
+  ],
+  "units": {
+    "rsds": "Langleys/day",
+    "td": "C",
+    "wspds": "m/s"
+  },
+  "conversions": {
+    "rsds": "Mean hourly-sampled W/m2 * 86400 s/day / 41840 J/m2 per Langley; approximate daily energy, diagnostic only",
+    "td": "K -273.15"
+  },
+  "limitation": "One historical month at two references; illustrates source/station mismatch, not full-period bias or a future-auxiliary workflow"
+}

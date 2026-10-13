@@ -1,0 +1,12 @@
+{
+  "historical": "1995-2014",
+  "common_future": "2060-2079 SSP2-4.5",
+  "mpi_late_century": "2080-2099 SSP2-4.5 and SSP3-7.0",
+  "wet_day_mm": 1,
+  "reference": "Public ORNL Daymet single-pixel; observed-data interpolation, not independent station measurements",
+  "calendar": "Daymet has 365 days per year; comparisons use intersecting calendar dates, omit Dec 31 in leap years",
+  "baseline_comparison": "Climate distributions; daily sequences are not date-matched weather forecasts",
+  "acceptance": "No nonfinite, missing, negative precipitation, inverted extrema, or calendar gaps. Bias reported without correction or invented suitability thresholds.",
+  "utc_boundary": "EDDE daily equals same-labeled UTC hourly sum; Daymet observation-day conventions differ",
+  "uncertainty": "20 years and two driving models do not establish full ensemble or future impact uncertainty"
+}

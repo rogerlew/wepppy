@@ -1,0 +1,28 @@
+{
+  "created_utc": "2026-10-13T22:52:43.242808+00:00",
+  "archives": [
+    {
+      "path": "point-data.tar.gz",
+      "sha256": "ebc92cffacfe82148b119892f21e2fef442aca757b4b678076249e14651ddfc4",
+      "bytes": 12153138,
+      "members": 276
+    },
+    {
+      "path": "generated-climates.tar.gz",
+      "sha256": "a109049f7e2c7699e9db149d2176266fbf659b68c224f0d208daa1edd1a294bb",
+      "bytes": 24190306,
+      "members": 352
+    },
+    {
+      "path": "wepp-evidence.tar.gz",
+      "sha256": "116ef15c755e9480cb5b70372c21de14fd1a3ddf2b6ff7317bec463d4639abac",
+      "bytes": 2015879,
+      "members": 900
+    }
+  ],
+  "native_source_cache": "/home/workdir/wepppy-scratch/edde-v2-20261013/cache",
+  "source_reproduction": "Object keys/ETags/sizes/SHA-256 are in each query manifest inside point-data.tar.gz; full native objects remain in scratch cache, not Git.",
+  "generated_climate_reproduction": "Archive contains raw/normalized daily input, PRN, station parameters, CLIGEN logs, success/failure manifests and successful base/PRISM CLI files.",
+  "wepp_output_coverage": "All 69 full-period runs have exact consumed-input/output hashes, parsed annual water diagnostics and execution results; three fixed full water-output examples retained. Other full outputs remain in scratch and are reproducible from inputs.",
+  "restore": "Extract point-data.tar.gz into this artifacts directory before rerunning study scripts. Extract generated-climates.tar.gz and wepp-evidence.tar.gz into the recorded scratch root to inspect generated/consumed artifacts."
+}

@@ -1,0 +1,85 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest 'tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py::test_upload_schema_and_defaults_routes_include_hardened_file_metadata[rq_engine_upload_sbs-input_upload_sbs-run_resolved-geospatial_metadata]' -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_upload_schema_and_defaults_routes_include_hardened_file_metadata[rq_engine_upload_sbs-input_upload_sbs-run_resolved-geospatial_metadata] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fdb79430b90>
+operation_id = 'rq_engine_upload_sbs', required_field = 'input_upload_sbs'
+constraint_mode = 'run_resolved', constraint_source = 'geospatial_metadata'
+
+    @pytest.mark.parametrize(
+        "operation_id,required_field,constraint_mode,constraint_source",
+        (
+            ("rq_engine_upload_dem", "input_upload_dem", "run_resolved", "geospatial_metadata"),
+            ("rq_engine_upload_cli", "input_upload_cli", "static", None),
+            ("rq_engine_upload_sbs", "input_upload_sbs", "run_resolved", "geospatial_metadata"),
+            ("rq_engine_upload_cover_transform", "input_upload_cover_transform", "static", None),
+        ),
+    )
+    def test_upload_schema_and_defaults_routes_include_hardened_file_metadata(
+        monkeypatch: pytest.MonkeyPatch,
+        operation_id: str,
+        required_field: str,
+        constraint_mode: str,
+        constraint_source: str | None,
+    ) -> None:
+        _stub_auth(monkeypatch, "rq:status")
+        monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+        schema_path = f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/schema"
+        defaults_path = f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/defaults"
+
+        with TestClient(rq_engine.app) as client:
+            schema_response = client.get(schema_path)
+            defaults_response = client.get(defaults_path)
+
+        assert schema_response.status_code == 200, operation_id
+        schema_payload = schema_response.json()
+        descriptor = schema_payload["operation_descriptor"]
+        assert descriptor["operation_id"] == operation_id
+        assert descriptor["content_types"] == ["multipart/form-data"]
+        assert descriptor["file_fields"][0]["name"] == required_field
+        assert schema_payload["request"]["required"] == [required_field]
+        field_metadata = schema_payload["request"]["properties"][required_field]
+        assert field_metadata["constraint_mode"] == constraint_mode
+        if constraint_source is None:
+            assert "constraint_source" not in field_metadata
+        else:
+            assert field_metadata["constraint_source"] == constraint_source
+
+        if operation_id == "rq_engine_upload_sbs":
+            sbs_field = descriptor["file_fields"][0]
+            assert sbs_field["value_semantics"]["max_unique_classes"] == 256
+>           assert sbs_field["value_semantics"]["color_table_mode"] == "optional_but_if_present_must_map_known_severity"
+E           AssertionError: assert 'optional_unk...rs_unassigned' == 'optional_but...nown_severity'
+E
+E             - optional_but_if_present_must_map_known_severity
+E             + optional_unknown_colors_unassigned
+
+tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py:498: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py::test_upload_schema_and_defaults_routes_include_hardened_file_metadata[rq_engine_upload_sbs-input_upload_sbs-run_resolved-geospatial_metadata]
+1 failed, 6 warnings in 0.93s
