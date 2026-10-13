@@ -37,6 +37,10 @@ def runs_renderer() -> Flask:
     def runs():
         return ""
 
+    @user.get("/profile", endpoint="profile")
+    def profile():
+        return ""
+
     @user.get("/runs/catalog", endpoint="runs_catalog")
     def runs_catalog():
         return ""
@@ -63,6 +67,9 @@ def _render(app: Flask, *, admin: bool) -> str:
     with app.test_request_context("/runs"):
         return app.jinja_env.get_template("user/runs2.html").render(
             user=SimpleNamespace(),
+            current_user=SimpleNamespace(
+                is_authenticated=True, has_role=lambda role: admin and role == "Admin"
+            ),
             show_owner=False,
             sort="last_modified",
             direction="desc",
