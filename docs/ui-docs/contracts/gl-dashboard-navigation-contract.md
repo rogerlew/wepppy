@@ -1,6 +1,7 @@
 # GL Dashboard navigation (PUUX-01A)
 
-Status: operator-authorized 2026-10-13; independent contract reviews passed; implementation pending.
+Status: operator-authorized 2026-10-13; independent contract reviews passed at checkpoint 5528224f6;
+implemented and locally validated. Production deployment not claimed.
 
 ## Access and placement
 

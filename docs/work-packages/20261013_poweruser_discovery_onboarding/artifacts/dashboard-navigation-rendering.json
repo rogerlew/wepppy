@@ -1,0 +1,126 @@
+{
+  "rendered_cases": 20,
+  "cases": [
+    {
+      "role": "ordinary",
+      "runid": "test-run",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "ordinary",
+      "runid": "test-run",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "ordinary",
+      "runid": "test-run;;omni;;child",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "ordinary",
+      "runid": "test-run;;omni;;child",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "public",
+      "runid": "test-run",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "public",
+      "runid": "test-run",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "public",
+      "runid": "test-run;;omni;;child",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "public",
+      "runid": "test-run;;omni;;child",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "PowerUser",
+      "runid": "test-run",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "PowerUser",
+      "runid": "test-run",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "PowerUser",
+      "runid": "test-run;;omni;;child",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "PowerUser",
+      "runid": "test-run;;omni;;child",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "Admin",
+      "runid": "test-run",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "Admin",
+      "runid": "test-run",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "Admin",
+      "runid": "test-run;;omni;;child",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "Admin",
+      "runid": "test-run;;omni;;child",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "Root",
+      "runid": "test-run",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "Root",
+      "runid": "test-run",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run/view-config"
+    },
+    {
+      "role": "Root",
+      "runid": "test-run;;omni;;child",
+      "template": "header/_run_header_fixed.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    },
+    {
+      "role": "Root",
+      "runid": "test-run;;omni;;child",
+      "template": "reports/_base_report.htm",
+      "href": "/run/gl_dashboard.gl_dashboard/test-run;;omni;;child/view-config"
+    }
+  ],
+  "panel_duplicate_absent": true
+}

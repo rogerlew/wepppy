@@ -257,13 +257,6 @@
         <section class="pu-modal__column" aria-labelledby="puActionsColumn">
           <h3 class="pu-modal__section-title" id="puActionsColumn">Actions</h3>
           <div class="pu-action-list">
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=runid, config=config) }}"
-               target="_blank"
-               rel="noopener"
-               data-open-tab-pref>
-              GL Dashboard
-            </a>
             {% if storm_event_analyzer_ready|default(false) %}
             <a class="pure-button pure-button-secondary"
                href="{{ url_for_run('storm_event_analyzer.storm_event_analyzer', runid=runid, config=config) }}"

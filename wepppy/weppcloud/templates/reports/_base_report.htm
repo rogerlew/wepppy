@@ -117,6 +117,13 @@
                  data-open-tab-pref>
                 Browse
               </a>
+              <a class="pure-button"
+                 href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=view_runid, config=view_config) }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
+                GL Dashboard
+              </a>
               <button type="button" class="pure-button" data-modal-open="puModal">PowerUser</button>
               {% if 'disturbed' in (ron.mods or []) %}
               <button type="button" class="pure-button" data-modal-open="disturbedModal">Disturbed</button>

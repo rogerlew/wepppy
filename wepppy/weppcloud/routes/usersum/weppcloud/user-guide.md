@@ -110,6 +110,13 @@ release can remain visible but unavailable as a new selection.
 
 ---
 
+## GL Dashboard
+
+Open **More → GL Dashboard** from a project or its report pages to explore the
+project in the dashboard. PowerUser access is not required. You must still have
+permission to view the project; available views depend on its prepared data and
+outputs. The link follows your **Open links in new tabs** preference.
+
 ## Privacy Statement
 
 WEPPcloud collects only the information necessary to operate the platform and support your work.
