@@ -1,6 +1,6 @@
 # PowerUser discovery and onboarding (PUUX-01)
 
-Status: broader onboarding scaffolded 2026-10-13 17:42 UTC; PUUX-01A dashboard navigation implemented and locally validated.
+Status: execution authorized 2026-10-13; M0 contract review in progress. PUUX-01A dashboard navigation implemented and locally validated.
 Owner: WEPPcloud maintainer. Primary users: signed-in users discovering advanced workflows and newly activated PowerUsers.
 
 ## Problem and outcome

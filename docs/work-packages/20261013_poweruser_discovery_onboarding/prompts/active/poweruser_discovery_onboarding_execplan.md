@@ -1,7 +1,7 @@
 ```md
 # Make PowerUser discovery and onboarding useful from Runs
 
-This is the active PUUX-01 ExecPlan, maintained under docs/prompt_templates/codex_exec_plans.md. Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective are living sections. The current request is scaffolding only. Execute implementation milestones only when instructed to carry out this package; no production deployment is included.
+This is the active PUUX-01 ExecPlan, maintained under docs/prompt_templates/codex_exec_plans.md. Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective are living sections. The operator authorized execution on 2026-10-13. Execute this package on master; no production deployment is included.
 
 ## Purpose / Big Picture
 

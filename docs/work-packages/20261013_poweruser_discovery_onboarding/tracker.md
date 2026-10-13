@@ -1,6 +1,6 @@
 # PUUX-01 tracker
 
-Status: scaffold complete; M0 contract checkpoint and all implementation remain pending.
+Status: execution authorized 2026-10-13; M0 contract reviews in progress. Broader runtime implementation pending.
 Started: 2026-10-13 17:42 UTC. Base: `a8de37a0db1e678e76eefb36a991514036fb9a9c`, branch `master`.
 
 ## Task board

@@ -267,3 +267,17 @@ private Batch/Culvert access.
 ## Portland collection read admission (PCV-01)
 
 [The combined viewer contract](../ui-docs/contracts/combined-watershed-viewer-contract.md) restores the existing PortlandGroup role's read admission for the explicit Portland collection catalog. It does not introduce a feature-action entitlement, migrate membership, grant mutations, or alter ordinary ownerless/public resource visibility. Its reviewed checkpoint and forest implementation are separate from FA-01/FA-02 milestones.
+
+## PUUX-01 discovery and onboarding presentation amendment
+
+Operator authorized execution 2026-10-13; implementation conformance pending.
+The [PowerUser presentation contract](../ui-docs/contracts/poweruser-onboarding-contract.md)
+owns Runs-page discovery, immediate-activation wording, post-grant Profile
+refresh/destinations, legacy explanations, internal-statement disclosure and
+consistent panel triggers. This replaces the manual-refresh-only completion
+presentation; it does not change the two affirmative answers, statement text or
+version, automatic decision rule, endpoint fields, atomic role/acceptance grant,
+idempotence, internal memberships, CSRF or existing operational access.
+Users without memberships retain voluntary internal acknowledgment through
+secondary disclosure. Rationale: explain and complete access acquisition without
+confusing it with separate internal permission or granting additional authority.

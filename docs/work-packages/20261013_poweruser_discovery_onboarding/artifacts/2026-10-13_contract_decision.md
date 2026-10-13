@@ -1,7 +1,7 @@
-# PUUX-01 contract decision — prepared, not ratified
+# PUUX-01 contract decision — execution authorized; review pending
 
-Recorded: 2026-10-13 17:42 UTC. Base: `a8de37a0db1e678e76eefb36a991514036fb9a9c`.
-Authority: operator requested a scaffold to carry out the static-review improvements and specifically proposed a Runs notice only for non-PowerUsers. No implementation/deployment approval or completed independent review is inferred from this document.
+Recorded: 2026-10-13 17:42 UTC. Implementation base: `48a403c27` (includes completed PUUX-01A).
+Authority: operator requested a scaffold to carry out the static-review improvements and specifically proposed a Runs notice only for non-PowerUsers. The operator subsequently instructed execution of this package on 2026-10-13. This authorizes implementation under the checkpoint; production deployment remains excluded.
 
 ## Current contracts and proposed delta
 
@@ -48,3 +48,7 @@ Classification: intended presentation amendment plus correction of the report tr
 ## Review disposition
 
 Pending. This prepared decision does not constitute the required contract checkpoint. Record amended canonical paths, reviewer findings, operator scope reconciliation and the ancestor SHA here before implementation.
+
+## Prepared canonical checkpoint
+
+Exact canonical delta: `docs/ui-docs/contracts/poweruser-onboarding-contract.md` and the PUUX-01 presentation amendment in `docs/schemas/feature-access-governance-contract.md`. Shared controller and registry contracts require no semantic changes. No API/schema migration, new role or parameterization change. Existing statement text/version remains unchanged. Independent correctness/security reviews passed; see 2026-10-13_contract_reviews.md.
