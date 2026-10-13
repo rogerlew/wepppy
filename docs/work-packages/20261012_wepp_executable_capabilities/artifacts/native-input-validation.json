@@ -1,0 +1,314 @@
+{
+  "root": "/tmp/cbexec-native-sp2yd0lv",
+  "source_hashes": {
+    "/workdir/wepppy/tests/data/single_input_soils/7777.sol": "da29696b1eced7aed95c1cfd7906911dfc964c0b1700fac358bdbef301f414cf",
+    "/workdir/wepppy/tests/data/single_input_soils/2006.sol": "e6174bf1df6bc178b665da61d189c1d069c55c535ad6cbe184714cbcc9cb5862",
+    "/workdir/wepppy/tests/data/single_input_soils/2006.2.sol": "a7bfc14a59bf4c7615d0738d1f3496048426d75369ad77413db112ab8505ec01",
+    "/workdir/wepppy/tests/data/single_input_soils/9002.sol": "4581c3555d1a07058deec4666ac24903cbc80ce7748af6a8dc6551f283f3201a",
+    "/workdir/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/Forest loam.sol": "2a58b8e236c48c20afa9f436483f88c599c110effd4f2f870a4e2ac2a6b25a6a",
+    "/workdir/wepppy/wepppy/wepp/management/data/GeoWEPP/grass.man": "d9f07a41f3be6f7d9cd43346adeef07feac00399d36b761d57fe8aefe8755e3b"
+  },
+  "records": [
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7777",
+      "ofes": 1,
+      "prepared_sha256": "9c3c0ee4fb865864942180f71ee75f620300f88a504fcbe78f2d6e8df8f5df41",
+      "output_sha256": "6350dc265f3718b688ac0c87b435641960a8ff1e3ff77d7713087b2ad239258b",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7777",
+      "ofes": 2,
+      "prepared_sha256": "72466cb5f5607a69cba398e56d4ef7bc8f262a102639b3eb29e012939f618bba",
+      "output_sha256": "d60ec3c9bac076c4f8ac1420b1ca45ae03cfb350fc8a07256afa8e79b57de498",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7777",
+      "ofes": 32,
+      "prepared_sha256": "cd32fed0ad4f026008f6e16c1db276fc08e1a8d7741fdec6272a8c97f1d922d8",
+      "output_sha256": "8207c009d3f04cfbb70a49dc2253963740df055749a1bc28c182fce0d21dea3c",
+      "output_bytes": 85761,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006",
+      "ofes": 1,
+      "prepared_sha256": "a36698f0a474dfdff7d5614514e7d6025957e467e65470f0faf102492068d0a2",
+      "output_sha256": "31d8826fb4a9e1806373010efcfebdc307b5cfe8e56d279a240a555cea2d7895",
+      "output_bytes": 6829,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006",
+      "ofes": 2,
+      "prepared_sha256": "9059c2d0db21222258f0ecead5cc865b67186aafae68258ba8de7d6acea74360",
+      "output_sha256": "5cbf270a9c3e65dc63999a72d36b401da0807428886a06a8e0290c7ef34c311f",
+      "output_bytes": 9352,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006",
+      "ofes": 32,
+      "prepared_sha256": "0e2841eb165ae0188728da1b04d670a65a93acd65fa90d3d19af648114bc4f28",
+      "output_sha256": "6931a3b0b821dc6d0c215a62234de8ca3ac74adbd488cb459470b25e7000ba31",
+      "output_bytes": 85599,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006.2",
+      "ofes": 1,
+      "prepared_sha256": "0cb06c8db13f337c3dfb53684dc918b9b0775c6639a19d243ab5a04a04ff16db",
+      "output_sha256": "31d8826fb4a9e1806373010efcfebdc307b5cfe8e56d279a240a555cea2d7895",
+      "output_bytes": 6829,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006.2",
+      "ofes": 2,
+      "prepared_sha256": "590eb1c2a247da89d3cf5c6ea4ccfd8ed4bdd70028730b8480025c6938db1a50",
+      "output_sha256": "5cbf270a9c3e65dc63999a72d36b401da0807428886a06a8e0290c7ef34c311f",
+      "output_bytes": 9352,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "2006.2",
+      "ofes": 32,
+      "prepared_sha256": "741f47847d3ade7e7889ef78e7cd039984bba43c07302c770f64e3af1e066e12",
+      "output_sha256": "6931a3b0b821dc6d0c215a62234de8ca3ac74adbd488cb459470b25e7000ba31",
+      "output_bytes": 85599,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "9002",
+      "ofes": 1,
+      "prepared_sha256": "9b92575c0345bcea0766ac153be57a5e947b40747d10aa591c657817c8dc46f9",
+      "output_sha256": "1c26b23512000471e9b306938edfa11c4855e613b393a73520ab371c73b35cdb",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "9002",
+      "ofes": 2,
+      "prepared_sha256": "bff26f334e845927abfd64d7583f4d925f4223744837b63160f8ab1280d983bf",
+      "output_sha256": "a4161dbba09260de000ac21eb1a839d56d5b3bcf0d4eb0bbf732868c22dfee74",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "9002",
+      "ofes": 32,
+      "prepared_sha256": "3a08c9087561727cc7f56561a1daf888c8121dbcaacedf47cb470c1efd8e38b1",
+      "output_sha256": "c886d52e34da8ee0e4420c11474fad3be828931dad2fa8ee03dee5e9d69e17f0",
+      "output_bytes": 85761,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7778",
+      "ofes": 1,
+      "prepared_sha256": "d6ad184d30d152f2eaa26d035c57c2fbf68f351da103ce34abdb6f03b28f18b6",
+      "output_sha256": "f585dcac8d2ae5a1723027111a1b4acf06797c9a6caaf14a51fb3c04ba085c53",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7778",
+      "ofes": 2,
+      "prepared_sha256": "07d03e4b8b61bb765aea2d2db5088580fcc8c6522dfbeb5656f3b5c0740a0176",
+      "output_sha256": "51cdacb9320caf1d171ed84d6edd63fe0eadeb0de52dc8693f4514f0941f822b",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_260803",
+      "binary_sha256": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+      "soil_version": "7778",
+      "ofes": 32,
+      "prepared_sha256": "98b66e52a2e39c7ca185c88b8c1c7f8dbdb813e1f0e3a9ccd903c09495676243",
+      "output_sha256": "e248493fb5e4f77d297a864d616a8c04c08e9c425389e7accb3ee87ccb5485fa",
+      "output_bytes": 85761,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7777",
+      "ofes": 1,
+      "prepared_sha256": "9c3c0ee4fb865864942180f71ee75f620300f88a504fcbe78f2d6e8df8f5df41",
+      "output_sha256": "6350dc265f3718b688ac0c87b435641960a8ff1e3ff77d7713087b2ad239258b",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7777",
+      "ofes": 2,
+      "prepared_sha256": "72466cb5f5607a69cba398e56d4ef7bc8f262a102639b3eb29e012939f618bba",
+      "output_sha256": "d60ec3c9bac076c4f8ac1420b1ca45ae03cfb350fc8a07256afa8e79b57de498",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7777",
+      "ofes": 32,
+      "prepared_sha256": "cd32fed0ad4f026008f6e16c1db276fc08e1a8d7741fdec6272a8c97f1d922d8",
+      "output_sha256": "8207c009d3f04cfbb70a49dc2253963740df055749a1bc28c182fce0d21dea3c",
+      "output_bytes": 85761,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006",
+      "ofes": 1,
+      "prepared_sha256": "a36698f0a474dfdff7d5614514e7d6025957e467e65470f0faf102492068d0a2",
+      "output_sha256": "31d8826fb4a9e1806373010efcfebdc307b5cfe8e56d279a240a555cea2d7895",
+      "output_bytes": 6829,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006",
+      "ofes": 2,
+      "prepared_sha256": "9059c2d0db21222258f0ecead5cc865b67186aafae68258ba8de7d6acea74360",
+      "output_sha256": "5cbf270a9c3e65dc63999a72d36b401da0807428886a06a8e0290c7ef34c311f",
+      "output_bytes": 9352,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006",
+      "ofes": 32,
+      "prepared_sha256": "0e2841eb165ae0188728da1b04d670a65a93acd65fa90d3d19af648114bc4f28",
+      "output_sha256": "6931a3b0b821dc6d0c215a62234de8ca3ac74adbd488cb459470b25e7000ba31",
+      "output_bytes": 85599,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006.2",
+      "ofes": 1,
+      "prepared_sha256": "0cb06c8db13f337c3dfb53684dc918b9b0775c6639a19d243ab5a04a04ff16db",
+      "output_sha256": "31d8826fb4a9e1806373010efcfebdc307b5cfe8e56d279a240a555cea2d7895",
+      "output_bytes": 6829,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006.2",
+      "ofes": 2,
+      "prepared_sha256": "590eb1c2a247da89d3cf5c6ea4ccfd8ed4bdd70028730b8480025c6938db1a50",
+      "output_sha256": "5cbf270a9c3e65dc63999a72d36b401da0807428886a06a8e0290c7ef34c311f",
+      "output_bytes": 9352,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "2006.2",
+      "ofes": 32,
+      "prepared_sha256": "741f47847d3ade7e7889ef78e7cd039984bba43c07302c770f64e3af1e066e12",
+      "output_sha256": "6931a3b0b821dc6d0c215a62234de8ca3ac74adbd488cb459470b25e7000ba31",
+      "output_bytes": 85599,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "9002",
+      "ofes": 1,
+      "prepared_sha256": "9b92575c0345bcea0766ac153be57a5e947b40747d10aa591c657817c8dc46f9",
+      "output_sha256": "1c26b23512000471e9b306938edfa11c4855e613b393a73520ab371c73b35cdb",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "9002",
+      "ofes": 2,
+      "prepared_sha256": "bff26f334e845927abfd64d7583f4d925f4223744837b63160f8ab1280d983bf",
+      "output_sha256": "a4161dbba09260de000ac21eb1a839d56d5b3bcf0d4eb0bbf732868c22dfee74",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "9002",
+      "ofes": 32,
+      "prepared_sha256": "3a08c9087561727cc7f56561a1daf888c8121dbcaacedf47cb470c1efd8e38b1",
+      "output_sha256": "c886d52e34da8ee0e4420c11474fad3be828931dad2fa8ee03dee5e9d69e17f0",
+      "output_bytes": 85761,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7778",
+      "ofes": 1,
+      "prepared_sha256": "d6ad184d30d152f2eaa26d035c57c2fbf68f351da103ce34abdb6f03b28f18b6",
+      "output_sha256": "f585dcac8d2ae5a1723027111a1b4acf06797c9a6caaf14a51fb3c04ba085c53",
+      "output_bytes": 7558,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7778",
+      "ofes": 2,
+      "prepared_sha256": "07d03e4b8b61bb765aea2d2db5088580fcc8c6522dfbeb5656f3b5c0740a0176",
+      "output_sha256": "51cdacb9320caf1d171ed84d6edd63fe0eadeb0de52dc8693f4514f0941f822b",
+      "output_bytes": 10081,
+      "native_success": true
+    },
+    {
+      "binary": "wepp_261010",
+      "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+      "soil_version": "7778",
+      "ofes": 32,
+      "prepared_sha256": "98b66e52a2e39c7ca185c88b8c1c7f8dbdb813e1f0e3a9ccd903c09495676243",
+      "output_sha256": "e248493fb5e4f77d297a864d616a8c04c08e9c425389e7accb3ee87ccb5485fa",
+      "output_bytes": 85761,
+      "native_success": true
+    }
+  ],
+  "source_unchanged": true
+}

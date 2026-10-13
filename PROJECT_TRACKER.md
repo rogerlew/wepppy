@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Forest acceptance passed: [WEPP executable capabilities](docs/work-packages/20261012_wepp_executable_capabilities/package.md) — vendored native sidecars for260803/261010; Builder and existing projects use live compatible releases. Browser, native worker, download and archive/restore checks pass; broad Python gate is running.
+
 Forest complete: [MOFE soil anisotropy advanced options](docs/work-packages/20261012_soil_anisotropy/package.md) — Rust overrides and single-read preparation pass browser/live-worker artifact acceptance; broad-run catalog timing failure passes on rerun with remaining coverage. Validation limitations retained; paired Python/native rollout pending.
 
 Forest ready for rollout: [Portland group access and combined watershed viewer](docs/work-packages/20261012_portland_combined_viewer/package.md)

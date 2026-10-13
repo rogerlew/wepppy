@@ -1,0 +1,32 @@
+{
+  "reviewed_at_utc": "2026-10-13T00:13:57.314730+00:00",
+  "contract_checkpoint": "b4c950ced266765bb75f5f058bbdda8b6055278b",
+  "native_commit": "917265bb5de62d1e20f2f5aada434a622f916398",
+  "wepppy_context": "All 22 runtime hashes independently match this implementation commit and the final working tree; subsequent documentation/evidence-only edits are outside this runtime identity.",
+  "runtime_files": {
+    "wepp_runner/bin/wepp_260803.json": "4102a2ed7ff4a1fd5c46f6694bc9c30a59a2a187a4e605f1a6d64b370bb15881",
+    "wepp_runner/bin/wepp_260803_hill.json": "efa5b990000265a6c55e92de4ba735cae8ae6fbad06fe5d0f3c10c5fd3adc933",
+    "wepp_runner/bin/wepp_261010.json": "264a861ed6528fc40198a501938db7e9587982f02f5f455bda5f699c1b8e1006",
+    "wepp_runner/bin/wepp_261010_hill.json": "007ece3a15692c3ca965a38bc2351da7cf14525f038bd65f915827d237cd7374",
+    "wepp_runner/wepp_binary_capabilities.py": "6be8a7b609e123759cc095cd7cd6f0f351e1641479e5c8b8bb2f54f12a3529db",
+    "wepp_runner/wepp_runner.py": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+    "wepppy/microservices/rq_engine/schema_defaults_routes.py": "6c769a9d355ec3c6c23efb38ca0139015b46452c1c34d50223dd78a41ebbf938",
+    "wepppy/microservices/rq_engine/wepp_run_payload.py": "7b6f833d094927b8382e4bfa598bff83ae9a402f45199f4984a815b46a9bc70f",
+    "wepppy/nodb/config_builder/profiles/representation/multiple-ofe.toml": "97df6367cbf55ecac37bad3d5a6cab7b864ad127fe9fd4147707f4945cc2e1d5",
+    "wepppy/nodb/config_builder/registry.py": "072d88d86bac0bf01ee410aeadb93de9d0ba983746a6d92357b1c833287f725a",
+    "wepppy/nodb/config_builder/resolver.py": "da5420d6555c3c6d6f18633380adb36dc8ea748b176f9242533442a0f37f86e8",
+    "wepppy/nodb/config_builder/schema.py": "f64079b8c32d21df6043f94435b32cb4338b94439076ede59fa1e908fd4809bf",
+    "wepppy/nodb/config_builder/schema.pyi": "66b6e8f6dec489474518f2ff04ce7bb36a52c7b2d346d5c43a3f44e862443edf",
+    "wepppy/nodb/core/wepp_input_parser.py": "e5461ac3a81d8bb4aa85c120b5bdd15b4d577365c6bbfeb1aa1da132ab65511f",
+    "wepppy/nodb/locales/capability_graph.py": "687856a3b9c957b39cae22372bb3700924177f81c3c506dd0a4dfd9752d73f7c",
+    "wepppy/nodb/project_config_capabilities.py": "62eef1a834880e22e626393953c248a2aa75994a619261ac36d61c3f6dbbd81e",
+    "wepppy/nodb/single_input_policy.py": "766931601cc3dfc0aea939343cd3e9216512e0bf6d25300a2aed26cfaed5519c",
+    "wepppy/nodb/wepp_binary_policy.py": "005f5f80d8ab4706d1658dce41bcb066038bbcf7543533c39e2a93c2e8c11a4d",
+    "wepppy/weppcloud/controllers_js/config_builder.js": "45b328be178546ba6fa77b488e321a84ac19525c35520a8c807feb71b6a7449a",
+    "wepppy/weppcloud/routes/run_0/run_0_bp.py": "690f7d1db947282029d54ff8b3910b6e462ebae97b03a93bf3c283a0ee88f187",
+    "wepppy/weppcloud/templates/config_builder.htm": "e738b8dd4f2ca1604b5f8a21864108bb34ac016bb2c9890e52ceda00da72941a",
+    "wepppy/weppcloud/templates/controls/wepp_pure_advanced_options/wepp_bin.htm": "e3164489fea1ff71068194d0ba2a97f8d9112ba93fa454032ba8de4a0eb271d5"
+  },
+  "post_live_evidence_delta": "wepp_runner.py adds st_ctime_ns to existing binary hash-cache identity; direct same-size/restored-mtime rejection and 59 runner regressions pass.",
+  "wepppy_commit": "3c114719b565ce4ee153c5b06d7690d11129ff6d"
+}

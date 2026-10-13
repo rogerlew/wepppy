@@ -1,0 +1,14 @@
+{
+  "runid": "sabbatical-stitcher",
+  "wd": "/wc1/runs/sa/sabbatical-stitcher",
+  "job_id": "cbexec-native-b9034a3e10b24f6b9eab1db26b092ba4",
+  "queue": "default",
+  "selected_binary": "wepp_261010",
+  "config_hashes_unchanged": {
+    "config.cfg": "0b64e73efbd50b934f9919bc2c52a483c58d93871bbd89cef5710ff60ed6b5db",
+    "config-manifest.json": "a82b948e5b29c097f912a418c9db8a21ee2490e22fa61dbd2a605353f4299a07"
+  },
+  "hillslope_binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+  "submit_uid": 1000,
+  "submit_gid": 993
+}

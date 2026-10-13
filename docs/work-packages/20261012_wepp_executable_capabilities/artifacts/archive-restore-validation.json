@@ -1,0 +1,14 @@
+{
+  "runid": "sabbatical-stitcher",
+  "archive_job": "06188d83-3303-4f97-939d-d4ecf4a3e040",
+  "restore_job": "7ddae1ba-3bf4-4362-a0e9-c9b662e6e7bb",
+  "archive_name": "sabbatical-stitcher.20261013T001339Z.zip",
+  "archive_sha256": "ed16e425416e8ce9207aed9486a46694ccbd0548b4f71c07d582228b32bea583",
+  "selected_binary": "wepp_261010",
+  "restored_download_hashes": {
+    "config.cfg": "0b64e73efbd50b934f9919bc2c52a483c58d93871bbd89cef5710ff60ed6b5db",
+    "config-manifest.json": "a82b948e5b29c097f912a418c9db8a21ee2490e22fa61dbd2a605353f4299a07",
+    "wepp/runs/p1.sol": "bff26f334e845927abfd64d7583f4d925f4223744837b63160f8ab1280d983bf",
+    "wepp/output/H1.loss.dat": "a4161dbba09260de000ac21eb1a839d56d5b3bcf0d4eb0bbf732868c22dfee74"
+  }
+}

@@ -9,10 +9,11 @@ A user can create a MOFE project with 261010 and change an existing Builder proj
 ## Progress
 
 - [x] Trace registry, graph validation, run-page selector, input parsing, RQ admission and schemas; locate default-branch native worktree.
-- [ ] Ratify canonical amendments with two independent contract reviews and standalone ancestor commit.
-- [ ] Update native generator/remint four sidecars; validate metadata preservation and binary hashes, vendor identical sidecars.
-- [ ] Wire shared live executable policy through Builder, run controls, submission and schemas; preserve stored graph readability.
-- [ ] Complete targeted, broad and live artifact validation plus independent correctness/security review; retain handoff.
+- [x] Ratify canonical amendments with two independent contract reviews; standalone ancestor commit `b4c950ced`.
+- [x] Update native generator/remint four sidecars; preserve provenance and binary hashes; vendor identical sidecars. Native full suite 171 pass; 30 real input/OFE executions pass.
+- [x] Wire shared live executable policy through Builder, run controls, submission and schemas; preserve stored graph readability. Implementation `3c114719b`; native `917265bb5`.
+- [x] Complete targeted and live browser, worker, download and canonical archive/restore artifact validation.
+- [ ] Finish broad Python sanity and final independent review disposition; retain handoff.
 
 ## Surprises & Discoveries
 
@@ -20,11 +21,13 @@ Builder already discovers current installed binaries. Its MOFE profile and graph
 
 ## Decision Log
 
+2026-10-12, Codex: a real-file regression reproduced stale SHA acceptance after same-size in-place replacement with restored mtime. Include ctime in the existing hash cache key; no new cache or dependency. Final runner tests pass.
+
 2026-10-12, operator/Codex: keep default executable 260803 and saved choices unchanged; enable explicit selection of compatible installed releases. Store MOFE support in release sidecars as requested, rather than infer it from date-shaped names. Include upload-project flexibility with its own capability declaration and native-reader acceptance (optional narrower-scope question unanswered at drafting). Keep geometry, input-format and feature exclusions unchanged. No Fortran rebuild is needed for a metadata-only remint.
 
 ## Outcomes & Retrospective
 
-Pending implementation. No capability or runtime claim is yet validated.
+Native metadata and input/OFE acceptance are validated; Builder/run selection integration is implemented and undergoing regression and live validation. Live creation, schema, grouped save/reload, worker output, authenticated download and canonical archive/restore pass. All reported review findings are corrected. Broad Python sanity and final review disposition remain open.
 
 ## Context and Orientation
 
