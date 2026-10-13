@@ -646,6 +646,7 @@ def test_model_tuple_matrix_covers_every_advertised_value_without_cross_product(
     graph = build_continental_us_capability_graph(
         binary_ids,
         _binary_revisions(binary_ids),
+        wepp_binary_capabilities={"wepp_260803": ("mofe_supported",)},
     )
     tuples = {tuple(token.split("|")) for token in graph.allowed_model_tuples}
 
@@ -1114,15 +1115,15 @@ def test_schema_v1_only_constrains_present_axes() -> None:
     assert capability_ids(config, "mods") == frozenset()
 
 
-def test_explicit_schema_v1_is_rejected_instead_of_inferred_as_v2() -> None:
+def test_explicit_schema_v1_preserves_coarse_authority_without_inference_as_v2() -> None:
     config = ParsedConfig(
         "[capabilities]\n"
         "schema_version = 1\n"
         'climate_datasets = ["vanilla_cligen"]\n'
     )
 
-    with pytest.raises(ValueError, match="unsupported capabilities.schema_version: 1"):
-        capability_authority(config)
+    assert capability_authority(config) is None
+    assert capability_ids(config, "climate_datasets") == frozenset({"vanilla_cligen"})
 
 
 def test_schema_v1_present_empty_mandatory_axis_is_invalid() -> None:

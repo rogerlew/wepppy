@@ -1,6 +1,6 @@
 # WEPP executable capabilities and selection (CBEXEC-01)
 
-Status: operator-authorized 2026-10-12; independent review and implementation conformance pending.
+Status: operator-authorized 2026-10-12; implemented; independent correctness/security review and Forest conformance complete.
 
 ## Purpose and authority
 

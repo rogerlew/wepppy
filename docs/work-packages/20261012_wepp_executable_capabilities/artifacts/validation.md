@@ -30,7 +30,7 @@ metadata-only remint; actual native execution is separately demonstrated below.
 | Schema stubtest | Passed after synchronizing the preexisting missing upload selection member and new feature members; `/tmp/cbexec-stubtest2.log` |
 | Stub completeness | Passed; `/tmp/cbexec-stubs.log` |
 | Broad exceptions | No additional broad handlers; changed-file gate passed |
-| Full Python sanity | Running; `/tmp/cbexec-full-pytest.log` |
+| Broad Python coverage | Completed in segments after two test-contract corrections; details below |
 
 Native refresh tests failed before implementation, then passed. A real-file
 regression also proved the runner hash cache accepted stale sidecar hashes after
@@ -92,3 +92,45 @@ when its temporary fixture directory is unavailable. Historical release
 provenance and PASS contracts are unchanged. Matching watershed/hillslope
 reruns remain required when users change releases; the feature does not make
 old mixed-release intermediate files compatible.
+
+## Broad regression closeout
+
+The original `wctl run-pytest tests --maxfail=1` stopped after 4,838 passes
+and 51 skips at an outdated graph fixture that omitted the new MOFE declaration.
+The module rerun exposed a second outdated expectation that explicit schema-v1
+configs must fail. Both test-only corrections preserve the accepted contract:
+explicit MOFE declarations and readable v1 coarse restrictions. The entire
+module then passed all 75 tests (`/tmp/cbexec-locale-final2.log`). No runtime
+code changed after implementation commit `3c114719b`.
+
+Continuation covered the remaining collected modules: 3,108 passed and 69
+skipped before an accidentally enabled optional native WBT test failed with
+inconsistent conditioning diagnostics (`/tmp/cbexec-tail-pytest.log`). Naming
+that test file explicitly opts into native integration, unlike the original
+broad command. No terrain-processing files changed in this feature. This
+observed optional integration failure remains unresolved and is not reported
+as a passing gate.
+
+The final continuation retained the original `tests` invocation and excluded
+completed modules, preserving normal opt-in rules: 2,792 passed, 4 skipped
+(`/tmp/cbexec-tail3-pytest.log`). Its 47 directory/file exclusions were checked
+against the full 10,827-node collection to retain all final 190 modules. An
+earlier equivalent 504-file exclusion attempt was interrupted during slow
+collection, before test execution. Every normally collected module is covered;
+these are segmented results, not a claim that the original full command passed.
+The independent correctness review approved both test corrections and assessed
+the continuation coverage. The existing frontend lint failure also remains
+disclosed above.
+
+## Final Forest refresh
+
+After regression completion, all 11 RQ workers were idle and the default, batch
+and fork/archive queues were empty. Authorized `wctl restart weppcloud rq-engine
+rq-worker rq-worker-batch` refreshed the final runtime source. All four services
+returned running. The first immediate authenticated download attempt returned
+401 despite a successful run-page load; two subsequent fresh-login probes
+passed, including an unchanged-test rerun. No auth code, account permissions
+or browse service changes were made; the transient cause is unconfirmed.
+`/tmp/cbexec-final-readback3.log` records 1 passed/2 intentionally skipped.
+Selected 261010, prepared-soil/output hashes and downloaded runner identity all
+match the retained execution receipt. Production remains unchanged.

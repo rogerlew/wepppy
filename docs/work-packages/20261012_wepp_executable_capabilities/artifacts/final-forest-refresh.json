@@ -1,0 +1,30 @@
+{
+  "recorded_at": "2026-10-13T01:02:25.331914+00:00",
+  "runtime_commit": "3c114719b565ce4ee153c5b06d7690d11129ff6d",
+  "native_commit": "917265bb5de62d1e20f2f5aada434a622f916398",
+  "preflight": {
+    "idle_workers": 11,
+    "busy_workers": 0,
+    "queue_counts": {
+      "default": 0,
+      "batch": 0,
+      "fork-archive": 0
+    }
+  },
+  "refreshed_services": [
+    "weppcloud",
+    "rq-engine",
+    "rq-worker",
+    "rq-worker-batch"
+  ],
+  "services_running": true,
+  "authenticated_readback": {
+    "first_attempt": 401,
+    "fresh_login_retries_passed": 2,
+    "final_test_passed": 1,
+    "final_tests_skipped": 2,
+    "receipt": "browser-artifact-readback.json"
+  },
+  "permissions_changed": false,
+  "production_changed": false
+}

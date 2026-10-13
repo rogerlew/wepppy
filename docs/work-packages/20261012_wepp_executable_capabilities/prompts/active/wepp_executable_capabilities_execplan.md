@@ -13,7 +13,7 @@ A user can create a MOFE project with 261010 and change an existing Builder proj
 - [x] Update native generator/remint four sidecars; preserve provenance and binary hashes; vendor identical sidecars. Native full suite 171 pass; 30 real input/OFE executions pass.
 - [x] Wire shared live executable policy through Builder, run controls, submission and schemas; preserve stored graph readability. Implementation `3c114719b`; native `917265bb5`.
 - [x] Complete targeted and live browser, worker, download and canonical archive/restore artifact validation.
-- [ ] Finish broad Python sanity and final independent review disposition; retain handoff.
+- [x] Finish segmented broad Python coverage and final independent review disposition; retain original failures and validation limitations.
 
 ## Surprises & Discoveries
 
@@ -27,7 +27,7 @@ Builder already discovers current installed binaries. Its MOFE profile and graph
 
 ## Outcomes & Retrospective
 
-Native metadata and input/OFE acceptance are validated; Builder/run selection integration is implemented and undergoing regression and live validation. Live creation, schema, grouped save/reload, worker output, authenticated download and canonical archive/restore pass. All reported review findings are corrected. Broad Python sanity and final review disposition remain open.
+Native metadata and input/OFE acceptance are validated; Builder/run selection integration and regression validation are complete. Live creation, schema, grouped save/reload, worker output, authenticated download and canonical archive/restore pass. All reported review findings are corrected. Broad coverage completed in segments after two test-contract corrections; final continuation 2,792 pass/4 skip. Existing frontend lint and optional native WBT diagnostics failures remain disclosed in validation evidence.
 
 ## Context and Orientation
 
