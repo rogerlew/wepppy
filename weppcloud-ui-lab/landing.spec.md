@@ -75,6 +75,12 @@
        - Image: `/weppcloud/static/images/University_of_Idaho_logo.svg`
        - Caption: "Go Vandals! University of Idaho"
        - Link: `https://www.uidaho.edu/`
+     - **Portland State University:**
+       - Image: `/weppcloud/static/images/Portland_State_University_logo.svg`
+       - Caption: "Portland State University"
+       - Link: `https://www.pdx.edu/`
+       - Official logo source: `https://www.pdx.edu/themes/custom/pdxd8/psulogo_horiz-spot.svg`
+       - Preserve logo colors on a light background in both themes.
      - **Swansea University:**
        - Image: `/weppcloud/static/images/Swansea_University_logo.png`
        - Caption: "Gweddw Crefft Heb Ei Dawn - Technical Skill is Bereft Without Culture"
@@ -156,11 +162,13 @@
      - Marta Basso
      - Erin Brooks
      - Chinmay Deval
+     - Sahan T. M. Dissanayake
      - Mariana Dobre
      - Stefan Doerr
      - Helen Dow
      - William Elliot
      - Jim Frakenberger
+     - Sonja Kolstoe
      - Roger Lew
      - Mary E. Miller
      - Jonay Neris
