@@ -1,14 +1,14 @@
 schema_version = 1
 id = "multiple-ofe"
 kind = "representation"
-source_revision = "wepp-representation-contract-v1:multiple-ofe"
+source_revision = "wepp-representation-contract-v2:multiple-ofe"
 label = "Multiple OFE"
-description = "Multiple overland flow elements per hillslope; Config Builder Preview eligibility requires WhiteboxTools and WEPP 260803."
+description = "Multiple overland flow elements per hillslope; requires WhiteboxTools and a WEPP release declaring MOFE support."
 owns = ["wepp.multi_ofe"]
 overrides = ["wepp.multi_ofe"]
 
 [constraints]
-requires = ["continental-us", "wbt", "wepp_260803"]
+requires = ["continental-us", "wbt"]
 conflicts = []
 
 [[writes]]

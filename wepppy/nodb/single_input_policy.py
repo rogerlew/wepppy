@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from types import MappingProxyType
+from wepp_runner.wepp_binary_capabilities import get_binary_capabilities
 
 __all__ = [
     "EXCLUDED_FEATURES", "SUPPORTED_BINARY", "SingleInputPolicyError",
@@ -10,7 +11,7 @@ __all__ = [
     "require_single_input_policy", "single_input_capability_graph", "require_wepp_input_policy",
 ]
 
-SUPPORTED_BINARY = "wepp_260803"
+SUPPORTED_BINARY = "wepp_260803"  # Historical public default; not a release allowlist.
 EXCLUDED_FEATURES = frozenset({
     "disturbed", "baer", "treatments", "omni", "omni_contrasts", "path_ce",
     "debris_flow", "rusle", "postfire_debris_flow", "revegetation", "rred",
@@ -49,20 +50,28 @@ def require_single_input_policy(config, *, watershed=None, require_enabled=False
         return
     if EXCLUDED_FEATURES.intersection(config.mods):
         raise SingleInputPolicyError("The project contains modules incompatible with single-input uploads.")
-    if config.config_get_str("wepp", "bin", None) != SUPPORTED_BINARY:
-        raise SingleInputPolicyError(f"Single User-Defined inputs require {SUPPORTED_BINARY}.")
     if watershed is not None and watershed.mofe_buffer:
         raise SingleInputPolicyError("Buffer OFEs are disabled for single-input upload projects.")
 
 
-def single_input_capability_graph(graph):
+def single_input_capability_graph(graph, *, binary_capabilities=None, selected_binary=None):
     """Add source methods without changing dataset defaults; restrict native readers."""
     method = "single-user-defined"
     add = lambda values: tuple(dict.fromkeys((*values, method)))
     relation = lambda values: MappingProxyType({key: add(value) for key, value in values.items()})
     mods = tuple(item for item in graph.mods if item not in EXCLUDED_FEATURES)
     defaults = dict(graph.defaults)
-    defaults["wepp_binary"] = SUPPORTED_BINARY
+    if binary_capabilities is None:
+        binary_capabilities = {binary: tuple(key for key, value in get_binary_capabilities(binary).items() if value)
+                               for binary in graph.wepp_binaries}
+    binaries = tuple(binary for binary in graph.wepp_binaries
+                     if "single_user_defined_inputs_supported" in binary_capabilities.get(binary, ()))
+    if not binaries:
+        raise SingleInputPolicyError("No installed WEPP release declares Single User-Defined input support.")
+    if selected_binary is not None:
+        defaults["wepp_binary"] = selected_binary
+    elif defaults["wepp_binary"] not in binaries:
+        raise SingleInputPolicyError("The default WEPP release does not declare Single User-Defined input support.")
     result = replace(
         graph,
         landuse_methods=add(graph.landuse_methods),
@@ -70,9 +79,9 @@ def single_input_capability_graph(graph):
         landuse_methods_by_dataset=relation(graph.landuse_methods_by_dataset),
         landuse_methods_by_representation=relation(graph.landuse_methods_by_representation),
         soil_builders_by_dataset=relation(graph.soil_builders_by_dataset),
-        wepp_binaries=(SUPPORTED_BINARY,),
-        wepp_binary_revisions=MappingProxyType({SUPPORTED_BINARY: graph.wepp_binary_revisions[SUPPORTED_BINARY]}),
-        allowed_model_tuples=tuple(value for value in graph.allowed_model_tuples if value.endswith("|" + SUPPORTED_BINARY)),
+        wepp_binaries=binaries,
+        wepp_binary_revisions=MappingProxyType({binary: graph.wepp_binary_revisions[binary] for binary in binaries}),
+        allowed_model_tuples=tuple(value for value in graph.allowed_model_tuples if value.rsplit("|", 1)[1] in binaries),
         mods=mods,
         mod_requires=MappingProxyType({key: value for key, value in graph.mod_requires.items() if key in mods}),
         mod_conflicts=MappingProxyType({key: tuple(item for item in value if item in mods) for key, value in graph.mod_conflicts.items() if key in mods}),
@@ -86,7 +95,13 @@ def require_wepp_input_policy(wepp, *, binary=None, reveg=False):
     if not single_input_uploads_enabled(wepp):
         return
     require_single_input_policy(wepp, watershed=wepp.watershed_instance)
-    if (wepp.wepp_bin if binary is None else binary) != SUPPORTED_BINARY:
-        raise SingleInputPolicyError(f"Single User-Defined inputs require {SUPPORTED_BINARY}.")
+    # Preserve saved legacy state; only explicit changes require new declarations.
+    if binary not in (None, "", wepp.wepp_bin):
+        try:
+            supported = get_binary_capabilities(binary)["single_user_defined_inputs_supported"]
+        except ValueError as exc:
+            raise SingleInputPolicyError(str(exc)) from exc
+        if not supported:
+            raise SingleInputPolicyError("The selected WEPP release does not declare Single User-Defined input support.")
     if reveg:
         raise SingleInputPolicyError("Revegetation is disabled for single-input upload projects.")

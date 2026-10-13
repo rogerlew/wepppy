@@ -8,7 +8,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
-from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES, SUPPORTED_BINARY, single_input_capability_graph
+from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES, single_input_capability_graph
 from wepppy.nodb.config_builder.registry import DEFAULT_PROFILES_ROOT, load_registry
 from wepppy.nodb.config_builder.schema import (
     BuilderDescription,
@@ -77,6 +77,7 @@ def _capability_graph_for_registry(registry: Registry, locale_id: str):
         locale_id,
         tuple(item.component_id for item in binary_components),
         {item.component_id: item.source_revision for item in binary_components},
+        wepp_binary_capabilities={item.component_id: item.supported_features for item in binary_components},
     )
 
 
@@ -85,6 +86,7 @@ def _historical_capability_graph_for_registry(registry: Registry):
     return build_continental_us_capability_graph(
         tuple(item.component_id for item in binary_components),
         {item.component_id: item.source_revision for item in binary_components},
+        wepp_binary_capabilities={item.component_id: item.supported_features for item in binary_components},
     )
 
 
@@ -319,6 +321,7 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
             item.runtime_tokens,
             item.base_profile_id,
             item.overlay_precedence,
+            item.supported_features,
         )
         for item in resolved_registry.components.values()
     }
@@ -442,8 +445,9 @@ def resolve_builder_config(
     if type(selections.single_user_defined_uploads) is not bool:
         raise BuilderConstraintError("single_user_defined_uploads", "invalid_type", "single_user_defined_uploads must be a boolean")
     if selections.single_user_defined_uploads:
-        if selections.wepp_binary != SUPPORTED_BINARY:
-            raise BuilderConstraintError("wepp_binary", "unsupported_capability", f"Single-input uploads require {SUPPORTED_BINARY}.")
+        binary_component = _component(resolved_registry, selections.wepp_binary, ComponentKind.WEPP_BINARY, "wepp_binary")
+        if "single_user_defined_inputs_supported" not in binary_component.supported_features:
+            raise BuilderConstraintError("wepp_binary", "unsupported_capability", "The selected WEPP release does not declare Single User-Defined input support.")
         if EXCLUDED_FEATURES.intersection(selections.mods):
             raise BuilderConstraintError("mods", "unsupported_capability", "Selected modules require Disturbed or SBS and cannot be used with single-input uploads.")
     chain = _selection_chain(
@@ -478,7 +482,11 @@ def resolve_builder_config(
         else resolve_builder_capability_graph(selections.locale, registry=resolved_registry)
     )
     if selections.single_user_defined_uploads:
-        graph = single_input_capability_graph(graph)
+        graph = single_input_capability_graph(
+            graph,
+            binary_capabilities={item.component_id: item.supported_features for item in resolved_registry.by_kind(ComponentKind.WEPP_BINARY)},
+            selected_binary=selections.wepp_binary,
+        )
     if (
         selections.single_user_defined_uploads
         or capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION

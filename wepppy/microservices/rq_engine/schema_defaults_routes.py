@@ -16,6 +16,8 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 from werkzeug.utils import secure_filename
 
+from wepp_runner.wepp_binary_capabilities import binary_selection_revision
+from wepppy.nodb.wepp_binary_policy import project_wepp_binary_options
 from wepppy.all_your_base.file_digest import sha256_file
 from wepppy.nodb.mods.features_export import (
     FeaturesExportServiceError,
@@ -158,6 +160,9 @@ class RuntimeState:
     model_capability_graph: CapabilityGraph | None = None
     v1_capabilities: Mapping[str, tuple[str, ...]] | None = None
     projected_domains: frozenset[str] = frozenset()
+    wepp_binary_options: tuple[str, ...] | None = None
+    wepp_binary_revision: str | None = None
+    wepp_model_tuples: tuple[str, ...] | None = None
 
 
 def _utc_timestamp() -> str:
@@ -528,6 +533,23 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         if discovered_v1:
             v1_capabilities = discovered_v1
 
+    try:
+        binary_options = project_wepp_binary_options(wepp, backend=states.get("delineation_backend"))
+        model_tuples = None
+        if binary_options is not None and model_capability_graph is not None:
+            model_tuples = tuple(
+                f"{backend}|{representation}|{binary}"
+                for backend in model_capability_graph.delineation_backends
+                for representation in model_capability_graph.watershed_representations
+                for binary in project_wepp_binary_options(
+                    wepp, backend=backend, multi_ofe=representation == "multiple-ofe"
+                )
+            )
+        revision_binaries = tuple(dict.fromkeys(value.rsplit("|", 1)[1] for value in model_tuples)) if model_tuples is not None else binary_options
+        binary_revision = binary_selection_revision(revision_binaries) if revision_binaries is not None else None
+    except ValueError as exc:
+        raise CapabilityAuthorityInvalidError(str(exc)) from exc
+
     generated_at = _utc_timestamp()
     snapshot_fallback_updated_at = _runtime_snapshot_updated_at(
         runid=runid,
@@ -547,6 +569,9 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
             else None
         ),
         "v1_capabilities": v1_capabilities,
+        "wepp_binary_options": binary_options,
+        "wepp_binary_revision": binary_revision,
+        "wepp_model_tuples": model_tuples,
         "projected_domains": sorted(projected_domains),
         "snapshot_fallback_updated_at": snapshot_fallback_updated_at,
     }
@@ -562,6 +587,9 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         capability_graph=capability_graph,
         model_capability_graph=model_capability_graph,
         v1_capabilities=v1_capabilities,
+        wepp_binary_options=binary_options,
+        wepp_binary_revision=binary_revision,
+        wepp_model_tuples=model_tuples,
         projected_domains=projected_domains,
         generated_at=generated_at,
         run_state_revision=run_state_revision,
@@ -1246,14 +1274,14 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
             },
         }
         graph = runtime.model_capability_graph
-        if graph is not None:
+        if graph is not None or runtime.wepp_binary_options is not None:
             allowed_binaries = _model_tuple_binaries_for_runtime(runtime)
             current_binary = str(runtime.states.get("wepp_binary") or "").strip() or None
             fields["wepp_bin"] = {
                 "type": "string",
                 "required": False,
                 "constraint_mode": "run_resolved",
-                "constraint_source": "project_capability_graph",
+                "constraint_source": "installed_release_capabilities" if runtime.wepp_binary_options is not None else "project_capability_graph",
                 "resolved_at": resolved_at,
                 "enum": allowed_binaries,
                 "enum_available": allowed_binaries,
@@ -1284,8 +1312,9 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
             result["model_authority"] = {
                 "delineation_backends": list(graph.delineation_backends),
                 "watershed_representations": list(graph.watershed_representations),
-                "wepp_binaries": list(graph.wepp_binaries),
-                "allowed_model_tuples": list(graph.allowed_model_tuples),
+                "wepp_binaries": _effective_model_binaries(runtime, graph),
+                "allowed_model_tuples": _effective_model_tuples(runtime, graph),
+                "executable_revision": runtime.wepp_binary_revision,
             }
         return result
 
@@ -2077,6 +2106,8 @@ def _stable_runtime_state(
 
 
 def _model_tuple_binaries_for_runtime(runtime: RuntimeState) -> list[str]:
+    if runtime.wepp_binary_options is not None:
+        return list(runtime.wepp_binary_options)
     graph = runtime.model_capability_graph
     if graph is None:
         return []
@@ -2093,6 +2124,16 @@ def _model_tuple_binaries_for_runtime(runtime: RuntimeState) -> list[str]:
         for token in graph.allowed_model_tuples
         if token.startswith(prefix)
     ]
+
+
+def _effective_model_tuples(runtime: RuntimeState, graph: CapabilityGraph) -> list[str]:
+    return list(runtime.wepp_model_tuples if runtime.wepp_model_tuples is not None else graph.allowed_model_tuples)
+
+
+def _effective_model_binaries(runtime: RuntimeState, graph: CapabilityGraph) -> list[str]:
+    if runtime.wepp_model_tuples is None:
+        return list(graph.wepp_binaries)
+    return list(dict.fromkeys(value.rsplit("|", 1)[1] for value in _effective_model_tuples(runtime, graph)))
 
 
 def _operation_capability_authority(runtime: RuntimeState) -> dict[str, Any] | None:
@@ -2138,8 +2179,9 @@ def _operation_capability_authority(runtime: RuntimeState) -> dict[str, Any] | N
         authority.update({
             "delineation_backends": list(model_graph.delineation_backends),
             "watershed_representations": list(model_graph.watershed_representations),
-            "wepp_binaries": list(model_graph.wepp_binaries),
-            "allowed_model_tuples": list(model_graph.allowed_model_tuples),
+            "wepp_binaries": _effective_model_binaries(runtime, model_graph),
+            "allowed_model_tuples": _effective_model_tuples(runtime, model_graph),
+            "executable_revision": runtime.wepp_binary_revision,
         })
     return authority
 
@@ -2155,8 +2197,9 @@ def _model_operation_capability_authority(
         "provider_revision": graph.provider_revision,
         "delineation_backends": list(graph.delineation_backends),
         "watershed_representations": list(graph.watershed_representations),
-        "wepp_binaries": list(graph.wepp_binaries),
-        "allowed_model_tuples": list(graph.allowed_model_tuples),
+        "wepp_binaries": _effective_model_binaries(runtime, graph),
+        "allowed_model_tuples": _effective_model_tuples(runtime, graph),
+        "executable_revision": runtime.wepp_binary_revision,
         "defaults": {
             key: graph.defaults[key]
             for key in (
@@ -4340,12 +4383,12 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                                 "wepp_bin": {
                                     "type": "string",
                                     "constraint_mode": "run_resolved",
-                                    "constraint_source": "project_capability_graph",
+                                    "constraint_source": "installed_release_capabilities" if runtime.wepp_binary_options is not None else "project_capability_graph",
                                     "resolved_at": runtime.generated_at,
                                     "enum": _model_tuple_binaries_for_runtime(runtime),
                                 },
                             }
-                            if runtime.model_capability_graph is not None
+                            if runtime.model_capability_graph is not None or runtime.wepp_binary_options is not None
                             else (
                                 {
                                     "wepp_bin": {
@@ -4425,12 +4468,12 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                                 "wepp_bin": {
                                     "type": "string",
                                     "constraint_mode": "run_resolved",
-                                    "constraint_source": "project_capability_graph",
+                                    "constraint_source": "installed_release_capabilities" if runtime.wepp_binary_options is not None else "project_capability_graph",
                                     "resolved_at": runtime.generated_at,
                                     "enum": _model_tuple_binaries_for_runtime(runtime),
                                 },
                             }
-                            if runtime.model_capability_graph is not None
+                            if runtime.model_capability_graph is not None or runtime.wepp_binary_options is not None
                             else (
                                 {
                                     "wepp_bin": {

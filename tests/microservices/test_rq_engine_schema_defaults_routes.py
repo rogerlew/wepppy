@@ -1265,7 +1265,8 @@ def test_schema_v2_discovery_uses_only_stored_graph_options(
     _stub_auth(monkeypatch, "rq:read")
     binary_ids = ("wepp_260803", "wepp_dcc52a6")
     graph = build_continental_us_capability_graph(
-        binary_ids, _binary_revisions(binary_ids)
+        binary_ids, _binary_revisions(binary_ids),
+        wepp_binary_capabilities={"wepp_260803": ("mofe_supported",)}
     )
     monkeypatch.setattr(
         schema_defaults_routes,
@@ -1865,3 +1866,39 @@ def test_schema_defaults_route_internal_errors_return_canonical_500(
 
     assert response.status_code == 500
     _assert_canonical_error(response.json())
+
+
+def test_live_binary_enums_and_complete_model_metadata_share_current_revision(monkeypatch):
+    _stub_auth(monkeypatch, 'rq:read')
+    graph = build_continental_us_capability_graph(
+        ('wepp_260803',), _binary_revisions(('wepp_260803',)),
+        wepp_binary_capabilities={'wepp_260803': ('mofe_supported',)},
+    )
+    tuples = tuple(f'{backend}|{representation}|{binary}'
+                   for backend, representation in [('topaz', 'single-ofe'), ('wbt', 'single-ofe'), ('wbt', 'multiple-ofe')]
+                   for binary in ('wepp_260803', 'wepp_261010'))
+    runtime = replace(_sample_runtime(capability_graph=graph),
+                      wepp_binary_options=('wepp_260803', 'wepp_261010'),
+                      wepp_model_tuples=tuples, wepp_binary_revision='current-role-and-feature-revision')
+    monkeypatch.setattr(schema_defaults_routes, '_load_runtime_state', lambda *_: runtime)
+    with TestClient(rq_engine.app) as client:
+        controller = client.get(f'/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema').json()
+        operation = client.get(RUN_ENDPOINT_SCHEMA_PATH).json()
+    assert controller['fields']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']
+    assert operation['request']['properties']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']
+    authority = controller['model_authority']
+    assert authority['allowed_model_tuples'] == list(tuples)
+    assert authority['executable_revision'] == 'current-role-and-feature-revision'
+    assert 'topaz|single-ofe|wepp_261010' in authority['allowed_model_tuples']
+
+
+def test_v1_live_choices_override_only_the_old_binary_population(monkeypatch):
+    _stub_auth(monkeypatch, 'rq:read')
+    runtime = replace(_sample_runtime(), v1_capabilities={'wepp_binaries': ('wepp_260803',)},
+                      wepp_binary_options=('wepp_260803', 'wepp_261010'), wepp_binary_revision='live')
+    monkeypatch.setattr(schema_defaults_routes, '_load_runtime_state', lambda *_: runtime)
+    with TestClient(rq_engine.app) as client:
+        controller = client.get(f'/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema').json()
+        operation = client.get(RUN_ENDPOINT_SCHEMA_PATH).json()
+    assert controller['fields']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']
+    assert operation['request']['properties']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']

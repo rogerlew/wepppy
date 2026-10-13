@@ -47,6 +47,7 @@ from wepp_runner.wepp_runner import (
     get_linux_wepp_bin_opts,
     get_linux_wepp_bin_role_paths,
 )
+from wepp_runner.wepp_binary_capabilities import read_binary_capabilities
 
 __all__ = ["DEFAULT_PROFILES_ROOT", "RegistryError", "load_registry"]
 
@@ -379,6 +380,10 @@ def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
             ) from exc
         watershed_digest = _executable_sha256(watershed_path, binary_id, "watershed")
         hillslope_digest = _executable_sha256(hillslope_path, binary_id, "hillslope")
+        try:
+            features = read_binary_capabilities(watershed_path, hillslope_path)
+        except ValueError as exc:
+            raise RegistryError(str(exc)) from exc
         source_revision = (
             f"provider-v1:watershed={watershed_digest}:hillslope={hillslope_digest}"
         )
@@ -397,6 +402,7 @@ def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
                 ),
                 constraints=ConstraintSet(),
                 source_path=f"provider://wepp_binary/{binary_id}",
+                supported_features=tuple(key for key, supported in features.items() if supported),
             )
         )
     return tuple(components)
@@ -431,7 +437,8 @@ def _synthesized_builder_components(
     }
     graphs = {
         profile.profile_id: build_locale_capability_graph(
-            profile.profile_id, binary_ids, binary_revisions
+            profile.profile_id, binary_ids, binary_revisions,
+            wepp_binary_capabilities={item.component_id: item.supported_features for item in provider_components},
         )
         for profile in profiles
     }
@@ -697,6 +704,8 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
         digest.update(component.component_id.encode("utf-8"))
         digest.update(b"\0")
         digest.update(component.source_revision.encode("ascii"))
+        digest.update(b"\0")
+        digest.update(json.dumps(component.supported_features).encode("ascii"))
         digest.update(b"\0")
     if "continental-us" not in components:
         raise RegistryError("WEPP binary provider requires the Builder profile registry")

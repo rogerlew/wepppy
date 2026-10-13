@@ -726,73 +726,28 @@ def test_build_runs0_context_gates_ag_fields_by_registry_role(run0_module) -> No
     assert "'ag_fields' in mods_list" in visibility_block.group(0)
 
 
-def test_schema_v2_wepp_options_use_only_stored_tuple_authority(
-    run0_module,
-) -> None:
-    authority = SimpleNamespace(
-        wepp_binaries=("wepp_stored_only", "wepp_other"),
-        allowed_model_tuples=("wbt|single-ofe|wepp_stored_only",),
-    )
-
-    options, disabled = run0_module._stored_wepp_binary_options(
-        authority,
-        "wbt",
-        "single-ofe",
-        "wepp_stored_only",
-    )
-
-    assert options == [("wepp_stored_only", "wepp_stored_only")]
-    assert disabled == []
+def test_wepp_options_offer_live_releases_and_preserve_saved_legacy_display(run0_module, monkeypatch):
+    config = SimpleNamespace(wepp_bin="wepp_stored_only")
+    monkeypatch.setattr(run0_module, "project_wepp_binary_options", lambda _config, **_kw: ("wepp_260803", "wepp_261010"))
+    options, disabled = run0_module._wepp_binary_options(config, "wbt")
+    assert options == [("wepp_260803", "wepp_260803"), ("wepp_261010", "wepp_261010"), ("wepp_stored_only", "wepp_stored_only")]
+    assert disabled == ["wepp_stored_only"]
 
 
-def test_legacy_wepp_presentation_does_not_consult_live_run_authority(
-    run0_module,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    stored = SimpleNamespace(wepp_binaries=("wepp_stored",))
-    monkeypatch.setattr(run0_module, "capability_authority", lambda _config: stored)
-    monkeypatch.setattr(
-        run0_module,
-        "resolve_run_capability_authority",
-        lambda _config: (_ for _ in ()).throw(
-            AssertionError("legacy WEPP presentation consulted live authority")
-        ),
-    )
-
-    config = SimpleNamespace(
-        config_get_bool=lambda *_args: True,
-        config_get_raw=lambda *_args: "2",
-    )
-    assert run0_module._wepp_presentation_authority(config) is stored
-
-    legacy = SimpleNamespace(
-        config_get_bool=lambda *_args: False,
-        config_get_raw=lambda *_args: None,
-    )
-    assert run0_module._wepp_presentation_authority(legacy) is None
+def test_ordinary_legacy_wepp_options_keep_provider_choices(run0_module, monkeypatch):
+    config = SimpleNamespace(wepp_bin="old")
+    monkeypatch.setattr(run0_module, "project_wepp_binary_options", lambda _config, **_kw: None)
+    monkeypatch.setattr(run0_module, "get_linux_wepp_bin_opts", lambda: ["old", "new"])
+    assert run0_module._wepp_binary_options(config) == ([("old", "old"), ("new", "new")], [])
 
 
-def test_schema_v1_wepp_options_enforce_present_coarse_axis(run0_module) -> None:
-    class Config:
-        def config_get_raw(self, section, option, default=None):
-            if (section, option) == ("capabilities", "wepp_binaries"):
-                return '["wepp_v1_only"]'
-            return default
-
-        def config_get_list(self, section, option, default=None):
-            if (section, option) == ("capabilities", "wepp_binaries"):
-                return ["wepp_v1_only"]
-            return default
-
-    options, disabled = run0_module._v1_wepp_binary_options(
-        Config(), "wepp_persisted_omitted"
-    )
-
-    assert options == [
-        ("wepp_v1_only", "wepp_v1_only"),
-        ("wepp_persisted_omitted", "wepp_persisted_omitted"),
-    ]
-    assert disabled == ["wepp_persisted_omitted"]
+def test_empty_governed_choices_do_not_fall_back_to_legacy_provider(run0_module, monkeypatch):
+    config = SimpleNamespace(wepp_bin="saved")
+    monkeypatch.setattr(run0_module, "project_wepp_binary_options", lambda _config, **_kw: ())
+    def forbidden():
+        pytest.fail("No compatible choices must not broaden to all executables")
+    monkeypatch.setattr(run0_module, "get_linux_wepp_bin_opts", forbidden)
+    assert run0_module._wepp_binary_options(config) == ([("saved", "saved")], ["saved"])
 
 
 def test_landuse_method_modes_use_current_authorized_dataset(

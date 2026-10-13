@@ -304,7 +304,7 @@ def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
     config = _observe_nodb_config(config)
 
     version = _schema_version(config)
-    if version is None:
+    if version in (None, 1):
         return None
     if version not in {HISTORICAL_CAPABILITY_SCHEMA_VERSION, CAPABILITY_SCHEMA_VERSION}:
         raise ValueError(f"unsupported capabilities.schema_version: {version}")

@@ -22,7 +22,9 @@ must be true in both runner-resolved watershed and hillslope sidecars to admit
 a new selection requiring it. Missing sidecars or missing members mean unknown
 support, never date/name inference. False means unsupported. Non-boolean
 members, mismatched paired declarations, malformed metadata or a declaration
-whose SHA-256 does not match its executable fail explicitly. Single-OFE
+whose SHA-256 does not match its executable fail explicitly. Sidecars bind
+the resolved binary name and agree on release tag and source repository, branch
+and commit; positive declarations require that provenance. Single-OFE
 ordinary selection does not require either optional feature.
 
 The sidecar generator on wepp-forest's default branch owns declarations. Its
@@ -70,7 +72,10 @@ executable. The selected executable persists through the existing Wepp lock and
 reload contract and is used by preparation and execution. Schema enums and
 operation metadata must describe the same effective binary choices as the UI
 and submission validator; their freshness identity must reflect live binary
-capabilities.
+capabilities. Model-authority metadata retains the complete stored-authorized
+geometry with live compatible tuples, while the executable field enum is
+filtered for the current geometry. `executable_revision` identifies live role
+bytes and declarations separately from the stored `provider_revision`.
 
 An omitted field preserves saved selection. A previously saved binary no longer
 available or lacking a newly required declaration remains visible as current

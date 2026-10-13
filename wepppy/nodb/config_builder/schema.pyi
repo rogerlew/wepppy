@@ -66,7 +66,8 @@ class ComponentDefinition:
     runtime_tokens: tuple[str, ...]
     base_profile_id: str | None
     overlay_precedence: int | None
-    def __init__(self, component_id: str, kind: ComponentKind, schema_version: int, source_revision: str, label: str, description: str, owns: tuple[ConfigKey, ...], overrides: tuple[ConfigKey, ...], writes: tuple[ConfigWrite, ...], constraints: ConstraintSet, default_cellsize: int | None = ..., source_path: str = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ...) -> None: ...
+    supported_features: tuple[str, ...]
+    def __init__(self, component_id: str, kind: ComponentKind, schema_version: int, source_revision: str, label: str, description: str, owns: tuple[ConfigKey, ...], overrides: tuple[ConfigKey, ...], writes: tuple[ConfigWrite, ...], constraints: ConstraintSet, default_cellsize: int | None = ..., source_path: str = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ..., supported_features: tuple[str, ...] = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class Registry:
@@ -92,7 +93,8 @@ class BuilderSelections:
     mods: tuple[str, ...]
     capability_profile: str
     cellsize_override: int | None
-    def __init__(self, locale: str, dem: str, delineation_backend: str, watershed_representation: str, wepp_binary: str, soil: str, landuse: str, climate: str, climate_station_database: str = ..., mods: tuple[str, ...] = ..., capability_profile: str = ..., cellsize_override: int | None = ...) -> None: ...
+    single_user_defined_uploads: bool
+    def __init__(self, locale: str, dem: str, delineation_backend: str, watershed_representation: str, wepp_binary: str, soil: str, landuse: str, climate: str, climate_station_database: str = ..., mods: tuple[str, ...] = ..., capability_profile: str = ..., cellsize_override: int | None = ..., single_user_defined_uploads: bool = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class ConfigProvenance:
@@ -113,7 +115,8 @@ class ComponentSummary:
     runtime_tokens: tuple[str, ...]
     base_profile_id: str | None
     overlay_precedence: int | None
-    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ..., constraints: ConstraintSet = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ...) -> None: ...
+    supported_features: tuple[str, ...]
+    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ..., constraints: ConstraintSet = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ..., supported_features: tuple[str, ...] = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class BuilderDescription:

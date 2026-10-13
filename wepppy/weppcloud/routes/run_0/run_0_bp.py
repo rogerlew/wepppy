@@ -1,6 +1,5 @@
 """Routes for wepp blueprint extracted from app.py."""
 
-import wepppy
 import os
 import pathlib
 import math
@@ -30,6 +29,8 @@ from flask import current_app, session
 from werkzeug.exceptions import HTTPException
 
 import wepppy
+from wepppy.nodb.wepp_binary_policy import project_wepp_binary_options
+from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 from wepppy.all_your_base import isint
 from wepppy.config.secrets import get_secret
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -1848,55 +1849,16 @@ def _log_access(wd, current_user, ip):
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
 
-def _stored_wepp_binary_options(authority, backend, representation, current_binary):
-    """Return tuple-authorized v2 options without consulting the live provider."""
-
-    prefix = f"{backend}|{representation}|"
-    tuple_binaries = tuple(
-        token[len(prefix):]
-        for token in authority.allowed_model_tuples
-        if token.startswith(prefix)
-    )
-    allowed = set(tuple_binaries)
-    options = [
-        (binary_id, binary_id)
-        for binary_id in authority.wepp_binaries
-        if binary_id in allowed
-    ]
+def _wepp_binary_options(config, backend=None):
+    choices = project_wepp_binary_options(config, backend=backend)
+    if choices is None:
+        choices = get_linux_wepp_bin_opts()
+    options = [(value, value) for value in choices]
+    current = config.wepp_bin
     disabled = []
-    if current_binary and current_binary not in allowed:
-        options.append((current_binary, current_binary))
-        disabled.append(current_binary)
-    return options, disabled
-
-
-def _wepp_presentation_authority(config):
-    """Keep legacy WEPP controls outside WP12D's live locale-authority scope."""
-
-    if not bool(config.config_get_bool("config", "flattened", False)):
-        return None
-    schema_version = config.config_get_raw(
-        "capabilities", "schema_version", None
-    )
-    if schema_version in (None, 1, "1"):
-        return None
-    return capability_authority(config)
-
-
-def _v1_wepp_binary_options(config, current_binary):
-    """Return present schema-v1 coarse-axis options, or ``None`` for legacy."""
-
-    allowed = capability_ids(config, "wepp_binaries")
-    if allowed is None:
-        return None
-    raw = config.config_get_list("capabilities", "wepp_binaries", None)
-    if not isinstance(raw, (list, tuple)):
-        raise ValueError("capabilities.wepp_binaries must be a string list")
-    options = [(str(binary_id), str(binary_id)) for binary_id in raw]
-    disabled = []
-    if current_binary and current_binary not in allowed:
-        options.append((current_binary, current_binary))
-        disabled.append(current_binary)
+    if current and current not in choices:
+        options.append((current, current))
+        disabled.append(current)
     return options, disabled
 
 
@@ -2088,7 +2050,6 @@ def _build_runs0_context(runid, config, playwright_load_all):
     from wepppy.nodb.mods.revegetation import Revegetation
     from wepppy.wepp.soils import soilsdb
     from wepppy.wepp import management
-    from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
     from wepppy.wepp.management.managements import landuse_management_mapping_options
     from wepppy.weppcloud.app import db, Run
 
@@ -2219,29 +2180,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         config,
         ctx.active_root,
     )
-    stored_wepp_authority = _wepp_presentation_authority(wepp)
-    if stored_wepp_authority is None:
-        v1_options = _v1_wepp_binary_options(wepp, wepp.wepp_bin)
-        if v1_options is None:
-            wepp_bin_options = [(opt, opt) for opt in get_linux_wepp_bin_opts()]
-        else:
-            wepp_bin_options, disabled_wepp_bin_options = v1_options
-    else:
-        backend_value = getattr(watershed, "delineation_backend", None)
-        backend_name = getattr(backend_value, "name", backend_value)
-        delineation_backend = str(backend_name or "").strip().lower()
-        if not delineation_backend:
-            delineation_backend = stored_wepp_authority.defaults["delineation_backend"]
-        watershed_representation = (
-            "multiple-ofe" if wepp.multi_ofe else "single-ofe"
-        )
-        current_wepp_bin = wepp.wepp_bin
-        wepp_bin_options, disabled_wepp_bin_options = _stored_wepp_binary_options(
-            stored_wepp_authority,
-            delineation_backend,
-            watershed_representation,
-            current_wepp_bin,
-        )
+    backend_value = getattr(watershed, "delineation_backend", None)
+    backend_name = getattr(backend_value, "name", backend_value)
+    wepp_bin_options, disabled_wepp_bin_options = _wepp_binary_options(
+        wepp, backend=str(backend_name or "").strip().lower() or None,
+    )
     landuse_method_modes = None
     climate_default_catalog_id = None
     climate_catalog = climate.catalog_datasets_payload(include_hidden=True)

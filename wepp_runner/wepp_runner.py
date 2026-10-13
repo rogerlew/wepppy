@@ -432,6 +432,7 @@ def _collect_binary_identity(binary_path):
         stat_result.st_ino,
         stat_result.st_size,
         stat_result.st_mtime_ns,
+        stat_result.st_ctime_ns,
     )
     cached = _BINARY_IDENTITY_CACHE.get(resolved_path)
     if cached is not None and cached.get("cache_key") == cache_key:

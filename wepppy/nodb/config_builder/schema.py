@@ -88,6 +88,7 @@ class ComponentDefinition:
     runtime_tokens: tuple[str, ...] = ()
     base_profile_id: str | None = None
     overlay_precedence: int | None = None
+    supported_features: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,6 +156,7 @@ class ComponentSummary:
     runtime_tokens: tuple[str, ...] = ()
     base_profile_id: str | None = None
     overlay_precedence: int | None = None
+    supported_features: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

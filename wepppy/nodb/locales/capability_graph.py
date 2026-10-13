@@ -484,7 +484,7 @@ class CapabilityGraph:
             raise CapabilityGraphError("allowed_model_tuples contains duplicates")
         for values, index in (
             (self.delineation_backends, 0),
-            (self.watershed_representations, 1),
+            (tuple(item for item in self.watershed_representations if item != "multiple-ofe"), 1),
             (self.wepp_binaries, 2),
         ):
             if any(not any(item[index] == value for item in allowed) for value in values):
@@ -501,8 +501,8 @@ class CapabilityGraph:
             for binary in self.wepp_binaries
             for backend in _DELINEATION_BACKENDS
         }
-        expected_model.add(("wbt", "multiple-ofe", "wepp_260803"))
-        if allowed != expected_model:
+        optional_mofe = {("wbt", "multiple-ofe", binary) for binary in self.wepp_binaries}
+        if not expected_model <= allowed or not allowed <= expected_model | optional_mofe:
             raise CapabilityGraphError("model tuple set violates the Builder binary policy")
 
     def as_config_sections(self) -> dict[str, dict[str, CanonicalValue]]:
@@ -563,12 +563,12 @@ class CapabilityGraph:
 def capability_structure_payload(graph: CapabilityGraph) -> dict[str, object]:
     """Return the selection/provider-independent structural contract payload."""
 
-    allowed_model_pairs = sorted({
+    # Geometry is structural; installed executable support may be temporarily absent.
+    allowed_model_pairs = sorted(
         (backend, representation)
-        for backend, representation, _binary in (
-            tuple(token.split("|")) for token in graph.allowed_model_tuples
-        )
-    })
+        for backend, representation in (("topaz", "single-ofe"), ("wbt", "single-ofe"), ("wbt", "multiple-ofe"))
+        if backend in graph.delineation_backends and representation in graph.watershed_representations
+    )
     return {
         "schema_version": graph.schema_version,
         "locale_profile": graph.locale_profiles[0] if len(graph.locale_profiles) == 1 else "",
@@ -743,6 +743,7 @@ def _provider_revision(
     wepp_binaries: tuple[str, ...],
     wepp_binary_revisions: typing.Mapping[str, str],
     climate_provider_tokens: typing.Mapping[str, str] | None,
+    wepp_binary_capabilities: typing.Mapping[str, tuple[str, ...]] | None = None,
 ) -> str:
     profile = get_locale_profile(profile_id)
     if profile is None:
@@ -771,18 +772,21 @@ def _provider_revision(
         "representation_adapter": "wepp-representation-contract-v1",
         "wepp_binaries": wepp_binaries,
         "wepp_binary_revisions": dict(wepp_binary_revisions),
+        "wepp_binary_capabilities": dict(wepp_binary_capabilities or {}),
     }
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
 
 
-def _model_tuples(wepp_binaries: tuple[str, ...]) -> tuple[str, ...]:
+def _model_tuples(wepp_binaries: tuple[str, ...], capabilities=None) -> tuple[str, ...]:
+    capabilities = {} if capabilities is None else capabilities
     return tuple(
         f"{backend}|single-ofe|{binary_id}"
         for binary_id in wepp_binaries
         for backend in _DELINEATION_BACKENDS
-    ) + ("wbt|multiple-ofe|wepp_260803",)
+    ) + tuple(f"wbt|multiple-ofe|{binary_id}" for binary_id in wepp_binaries
+              if "mofe_supported" in capabilities.get(binary_id, ()))
 
 
 def _validate_wepp_provider(
@@ -800,6 +804,7 @@ def build_continental_us_capability_graph(
     wepp_binary_revisions: typing.Mapping[str, str],
     *,
     climate_provider_tokens: typing.Mapping[str, str] | None = None,
+    wepp_binary_capabilities: typing.Mapping[str, tuple[str, ...]] | None = None,
 ) -> CapabilityGraph:
     """Build the frozen historical Continental-US schema-v2 graph."""
 
@@ -822,7 +827,7 @@ def build_continental_us_capability_graph(
         wepp_binaries=wepp_binaries,
         wepp_binary_revisions=MappingProxyType(dict(wepp_binary_revisions)),
         mods=(),
-        allowed_model_tuples=_model_tuples(wepp_binaries),
+        allowed_model_tuples=_model_tuples(wepp_binaries, wepp_binary_capabilities),
         climate_station_methods_by_dataset=_freeze_map(dict(_V2_STATION_RELATIONS)),
         climate_spatial_methods_by_dataset=_freeze_map(dict(_V2_SPATIAL_RELATIONS)),
         climate_station_defaults=_freeze_defaults({source: "auto" for source in _V2_CLIMATE_IDS}),
@@ -848,7 +853,7 @@ def build_continental_us_capability_graph(
             "wepp_binary": "wepp_260803",
         }),
         provider_revision=_provider_revision(
-            "continental-us", wepp_binaries, wepp_binary_revisions, climate_provider_tokens
+            "continental-us", wepp_binaries, wepp_binary_revisions, climate_provider_tokens, wepp_binary_capabilities
         ),
     )
     if any(source not in climate_by_id for source in graph.climate_datasets):
@@ -863,6 +868,7 @@ def build_locale_capability_graph(
     wepp_binary_revisions: typing.Mapping[str, str],
     *,
     climate_provider_tokens: typing.Mapping[str, str] | None = None,
+    wepp_binary_capabilities: typing.Mapping[str, tuple[str, ...]] | None = None,
 ) -> CapabilityGraph:
     """Build the current schema-v3 graph for one exposed locale profile."""
 
@@ -912,7 +918,7 @@ def build_locale_capability_graph(
         wepp_binaries=wepp_binaries,
         wepp_binary_revisions=MappingProxyType(dict(wepp_binary_revisions)),
         mods=(),
-        allowed_model_tuples=_model_tuples(wepp_binaries),
+        allowed_model_tuples=_model_tuples(wepp_binaries, wepp_binary_capabilities),
         climate_station_methods_by_dataset=_freeze_map(station_relations),
         climate_spatial_methods_by_dataset=_freeze_map(spatial_relations),
         climate_station_defaults=_freeze_defaults({
@@ -953,7 +959,7 @@ def build_locale_capability_graph(
             "wepp_binary": "wepp_260803",
         }),
         provider_revision=_provider_revision(
-            profile_id, wepp_binaries, wepp_binary_revisions, climate_provider_tokens
+            profile_id, wepp_binaries, wepp_binary_revisions, climate_provider_tokens, wepp_binary_capabilities
         ),
     )
     graph.validate()

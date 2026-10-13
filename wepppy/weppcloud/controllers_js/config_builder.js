@@ -228,11 +228,35 @@
         var tuples = this._modelTuples();
         var singleUploads = Boolean(this.form.elements.single_user_defined_uploads && this.form.elements.single_user_defined_uploads.checked);
         if (singleUploads) {
-            tuples = tuples.filter(function (item) { return item.binary === "wepp_260803"; });
-            this.form.elements.wepp_binary.value = "wepp_260803";
+            tuples = tuples.filter(function (item) {
+                var component = this.components[item.binary];
+                return component && (component.supported_features || []).indexOf("single_user_defined_inputs_supported") !== -1;
+            }, this);
         }
+        // Keep the last geometry visible when no release supports uploads;
+        // server validation supplies the field error and prevents creation.
+        if (!tuples.length) { return; }
         var backend = this.form.elements.delineation_backend.value;
         var binary = this.form.elements.wepp_binary.value;
+        var currentRepresentation = this.form.elements.watershed_representation.value;
+        var compatible = tuples.find(function (item) {
+            return item.backend === backend && item.binary === binary && item.representation === currentRepresentation;
+        });
+        if (!compatible) {
+            compatible = tuples.find(function (item) {
+                return item.backend === backend && item.representation === currentRepresentation;
+            }) || tuples.find(function (item) {
+                return item.backend === backend && item.binary === binary;
+            }) || tuples.find(function (item) { return item.backend === backend; }) || tuples[0];
+            this._setOptions("wepp_binary", this._graphAxis("wepp_binaries"));
+            this._setOptions("watershed_representation", this._graphAxis("watershed_representations"));
+            this._setOptions("delineation_backend", this._graphAxis("delineation_backends"));
+            this.form.elements.wepp_binary.value = compatible.binary;
+            this.form.elements.watershed_representation.value = compatible.representation;
+            this.form.elements.delineation_backend.value = compatible.backend;
+            backend = compatible.backend;
+            binary = compatible.binary;
+        }
         var representationIds = this._graphAxis("watershed_representations").filter(function (id) {
             return tuples.some(function (item) {
                 return item.backend === backend && item.binary === binary && item.representation === id;

@@ -49,8 +49,8 @@ function description(canOverride = false) {
         item("dem-a", "dem", "DEM A", {default_cellsize: 10}),
         item("dem-b", "dem", "DEM B", {default_cellsize: 30}),
         item("wbt", "delineation", "WBT"), item("single", "representation", "Single OFE"),
-        item("multiple-ofe", "representation", "Multiple OFE", {constraints: Object.assign({}, empty, {requires: ["continental-us", "wbt", "wepp_260803"]})}),
-        item("wepp_dcc52a6", "wepp_binary", "WEPP legacy"), item("wepp_260803", "wepp_binary", "WEPP 260803"),
+        item("multiple-ofe", "representation", "Multiple OFE", {constraints: Object.assign({}, empty, {requires: ["continental-us", "wbt"]})}),
+        item("wepp_dcc52a6", "wepp_binary", "WEPP legacy"), item("wepp_260803", "wepp_binary", "WEPP 260803", {supported_features: ["mofe_supported", "single_user_defined_inputs_supported"]}),
         item("soil", "soil", "Soil"), item("land", "landuse", "Land cover"),
         item("climate", "climate", "Climate"),
         item("stations-2015", "climate_station_database", "2015"),
@@ -391,6 +391,73 @@ describe("Config Builder controller", () => {
         controller._renderDependencies(true, "watershed_representation");
         expect([...root.querySelector("[name=wepp_binary]").options].map((option) => option.value)).toEqual(["wepp_dcc52a6", "wepp_260803"]);
         expect([...root.querySelector("[name=delineation_backend]").options].map((option) => option.value)).toEqual(["topaz", "wbt"]);
+    });
+
+    test("new declared releases stay selectable for MOFE and uploads", async () => {
+        const schema = description(false);
+        const graph = schema.capability_graph.capabilities;
+        graph.wepp_binaries.push("wepp_261010");
+        graph.allowed_model_tuples.push("wbt|single|wepp_261010", "wbt|multiple-ofe|wepp_261010");
+        schema.components.push(Object.assign({}, schema.components.find((item) => item.component_id === "wepp_260803"), {
+            component_id: "wepp_261010", label: "WEPP 261010"
+        }));
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(validatingHttp(schema)));
+        await controller.init();
+        root.querySelector("[name=wepp_binary]").value = "wepp_261010";
+        controller._renderDependencies(true, "wepp_binary");
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        controller._renderDependencies(true, "watershed_representation");
+        root.querySelector("[name=single_user_defined_uploads]").checked = true;
+        controller._renderDependencies(true, "single_user_defined_uploads");
+        expect(controller._selections().wepp_binary).toBe("wepp_261010");
+        expect(controller._selections().watershed_representation).toBe("multiple-ofe");
+        expect([...root.querySelector("[name=wepp_binary]").options].map((option) => option.value)).toEqual(["wepp_260803", "wepp_261010"]);
+    });
+
+    test("enabling uploads replaces an incompatible binary without emptying geometry choices", async () => {
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(validatingHttp(description(false))));
+        await controller.init();
+        root.querySelector("[name=wepp_binary]").value = "wepp_dcc52a6";
+        controller._renderDependencies(true, "wepp_binary");
+        root.querySelector("[name=single_user_defined_uploads]").checked = true;
+        controller._renderDependencies(true, "single_user_defined_uploads");
+        expect(controller._selections().wepp_binary).toBe("wepp_260803");
+        expect(controller._selections().watershed_representation).toBe("single");
+        expect(controller._selections().delineation_backend).toBe("wbt");
+    });
+
+    test("upload-only single-OFE release recovers from a MOFE-only release", async () => {
+        const schema = description(false);
+        schema.components.find((item) => item.component_id === "wepp_260803").supported_features = ["mofe_supported"];
+        schema.components.find((item) => item.component_id === "wepp_dcc52a6").supported_features = ["single_user_defined_inputs_supported"];
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(validatingHttp(schema)));
+        await controller.init();
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        controller._renderDependencies(true, "watershed_representation");
+        root.querySelector("[name=single_user_defined_uploads]").checked = true;
+        controller._renderDependencies(true, "single_user_defined_uploads");
+        expect(controller._selections().wepp_binary).toBe("wepp_dcc52a6");
+        expect(controller._selections().watershed_representation).toBe("single");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("replaced");
+    });
+
+    test("no certified upload release preserves geometry and recovers when unchecked", async () => {
+        const schema = description(false);
+        schema.components.forEach((item) => { item.supported_features = []; });
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(validatingHttp(schema)));
+        await controller.init();
+        root.querySelector("[name=single_user_defined_uploads]").checked = true;
+        controller._renderDependencies(true, "single_user_defined_uploads");
+        expect(controller._selections().watershed_representation).toBe("single");
+        expect(controller._selections().delineation_backend).toBe("wbt");
+        root.querySelector("[name=single_user_defined_uploads]").checked = false;
+        controller._renderDependencies(true, "single_user_defined_uploads");
+        expect(controller._selections().wepp_binary).toBe("wepp_260803");
+        expect([...root.querySelector("[name=wepp_binary]").options]).toHaveLength(2);
     });
 
     test("offers only fixed privileged overrides and clears intent at the DEM default", async () => {

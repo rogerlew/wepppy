@@ -99,6 +99,15 @@ read-only and reports `Not available` when a stored selection cannot be
 identified; it does not replace missing information with today's Builder
 defaults.
 
+To rerun with another executable, open **WEPP Advanced Options -> WEPP Exec**
+and select an installed compatible release. This does not recreate the project
+or change its original config/manifest. MOFE projects require WBT and declared
+MOFE support; projects with single landuse/soil uploads also require declared
+native input-reader support. The current certified choices include 260803 and
+261010. The default remains 260803. After changing releases, rerun hillslopes
+and the watershed together so their intermediate outputs match. A saved legacy
+release can remain visible but unavailable as a new selection.
+
 ---
 
 ## Privacy Statement

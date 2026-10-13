@@ -621,3 +621,32 @@ def test_executable_hash_failure_keeps_registry_error_translation(tmp_path, monk
     with pytest.raises(RegistryError, match='unreadable watershed executable') as caught:
         registry_module._executable_sha256(str(path), 'fixture', 'watershed')
     assert caught.value.__cause__ is original
+
+
+def test_metadata_only_capability_change_invalidates_builder_revision(tmp_path, monkeypatch):
+    import json
+    from hashlib import sha256
+    paths = _provider_fixture_paths(tmp_path, ('wepp_260803',))
+    monkeypatch.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: ['wepp_260803'])
+    monkeypatch.setattr(registry_module, 'get_linux_wepp_bin_role_paths', lambda binary: paths[binary])
+    absent = load_registry()
+    sidecars = []
+    for role, executable in zip(('watershed', 'hillslope'), paths['wepp_260803']):
+        path = Path(executable)
+        sidecar = Path(executable + '.json')
+        payload = dict(schema='wepp-binary-release-metadata-v1', binary_name=path.name,
+                       binary_role=role, release_tag='260803', source_repo='wepp-forest',
+                       source_branch='default', source_commit='a' * 40,
+                       sha256=sha256(path.read_bytes()).hexdigest(),
+                       features={'mofe_supported': True, 'single_user_defined_inputs_supported': False})
+        sidecar.write_text(json.dumps(payload))
+        sidecars.append((sidecar, payload))
+    declared = load_registry()
+    assert declared.revision != absent.revision
+    assert declared.get('wepp_260803').source_revision == absent.get('wepp_260803').source_revision
+    assert declared.get('wepp_260803').supported_features == ('mofe_supported',)
+    for path, payload in sidecars:
+        payload['features']['mofe_supported'] = False
+        path.write_text(json.dumps(payload))
+    unsupported = load_registry()
+    assert unsupported.revision != declared.revision

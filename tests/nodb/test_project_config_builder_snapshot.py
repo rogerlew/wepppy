@@ -116,7 +116,7 @@ def test_single_inputs_are_independent_creation_capabilities(representation, cli
     assert config["nodb"]["single_user_defined_uploads"] is True
     assert config["watershed"]["mofe_buffer"] is False
     assert manifest["selections"]["single_user_defined_uploads"] is True
-    assert config["capabilities"]["wepp_binaries"] == ["wepp_260803"]
+    assert config["capabilities"]["wepp_binaries"] == ["wepp_260803", "wepp_261010"]
     assert "observed_prism_800m" in config["capabilities"]["climate_datasets"]
     for section in ("capabilities.landuse_methods", "capabilities.soil_builders",
                     "capabilities.landuse_methods_by_representation"):
@@ -136,7 +136,28 @@ def test_single_input_builder_boolean_is_not_coerced(value):
 
 
 def test_single_input_native_binary_is_explicit():
-    with pytest.raises(BuilderConstraintError, match="require wepp_260803"):
+    with pytest.raises(BuilderConstraintError, match="does not declare"):
         resolve_builder_candidate(parse_builder_selections(_payload(
             single_user_defined_uploads=True, wepp_binary="latest",
         )))
+
+
+@pytest.mark.parametrize("uploads", [False, True])
+def test_new_release_creates_mofe_config_with_explicit_original_choice(uploads):
+    candidate = resolve_builder_candidate(parse_builder_selections(_payload(
+        single_user_defined_uploads=uploads, watershed_representation="multiple-ofe",
+        wepp_binary="wepp_261010",
+    )))
+    config = parse_config_text(candidate.artifact.config_bytes.decode())
+    assert config["wepp"]["bin"] == "wepp_261010"
+    assert config["wepp"]["multi_ofe"] is True
+    assert "wbt|multiple-ofe|wepp_261010" in config["capabilities"]["allowed_model_tuples"]
+    assert json.loads(candidate.artifact.manifest_bytes)["selections"]["wepp_binary"] == "wepp_261010"
+
+
+@pytest.mark.parametrize("binary", ["../wepp_261010", "/tmp/solver", "unknown"])
+def test_upload_unknown_binary_has_field_specific_error(binary):
+    with pytest.raises(BuilderConstraintError) as error:
+        resolve_builder_candidate(parse_builder_selections(_payload(single_user_defined_uploads=True, wepp_binary=binary)))
+    assert error.value.field == "wepp_binary"
+    assert error.value.code == "unknown_component"

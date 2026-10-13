@@ -3,6 +3,7 @@ import json
 from types import SimpleNamespace
 
 import pytest
+import wepppy.nodb.wepp_binary_policy as binary_policy
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -79,9 +80,9 @@ def _stub_wepp_stack(
 ) -> None:
     monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: None)
     monkeypatch.setattr(
-        wepp_run_payload,
-        "runtime_value_allowed",
-        lambda config, option, value: True,
+        binary_policy,
+        "project_wepp_binary_options",
+        lambda config, **kwargs: None,
     )
     class ReadyPrep:
         def __getitem__(self, key):
@@ -833,9 +834,9 @@ def test_run_wepp_rejects_binary_outside_stored_graph_before_controller_mutation
     _stub_wepp_stack(monkeypatch, capture=capture)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
-        wepp_run_payload,
-        "runtime_value_allowed",
-        lambda config, option, value: value == "wepp_260803",
+        binary_policy,
+        "project_wepp_binary_options",
+        lambda config, **kwargs: ("wepp_260803",),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -859,9 +860,9 @@ def test_run_wepp_allows_exact_persisted_binary_omitted_from_v2_authority(
     _stub_wepp_stack(monkeypatch, capture=capture)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
-        wepp_run_payload,
-        "runtime_value_allowed",
-        lambda config, option, value: False,
+        binary_policy,
+        "project_wepp_binary_options",
+        lambda config, **kwargs: (),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -889,9 +890,9 @@ def test_run_wepp_rejects_axis_advertised_binary_outside_current_model_tuple(
     )
     monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: authority)
     monkeypatch.setattr(
-        wepp_run_payload,
-        "runtime_value_allowed",
-        lambda config, option, value: value in {"wepp_260803", "wepp_dcc52a6"},
+        binary_policy,
+        "project_wepp_binary_options",
+        lambda config, **kwargs: ("wepp_260803", "wepp_261010"),
     )
     capture["wepp"].wepp_bin = "wepp_260803"
     capture["wepp"].multi_ofe = True
@@ -904,11 +905,11 @@ def test_run_wepp_rejects_axis_advertised_binary_outside_current_model_tuple(
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "unsupported_capability"
-    assert "allowed_model_tuples" in response.json()["error"]["details"]
+    assert "does not support" in response.json()["error"]["details"]
     assert "parse_payload" not in capture
 
 
-def test_run_wepp_v2_uses_stored_tuple_without_live_provider_lookup(
+def test_run_wepp_v2_allows_new_live_release_absent_from_stored_tuple(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
@@ -926,9 +927,9 @@ def test_run_wepp_v2_uses_stored_tuple_without_live_provider_lookup(
     )
     monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: authority)
     monkeypatch.setattr(
-        wepp_run_payload,
-        "runtime_value_allowed",
-        lambda config, option, value: value in {"wepp_260803", "wepp_stored_only"},
+        binary_policy,
+        "project_wepp_binary_options",
+        lambda config, **kwargs: ("wepp_260803", "wepp_261010"),
     )
     capture["wepp"].wepp_bin = "wepp_260803"
     capture["wepp"].multi_ofe = True
@@ -936,7 +937,7 @@ def test_run_wepp_v2_uses_stored_tuple_without_live_provider_lookup(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/run-wepp",
-            json={"wepp_bin": "wepp_stored_only"},
+            json={"wepp_bin": "wepp_261010"},
         )
 
     assert response.status_code == 200

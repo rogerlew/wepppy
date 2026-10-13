@@ -31,14 +31,13 @@ def test_features_independent_of_current_input_modes(feature):
 
 
 def test_inconsistent_state_and_effective_binary_are_rejected():
-    for state in [config(mods=['disturbed']), config(binary='wepp_250217')]:
+    for state in [config(mods=['disturbed'])]:
         with pytest.raises(SingleInputPolicyError):
             require_single_input_policy(state)
     with pytest.raises(SingleInputPolicyError):
         require_single_input_policy(config(), watershed=SimpleNamespace(mofe_buffer=True))
-    state = config(); state.wepp_bin = 'wepp_250217'
     with pytest.raises(SingleInputPolicyError):
-        require_wepp_input_policy(state)
+        require_wepp_input_policy(config(), binary='wepp_250217')
     with pytest.raises(SingleInputPolicyError):
         require_wepp_input_policy(config(), reveg=True)
 
@@ -58,3 +57,20 @@ def test_path_guard_reads_parent_run_policy_not_its_solver_dictionary(monkeypatc
         config_get_str=lambda section, key, default=None: 'True')))
     with pytest.raises(SingleInputPolicyError):
         controller.run()
+
+
+def test_new_native_reader_is_not_pinned_by_creation_config():
+    state = config(binary='wepp_260803')
+    state.wepp_bin = 'wepp_261010'
+    require_wepp_input_policy(state)
+    require_wepp_input_policy(state, binary='wepp_260803')
+    with pytest.raises(SingleInputPolicyError):
+        require_wepp_input_policy(state, binary='wepp_250217')
+
+
+def test_saved_legacy_upload_binary_needs_no_new_declaration():
+    state = config(binary='wepp_saved_unavailable')
+    require_wepp_input_policy(state)
+    require_wepp_input_policy(state, binary=state.wepp_bin)
+    with pytest.raises(SingleInputPolicyError):
+        require_wepp_input_policy(state, binary='wepp_not_installed')

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from wepppy.nodb.single_input_policy import require_wepp_input_policy
 from .soil_anisotropy import parse_anisotropy_inputs
+from wepppy.nodb.wepp_binary_policy import validate_project_wepp_binary_selection
 from typing import TYPE_CHECKING, Any
 
 from wepppy.all_your_base import isfloat, isint
@@ -35,6 +36,7 @@ class WeppInputParser:
         requested_binary = kwds.get("wepp_bin")
         if isinstance(requested_binary, (list, tuple, set)):
             requested_binary = next((item for item in requested_binary if item not in (None, "")), None)
+        validate_project_wepp_binary_selection(wepp, requested_binary)
         require_wepp_input_policy(wepp, binary=requested_binary)
         wepp.baseflow_opts.parse_inputs(kwds)
         wepp.phosphorus_opts.parse_inputs(kwds)
