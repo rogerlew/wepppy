@@ -145,7 +145,8 @@ class ClimateInputParsingService:
         climate._climate_spatialmode = climate_spatialmode
         if climatestation_mode is not None:
             climate._climatestation_mode = climatestation_mode
-        climate._input_years = input_years
+        if climate_mode != ClimateMode.EddeV2:
+            climate._input_years = input_years
 
         climate._climate_daily_temp_ds = kwds.get("climate_daily_temp_ds", None)
 
@@ -238,7 +239,6 @@ class ClimateInputParsingService:
                 )
                 climate._edde_projection = projection
                 climate._future_start_year, climate._future_end_year = start, end
-                climate._input_years = end - start + 1
             else:
                 climate._set_future_pars_without_lock(**future_pars)
             self._clear_year_bounds(

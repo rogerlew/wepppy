@@ -75,3 +75,18 @@ No concrete security evidence gap remains for the reviewed integration boundarie
 Residual risks are public source availability, authenticated costly multi-year builds within the accepted bounds, interrupted workers, and the existing multi-file publication crash window. Private caches, explicit failures, durable source/attempt evidence and existing finalization rules are appropriate controls; no new threshold or broader authorization flow is requested. No exceptional risk acceptance is proposed.
 
 Security reviewer signs **PASS** for candidate `d2ca5821b` after final correctness review and the concrete security evidence above. No unresolved finding is waived and no exceptional risk acceptance is required. Package owner retains responsibility for remaining broad quality gates and final handoff; no production deployment is approved.
+
+## Calendar publication amendment review
+
+**PASS for the bounded follow-up delta reviewed on 2026-10-14 UTC**, based on `93524e393` with the calendar/publication changes still uncommitted at review time. No new security finding. This delta closes a data-integrity gap: a valid replacement request could previously change the WEPP-consumed simulation length/start before successful publication, even when the previous CLI survived a failed rebuild.
+
+The EDDE parser now preserves published `_input_years` despite requested future bounds or a submitted `input_years` value; the existing successful staged finalizer remains its assignment boundary. `calendar_start_year` reads the active CLI for EDDE instead of pending request bounds. The absent-safe mode check preserves the prior calendar fallback for minimal or absent mode state. Other modes retain their previous parsing/calendar behavior. No auth, path construction, egress, cache, subprocess, archive or publication-lock boundary changed.
+
+Reviewed runtime identities:
+
+- `wepppy/nodb/core/climate.py`: SHA-256 `1d07d71f636d4e930a8ddf209fd2d659018bf216e630ecff98fe3e42db6e49e0`.
+- `wepppy/nodb/core/climate_input_parser.py`: SHA-256 `8bd96babcef559837b4aa93f561967cfdba94480ae6b29f7de7945e1817513e1`.
+
+The new regression generates a real 2060 climate, submits 2061–2062 with `input_years=99`, injects acquisition failure, and verifies durable reload retains one published year, calendar start 2060, identical provenance and the CLI hash. The retained validation log `/tmp/edde-period-final-tests.log` records **62 passed** across the existing input-parser, user-defined CLI calendar, and EDDE builder modules; `/tmp/edde-period-regression.log` records **46 passed** for EDDE and RQ route tests. The initial direct-mode-access compatibility failure was corrected with the absent-safe check before this disposition; it is not relabeled as a passing run.
+
+[Live submission](period-rejection-submission.json), [failed worker](period-rejection-job.json), and [fresh readback](failed-period-readback.json) independently prove the same publication separation through the existing endpoint/worker: requested years remain 2061–2062, PRISM rejects missing normals, and the prior climate still supplies one year starting in 2060 with unchanged CLI bytes and published 2060 provenance. This is a failed replacement with retained valid publication, not a successful new climate build. The prior security PASS therefore extends to this exact bounded delta; the independent correctness amendment and actual broad-suite disposition remain separate package responsibilities.

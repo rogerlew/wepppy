@@ -842,10 +842,13 @@ class Climate(NoDbBase):
             except (TypeError, ValueError):
                 return None
         
-        for candidate in (self._observed_start_year, self._future_start_year):
-            normalized = _normalize(candidate)
-            if normalized is not None:
-                return normalized
+        # EDDE request bounds can differ from the still-published CLI after a
+        # failed rebuild. Downstream WEPP dates must follow the active artifact.
+        if getattr(self, "_climate_mode", None) != ClimateMode.EddeV2:
+            for candidate in (self._observed_start_year, self._future_start_year):
+                normalized = _normalize(candidate)
+                if normalized is not None:
+                    return normalized
 
         # Fall back to the active CLI file when available. This is especially
         # important for user-defined uploads where observed/future start years

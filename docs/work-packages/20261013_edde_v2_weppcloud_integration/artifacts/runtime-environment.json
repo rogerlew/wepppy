@@ -28,5 +28,13 @@
   "source_mount": "/workdir/wepppy bind rw",
   "attempt_directory_mode": "0700 before and after canonical restore",
   "native_wepppyo3_sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
-  "rq_climate_timeout_seconds": 216000
+  "rq_climate_timeout_seconds": 216000,
+  "wepp_binary": {
+    "path": "wepp_runner/bin/wepp_260803",
+    "sha256": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+    "accepted_projects": [
+      "edde-ca-20261014",
+      "edde-us-current-20261014"
+    ]
+  }
 }

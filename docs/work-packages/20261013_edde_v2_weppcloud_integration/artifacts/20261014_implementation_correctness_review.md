@@ -1,6 +1,6 @@
 # EDDE integration implementation correctness review
 
-**Current disposition: correctness review passes for runtime commit `d2ca5821b`; broad-suite gate remains ongoing.** Independent reviewer initially examined the uncommitted candidate over reader-floor checkpoint `85f6ae9f8` on 2026-10-14 UTC and subsequently re-reviewed fixes and actual acceptance receipts. Runtime files were not edited by this reviewer. Earlier findings and intermediate coverage limits are retained below; the final disposition supersedes their open status.
+**Current disposition: correctness review passes for runtime commit `d2ca5821b` plus the publication-year fix reviewed below; broad-suite disposition remains open.** Independent reviewer initially examined the uncommitted candidate over reader-floor checkpoint `85f6ae9f8` on 2026-10-14 UTC and subsequently re-reviewed fixes and actual acceptance receipts. Runtime files were not edited by this reviewer. Earlier findings and intermediate coverage limits are retained below; the latest disposition supersedes their open status.
 
 ## Initial findings
 
@@ -78,3 +78,23 @@ Updated acceptance evidence closes the earlier specific consumer/artifact gaps:
 - `runtime-environment.json` identifies the forest development Compose service identities, NFS run mount, bind-mounted source, worker umask, private attempt-directory mode, native extension hash and existing RQ timeout. These are development-environment receipts, not a production deployment claim.
 
 **Residual risks and coverage limits:** the broad repository Python suite was still running at final review; this disposition does not call that gate passing or close the package on its behalf. Live consumer evidence samples MPI SSP3-7.0 for 2060 at the stated US/Canadian projects; broader source/period eligibility relies on the retained feasibility and validation coverage, not an assertion that every combination was live-tested. PRISM period interpretation remains bound to the documented owned product contract rather than an absent per-response period field. Existing public-source availability, interrupted-worker and multi-file publication crash-window risks remain unchanged. No production deployment is approved by this review.
+
+## Final-audit publication-year correction
+
+The implementer subsequently found a **high-severity publication-state defect** missed by the preceding review: EDDE parsing changed `_input_years` before a replacement succeeded. A valid two-year request followed by failed acquisition could leave a one-year published CLI with two years requested by actual WEPP preparation. Independent follow-up also identified `calendar_start_year` preferring the pending future start year, which would misdate downstream WEPP interchange/postprocessing after a shifted-period failure. This reopened the earlier candidate disposition for the bounded correction below.
+
+**Resolution reviewed:** EDDE input parsing now preserves `_input_years`; only the existing successful staged finalization assigns the generated duration. EDDE's `calendar_start_year` reads the existing active CLI parser instead of pending request bounds. The branch applies only when `_climate_mode` positively identifies EDDE, preserving older and absent-mode fixture behavior. Future request fields remain editable and are retained after failed acquisition. No new persistence field or broader climate redesign is introduced.
+
+The regression first generates real 2060 weather, then submits 2061–2062 with conflicting generic `input_years=99`, injects failed preflight, reloads durable state, and verifies one published year, calendar start 2060, prior provenance and CLI SHA-256. The implementer reports 62 focused parser/legacy-CLI/EDDE tests passing; this reviewer inspected the regression and code without claiming an independent rerun.
+
+The live request/job `b0ec26bc-4104-4b1b-8f0a-dc13f7435400` fails on missing PRISM normals. `failed-period-readback.json` and its readback script prove requested 2061–2062 remain stored while WEPP duration stays one year, calendar start stays 2060, published period stays 2060–2060 and the previous CLI hash is unchanged. This is evidence from the actual failed worker and durable publication, not only an injected unit failure.
+
+Reviewed source SHA-256 identities for the bounded change:
+
+| File | SHA-256 |
+| --- | --- |
+| `wepppy/nodb/core/climate.py` | `1d07d71f636d4e930a8ddf209fd2d659018bf216e630ecff98fe3e42db6e49e0` |
+| `wepppy/nodb/core/climate_input_parser.py` | `8bd96babcef559837b4aa93f561967cfdba94480ae6b29f7de7945e1817513e1` |
+| `tests/nodb/test_climate_edde_build.py` | `36509aa3e2988abe87acdd40497ce98bde07cfab6959ad5cf03448d691e8f918` |
+
+**Updated disposition: pass with no open medium/high correctness findings in the reviewed integration and bounded fix.** The broad run stopped after 2,783 passes on a separately dispositioned existing AG Fields expectation; the implementer reports its 34-test module passing after correction and a broad continuation in progress. This review does not certify that unrelated correction or mark the broad gate passed. Earlier artifact/consumer evidence remains valid for unchanged generation code; no production deployment approval is implied.

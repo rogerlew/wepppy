@@ -1,0 +1,20 @@
+{
+  "payload": {
+    "climate_catalog_id": "future_edde_v2",
+    "climate_mode": 17,
+    "climate_spatialmode": 1,
+    "edde_projection": "WRF-MPI/SSP3-7.0",
+    "future_start_year": 2061,
+    "future_end_year": 2062,
+    "input_years": 99,
+    "precip_scaling_mode": 0,
+    "cligen_seed": 1001
+  },
+  "response": {
+    "job_id": "b0ec26bc-4104-4b1b-8f0a-dc13f7435400"
+  },
+  "status": 200,
+  "prior_cli_hashes": {
+    "wepp.cli": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "requested_years": [
+    2061,
+    2062
+  ],
+  "wepp_input_years": 1,
+  "wepp_calendar_start_year": 2060,
+  "published_years": [
+    2060,
+    2060
+  ],
+  "published_cli_hashes": {
+    "wepp.cli": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a"
+  },
+  "prior_publication_unchanged": true
+}

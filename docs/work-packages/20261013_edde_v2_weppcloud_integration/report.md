@@ -46,3 +46,9 @@ Configured worker, API and browse processes run as UID 1000/GID 993, groups 993;
 ## Remaining scope
 
 Production rollout is separate work. Preserve reader floor `26c9e86ca` after any additive graph has been saved. Existing source availability, coarse-grid bias/elevation limits, station-derived auxiliary fields and automatic-seed reproducibility limitations remain disclosed; none is silently corrected or waived.
+
+## Final audit corrections and broad-suite disposition
+
+A valid replacement period previously changed `input_years` before staged publication, and `calendar_start_year` preferred pending future bounds. Both could misdescribe retained climate after a failed rebuild. EDDE now updates simulation length only during successful publication and reads downstream calendar start from the active CLI. Other methods retain their existing precedence, including CLI-backed readers without mode metadata. A live 2061–2062 request with generic `input_years=99` failed PRISM eligibility while retaining the published one-year 2060 climate and exact CLI hash; see `failed-period-readback.json`. Parser/legacy CLI/EDDE regressions pass 62 tests. Both independent reviewers accepted the bounded amendment.
+
+The initial broad run stopped after 2,783 passed/48 skipped on `test_ag_fields_config_defaults_new_projects_to_capacity_32_wepp`: it expected 260714 even though accepted ADR-0089 and commit `69cfd68aa` changed the default to 261010. Corrected the stale in-memory/persisted expectations and obsolete capacity-specific test name; no agricultural runtime or configuration changed. All 34 tests in that backend-contract module pass. Original failed output is retained in `broad-initial-failure.log`. The continuation excludes only files that completed in the initial run; its exact arguments are retained in `broad-continuation-command.json`. This is segmented coverage, not a claim that the original run passed.

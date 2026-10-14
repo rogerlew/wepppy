@@ -213,3 +213,25 @@ def test_report_uses_published_station_not_pending_selection():
         url_for_run=lambda *args, **kwargs: '/browse/'+kwargs.get('subpath',''))
     assert 'published-id' in html
     assert 'pending-id' not in html
+
+
+def test_failed_new_period_preserves_published_simulation_length(prepared, monkeypatch):
+    c = prepared
+    service.run_edde_build(c)
+    previous = c.edde_provenance
+    assert c.input_years == 1
+    c.parse_inputs({'climate_mode':17, 'climate_spatialmode':0, 'input_years':99,
+        'edde_projection':'WRF-MPI/SSP2-4.5', 'future_start_year':2061, 'future_end_year':2062})
+    assert (c.future_start_year, c.future_end_year) == (2061, 2062)
+    assert c.input_years == 1
+    assert c.calendar_start_year == 2060
+    def rejected(*args):
+        raise service.DataQualityError('new period acquisition failed')
+    monkeypatch.setattr(service, 'locate', rejected)
+    with pytest.raises(service.DataQualityError):
+        service.run_edde_build(c)
+    current = Climate.getInstance(c.wd)
+    assert current.input_years == 1
+    assert current.calendar_start_year == 2060
+    assert current.edde_provenance == previous
+    assert service.sha256(Path(c.cli_dir)/current.cli_fn) == previous['files'][current.cli_fn]
