@@ -20,6 +20,7 @@
 | [secrets.md](secrets.md) | Canonical secrets handling policy (Compose secrets now; Kubernetes worker pools next). |
 | [ui-rcds-nfs-vs-dev-nfs.md](ui-rcds-nfs-vs-dev-nfs.md) | NFS metadata workload benchmark for delete/recreate performance comparisons. |
 | [wmesque-dataset-sync-manifest.md](wmesque-dataset-sync-manifest.md) | Canonical dataset inventory for production-to-test-production WMesque geodata sync. |
+| [wmesque-operations.md](wmesque-operations.md) | Endpoint configuration, managed publication, scheduled pull synchronization, and recovery. |
 | [wmesque-catalog-governance.md](wmesque-catalog-governance.md) | Master catalog authority, extension-only deployment catalogs, and scheduled RQ synchronization policy. |
 
 ## Curation Notes

@@ -1,6 +1,6 @@
 # WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: Open — scaffolded; implementation not started
+**Status**: Open — M1–M4 implemented and reviewed; M5 forest acceptance in progress
 **Started**: 2026-10-14 20:16 UTC
 **Owner**: Roger Lew
 **Implementation location**: forest WEPPpy checkout
@@ -12,9 +12,9 @@ wepp.cloud as the default. Receiving deployments synchronize master resources
 from wepp.cloud and may maintain local extensions. When master adopts an
 extension, ordinary synchronization takes ownership under the same identifier.
 
-The current deliverable is planning scaffolding only. This package remains open
-until implementation, artifact validation, reviews, and authorized rollout are
-recorded separately; creating these documents does not complete the feature.
+The operator authorized M1–M5 and forest restarts. Implementation and independent
+reviews are complete; forest acceptance and regression results are recorded in
+the tracker. M6–M8 production/receiving deployment activation remains separate.
 
 ## Authority and References
 
@@ -59,15 +59,16 @@ WEPP inputs, and retain fresh execution/report evidence for a representative
 project. Test copy failure and publication concurrently with real retrievals.
 Record job IDs, candidate revision, identities, mounts, raster semantics, and
 actual serving endpoint. Health responses, timestamps, and job success alone
-cannot establish acceptance. Highest current claim: static assessment only.
+cannot establish acceptance. Current evidence includes real scheduled batch jobs,
+interrupted-copy recovery, raster readback, and an isolated project execution.
 
 ## Success Criteria
 
-- [ ] Missing configuration uses wepp.cloud; explicit lists honor priority and overrides.
-- [ ] Failed attempts preserve prior output; provenance identifies the actual source and revision.
-- [ ] Revision mismatches are explicit; old clients remain compatible with upgraded servers.
-- [ ] Sync is repeatable, overlap-safe, observable, and disabled by default.
-- [ ] Local extensions survive sync; adopted identifiers transition through ordinary sync.
+- [x] Missing configuration uses wepp.cloud; explicit lists honor priority and overrides.
+- [x] Failed attempts preserve prior output; provenance identifies the actual source and revision.
+- [x] Revision mismatches are explicit; old clients remain compatible with upgraded servers.
+- [x] Sync is repeatable, overlap-safe, observable, and disabled by default.
+- [x] Local extensions survive sync; adopted identifiers transition through ordinary sync.
 - [ ] Forest real-worker tests validate complete publication and downstream artifacts.
 - [ ] Required regression, correctness, and security gates pass with no open medium/high findings.
 - [ ] Authorized rollout and recovery evidence exists for each activated deployment.
@@ -78,17 +79,15 @@ Security impact: **high** because the implementation touches public data serving
 remote transfer/path handling, queue execution, and receiving filesystem writes.
 Dedicated [security review](artifacts/20261014_security_review.md) and independent
 [correctness review](artifacts/20261014_correctness_review.md) are required before
-release. Both are pending; no review verdict is implied by their creation.
-Roger is the decision owner; implementation and independent reviewers are assigned
-when execution begins.
+release. Both independent implementation reviews approved the resolved findings;
+rollout prerequisites remain gates. Roger is the decision owner.
 
 ## Parameterization ADR Gate
 
-Fallback behavior and timeout policy will change: an ADR is required before merge
-for those implementation choices. Its identifier is not allocated yet. Preserve
-the wepp.cloud default; record operator decisions and implementation rationale.
-Before any project metadata/schema mutation, write an additive compatibility and
-regression plan and validate downstream artifact propagation.
+Fallback behavior and timeout policy are recorded in
+[ADR-0094](../../adrs/ADR-0094-wmesque-priority-and-sync-policy.md).
+The contract checkpoint includes the additive EDDE compatibility/regression plan;
+existing endpoint fields remain while actual sources and revisions are added.
 
 ## Dependencies and Rollout Boundaries
 
@@ -110,6 +109,7 @@ rollout. Production action requires authorization beyond this scaffold request.
 
 Planned deliverables are compatible code, contract documentation, fixtures,
 strict acceptance tests, run evidence, review artifacts, rollout instructions,
-and rollback evidence. No production code or deployment has been delivered.
+and rollback evidence. Forest implementation is delivered; no production or
+Kubernetes activation is claimed.
 At closure, keep durable rules outside this package, archive the active prompt
 with outcomes, and update the root project tracker.

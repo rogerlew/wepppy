@@ -1,0 +1,12 @@
+{
+  "projected_nlcd_pixel_parity": true,
+  "canopy_shape": [
+    195,
+    199
+  ],
+  "canopy_range": [
+    0.0,
+    89.0
+  ],
+  "canopy_endpoint": "https://wepp.cloud/webservices/wmesque2"
+}

@@ -264,6 +264,11 @@ use `--write` only when intentionally normalizing those tracked sources.
 | `METQUERY_PORT` | `compose(prod): 8004` | compose(prod): `metquery` | Host port mapping for metquery service. |
 | `WMESQUE_PORT` | `compose(prod): 8003` | compose(prod): `wmesque` | Host port mapping for wmesque service. |
 | `WMESQUE2_PORT` | `compose(prod): 8030` | compose(prod): `wmesque2` | Host port mapping for wmesque2 service. |
+| `WMESQUE_ENDPOINTS` | blank → wepp.cloud | shared WEPPpy runtime | Ordered JSON URL array for v2; explicit client endpoint overrides it. See [operations](infrastructure/wmesque-operations.md). |
+| `WMESQUE_SYNC_ENABLED` | `false` | scheduler | Opt into receiving-side catalog pulls on the batch queue. |
+| `WMESQUE_SYNC_SOURCE` | blank | scheduler/RQ | Required when enabled: authorized master SSH export, or absolute local fixture root. |
+| `WMESQUE_SYNC_DESTINATION` | `/geodata` | scheduler/RQ | Writable receiving root; scheduler records this path in each job. |
+| `WMESQUE_SYNC_INTERVAL_SECONDS` | `86400` | scheduler | Interval between eligible pulls; overlapping pending/running jobs coalesce. |
 | `WEPPCLOUD_STATUS_IMAGE` | `compose(prod): wepppy-status:latest` | compose(prod): `status` | status service image tag override. |
 | `WEPPCLOUD_PREFLIGHT_IMAGE` | `compose(prod): wepppy-preflight:latest` | compose(prod): `preflight` | preflight service image tag override. |
 | `WEPPCLOUDR_IMAGE` | `compose(prod): weppcloudr:latest` | compose(prod): `weppcloudr` | weppcloudr image tag override. |

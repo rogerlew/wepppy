@@ -81,6 +81,10 @@ def _normals(climate, stage, locations):
     write_json(stage / 'prism-normals.json', {'locations': normals, 'sha256': identities,
                'source': 'wmesque prism 800m M4 normals', 'period': '1991-2020',
                'acquisition': acquisition, 'endpoint': climate.wmesque_endpoint,
+               'serving_endpoints': {key: value.get('wmesque_retrieve', {}).get('wmesque_endpoint')
+                                     for key, value in acquisition.items()},
+               'dataset_revisions': {key: value.get('wmesque', {}).get('revision')
+                                     for key, value in acquisition.items()},
                'version': climate.wmesque_version, 'units': {'ppt': 'mm/month', 'tmin': 'C', 'tmax': 'C'}})
     return normals
 

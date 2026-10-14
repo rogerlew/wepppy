@@ -12,7 +12,9 @@ URL, credentials, query, fragment, or malformed value is an explicit config erro
 Do not append implicit servers. V1 behavior and integer success return remain.
 
 Use at most one attempt per configured endpoint and a 300-second total network
-budget, sharing remaining time among remaining candidates. Retry HTTP 404, 409,
+budget, sharing remaining time among remaining candidates. Deadlines cover response
+headers and body; OS DNS and connection/TLS establishment are not a universal
+wall-clock guarantee. Retry HTTP 404, 409,
 429, 500, 502, 503, 504, network timeout/disconnection, and invalid/truncated raster
 responses. Do not retry other HTTP errors or local filesystem failures. Record
 attempts in logs and successful metadata. No persistent endpoint health state.
@@ -80,8 +82,8 @@ alone. Resources absent from master remain unchanged. A failed transfer preserve
 the previous catalog; dry run reports proposed updates without publishing. Retain
 a bounded last-attempt/last-success JSON status record with revision results.
 
-`sync_wmesque_rq()` reads `WMESQUE_SYNC_SOURCE` and `WMESQUE_SYNC_DESTINATION`
-(default `/geodata`) and delegates to the helper. Scheduling is disabled unless
+`sync_wmesque_rq(source=None, destination=None)` reads `WMESQUE_SYNC_SOURCE` and `WMESQUE_SYNC_DESTINATION`
+(default `/geodata`) when explicit administrative arguments are absent, and delegates to the helper. The scheduler snapshots source/destination into job arguments so workers execute the same configuration used for admission. Scheduling is disabled unless
 `WMESQUE_SYNC_ENABLED=true`, and uses the existing batch queue and scheduler.
 An enqueue helper coalesces queued/started work by destination using Redis
 transactions and job state; OS locking also protects manual execution. Default

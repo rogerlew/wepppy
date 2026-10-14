@@ -1,0 +1,14 @@
+{
+  "root": "/wc1/wmesque-interruption-q7se1v02",
+  "uid": 1000,
+  "gid": 993,
+  "killed_pid": 693942,
+  "exit": -9,
+  "staged_copy": {
+    "path": "/wc1/wmesque-interruption-q7se1v02/replica/.wmesque/sync-3zsyuhok/e9b47a5d6e0feee21387c197c7634b8913416d7662eac941a3e4be49a523398b/data/test/map/tile.tif",
+    "size": 2031616
+  },
+  "source_bytes": 268484850,
+  "old_catalog_preserved": true,
+  "retry_status": "success"
+}

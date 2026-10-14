@@ -30,3 +30,12 @@ VRT-relative references, shared catalog locking, and canonical JSON were clarifi
 Security reviewer approved after pre-GDAL dependency validation, shared lock, and
 strict SSH host verification were specified. No unresolved medium/high contract
 findings. These approvals do not replace implementation reviews.
+
+## Additive provenance compatibility plan
+
+Keep the existing EDDE `endpoint` key as the configured single-endpoint value.
+Add `serving_endpoints` and `dataset_revisions` maps derived from each acquired
+raster's metadata; legacy metadata yields null values. Existing readers retain
+all keys and values. Regression checks read the written `prism-normals.json`
+and preserve existing downstream climate numeric assertions. No NoDb schema,
+model parameter, or prepared input formula changes.

@@ -1,0 +1,274 @@
+{
+  "source": "/wc1/runs/an/anisotropic-sassafras",
+  "destination": "/wc1/runs/wm/wmesque-acceptance-1792010682",
+  "checks": [
+    "Ron.fetch_dem actual acquisition",
+    "Landuse.build actual acquisition and summaries",
+    "actual SSURGO acquisition",
+    "actual climate helper PRISM acquisitions",
+    "fresh prepared hillslope inputs",
+    "fresh WEPP hillslope execution",
+    "Soils.build fresh raster, soil summaries, and soil files",
+    "PRISM revision fresh rasters and hillslope climate files",
+    "WEPP rerun consumes rebuilt soil and climate inputs"
+  ],
+  "wepp_bin": "wepp_261010",
+  "prepared_inputs": {
+    "slp": 295,
+    "sol": 5210,
+    "man": 10578,
+    "cli": 2594129,
+    "run": 256
+  },
+  "execution": [
+    true,
+    "67",
+    1.860280990600586
+  ],
+  "dem": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/dem/dem.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 1,
+    "range": [
+      734.5478515625,
+      1924.7384033203125
+    ],
+    "endpoint": "http://wmesque2:8030"
+  },
+  "landuse": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/landuse/nlcd.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 1,
+    "range": [
+      21.0,
+      90.0
+    ],
+    "endpoint": "http://wmesque2:8030"
+  },
+  "soils": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/soils/wmesque-acceptance.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 1,
+    "range": [
+      81156.0,
+      3417791.0
+    ],
+    "endpoint": "http://wmesque2:8030"
+  },
+  "ppt": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/wmesque-acceptance/ppt.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 12,
+    "range": [
+      51.884490966796875,
+      88.09982299804688
+    ],
+    "endpoint": "https://wepp.cloud/webservices/wmesque2"
+  },
+  "tmin": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/wmesque-acceptance/tmin.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 12,
+    "range": [
+      -7.215897083282471,
+      -4.291522979736328
+    ],
+    "endpoint": "https://wepp.cloud/webservices/wmesque2"
+  },
+  "tmax": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/wmesque-acceptance/tmax.tif",
+    "shape": [
+      195,
+      199
+    ],
+    "bands": 12,
+    "range": [
+      -0.2285674661397934,
+      3.834808588027954
+    ],
+    "endpoint": "https://wepp.cloud/webservices/wmesque2"
+  },
+  "output_readback": {
+    "loss_rows": 5,
+    "daily_water_rows": 36525,
+    "required_numeric_finite": true,
+    "optional_null_counts": {
+      "InterceptionStorage": 36525
+    },
+    "sample_csv": "/wc1/runs/wm/wmesque-acceptance-1792010682/wmesque-output-readback.csv"
+  },
+  "prepared_input_sha256": {
+    "slp": "30d8d97e105014979dd4ce8f91159818cbf7a55d0840398cd229062b88aae399",
+    "sol": "79c0deea150e3a86014897a9e121e187a3547c4bced0121d2f76c35c421abe8f",
+    "man": "8e12249901c26c7de34f667b64f4c810018d2a4f2560b988e0a16a5b0c960272",
+    "cli": "076f6b9b3075480825d098d06d6dc56fc5f9cc32e92c1d14a8b41865d7fd3687",
+    "run": "fb10947586797baae36be1cc62de892f68e68e6411929177a96dc2018e46d098"
+  },
+  "consumed_rasters": {
+    "dem": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/dem/dem.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 1,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "Float32",
+      "nodata": -999999.0,
+      "range": [
+        734.5478515625,
+        1924.7384033203125
+      ],
+      "endpoint": "http://wmesque2:8030",
+      "revision": null
+    },
+    "landuse": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/landuse/nlcd.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 1,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "Byte",
+      "nodata": 250.0,
+      "range": [
+        21.0,
+        90.0
+      ],
+      "endpoint": "http://wmesque2:8030",
+      "revision": null
+    },
+    "soil_build": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/soils/ssurgo.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 1,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "UInt32",
+      "nodata": 0.0,
+      "range": [
+        81156.0,
+        3417791.0
+      ],
+      "endpoint": "http://wmesque2:8030",
+      "revision": null
+    },
+    "ppt": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/ppt.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 12,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "Float32",
+      "nodata": -9999.0,
+      "range": [
+        51.884490966796875,
+        88.09982299804688
+      ],
+      "endpoint": "https://wepp.cloud/webservices/wmesque2",
+      "revision": null
+    },
+    "tmin": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/tmin.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 12,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "Float32",
+      "nodata": -9999.0,
+      "range": [
+        -7.215897083282471,
+        -4.291522979736328
+      ],
+      "endpoint": "https://wepp.cloud/webservices/wmesque2",
+      "revision": null
+    },
+    "tmax": {
+      "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/tmax.tif",
+      "shape": [
+        195,
+        199
+      ],
+      "bands": 12,
+      "transform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "projection": "PROJCS[\"WGS 84 / UTM zone 11N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-117],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32611\"]]",
+      "dtype": "Float32",
+      "nodata": -9999.0,
+      "range": [
+        -0.2285674661397934,
+        3.834808588027954
+      ],
+      "endpoint": "https://wepp.cloud/webservices/wmesque2",
+      "revision": null
+    }
+  }
+}

@@ -36,6 +36,8 @@ and [work package](../work-packages/20261014_wmesque_catalog_sync/package.md).
 ## Risk and Rollback
 
 Slow servers may exhaust their divided attempt allowance; actual elapsed time
-and failure tests must be retained. Unpinned replicas may lag; record revisions
+and failure tests must be retained. Socket read deadlines cover header/body
+trickling; OS name resolution and connection/TLS establishment are not a universal
+wall-clock guarantee. Unpinned replicas may lag; record revisions
 and do not imply reproducible rebuilds. Disable sync and restore wepp.cloud-only
 routing to roll back. Preserve releases and local extensions; no automatic deletion.

@@ -20,10 +20,10 @@ sync/adoption followed by downstream project input and output readback.
 
 
 - [x] (2026-10-14 20:16 UTC) Governance, static assessment, and work-package scaffold prepared.
-- [ ] M1: Finalize concrete interfaces and bounded fixture/publication design.
-- [ ] M2: Add backward-compatible server manifest and revision support.
-- [ ] M3: Add client configuration, bounded failover, and staged publication.
-- [ ] M4: Add manual synchronization and disabled scheduled RQ integration.
+- [x] (2026-10-14 UTC) M1: Concrete contract/ADR accepted and independently reviewed; checkpoint `193df8b8c`.
+- [x] (2026-10-14 UTC) M2: Compatible server manifest, immutable publication, and revision support; real GDAL fixtures pass.
+- [x] (2026-10-14 UTC) M3: Ordered client configuration, deadline transport, validated publication, and additive EDDE provenance; focused regressions pass.
+- [x] (2026-10-14 UTC) M4: Manual sync and disabled/coalesced scheduled RQ integration; actual batch jobs validate adoption and failure recovery.
 - [ ] M5: Validate forest integration and production-equivalent Compose behavior.
 - [ ] M6: Complete reviews and authorized wepp.cloud publication.
 - [ ] M7: Complete authorized receiving-deployment canary.
@@ -39,6 +39,19 @@ on compute workers. Their scheduler is dry-run-only and its readiness check
 asserts exactly three tasks. These are static observations, not live verification.
 The existing WMesque network test skips retrieval exceptions, so it cannot be
 the strict rollout acceptance test.
+
+Forest and forest1 existing worker images contain rsync but not ssh. The smallest
+repair adds the standard OS client package to both Dockerfiles, with no new
+service or credential mount. Forest1's existing worker identity and umask match
+forest (1000:993, 0022); its deployment was inspected read-only. Forest fixtures
+exercise existing NFSv4.2 `/wc1` storage. Actual master export credentials and
+Kubernetes write permissions remain later rollout checks.
+
+Live NED VRTs reference mutable `/vsicurl/` sources. Managed publication correctly
+rejects them until materialized; legacy retrieval remains available. The isolated
+project referenced a retired model executable, so only that clone selected the
+currently installed `wepp_261010`. Native output lacks optional interception
+storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
 
@@ -59,12 +72,25 @@ bulk-transfer and cross-tailnet designs. Prefer rsync over existing SSH access;
 verify task reachability and permissions instead of assuming membership supplies
 them. This narrows transport design without changing client endpoint defaults.
 
+On 2026-10-14, independent reviews required rejecting disguised VRT downloads,
+checking VRT content rather than suffixes, rejecting catalog symlinks, and treating
+damaged catalog/server processing as retryable 500. Invalid processing options
+are checked before source IO and remain nonretryable 400. These close confirmed
+failure paths. Read deadlines use standard urllib/socket hooks because a real
+trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
+connection setup are explicitly outside a universal wall-clock guarantee.
+
 ## Outcomes & Retrospective
 
 
-Only the static assessment and planning scaffold exist. No runtime implementation,
-artifact validation, review approval, or deployment is claimed. M2 through M8
-deliver and validate the working feature; scaffolding cannot close this package.
+M1–M4 implementation and independent reviews are complete. Forest real scheduled
+jobs, adoption, concurrent retrieval, SIGKILL during copy, and retry all passed.
+An isolated project rebuilt DEM/landuse/soils/spatial climate and prepared inputs;
+a fresh 100-year WEPP hillslope run yielded five loss rows and 36,525 daily water
+rows through production interchange/report readers. M5 image and broad-regression
+checks are still running. See `artifacts/20261014_forest_acceptance.md` and retained
+JSON/CSV evidence. No production or Kubernetes activation is claimed; M6–M8 keep
+the package open and recurrence remains disabled.
 
 ## Context and Orientation
 
@@ -287,3 +313,5 @@ Revision note: 2026-10-14 UTC — added the operator's shared-tailnet assumption
 to narrow M1 transport design; runtime access remains to be validated.
 
 Execution update: 2026-10-14 UTC — operator authorized M1–M5 and forest stack restarts. Concrete interfaces and policy now live in `docs/schemas/wmesque-catalog-contract.md` and ADR-0094. M5 failure injection uses isolated services/data; M6 production actions remain excluded.
+
+Execution update: M2–M4 code and focused tests exist; M5 real-worker integration underway. Interfaces are implemented in `wepppy/webservices/wmesque_catalog.py` and `wepppy/rq/wmesque_rq.py`; scheduler snapshots administrative source/destination into jobs. Initial focused checks passed (16 + 41); one pre-existing opt-in remote smoke skipped.

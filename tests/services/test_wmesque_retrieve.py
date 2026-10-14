@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import io
 from typing import Sequence
 
 import numpy as np
@@ -47,13 +48,22 @@ def _download_fixture(
 @pytest.mark.unit
 def test_wmesque_retrieve_appends_bbox_crs(monkeypatch, tmp_path) -> None:
     captured: dict[str, str] = {}
+    from osgeo import gdal
+    fixture = tmp_path / "fixture.tif"
+    raster = gdal.GetDriverByName("GTiff").Create(str(fixture), 1, 1, 1, gdal.GDT_Byte)
+    raster.GetRasterBand(1).Fill(1)
+    raster = None
+    payload = fixture.read_bytes()
 
     class _DummyResponse:
         status = 200
         headers: dict[str, str] = {}
 
-        def read(self, _size: int = -1) -> bytes:
-            return b""
+        def __init__(self):
+            self.stream = io.BytesIO(payload)
+
+        def read1(self, size: int = -1) -> bytes:
+            return self.stream.read(size)
 
         def getcode(self) -> int:
             return self.status

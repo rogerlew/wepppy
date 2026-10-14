@@ -80,6 +80,8 @@ import json
 import xml.etree.ElementTree as ET
 import zlib
 
+from wepppy.webservices.wmesque_catalog import read_catalog, resolve_dataset, revision_id, dataset_id
+
 gdal.UseExceptions()
 
 logging.basicConfig(
@@ -120,7 +122,7 @@ _catalog = os.environ.get(
     'CATALOG_PATH', 
     os.path.join(_this_dir, "catalog"))
 
-resample_methods = tuple("near bilinear cubic cubicspline lanczos average mode max min med q1 q1".split())
+resample_methods = tuple("near bilinear cubic cubicspline lanczos average rms mode max min med q1 q3 sum".split())
 ext_d = {"GTiff": ".tif", "AAIGrid": ".asc", "PNG": ".png", "ENVI": ".raw"}
 format_drivers = tuple(ext_d.keys())
 gdaldem_modes = tuple("hillshade slope aspect tri tpi roughness".split())
@@ -175,7 +177,7 @@ def format_convert(src: str, _format: str) -> str:
         cmd = ["gdal_translate", "-of", _format, src, dst]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
-    if not os.path.exists(dst):
+    if res.returncode != 0 or not os.path.exists(dst):
         output = (res.stdout or "") + (res.stderr or "")
         raise RuntimeError(f"gdal_translate failed: {output}")
     
@@ -190,6 +192,7 @@ def process_raster(
     _format: str,
     gdaldem: Optional[str],
     bbox_crs: Optional[str],
+    expected_revision: Optional[str] = None,
 ) -> Tuple[str, dict, List[str]]:
     """Warp, optionally process, and format a dataset for a given ``bbox``.
 
@@ -199,13 +202,23 @@ def process_raster(
     responsive.
     """
     # 1. Path validation and setup
-    parts = dataset.split("/")
-    src = os.path.normpath(os.path.join(geodata_dir, *[p for p in parts if p], ".vrt"))
-    base = os.path.normpath(geodata_dir)
-    if not src.startswith(base + os.sep) and src != base:
-        raise HTTPException(status_code=400, detail="Invalid dataset path.")
-    if not os.path.exists(src):
-        raise HTTPException(status_code=404, detail=f"Cannot find dataset: {src}")
+    for name, value, allowed in (("resample", resample, resample_methods),
+                                 ("gdaldem", gdaldem, gdaldem_modes),
+                                 ("format", _format, format_drivers)):
+        if value is not None and value not in allowed:
+            raise HTTPException(status_code=400, detail=f"Invalid {name}: {value}")
+    try:
+        dataset_id(dataset.strip("/"))
+        if expected_revision is not None:
+            revision_id(expected_revision)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    source, revision = resolve_dataset(geodata_dir, dataset.strip("/"))
+    if expected_revision is not None and revision != expected_revision:
+        raise HTTPException(status_code=409, detail="Requested dataset revision unavailable")
+    src = str(source)
+    if not source.is_file():
+        raise HTTPException(status_code=404, detail="Dataset unavailable")
 
     fn_uuid = str(uuid4().hex)
     dst = os.path.join(SCRATCH_DIR, fn_uuid + ".tif")
@@ -257,8 +270,8 @@ def process_raster(
     
     res_warp = subprocess.run(cmd_warp, capture_output=True, text=True)
     out_warp = (res_warp.stdout or "") + (res_warp.stderr or "")
-    if not os.path.exists(dst):
-        raise HTTPException(status_code=400, detail={
+    if res_warp.returncode != 0 or not os.path.exists(dst):
+        raise HTTPException(status_code=500, detail={
             "Error": "gdalwarp failed unexpectedly", "cmd": ' '.join(cmd_warp), "stdout": out_warp
         })
 
@@ -275,6 +288,7 @@ def process_raster(
         "bbox_source": bbox_source,
         "cache": dst,
         "dataset": dataset,
+        "revision": revision,
         "cellsize": cellsize,
         "ul": {"ul_x": ul_x, "ul_y": ul_y, "utm_number": utm_number, "utm_letter": utm_letter},
         "proj4": proj4,
@@ -292,8 +306,8 @@ def process_raster(
         res_dem = subprocess.run(cmd_dem, capture_output=True, text=True)
         out_dem = (res_dem.stdout or "") + (res_dem.stderr or "")
         
-        if not os.path.exists(dst2):
-            raise HTTPException(status_code=400, detail={
+        if res_dem.returncode != 0 or not os.path.exists(dst2):
+            raise HTTPException(status_code=500, detail={
                 "Error": "gdaldem failed unexpectedly", "cmd2": ' '.join(cmd_dem), "stdout2": out_dem,
             })
         
@@ -308,7 +322,7 @@ def process_raster(
             fn_list_to_cleanup.append(dst3)
             dst_final = dst3
         except (RuntimeError, FileNotFoundError) as e:
-            raise HTTPException(status_code=400, detail=f"Failed to convert to output format: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to convert to output format: {e}")
 
     return dst_final, meta, fn_list_to_cleanup
 
@@ -354,7 +368,15 @@ async def health():
 @app.get("/catalog", response_model=List[str])
 async def catalog():
     """Returns a list of available map datasets."""
-    return load_maps(geodata_dir)
+    legacy = load_maps(geodata_dir)
+    managed = [os.path.join(geodata_dir, name, ".vrt") for name in read_catalog(geodata_dir)["datasets"]]
+    return list(dict.fromkeys(legacy + managed))
+
+
+@app.get("/catalog/manifest")
+async def catalog_manifest():
+    """Return the managed logical catalog without exposing physical release paths."""
+    return read_catalog(geodata_dir)
 
 @app.get("/retrieve/{dataset:path}")
 async def api_dataset_retrieve(
@@ -365,6 +387,7 @@ async def api_dataset_retrieve(
     resample: Optional[str] = Query(None, enum=resample_methods),
     _format: str = Query("GTiff", enum=format_drivers, alias="format"),
     gdaldem: Optional[str] = Query(None, enum=gdaldem_modes),
+    expected_revision: Optional[str] = Query(None, pattern=r"^[0-9a-f]{64}$"),
     bbox_crs: Optional[str] = Query(
         None,
         alias="bbox_crs",
@@ -377,13 +400,13 @@ async def api_dataset_retrieve(
     try:
         # Run the entire blocking process in a separate thread
         dst_final, meta, fn_list_to_cleanup = await asyncio.to_thread(
-            process_raster, dataset, bbox, cellsize, resample, _format, gdaldem, bbox_crs
+            process_raster, dataset, bbox, cellsize, resample, _format, gdaldem, bbox_crs, expected_revision
         )
     except HTTPException as e:
         # If the blocking function raised an HTTP exception, re-raise it
         raise e
-    except Exception as e:
-        # Catch any other unexpected errors from the processing function
+    except (OSError, RuntimeError, ValueError, ET.ParseError) as e:
+        # Raster/filesystem/catalog failures are server faults, eligible for failover.
         logger.error(f"Unhandled exception during raster processing: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="An internal error occurred during processing.")
 

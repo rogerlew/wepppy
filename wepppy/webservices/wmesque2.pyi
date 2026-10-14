@@ -50,6 +50,8 @@ def process_raster(
     resample: Optional[str],
     _format: str,
     gdaldem: Optional[str],
+    bbox_crs: Optional[str],
+    expected_revision: Optional[str] = ...,
 ) -> Tuple[str, Dict[str, Any], List[str]]: ...
 
 
@@ -65,6 +67,9 @@ async def health() -> Dict[str, str]: ...
 async def catalog() -> List[str]: ...
 
 
+async def catalog_manifest() -> Dict[str, Any]: ...
+
+
 async def api_dataset_retrieve(
     background_tasks: BackgroundTasks,
     dataset: Any = Path(...),
@@ -73,4 +78,6 @@ async def api_dataset_retrieve(
     resample: Any = Query(None),
     _format: Any = Query("GTiff"),
     gdaldem: Any = Query(None),
+    expected_revision: Any = Query(None),
+    bbox_crs: Any = Query(None),
 ) -> FileResponse: ...

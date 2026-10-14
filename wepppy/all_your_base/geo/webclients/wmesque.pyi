@@ -22,6 +22,9 @@ def _wmesque1_retrieve(
 def _b64url_to_bytes(s: str) -> bytes: ...
 
 
+def resolve_endpoints(explicit: str | None = ...) -> list[str]: ...
+
+
 def wmesque_retrieve(
     dataset: str,
     extent: Sequence[float],
@@ -32,4 +35,5 @@ def wmesque_retrieve(
     write_meta: bool = ...,
     wmesque_endpoint: str | None = ...,
     extent_crs: str | None = ...,
+    expected_revision: str | None = ...,
 ) -> int: ...

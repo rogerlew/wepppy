@@ -160,6 +160,11 @@ RUN curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v${QU
     /opt/venv/bin/python -m ipykernel install --prefix /opt/venv --name python3 && \
     quarto --version
 
+# rsync's private WMesque transport needs the client, never an SSH server.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssh-client && \
+    rm -rf /var/lib/apt/lists/*
+
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PROJ_LIB=/usr/share/proj

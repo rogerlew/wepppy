@@ -226,6 +226,10 @@ def _enqueue_task(queue: Queue, task: TaskState) -> bool:
         from wepppy.rq.run_catalog_rq import enqueue_sweep
         enqueue_sweep(queue, timeout=spec.job_timeout or 3600, result_ttl=spec.result_ttl or 86400)
         return True
+    if spec.func_path == "wepppy.rq.wmesque_rq.sync_wmesque_rq":
+        from wepppy.rq.wmesque_rq import enqueue_sync
+        enqueue_sync(queue, timeout=spec.job_timeout or 3600, result_ttl=spec.result_ttl or 86400)
+        return True
     func = _resolve_task_callable(task)
     if func is None:
         return False

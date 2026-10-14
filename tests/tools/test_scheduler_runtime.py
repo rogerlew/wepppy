@@ -264,3 +264,24 @@ def test_run_scheduler_passes_task_kwargs_to_enqueue(monkeypatch: pytest.MonkeyP
     assert enqueue_kwargs["write_index"] is False
     assert enqueue_kwargs["require_vendor_files"] is False
     assert enqueue_kwargs["sync_postgres"] is True
+
+
+@pytest.mark.parametrize('enabled', ['false', 'true'])
+def test_wmesque_schedule_is_opt_in(monkeypatch, enabled):
+    monkeypatch.setenv('WMESQUE_SYNC_ENABLED', enabled)
+    config = scheduler._load_config(str(Path(__file__).resolve().parents[2] / 'docker/scheduled-tasks.yml'))
+    spec = next(item for item in scheduler._normalize_tasks(config['tasks'], config) if item.name == 'wmesque_sync')
+    assert spec.enabled is (enabled == 'true')
+    assert spec.queue == 'batch'
+    assert spec.interval_seconds == 86400
+
+
+def test_wmesque_uses_coalesced_enqueue(monkeypatch):
+    from wepppy.rq import wmesque_rq
+    calls = []
+    monkeypatch.setattr(wmesque_rq, 'enqueue_sync', lambda queue, **kwargs: calls.append(kwargs) or False)
+    config = {'name': 'wmesque_sync', 'func': 'wepppy.rq.wmesque_rq.sync_wmesque_rq',
+              'interval_seconds': 86400, 'enabled': True, 'queue': 'batch'}
+    spec = scheduler._normalize_tasks([config], {})[0]
+    assert scheduler._enqueue_task(_RecordingQueue('batch', object()), scheduler.TaskState(spec, None, 0))
+    assert calls == [{'timeout':3600, 'result_ttl':86400}]
