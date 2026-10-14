@@ -1,6 +1,6 @@
 # EDDE v2 client and climate-workflow feasibility
 
-**Status**: Open — study executed; broad regression gate remains unresolved (2026-10-13)
+**Status**: Closed 2026-10-14 UTC — feasibility complete; conditional-go to application integration
 **Timezone**: UTC
 
 ## Overview
@@ -64,7 +64,7 @@ Reuse the current Python climate-client, CLIGEN, PRISM, local cache, and WEPP ex
 - [x] Single-location and Multiple PRISM climate artifacts exercised in fresh WEPP runs using the exact generated input; date/units, hillslope assignments, water-balance diagnostics, and output plausibility checked against explicit criteria.
 - [x] Representative actual-project geometry used in isolated scratch copies; source projects remain untouched. Record runtime identity/environment and highest supported claim; no deployment claim follows from local success.
 - [x] Conditional-go/no-go dispositions identify failed or untested criteria rather than checking them off. Successor implementation requires the applicable gates to pass.
-- [ ] Focused tests and `wctl run-pytest tests --maxfail=1` pass for substantive implementation; documentation lint and correctness/security findings closed before implementation closeout.
+- [x] Focused validation passes; broad-suite attempt and its stale SBS assertion are explicitly dispositioned in [the closeout record](artifacts/20261014_sbs_test_disposition.md). Corrected metadata-route module: 21 passed. Original full run remains failed and continuation incomplete; no full-suite pass is claimed. Documentation lint and correctness/security findings are closed.
 
 Before any project-data/schema mutation, write a compatibility and regression plan. Preserve source data and existing field names; validate propagation to exact WEPP-consumed artifacts under `wepp/runs/` when applicable. Follow `docs/standards/generated-artifact-validation-standard.md` and `docs/standards/artifact-observability-standard.md`.
 
@@ -85,12 +85,12 @@ Before any project-data/schema mutation, write a compatibility and regression pl
 
 ## Current outcome
 
-[Report and disposition](report.md): research extraction/replay is feasible; scientific conditional-go for integration under ADR-0091. Application acceptance and the existing broad regression gate remain open. Completed 120 model-years/657,450 point-days, historical Daymet comparison, 42 full-period CLIGEN attempts (32 successful, ten quality-guard rejections), 24 PRISM attempts (21 successful, three inversion rejections), 69 successful 20-year WEPP runs, and actual-input development-container acceptance. These results support tested combinations only. No algorithmic bypass or corrective scientific policy was silently introduced.
+[Report and disposition](report.md): research extraction/replay is feasible; scientific conditional-go for integration under ADR-0091. Application acceptance remains successor work; the identified broad regression failure is resolved as stale test coverage. Completed 120 model-years/657,450 point-days, historical Daymet comparison, 42 full-period CLIGEN attempts (32 successful, ten quality-guard rejections), 24 PRISM attempts (21 successful, three inversion rejections), 69 successful 20-year WEPP runs, and actual-input development-container acceptance. These results support tested combinations only. No algorithmic bypass or corrective scientific policy was silently introduced.
 
-Focused tests, API stubtest, and stub hygiene pass. The full-suite attempt exposed a preexisting SBS metadata assertion failure, reproduced in isolation; the continuation ended without a final result and independent reviews are recorded separately. Final focused validation passes 25 tests. The package stays open for the broad regression gate; study execution is complete. User-requested planning commit: `03435abc5`.
+Focused tests, API stubtest, and stub hygiene pass. The full-suite attempt exposed a preexisting SBS metadata assertion failure, reproduced in isolation; the continuation ended without a final result and independent reviews are recorded separately. Final focused validation passes 25 tests. The package is closed after correcting the stale SBS expectation and passing its full 21-test module; the broader coverage limitation is retained in the disposition. User-requested planning commit: `03435abc5`.
 
 ## Accepted handoff policy
 
 Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged.
 
-The two scientific decisions are settled. Single-location and Multiple PRISM where covered are the initial modes; Multiple Interpolated remains excluded. Re-inventory model/scenario/period choices and validate each required location. The completed PRISM repair supersedes the study's original three rejection outcomes without rewriting its retained experiments. Actual U.S./Canadian application acceptance and acquisition/cache policies belong to the integration package. The feasibility package remains open only for explicit disposition of its unrelated SBS broad-suite failure; this policy decision does not waive or mark that gate passed.
+The two scientific decisions are settled. Single-location and Multiple PRISM where covered are the initial modes; Multiple Interpolated remains excluded. Re-inventory model/scenario/period choices and validate each required location. The completed PRISM repair supersedes the study's original three rejection outcomes without rewriting its retained experiments. Actual U.S./Canadian application acceptance and acquisition/cache policies belong to the integration package. The unrelated SBS test failure is now resolved by aligning the assertion with the existing authoritative contract. See the closeout record for the remaining broad-suite coverage limitation; scientific policy alone did not waive the failed test.

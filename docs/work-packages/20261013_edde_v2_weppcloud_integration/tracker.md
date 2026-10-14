@@ -3,7 +3,7 @@
 ## Quick status
 
 **Started / last updated**: 2026-10-13 21:15 UTC  
-**Current phase**: Backlog; gated on feasibility  
+**Current phase**: Ready for integration planning; feasibility closed
 **Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
 **Plan**: [Package scope and acceptance](package.md). Execution plan to be authored before implementation.
 
@@ -26,7 +26,7 @@ None; this session scopes future work only.
 
 ### Blocked
 
-Scientific conditional-go and executable workflow evidence are available. Integration still needs its ExecPlan, contract/state matrix, explicit supported choices and disposition of the unrelated broad regression failure.
+Scientific conditional-go and executable workflow evidence are available. Integration still needs its ExecPlan, contract/state matrix, explicit supported choices and actual-project acceptance. The unrelated stale SBS assertion is corrected and its full metadata-route module passes 21 tests; original broad results remain failed/incomplete.
 
 ## Decisions log
 
@@ -59,3 +59,5 @@ Source inventory, coverage, quality, replay and PRISM evidence are retained. Raw
 **2026-10-14 UTC — Accepted scientific policy:** Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Scientific method decisions are settled; integration remains unstarted. PRISM ordering repair is now completed and validated in its separate package, superseding the earlier progress notes. The unrelated SBS broad gate remains explicitly open; actual Canadian-project acceptance and operational decisions belong to integration.
 
 Policy-update validation: scoped Markdown lint passed for all nine changed documents; no executable code changed and no runtime tests were required. Existing spelling suggestions outside the changed prose remain untouched.
+
+**2026-10-14 UTC — Feasibility handoff complete:** The stale SBS assertion is corrected against the existing upload contract; 21 metadata-route tests pass. Feasibility closed with conditional-go and explicit broad-suite coverage limits. No remaining scientific correction/auxiliary-field study is required. Author the integration ExecPlan and contracts before runtime work; retain full-suite and actual U.S./Canadian acceptance gates.

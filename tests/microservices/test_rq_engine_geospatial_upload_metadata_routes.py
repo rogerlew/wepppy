@@ -495,7 +495,7 @@ def test_upload_schema_and_defaults_routes_include_hardened_file_metadata(
     if operation_id == "rq_engine_upload_sbs":
         sbs_field = descriptor["file_fields"][0]
         assert sbs_field["value_semantics"]["max_unique_classes"] == 256
-        assert sbs_field["value_semantics"]["color_table_mode"] == "optional_but_if_present_must_map_known_severity"
+        assert sbs_field["value_semantics"]["color_table_mode"] == "optional_unknown_colors_unassigned"
     if operation_id == "rq_engine_upload_dem":
         dem_field = descriptor["file_fields"][0]
         assert dem_field["resolution_requirements"]["max_dimension_px"] == watershed_routes.UPLOAD_DEM_MAX_DIMENSION

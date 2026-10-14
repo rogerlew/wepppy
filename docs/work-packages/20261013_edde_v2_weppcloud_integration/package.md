@@ -21,7 +21,7 @@ The [feasibility report](../20261013_edde_v2_feasibility/report.md) demonstrates
 
 ## Entry gate
 
-The scientific conditional-go accepts raw future EDDE plus station-generated auxiliary fields. Before application implementation, record supported locale/model/scenario/period/spatial-mode combinations and remaining limitations in the integration contract. The feasibility broad regression failure still needs explicit disposition; it is not waived by the scientific decision. Require client API and error contracts, generated CLIGEN/WEPP evidence, acquisition measurements, scientific ADRs, and provenance fields. A conditional-go permits only combinations whose required evidence passes. A no-go leaves this package deferred.
+The scientific conditional-go accepts raw future EDDE plus station-generated auxiliary fields. Before application implementation, record supported locale/model/scenario/period/spatial-mode combinations and remaining limitations in the integration contract. The feasibility package is closed; its stale SBS assertion is corrected and its complete metadata-route module passes 21 tests. Original full-suite failed/incomplete results are retained, not relabeled passing. Integration retains its own full-suite gate. Require client API and error contracts, generated CLIGEN/WEPP evidence, acquisition measurements, scientific ADRs, and provenance fields. A conditional-go permits only combinations whose required evidence passes. A no-go leaves this package deferred.
 
 Before implementation, author `prompts/active/edde_v2_weppcloud_integration_execplan.md` using `docs/prompt_templates/codex_exec_plans.md`; read nearest AGENTS instructions and `docs/standards/contract-first-change-standard.md`. Update authoritative UI/data contracts before coupled production code. No method enum value, default model/scenario/period, or locale identifier is reserved by this planning document.
 
@@ -49,7 +49,7 @@ Reuse existing climate clients/adapters, capability/configuration ownership, rou
 
 ## Success criteria and generated artifact gate
 
-- [ ] Feasibility entry gate met and accepted contracts promoted outside closed work packages.
+- [x] Feasibility method handoff accepted and contracts promoted; supported application choices/state contracts remain M1 work.
 - [ ] Locale presentation and per-project/per-location server eligibility agree, including Canadian and PRISM-negative cases.
 - [ ] Only validated source combinations and Single/Multiple PRISM choices can build; unsupported selections return clear contract-compliant errors.
 - [ ] Saved selections reload correctly; actual source records, normalized intermediates, exact CLIGEN/WEPP inputs, fresh outputs, and displayed/exported provenance agree.

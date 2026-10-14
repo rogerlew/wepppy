@@ -1,6 +1,8 @@
 # Execute EDDE v2 query and climate feasibility
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective with the package tracker. The executing package is `20261013_edde_v2_feasibility`; WEPPcloud integration remains deferred.
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective with the package tracker. The executing package is `20261013_edde_v2_feasibility`; Feasibility is closed with conditional-go; WEPPcloud implementation and acceptance are successor work.
+
+Outcome: completed feasibility with conditional-go; stale SBS assertion repaired, 21 metadata-route tests pass. Broad-suite coverage limitations remain disclosed. See the final disposition and package report.
 
 ## Purpose / Big Picture
 
@@ -17,9 +19,11 @@ A researcher will query real U.S. and Canadian points from the public EDDE v2 ar
 - [x] (2026-10-13 22:00 UTC) M1: Implement bounded public-archive discovery, native-grid eligibility, daily point extraction, CLI, and meaningful offline tests; retain live inventory and acquisition evidence.
 - [x] M2: Probe both grids and actual-location matrix; measure historical quality, future signals, data completeness, and multidecade acquisition.
 - [x] M3: Implement explicit experimental CLIGEN adapter and demonstrate single/PRISM climates and fresh WEPP outputs with preserved provenance.
-- [ ] M4: Implementation/evidence delivered; focused tests and independent reviews pass, contract and ADR promoted. Broad regression gate remains open due to the preexisting SBS assertion; continuation is incomplete.
+- [x] M4: Implementation/evidence delivered, scientific policies accepted, independent reviews pass and contracts promoted. Stale SBS test corrected; metadata-route module passes 21. Original broad results remain failed/incomplete; bounded disposition recorded.
 
 ## Surprises & Discoveries
+
+Closeout: the SBS assertion predates the changed palette admission contract. Runtime already matches the canonical contract; only the expected string needed correction. This was not an EDDE regression.
 
 
 The first daily file inspected is NETCDF3_CLASSIC, despite the registry description of compressed NetCDF4. January humidity is 32,858,496 bytes; the 1985 daily MPI inventory has 84 files, seven variables, totaling 2,711,344,148 bytes. It has `time,y,x` arrays and unlimited time. Full monthly download is the simplest initial client; multiple requested points share acquisition. HTTP byte ranges work, but a new range parser is not justified before measuring this bounded approach. Daily fields are `husmean`, `prday`, `tsmax`, `tsmean`, `tsmean2`, `tsmin`, and `wspds`; radiation requires separate investigation.
@@ -27,6 +31,8 @@ The first daily file inspected is NETCDF3_CLASSIC, despite the registry descript
 Live inventory found MPI future daily coverage ending in 2099 and NorESM SSP2-4.5 ending in 2079, with no NorESM SSP3-7.0 directory. Use 2060–2079 for matched model comparisons, and retain MPI 2080–2099 as a distinct late-century experiment. Topanga's three sampled hillslopes and Miami select ocean-mask cells; eight Canadian cities select valid land cells. A 465-point-day precipitation comparison establishes same-labeled 00–23 UTC daily aggregation (maximum error 1.22e-6 mm). Pilot climate generation and 59 fresh WEPP runs passed; one PRISM target was rejected for daily temperature inversion, without clamping. The operator continued after the pending independent-review request; correctness and security reviewers were then engaged. Their concrete findings prompted rejection of invalid PRISM source files, protection of existing companion provenance, suppression of ambient netrc authentication, and additional seasonal wet-day/extreme diagnostics.
 
 ## Decision Log
+
+2026-10-14 UTC, operator requested failure disposition: correct the stale assertion to match existing SBS policy, validate the complete metadata-route module, and close the feasibility hold while retaining the incomplete broad coverage. Do not alter production behavior or claim a full-suite pass.
 
 2026-10-14 UTC, operator/Codex: Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Rationale: correcting bias or subgrid terrain would be a separate scientific method; reuse the precedented hybrid with attribution. These decisions supersede earlier scientific-policy deferrals.
 
@@ -89,7 +95,7 @@ Use existing `requests`, `netCDF4`, `numpy`, `pandas`, and `pyproj` for HTTP, Ne
 
 The 120-model-year study completed 657,450 point-days and 69 successful full-period WEPP executions. Ten of 42 CLIGEN attempts and three of 24 PRISM attempts were explicitly rejected; the 59-run pilot and development-container single/PRISM consumer checks succeeded. Historical biases and station-derived auxiliary weather were initially adoption questions; the operator now accepts them as disclosed limitations under ADR-0091. The full regression gate failed an unchanged SBS metadata expectation after 1,265 passes and 28 skips; isolated reproduction confirms it. A continuation ended without a final summary at approximately 34%, so it is incomplete coverage, not a passing gate. Final focused validation and independent reviews are recorded in the report. Initial plan authored 2026-10-13.
 
-Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package remains open for the documented broad-suite regression gate, not additional data acquisition or integration work.
+Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package is now closed after the identified stale SBS test was corrected; the remaining broad-suite coverage limitation is explicitly retained.
 
 Scope clarification revision: corrected the handoff framing so diagnostic historical runs and known CLIGEN behavior do not expand the requested future-climate feature. Report, package scopes, durable contract, and trackers now record that distinction. Documentation lint passed; no executable behavior changed.
 
@@ -98,3 +104,5 @@ PRISM clarification revision: report and authoritative scope now distinguish the
 Patch investigation outcome: midpoint projection repaired all 15 observed inversions in three climates; all three passed fresh 20-year WEPP consumption. All 21 previously accepted revisions remain numerically unchanged. ADR-0092 proposes the formula and coordinated Rust/Python implementation; this evaluation does not modify production climate writers. Monthly perturbation and exact written/consumed evidence are retained under artifacts/prism-inversion-patch-*.
 
 Policy update: the operator settled raw-projection and station-hybrid acceptance after PRISM repair completion. No further bias/elevation correction or projected auxiliary-field study is required. Earlier discovery/proposal entries remain historical evidence. Scientific conditional-go is recorded; the existing unrelated SBS broad regression gate remains open, while actual application acceptance belongs to integration. No runtime change was made in this policy update.
+
+Final outcome: feasibility closed 2026-10-14 UTC with conditional-go. The single obsolete SBS metadata expectation is corrected and all 21 module tests pass. Exact authority, ancestry and retained output are in `../../artifacts/20261014_sbs_test_disposition.md`. Original broad failures remain evidence; integration retains its normal full-suite and actual-project gates. No scientific, production or deployment behavior changed during this closeout.

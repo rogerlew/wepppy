@@ -2,10 +2,10 @@
 
 ## Quick status
 
-**Started / last updated**: 2026-10-13 22:58 UTC
-**Current phase**: Study executed; M4 delivery, broad regression gate open
+**Started / last updated**: 2026-10-13 / 2026-10-14 UTC
+**Current phase**: Closed — conditional-go handoff; stale SBS test corrected
 **Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
-**Plan**: [Package scope and acceptance](package.md). [Active ExecPlan](prompts/active/edde_v2_feasibility_execplan.md).
+**Plan**: [Package scope and acceptance](package.md). [Completed ExecPlan](prompts/completed/edde_v2_feasibility_execplan.md).
 
 ## Task board
 
@@ -18,7 +18,7 @@
 - [x] M1: Author ExecPlan; inventory source records; build bounded client and query command.
 - [x] M2: Retain actual-location coverage matrix, historical quality study, and acquisition benchmarks.
 - [x] M3: Implement and validate single-location CLIGEN and Multiple PRISM workflows.
-- [ ] M4: Complete reviews, scientific ADRs, and evidence-based integration disposition.
+- [x] M4: Complete reviews, scientific ADRs, and evidence-based integration disposition.
 
 ### In progress
 
@@ -26,7 +26,7 @@ M1–M3 executed: 120 model-years, 657,450 point-days, 69 successful full-period
 
 ### Blocked
 
-The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Raw-projection and hybrid policies are accepted and PRISM repair is complete. Actual Canadian-project acceptance belongs to integration; see report.
+No remaining feasibility blocker. The SBS expectation was stale relative to its existing contract and is now corrected; all 21 metadata-route tests pass. The original broad run failed and its continuation remains incomplete, not passing. Raw-projection and hybrid policies are accepted and PRISM repair is complete. Actual Canadian-project acceptance belongs to integration; see report.
 
 ## Decisions log
 
@@ -38,10 +38,10 @@ Measured coverage, endpoint, quality, acquisition, and generated-artifact eviden
 
 ## Verification
 
-- [ ] Applicable package success criteria and generated-artifact chain passed.
+- [x] Applicable feasibility criteria and generated-artifact chain complete; broad-suite coverage limitation explicitly dispositioned.
 - [x] Parameterization ADR-0091 records accepted research transformations and deferred production policies.
 - [x] Correctness/security review artifacts complete with no unresolved medium/high findings.
-- [ ] Required implementation tests and actual-project acceptance recorded.
+- [x] Research implementation tests and artifact acceptance recorded; actual application acceptance transferred to integration.
 - [x] Durable experimental contract promoted; package and root tracker updated.
 
 ## Progress notes
@@ -63,3 +63,5 @@ Measured coverage, endpoint, quality, acquisition, and generated-artifact eviden
 **2026-10-14 UTC — Accepted scientific policy:** Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Scientific method decisions are settled; integration remains unstarted. PRISM ordering repair is now completed and validated in its separate package, superseding the earlier progress notes. The unrelated SBS broad gate remains explicitly open; actual Canadian-project acceptance and operational decisions belong to integration.
 
 Policy-update validation: scoped Markdown lint passed for all nine changed documents; no executable code changed and no runtime tests were required. Existing spelling suggestions outside the changed prose remain untouched.
+
+**2026-10-14 UTC — Closed:** Identified SBS failure is stale test coverage from pre-EDDE contract/implementation commits `b4be200b4`/`69cfd68aa`. Corrected the single expected string; full metadata-route module passes 21 tests. [Disposition](artifacts/20261014_sbs_test_disposition.md) preserves original failed/incomplete broad results without claiming a complete suite pass. Scientific policy, retained climate/WEPP evidence and independent reviews support conditional-go handoff. No production change or deployment. This closure supersedes earlier open-gate progress notes.

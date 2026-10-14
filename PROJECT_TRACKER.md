@@ -367,15 +367,9 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### EDDE v2 client and climate-workflow feasibility
-
-**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) records scientific conditional-go for raw future EDDE with the precedented CLIGEN hybrid; independent review findings resolved; unrelated broad regression gate remains open. The generic PRISM midpoint repair is now implemented and development-stack validated under ADR-0092 in its separate package; deployment remains separate.
-**Link**: [Work package](docs/work-packages/20261013_edde_v2_feasibility/package.md)
-**Scope**: Bounded API client, actual U.S./Canadian location queries, grid eligibility, data-quality and acquisition study, executable CLIGEN workflows, and Multiple PRISM where available. Multiple Interpolated excluded initially. Evidence-based disposition gates integration.
-
 ### EDDE v2 WEPPcloud integration
 
-**Status**: Backlog; raw future EDDE and the precedented CLIGEN hybrid are accepted under ADR-0091, with bias/grid-elevation limitations disclosed and correction outside scope. PRISM repair is complete. Integration contracts, actual-project acceptance and unrelated broad-gate disposition remain. Standalone feasibility reviews passed.
+**Status**: Backlog; raw future EDDE and the precedented CLIGEN hybrid are accepted under ADR-0091, with bias/grid-elevation limitations disclosed and correction outside scope. PRISM repair is complete. Feasibility is closed; integration contracts and actual-project acceptance remain. The unrelated stale SBS test is corrected. Standalone feasibility reviews passed.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_weppcloud_integration/package.md)
 **Scope**: Locale-scoped availability plus per-project eligibility, validated source/scenario/period controls, existing climate orchestration, provenance, and actual-project acceptance. Single and Multiple PRISM only initially.
 
@@ -1571,6 +1565,12 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### EDDE v2 client and climate-workflow feasibility (2026-10-14)
+
+**Status**: Closed; conditional-go for raw future EDDE and the precedented CLIGEN hybrid under ADR-0091. Bias/elevation correction outside scope; limitations retained.
+**Link**: [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md)
+**Outcome**: 120 model-years, 657,450 point-days, 69 full-period WEPP runs and independent reviews. Subsequent PRISM repair complete. Stale unrelated SBS assertion corrected; 21 metadata-route tests pass. Original broad suite failed/incomplete coverage is explicitly dispositioned, not a full-suite pass. Actual application acceptance remains integration work.
 
 ### PRISM spatialization temperature ordering (2026-10-13)
 

@@ -1,6 +1,6 @@
 # EDDE v2 feasibility findings
 
-**Study date**: 2026-10-13 UTC. **Disposition**: extraction and experimental daily replay are feasible; **scientific conditional-go for WEPPcloud integration** under the accepted raw-projection/station-hybrid policy; application acceptance and broad-gate disposition remain outstanding. No application mode, locale capability, NoDb state, RQ wiring, or deployment was changed.
+**Study date**: 2026-10-13 UTC. **Disposition**: extraction and experimental daily replay are feasible; **scientific conditional-go for WEPPcloud integration** under the accepted raw-projection/station-hybrid policy; application acceptance remains successor work and the unrelated SBS failure is resolved; feasibility closed 2026-10-14 UTC. No application mode, locale capability, NoDb state, RQ wiring, or deployment was changed.
 
 ## Scope clarification
 
@@ -73,9 +73,9 @@ This establishes a bounded batch path, not interactive latency. Existing asynchr
 2. Decided: retain the precedented CLIGEN hybrid and attribute its station-generated fields explicitly. Full-period source-derived auxiliary weather is outside the initial requirement.
 3. Completed in the separate PRISM package: midpoint ordering repair across all four writers, with retained diagnostics. Preserve CLIGEN guards/rounding and source eligibility; no unrelated clamping, relocation or quality bypass.
 4. Confirm project-level eligibility and actual Canadian project/locale acceptance in the integration environment. The current Canadian consumer runs use a U.S. hillslope fixture.
-5. Resolve the existing broad-suite regression gate before package closeout. Independent correctness and security reviews assess the bounded research implementation separately from scientific production adoption; their artifacts are linked below.
+5. Resolved: the broad-suite SBS failure was a stale test expectation; correction and 21 passing metadata-route tests are retained in [the disposition](artifacts/20261014_sbs_test_disposition.md). This is not a complete full-suite pass. Independent correctness and security reviews assess the bounded research implementation separately from scientific production adoption; their artifacts are linked below.
 
-The [integration package](../20261013_edde_v2_weppcloud_integration/package.md) remains gated. This study supports a reusable research client and identifies concrete blockers; it does not authorize production rollout.
+The [integration package](../20261013_edde_v2_weppcloud_integration/package.md) has its scientific feasibility handoff; implementation contracts and actual-project acceptance remain required. This study supports a reusable research client and identifies concrete blockers; it does not authorize production rollout.
 
 ## Data references
 
@@ -83,7 +83,7 @@ EPA Dynamically Downscaled Ensemble (EDDE), Version 2, U.S. EPA (2024), [DOI 10.
 
 ## Implementation validation
 
-The required broad test command stopped at an unchanged SBS upload-metadata contract assertion after 1,265 passed and 28 skipped; the same failure reproduced in isolation. The follow-on run ended without a summary at roughly 34% and is recorded as incomplete, not passing. No unrelated SBS behavior was changed. Focused client/real-CLIGEN tests, API stubtest, stub hygiene, and review outcomes are retained under [validation evidence](artifacts/validation/). The feasibility study is executed; its broad regression gate remains open, and the scientific conditions above are now accepted; application integration and broad-gate disposition remain outstanding.
+The required broad test command stopped at an unchanged SBS upload-metadata contract assertion after 1,265 passed and 28 skipped; the same failure reproduced in isolation. The follow-on run ended without a summary at roughly 34% and is recorded as incomplete, not passing. No unrelated SBS behavior was changed. Focused client/real-CLIGEN tests, API stubtest, stub hygiene, and review outcomes are retained under [validation evidence](artifacts/validation/). The feasibility study is complete and scientific conditions above are accepted. Its identified SBS failure is resolved by the closeout below; application integration remains outstanding.
 
 Independent [correctness review](artifacts/20261013_independent_correctness_review.md) passed after resolving source-validation, provenance-preservation, and seasonal-evidence findings. [Security review](artifacts/20261013_independent_security_review.md) records the anonymous-request correction and its verification; [implementer QA](artifacts/20261013_qa_review.md) is explicitly separate. Focused validation: **25 passed**; stubtest: **four modules passed**; stub hygiene, changed-exception enforcement, and documentation lint passed. The full native metadata audit passed all 4,320 objects.
 
@@ -103,4 +103,4 @@ The operator has accepted both raw future EDDE and the precedented station hybri
 
 The earlier PRISM rejection/proposal statements describe the original study. They are superseded for current executable behavior by [the completed implementation](../20261013_prism_temperature_ordering/report.md): all three rejected climates now pass, and the 21 accepted revisions are unchanged. Do not reinterpret or overwrite the archived original results.
 
-Remaining feasibility closeout: explicit disposition of the unrelated SBS broad-suite failure (also observed in the PRISM package), not another scientific-method decision. Actual Canadian-project acceptance, supported live inventory choices, UI/worker integration, operational acquisition policies and deployment remain successor-package work. This is a scientific conditional-go, not a clean broad-test result or production rollout claim.
+Feasibility closeout is complete: [the SBS failure disposition](artifacts/20261014_sbs_test_disposition.md) establishes the obsolete test expectation, corrects it and retains 21 passing metadata-route tests. The original full-suite failure and incomplete continuation remain historical results; no complete broad pass is claimed. Actual Canadian-project acceptance, supported live inventory choices, UI/worker integration, operational acquisition policies and deployment remain successor-package work. This is a scientific conditional-go, not a clean broad-test result or production rollout claim.
