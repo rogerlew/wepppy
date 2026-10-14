@@ -157,3 +157,56 @@ may resolve to the established parent project only for canonical
 child scenario to Query Engine; a terminal `;;omni;;<name>` URL already names the
 child endpoint. Labels use the exact child name. Batch-map dashboards do not
 expose this run-specific panel.
+
+## Observed streamflow overlay
+
+Accepted scope 2026-10-14; implementation conformance pending in the observed
+flow-duration work package. Projects with Observed uploads shall offer an optional
+Show observed streamflow checkbox for both hillslope streamflow and channel outlet
+discharge. Default off; preserve its selection across source/year/axis/layout
+changes using existing dashboard state. Render one stable Observed series alongside
+all scenarios, with normal legend, hover and keyboard/touch value access.
+
+Use project-local observed/observed.csv normalized by Observed.parse_textdata;
+require Year, Month, Day, Julian (zero-based) and Streamflow (mm). Convert Julian
+to the graph's one-based convention. Empty flow cells and NaN are missing; retain
+numeric strings until existing validation rejects negatives/infinities/nonnumeric
+values. Dates, duplicates, zeros, ties and missing-day coverage follow daily graph
+rules. Do not require calc_model_fit or read its matched comparison CSVs.
+
+Convert depth using the same project totalwatsed3 maximum Area (m²) used by Observed
+model-fit: Q = depth_mm × area_m² / 1000 / 86400. Require finite positive area;
+never invent a default or use a channel area. Both plot sources use this same
+observed distribution. At area 86,400,000 m², depths [4,2,2,0] mm yield
+[4,2,2,0] m³/s with probabilities [20,40,60,80] percent. See ADR-0093.
+
+Use the complete measured record, independent N and period, without simulated
+warm-up exclusions or common-date intersection. Label this policy next to the
+control and label year selection as simulation-only. Rationale: observations have
+no model initialization period; discarding their early years would remove valid
+measurements. Independent record lengths match existing scenario comparisons.
+
+Read narrow CSV rows and conversion area through the existing authorized dashboard
+bootstrap. Validate ownership before opening files; reject symlinks escaping the
+project. No catalog dependency is required for observations. The canonical
+_pups/omni/scenarios/<name> view uses the parent project's observed record and area,
+while simulated daily sources retain their own scenario ownership. Other child
+paths never infer an arbitrary ancestor. Roads remains unavailable. Bootstrap is
+a page-session snapshot: reload after replacing observations or model outputs.
+
+Valid states: absent upload hides the optional control; no streamflow column,
+present-empty CSV, malformed headers/rows, missing/invalid area and escaping paths
+show an observed-unavailable explanation without suppressing simulations. Available
+metadata enables the checkbox; invalid dates/flows or duplicates invalidate only
+the observed curve when selected. All-null/empty populations show an explicit
+no-valid-values message. Keep user-provided values out of HTML interpolation.
+Absent optional data is normal; invalid present artifacts are explained and logged.
+The additional series is additive and never modifies Observed files or model outputs.
+
+Bound eager bootstrap work to at most 16 MiB of observed CSV bytes and 100,000
+daily records. Read at most the byte limit plus one before parsing, and stop at
+the first excess row. Oversized artifacts are explicitly observed-unavailable;
+never truncate or sample a distribution. These transport limits cover over 270
+years of daily records; they are not scientific filters. Retain files unchanged
+and explain the limit with a reload/reduce-upload action. No observed rows are
+returned on failure. File-size metadata alone is not the enforced read bound.

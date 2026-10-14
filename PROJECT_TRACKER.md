@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Active: [Observed flow-duration overlay](docs/work-packages/20261014_gl_dashboard_observed_flow_duration/package.md) — optional measured distribution on hillslope and outlet plots; contract checkpoint in progress.
+
 Completed (code/focused validation): [Selected onboarding audit corrections](docs/work-packages/20261013_onboarding_audit_corrections/package.md) — D01/D02/D13/D14/D18; AgFields 261010 default, editable unknown SBS palettes, ORCID deferral, Mariana contact and official FAQ. Reviewed checkpoint b4be200b4; 182 passed/1 skipped. Other 13 audit dispositions remain open; no production rollout.
 
 Completed (Forest): [PowerUser discovery and onboarding](docs/work-packages/20261013_poweruser_discovery_onboarding/package.md) — Runs discovery, immediate Profile activation, panel orientation, report guard and guide verified at `3df2ec482`. Real grant/DB/browser and cleanup evidence retained; 10,723 distinct Python tests pass across segments, 980 frontend tests pass. Existing lint/order/timing limitations documented. Permissions unchanged; production rollout and push remain separate.
