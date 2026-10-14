@@ -61,3 +61,5 @@ Source inventory, coverage, quality, replay and PRISM evidence are retained. Raw
 Policy-update validation: scoped Markdown lint passed for all nine changed documents; no executable code changed and no runtime tests were required. Existing spelling suggestions outside the changed prose remain untouched.
 
 **2026-10-14 UTC — Feasibility handoff complete:** The stale SBS assertion is corrected against the existing upload contract; 21 metadata-route tests pass. Feasibility closed with conditional-go and explicit broad-suite coverage limits. No remaining scientific correction/auxiliary-field study is required. Author the integration ExecPlan and contracts before runtime work; retain full-suite and actual U.S./Canadian acceptance gates.
+
+**M1 checkpoint (2026-10-14 UTC):** Contract ancestor `75b47f61f`; standalone reader floor `26c9e86ca`. Four additive US/Canada ordinary/single-input structures registered; all 18 older entries unchanged. Capability suite passes 79 tests after updating exact catalog-count/hash expectations. No live writer exposure yet.

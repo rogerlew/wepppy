@@ -735,7 +735,7 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         "c1d02d73f",
         "e25299022",
         "6781de988",
-        "pending-standalone-edde-reader-floor",
+        "26c9e86ca",
     }
     assert all(
         hashlib.sha256(
