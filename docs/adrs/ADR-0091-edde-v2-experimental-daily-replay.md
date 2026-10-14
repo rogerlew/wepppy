@@ -40,3 +40,7 @@ See [feasibility package](../work-packages/20261013_edde_v2_feasibility/package.
 ## Risk and rollback
 
 All additions are isolated and existing methods/defaults remain unchanged. Do not enable WEPPcloud integration without an explicit disposition that addresses the station-field limitations, geography, period availability, and bias assessment. Revert the additive client/adapter if provenance, units, or generated-input parity fails. Retain failed experiment logs and manifests.
+
+## Amendment: introduced PRISM inversions
+
+ADR-0092 supersedes rejection/no-correction policy only for finite temperature inversions introduced by independent PRISM offsets: replace both adjusted extrema with their midpoint before serialization, following the [temperature-ordering contract](../schemas/prism-spatialization-temperature-contract.md). Implementation conformance is pending the dedicated package. Preserve source validation, CLIGEN guards, other weather fields, and all unrelated rejection behavior. This is not a bias correction.

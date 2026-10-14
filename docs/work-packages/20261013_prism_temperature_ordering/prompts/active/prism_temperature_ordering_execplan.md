@@ -1,6 +1,6 @@
 # Preserve temperature ordering in every PRISM spatialization writer
 
-This living plan follows `docs/prompt_templates/codex_exec_plans.md`. Execute package `20261013_prism_temperature_ordering`; keep this plan and its tracker current. Planning is the current authorized turn; this document describes subsequent implementation work.
+This living plan follows `docs/prompt_templates/codex_exec_plans.md`. Execute package `20261013_prism_temperature_ordering`; keep this plan and its tracker current. The operator authorized execution; M1 contract review is in progress.
 
 ## Purpose / Big Picture
 
@@ -85,3 +85,5 @@ Keep existing climate API signatures and Rust import paths. Reuse NumPy and owne
 
 
 Planning complete; production implementation, reviewed contract checkpoint, rebuilt native extension, and final consumer validation are pending. Prototype results support the chosen small correction but do not substitute for wired acceptance. Initial plan authored 2026-10-13 in response to the operator's request for an implementation package and ADR.
+
+M1 review amendment: process logging alone misses durable per-project diagnostic retention. Implement visible per-output `.temperature-ordering.log` with working/completed status in the normal climate/attempt directory, without changing native return values. This is the smallest bounded escalation after verifying separate native/module and project log channels. Add actual canonical ZIP archive/restore plus authenticated browser/download checks for completed/failed climate and log paths. The Historic PRISM downstream `max(raw tdmean, final Tmin)` rule remains unchanged and needs a repaired-day propagation regression.
