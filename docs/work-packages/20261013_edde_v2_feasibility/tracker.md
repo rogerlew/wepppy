@@ -26,7 +26,7 @@ M1–M3 executed: 120 model-years, 657,450 point-days, 69 successful full-period
 
 ### Blocked
 
-The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Production integration is held for future-projection interpretation, projected auxiliary weather, PRISM limitation documentation, and actual Canadian project acceptance; see report.
+The required broad regression gate fails an unchanged SBS metadata assertion (also reproduced in isolation). Continuation ended without a final result. Raw-projection and hybrid policies are accepted and PRISM repair is complete. Actual Canadian-project acceptance belongs to integration; see report.
 
 ## Decisions log
 
@@ -34,7 +34,7 @@ The required broad regression gate fails an unchanged SBS metadata assertion (al
 
 ## Risks and open questions
 
-Measured coverage, endpoint, quality, acquisition, and generated-artifact evidence are in report.md and indexed archives. Scientific policies and actual Canadian project acceptance remain unresolved; no undocumented defaults or silent fallback are authorized.
+Measured coverage, endpoint, quality, acquisition, and generated-artifact evidence are in report.md and indexed archives. Scientific policies are accepted in ADR-0091. Actual Canadian-project acceptance remains integration work; no undocumented defaults or silent fallback are authorized.
 
 ## Verification
 
@@ -59,3 +59,7 @@ Measured coverage, endpoint, quality, acquisition, and generated-artifact eviden
 **PRISM patch investigation (2026-10-13):** Operator requested a patch approach. Evaluated midpoint projection only on inverted adjusted extrema against all 24 retained revisions; 15 days repaired, 21 previously successful revisions unchanged, three fresh 20-year WEPP executions passed. Production daily spatialization uses Rust wepppyo3; Python breakpoint/public PRISM and EDDE paths also need coordinated implementation. See proposed ADR-0092 and the candidate evaluation artifacts. No production formula changed.
 
 **2026-10-13 23:52 UTC:** Operator requested the dedicated [PRISM temperature-ordering implementation package](../20261013_prism_temperature_ordering/package.md) and accepted ADR-0092 design. All four writer paths and rebuilt-native consumer validation are planned there; this does not expand EDDE application scope or claim the repair is installed.
+
+**2026-10-14 UTC — Accepted scientific policy:** Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Scientific method decisions are settled; integration remains unstarted. PRISM ordering repair is now completed and validated in its separate package, superseding the earlier progress notes. The unrelated SBS broad gate remains explicitly open; actual Canadian-project acceptance and operational decisions belong to integration.
+
+Policy-update validation: scoped Markdown lint passed for all nine changed documents; no executable code changed and no runtime tests were required. Existing spelling suggestions outside the changed prose remain untouched.

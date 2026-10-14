@@ -1,10 +1,10 @@
 # EDDE v2 feasibility findings
 
-**Study date**: 2026-10-13 UTC. **Disposition**: extraction and experimental daily replay are feasible; **hold WEPPcloud production integration** pending the scientific and integration gates below. No application mode, locale capability, NoDb state, RQ wiring, or deployment was changed.
+**Study date**: 2026-10-13 UTC. **Disposition**: extraction and experimental daily replay are feasible; **scientific conditional-go for WEPPcloud integration** under the accepted raw-projection/station-hybrid policy; application acceptance and broad-gate disposition remain outstanding. No application mode, locale capability, NoDb state, RQ wiring, or deployment was changed.
 
 ## Scope clarification
 
-The operator clarified that the application scope is future climate only. Historical EDDE runs are diagnostic baselines for source assessment and future-change checks, not a proposed historical climate method. Existing CLIGEN quality-guard failures and PRN/CLI quantization are known limitations; retain their reporting and current safeguards, but do not require this package to solve them as new integration blockers. This clarification does not approve a bias correction or decide how future auxiliary fields or PRISM temperature inversions should be handled.
+The operator clarified that the application scope is future climate only. Historical EDDE runs are diagnostic baselines for source assessment and future-change checks, not a proposed historical climate method. Existing CLIGEN quality-guard failures and PRN/CLI quantization are known limitations; retain their reporting and current safeguards, but do not require this package to solve them as new integration blockers. Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged.
 
 ## What was executed
 
@@ -69,9 +69,9 @@ This establishes a bounded batch path, not interactive latency. Existing asynchr
 
 ## Required handoff gates
 
-1. Document the interpretation of raw future projections and their model-bias limitations. Historical comparisons are supporting diagnostics, not an in-scope historical method or an automatic requirement to build bias correction. Any proposed adjustment requires a separate scientific decision and future-signal validation.
-2. Decide how to derive or validate future storm structure, radiation, wind, and dewpoint. Hourly fields and 5-minute precipitation exist in inspected inventories; this study did not build full-period source-derived auxiliary weather.
-3. Document the generic PRISM temperature-inversion limitation and expose the actual workflow outcome; this is not a separate EDDE integration blocker. Preserve existing CLIGEN failure reporting and rounding behavior as known limitations; resolving those existing limitations is not a new EDDE integration prerequisite. Do not bypass, clamp, or silently relocate.
+1. Decided: use raw future EDDE with bias and grid-scale elevation limitations disclosed. No bias correction or additional elevation correction; historical comparisons remain diagnostics.
+2. Decided: retain the precedented CLIGEN hybrid and attribute its station-generated fields explicitly. Full-period source-derived auxiliary weather is outside the initial requirement.
+3. Completed in the separate PRISM package: midpoint ordering repair across all four writers, with retained diagnostics. Preserve CLIGEN guards/rounding and source eligibility; no unrelated clamping, relocation or quality bypass.
 4. Confirm project-level eligibility and actual Canadian project/locale acceptance in the integration environment. The current Canadian consumer runs use a U.S. hillslope fixture.
 5. Resolve the existing broad-suite regression gate before package closeout. Independent correctness and security reviews assess the bounded research implementation separately from scientific production adoption; their artifacts are linked below.
 
@@ -83,7 +83,7 @@ EPA Dynamically Downscaled Ensemble (EDDE), Version 2, U.S. EPA (2024), [DOI 10.
 
 ## Implementation validation
 
-The required broad test command stopped at an unchanged SBS upload-metadata contract assertion after 1,265 passed and 28 skipped; the same failure reproduced in isolation. The follow-on run ended without a summary at roughly 34% and is recorded as incomplete, not passing. No unrelated SBS behavior was changed. Focused client/real-CLIGEN tests, API stubtest, stub hygiene, and review outcomes are retained under [validation evidence](artifacts/validation/). The feasibility study is executed; its broad regression gate remains open, and production integration remains held for the scientific conditions above.
+The required broad test command stopped at an unchanged SBS upload-metadata contract assertion after 1,265 passed and 28 skipped; the same failure reproduced in isolation. The follow-on run ended without a summary at roughly 34% and is recorded as incomplete, not passing. No unrelated SBS behavior was changed. Focused client/real-CLIGEN tests, API stubtest, stub hygiene, and review outcomes are retained under [validation evidence](artifacts/validation/). The feasibility study is executed; its broad regression gate remains open, and the scientific conditions above are now accepted; application integration and broad-gate disposition remain outstanding.
 
 Independent [correctness review](artifacts/20261013_independent_correctness_review.md) passed after resolving source-validation, provenance-preservation, and seasonal-evidence findings. [Security review](artifacts/20261013_independent_security_review.md) records the anonymous-request correction and its verification; [implementer QA](artifacts/20261013_qa_review.md) is explicitly separate. Focused validation: **25 passed**; stubtest: **four modules passed**; stub hygiene, changed-exception enforcement, and documentation lint passed. The full native metadata audit passed all 4,320 objects.
 
@@ -96,3 +96,11 @@ The [evaluation](artifacts/prism-inversion-patch-evaluation.json) covers all 24 
 The previously validated historical/future pairs require no repairs, so their existing signal checks are unchanged. Equivalent paired claims for the Cascade failures remain unavailable because historical CLIGEN generation failed; the measured future-only monthly perturbations are retained instead.
 
 [ADR-0092](../../adrs/ADR-0092-prism-temperature-inversion-midpoint-proposal.md) compares alternatives and identifies the required implementation paths: the Rust daily writer used by WEPPcloud, the Python breakpoint writer, public PRISM revision, and EDDE adapter. The candidate is evaluated, not wired: no production formula, existing project, or installed Rust extension was changed. [Changed-day values](artifacts/prism-inversion-patch-days.csv) and [exact repaired/consumed evidence](artifacts/prism-inversion-patch-evidence.tar.gz) are retained.
+
+## Current disposition after operator decisions
+
+The operator has accepted both raw future EDDE and the precedented station hybrid; neither bias/elevation correction nor projected auxiliary-field derivation is required to finish feasibility. ADR-0091 and the durable client contract record the normative policy and rationale. The historical measurements above remain evidence of limitations, not correction requirements.
+
+The earlier PRISM rejection/proposal statements describe the original study. They are superseded for current executable behavior by [the completed implementation](../20261013_prism_temperature_ordering/report.md): all three rejected climates now pass, and the 21 accepted revisions are unchanged. Do not reinterpret or overwrite the archived original results.
+
+Remaining feasibility closeout: explicit disposition of the unrelated SBS broad-suite failure (also observed in the PRISM package), not another scientific-method decision. Actual Canadian-project acceptance, supported live inventory choices, UI/worker integration, operational acquisition policies and deployment remain successor-package work. This is a scientific conditional-go, not a clean broad-test result or production rollout claim.

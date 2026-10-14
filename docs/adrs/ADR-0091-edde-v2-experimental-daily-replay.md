@@ -1,6 +1,6 @@
 # ADR-0091: EDDE v2 experimental daily replay and PRISM spatial revision
 
-Status: Accepted for feasibility experiments only; production adoption deferred
+Status: Accepted for feasibility and future-method scientific policy; application implementation/acceptance and deployment remain separate
 Date: 2026-10-13
 
 ## Context
@@ -27,7 +27,7 @@ Decision Venue: user/Codex conversation, 2026-10-13 (UTC).
 Participants Present: repository operator and Codex.
 Decision Owner: operator for package scope and Multiple PRISM requirement; Codex for bounded experimental implementation choices under authorized execution.
 Implementer: Codex.
-Production scientific acceptance: not requested or granted by this ADR.
+Initial acceptance covered experiments only. The subsequent operator decision below accepts the raw-projection and station-hybrid policy for the future application method.
 
 ## Rationale and alternatives
 
@@ -35,7 +35,7 @@ Daily replay preserves the modeled precipitation and temperature sequence with k
 
 ## Evidence and consequences
 
-See [feasibility package](../work-packages/20261013_edde_v2_feasibility/package.md) and its `artifacts/` for native-grid rejection, daily extraction, source-unit metadata, historical quality, generated climate, PRISM parity, and WEPP execution evidence as execution proceeds. Point climate with station auxiliary fields is a feasibility product, not a validated full future-weather method. Historical bias, station mismatch, finite ensemble, and changing humidity/radiation/intensity may prevent production adoption even if executable tests pass.
+See [feasibility package](../work-packages/20261013_edde_v2_feasibility/package.md) and its `artifacts/` for native-grid rejection, daily extraction, source-unit metadata, historical quality, generated climate, PRISM parity, and WEPP execution evidence as execution proceeds. The operator accepts raw future EDDE with station-generated auxiliary fields as the intended hybrid method. Historical bias, grid-scale elevation limitations, station mismatch, finite ensemble, and unmodeled auxiliary-field climate responses remain disclosures, not requirements to invent corrections. This does not establish locally unbiased or fully projected future weather.
 
 ## Risk and rollback
 
@@ -44,3 +44,11 @@ All additions are isolated and existing methods/defaults remain unchanged. Do no
 ## Amendment: introduced PRISM inversions
 
 ADR-0092 supersedes rejection/no-correction policy only for finite temperature inversions introduced by independent PRISM offsets: replace both adjusted extrema with their midpoint before serialization, following the [temperature-ordering contract](../schemas/prism-spatialization-temperature-contract.md). Development-stack conformance is verified in the [dedicated package report](../work-packages/20261013_prism_temperature_ordering/report.md). Preserve source validation, CLIGEN guards, other weather fields, and all unrelated rejection behavior. This is not a bias correction.
+
+## Amendment: accepted future-method policy
+
+Decision venue: operator/Codex conversation, 2026-10-13 Pacific (2026-10-14 UTC), after PRISM repair completion. Decision owner: repository operator. The operator directed using EDDE as provided with limitations, excluded correction of elevation effects, and accepted the hybrid as precedented.
+
+Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged.
+
+Rationale: correcting model bias and unresolved elevation effects would expand this bounded source integration into a separate scientific method. Reuse the existing daily-replay hybrid rather than require a new source-derived storm or auxiliary-weather method. Disclose that station-generated fields are not EDDE projections; precedent is the basis for method acceptance, not evidence that their future response has been validated. Locale/project eligibility, actual Canadian-project acceptance, operational contracts and regression gates remain integration work.

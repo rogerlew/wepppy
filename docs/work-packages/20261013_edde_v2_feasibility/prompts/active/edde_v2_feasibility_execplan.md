@@ -9,6 +9,8 @@ A researcher will query real U.S. and Canadian points from the public EDDE v2 ar
 
 ## Progress
 
+- [x] (2026-10-14 UTC) Record operator acceptance of raw future EDDE and precedented CLIGEN hybrid in ADR-0091/current contracts; retain unrelated broad-gate disposition as outstanding.
+
 - [x] Operator follow-up: evaluate a concrete PRISM inversion patch using retained failing climates, quantify daily/monthly/signal changes, validate fresh WEPP consumption, and identify all production writer paths before proposing a formula change.
 
 - [x] (2026-10-13 21:20 UTC) Planning documents committed as `03435abc5`; inspect existing clients, CLIGEN replay, PRISM revision, study fixtures, and running dev stack.
@@ -25,6 +27,8 @@ The first daily file inspected is NETCDF3_CLASSIC, despite the registry descript
 Live inventory found MPI future daily coverage ending in 2099 and NorESM SSP2-4.5 ending in 2079, with no NorESM SSP3-7.0 directory. Use 2060–2079 for matched model comparisons, and retain MPI 2080–2099 as a distinct late-century experiment. Topanga's three sampled hillslopes and Miami select ocean-mask cells; eight Canadian cities select valid land cells. A 465-point-day precipitation comparison establishes same-labeled 00–23 UTC daily aggregation (maximum error 1.22e-6 mm). Pilot climate generation and 59 fresh WEPP runs passed; one PRISM target was rejected for daily temperature inversion, without clamping. The operator continued after the pending independent-review request; correctness and security reviewers were then engaged. Their concrete findings prompted rejection of invalid PRISM source files, protection of existing companion provenance, suppression of ambient netrc authentication, and additional seasonal wet-day/extreme diagnostics.
 
 ## Decision Log
+
+2026-10-14 UTC, operator/Codex: Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Rationale: correcting bias or subgrid terrain would be a separate scientific method; reuse the precedented hybrid with attribution. These decisions supersede earlier scientific-policy deferrals.
 
 Operator follow-up: investigate how to patch PRISM inversions. Start with midpoint projection of inverted adjusted extrema; compare one-sided clamp and swapping. This is a bounded formula evaluation in retained study artifacts, not authorization to silently change unrelated weather fields. Production daily Rust, Python breakpoint, public PRISM, and EDDE paths must be identified.
 
@@ -83,7 +87,7 @@ Use existing `requests`, `netCDF4`, `numpy`, `pandas`, and `pyproj` for HTTP, Ne
 ## Outcomes & Retrospective
 
 
-The 120-model-year study completed 657,450 point-days and 69 successful full-period WEPP executions. Ten of 42 CLIGEN attempts and three of 24 PRISM attempts were explicitly rejected; the 59-run pilot and development-container single/PRISM consumer checks succeeded. Historical biases and station-derived auxiliary weather prevent general production adoption. The full regression gate failed an unchanged SBS metadata expectation after 1,265 passes and 28 skips; isolated reproduction confirms it. A continuation ended without a final summary at approximately 34%, so it is incomplete coverage, not a passing gate. Final focused validation and independent reviews are recorded in the report. Initial plan authored 2026-10-13.
+The 120-model-year study completed 657,450 point-days and 69 successful full-period WEPP executions. Ten of 42 CLIGEN attempts and three of 24 PRISM attempts were explicitly rejected; the 59-run pilot and development-container single/PRISM consumer checks succeeded. Historical biases and station-derived auxiliary weather were initially adoption questions; the operator now accepts them as disclosed limitations under ADR-0091. The full regression gate failed an unchanged SBS metadata expectation after 1,265 passes and 28 skips; isolated reproduction confirms it. A continuation ended without a final summary at approximately 34%, so it is incomplete coverage, not a passing gate. Final focused validation and independent reviews are recorded in the report. Initial plan authored 2026-10-13.
 
 Final implementation and retained evidence were committed as `5dd665305`. Independent correctness and security gates pass with no unresolved implementation findings; 25 focused tests pass. The package remains open for the documented broad-suite regression gate, not additional data acquisition or integration work.
 
@@ -92,3 +96,5 @@ Scope clarification revision: corrected the handoff framing so diagnostic histor
 PRISM clarification revision: report and authoritative scope now distinguish the generic spatialization limitation from EDDE-specific findings, following operator direction to document it. Current experimental rejection remains explicit.
 
 Patch investigation outcome: midpoint projection repaired all 15 observed inversions in three climates; all three passed fresh 20-year WEPP consumption. All 21 previously accepted revisions remain numerically unchanged. ADR-0092 proposes the formula and coordinated Rust/Python implementation; this evaluation does not modify production climate writers. Monthly perturbation and exact written/consumed evidence are retained under artifacts/prism-inversion-patch-*.
+
+Policy update: the operator settled raw-projection and station-hybrid acceptance after PRISM repair completion. No further bias/elevation correction or projected auxiliary-field study is required. Earlier discovery/proposal entries remain historical evidence. Scientific conditional-go is recorded; the existing unrelated SBS broad regression gate remains open, while actual application acceptance belongs to integration. No runtime change was made in this policy update.

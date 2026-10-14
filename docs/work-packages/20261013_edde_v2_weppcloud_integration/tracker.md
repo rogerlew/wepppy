@@ -26,7 +26,7 @@ None; this session scopes future work only.
 
 ### Blocked
 
-Implementation awaits the feasibility package's accepted go/conditional-go disposition and executable workflow evidence.
+Scientific conditional-go and executable workflow evidence are available. Integration still needs its ExecPlan, contract/state matrix, explicit supported choices and disposition of the unrelated broad regression failure.
 
 ## Decisions log
 
@@ -34,7 +34,7 @@ Implementation awaits the feasibility package's accepted go/conditional-go dispo
 
 ## Risks and open questions
 
-Source completeness and future endpoint, usable domain boundaries, model bias, CLIGEN storm construction, preservation of future signals under PRISM revision, and bounded multidecade acquisition all need retained evidence. Do not resolve these by undocumented defaults or silent fallback.
+Source inventory, coverage, quality, replay and PRISM evidence are retained. Raw bias and the station hybrid are accepted limitations. Remaining engineering decisions concern live choices, project eligibility, bounded acquisition/cache ownership and actual-project acceptance. Do not invent defaults or silent fallback.
 
 ## Verification
 
@@ -55,3 +55,7 @@ Source completeness and future endpoint, usable domain boundaries, model bias, C
 **Operator PRISM clarification (2026-10-13):** Document inversions as a generic independent-temperature-offset limitation, not a separate EDDE integration blocker. The retained January/December Cascade normal pair shrinks daily range by 0.5 C. Other-dataset occurrence frequency remains unmeasured. Runtime behavior is unchanged; the experimental adapter still rejects affected revisions.
 
 **2026-10-13 23:52 UTC:** Operator requested the dedicated [PRISM temperature-ordering implementation package](../20261013_prism_temperature_ordering/package.md) and accepted ADR-0092 design. All four writer paths and rebuilt-native consumer validation are planned there; this does not expand EDDE application scope or claim the repair is installed.
+
+**2026-10-14 UTC — Accepted scientific policy:** Use EDDE future precipitation and temperature as provided, with source bias and the 12 km grid's limited representation of local elevation effects disclosed. Bias correction and additional elevation/lapse-rate correction are outside scope. Retain the established CLIGEN hybrid: station-generated storm structure/intensity, radiation, wind and dewpoint, with explicit field attribution. The operator accepts this precedented approach; deriving projected auxiliary fields is not an entry requirement. Existing unit conversion, PRN/CLI quantization, quality guards and optional Multiple PRISM spatialization (including ADR-0092 ordering repair) remain in scope and unchanged. Scientific method decisions are settled; integration remains unstarted. PRISM ordering repair is now completed and validated in its separate package, superseding the earlier progress notes. The unrelated SBS broad gate remains explicitly open; actual Canadian-project acceptance and operational decisions belong to integration.
+
+Policy-update validation: scoped Markdown lint passed for all nine changed documents; no executable code changed and no runtime tests were required. Existing spelling suggestions outside the changed prose remain untouched.
