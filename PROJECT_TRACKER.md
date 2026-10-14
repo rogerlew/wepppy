@@ -367,15 +367,9 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### PRISM spatialization temperature ordering
-
-**Status**: Planned 2026-10-13; ADR-0092 accepted for implementation, production conformance pending.
-**Link**: [Work package](docs/work-packages/20261013_prism_temperature_ordering/package.md)
-**Scope**: Midpoint repair across Rust daily, Python breakpoint/public PRISM, and EDDE writers; reviewed contract checkpoint, rebuilt-extension provenance, unchanged-valid-weather parity, and actual WEPP consumer validation.
-
 ### EDDE v2 client and climate-workflow feasibility
 
-**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) recommends holding production integration; independent review findings resolved; broad regression gate remains open. A midpoint repair for generic PRISM inversions passed the retained failure cases and is accepted for implementation in ADR-0092; production writers remain unchanged.
+**Status**: Study executed 2026-10-13; research client and conditional CLIGEN/PRISM paths validated. [Report](docs/work-packages/20261013_edde_v2_feasibility/report.md) recommends holding production integration; independent review findings resolved; broad regression gate remains open. The generic PRISM midpoint repair is now implemented and development-stack validated under ADR-0092 in its separate package; deployment remains separate.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_feasibility/package.md)
 **Scope**: Bounded API client, actual U.S./Canadian location queries, grid eligibility, data-quality and acquisition study, executable CLIGEN workflows, and Multiple PRISM where available. Multiple Interpolated excluded initially. Evidence-based disposition gates integration.
 
@@ -1577,6 +1571,12 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### PRISM spatialization temperature ordering (2026-10-13)
+
+**Status**: Closed; all four writers implemented and development-stack validated. Contract `7bd7707c2`, native source `d3e51c2`, release `0515272`.
+**Link**: [Report](docs/work-packages/20261013_prism_temperature_ordering/report.md)
+**Outcome**: Midpoint repair, visible diagnostics, 80 focused tests and 23 Rust tests; retained 24-case parity, real 200-hillslope project, seven fresh WEPP runs. Independent review passes. Unchanged SBS broad-suite failure and legacy typing/tooling limits documented. Deployment and EDDE application integration remain separate.
 
 ### Omni Dynamic Timeout (WRT-02)
 

@@ -1,0 +1,2319 @@
+{
+  "status": "complete",
+  "archives": [
+    {
+      "path": "project-consumer-evidence.tar.gz",
+      "sha256": "aa873e20dec84a00426e0a85bbda19d679a9cedcad1a05f4e60d9bb6f4719d7d",
+      "members": [
+        {
+          "path": "climate/_102.cli.temperature-ordering.log",
+          "bytes": 288,
+          "sha256": "e5e103ec79656611edea689c50ca6a5293359700825b49f2b0898bbeb3244a60"
+        },
+        {
+          "path": "climate/_103.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "895501987056291f8720e1008d2a4c1fb27d9be532ea975f48d1b31a43d4688c"
+        },
+        {
+          "path": "climate/_112.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "fe7bc4f9eac8fe671af743b19aa716bda12b91b8071fa5c435fa8b4cadedba25"
+        },
+        {
+          "path": "climate/_113.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "e346138b9bf4c407f6a03863f6bda50126d8898c765655abbd55799b79078306"
+        },
+        {
+          "path": "climate/_121.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "ccdc35ba775382e767efcf1b02ae6eff04f15bac8b759544120ec2e24c7a0ad8"
+        },
+        {
+          "path": "climate/_122.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "59c564a12fa9fd04cb88a028c5ed35cb3a865564e86a0d2b4df31df9b16a16aa"
+        },
+        {
+          "path": "climate/_131.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "37644627642790d53472826a0d0e8b71cb6e5251236c75ed556ed4919583c319"
+        },
+        {
+          "path": "climate/_132.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "8987cc5a99a1b2cbf11c8f29acc159076f6d24edd1d948f13f9facc64e2e17c0"
+        },
+        {
+          "path": "climate/_133.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "d1605f6930d20b5dfb8613d0b20bec2ad3736320c18d9eb9e867d46805475742"
+        },
+        {
+          "path": "climate/_142.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "8f035b483274b6a481db5d1a10a57f8cacf6ca8bda0577eef16dd874d006fa64"
+        },
+        {
+          "path": "climate/_152.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "dab06b68e946dcddf8d3f3cdc550e2f23f2844ed4b7cb758c47067193ae2ef68"
+        },
+        {
+          "path": "climate/_153.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "72a81cc32f98608e2c150021fc7aa6a4ab27e18cce7a0c24617469c2509a820b"
+        },
+        {
+          "path": "climate/_161.cli.temperature-ordering.log",
+          "bytes": 288,
+          "sha256": "11b901af6926caadd39892f71df163c45379b6eba320816f30d1adf44098c537"
+        },
+        {
+          "path": "climate/_162.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "d69e47638efb6ba3b4eee9f51200ca593de0e60f5fc80bd0f1f43254ac2d53c4"
+        },
+        {
+          "path": "climate/_163.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "98b5beca32dcb1e36935c160fa52af0c5e314506a9fa29c27552876152c8c296"
+        },
+        {
+          "path": "climate/_172.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "2ab758b2dee27eb626626e408815bb7859a5179ef1a7faad6256beb7eed69e27"
+        },
+        {
+          "path": "climate/_173.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "a31cf775542215c3c3228ec12463270f4c0579a1faed33227f4c4805819f2c20"
+        },
+        {
+          "path": "climate/_181.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "d52bb73de223b4cd68c6e221d04c6d586c565de7754a9cddaf8e9aa2efa19b49"
+        },
+        {
+          "path": "climate/_182.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "64315df860faa4a79bc8d4527a80b541495203f7e84662845daf5ad266f37a24"
+        },
+        {
+          "path": "climate/_183.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a319a9ced3fd7a7ba7e3eae7c72f2bd1c80e54ed1fa4a1fe252288ce8b372ee2"
+        },
+        {
+          "path": "climate/_191.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "d78fd0849ce6c17fad1397e297bbf57bb9ccc1bb693b114e692eb3ca96cf67cb"
+        },
+        {
+          "path": "climate/_192.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "1f636f7446e65d958e60bb2bcffd4920efe0ffec83ebea5a43b7912c15544233"
+        },
+        {
+          "path": "climate/_193.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "e6bc07ac4a26cf0b8546a3da419b8371dba1aab12b9a57dd6584af37139b081e"
+        },
+        {
+          "path": "climate/_202.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "eea295e671eefaf3f00a7fc54b27e2918b39d4b78583a2a5b18a4cdfd34731ea"
+        },
+        {
+          "path": "climate/_203.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "c7b5a5c761e2b91adb8115436ec18720211bbbe7ee09c672c539e2b5830030bd"
+        },
+        {
+          "path": "climate/_212.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "9f6e8a1e17aa4441b329d6d6186962f28da448fd0a2d8e260040a8cb49d82573"
+        },
+        {
+          "path": "climate/_213.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a3da261cc16f426380a6eb51a9e22db71d818d4ae780ae6bfac430fbd85813c4"
+        },
+        {
+          "path": "climate/_22.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "9b73e9eab936bc8a1ffe5fff3f70f01c5a91e4b648d9d2da7404ae488a6438c1"
+        },
+        {
+          "path": "climate/_222.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "0fcc92af2b407424e57579fe5c193b7e88fcac8a77651c31135b3c910898ed2b"
+        },
+        {
+          "path": "climate/_223.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "41e7d8fc98501b4facfc92ff2fb17e430db8aa65dc0db70c86e767b4eceb05ce"
+        },
+        {
+          "path": "climate/_23.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "27b5e882280523ee149153ca2c5bb1f51529ae08c29db9336dec1cbae81c5c67"
+        },
+        {
+          "path": "climate/_232.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "93efb3c141b3313f39ae42247b3ee3ab3b3cd3d47ca9854be8e471f53bb547e2"
+        },
+        {
+          "path": "climate/_233.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "0ec09bbfc682bd2dbd3efbe2e05cc1793a70fa8fd31b469e53370622dc08165b"
+        },
+        {
+          "path": "climate/_241.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "9e6357e3ad20926d838ad07ef24cbc8ad01c944c91c7b974411fc21dc02e6c88"
+        },
+        {
+          "path": "climate/_242.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "e398633d04bcd596d5a704f736aff0c96647e0317621873bad2bd6646bb5d69f"
+        },
+        {
+          "path": "climate/_243.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "808843da154e156df1f3aab002604cf2db2ce9aa61a4e64925df65385db958ee"
+        },
+        {
+          "path": "climate/_252.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "99544580171f0db3172eb3f83d800e4601a67b4f9758f767ea21b34ef436b355"
+        },
+        {
+          "path": "climate/_253.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "202effcffa88f84e4761f523da2809b8abca8a6fcd138a7c6627b68251675d6d"
+        },
+        {
+          "path": "climate/_261.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "bc0a8876ec0fe7f6a2392aefd1ddefbe1b2471453d9408e78333c1de48a5fec1"
+        },
+        {
+          "path": "climate/_262.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "91dcfb5be24374fd53b4830defc8e155e55e4ea87f99b6b2c26ddc73ccaa999a"
+        },
+        {
+          "path": "climate/_263.cli.temperature-ordering.log",
+          "bytes": 283,
+          "sha256": "86c5f9cf26b196b32c035e21de7d1dffb6389ab9e1a056a7dc1f270f6da2ee36"
+        },
+        {
+          "path": "climate/_271.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "79107eb254e9c5375883a84e66423f7ac5e16ca477d85c039600b096acb0d2d0"
+        },
+        {
+          "path": "climate/_272.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "91a3aecf2033731edaa0187eed135844cb977e44c938efab7b53781be50b7a2f"
+        },
+        {
+          "path": "climate/_273.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "0335affa4c8c9d470ee695f773f35dd976f4c46ed547ade7286f82b522207f64"
+        },
+        {
+          "path": "climate/_281.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "7725cbe693f0cc87c5ca6511c39470ace5579e8e7e51d718e7301436432e204e"
+        },
+        {
+          "path": "climate/_282.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "0f0e312ac9b90562b0fe7b1637024643413844913f89a782b2ace42043463323"
+        },
+        {
+          "path": "climate/_283.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "0290ec137aedf987a20102f3cc3f9c335155681205977b7f9c38bc6e12a35d14"
+        },
+        {
+          "path": "climate/_292.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "be7112d1d6ff3abd439d089eb2e01e6ce0180b8108c0595eba3a6ec6b7b08cdd"
+        },
+        {
+          "path": "climate/_293.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "32dc9460e7de0363d970cd8a2b403835b24ac3ecb92035b275bc94da3ecb45f1"
+        },
+        {
+          "path": "climate/_301.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b29258b0ad1c19be2def44909f89cade9d911fceeacca60ff7d6f30ef3ccddf1"
+        },
+        {
+          "path": "climate/_302.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "dfd51173a86fc35721d027adde80306403b1bcb9906e11098adc6687131be4bc"
+        },
+        {
+          "path": "climate/_303.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "9de06434a9a88390c9662b8de0a7ad7635b4984f4fb086289e18b3bcb90314c8"
+        },
+        {
+          "path": "climate/_31.cli.temperature-ordering.log",
+          "bytes": 283,
+          "sha256": "08a3fc5cfac101244b914d1d22b6ab646fc5744983cf4750fac0f4eb5dd09116"
+        },
+        {
+          "path": "climate/_312.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "57d9a692b083d8ca6ed9f0c5bd38aa259592a74e9c41b755111ab57a2df2b3c0"
+        },
+        {
+          "path": "climate/_313.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "f587bdc9e4bcb8d307be5626777860097b53d313920ad49e65f264c73aada1be"
+        },
+        {
+          "path": "climate/_32.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "5d06e4ff7eebad53b4eeeddebf47116808da1eae2fef6d9614b14c21063b2e8d"
+        },
+        {
+          "path": "climate/_322.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "111a1a748fc16b4ba8fba7ec9d0c25914150d27e45c597061d2ebff7f14c83d3"
+        },
+        {
+          "path": "climate/_323.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "c3273bdb5bdbe0c5a5b412c4758d5ec04fd4b9080073bc0697af8fc9ef405b6b"
+        },
+        {
+          "path": "climate/_33.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "f16dc2e3b43fd79bd7bcbd1850108af0fab8319b1a288e29d287a95413161ebb"
+        },
+        {
+          "path": "climate/_331.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "1b1793fb1d53c328afef9da20c1333ac9a6d2e8aaeb6cc1a2124876fca2f06a0"
+        },
+        {
+          "path": "climate/_332.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "32422d0e8e1e84253085b158a9c6cad42db7d68d505da5d57a6c06b1407c919a"
+        },
+        {
+          "path": "climate/_333.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "ae2cccff4a2ac7492340cdcd3e18a7f8251178bae0954a7e491ea9a159e05cee"
+        },
+        {
+          "path": "climate/_341.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "80359a78d3aceb6f2d0e240162c5df2e770c82ea4ac8c4ab29c2184c29421872"
+        },
+        {
+          "path": "climate/_342.cli.temperature-ordering.log",
+          "bytes": 280,
+          "sha256": "822e6627451e377459ead40473295f6cb54db39f550e691546f9c37f43bbe038"
+        },
+        {
+          "path": "climate/_343.cli.temperature-ordering.log",
+          "bytes": 280,
+          "sha256": "7bea979fb018b0e9b3de8e31e1be78e39fc7cd1f51f930b537cdcb4b4f7729a5"
+        },
+        {
+          "path": "climate/_352.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "2e95eb01e620e2290848194979102b6267680d84afa6693c7dc0b7961247587c"
+        },
+        {
+          "path": "climate/_353.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "44a32e446dbf6b4a64045d5dff60ddb06ab43a439ce31e9f794c0ae7a15642ca"
+        },
+        {
+          "path": "climate/_361.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "b1d9a0f99083c4ee87b280abc8542eafc0cacca6da90fd30aabae233a99f55b3"
+        },
+        {
+          "path": "climate/_362.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "11680d0610ad5e7f819b9146b08aebc596a8627f723f57c27e0e8c288e6df7d5"
+        },
+        {
+          "path": "climate/_363.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "1e719a33d3ea20f27554eeb9a9df006d790b6438b3449898f151299693ef3e50"
+        },
+        {
+          "path": "climate/_371.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "e611d7118013e1e407ae5b454a699196f91c9e76df848654b01e8e2a62cd6f17"
+        },
+        {
+          "path": "climate/_372.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "5323136744d2f5113f207d7158b9e3d520dc914988eeecba55deba75eb895323"
+        },
+        {
+          "path": "climate/_373.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a921f3d0ada1bd08faa7d54dbca9a2b09f1a4a144c62840d0701fccca55f2118"
+        },
+        {
+          "path": "climate/_382.cli.temperature-ordering.log",
+          "bytes": 250,
+          "sha256": "f4e97ce547ff940561c9aad3d1b8e7660d10cc8f419deeae1875263cfd92462c"
+        },
+        {
+          "path": "climate/_383.cli.temperature-ordering.log",
+          "bytes": 288,
+          "sha256": "203a0236a217f1b308c56fbb6194c079f78accd6110ad379a64b4512c85c39ba"
+        },
+        {
+          "path": "climate/_392.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "7cd870c951e79e2fac80a74c37360eca22595d1fe34a5fe5aa6c066d6b2264c7"
+        },
+        {
+          "path": "climate/_393.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "6dd5ae1ded5bcb51b1b57b4b98dbc3d1b2669d264d39128b38b8d8a89f187b0f"
+        },
+        {
+          "path": "climate/_402.cli.temperature-ordering.log",
+          "bytes": 250,
+          "sha256": "23f963697bc25d075e2fc63e73e7854a0dd501d807eb15dfd713d676d29fe83c"
+        },
+        {
+          "path": "climate/_403.cli.temperature-ordering.log",
+          "bytes": 250,
+          "sha256": "6512a3bcda5b54de257f7e3ab87a4f32bd51d9a06a4389b5c126d2e758834934"
+        },
+        {
+          "path": "climate/_412.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "437fad0332013331c50db57093609ade8c8d15091c6b49f021807d6b94338f8d"
+        },
+        {
+          "path": "climate/_413.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "7477b1dd75b175d193ad5effcd60c77fc8b431ae828d883204a24c9e9b29eb34"
+        },
+        {
+          "path": "climate/_42.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "303492fb7ca291953fe8c06edd583547bf77b01f693ea2331bc7aa573b5405ff"
+        },
+        {
+          "path": "climate/_421.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "03960f202c7b1779b48fb6b68cc37a47367446ab26d337ccf02b62b76b2d0778"
+        },
+        {
+          "path": "climate/_422.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "94d210f2ac42c145b0bcbc580a31cdbfe7c9db0b41c15b62fafdfe575b74a9f9"
+        },
+        {
+          "path": "climate/_423.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "803e7c1c97c60821ec109b1644251fb479454c16699b19a16a1a33f1258a2ac0"
+        },
+        {
+          "path": "climate/_43.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "86270b34424c5cf27ccdd900cdccb7ef78dba1fffafed63cc9a8d078f191fd77"
+        },
+        {
+          "path": "climate/_432.cli.temperature-ordering.log",
+          "bytes": 280,
+          "sha256": "040ccbd9867e3bafab2908a7548d3ae81d6c571058073944321706fbe19c42a4"
+        },
+        {
+          "path": "climate/_433.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "fe082af284c97a77f7b88d2229e7486407a6a09f41a24b7e85e1f144bbe20ac4"
+        },
+        {
+          "path": "climate/_442.cli.temperature-ordering.log",
+          "bytes": 250,
+          "sha256": "4cafda4790a18cfe51408dc977483907bce27cfd36770d9cb07f61c62cd44ec6"
+        },
+        {
+          "path": "climate/_443.cli.temperature-ordering.log",
+          "bytes": 290,
+          "sha256": "dd38375f45eac1d4de653bc0094e039e9f6150a615607cf1dd73deac4dc82a91"
+        },
+        {
+          "path": "climate/_451.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "dbbc2adb44790bf1958ad9037bfc8ef5145d6776dd04688103c4ee4ebe804b09"
+        },
+        {
+          "path": "climate/_452.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "8898944da67a59f3a6d92eb70efb31495c3d4e1cff2e3f1227f0c313c420e5c9"
+        },
+        {
+          "path": "climate/_453.cli.temperature-ordering.log",
+          "bytes": 280,
+          "sha256": "a2bd3e632b36dd3b30ae63432fc11eb7eaa44ad48f3825d8627e5e507c419f4a"
+        },
+        {
+          "path": "climate/_461.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "da427cda6c75f2751c408f0e0ac1c4b46c12211d56e70da98d0eaae55f808e41"
+        },
+        {
+          "path": "climate/_462.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "927215bb68e781575031d57039b9ad5e6a69b62cc20edcf0dffad98e3cfe2aed"
+        },
+        {
+          "path": "climate/_463.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "acdbabb68cb9f6d8d8143aa4d6ce3dcfef480425e3693b858eb4bcc9824dfe32"
+        },
+        {
+          "path": "climate/_472.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "c7e51d11235e4c13079fb6b999cf2cae06464e12ab6dd5f5e0ea669e8dfc053b"
+        },
+        {
+          "path": "climate/_473.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "bd7a509d59e8926265ba2468fe7499fa8c4c215d819f13c86ac4ec1c5fafbc2e"
+        },
+        {
+          "path": "climate/_482.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "465469d6b9c61e2156078d11339ad3ec58ab02fcd4933190c1e411198ba3fdcd"
+        },
+        {
+          "path": "climate/_483.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "fe461e35fe0dca72c385126d489854da4327296c063bd57a432160b7013ddebd"
+        },
+        {
+          "path": "climate/_492.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "50845a8aad3b0afe78ea9b3e5897db9831e0ed56daa32ed507f0b143a92eea26"
+        },
+        {
+          "path": "climate/_493.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "7ffd4dc2b09845d60c778a543ef6357dbc484c712287ade078f1a7d957dfc284"
+        },
+        {
+          "path": "climate/_501.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "acabb1d6b1e3b97403ea8fda9b1ba94b71b8b71cc368b0d776a306bc50bda5cd"
+        },
+        {
+          "path": "climate/_502.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "e94b23a69103d85877d5aab1e0566684d5de3da4102af670283265e6f25a947b"
+        },
+        {
+          "path": "climate/_503.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "76a4bd90bd20409c6eeddb6a09a2f5bb045b6e0b839d46b4d8fe2c6620c950e9"
+        },
+        {
+          "path": "climate/_512.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "c78a8e67e92040782a1d3804f09e28633f80796035af74f1e3e3ccd97b3fc3c6"
+        },
+        {
+          "path": "climate/_513.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "912a7b4730fe4a371b8ce7c1e6710fec2740b99b8cb1943b25b9239c56672046"
+        },
+        {
+          "path": "climate/_52.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "296bc8de4697e501ee9841394609b8addede859c9f3bb64850ba43dfb46f651b"
+        },
+        {
+          "path": "climate/_522.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "a45804c9ee16f5261fb6d36a86c8554f802280759fb9be01940ccf623068cca4"
+        },
+        {
+          "path": "climate/_523.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "8eb4451e8abc5c077dbace7d469b42da09527eaaaa0e48d6bff2902649f0df89"
+        },
+        {
+          "path": "climate/_53.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a0cc00fe9bb40aeb296e859df497e4465f5d9c6fb2566771c0817badd62d5e2f"
+        },
+        {
+          "path": "climate/_532.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "40b48892771e25a5299b4d48cf968398da294eadc925dbb47a29f2fe67641c0a"
+        },
+        {
+          "path": "climate/_541.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "1e1390c9b5e6e184130df30c1a5ef7a244c68b3ba135657df0d039906552003a"
+        },
+        {
+          "path": "climate/_542.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "529aa5da5e490bc9747f42770a2cae3994317b97d3f9137d19d836e0ee7f7a4b"
+        },
+        {
+          "path": "climate/_543.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "438b680efb2dcb026dd36f92926a48ea341e31f52f7449f909d5b50dbcfc05a8"
+        },
+        {
+          "path": "climate/_551.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "65bb015e18b4c6e19b7bbe352e731a5f4957dcdeee235dd2373b8cfc185fae8f"
+        },
+        {
+          "path": "climate/_552.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "336a86be2336cf2a68e8d74a44072efe79cdd93f942ea5d6b17400c7436ba066"
+        },
+        {
+          "path": "climate/_553.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "77131f83c778ff7b037928133bac40894a048cd3c38c7f9680be5f1344fae812"
+        },
+        {
+          "path": "climate/_561.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "6370194a07859a03e18d0bffe8d79237ae5955f7d0d5402bf699a2d0beb60c7f"
+        },
+        {
+          "path": "climate/_562.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "f2e6cf0ea55682d41531c574100e80b249a1259efd8d664efbd04d335bcfdd59"
+        },
+        {
+          "path": "climate/_563.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "33c51b6800553f496851e38b63370937988e885982845eec2381fcfd1474c426"
+        },
+        {
+          "path": "climate/_571.cli",
+          "bytes": 512302,
+          "sha256": "587459de04b1b0d50fd980200074ab266e6d210a04701a86335142951d79eeb6"
+        },
+        {
+          "path": "climate/_571.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "8d8bfa714ff87abe096ec25c9a1d4eae3bb3193262dd9ec40c13f8fd05c1b7c4"
+        },
+        {
+          "path": "climate/_572.cli.temperature-ordering.log",
+          "bytes": 280,
+          "sha256": "11b11c8e450ac099078ff834a80ad8a2a8a7e26a9c9f158a3cb0471523023ee0"
+        },
+        {
+          "path": "climate/_573.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "fe2b250fbf1bbe36d8af61593e50fa065043e2e8fcdb4e7fe9523f242f1d2880"
+        },
+        {
+          "path": "climate/_581.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "2a443480ddc3ca77739f340184c7c935267b31d59d39f15d06ed504b25dd80c2"
+        },
+        {
+          "path": "climate/_582.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a1ded4ccbf4f1757a4b707dedb841d74a9a9d31820c8af40abfa1e9eb66a5f35"
+        },
+        {
+          "path": "climate/_583.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b287bf7f7c09c10c813d5649ef0e8b3d6fde557c5ab8daa8cc7e84535953af1f"
+        },
+        {
+          "path": "climate/_591.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "aaedde3932abafd4c4301333b34d32368f0e086456a5608e36cc38bf9859900f"
+        },
+        {
+          "path": "climate/_592.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "082dc59ce81a41b03953040d8cea29565faf9917ef0bc4c49acd95435890ab6d"
+        },
+        {
+          "path": "climate/_593.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "13b0beda7f6328206d9bba30bc1b39b0a0f65224bee7e7d5da77ac0866f53276"
+        },
+        {
+          "path": "climate/_602.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "bac914e8fa80916ba4628698eded5d4285416ba1ca94f2ba6be75933979f5d4d"
+        },
+        {
+          "path": "climate/_603.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "31910d0a8f2922f6e30941156348df8ea67a1eee5bc6cde0328c501bda206f88"
+        },
+        {
+          "path": "climate/_61.cli.temperature-ordering.log",
+          "bytes": 249,
+          "sha256": "37f6c1bbdc8c52aa795c911be1269ee1b2fc228fab4366e9a6da469823029b04"
+        },
+        {
+          "path": "climate/_612.cli.temperature-ordering.log",
+          "bytes": 284,
+          "sha256": "24120ec754ce692d3a202653bdf8fa9322a3b2fec2f6c7e8e46f3326c2f5af25"
+        },
+        {
+          "path": "climate/_613.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "be72543e8b1c1d4c19b54bbba8bc16a48b5bd2763329a292dca4f03f26859dce"
+        },
+        {
+          "path": "climate/_62.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "55825d6254a3425e470ce9aa8ee83b5de16d658325604268405c95a819723e91"
+        },
+        {
+          "path": "climate/_622.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "1cca614de3c34ce05822f11377c1aed8416d1a6dd7dcdb054a52c630db704109"
+        },
+        {
+          "path": "climate/_623.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "53f3e3abc14d2c4c03dd5df6a6999928f4079deff6873b4c61b66fcd3f8fa134"
+        },
+        {
+          "path": "climate/_63.cli.temperature-ordering.log",
+          "bytes": 287,
+          "sha256": "d8a02b24aef4292257d8f3bc04cd24e320e2df20bb0345679fb117095023fe09"
+        },
+        {
+          "path": "climate/_631.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "dcfd3b74db79cad876dca81421de25c8623762ad1d0b0f881f6c61a22c9a8264"
+        },
+        {
+          "path": "climate/_632.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "ef273d846bd533dc8b9c6f68e041321b66b12b52be179777070678a65cd99d58"
+        },
+        {
+          "path": "climate/_633.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "d6b15d77d1843d29737c5800fea8bd39f9d549d83d6878ad40803a0213c0d37d"
+        },
+        {
+          "path": "climate/_642.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "ca2e8fddd480901a97e92e2352cc73173f03ca1c63e67601447489bde7527c5b"
+        },
+        {
+          "path": "climate/_643.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b11f17e21fb6aa464937ab9d4e6ba538de39e1d97c6fef177692d40148ad2990"
+        },
+        {
+          "path": "climate/_652.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "75cfaae53d55fcb766a312f89a875d284b8d2babd896d54637bd24e33e073754"
+        },
+        {
+          "path": "climate/_653.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b45c2701e87358bc962636b359498bff3085addd2b3546184aa0f743d20a20ca"
+        },
+        {
+          "path": "climate/_661.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "6df7a5a6ff7c127133fc9af75a1b454b7a625ec270d4d2f37a0deecaab7429e0"
+        },
+        {
+          "path": "climate/_662.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "ac7b7d95a0e93e8da4d38b921a2d9ac1328a717134e2dfd6b5d91a8367b0bb70"
+        },
+        {
+          "path": "climate/_663.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "a45e3e7d34906dce067afaa2dff9851c23def23f23beebb11100fb2d6af1a857"
+        },
+        {
+          "path": "climate/_672.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "52bb856a7a1d205dc787947ebd31a7d4fb6cc7fdecaf24ccff914d30f61de143"
+        },
+        {
+          "path": "climate/_673.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "3a803dc27b354e8e37ef5b3cd78c2f504320861022d979e610a328d9586aa030"
+        },
+        {
+          "path": "climate/_681.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "fdf1f1c20e589c250be1e41125e470285d0ec48e4eb71f8257feee3dddd266d2"
+        },
+        {
+          "path": "climate/_682.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "3a256c00cb677bcb90205c1979c3770930ef9109b69adcbcc8224ef4231f7f12"
+        },
+        {
+          "path": "climate/_683.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "701241c3f25d206087c286412611829645f7bc19dd3061b2fbe6643353f7412a"
+        },
+        {
+          "path": "climate/_691.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "79c47fdf06161aafc29ca1f780185c70869186d21601b1778349538ef1cd941c"
+        },
+        {
+          "path": "climate/_692.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "9bcdb022cd1dbd9c1d51edbf67647caea8f3d8efb932f19778fe81849b7ba024"
+        },
+        {
+          "path": "climate/_693.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "11b0c2183301c4905a2b1386af3de679dd224239b418bf01b688c59ab92c30c1"
+        },
+        {
+          "path": "climate/_702.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "fb83076c40148fe9f8c077403dc2eb74039ccf63473de088c3cfe15390a2ec67"
+        },
+        {
+          "path": "climate/_703.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "6248406c09b4fa8d0d0ba7fe38196fe8ad82f9934beff00951ba5b797865c02d"
+        },
+        {
+          "path": "climate/_711.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "52f448a8f3962397cd7db667bc15617b563d3224f10333388b0927346e8d92a5"
+        },
+        {
+          "path": "climate/_712.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "c4634d6159a439eba89068e477758eeb34ea420f3a7f1ba145392a21c0a2e17e"
+        },
+        {
+          "path": "climate/_713.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "9552565aad8d871a9d7713b504a9eb20d2b502adcdbcb69b2d48ed058b9c7afc"
+        },
+        {
+          "path": "climate/_72.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "2048c5f33a5943472fff33f9a13d5e88180c5ca03eb5f0abd5995f4a11ffdda7"
+        },
+        {
+          "path": "climate/_721.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "1506758f92a3f10645743a1e2f7da228be2cf84318e17865d7ffdd93abc393ec"
+        },
+        {
+          "path": "climate/_722.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "5c05b01b0697fbd3337fe9e4d3cdbcefaad0f4f31d75a2318b19df27edce27a4"
+        },
+        {
+          "path": "climate/_723.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "387608b445dc469b15453d3e895510b557291e0bd9fb8386db4059ac2853a6a1"
+        },
+        {
+          "path": "climate/_73.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "c08cc5682a8377bd286b69be050f5288d1705a1011b41d289a481508068852c3"
+        },
+        {
+          "path": "climate/_731.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "a635f2c62db40b0ac23636cb788dacc421c7cbf4a4d8aa187633304eb10bb827"
+        },
+        {
+          "path": "climate/_732.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "138619deb054ad70575fc8f77cf61b8f34cd1c120dfc50e6526f3dcf3017468d"
+        },
+        {
+          "path": "climate/_733.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "0584fa100f079d24ae04c2c45d9f85e51641b6bfb62e1d6edd37c78b21276336"
+        },
+        {
+          "path": "climate/_741.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "353cba34c2086f10386139fcbd8f4a99551e0bddb27c89a9dec2eb7fc582a55b"
+        },
+        {
+          "path": "climate/_742.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "c24b4af7822b66dc14f4f31560cbdb68bd1539f4a34826cddd9ab3f12d37b190"
+        },
+        {
+          "path": "climate/_743.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "8433ee48ea667f387ae2880e89ad52389a275f3ca198ce71a63b2f55edc37769"
+        },
+        {
+          "path": "climate/_752.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "5b2084c3a9df9c9721ac8a4ffabcc55b57bf77be9a659a9e8cbc86ecc5b0a00a"
+        },
+        {
+          "path": "climate/_761.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "cc6cda9deea54b51ec691b5a180af4d7160abb8f7f6f716a789b94f11dcd2d47"
+        },
+        {
+          "path": "climate/_762.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "09d36310bdd13e5e8104346488b3f4a007984daacb7dfbaaaf431e52c4b8318e"
+        },
+        {
+          "path": "climate/_763.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "98b499450fb19b47c7580efbbda8d9f375d940040bbcc4c4d2f856c66ff3b3bf"
+        },
+        {
+          "path": "climate/_771.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "8f47dd47fe128bd3a0bf8e3217660491c27d30d69586339d02f8c5ed42d19f5d"
+        },
+        {
+          "path": "climate/_772.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "05c2348f659fde222ae83b8f1cadfb45b5920ffc3fe9d8e8f5a58e6661fd4377"
+        },
+        {
+          "path": "climate/_773.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "32dbed01de6c61414822fc60fc7fc603b7a135761966413c04ba1f8e5813b906"
+        },
+        {
+          "path": "climate/_782.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "4755bb716feafd289e4123f6f441b6297ce5fa91efd8137a8f6f4d0bc68f5133"
+        },
+        {
+          "path": "climate/_783.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "2f7550aa05d2a472183e36a97ba0c5ea464bdf11863611bb888ea64e726a0253"
+        },
+        {
+          "path": "climate/_791.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b3e5dd548e9ca59003e60533f82cc84476016a9f822046bfde806e439ffa92b6"
+        },
+        {
+          "path": "climate/_802.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "c9937d1d2c036878349ca614c6aff71dfc42a1d7d58f3c9ae322981ec3d3edce"
+        },
+        {
+          "path": "climate/_803.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "0f2323f83504d9f7bc52deaebe5a32b8490f54cb6ea22add5cfc9f45ad65c04f"
+        },
+        {
+          "path": "climate/_81.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "ef806605c5d634700806a19df0161b1fc424554a7803858108269337161f0484"
+        },
+        {
+          "path": "climate/_811.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "b68b342cb7a919796bd147363b19636849baa45debeac06eaef163406c0e55bd"
+        },
+        {
+          "path": "climate/_813.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "30d8e68d58c16d4d33068a4e5d12882dec369ed72f0e25c3ff52b0514cc4251a"
+        },
+        {
+          "path": "climate/_822.cli.temperature-ordering.log",
+          "bytes": 282,
+          "sha256": "9ab088ff95c90b533a54ce739d524da051c8a319d7dc12521a11310c84e3af16"
+        },
+        {
+          "path": "climate/_823.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "938cbd8441dcfeec5fe933359d3ccb52b20fc17def176ec704635e53fcdf87ec"
+        },
+        {
+          "path": "climate/_83.cli.temperature-ordering.log",
+          "bytes": 286,
+          "sha256": "40c368339dc9dd9d0ca74588edd9a3aa42b835d73c506c0125bebefb81dacd08"
+        },
+        {
+          "path": "climate/_831.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "df146ea33b41167b3ad27696552f2bd47a69724f587ff63b5582568a7de92a8a"
+        },
+        {
+          "path": "climate/_832.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "163fd1ff50c0505c5efd1d8753253e531f7a25a43d5c0dda7511dbc4ebf090ed"
+        },
+        {
+          "path": "climate/_833.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "9f93db38087729a78cc982ceefb04a840b0e094c260ecacb132ffd15930b9de0"
+        },
+        {
+          "path": "climate/_841.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "b42bc7d3acbfc50045ee81ac902ff5a9d576dd927b6db74d75c636468dee0ccf"
+        },
+        {
+          "path": "climate/_842.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "d45cda99289cc90774e98073a74c2c0df71212307379bbe08700f6d8c9cfc94e"
+        },
+        {
+          "path": "climate/_843.cli.temperature-ordering.log",
+          "bytes": 281,
+          "sha256": "b4097697ae9eafc9a43593ba8b6ddfe1b77124dc918a87230cf1522d3e075d3e"
+        },
+        {
+          "path": "climate/_91.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "ea6f88678bf2c69acadf5d8b50aa4ead5db484b442d5b56917981f96b46cbfaa"
+        },
+        {
+          "path": "climate/_92.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "43e9f6be1b95b1a2f431f5a49d6cc114cc73219c79439eb7f51eac09c0a82a19"
+        },
+        {
+          "path": "climate/_93.cli.temperature-ordering.log",
+          "bytes": 285,
+          "sha256": "50088c41638209ee7829c1ff7924127d3fcb42484263863aef72411427ca6787"
+        },
+        {
+          "path": "climate/ppt.tif",
+          "bytes": 7428820,
+          "sha256": "aec667fdfd2678140d8f7ba882a27fcd5d40ee0949a4301f9be85ec1b25987d6"
+        },
+        {
+          "path": "climate/tmax.tif",
+          "bytes": 7428820,
+          "sha256": "9f440e469aa3f2404d0be8c275e4c1a16b9eded292a2f35f050a1a460fa55218"
+        },
+        {
+          "path": "climate/tmin.tif",
+          "bytes": 7428820,
+          "sha256": "df80e2b0e7a308e48170ccb59e566ed97590c0220ca82e3a4e01d6ec85d8d1ed"
+        },
+        {
+          "path": "climate/wepp.cli",
+          "bytes": 519607,
+          "sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b"
+        },
+        {
+          "path": "climate/wepp_cli.parquet",
+          "bytes": 450591,
+          "sha256": "92f0c3457eb122ecf9fb9ffea1e1b104269bd760216fc8ce66f058f45c680058"
+        },
+        {
+          "path": "wepp/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "4bd410b0ab3fd30c7d65578f5fd70bd1b7a0d04d4c840cf0347aa9f537b1874c"
+        },
+        {
+          "path": "wepp/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "587459de04b1b0d50fd980200074ab266e6d210a04701a86335142951d79eeb6"
+        },
+        {
+          "path": "wepp/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "wepp/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "wepp/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "wepp/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "wepp/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "wepp/stdout.log",
+          "bytes": 12876,
+          "sha256": "1294fffed716ca9c98333ebb5a6d6ce613b94bd751a8a8e1e7fef21ce22c6dcb"
+        }
+      ]
+    },
+    {
+      "path": "writer-consumer-evidence.tar.gz",
+      "sha256": "96e95438f7d465a44a82394d2f20ce8e1f90045c308ec689e8401f60dcd6051c",
+      "members": [
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h1153/edde.cli",
+          "bytes": 512302,
+          "sha256": "6f9173b224ce1054b812b35d7a45ae407fe91616048143844003db87808c855e"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h1153/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "9f805fab748be78bdf337cc1447a9abca5010f239353f6f2baaa60344e10a295"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h1153/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "c0d2ffbb8113ef34f9c52587e27dae1798a40ac4f3c43caac7696d380c77c8be"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h1153/native.cli",
+          "bytes": 512302,
+          "sha256": "fa7bcf767148368afb2da2dfc8d35d25fbe089a9ab7bd4729dbdec6f8e98208b"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h1153/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "795f19eab117b73f7970ac47659a2dd12fbae5e87619a5d05a91369350641db5"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h122/edde.cli",
+          "bytes": 512302,
+          "sha256": "58de2615d2801eabc1c480d181643c2d46642f28a052506f0549c19e35df3564"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h122/edde.cli.temperature-ordering.log",
+          "bytes": 319,
+          "sha256": "2a6d2fc5ac88a44b8ef9c62592d6778c77352cb487afc15461ced792a30d9219"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h122/edde.prism.json",
+          "bytes": 3567,
+          "sha256": "386418f4613f628370efc6a3eac5709c3d7f68521f3de70a8acbb523cbae6146"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h122/native.cli",
+          "bytes": 512302,
+          "sha256": "5d347dc1a03afb5b07529aded6dc614bc53ff146d48973a4011aa4a3255111e8"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h122/native.cli.temperature-ordering.log",
+          "bytes": 317,
+          "sha256": "4febfd756dc0d8d94563a73a8c9a567b0de0ddac5e74d7f6d502d65f4f41ae02"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h2196/edde.cli",
+          "bytes": 512302,
+          "sha256": "ed36b574ff8e63f9f2720328c5d53531333c211b17df834cb5eb1cd4b4387e35"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h2196/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "94e842041bc0451deb736abf8410715156f5c11459b5fe6ab64c33985e694e2d"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h2196/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "0ab13837c2f6f3754445eeab838ee481d120c14277e017e0e2f8893f3913f764"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h2196/native.cli",
+          "bytes": 512302,
+          "sha256": "cda5931fe948522b606fa7d3565b972a7ebaec410dbc52c86ffa40757514459a"
+        },
+        {
+          "path": "patched/WRF-MPI/Historical/apostolic-saw-h2196/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "7a4d0bb6022985bd4782f834c0ff4bea0cd454aac3f08a623acdab19cf52e958"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h1153/edde.cli",
+          "bytes": 512302,
+          "sha256": "45e0b5744a1e9257f0414c09c46cf7853c07c5946e6fc636a8f88e8ee4ad67d4"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h1153/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "4b4189c1fbaf50b411e85796150eddf4e961cb4dbd623d8dd7f4d6df492defc1"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h1153/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "fdb8a4050fc05a660cfc28cf928410f6044f60a21ce51535648ec9be6de5890e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h1153/native.cli",
+          "bytes": 512302,
+          "sha256": "35f5442872e1f0c47729e27d35634733d38a38901089bb85a8ecc437ec9c0800"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h1153/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "a34d6ade65bd780d3a5e79a04b0d120e0fbe92677edc1fe67c9fcb775295ccbc"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h122/edde.cli",
+          "bytes": 512302,
+          "sha256": "3fbb8b14f060e0ff685ed1317822ab768d7a6db0b14463c8d1c0ccc2891f392e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h122/edde.cli.temperature-ordering.log",
+          "bytes": 315,
+          "sha256": "15882ada10712c70a3f68dc3db9bcec1386fef4aa091a3168ae73a831cffaace"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h122/edde.prism.json",
+          "bytes": 3567,
+          "sha256": "33f9b7951e9e47be95d86166aa647f245542df176e687cce7dc89998c609291e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h122/native.cli",
+          "bytes": 512302,
+          "sha256": "9ab7cdd8f8a8391b705698071e952c6e0d1dbffb3c472833ad2d48c5743b1957"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h122/native.cli.temperature-ordering.log",
+          "bytes": 313,
+          "sha256": "00bae72d5aa5e4e018ad88b6865856beb32d3f6c12f4ea6b9b9b921175e07154"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h2196/edde.cli",
+          "bytes": 512302,
+          "sha256": "2572efef46894589d3f6c56ed249a0faf71150ef01aa166454e747eaf1bf743c"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h2196/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "fe1054e2f954aaf9f310892dd86a5c5468bfb21ae8772ec75a63fccfd5e16daa"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h2196/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "468e6ba35292541047c0df1ad7484e71879210f27b282097a11fca3952a54f67"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h2196/native.cli",
+          "bytes": 512302,
+          "sha256": "24724067c9e03f32691eb4a8c59b693cce7b8e43895de91d97cbf4a8d11d47d6"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/apostolic-saw-h2196/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "a92212d161fe55a3463b192368d3eaf7d896817830298364ad3b9471ef40d308"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/edde.cli",
+          "bytes": 512302,
+          "sha256": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/edde.cli.temperature-ordering.log",
+          "bytes": 354,
+          "sha256": "852f05f592919185a005178840b4ea46a832fd096a9f3bfdfc4e7ae5a73e0684"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/edde.prism.json",
+          "bytes": 3719,
+          "sha256": "56d785f8f3f29a19420996a2f8745322af33cff19dc2754c6f55c964bebd2db8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/native.cli",
+          "bytes": 512302,
+          "sha256": "2947d6cbe2835f7642c1581585e5b6d095eeec96d24c624d2a116bfa402ad9a3"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/native.cli.temperature-ordering.log",
+          "bytes": 355,
+          "sha256": "cb75adcdbe5f07b4d69c7584d05f4ec88f6fa83f1ce91b453598842f8fab507e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/execution.json",
+          "bytes": 2104,
+          "sha256": "4cd8d1f135bfc123b9211710e359921a6136f6afdade8ec4ebd448309214874c"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.ebe.dat",
+          "bytes": 10967,
+          "sha256": "d1d36e3e91887bf2bbc8b2555e878d50aabfc16346043f0872265005d7b99e1f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.element.dat",
+          "bytes": 112501,
+          "sha256": "4e0a8ca5faaec8b6d028b3edca72914ba8f5fe139b419930b08c1bdd23ce7617"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.loss.dat",
+          "bytes": 6991,
+          "sha256": "a93b300a701b75a58595e1e03d82570da6b0ae66ab450b8f1670d80acf8f6366"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.pass.dat",
+          "bytes": 641370,
+          "sha256": "54b801b62d0aeb19d3ae85e64ed528ff5ddda1ceac2173ac0273989101193279"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "8a9ae8d5f8648125be074be3d4d5dbcb20dc7a27057bc47918da47e6438c7816"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "11070dfaa0696f51ff7201f0838b82b2311079572e401c16ed541d78276bb11d"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/stdout.log",
+          "bytes": 15684,
+          "sha256": "31710c4626a4a027bb4848a646c76192d39e56e990ee05fed60879f90a964235"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/execution.json",
+          "bytes": 2109,
+          "sha256": "665e7967ec79fadac57efef7de5158250939cd1cd0e0dc0b9c7f6c78d7c994dc"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.ebe.dat",
+          "bytes": 10870,
+          "sha256": "17c667f3c4fd91c08d2c0244dfcceb7744ef2e02aa5a4ea8516d8317df592f28"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.element.dat",
+          "bytes": 112309,
+          "sha256": "9eae24eef62ca4cec9c1cad6f0d218e48f23ef1380e2b501a3bf7170620fa2f2"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.loss.dat",
+          "bytes": 6991,
+          "sha256": "1d5e8a4169540dad3c42d071fbb61f86bf97b05841098551e4e4b6831e583187"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.pass.dat",
+          "bytes": 641226,
+          "sha256": "8af5a30f1be5aff175bd40cad5fe40ba72370fd0eddef08b2445a3b673fd3367"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "926ed0b119e8ab5b726b7f0db31eaf432e90eb78e24ac4fcd7e7566be192900a"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "1a4422d6630db06122d02a47c9f5d908c3cfbd7b35c8c9aa9cc970cf4b422fd9"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "2947d6cbe2835f7642c1581585e5b6d095eeec96d24c624d2a116bfa402ad9a3"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h132/wepp-native/stdout.log",
+          "bytes": 15606,
+          "sha256": "98bfe8e6928f86587f20caa85a11ff038b777d676977e74b4099343b8e03dc3d"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h72/edde.cli",
+          "bytes": 512302,
+          "sha256": "2075ad92ae5466cec29083482c68f3a912b1106161d46ea5a9d5003d94d667c8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h72/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "af767ac9ed031bc9266a0f1b122b92586242cb80a7fb8b5345a03641b7727693"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h72/edde.prism.json",
+          "bytes": 3615,
+          "sha256": "eba7d1aa9441756e21071eecb8bfefd98bfbef5fcd1b1db91d807b7620fe7382"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h72/native.cli",
+          "bytes": 512302,
+          "sha256": "c4f8ced5422d332319995682c57c522218e2ec0f3d449f9211fe54bf17d57be6"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h72/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "c4c6e633981641cf487d216c16d7c34e74a804c2efbcc40f9e33ffa6239ce6a1"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h78/edde.cli",
+          "bytes": 512302,
+          "sha256": "d9f12119a1cc25b361af02fd58aef45ac71b220eee01a3c9756438ac7f340950"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h78/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "7ab9b0f847c7ae65b9e3e87a0fc07d1716b5c4f6a6fda514fab79007104055e5"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h78/edde.prism.json",
+          "bytes": 3561,
+          "sha256": "036dfba3d3e42db296688f97211f115c64d022cdc3b188450b4eb94f1bd92c4f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h78/native.cli",
+          "bytes": 512302,
+          "sha256": "1dd0a7425538fdc78ac151a62adf0fa36cb4c4a5b905c6053dfd85df49cd176c"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP2-4.5/cryptic-beechnut-h78/native.cli.temperature-ordering.log",
+          "bytes": 382,
+          "sha256": "e93c6f179eb898596b034e7893144e70298561956d8a9430e427417e461b259e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h1153/edde.cli",
+          "bytes": 512302,
+          "sha256": "065a5f82d76e492da28389056fdcc86c6d9611d3f7145d363f6d6b4873d6f0bf"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h1153/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "d85e1328c40b43b917ca34c09ad431e06467c105da0eaf1715551f837de36ba1"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h1153/edde.prism.json",
+          "bytes": 3617,
+          "sha256": "c459b31fa281be4805bec09382f3754cb49ac638a61d562e97449866579c9719"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h1153/native.cli",
+          "bytes": 512302,
+          "sha256": "6157140650519cbd53798120921efbef4b518f6afa3033d66d665e070737b1af"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h1153/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "7df522552bb714db8192e74967430e23ceb21e01e8b2d7764798764215438abd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h122/edde.cli",
+          "bytes": 512302,
+          "sha256": "e1f3dd239422aa4ea1c13b34aa60ea6da0cf01f4c381ce37903cf2e933723e10"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h122/edde.cli.temperature-ordering.log",
+          "bytes": 315,
+          "sha256": "e6ecf9d9bbca601ad601a38e91c50c6b77f3e2f166fea8757d6fa8fd0cbc51dd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h122/edde.prism.json",
+          "bytes": 3567,
+          "sha256": "283d83ced3c209010312e7989f798b142d9d42f23317b39de20279df14a1bfd8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h122/native.cli",
+          "bytes": 512302,
+          "sha256": "f7ce3fcfb77e7d6ef5682455434eb730983ac5d83580ff2ed073c8266be9c76d"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h122/native.cli.temperature-ordering.log",
+          "bytes": 313,
+          "sha256": "35efd0c5b58abab7926b2a63ebcdde7f67d8e419ca8b67ab1ad1b33675d12df4"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h2196/edde.cli",
+          "bytes": 512302,
+          "sha256": "7e81c1fa647bb9e780424609a51626552fc9abedeb01ef65c9f3dc7a76e9f94d"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h2196/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "04388e78110e3ba41aa8060977a49b968377628f4e43e48c4a2e3c5dcb7deed4"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h2196/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "a9aee62e07ec916a2b6591b566e1e9ad2ed3e4e3a0fae9ea563614d0124b52a2"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h2196/native.cli",
+          "bytes": 512302,
+          "sha256": "9b0b8fe212b906b80d15cdb12555bb12bf0657f573171ef53076300456814781"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/apostolic-saw-h2196/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "a1aedbece25a873f49a9341f2224a7fc7ae6048e5de34b45a6ae9aacfda2247c"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/edde.cli",
+          "bytes": 512302,
+          "sha256": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/edde.cli.temperature-ordering.log",
+          "bytes": 322,
+          "sha256": "68c7dbe98cb5d42663275f18bd38198c0de3baecb3e5836d419b1e1d24163303"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/edde.prism.json",
+          "bytes": 3726,
+          "sha256": "e20e2df328f54aa92ebe311a9b14bac21483c4fd3f38d778992470b3bf1298e9"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/native.cli",
+          "bytes": 512302,
+          "sha256": "95d6f1b0d1bb13201162078057b30c9da4636a522932e198fdfaec3492ba45d8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/native.cli.temperature-ordering.log",
+          "bytes": 353,
+          "sha256": "f1cc11f119dd8e0e27a2f8bc02264225e24634aa3d1075420357299e4f9baf34"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/execution.json",
+          "bytes": 2100,
+          "sha256": "f2bb964b3266383236e8ed52d22ae1bf8effb333f10a9a3eeea6787ccbf58f49"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.ebe.dat",
+          "bytes": 7475,
+          "sha256": "c6fd52f501cc6b8e9af66f9232f9b51332fa8dd4d6e5248aa5176fb0347aee74"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.element.dat",
+          "bytes": 105781,
+          "sha256": "b155b1daf81d341998a78b67eeab44566009114c3579356122d13f12ad107520"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.loss.dat",
+          "bytes": 7558,
+          "sha256": "3f68a2ac401c534dd6c538f3facf62582366c3d4a3760b823d878562a47ec41b"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.pass.dat",
+          "bytes": 636589,
+          "sha256": "bea37ce4e0f3ab78de7e1e4acde011c14e44fae2fa513b3f764617e437c0ab89"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "e3100b2db855b2f5ba5629579fb0eb2ba6416d96095f0b9a56ef1b1debeafe44"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "e1ec32d4a684850bac8d1c2fc911bc514f0b0363fa08c96b6d964f1789fccedd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "b491f9d1b7477ebcfa1441aad54c577c3c6c17af532a5c0f227ae90a8c9994ad"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-edde/stdout.log",
+          "bytes": 12876,
+          "sha256": "2692a5842bc54295cb69978b41c0553d66a25b5d978ed8b378993f0c2af075ad"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/execution.json",
+          "bytes": 2096,
+          "sha256": "b74736abf35ca2cac985801f83d7555c0b229e33f6ee5d4e8f4280cd3a61593f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.ebe.dat",
+          "bytes": 7475,
+          "sha256": "fd5b66c1a4feccbb2ebd5241b092fdf10b16a1dcc599aabb34299491ab892e20"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.element.dat",
+          "bytes": 105781,
+          "sha256": "afff3a90ea8c54ca01606aa44b6b1413977fa893fa4f047845098d61001157c6"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.loss.dat",
+          "bytes": 7558,
+          "sha256": "83e51242624557add9625f03427afd969ba55d01ddafac8cc0250ce09f81a35f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.pass.dat",
+          "bytes": 636589,
+          "sha256": "c28e1668b59508cdd08341d150ecf3a5015b5aad1909969f8e06cb0be72917d2"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "ea5735817011c99296e787802baf8d07c4db006e3290b701fe1fb1df1b731af3"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "9909866c5900a55bd3d16c027abcb1d0ba8c512d01c5379117f8436a5742827a"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "b413350751d97db5f391a470ae8fd6ebeee74a6204ad792427be94e3f744b130"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "95d6f1b0d1bb13201162078057b30c9da4636a522932e198fdfaec3492ba45d8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h132/wepp-native/stdout.log",
+          "bytes": 12876,
+          "sha256": "2692a5842bc54295cb69978b41c0553d66a25b5d978ed8b378993f0c2af075ad"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h72/edde.cli",
+          "bytes": 512302,
+          "sha256": "9168c89e22c1c728e2136010ab9df9e851f9833ed9b69049a72d68dba8168560"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h72/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "37e037ec068ee2aacc2ac7db7f2e3dbd3712dd75ad1688fe837fcdd0f46dd2e2"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h72/edde.prism.json",
+          "bytes": 3615,
+          "sha256": "e420b0ead304c6fa32b3bfaef179078085db9b788e2cd451c179f702a8b15d30"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h72/native.cli",
+          "bytes": 512302,
+          "sha256": "592521b0e0ed40507a73c15932e70c70cbd7a44ab0e3bcd388ddad70ebf926a7"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h72/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "e4dd20f2b701ebb6d0346035fab25e9220be726eff48fa3049e9568acf3cbbc6"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h78/edde.cli",
+          "bytes": 512302,
+          "sha256": "cf52da121ceaece7f8ef80107dbd9129f185c019420b084b019d07f95c0b93f8"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h78/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "19310ea765726ec078d3af1b2656f063e20fab0d66130dca1ae405f477bcb49b"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h78/edde.prism.json",
+          "bytes": 3561,
+          "sha256": "9852b86b227a1864e067ba84d432261aa0ca926d0313e2cf196726b83f138934"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h78/native.cli",
+          "bytes": 512302,
+          "sha256": "92a28c70997b9fb4be0da59cf3a8645d9d44aba3e12da8a54c0607d02d06d9c4"
+        },
+        {
+          "path": "patched/WRF-MPI/SSP3-7.0/cryptic-beechnut-h78/native.cli.temperature-ordering.log",
+          "bytes": 382,
+          "sha256": "9aeb1421a09c18e40be0db3f9703151dc812505d83be5f150edfdcac925cffbc"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h1153/edde.cli",
+          "bytes": 512302,
+          "sha256": "9cd3dd57b2301dda603c94da28d603707d8b41c244d62c53d684f6fe7961214d"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h1153/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "7f5047346b322c5fdae0648f355231326a2a50dbc75c2d127b57464a80aebf30"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h1153/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "362c05b30de798a1ed4d296edbe5b23f0a7cd65008c7fd8c5670f144fec74dd4"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h1153/native.cli",
+          "bytes": 512302,
+          "sha256": "8b57737ba17c481c6c86a6adfa174326694a72c29d59be124b50505e6c82d290"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h1153/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "5e10359072408854ce8bef02763bc0c77c079f2a4e4ae4f7b7084b09f3f9451d"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h122/edde.cli",
+          "bytes": 512302,
+          "sha256": "02e46b12951d35be2acd37c7f9dd22b55b9dc2e3c63f544e5c848e41c4cd02b0"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h122/edde.cli.temperature-ordering.log",
+          "bytes": 319,
+          "sha256": "611a19ad13039be74698b73df9d56cbf36f0d764c85593d0b2be502642f29e5a"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h122/edde.prism.json",
+          "bytes": 3567,
+          "sha256": "c70cb276268ee0a00e15b6e09a7e150cce7976e7025d48e552a8db7dde34a035"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h122/native.cli",
+          "bytes": 512302,
+          "sha256": "bdfe17cb3d50bb5756b54325da7d9b73adad023280631b78e6f74150ea1d47be"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h122/native.cli.temperature-ordering.log",
+          "bytes": 317,
+          "sha256": "e7ced1971049f3de3cfbb838ba661095aabdbc78a08d59a3bd553277cdce1ddc"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h2196/edde.cli",
+          "bytes": 512302,
+          "sha256": "3dd5420cd6da3ba7e9a3913cc5cc5ed06cbc5ebd32cd5581ac154b621dc047f8"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h2196/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "07db19f9981681c5b7f6d391dcced2bf85e4a2f5ed2bb0dae9e025ce1f4b39b3"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h2196/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "f298e0ddb263c10109dd23ee753e04dd62ee6f4c46cbfd4abc124c69d7af5034"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h2196/native.cli",
+          "bytes": 512302,
+          "sha256": "df8c21b00026d12e2dab3980a08bb31a4e2a6c8b4b4ef9e1696e6f1874ba6215"
+        },
+        {
+          "path": "patched/WRF-Nor/Historical/apostolic-saw-h2196/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "1752971391254a76eac6d7b0790875117e7144156eacfdbac03b4fb415873276"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h1153/edde.cli",
+          "bytes": 512302,
+          "sha256": "60ea9b6a05696ed9f6e3938c2461f952acfce8b42a80b772f1f35f5250b7f580"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h1153/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "294d10a265288eb3a16df4b332f13e67d8817aa1778ec2ba6142504bb48e6b8f"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h1153/edde.prism.json",
+          "bytes": 3616,
+          "sha256": "6e49d305184c825e85d89310b37ee5fe980bf6131cde8ccea3e6bb37d072fdec"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h1153/native.cli",
+          "bytes": 512302,
+          "sha256": "3b4271e614ef6aeaba54c876ce7f4dea9ed2ee6a3947ef0317a02ca884ad80be"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h1153/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "64134016babfffa84c84d2d86b12b7c0dece8c9e5c806efe783cd626e9bf1e56"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h122/edde.cli",
+          "bytes": 512302,
+          "sha256": "5728e270cb6bee03c0b3683419d1822d1bf66c2cfbeb2fc5b549a40d406c14d5"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h122/edde.cli.temperature-ordering.log",
+          "bytes": 315,
+          "sha256": "09498bcd9f01e996892b78e044f62090163cbd3e8d415ccc8d1f7df18eb6d5aa"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h122/edde.prism.json",
+          "bytes": 3567,
+          "sha256": "d21be5d5f35a164094b904badf8a04ba1ef358765d2ee12ec37fa2d99a487bd2"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h122/native.cli",
+          "bytes": 512302,
+          "sha256": "300a8696dc1b5812e37d4336313896fb6e01686575d3e1856031bf6668273ad5"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h122/native.cli.temperature-ordering.log",
+          "bytes": 313,
+          "sha256": "69e75a9eccd7816fa8b3d12f3b04e384b26d93710dddf551cd371cda21985a69"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h2196/edde.cli",
+          "bytes": 512302,
+          "sha256": "9899d264c79d5cba8ac186f17cf2fe0a7fdcda176e2efcff00ad93937f16506c"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h2196/edde.cli.temperature-ordering.log",
+          "bytes": 316,
+          "sha256": "06e396e7dee2ab8079e8a6e06378dba678fd2eae42bade09df06103cad0bcd80"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h2196/edde.prism.json",
+          "bytes": 3621,
+          "sha256": "861d3c672d46ae61650843659e6ecaccf15fe051a85704040f883efcd96a0982"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h2196/native.cli",
+          "bytes": 512302,
+          "sha256": "77ea91e76fcb35c86ee46bfbc417f4acd32386d7163879e951b7ef34d0a1088c"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/apostolic-saw-h2196/native.cli.temperature-ordering.log",
+          "bytes": 314,
+          "sha256": "2c96bf4c9d331d94a4f10b876d2b5604c22714fe55bb3e780827544360b7c7fc"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/edde.cli",
+          "bytes": 512302,
+          "sha256": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/edde.cli.temperature-ordering.log",
+          "bytes": 322,
+          "sha256": "b94a544f9f2502288fd7907b40ae6aab8da35e9b3028f601af9bded9ae3baed6"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/edde.prism.json",
+          "bytes": 3687,
+          "sha256": "78fa36b27643442f822bc68423eb612adb8ac5aeed1c1ae7f9dd39cdfc112dfe"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/native.cli",
+          "bytes": 512302,
+          "sha256": "3ab2161bea7a11929742f015be61c88150603fd2b0fab173efbe4d77001ff3f9"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/native.cli.temperature-ordering.log",
+          "bytes": 353,
+          "sha256": "d30be4b7bbee1b2cdff140cf78a39bb130df380b79cb6b48042409d6a2832ac7"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/execution.json",
+          "bytes": 2109,
+          "sha256": "6526de77c2af837b795ab19554c49121da404f02cac446f8d9130f7469c82998"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.ebe.dat",
+          "bytes": 9997,
+          "sha256": "cff8bfd97497c28979cdabab60538561efa67c88689c5cc6ebcc88f5090b96a8"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.element.dat",
+          "bytes": 110773,
+          "sha256": "ea773a8ba3e75f177e98bf844eef09ef7e91e28881478559fd81d6528a4b71e0"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.loss.dat",
+          "bytes": 6991,
+          "sha256": "f953fd6a32faa46fec045cb5fc8ee207f752ef5a04157cd886799de0ccfd3fad"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.pass.dat",
+          "bytes": 611598,
+          "sha256": "06d84aab96043d36c23c4fc7a188c59d2ca54da88d1d4f3bf54a3929dc6ed0af"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "7e97b5105a562358ce340587280244a953d30412d799b31ed991cdfbab3d28da"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "743653fba5138801ccde0f7e159b3955c7e9199a3e7360bc951b8bd13d5b3078"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-edde/stdout.log",
+          "bytes": 14904,
+          "sha256": "c600e9f24f003ec6f84d872c2e2f44d5e19499afb238c3345e5bd0ab66fa78f7"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/execution.json",
+          "bytes": 2109,
+          "sha256": "a69535dae0f32a3f0cdf2dd3c1ef2d56cac43ba31772b98692949dc1da3de2de"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.ebe.dat",
+          "bytes": 9900,
+          "sha256": "930be8b781e17400bb058287dcc52f410997692b32a4c9cf65ed02a532f208d1"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.element.dat",
+          "bytes": 110581,
+          "sha256": "7befa85a2ee984ba8d89cb37a92e7e1ca70ca2a389ef6abf62fb9b394d6ee93b"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.loss.dat",
+          "bytes": 6991,
+          "sha256": "59638c3817615a6a90a201dffaaa744c2972db148d7f10f47112bab123192a54"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.pass.dat",
+          "bytes": 612078,
+          "sha256": "dafa51d18d3e4019ff1666d991ebd476ab0788c2e0bb21114ff258d5f551e0fe"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.plot.dat",
+          "bytes": 3473,
+          "sha256": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.soil.dat",
+          "bytes": 782086,
+          "sha256": "01fd663ae545a8823c82c93c52ef1fb9b8acb64b3a33dca9ff491e3f6075ca35"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/output/H132.wat.dat",
+          "bytes": 1784321,
+          "sha256": "2d2792229fe0005fbafd508d445be14ec06e9a8600a75fb27229e71ba992e632"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/chntyp.txt",
+          "bytes": 5531,
+          "sha256": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/gwcoeff.txt",
+          "bytes": 168,
+          "sha256": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.cli",
+          "bytes": 512302,
+          "sha256": "3ab2161bea7a11929742f015be61c88150603fd2b0fab173efbe4d77001ff3f9"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.man",
+          "bytes": 5283,
+          "sha256": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.run",
+          "bytes": 266,
+          "sha256": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.slp",
+          "bytes": 190,
+          "sha256": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/p132.sol",
+          "bytes": 3988,
+          "sha256": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/pmetpara.txt",
+          "bytes": 7065,
+          "sha256": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/snow.txt",
+          "bytes": 87,
+          "sha256": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/tc.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/runs/wepp_ui.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h132/wepp-native/stdout.log",
+          "bytes": 14826,
+          "sha256": "640c79bc977ef96a55f2cdaf953c1397de1eca4dedb3d8e9e77c8559e16f0d81"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h72/edde.cli",
+          "bytes": 512302,
+          "sha256": "9ae94d5b0af46ea4e603ffb57a6ac88df4ceb2dc83ac5de8cd6586cfd0cefb72"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h72/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "b67d87b1345c3a31dc132ec419e4ca2a00be79faf9dc459a2817030f84d68449"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h72/edde.prism.json",
+          "bytes": 3615,
+          "sha256": "2bc6957d3afb02655e7a94e9354f93b6b7ff57f32455a1238ccebe90e2b1a556"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h72/native.cli",
+          "bytes": 512302,
+          "sha256": "ac2a723f65431d615d4473f950ffe63f6f4bd573ed1f7996be0ac050c7e643bb"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h72/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "f5f6cf288883f29e1649aef100be6c4828ee9a1ef39b51625fe86c32be6780ee"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h78/edde.cli",
+          "bytes": 512302,
+          "sha256": "c613b4b77f02927cd9b8090ad9713d7b7fb13bc29af7a8113723fa3a70920235"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h78/edde.cli.temperature-ordering.log",
+          "bytes": 320,
+          "sha256": "558e0901e83273a1795c7472d896f4ad9470b5a80b910d2a274f13c361f84c00"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h78/edde.prism.json",
+          "bytes": 3561,
+          "sha256": "357fb12c5e8e9fa26e2b8723296b45240ad30f6c83bd5ab6889109ca812755ff"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h78/native.cli",
+          "bytes": 512302,
+          "sha256": "efd3251cbe9b27fc1f209954016d36741b36618308f012f841bb97f93b553c67"
+        },
+        {
+          "path": "patched/WRF-Nor/SSP2-4.5/cryptic-beechnut-h78/native.cli.temperature-ordering.log",
+          "bytes": 318,
+          "sha256": "433376844abea0d1cbdcbe28fc3b32bf23e36c2364cde5f00605bd37f00ad16a"
+        }
+      ]
+    }
+  ],
+  "parquet_check": "7305 rows; canonical watershed CLI weather values exactly match export",
+  "limitation": "Canonical climate parquet describes the watershed CLI; per-hillslope spatial climates remain CLI artifacts."
+}

@@ -50,6 +50,11 @@ from wepppy.nodb.core.climate_multiple_build import (
     finalize_multiple_build,
 )
 
+from wepppy.climates.prism.temperature import (
+    validate_source_temperatures, repair_temperature_ordering,
+    start_temperature_revision, complete_temperature_revision,
+)
+
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
 
@@ -812,9 +817,11 @@ def cli_revision(
         assert _exists(new_cli_path), "wepppyo3.climate.cli_revision failed"
         return new_cli_path
 
+    diagnostic_path = start_temperature_revision(cli_fn, new_cli_path)
     cli2 = ClimateFile(cli_fn)
 
     df = cli2.as_dataframe()
+    validate_source_temperatures(df.tmax, df.tmin, ws_tmaxs, ws_tmins, hill_tmaxs, hill_tmins)
     rev_ppt = np.zeros(df.prcp.shape)
     rev_tmax = np.zeros(df.prcp.shape)
     rev_tmin = np.zeros(df.prcp.shape)
@@ -827,10 +834,12 @@ def cli_revision(
         rev_tmin[index] = row.tmin - ws_tmins[mo] + hill_tmins[mo]
         dates.append((int(row.year), int(row.mo), int(row.da)))
 
+    rev_tmax, rev_tmin, diagnostics = repair_temperature_ordering(rev_tmax, rev_tmin)
     cli2.replace_var("prcp", dates, rev_ppt)
     cli2.replace_var("tmax", dates, rev_tmax)
     cli2.replace_var("tmin", dates, rev_tmin)
     cli2.write(new_cli_path)
+    complete_temperature_revision(diagnostic_path, diagnostics)
     del cli2
 
     assert _exists(new_cli_path), "ClimateFile.revision failed"

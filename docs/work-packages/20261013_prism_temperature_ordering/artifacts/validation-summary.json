@@ -1,0 +1,142 @@
+{
+  "archive": "validation-logs.tar.gz",
+  "sha256": "868438dc9701dce69c2590e371bf1707b54a848f42510ec7834bf2b93c2deac5",
+  "files": [
+    {
+      "name": "baseline.log",
+      "sha256": "5e8f8e88dccb577f9242390c6efbeaac1cec28ef75766d8a3e2686de9f6cb0b6"
+    },
+    {
+      "name": "docs-package-final.log",
+      "sha256": "e752912f69c704ee3b897518d456370ed609e3cea2ab7b6d35cb24c22c168392"
+    },
+    {
+      "name": "docs-package.log",
+      "sha256": "e752912f69c704ee3b897518d456370ed609e3cea2ab7b6d35cb24c22c168392"
+    },
+    {
+      "name": "exceptions-unsuppressed.log",
+      "sha256": "419847100ed509cb1001422fef8a4666683429aff6a6901ba8a8d63c49cc33c5"
+    },
+    {
+      "name": "exceptions.log",
+      "sha256": "9966154e713251549e861c9e2c6a017eaaa2636f1f4c65b0fff1108fcbff4a1b"
+    },
+    {
+      "name": "focused-final.log",
+      "sha256": "794a8c5421774f8d3c46f2e4c33613280b2276d6d755d5870bd2ec292f5e84d7"
+    },
+    {
+      "name": "focused.log",
+      "sha256": "39c120660f7966d5eaf9a0414900c4b5e81fe42266d06079b7f45c14d65c1010"
+    },
+    {
+      "name": "full-suite.log",
+      "sha256": "a68241e3ffa59d93506b404e5899c58f74efc039ba9200ab7db841bc01af28bd"
+    },
+    {
+      "name": "native-build-final.log",
+      "sha256": "887e182a5f9d2a209545e4142414b97c6426a888c1e9840165affdba08c91abd"
+    },
+    {
+      "name": "native-build.log",
+      "sha256": "afc7839955907b7b69c984cdc720a88e7f83c70ae6dfab9521b76524c90b3646"
+    },
+    {
+      "name": "patched-writers-final.log",
+      "sha256": "4a0c91ab843269ea47951c80130cf2c9d40ad45350000c5050686e6cfd211d6f"
+    },
+    {
+      "name": "patched-writers.log",
+      "sha256": "0a4051d58fb3cc7b359717fd60c97bdf1909014470f090798e149555f58d3556"
+    },
+    {
+      "name": "project-consume-final.log",
+      "sha256": "3aa71f237bb099ebad784aecc13a5a1f7e403e804904b1600fb972e3c054f0b2"
+    },
+    {
+      "name": "project-final.log",
+      "sha256": "277367f610832dd52acee46207ff171296f56f777a53ea06d3ec21bedbcad1c3"
+    },
+    {
+      "name": "project-fourth.log",
+      "sha256": "b8bfe45032318e37c3b540f8f676921d0f118aa86c90a3642a769599f12bdd25"
+    },
+    {
+      "name": "project-second.log",
+      "sha256": "9e54009db2bfebd54ad25321977f302d13752bd862a9b062e9700d8be5b0d639"
+    },
+    {
+      "name": "project-third.log",
+      "sha256": "1923a3ad50950c897af83a3f489821b0daf24f7c97ee27de55b2ff8161aca58d"
+    },
+    {
+      "name": "project.log",
+      "sha256": "3c8352dc7d094b3fc30eb7d4813c897f76afc4029711061cf86707c38f1c9de8"
+    },
+    {
+      "name": "quality.json",
+      "sha256": "18d9ef70af389fe4f2064b03084c50eaf8dfff7c59fb3df810a6984e1109fbea"
+    },
+    {
+      "name": "quality.log",
+      "sha256": "7aa1a47bb1a7c66d4c3aed2588756982ce168cabb57320f32fcaeb63e3244d9a"
+    },
+    {
+      "name": "quality.md",
+      "sha256": "4e7311405e8fea6f49c9c09a8cd676b972e2159f8fd0da5ab69d8ba5688802f2"
+    },
+    {
+      "name": "retained.log",
+      "sha256": "47fd8947b85341fc1598d215d1d890907763375303427c172cdcd340ac0c84d4"
+    },
+    {
+      "name": "rust-tests-final.log",
+      "sha256": "6eecdcef0dfcb342fcbb980ab412466ebdee41578167f9715334ece40325c306"
+    },
+    {
+      "name": "rust-tests.log",
+      "sha256": "eca46863de0be6fa5d6db4e92119b79cf065711a7126c87a58bca794c57693ba"
+    },
+    {
+      "name": "stubtest-climate.log",
+      "sha256": "bb3e3fea13a93c05a7bfb095b9de5deb849cb14b3468d269b3dee4ed7364985a"
+    },
+    {
+      "name": "stubtest-disposition.log",
+      "sha256": "66d83cb9972c953cd763f460d0e394a7dc52a906d58e2a01c3a0bc1a1d0f837e"
+    },
+    {
+      "name": "stubtest-final.log",
+      "sha256": "8825bce2eaed2c7abc8ceab384960dd61d12b540bfc3dc1e10b6e3df42956d6b"
+    },
+    {
+      "name": "stubtest-scoped.log",
+      "sha256": "db94ccc47e6e3f1c965145491a084213821ab6c52a5479fba8c313939e254425"
+    },
+    {
+      "name": "stubtest.log",
+      "sha256": "a2c454b0d433e3780626fd78f8272e1f67d824eacdf9856366ef8c3c9d8c227a"
+    },
+    {
+      "name": "test-stubs.log",
+      "sha256": "ee775a79bf72d0202e3135c0d4e59ad4f41917f6c8f5360c8ee45ffa249bc0cc"
+    },
+    {
+      "name": "timing-final.log",
+      "sha256": "0f38433a77e5f297a40ed5b188c01641d94bd213890862da9638bb7306fc1027"
+    },
+    {
+      "name": "timing.log",
+      "sha256": "b1bd66a45a91e56349bdcc13ca32dbfe5db29bce6606e9a39609fcfd8144bada"
+    }
+  ],
+  "focused": "80 passed",
+  "rust": "23 passed",
+  "full_suite": "1280 passed, 28 skipped, 1 unchanged SBS metadata failure",
+  "climate_stubtest": "12 modules passed with retained single-symbol baseline allowlist",
+  "nodb_stubtest": "blocked by existing module typing errors; see stubtest-disposition.log",
+  "exception_gate": "line-sensitive allowlist false positive; no-allowlist comparison passes, delta zero",
+  "docs": "All changed Markdown paths lint clean. New prose spelling previews clean; preexisting suggestions in PROJECT_TRACKER.md and sibling historical release notes left unchanged.",
+  "correctness": "independent final review passed, no open findings"
+}

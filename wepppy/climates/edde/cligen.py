@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 
 from wepppy.climates.cligen import Cligen, ClimateFile, df_to_prn
+from wepppy.climates.prism.temperature import (
+    repair_temperature_ordering, start_temperature_revision, complete_temperature_revision,
+)
 from .client import DataQualityError, sha256, write_json
 
 
@@ -134,8 +137,10 @@ def revise_prism(source: str | Path, output: str | Path, reference: dict, target
         raise DataQualityError('Reference PRISM precipitation must be positive')
     path=Path(output)
     companion = path.with_suffix('.prism.json')
-    if path.exists() or companion.exists() or Path(source).resolve() in (path.resolve(), companion.resolve()):
+    diagnostic_path = Path(str(path) + '.temperature-ordering.log')
+    if path.exists() or companion.exists() or diagnostic_path.exists() or Path(source).resolve() in (path.resolve(), companion.resolve()):
         raise ValueError('PRISM output must be a new file distinct from source')
+    diagnostic_path = start_temperature_revision(source, path)
     cli=ClimateFile(str(source))
     frame=read_cli(source)
     _validate_cli(frame)
@@ -149,13 +154,19 @@ def revise_prism(source: str | Path, output: str | Path, reference: dict, target
     }
     if not all(np.isfinite(values).all() for values in expected.values()):
         raise DataQualityError('PRISM revision produced nonfinite values')
-    inverted = np.flatnonzero(expected['tmin'] > expected['tmax'])
-    if len(inverted):
-        first = int(inverted[0])
-        maximum = float(np.max(expected['tmin'] - expected['tmax']))
-        raise DataQualityError(
-            f'PRISM revision would invert temperature extrema on {len(inverted)} days; '
-            f'first={frame.index[first].date()}, maximum inversion={maximum:.3f} C')
+    original_max, original_min = expected['tmax'], expected['tmin']
+    try:
+        expected['tmax'], expected['tmin'], ordering = repair_temperature_ordering(original_max, original_min)
+    except ValueError as exc:
+        raise DataQualityError(str(exc)) from exc
+    ordering['monthly_mean_adjustment_c'] = [
+        dict(month=month, days=int((months == month - 1).sum()),
+             tmax=float(np.mean((expected['tmax'] - original_max)[months == month - 1])) if np.any(months == month - 1) else None,
+             tmin=float(np.mean((expected['tmin'] - original_min)[months == month - 1])) if np.any(months == month - 1) else None)
+        for month in range(1, 13)]
+    if any(not np.isfinite(record[key]) for record in ordering['monthly_mean_adjustment_c']
+           for key in ('tmax', 'tmin') if record[key] is not None):
+        raise DataQualityError('PRISM monthly temperature adjustment must be finite')
     for name,values in expected.items():cli.replace_var(name,dates,values)
     cli.write(str(path))
     actual=read_cli(path)
@@ -166,6 +177,7 @@ def revise_prism(source: str | Path, output: str | Path, reference: dict, target
     if any(error>.05001 for error in errors.values()):
         raise DataQualityError('PRISM output does not match spatial revision within CLI rounding')
     result=dict(status='complete',source_sha256=sha256(Path(source)),output_sha256=sha256(path),
-                reference=reference,target=target,maximum_rounding_error=errors)
+                reference=reference,target=target,maximum_rounding_error=errors,temperature_ordering=ordering)
+    complete_temperature_revision(diagnostic_path, ordering)
     write_json(companion,result)
     return result

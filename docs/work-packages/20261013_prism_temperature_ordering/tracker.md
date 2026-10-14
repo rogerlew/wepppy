@@ -2,21 +2,21 @@
 
 ## Quick status
 
-**Started / updated**: 2026-10-13 23:52 UTC
-**Phase**: Planning complete; implementation not started
-**Next milestone**: M1 reviewed contract checkpoint
+**Started / updated**: 2026-10-13 23:52 UTC / 2026-10-14 02:22 UTC
+**Phase**: Closed — development-stack acceptance complete
+**Next milestone**: None in this package; deployment and EDDE integration are separate
 **Security impact**: low; dedicated security artifact not required under current scope
-**Plan**: [ExecPlan](prompts/active/prism_temperature_ordering_execplan.md)
+**Plan**: [ExecPlan](prompts/completed/prism_temperature_ordering_execplan.md)
 
 ## Task board
 
 - [x] Operator accepted midpoint proposal and requested implementation work-package plus ADR.
 - [x] Scope all four writers, candidate evidence, native build, compatibility, and consumer validation.
 - [x] Accept ADR-0092 for implementation; retain explicit conformance-pending status.
-- [ ] M1: Current contracts, exact diagnostic fields, two independent reviews, and ancestor checkpoint commit.
-- [ ] M2: Rust daily and three Python paths; analytical and serializer regression tests.
-- [ ] M3: Rebuilt extension provenance, project/consumer validation, non-EDDE case, retained 24-case parity, WEPP and performance evidence.
-- [ ] M4: Required gates, correctness review, final docs and handoff.
+- [x] M1: Current contracts, exact diagnostic fields, two independent reviews, and ancestor checkpoint commit.
+- [x] M2: Rust daily and three Python paths; analytical and serializer regression tests.
+- [x] M3: Rebuilt extension provenance, project/consumer validation, non-EDDE case, retained 24-case parity, WEPP and performance evidence.
+- [x] M4: Required gates, correctness review, final docs and handoff.
 
 ## Decisions
 
@@ -33,3 +33,7 @@ The finite acceptance matrix and rollback criteria are in [package.md](package.m
 ## Progress
 
 2026-10-13 23:52 UTC: authored package and active plan, promoted existing ADR-0092 from proposal to accepted implementation decision, and linked parent/successor packages. Runtime code and native artifacts remain unchanged. Scoped documentation lint passed for the package, ADR, ADR index, and root tracker; spelling preview and git diff whitespace checks were clean. No runtime tests are required for this documentation-only change.
+
+2026-10-14 02:10 UTC: M1 checkpoint committed as `7bd7707c2` after two independent reviews. Implemented all four writers and visible diagnostic logs; native crate tests pass 23 and focused Python tests pass 76. Actual native/EDDE 24-case rewrite and six fresh WEPP runs pass. Real raster-backed scratch-project build generated 200 climates; preparation/readback verification continues. Full suite and independent implementation review are running.
+
+2026-10-14 02:22 UTC: M3/M4 complete. Native source `d3e51c2`, release `0515272`, imported SHA `da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882`. Focused 80/Rust 23 pass. Retained 24-case study and actual 200-hillslope project verify seven fresh WEPP runs. Independent final review verifies all 460 archive members and project mapping/consumption. Full suite stopped at unchanged SBS assertion after 1,280 passed/28 skipped. Climate stubtest passes 12 modules with one recorded preexisting symbol exclusion; NoDb typing gate and default exception allowlist limitation are retained, while unsuppressed catch comparison has zero increase. See [report](report.md) for exact claims and follow-ups. No deployment or original-project mutation occurred.

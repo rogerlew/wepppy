@@ -19,6 +19,11 @@ from wepppy.climates.metquery_client import (
     get_prism_monthly_ppt
 )
 
+from wepppy.climates.prism.temperature import (
+    validate_source_temperatures, repair_temperature_ordering,
+    start_temperature_revision, complete_temperature_revision,
+)
+
 _rowfmt = lambda x : '\t'.join(['%0.2f' % v for v in x])
 
 
@@ -32,12 +37,13 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
 
 
 def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
-                   hill_lng: float, hill_lat: float, new_cli_fn: None):
+                   hill_lng: float, hill_lat: float, new_cli_fn: str | None):
 
     if new_cli_fn is None:
         assert cli_fn.endswith('.cli'), cli_fn
         new_cli_fn = cli_fn.replace('.cli', '_revised.cli')
 
+    diagnostic_path = start_temperature_revision(cli_fn, new_cli_fn)
     cli = ClimateFile(cli_fn)
     df = cli.as_dataframe()
 
@@ -49,6 +55,7 @@ def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
     hill_tmaxs = get_prism_monthly_tmax(hill_lng, hill_lat, units='c')
     hill_tmins = get_prism_monthly_tmin(hill_lng, hill_lat, units='c')
 
+    validate_source_temperatures(df.tmax, df.tmin, ws_tmaxs, ws_tmins, hill_tmaxs, hill_tmins)
     rev_ppt = np.zeros(df.prcp.shape)
     rev_tmax = np.zeros(df.prcp.shape)
     rev_tmin = np.zeros(df.prcp.shape)
@@ -63,11 +70,13 @@ def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
 
         dates.append(tuple([int(row.year), int(row.mo), int(row.da)]))
 
+    rev_tmax, rev_tmin, diagnostics = repair_temperature_ordering(rev_tmax, rev_tmin)
     cli.replace_var('prcp', dates, rev_ppt)
     cli.replace_var('tmax', dates, rev_tmax)
     cli.replace_var('tmin', dates, rev_tmin)
 
     cli.write(new_cli_fn)
     monthlies = cli.calc_monthlies()
+    complete_temperature_revision(diagnostic_path, diagnostics)
 
     return new_cli_fn, monthlies

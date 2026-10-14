@@ -1,0 +1,5606 @@
+{
+  "root": "/tmp/prism-writers-q9j0as5t",
+  "baseline_binary_sha256": "98988e98022d1bdf56865c044c544830c3d4d639a0e6279c9ac6c6c15e70118c",
+  "cases": [
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "sha256": "fa7bcf767148368afb2da2dfc8d35d25fbe089a9ab7bd4729dbdec6f8e98208b"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "sha256": "5d347dc1a03afb5b07529aded6dc614bc53ff146d48973a4011aa4a3255111e8"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "sha256": "cda5931fe948522b606fa7d3565b972a7ebaec410dbc52c86ffa40757514459a"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "sha256": "35f5442872e1f0c47729e27d35634733d38a38901089bb85a8ecc437ec9c0800"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "sha256": "9ab7cdd8f8a8391b705698071e952c6e0d1dbffb3c472833ad2d48c5743b1957"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "sha256": "24724067c9e03f32691eb4a8c59b693cce7b8e43895de91d97cbf4a8d11d47d6"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "sha256": "c4f8ced5422d332319995682c57c522218e2ec0f3d449f9211fe54bf17d57be6"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "sha256": "1dd0a7425538fdc78ac151a62adf0fa36cb4c4a5b905c6053dfd85df49cd176c"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "sha256": "4fd95352a41f9f342bcff7aa9a3b45f2454c93b8c64220b04be409b20558b375"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h1153",
+      "sha256": "6157140650519cbd53798120921efbef4b518f6afa3033d66d665e070737b1af"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h122",
+      "sha256": "f7ce3fcfb77e7d6ef5682455434eb730983ac5d83580ff2ed073c8266be9c76d"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h2196",
+      "sha256": "9b0b8fe212b906b80d15cdb12555bb12bf0657f573171ef53076300456814781"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h72",
+      "sha256": "592521b0e0ed40507a73c15932e70c70cbd7a44ab0e3bcd388ddad70ebf926a7"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h78",
+      "sha256": "92a28c70997b9fb4be0da59cf3a8645d9d44aba3e12da8a54c0607d02d06d9c4"
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "sha256": "0b69e8bd1625e7fb0e0805f9d0d1602d6acb156cb54dc9de6e09526dfe32f055"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "sha256": "8b57737ba17c481c6c86a6adfa174326694a72c29d59be124b50505e6c82d290"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "sha256": "bdfe17cb3d50bb5756b54325da7d9b73adad023280631b78e6f74150ea1d47be"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "sha256": "df8c21b00026d12e2dab3980a08bb31a4e2a6c8b4b4ef9e1696e6f1874ba6215"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "sha256": "3b4271e614ef6aeaba54c876ce7f4dea9ed2ee6a3947ef0317a02ca884ad80be"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "sha256": "300a8696dc1b5812e37d4336313896fb6e01686575d3e1856031bf6668273ad5"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "sha256": "77ea91e76fcb35c86ee46bfbc417f4acd32386d7163879e951b7ef34d0a1088c"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "sha256": "ac2a723f65431d615d4473f950ffe63f6f4bd573ed1f7996be0ac050c7e643bb"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "sha256": "efd3251cbe9b27fc1f209954016d36741b36618308f012f841bb97f93b553c67"
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "sha256": "f5eec382e33306245f21e449491b30cb208d4624603b4af9aa6e0e885776a738"
+    }
+  ],
+  "baseline_seconds": [
+    0.014352879952639341,
+    0.014530012966133654,
+    0.014131075935438275,
+    0.014432832016609609,
+    0.014344527036882937,
+    0.014157419907860458,
+    0.014157983008772135,
+    0.014529756968840957,
+    0.014154329081065953,
+    0.014415550976991653,
+    0.013976535992696881,
+    0.014385205111466348,
+    0.014490494970232248,
+    0.014016920002177358,
+    0.01442691299598664,
+    0.01462560798972845,
+    0.014503307058475912,
+    0.01441745099145919,
+    0.014548968058079481,
+    0.014294257038272917,
+    0.015207433025352657,
+    0.015871923067606986,
+    0.015745153999887407,
+    0.015753963962197304
+  ],
+  "patched_binary_sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so",
+  "patched_cases": [
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "native_sha256": "fa7bcf767148368afb2da2dfc8d35d25fbe089a9ab7bd4729dbdec6f8e98208b",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+        "output_sha256": "6f9173b224ce1054b812b35d7a45ae407fe91616048143844003db87808c855e",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            145.75,
+            128.16,
+            136.07,
+            113.63,
+            94.24,
+            64.01,
+            14.64,
+            17.73,
+            32.2,
+            97.09,
+            146.17,
+            150.25
+          ],
+          "tmax": [
+            2.5,
+            4.7,
+            9.1,
+            12.4,
+            17.1,
+            21.0,
+            27.0,
+            27.2,
+            22.0,
+            14.0,
+            6.8,
+            1.8
+          ],
+          "tmin": [
+            -4.7,
+            -4.2,
+            -2.4,
+            0.2,
+            3.5,
+            6.2,
+            8.9,
+            8.8,
+            5.8,
+            1.4,
+            -1.7,
+            -5.0
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h1153",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04993479205912088,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "native_sha256": "5d347dc1a03afb5b07529aded6dc614bc53ff146d48973a4011aa4a3255111e8",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+        "output_sha256": "58de2615d2801eabc1c480d181643c2d46642f28a052506f0549c19e35df3564",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+      "native_sha256": "cda5931fe948522b606fa7d3565b972a7ebaec410dbc52c86ffa40757514459a",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "811e6ec23d29230c8412752ae851bd6fc928136be8eb2637295da1755fdda793",
+        "output_sha256": "ed36b574ff8e63f9f2720328c5d53531333c211b17df834cb5eb1cd4b4387e35",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            203.21,
+            165.21,
+            173.38,
+            136.86,
+            100.76,
+            74.3,
+            17.64,
+            21.2,
+            36.58,
+            116.89,
+            216.48,
+            234.83
+          ],
+          "tmax": [
+            0.7,
+            2.3,
+            5.4,
+            8.6,
+            13.1,
+            17.0,
+            23.2,
+            23.5,
+            18.6,
+            10.8,
+            3.8,
+            -0.1
+          ],
+          "tmin": [
+            -5.3,
+            -5.0,
+            -3.4,
+            -1.3,
+            2.6,
+            5.7,
+            10.4,
+            10.9,
+            7.4,
+            2.1,
+            -2.5,
+            -5.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h2196",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0499621550953,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 7.105427357601002e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "native_sha256": "35f5442872e1f0c47729e27d35634733d38a38901089bb85a8ecc437ec9c0800",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+        "output_sha256": "45e0b5744a1e9257f0414c09c46cf7853c07c5946e6fc636a8f88e8ee4ad67d4",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            145.75,
+            128.16,
+            136.07,
+            113.63,
+            94.24,
+            64.01,
+            14.64,
+            17.73,
+            32.2,
+            97.09,
+            146.17,
+            150.25
+          ],
+          "tmax": [
+            2.5,
+            4.7,
+            9.1,
+            12.4,
+            17.1,
+            21.0,
+            27.0,
+            27.2,
+            22.0,
+            14.0,
+            6.8,
+            1.8
+          ],
+          "tmin": [
+            -4.7,
+            -4.2,
+            -2.4,
+            0.2,
+            3.5,
+            6.2,
+            8.9,
+            8.8,
+            5.8,
+            1.4,
+            -1.7,
+            -5.0
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h1153",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04996331621423522,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "native_sha256": "9ab7cdd8f8a8391b705698071e952c6e0d1dbffb3c472833ad2d48c5743b1957",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+        "output_sha256": "3fbb8b14f060e0ff685ed1317822ab768d7a6db0b14463c8d1c0ccc2891f392e",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+      "native_sha256": "24724067c9e03f32691eb4a8c59b693cce7b8e43895de91d97cbf4a8d11d47d6",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c90c578c8f2ed2786104fd410fabbce003a487c0efc78e959a500a9afbaee575",
+        "output_sha256": "2572efef46894589d3f6c56ed249a0faf71150ef01aa166454e747eaf1bf743c",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            203.21,
+            165.21,
+            173.38,
+            136.86,
+            100.76,
+            74.3,
+            17.64,
+            21.2,
+            36.58,
+            116.89,
+            216.48,
+            234.83
+          ],
+          "tmax": [
+            0.7,
+            2.3,
+            5.4,
+            8.6,
+            13.1,
+            17.0,
+            23.2,
+            23.5,
+            18.6,
+            10.8,
+            3.8,
+            -0.1
+          ],
+          "tmin": [
+            -5.3,
+            -5.0,
+            -3.4,
+            -1.3,
+            2.6,
+            5.7,
+            10.4,
+            10.9,
+            7.4,
+            2.1,
+            -2.5,
+            -5.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h2196",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0499621550953,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "native_sha256": "c4f8ced5422d332319995682c57c522218e2ec0f3d449f9211fe54bf17d57be6",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+        "output_sha256": "2075ad92ae5466cec29083482c68f3a912b1106161d46ea5a9d5003d94d667c8",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            157.26,
+            110.79,
+            92.92,
+            55.03,
+            44.67,
+            31.79,
+            13.49,
+            12.23,
+            27.84,
+            80.61,
+            144.4,
+            168.44
+          ],
+          "tmax": [
+            1.7,
+            3.7,
+            7.0,
+            10.8,
+            15.9,
+            19.4,
+            24.9,
+            25.2,
+            20.5,
+            12.3,
+            4.7,
+            0.9
+          ],
+          "tmin": [
+            -4.6,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.1,
+            6.4,
+            10.0,
+            10.3,
+            7.6,
+            2.7,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h72",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04997322862752096,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "native_sha256": "1dd0a7425538fdc78ac151a62adf0fa36cb4c4a5b905c6053dfd85df49cd176c",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+        "output_sha256": "d9f12119a1cc25b361af02fd58aef45ac71b220eee01a3c9756438ac7f340950",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+      "native_sha256": "2947d6cbe2835f7642c1581585e5b6d095eeec96d24c624d2a116bfa402ad9a3",
+      "native_corrected_serialized_days": 1,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "3cd9a62bd96d0ca5126a991fec25d383ccdaffd4eec20fb6587733013a6aff22",
+        "output_sha256": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            168.31,
+            118.15,
+            101.22,
+            57.05,
+            44.03,
+            31.48,
+            13.51,
+            12.16,
+            28.99,
+            86.06,
+            157.12,
+            177.99
+          ],
+          "tmax": [
+            0.3,
+            2.3,
+            5.5,
+            9.5,
+            14.7,
+            18.3,
+            23.8,
+            24.1,
+            19.3,
+            10.9,
+            3.2,
+            -0.7
+          ],
+          "tmin": [
+            -5.3,
+            -4.7,
+            -3.3,
+            -1.1,
+            2.4,
+            5.1,
+            8.9,
+            9.4,
+            6.7,
+            2.0,
+            -2.5,
+            -5.6
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h132",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04988001815941345,
+          "tmax": 0.04999999999999971,
+          "tmin": 0.04999999999999971
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 5,
+          "maximum_inversion_c": 0.10000000000000031,
+          "maximum_adjustment_c": 0.050000000000000155,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 3.581364595565021e-19,
+              "tmin": -3.581364595565021e-19
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 8.333333333333359e-05,
+              "tmin": -8.333333333333359e-05
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0033333333333333327
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h1153",
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "native_sha256": "6157140650519cbd53798120921efbef4b518f6afa3033d66d665e070737b1af",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+        "output_sha256": "065a5f82d76e492da28389056fdcc86c6d9611d3f7145d363f6d6b4873d6f0bf",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            145.75,
+            128.16,
+            136.07,
+            113.63,
+            94.24,
+            64.01,
+            14.64,
+            17.73,
+            32.2,
+            97.09,
+            146.17,
+            150.25
+          ],
+          "tmax": [
+            2.5,
+            4.7,
+            9.1,
+            12.4,
+            17.1,
+            21.0,
+            27.0,
+            27.2,
+            22.0,
+            14.0,
+            6.8,
+            1.8
+          ],
+          "tmin": [
+            -4.7,
+            -4.2,
+            -2.4,
+            0.2,
+            3.5,
+            6.2,
+            8.9,
+            8.8,
+            5.8,
+            1.4,
+            -1.7,
+            -5.0
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h1153",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.049938700449530415,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h122",
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "native_sha256": "f7ce3fcfb77e7d6ef5682455434eb730983ac5d83580ff2ed073c8266be9c76d",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+        "output_sha256": "e1f3dd239422aa4ea1c13b34aa60ea6da0cf01f4c381ce37903cf2e933723e10",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "apostolic-saw-h2196",
+      "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+      "native_sha256": "9b0b8fe212b906b80d15cdb12555bb12bf0657f573171ef53076300456814781",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "9ca032135dd22d0b1ce21f861b626555907beebad59e8dcf29c62fa325f39d31",
+        "output_sha256": "7e81c1fa647bb9e780424609a51626552fc9abedeb01ef65c9f3dc7a76e9f94d",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            203.21,
+            165.21,
+            173.38,
+            136.86,
+            100.76,
+            74.3,
+            17.64,
+            21.2,
+            36.58,
+            116.89,
+            216.48,
+            234.83
+          ],
+          "tmax": [
+            0.7,
+            2.3,
+            5.4,
+            8.6,
+            13.1,
+            17.0,
+            23.2,
+            23.5,
+            18.6,
+            10.8,
+            3.8,
+            -0.1
+          ],
+          "tmin": [
+            -5.3,
+            -5.0,
+            -3.4,
+            -1.3,
+            2.6,
+            5.7,
+            10.4,
+            10.9,
+            7.4,
+            2.1,
+            -2.5,
+            -5.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h2196",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0499621550953,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h72",
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "native_sha256": "592521b0e0ed40507a73c15932e70c70cbd7a44ab0e3bcd388ddad70ebf926a7",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+        "output_sha256": "9168c89e22c1c728e2136010ab9df9e851f9833ed9b69049a72d68dba8168560",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            157.26,
+            110.79,
+            92.92,
+            55.03,
+            44.67,
+            31.79,
+            13.49,
+            12.23,
+            27.84,
+            80.61,
+            144.4,
+            168.44
+          ],
+          "tmax": [
+            1.7,
+            3.7,
+            7.0,
+            10.8,
+            15.9,
+            19.4,
+            24.9,
+            25.2,
+            20.5,
+            12.3,
+            4.7,
+            0.9
+          ],
+          "tmin": [
+            -4.6,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.1,
+            6.4,
+            10.0,
+            10.3,
+            7.6,
+            2.7,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h72",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04997322862752096,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h78",
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "native_sha256": "92a28c70997b9fb4be0da59cf3a8645d9d44aba3e12da8a54c0607d02d06d9c4",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+        "output_sha256": "cf52da121ceaece7f8ef80107dbd9129f185c019420b084b019d07f95c0b93f8",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+      "native_sha256": "95d6f1b0d1bb13201162078057b30c9da4636a522932e198fdfaec3492ba45d8",
+      "native_corrected_serialized_days": 4,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "8ccc6c1a83b72e174c40177a0263bd028d586d6b1eddad3097222cf0d657d93b",
+        "output_sha256": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            168.31,
+            118.15,
+            101.22,
+            57.05,
+            44.03,
+            31.48,
+            13.51,
+            12.16,
+            28.99,
+            86.06,
+            157.12,
+            177.99
+          ],
+          "tmax": [
+            0.3,
+            2.3,
+            5.5,
+            9.5,
+            14.7,
+            18.3,
+            23.8,
+            24.1,
+            19.3,
+            10.9,
+            3.2,
+            -0.7
+          ],
+          "tmin": [
+            -5.3,
+            -4.7,
+            -3.3,
+            -1.1,
+            2.4,
+            5.1,
+            8.9,
+            9.4,
+            6.7,
+            2.0,
+            -2.5,
+            -5.6
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h132",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04988001815941345,
+          "tmax": 0.04999999999999982,
+          "tmin": 0.04999999999999982
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 8,
+          "maximum_inversion_c": 0.5,
+          "maximum_adjustment_c": 0.25,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 3.581364595565021e-19,
+              "tmin": -3.581364595565021e-19
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.00035398230088495527,
+              "tmin": -0.00035398230088495527
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0008064516129032258,
+              "tmin": -0.0008064516129032258
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.009677419354838712,
+      "maximum_calendar_month_tmin_change_c": 0.00967741935483871
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h1153",
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "native_sha256": "8b57737ba17c481c6c86a6adfa174326694a72c29d59be124b50505e6c82d290",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+        "output_sha256": "9cd3dd57b2301dda603c94da28d603707d8b41c244d62c53d684f6fe7961214d",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            145.75,
+            128.16,
+            136.07,
+            113.63,
+            94.24,
+            64.01,
+            14.64,
+            17.73,
+            32.2,
+            97.09,
+            146.17,
+            150.25
+          ],
+          "tmax": [
+            2.5,
+            4.7,
+            9.1,
+            12.4,
+            17.1,
+            21.0,
+            27.0,
+            27.2,
+            22.0,
+            14.0,
+            6.8,
+            1.8
+          ],
+          "tmin": [
+            -4.7,
+            -4.2,
+            -2.4,
+            0.2,
+            3.5,
+            6.2,
+            8.9,
+            8.8,
+            5.8,
+            1.4,
+            -1.7,
+            -5.0
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h1153",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04993479205912088,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h122",
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "native_sha256": "bdfe17cb3d50bb5756b54325da7d9b73adad023280631b78e6f74150ea1d47be",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+        "output_sha256": "02e46b12951d35be2acd37c7f9dd22b55b9dc2e3c63f544e5c848e41c4cd02b0",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "Historical",
+      "site": "apostolic-saw-h2196",
+      "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+      "native_sha256": "df8c21b00026d12e2dab3980a08bb31a4e2a6c8b4b4ef9e1696e6f1874ba6215",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e7fac9ae64214a62f1602ed33c946fd1e781862fc820bcbe286cf9e9db0bae49",
+        "output_sha256": "3dd5420cd6da3ba7e9a3913cc5cc5ed06cbc5ebd32cd5581ac154b621dc047f8",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            203.21,
+            165.21,
+            173.38,
+            136.86,
+            100.76,
+            74.3,
+            17.64,
+            21.2,
+            36.58,
+            116.89,
+            216.48,
+            234.83
+          ],
+          "tmax": [
+            0.7,
+            2.3,
+            5.4,
+            8.6,
+            13.1,
+            17.0,
+            23.2,
+            23.5,
+            18.6,
+            10.8,
+            3.8,
+            -0.1
+          ],
+          "tmin": [
+            -5.3,
+            -5.0,
+            -3.4,
+            -1.3,
+            2.6,
+            5.7,
+            10.4,
+            10.9,
+            7.4,
+            2.1,
+            -2.5,
+            -5.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h2196",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0499621550953,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h1153",
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "native_sha256": "3b4271e614ef6aeaba54c876ce7f4dea9ed2ee6a3947ef0317a02ca884ad80be",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+        "output_sha256": "60ea9b6a05696ed9f6e3938c2461f952acfce8b42a80b772f1f35f5250b7f580",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            145.75,
+            128.16,
+            136.07,
+            113.63,
+            94.24,
+            64.01,
+            14.64,
+            17.73,
+            32.2,
+            97.09,
+            146.17,
+            150.25
+          ],
+          "tmax": [
+            2.5,
+            4.7,
+            9.1,
+            12.4,
+            17.1,
+            21.0,
+            27.0,
+            27.2,
+            22.0,
+            14.0,
+            6.8,
+            1.8
+          ],
+          "tmin": [
+            -4.7,
+            -4.2,
+            -2.4,
+            0.2,
+            3.5,
+            6.2,
+            8.9,
+            8.8,
+            5.8,
+            1.4,
+            -1.7,
+            -5.0
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h1153",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04993479205912088,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h122",
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "native_sha256": "300a8696dc1b5812e37d4336313896fb6e01686575d3e1856031bf6668273ad5",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+        "output_sha256": "5728e270cb6bee03c0b3683419d1822d1bf66c2cfbeb2fc5b549a40d406c14d5",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "apostolic-saw-h2196",
+      "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+      "native_sha256": "77ea91e76fcb35c86ee46bfbc417f4acd32386d7163879e951b7ef34d0a1088c",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "c2ccf9ebef06bff0b3ec00b881fe64b3bac9606506fc567b69018952739c7af9",
+        "output_sha256": "9899d264c79d5cba8ac186f17cf2fe0a7fdcda176e2efcff00ad93937f16506c",
+        "reference": {
+          "ppt": [
+            149.93,
+            138.02,
+            148.31,
+            118.33,
+            97.88,
+            69.49,
+            15.71,
+            19.27,
+            35.87,
+            105.69,
+            145.33,
+            152.22
+          ],
+          "tmax": [
+            2.1,
+            4.1,
+            7.5,
+            11.0,
+            15.7,
+            19.7,
+            25.8,
+            25.9,
+            20.8,
+            13.0,
+            5.4,
+            1.3
+          ],
+          "tmin": [
+            -3.7,
+            -3.1,
+            -1.2,
+            1.0,
+            4.7,
+            7.7,
+            12.1,
+            12.5,
+            9.2,
+            3.8,
+            -0.8,
+            -4.2
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h122",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            203.21,
+            165.21,
+            173.38,
+            136.86,
+            100.76,
+            74.3,
+            17.64,
+            21.2,
+            36.58,
+            116.89,
+            216.48,
+            234.83
+          ],
+          "tmax": [
+            0.7,
+            2.3,
+            5.4,
+            8.6,
+            13.1,
+            17.0,
+            23.2,
+            23.5,
+            18.6,
+            10.8,
+            3.8,
+            -0.1
+          ],
+          "tmin": [
+            -5.3,
+            -5.0,
+            -3.4,
+            -1.3,
+            2.6,
+            5.7,
+            10.4,
+            10.9,
+            7.4,
+            2.1,
+            -2.5,
+            -5.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "apostolic-saw-h2196",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.049978264019699736,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h72",
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "native_sha256": "ac2a723f65431d615d4473f950ffe63f6f4bd573ed1f7996be0ac050c7e643bb",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+        "output_sha256": "9ae94d5b0af46ea4e603ffb57a6ac88df4ceb2dc83ac5de8cd6586cfd0cefb72",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            157.26,
+            110.79,
+            92.92,
+            55.03,
+            44.67,
+            31.79,
+            13.49,
+            12.23,
+            27.84,
+            80.61,
+            144.4,
+            168.44
+          ],
+          "tmax": [
+            1.7,
+            3.7,
+            7.0,
+            10.8,
+            15.9,
+            19.4,
+            24.9,
+            25.2,
+            20.5,
+            12.3,
+            4.7,
+            0.9
+          ],
+          "tmin": [
+            -4.6,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.1,
+            6.4,
+            10.0,
+            10.3,
+            7.6,
+            2.7,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h72",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04999556776881775,
+          "tmax": 7.105427357601002e-15,
+          "tmin": 3.552713678800501e-15
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h78",
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "native_sha256": "efd3251cbe9b27fc1f209954016d36741b36618308f012f841bb97f93b553c67",
+      "native_corrected_serialized_days": 0,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+        "output_sha256": "c613b4b77f02927cd9b8090ad9713d7b7fb13bc29af7a8113723fa3a70920235",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.0,
+          "tmax": 0.0,
+          "tmin": 0.0
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 0,
+          "maximum_inversion_c": 0.0,
+          "maximum_adjustment_c": 0.0,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.0,
+      "maximum_calendar_month_tmin_change_c": 0.0
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+      "native_sha256": "3ab2161bea7a11929742f015be61c88150603fd2b0fab173efbe4d77001ff3f9",
+      "native_corrected_serialized_days": 1,
+      "edde": {
+        "status": "complete",
+        "source_sha256": "e2a938d7d9f83a85fa7606da665539f8c1cf7ae2bdbc7737d5c18f0880c256e9",
+        "output_sha256": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582",
+        "reference": {
+          "ppt": [
+            161.63,
+            112.81,
+            98.98,
+            56.03,
+            44.67,
+            31.56,
+            13.3,
+            12.28,
+            28.27,
+            82.56,
+            154.19,
+            173.1
+          ],
+          "tmax": [
+            1.4,
+            3.3,
+            6.6,
+            10.4,
+            15.6,
+            19.1,
+            24.6,
+            24.9,
+            20.2,
+            12.0,
+            4.3,
+            0.6
+          ],
+          "tmin": [
+            -4.7,
+            -3.9,
+            -2.3,
+            -0.3,
+            3.2,
+            6.2,
+            9.9,
+            10.4,
+            7.7,
+            2.8,
+            -1.7,
+            -4.8
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h78",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "target": {
+          "ppt": [
+            168.31,
+            118.15,
+            101.22,
+            57.05,
+            44.03,
+            31.48,
+            13.51,
+            12.16,
+            28.99,
+            86.06,
+            157.12,
+            177.99
+          ],
+          "tmax": [
+            0.3,
+            2.3,
+            5.5,
+            9.5,
+            14.7,
+            18.3,
+            23.8,
+            24.1,
+            19.3,
+            10.9,
+            3.2,
+            -0.7
+          ],
+          "tmin": [
+            -5.3,
+            -4.7,
+            -3.3,
+            -1.1,
+            2.4,
+            5.1,
+            8.9,
+            9.4,
+            6.7,
+            2.0,
+            -2.5,
+            -5.6
+          ],
+          "provenance": {
+            "source": "docs/work-packages/20261008_prism_stochastic_dewpoint/artifacts/normals.csv",
+            "sha256": "bd0309f886e2fefc8acbc55ccd8cf37d352b5bfe9933aa1b01f23ecbb8914d72",
+            "period": "1991-2020",
+            "resolution": "800m",
+            "site": "cryptic-beechnut-h132",
+            "sampling": "native cell",
+            "units": {
+              "ppt": "mm/month",
+              "tmax": "C",
+              "tmin": "C"
+            }
+          }
+        },
+        "maximum_rounding_error": {
+          "prcp": 0.04993662864385584,
+          "tmax": 0.04999999999999982,
+          "tmin": 0.04999999999999982
+        },
+        "temperature_ordering": {
+          "method": "midpoint_if_inverted",
+          "corrected_days": 2,
+          "maximum_inversion_c": 0.5,
+          "maximum_adjustment_c": 0.25,
+          "monthly_mean_adjustment_c": [
+            {
+              "month": 1,
+              "days": 620,
+              "tmax": 8.953411488912553e-20,
+              "tmin": -8.953411488912553e-20
+            },
+            {
+              "month": 2,
+              "days": 565,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 3,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 4,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 5,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 6,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 7,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 8,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 9,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 10,
+              "days": 620,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 11,
+              "days": 600,
+              "tmax": 0.0,
+              "tmin": 0.0
+            },
+            {
+              "month": 12,
+              "days": 620,
+              "tmax": 0.0004032258064516129,
+              "tmin": -0.0004032258064516129
+            }
+          ]
+        }
+      },
+      "maximum_calendar_month_tmax_change_c": 0.009677419354838708,
+      "maximum_calendar_month_tmin_change_c": 0.006451612903225808
+    }
+  ],
+  "patched_seconds": [
+    0.015723063959740102,
+    0.015074747963808477,
+    0.015291944961063564,
+    0.015744060976430774,
+    0.01616001094225794,
+    0.015419073053635657,
+    0.01480307593010366,
+    0.015244408044964075,
+    0.01455046096816659,
+    0.015662777004763484,
+    0.013594402000308037,
+    0.014706337940879166,
+    0.021449676947668195,
+    0.03220908693037927,
+    0.1770070579368621,
+    0.021082977997139096,
+    0.014926122967153788,
+    0.01557525701355189,
+    0.014338145963847637,
+    0.014703345019370317,
+    0.015078334952704608,
+    0.014949952019378543,
+    0.014857848989777267,
+    0.01486725709401071
+  ],
+  "executions": [
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "arm": "native",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.720933348988183,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "2947d6cbe2835f7642c1581585e5b6d095eeec96d24c624d2a116bfa402ad9a3",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1417.65,
+      "annual_runoff_mm": 98.98670339,
+      "annual_et_mm": 793.5109999999999,
+      "annual_deep_percolation_mm": 50.347625492295,
+      "annual_lateral_mm": 464.2634999999999,
+      "minimum_soil_water_mm": 92.1,
+      "maximum_swe_mm": 1252.66,
+      "outputs": {
+        "H132.element.dat": "9eae24eef62ca4cec9c1cad6f0d218e48f23ef1380e2b501a3bf7170620fa2f2",
+        "H132.soil.dat": "926ed0b119e8ab5b726b7f0db31eaf432e90eb78e24ac4fcd7e7566be192900a",
+        "H132.ebe.dat": "17c667f3c4fd91c08d2c0244dfcceb7744ef2e02aa5a4ea8516d8317df592f28",
+        "H132.loss.dat": "1d5e8a4169540dad3c42d071fbb61f86bf97b05841098551e4e4b6831e583187",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "1a4422d6630db06122d02a47c9f5d908c3cfbd7b35c8c9aa9cc970cf4b422fd9",
+        "H132.pass.dat": "8af5a30f1be5aff175bd40cad5fe40ba72370fd0eddef08b2445a3b673fd3367"
+      }
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "arm": "edde",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7712041889317334,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "3c96e2b59c73281e9c58929747ac486f27dacdd9a90615d0bd43710417e9ca36",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1417.65,
+      "annual_runoff_mm": 99.022020581215,
+      "annual_et_mm": 793.5615,
+      "annual_deep_percolation_mm": 50.326425811195,
+      "annual_lateral_mm": 464.1785000000001,
+      "minimum_soil_water_mm": 92.1,
+      "maximum_swe_mm": 1256.1,
+      "outputs": {
+        "H132.element.dat": "4e0a8ca5faaec8b6d028b3edca72914ba8f5fe139b419930b08c1bdd23ce7617",
+        "H132.soil.dat": "8a9ae8d5f8648125be074be3d4d5dbcb20dc7a27057bc47918da47e6438c7816",
+        "H132.ebe.dat": "d1d36e3e91887bf2bbc8b2555e878d50aabfc16346043f0872265005d7b99e1f",
+        "H132.loss.dat": "a93b300a701b75a58595e1e03d82570da6b0ae66ab450b8f1670d80acf8f6366",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "11070dfaa0696f51ff7201f0838b82b2311079572e401c16ed541d78276bb11d",
+        "H132.pass.dat": "54b801b62d0aeb19d3ae85e64ed528ff5ddda1ceac2173ac0273989101193279"
+      }
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "arm": "native",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 7.2837346059968695,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "95d6f1b0d1bb13201162078057b30c9da4636a522932e198fdfaec3492ba45d8",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1403.94,
+      "annual_runoff_mm": 51.70207505045501,
+      "annual_et_mm": 741.6705,
+      "annual_deep_percolation_mm": 55.5067622327,
+      "annual_lateral_mm": 542.133,
+      "minimum_soil_water_mm": 91.83,
+      "maximum_swe_mm": 1180.32,
+      "outputs": {
+        "H132.element.dat": "afff3a90ea8c54ca01606aa44b6b1413977fa893fa4f047845098d61001157c6",
+        "H132.soil.dat": "9909866c5900a55bd3d16c027abcb1d0ba8c512d01c5379117f8436a5742827a",
+        "H132.ebe.dat": "fd5b66c1a4feccbb2ebd5241b092fdf10b16a1dcc599aabb34299491ab892e20",
+        "H132.loss.dat": "83e51242624557add9625f03427afd969ba55d01ddafac8cc0250ce09f81a35f",
+        "H132.plot.dat": "ea5735817011c99296e787802baf8d07c4db006e3290b701fe1fb1df1b731af3",
+        "H132.wat.dat": "b413350751d97db5f391a470ae8fd6ebeee74a6204ad792427be94e3f744b130",
+        "H132.pass.dat": "c28e1668b59508cdd08341d150ecf3a5015b5aad1909969f8e06cb0be72917d2"
+      }
+    },
+    {
+      "model": "WRF-MPI",
+      "scenario": "SSP3-7.0",
+      "site": "cryptic-beechnut-h132",
+      "arm": "edde",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.820730848936364,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "0014124e05c41c7487ee9ea55c947e5cf52b2d6d8c226b84a1273d7b0573c325",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1403.94,
+      "annual_runoff_mm": 51.848243131699995,
+      "annual_et_mm": 741.6065,
+      "annual_deep_percolation_mm": 55.50781541215001,
+      "annual_lateral_mm": 542.027,
+      "minimum_soil_water_mm": 91.83,
+      "maximum_swe_mm": 1180.32,
+      "outputs": {
+        "H132.element.dat": "b155b1daf81d341998a78b67eeab44566009114c3579356122d13f12ad107520",
+        "H132.soil.dat": "e1ec32d4a684850bac8d1c2fc911bc514f0b0363fa08c96b6d964f1789fccedd",
+        "H132.ebe.dat": "c6fd52f501cc6b8e9af66f9232f9b51332fa8dd4d6e5248aa5176fb0347aee74",
+        "H132.loss.dat": "3f68a2ac401c534dd6c538f3facf62582366c3d4a3760b823d878562a47ec41b",
+        "H132.plot.dat": "e3100b2db855b2f5ba5629579fb0eb2ba6416d96095f0b9a56ef1b1debeafe44",
+        "H132.wat.dat": "b491f9d1b7477ebcfa1441aad54c577c3c6c17af532a5c0f227ae90a8c9994ad",
+        "H132.pass.dat": "bea37ce4e0f3ab78de7e1e4acde011c14e44fae2fa513b3f764617e437c0ab89"
+      }
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "arm": "native",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7717633799184114,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "3ab2161bea7a11929742f015be61c88150603fd2b0fab173efbe4d77001ff3f9",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1344.345,
+      "annual_runoff_mm": 91.6180763125,
+      "annual_et_mm": 781.6285,
+      "annual_deep_percolation_mm": 44.938830318855004,
+      "annual_lateral_mm": 432.01800000000003,
+      "minimum_soil_water_mm": 91.61,
+      "maximum_swe_mm": 1184.87,
+      "outputs": {
+        "H132.element.dat": "7befa85a2ee984ba8d89cb37a92e7e1ca70ca2a389ef6abf62fb9b394d6ee93b",
+        "H132.soil.dat": "01fd663ae545a8823c82c93c52ef1fb9b8acb64b3a33dca9ff491e3f6075ca35",
+        "H132.ebe.dat": "930be8b781e17400bb058287dcc52f410997692b32a4c9cf65ed02a532f208d1",
+        "H132.loss.dat": "59638c3817615a6a90a201dffaaa744c2972db148d7f10f47112bab123192a54",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "2d2792229fe0005fbafd508d445be14ec06e9a8600a75fb27229e71ba992e632",
+        "H132.pass.dat": "dafa51d18d3e4019ff1666d991ebd476ab0788c2e0bb21114ff258d5f551e0fe"
+      }
+    },
+    {
+      "model": "WRF-Nor",
+      "scenario": "SSP2-4.5",
+      "site": "cryptic-beechnut-h132",
+      "arm": "edde",
+      "status": "complete",
+      "returncode": 0,
+      "seconds": 2.7713546550367028,
+      "binary": "wepp_runner/bin/wepp_261010",
+      "binary_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+      "consumed": {
+        "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+        "p132.run": "ebf5f735f0e1f8a6709def9ca18f764e50bd992b0cc445418b6f238b4329857e",
+        "chntyp.txt": "ef61079019e07962f4bb63d9cb42f25886f70039ef0f1b736844edbb21fadefd",
+        "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.man": "6423d1726a6e301215914db0c6e1f759656d73c226719bb3e9e9a29aa36d37fe",
+        "p132.sol": "02da4615becaa55d09505254d0bf5830f25deccbc698e168a7433be8f5c755e7",
+        "pmetpara.txt": "d67123f4901beaf46817ede659515436f31c690b4385e1320791ae14849dca9f",
+        "p132.cli": "d85c7ddd1dbfc533651df145b21938da04c11ed7baf591fae763266e18d1b582",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p132.slp": "2cc21b3c1f828203f7c208aa34ef94c64220c82151801376c9614cb38e398149"
+      },
+      "days": 7305,
+      "precipitation_max_error_mm": 0.0,
+      "annual_p_mm": 1344.345,
+      "annual_runoff_mm": 91.30912337625,
+      "annual_et_mm": 781.7315000000001,
+      "annual_deep_percolation_mm": 44.816512985550006,
+      "annual_lateral_mm": 432.3715,
+      "minimum_soil_water_mm": 91.61,
+      "maximum_swe_mm": 1184.84,
+      "outputs": {
+        "H132.element.dat": "ea773a8ba3e75f177e98bf844eef09ef7e91e28881478559fd81d6528a4b71e0",
+        "H132.soil.dat": "7e97b5105a562358ce340587280244a953d30412d799b31ed991cdfbab3d28da",
+        "H132.ebe.dat": "cff8bfd97497c28979cdabab60538561efa67c88689c5cc6ebcc88f5090b96a8",
+        "H132.loss.dat": "f953fd6a32faa46fec045cb5fc8ee207f752ef5a04157cd886799de0ccfd3fad",
+        "H132.plot.dat": "79c7d9c102e9e8a13fdadc58bb437fab3cc6ab2f51864bb7ec56156dad758a83",
+        "H132.wat.dat": "743653fba5138801ccde0f7e159b3955c7e9199a3e7360bc951b8bd13d5b3078",
+        "H132.pass.dat": "06d84aab96043d36c23c4fc7a188c59d2ca54da88d1d4f3bf54a3929dc6ed0af"
+      }
+    }
+  ],
+  "status": "complete",
+  "archive": {
+    "path": "writer-consumer-evidence.tar.gz",
+    "sha256": "96e95438f7d465a44a82394d2f20ce8e1f90045c308ec689e8401f60dcd6051c"
+  }
+}

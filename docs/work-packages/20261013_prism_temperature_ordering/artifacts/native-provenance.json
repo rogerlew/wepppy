@@ -1,0 +1,14 @@
+{
+  "source_commit": "d3e51c2badd2cb30a6bcb2e2f7a3881a8b3b908c",
+  "source_file_sha256": "7717bad0bdbeea2558105a8fae3de7a5246bce380afee2080398b28e273b6500",
+  "binary_sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
+  "previous_binary_sha256": "98988e98022d1bdf56865c044c544830c3d4d639a0e6279c9ac6c6c15e70118c",
+  "binary_path": "/home/workdir/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so",
+  "build_command": "PYO3_PYTHON=/usr/bin/python3.12 PYTHON_SYS_EXECUTABLE=/usr/bin/python3.12 cargo build --release -p cli_revision_rust",
+  "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+  "cargo": "cargo 1.92.0 (344c4567c 2025-10-21)",
+  "python_build": "Python 3.12.3",
+  "publication": "same-directory temporary file, chmod 0755, atomic rename; only climate extension refreshed",
+  "deployment": false,
+  "release_commit": "0515272"
+}

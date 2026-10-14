@@ -1,6 +1,6 @@
 # Preserve temperature ordering in every PRISM spatialization writer
 
-This living plan follows `docs/prompt_templates/codex_exec_plans.md`. Execute package `20261013_prism_temperature_ordering`; keep this plan and its tracker current. The operator authorized execution; M1 contract review is in progress.
+This living plan follows `docs/prompt_templates/codex_exec_plans.md`. Execute package `20261013_prism_temperature_ordering`; keep this plan and its tracker current. The operator authorized execution. All milestones are complete; see the package report for evidence and limitations.
 
 ## Purpose / Big Picture
 
@@ -11,10 +11,12 @@ A climate build should not emit minimum temperature above maximum solely because
 
 
 - [x] (2026-10-13 23:52 UTC) Package and accepted ADR authored from the operator-approved, measured midpoint proposal.
-- [ ] M1: Review and commit canonical contract checkpoint before implementation.
-- [ ] M2: Implement matching Rust/Python semantics and diagnostic reporting; verify exact writers.
-- [ ] M3: Build and identify the imported native extension; validate project artifacts, 24 retained revisions, fresh WEPP consumption, and performance.
-- [ ] M4: Close review findings, run gates, update durable documentation, and commit handoff.
+- [x] M1: Review and commit canonical contract checkpoint before implementation.
+- [x] M2: Implement matching Rust/Python semantics and diagnostic reporting; verify exact writers.
+- [x] M3: Build and identify the imported native extension; validate project artifacts, 24 retained revisions, fresh WEPP consumption, and performance.
+- [x] M4: Close review findings, run gates, update durable documentation, and commit handoff.
+
+M1 ancestor: `7bd7707c2`. M2 checks: 23 Rust tests and 76 focused Python tests pass. Six fresh WEPP executions consume actual native/EDDE rewrites.
 
 ## Surprises & Discoveries
 
@@ -22,6 +24,8 @@ A climate build should not emit minimum temperature above maximum solely because
 The Python public PRISM function is not WEPPcloud's daily production writer. `wepppy/nodb/core/climate_build_helpers.py:cli_revision` calls `wepppyo3.climate.cli_revision` for ordinary daily climates and uses Python only for breakpoint files. The Rust formula lives in `wepppyo3/cli_revision/src/lib.rs:rust_cli_revision`. All four paths named in the package must be covered.
 
 The candidate study in `docs/work-packages/20261013_edde_v2_feasibility/artifacts/prism-inversion-patch-evaluation.json` repaired 15 days in three rejected climates and left all 21 accepted revision DataFrames identical. The three corrected climates each completed a fresh 20-year WEPP run. Existing serializer rounding changes some auxiliary values during any rewrite; compare against each writer's unrepaired output, not against the raw source, to isolate this patch. Different language formatters may treat ties differently; verify ordering and bounded numerical parity without gratuitously replacing serializers.
+
+Native arithmetic retains `(source - reference) + target`; EDDE retains `source + (target - reference)`. Floating-point equality can therefore produce different sub-femtodegree correction counts while serialized temperatures agree within existing 0.1 C precision. No tolerance or arithmetic reassociation was introduced. The project validation harness initially used a nonexistent `Climate.load`; corrected to canonical `load_detached`, preserving the failed attempt.
 
 ## Decision Log
 
@@ -84,6 +88,8 @@ Keep existing climate API signatures and Rust import paths. Reuse NumPy and owne
 ## Outcomes & Retrospective
 
 
-Planning complete; production implementation, reviewed contract checkpoint, rebuilt native extension, and final consumer validation are pending. Prototype results support the chosen small correction but do not substitute for wired acceptance. Initial plan authored 2026-10-13 in response to the operator's request for an implementation package and ADR.
+Completed 2026-10-14 UTC. Contract ancestor `7bd7707c2`, native source `d3e51c2`, native release `0515272`. All four writers, native build/import identity, 24 retained comparisons, seven fresh WEPP executions and 200-hillslope project preparation/export checks pass. Focused tests pass 80; Rust tests 23. Independent correctness/artifact review has no open findings. Broad-suite, legacy typing and line-offset allowlist limitations are recorded in the package report. Deployment and EDDE integration remain separate. Source/harness failures and their dispositions are retained, not erased.
 
 M1 review amendment: process logging alone misses durable per-project diagnostic retention. Implement visible per-output `.temperature-ordering.log` with working/completed status in the normal climate/attempt directory, without changing native return values. This is the smallest bounded escalation after verifying separate native/module and project log channels. Add actual canonical ZIP archive/restore plus authenticated browser/download checks for completed/failed climate and log paths. The Historic PRISM downstream `max(raw tdmean, final Tmin)` rule remains unchanged and needs a repaired-day propagation regression.
+
+Final discoveries: required EDDE diagnostics must complete before its manifest declares success; numerical diagnostics measure actual float movement and reject nonrepresentable magnitudes. The canonical project export requires a live logger-enabled Climate instance and its explicit export entrypoint. Fresh-process project preparation matches persisted mappings; same-process selection showed stale state and is a separate follow-up observation. Final review verifies all retained archive members. No temporary mitigation was introduced.

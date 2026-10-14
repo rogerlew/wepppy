@@ -1,13 +1,13 @@
 # PRISM spatialization temperature ordering
 
-**Status**: Open — implementation planned (2026-10-13)
+**Status**: Closed 2026-10-14 UTC (2026-10-13 Pacific) — implemented and development-stack validated
 **Timezone**: UTC
 
 ## Overview
 
 Independent PRISM monthly offsets can produce daily Tmin above Tmax. Implement the operator-accepted midpoint repair in every current spatialization writer, preserving valid daily values and existing non-temperature behavior. This is a generic PRISM correction; EDDE future-climate experiments supplied the initial reproducible failures.
 
-The current request is to author this package and its ADR. Production implementation, extension refresh, and validation are planned below; none is claimed complete by these planning documents.
+The operator authorized execution after planning. All four writers and the targeted native extension are implemented and validated. The [implementation report](report.md) records acceptance, exact artifact identities and gate limitations; deployment remains separate.
 
 ## Decision and scope
 
@@ -42,7 +42,7 @@ Reuse existing PRISM equations, NumPy, Rust/PyO3 writer, CLIGEN parser/serialize
 
 ### M1 — Contract checkpoint
 
-Follow the [active ExecPlan](prompts/active/prism_temperature_ordering_execplan.md). Read both repositories' nearest guidance. Record source revisions, affected contracts, exact behavior and diagnostic deltas, compatibility plan, scope/security triage, and regression matrix in `artifacts/<date>_contract_decision.md`. Promote a generic spatialization contract under `docs/schemas/` and amend the EDDE contract and ADR-0091's former no-clamping/inversion-rejection language precisely for this accepted rule. Do not waive other guards. Obtain the two independent read-only reviews required by the contract-first standard, disposition findings, and commit a standalone contract ancestor before editing NoDb-coupled implementation. This planning commit is not that reviewed checkpoint.
+Follow the [completed ExecPlan](prompts/completed/prism_temperature_ordering_execplan.md). Read both repositories' nearest guidance. Record source revisions, affected contracts, exact behavior and diagnostic deltas, compatibility plan, scope/security triage, and regression matrix in `artifacts/<date>_contract_decision.md`. Promote a generic spatialization contract under `docs/schemas/` and amend the EDDE contract and ADR-0091's former no-clamping/inversion-rejection language precisely for this accepted rule. Do not waive other guards. Obtain the two independent read-only reviews required by the contract-first standard, disposition findings, and commit a standalone contract ancestor before editing NoDb-coupled implementation. This planning commit is not that reviewed checkpoint.
 
 ### M2 — Matched Rust and Python implementation
 
@@ -58,19 +58,19 @@ Complete correctness review using the repository template, close medium/high fin
 
 ## Success criteria
 
-- [ ] Reviewed contract ancestor and accepted ADR precede implementation.
-- [ ] All four writer paths implement the rule; valid/equal pairs remain unchanged.
-- [ ] Positive/negative temperatures, narrow/large inversions, month boundaries, rounding ties, nonfinite input, and invalid-source states have meaningful coverage.
-- [ ] Daily and breakpoint serialization preserves ordering; non-temperature fields and valid days match the corresponding unpatched writer.
-- [ ] Rust/Python numerical behavior agrees; unavoidable serializer tie differences are measured and cannot yield inverted output. No claim of byte-identical serialization across different preexisting writers is required.
-- [ ] All 15 retained inversions are corrected; 21 previously accepted revisions retain their numerical content; the three repaired 20-year climates pass WEPP with exact consumed-input evidence.
-- [ ] Actual scratch-project build uses the rebuilt extension, persists/reloads required state, prepares the corrected climate in `wepp/runs/`, and yields fresh parsed outputs under the development stack's configured identity/mounts/umask.
-- [ ] Correction provenance, monthly drift, and historical/future signal effects are measured and visible. Candidate measurements are reference observations, not universal numerical thresholds.
-- [ ] Focused tests, Rust tests, API/stub checks, docs lint, full-suite disposition, correctness review, and binary provenance are retained.
+- [x] Reviewed contract ancestor and accepted ADR precede implementation.
+- [x] All four writer paths implement the rule; valid/equal pairs remain unchanged.
+- [x] Positive/negative temperatures, narrow/large inversions, month boundaries, rounding ties, nonfinite input, and invalid-source states have meaningful coverage.
+- [x] Daily and breakpoint serialization preserves ordering; non-temperature fields and valid days match the corresponding unpatched writer.
+- [x] Rust/Python numerical behavior agrees; unavoidable serializer tie differences are measured and cannot yield inverted output. No claim of byte-identical serialization across different preexisting writers is required.
+- [x] All 15 retained inversions are corrected; 21 previously accepted revisions retain their numerical content; the three repaired 20-year climates pass WEPP with exact consumed-input evidence.
+- [x] Actual scratch-project build uses the rebuilt extension, persists/reloads required state, prepares the corrected climate in `wepp/runs/`, and yields fresh parsed outputs under the development stack's configured identity/mounts/umask.
+- [x] Correction provenance, monthly drift, and historical/future signal effects are measured and visible. Candidate measurements are reference observations, not universal numerical thresholds.
+- [x] Focused tests, Rust tests, API/stub checks, docs lint, full-suite disposition, correctness review, and binary provenance are retained.
 
 ## Review and operational boundaries
 
-**Parameterization change**: yes. **ADR required**: yes; [ADR-0092](../../adrs/ADR-0092-prism-temperature-inversion-midpoint-proposal.md), accepted for implementation, conformance pending.
+**Parameterization change**: yes. **ADR required**: yes; [ADR-0092](../../adrs/ADR-0092-prism-temperature-inversion-midpoint-proposal.md), accepted and development-stack conformance verified.
 
 **Security impact**: low; bounded numerical arithmetic and existing artifact/log paths, with no new egress, parser format, authorization, queue, or subprocess interface. **Dedicated security review required**: no under current scope. Contract reviews and correctness review must check noninterference and binary provenance. Re-triage if scope introduces new boundaries. Do not spawn reviewers merely because this package exists; the contract standard's explicit independent-review requirement applies at M1 execution.
 
@@ -84,8 +84,12 @@ Depends on the [EDDE feasibility evidence](../20261013_edde_v2_feasibility/repor
 
 Candidate commit `3a455437d` validated 24 revisions, repaired 15 days, and passed three fresh 20-year WEPP runs. Largest per-extreme correction was 0.25 C before serialization; maximum individual calendar-month mean change was 0.00968 C. These are prototype results, not implementation acceptance. Source archives, scripts, hashes, and exact consumed files remain in the feasibility package.
 
-**Current delivery**: package, tracker, execution plan, and accepted ADR. **Highest supported claim**: candidate locally validated; production implementation unstarted.
+**Current delivery**: matched Rust/Python writers, tests, native release refresh, visible diagnostics and retained consumer evidence. **Highest supported claim**: implemented, wired and development-stack validated; not deployed. Contract ancestor `7bd7707c2`, native source `d3e51c2`, native release `0515272`. Broad-suite and typing/tooling limitations are dispositioned in [report.md](report.md), not counted as passing gates.
 
 ## M1 review amendments
 
 Native stdout/module logging is not reliably captured in project climate.log. The smallest retention correction is the per-output visible log specified in the canonical contract, published and archived with its climate; this supersedes the initial logs-only assumption. Verify real canonical archive/restore and browser/download access for complete and failed examples. Preserve the existing Historic PRISM downstream dewpoint floor on the repaired Tmin; writer-level auxiliary preservation does not prohibit that existing downstream effect.
+
+## Closure
+
+Independent final correctness/artifact review passes with no open findings. Focused tests pass 80, Rust tests 23; the retained 24-case study and real 200-hillslope scratch project pass exact generated-to-consumed checks and seven fresh WEPP runs. Paired native timing medians differ by about 0.9%. Full-suite disposition retains the unchanged SBS metadata failure. Deployment, source-project repairs, EDDE application integration and the observed same-process cache-lifecycle investigation remain separate follow-up work. Durable rules are in ADR-0092 and the canonical temperature-ordering contract.
