@@ -11,7 +11,7 @@ The independent correctness review has separately passed the same candidate. Its
 - Reviewer: independent `security_reviewer`, `/root/edde_integration_contract_security`.
 - Date: 2026-10-14 UTC.
 - Candidate: committed runtime `d2ca5821b6eeb35438eaf8c28c1c794c9a10d5b3`; reviewed runtime files remain unchanged after that commit. Later acceptance receipts are named below.
-- Contract ancestor: `75b47f61f`; additive reader floor: `26c9e86ca`. Their ordering and ancestry to candidate HEAD were checked directly.
+- Contract ancestor: `75b47f61f`; additive capability-graph reader floor: `26c9e86ca`. Their ordering and ancestry to candidate HEAD were checked directly. This graph floor is not a complete EDDE NoDb/runtime rollback target; see the compatibility clarification below.
 - Related artifacts: [contract security review](20261014_contract_security_review.md), [implementation correctness review](20261014_implementation_correctness_review.md), [reader-floor readback](reader-floor-reopen.json), and [page/report readback](browser-readback.json).
 - Scope: EDDE selection/parser, builder and router; capability/catalog/discovery changes; climate/report templates; climate route selection handling; source client/adapter and shared publication precedents; focused tests and acceptance records available at review time.
 - No runtime files were edited by this reviewer.
@@ -90,3 +90,11 @@ Reviewed runtime identities:
 The new regression generates a real 2060 climate, submits 2061–2062 with `input_years=99`, injects acquisition failure, and verifies durable reload retains one published year, calendar start 2060, identical provenance and the CLI hash. The retained validation log `/tmp/edde-period-final-tests.log` records **62 passed** across the existing input-parser, user-defined CLI calendar, and EDDE builder modules; `/tmp/edde-period-regression.log` records **46 passed** for EDDE and RQ route tests. The initial direct-mode-access compatibility failure was corrected with the absent-safe check before this disposition; it is not relabeled as a passing run.
 
 [Live submission](period-rejection-submission.json), [failed worker](period-rejection-job.json), and [fresh readback](failed-period-readback.json) independently prove the same publication separation through the existing endpoint/worker: requested years remain 2061–2062, PRISM rejects missing normals, and the prior climate still supplies one year starting in 2060 with unchanged CLI bytes and published 2060 provenance. This is a failed replacement with retained valid publication, not a successful new climate build. The prior security PASS therefore extends to this exact bounded delta; the independent correctness amendment and actual broad-suite disposition remain separate package responsibilities.
+
+## Capability-floor and runtime rollback clarification
+
+**Documentation precision review: PASS.** Revision `26c9e86ca` is a capability-graph-only compatibility minimum. The reopening harness loads its graph class/catalog while retaining current runtime dependencies; it does not deserialize EDDE climate NoDb with a wholly rolled-back application.
+
+Direct inspection of the accepted Canadian `climate.nodb` confirms that `py/state/_climate_mode` uses jsonpickle enum reconstruction for `wepppy.nodb.core.climate.ClimateMode(17)`. The enum at `26c9e86ca` ends at mode 16. Therefore that revision alone must not be represented as capable of reopening saved EDDE climate state, even though it recognizes the additive capability graphs.
+
+Rollback of projects that have saved EDDE state must retain both graph compatibility and EDDE-aware mode 17 hydration/build support, including the published-calendar behavior. The reviewed runtime is `d2ca5821b` plus calendar fix `202ab65f3`; an equivalent backport requires its own conformance evidence. No full rollback deployment was executed or validated. This clarification changes no runtime or authorization boundary and introduces no new security finding; it prevents graph-only evidence from being overstated as complete application rollback assurance.

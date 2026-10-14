@@ -48,3 +48,7 @@ Calendar amendment changed exceptions
 
 Net delta (all changed files): +0
 Result: PASS
+
+Broad-suite closeout
+Final default-selection continuation: 2,813 passed, 4 skipped in 310.65 seconds. Normal broad-suite coverage is complete across recorded segments; all encountered default-suite failures have passing corrected-module reruns. This is not one uninterrupted full-suite pass. The unrelated opt-in real-WBT conditioning-diagnostics failure remains unresolved and is retained as a follow-up. No production deployment.
+See report.md for segment results, corrections and exact command artifacts.

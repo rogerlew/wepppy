@@ -1,6 +1,6 @@
 # Execute EDDE v2 WEPPcloud integration
 
-This living ExecPlan follows docs/prompt_templates/codex_exec_plans.md. The operator authorized execution. Update this plan and tracker through final acceptance; do not alter closed feasibility/PRISM packages. No production deployment is included.
+This living ExecPlan follows docs/prompt_templates/codex_exec_plans.md. The operator authorized execution. Update this plan and tracker through final acceptance; do not alter closed feasibility/PRISM packages. Completed 2026-10-14: implementation and development-environment acceptance passed; detailed outcomes and validation limits are below. No production deployment is included.
 
 ## Purpose / Big Picture
 
@@ -14,17 +14,21 @@ Expose Future EDDE v2 in eligible US/Canadian projects using the accepted raw so
 - [x] M1: Complete canonical contracts, two independent reviews, standalone checkpoint and additive capability reader floor.
 - [x] M2: Wire catalog/profile authority, atomic parsing and staged EDDE build with project/grid/PRISM eligibility, source acquisition and supersession checks.
 - [x] M3: Add UI projection control, provenance/report visibility, user/operator documentation and regression coverage.
-- [ ] M4: Validate actual US/Canada job-to-WEPP artifacts, negative cases, compatibility, browser/archive, required gates and independent correctness/security review; commit handoff.
+- [x] M4: Validate actual US/Canada job-to-WEPP artifacts, negative cases, compatibility, browser/archive, required gates and independent correctness/security review; commit handoff.
 
 ## Surprises & Discoveries
 
 
 Schema-v3 capabilities are exact registered structures, not an extensible dataset list. Additive climate exposure requires reader-first registration for both ordinary and single-input variants. Stored graphs cannot gain EDDE silently. Existing PRISM staging captures observed years and cannot be called blindly for a future build; reuse its native revision and normal-acquisition helpers within the new EDDE staging transaction. Source acquisition reads full monthly objects, so private yearly caches avoid retaining an entire multidecade archive in project downloads.
 
+The broad continuation showed that explicit test filenames opt in native WBT probes; normal directory selection skips those probes. The same conditioning-diagnostics failure was previously recorded outside EDDE. The graph-only reader floor also cannot deserialize saved mode17; saved EDDE state needs the implementation reader and published-calendar correction.
+
 ## Decision Log
 
 
 The operator explicitly authorized this package after accepting raw EDDE and station-derived auxiliary weather. Use one combined model/scenario select to prevent impossible combinations and retain existing future-year/station/spatial controls. No default projection is invented. Admit initial archived ranges, with live record checks. Reuse the existing tracked climate RQ job and timeout; acquire with one private yearly cache and the existing client budget. Blank seed omits CLIGEN -r, matching the existing daily-replay path; explicit study seeds remain reproducible. All generated evidence remains visible in project climate attempts; temporary source cache is reconstructible from manifests.
+
+Closeout decision (2026-10-14, Codex): retain segmented normal-suite evidence and passing corrected-module reruns; do not relabel failed commands or the unrelated opt-in WBT probe as passing. Preserve EDDE-aware readers and calendar behavior in rollback candidates because actual enum deserialization proves the graph-only floor insufficient.
 
 ## Context and Orientation
 
@@ -77,3 +81,5 @@ Contract review amendment (2026-10-14 UTC): clarified scaling availability and a
 Acceptance discoveries (2026-10-14 UTC): existing Wmesque PRISM 800m M4 products are 1991–2020, verified from original provider XML; response metadata has no explicit period, so record the provider product contract and actual acquired hashes. An older US saved graph correctly rejects EDDE until an explicit supported capability refresh. Reader-floor reopening passes all eight US/Canada, ordinary/single-input, single/multiple-OFE cases with unchanged config bytes.
 
 Final audit (2026-10-14 UTC): `202ab65f3` preserves published simulation duration and active-CLI calendar across a failed new-period request. The original compatibility getter remains available without mode metadata. Live shifted-period proof and 62 parser/legacy CLI/EDDE tests pass; both review amendments pass. Initial broad run stopped at a stale ag-fields default assertion (2,783 passed, 48 skipped); ADR-0089 proves the expected release is261010. Corrected only stale test expectations/name; affected34-test module passes. Segmented continuation is running with explicit ignored-file list containing only previously completed files.
+
+Closeout revision (2026-10-14 UTC): Final default-selection continuation: 2,813 passed, 4 skipped in 310.65 seconds. Normal broad-suite coverage is complete across recorded segments; all encountered default-suite failures have passing corrected-module reruns. This is not one uninterrupted full-suite pass. The unrelated opt-in real-WBT conditioning-diagnostics failure remains unresolved and is retained as a follow-up. No production deployment. Both reviews accept final runtime `202ab65f3`. Updated package, tracker, durable contract status and rollback guidance, and moved this plan to completed. Future work is production rollout and the separately retained native-WBT follow-up.

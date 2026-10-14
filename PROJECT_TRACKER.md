@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-13
+**Last Updated**: 2026-10-14
 **Active Packages**: 45
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -366,12 +366,6 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
-
-### EDDE v2 WEPPcloud integration
-
-**Status**: Integration implemented; actual Canadian Single and US Multiple PRISM WEPP pipelines pass, with 136 prepared climate/daily consumer readbacks. Completed/failed archive byte and permission restoration passes. Final reviews and broad validation remain in progress; no production deployment. Raw future EDDE and the station hybrid remain accepted under ADR-0091.
-**Link**: [Work package](docs/work-packages/20261013_edde_v2_weppcloud_integration/package.md)
-**Scope**: Locale-scoped availability plus per-project eligibility, validated source/scenario/period controls, existing climate orchestration, provenance, and actual-project acceptance. Single and Multiple PRISM only initially.
 
 ### Feature access governance
 
@@ -1565,6 +1559,13 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### EDDE v2 WEPPcloud integration
+
+**Status**: Closed 2026-10-14; implemented and environment validated. Canadian Single and US Multiple PRISM pipelines pass all 136 prepared climate/daily WEPP consumer readbacks, browser/download and archive/restore checks. Both independent reviews pass. Default broad coverage completed across documented segments; unrelated opt-in WBT failure remains a disclosed follow-up. No production deployment.
+**Link**: [Work package](docs/work-packages/20261013_edde_v2_weppcloud_integration/package.md) | [Acceptance report](docs/work-packages/20261013_edde_v2_weppcloud_integration/report.md)
+**Scope**: Future-only raw EDDE plus accepted station hybrid, locale and actual-location eligibility, Single/Multiple PRISM, retained provenance and atomic publication. No added bias/elevation correction.
+
 
 ### EDDE v2 client and climate-workflow feasibility (2026-10-14)
 

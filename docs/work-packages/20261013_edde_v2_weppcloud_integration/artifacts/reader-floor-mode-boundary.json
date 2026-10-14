@@ -1,0 +1,15 @@
+{
+  "scope": "Exact committed ClimateMode classes only; not full deployment rollback",
+  "results": [
+    {
+      "revision": "26c9e86ca",
+      "mode17_readable": false,
+      "error": "17 is not a valid ClimateMode"
+    },
+    {
+      "revision": "202ab65f3",
+      "mode17_readable": true,
+      "enum_name": "EddeV2"
+    }
+  ]
+}

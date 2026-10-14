@@ -2,10 +2,10 @@
 
 ## Quick status
 
-**Started / last updated**: 2026-10-13 21:15 UTC  
-**Current phase**: M4 actual-project acceptance and final validation
-**Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
-**Plan**: [Package scope and acceptance](package.md). [Active ExecPlan](prompts/active/edde_v2_weppcloud_integration_execplan.md).
+**Started / last updated**: 2026-10-13 21:15 UTC / 2026-10-14 UTC
+**Current phase**: Closed — implementation and environment acceptance complete; not deployed
+**Security impact**: high; dedicated correctness/security reviews passed with no open findings.
+**Plan**: [Package scope and acceptance](package.md). [Completed ExecPlan](prompts/completed/edde_v2_weppcloud_integration_execplan.md).
 
 ## Task board
 
@@ -13,20 +13,20 @@
 
 - [x] Record operator scope, package split, spatialization decisions, and review/evidence gates (2026-10-13 21:15 UTC).
 
-### Ready / backlog
+### Completed milestones
 
 - [x] M1: Accept feasibility handoff; author ExecPlan and contract/state matrix.
 - [x] M2: Wire additive state, eligibility, and climate build orchestration.
 - [x] M3: Add locale-scoped UI and source provenance in reports/downloads.
-- [ ] M4: Validate actual projects, legacy behavior, artifacts, reviews, and rollout handoff.
+- [x] M4: Validate actual projects, legacy behavior, artifacts, reviews, and rollout handoff.
 
 ### In progress
 
-Operator authorized execution. Active plan: [ExecPlan](prompts/active/edde_v2_weppcloud_integration_execplan.md). Canonical EDDE-WEPP-01 and both independent contract reviews pass. Standalone checkpoint and capability reader floor precede runtime wiring.
+None. Implementation and development-environment acceptance are complete.
 
-### Blocked
+### Follow-up
 
-No external blocker. The integration full suite is running; final review and remaining retention checks are in progress. Earlier failed/incomplete broad runs remain historical evidence.
+Production rollout is separate. The preexisting opt-in WBT conditioning-diagnostics probe still fails; normal broad selection skips it. Retained in the [acceptance report](report.md), without changing WBT behavior.
 
 ## Decisions log
 
@@ -34,15 +34,15 @@ No external blocker. The integration full suite is running; final review and rem
 
 ## Risks and open questions
 
-Source inventory, coverage, quality, replay and PRISM evidence are retained. Raw bias and the station hybrid are accepted limitations. Remaining engineering decisions concern live choices, project eligibility, bounded acquisition/cache ownership and actual-project acceptance. Do not invent defaults or silent fallback.
+Raw source bias/coarse elevation representation, station-generated auxiliary fields and automatic-seed reproducibility limits remain disclosed. Acquisition/cache ownership, live choices and actual-project eligibility are implemented and validated. Rollback must retain EDDE-aware climate readers/calendar behavior in addition to the capability graph floor; no full rollback deployment was tested.
 
 ## Verification
 
-- [ ] Applicable package success criteria and generated-artifact chain passed.
-- [ ] Parameterization ADRs accepted before merging affected implementation.
+- [x] Applicable package success criteria and generated-artifact chain passed.
+- [x] Parameterization ADRs accepted before merging affected implementation.
 - [x] Correctness/security review artifacts complete with no unresolved medium/high findings.
-- [ ] Required implementation tests and actual-project acceptance recorded.
-- [ ] Durable contracts promoted before closure; package and root tracker updated.
+- [x] Required implementation tests and actual-project acceptance recorded.
+- [x] Durable contracts promoted before closure; package and root tracker updated.
 
 ## Progress notes
 
@@ -71,3 +71,5 @@ Policy-update validation: scoped Markdown lint passed for all nine changed docum
 **Final reviews:** Both independent reviews pass runtime `d2ca5821b` with no unresolved findings. Security independently reran 59 focused tests. Successful rebuild preserves all 100 prior completed/failed attempt files. Only the broad Python gate and final documentation closeout remain.
 
 **Final audit amendment:** Preserve published simulation length and active CLI calendar across failed period changes. Live request2061–2062/input_years99 retained published2060/one year/hash. Focused regressions:62 passed. Broad initial run:2,783 passed/48 skipped/one stale ag-fields default assertion, corrected against ADR-0089; complete affected module:34 passed. Segmented broad continuation excludes only previously completed files and remains running. Original failed run remains failed.
+
+**Closeout (2026-10-14 UTC):** Final default-selection continuation: 2,813 passed, 4 skipped in 310.65 seconds. Normal broad-suite coverage is complete across recorded segments; all encountered default-suite failures have passing corrected-module reruns. This is not one uninterrupted full-suite pass. The unrelated opt-in real-WBT conditioning-diagnostics failure remains unresolved and is retained as a follow-up. No production deployment. Actual 136-hillslope WEPP readback, browser and archive acceptance, both reviews, published-calendar correction and rollback-reader distinction are documented in the report. Durable contracts reside in EDDE-WEPP-01 and the user/operator guide.
