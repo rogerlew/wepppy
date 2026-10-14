@@ -4,6 +4,7 @@ export const FLOW_DURATION_DEFAULTS = {
   source: "hillslope",
   excludedYears: 2,
   scale: "linear",
+  includeObserved: false,
 };
 const DAY_MS = 86400000;
 
@@ -128,6 +129,7 @@ export function createFlowDurationLoader({
 }) {
   const cache = new Map();
   const curves = new Map();
+  let observedCurve;
   async function read(scenario, source) {
     const path = scenario.path || "";
     const readiness = metadata?.scenarios?.[path]?.[source];
@@ -217,6 +219,23 @@ export function createFlowDurationLoader({
           item.error = "No eligible daily values after year selection";
       } catch (error) {
         item.error = error.message || "Daily data could not be loaded";
+        item.points = [];
+      }
+      series.push(item);
+    }
+    if (settings.includeObserved && metadata?.observed?.present) {
+      const observed = metadata.observed;
+      const item = { id: "observed", label: "Observed", color: [6, 182, 212] };
+      try {
+        if (!observed.available) {
+          throw new Error(observed.reason || "Observed streamflow is unavailable");
+        }
+        // Measurements have no simulation warm-up; use their full independent record.
+        if (!observedCurve) observedCurve = rankDailyFlows(observed.records, "hillslope", 0);
+        Object.assign(item, observedCurve);
+        if (!item.count) item.error = "No valid observed daily values";
+      } catch (error) {
+        item.error = error.message || "Observed streamflow could not be loaded";
         item.points = [];
       }
       series.push(item);

@@ -34,7 +34,7 @@ function buildInfo(graph) {
   const box = document.createElement("div");
   box.className = "gl-flow-duration-info";
   const source = document.createElement("p");
-  source.textContent = `${graph._data.settings.source === "outlet" ? "Channel outlet discharge" : "Hillslope streamflow"} · daily mean m³/s · Weibull plotting positions · each scenario uses its own record`;
+  source.textContent = `${graph._data.settings.source === "outlet" ? "Channel outlet discharge" : "Hillslope streamflow"} · daily mean m³/s · Weibull plotting positions · each series uses its own record`;
   box.appendChild(source);
   for (const series of graph._data.series) {
     const row = document.createElement("div");

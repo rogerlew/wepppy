@@ -23,7 +23,9 @@ High (file/path handling): existing authorized dashboard reads another project-l
 endpoint or authorization behavior. Validate canonical project containment before
 opening CSV and area parquet, including escaping symlinks. Independent contract
 reviews and final correctness review are required; retain security assessment in
-review artifacts. A dedicated final security review artifact is required.
+review artifacts. The dedicated [security review](artifacts/20261014_security_review.md) passes with
+zero unresolved findings; [correctness review](artifacts/20261014_correctness_review.md)
+also approves.
 
 ## Compatibility and regression plan
 
@@ -39,7 +41,7 @@ new distribution. Verify normalized CSV semantics (zero-based Julian), finite
 positive area, hand-calculated discharge/probabilities and rendered series.
 Direct filesystem tests consume actual files; a browser harness exercises the
 actual control/loader/renderer. Production deployment is outside this package.
-Highest current claim: scoped.
+Highest current claim: locally validated; broad Python sanity still running.
 
 ## Parameterization ADR gate
 

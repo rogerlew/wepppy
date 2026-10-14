@@ -1,6 +1,6 @@
 # ADR-0093: Observed flow-duration conversion and population
 
-Status: Accepted scope; implementation pending. Date: 2026-10-14.
+Status: Accepted; implemented and locally validated. Date: 2026-10-14.
 
 ## Context and decision
 

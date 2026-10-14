@@ -12,9 +12,10 @@ observed record and appears once alongside all simulated scenarios.
 
 - [x] (2026-10-14 UTC) Inspect upload normalization and current daily graph pipeline.
 - [x] (2026-10-14 UTC) Scaffold package, canonical amendment and ADR.
-- [ ] Obtain two independent contract reviews and commit checkpoint.
-- [ ] Add tests, bootstrap adapter, observed series and checkbox.
-- [ ] Run focused/full gates, browser artifact verification and final review.
+- [x] (2026-10-14 UTC) Both reviews approved; checkpoint ancestor 4e02ee2e0.
+- [x] (2026-10-14 UTC) Add tests, bounded bootstrap adapter, observed series and checkbox.
+- [x] (2026-10-14 UTC) Focused tests, frontend gates, real artifact/browser verification and both final reviews pass.
+- [ ] Finish the running broad Python suite and record its result.
 - [ ] Record outcomes and update tracker/board.
 
 ## Surprises & Discoveries
@@ -37,7 +38,7 @@ silently intersecting dates. Default overlay off preserves existing graph behavi
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation. No production deployment is requested.
+Implemented and locally validated: 731 real observations render correctly on both source plots. Independent correctness and security reviews approve after fixing malformed/legacy area handling. Broad Python suite is still running. No production deployment is requested.
 
 ## Context and Orientation
 

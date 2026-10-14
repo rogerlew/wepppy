@@ -882,6 +882,7 @@
 
   const graphController = createGraphController({
     graphDefs,
+    flowDuration: ctx.flowDuration,
     graphScenarios,
     graphContrastScenarios,
     graphLoadersFactory: () =>

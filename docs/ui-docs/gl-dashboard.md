@@ -1525,3 +1525,16 @@ are explained alongside valid curves. Reload after regenerating outputs, restori
 archived daily files, or repairing a catalog; cached source data lasts for the
 page session. The scientific and data-quality rules are in the
 [flow-duration contract](contracts/gl-dashboard-flow-duration-contract.md).
+
+When a project has an Observed upload with **Streamflow (mm)**, enable **Show
+observed streamflow** to add its distribution to either source plot. It appears
+once as **Observed** alongside the simulated scenarios. The observed curve uses
+the full measured record; **Simulation year selection** affects model curves
+only. Compare the displayed periods and sample counts when records differ.
+
+Upload processing is sufficient; model-fit calculations are not required. The
+conversion to m³/s uses the project's watershed area from totalwatsed3. Missing
+area, invalid uploads, or uploads exceeding 16 MiB/100,000 records show an
+explanation while simulation curves remain usable. Reload after replacing an
+upload or restoring its source files. The overlay starts off and retains your
+selection while switching plot sources and axes.

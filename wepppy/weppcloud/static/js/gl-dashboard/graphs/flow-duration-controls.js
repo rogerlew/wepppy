@@ -2,7 +2,7 @@ import { FLOW_DURATION_DEFAULTS } from "./flow-duration-data.js";
 
 export function renderFlowDurationControls(
   parent,
-  { getState, setValue, activate },
+  { getState, setValue, activate, observed },
 ) {
   const controls = document.createElement("div");
   controls.className = "gl-layer-items";
@@ -53,7 +53,7 @@ export function renderFlowDurationControls(
     controls.appendChild(fieldset);
   }
   const label = document.createElement("label");
-  label.textContent = "Year selection ";
+  label.textContent = "Simulation year selection ";
   const select = document.createElement("select");
   select.id = "fdc-year-selection";
   for (const [value, text] of [
@@ -73,5 +73,25 @@ export function renderFlowDurationControls(
   );
   label.appendChild(select);
   controls.appendChild(label);
+  if (observed?.present) {
+    const note = document.createElement("p");
+    if (observed.available) {
+      const observedLabel = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "fdc-include-observed";
+      checkbox.checked = !!settings().includeObserved;
+      checkbox.addEventListener("change", () => update("includeObserved", checkbox.checked));
+      checkbox.setAttribute("aria-describedby", "fdc-observed-policy");
+      observedLabel.append(checkbox, document.createTextNode(" Show observed streamflow"));
+      controls.appendChild(observedLabel);
+      note.id = "fdc-observed-policy";
+      note.textContent = "Uses the full observed record; simulation year exclusions do not apply.";
+    } else {
+      note.textContent = `Observed streamflow unavailable: ${observed.reason || "Data cannot be read"}`;
+      note.setAttribute("role", "status");
+    }
+    controls.appendChild(note);
+  }
   parent.appendChild(controls);
 }

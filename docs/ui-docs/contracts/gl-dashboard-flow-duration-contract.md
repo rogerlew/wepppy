@@ -160,8 +160,9 @@ expose this run-specific panel.
 
 ## Observed streamflow overlay
 
-Accepted scope 2026-10-14; implementation conformance pending in the observed
-flow-duration work package. Projects with Observed uploads shall offer an optional
+Accepted scope 2026-10-14; implementation and local real-artifact/browser
+conformance verified in the observed flow-duration work package. Deployment is
+not claimed. Projects with Observed uploads shall offer an optional
 Show observed streamflow checkbox for both hillslope streamflow and channel outlet
 discharge. Default off; preserve its selection across source/year/axis/layout
 changes using existing dashboard state. Render one stable Observed series alongside

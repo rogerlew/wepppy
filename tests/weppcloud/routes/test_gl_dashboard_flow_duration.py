@@ -119,3 +119,131 @@ def test_standalone_omni_child_uses_parent_topology_and_own_daily_source(tmp_pat
     result = fdc.flow_duration_context(str(child), None, 'baseline', query_run_is_child=query_run_is_child)
     assert result['scenarios']['']['outlet'] == {'available': True, 'channelId': 2, 'elementId': 6}
     assert result['queryScenarioPath'] == ('' if query_run_is_child else '_pups/omni/scenarios/undisturbed')
+
+
+def observed_source(root, text=None, area=86400000):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    path = root / 'observed/observed.csv'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text if text is not None else
+                    'Date,Year,Month,Day,Julian,Streamflow (mm)\n'
+                    '2000-01-01,2000,1,1,0,4\n'
+                    '2000-01-02,2000,1,2,1,\n')
+    area_path = source(root)
+    pq.write_table(pa.table({'Area': [area]}), area_path)
+    return path, area_path
+
+
+def test_observed_reads_normalized_upload_without_model_fit_or_catalog(tmp_path):
+    csv_path, area_path = observed_source(tmp_path)
+    originals = [p.read_bytes() for p in (csv_path, area_path)]
+    data = fdc.flow_duration_context(str(tmp_path), None, 'baseline')['observed']
+    assert data['present'] and data['available']
+    assert data['records'] == [
+        {'year': '2000', 'month': '1', 'day': '1', 'julian': 1, 'flow': '4', 'area': '86400000.0'},
+        {'year': '2000', 'month': '1', 'day': '2', 'julian': 2, 'flow': None, 'area': '86400000.0'},
+    ]
+    assert [p.read_bytes() for p in (csv_path, area_path)] == originals
+    assert not (tmp_path / 'observed.nodb').exists()
+
+
+@pytest.mark.parametrize('text,reason', [
+    ('', 'columns'),
+    ('Year,Month,Day,Julian,Sediment\n2000,1,1,0,2\n', 'columns'),
+    ('Year,Month,Day,Julian,Streamflow (mm)\n', 'daily records'),
+    ('Year,Month,Day,Julian,Streamflow (mm)\n2000,1,1,0\n', 'row'),
+    ('Year,Month,Day,Julian,Streamflow (mm)\n2000,1,1,0,2,extra\n', 'row'),
+    ('Year,Month,Day,Julian,Streamflow (mm)\n2000,1,1,bad,2\n', 'Julian'),
+    ('Year,Month,Day,Julian,Streamflow (mm),Streamflow (mm)\n2000,1,1,0,2,3\n', 'columns'),
+])
+def test_invalid_observed_is_unavailable_without_breaking_model_sources(tmp_path, text, reason):
+    observed_source(tmp_path, text)
+    data = fdc.flow_duration_context(str(tmp_path), None, 'baseline')
+    assert data['scenarios']['']['hillslope']['available']
+    assert data['observed']['present'] and not data['observed']['available']
+    assert reason in data['observed']['reason']
+    assert 'records' not in data['observed']
+
+
+@pytest.mark.parametrize('area', [0, -1, float('nan'), float('inf'), None, [1, 2], {'value': 1}, True])
+def test_observed_invalid_area_is_explicit(tmp_path, area):
+    observed_source(tmp_path, area=area)
+    context = fdc.flow_duration_context(str(tmp_path), None, 'baseline')
+    assert context['scenarios']['']['hillslope']['available']
+    data = context['observed']
+    assert not data['available']
+    assert 'area' in data['reason']
+
+
+def test_observed_missing_and_roads_have_no_records(tmp_path):
+    assert fdc._observed_status(tmp_path) == {'present': False, 'available': False}
+    observed_source(tmp_path)
+    assert 'observed' not in fdc.flow_duration_context(str(tmp_path), None, 'roads')
+
+
+@pytest.mark.parametrize('which', ['csv', 'area'])
+def test_observed_rejects_escaping_files(tmp_path, which):
+    project = tmp_path / 'project'; project.mkdir()
+    paths = observed_source(project)
+    target = paths[0 if which == 'csv' else 1]
+    outside = tmp_path / target.name
+    target.rename(outside)
+    target.symlink_to(outside)
+    data = fdc._observed_status(project)
+    assert data['present'] and not data['available']
+    assert 'records' not in data
+
+
+def test_observed_canonical_child_uses_project_upload_and_area(tmp_path):
+    observed_source(tmp_path)
+    child = tmp_path / '_pups/omni/scenarios/undisturbed'
+    child.mkdir(parents=True)
+    observed_source(child, area=42)
+    result = fdc.flow_duration_context(str(child), None, 'baseline')
+    assert result['observed']['records'][0]['area'] == '86400000.0'
+    ordinary_child = tmp_path / 'ordinary'; ordinary_child.mkdir()
+    assert not fdc.flow_duration_context(str(ordinary_child), None, 'baseline')['observed']['present']
+
+
+def test_observed_byte_and_row_limits_never_return_partial_data(tmp_path, monkeypatch):
+    path, _ = observed_source(tmp_path)
+    monkeypatch.setattr(fdc, 'OBSERVED_MAX_BYTES', len(path.read_bytes()))
+    monkeypatch.setattr(fdc, 'OBSERVED_MAX_ROWS', 2)
+    assert fdc._observed_status(tmp_path)['available']
+    path.write_text(path.read_text() + '\n')
+    result = fdc._observed_status(tmp_path)
+    assert not result['available'] and '16 MiB' in result['reason']
+    assert 'records' not in result
+    monkeypatch.setattr(fdc, 'OBSERVED_MAX_BYTES', 1024)
+    monkeypatch.setattr(fdc, 'OBSERVED_MAX_ROWS', 1)
+    result = fdc._observed_status(tmp_path)
+    assert not result['available'] and '100,000' in result['reason']
+    assert 'records' not in result
+
+
+def test_observed_preserves_nonfinite_and_malformed_flow_for_graph_validation(tmp_path):
+    observed_source(tmp_path, 'Year,Month,Day,Julian,Streamflow (mm)\n2000,1,1,0,Infinity\n')
+    assert fdc._observed_status(tmp_path)['records'][0]['flow'] == 'Infinity'
+
+
+def test_observed_numeric_string_area_is_converted_before_maximum(tmp_path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    _, area_path = observed_source(tmp_path)
+    pq.write_table(pa.table({'Area': ['9', '100']}), area_path)
+    data = fdc.flow_duration_context(str(tmp_path), None, 'baseline')
+    assert data['observed']['records'][0]['area'] == '100.0'
+    assert data['scenarios']['']['hillslope']['available']
+
+
+def test_missing_observed_conversion_source_and_bad_encoding_are_isolated(tmp_path):
+    csv_path, area_path = observed_source(tmp_path)
+    area_path.unlink()
+    result = fdc._observed_status(tmp_path)
+    assert result['present'] and not result['available']
+    assert 'records' not in result
+    csv_path.write_bytes(b'\xff\xfe')
+    result = fdc._observed_status(tmp_path)
+    assert result['present'] and not result['available']
+    assert 'records' not in result

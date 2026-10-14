@@ -8,6 +8,7 @@ import { GRAPH_CONTEXT_KEYS, GRAPH_MODES } from '../config.js';
 
 export function createGraphController({
   graphDefs,
+  flowDuration,
   graphScenarios,
   graphContrastScenarios,
   graphLoadersFactory,
@@ -660,7 +661,7 @@ export function createGraphController({
 
       details.appendChild(itemList);
       if (group.key === 'flow-duration') {
-        renderFlowDurationControls(details, { getState, setValue,
+        renderFlowDurationControls(details, { getState, setValue, observed: flowDuration?.observed,
           activate: () => activateGraphItem('flow-duration', { force: true, keepFocus: true }) });
       }
       if (group.key === 'cumulative') {

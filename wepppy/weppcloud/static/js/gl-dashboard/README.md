@@ -169,3 +169,13 @@ Browser test: `tests/smoke/gl-dashboard-flow-duration.spec.js`; optionally set
 `FDC_ORACLE_PATH` to a direct-source oracle JSON for numerical integration checks.
 
 The shared map controller accepts optional `eventRecognizerOptions` at Deck construction. Only the standalone combined viewer supplies a five-second stationary-click allowance for measured software-GPU picking delays; other callers preserve Deck defaults. See the combined-viewer contract for the gesture rationale and keyboard alternative.
+
+The bootstrap also supplies `observed` readiness and narrow daily records from
+`observed/observed.csv`. Its zero-based Julian is normalized to one-based and
+empty flow cells become null. Both source choices share the full-record Observed
+curve, using project totalwatsed3 maximum Area for depth-to-discharge conversion.
+`includeObserved` defaults false. Canonical Omni children use their parent
+project's observation and area; simulated sources remain scenario-owned. Reads
+are capped at 16 MiB and 100,000 rows with explicit rejection, never truncation.
+No model-fit computation or query-catalog refresh is required. Reload after
+uploads change. No run files are written by this feature.
