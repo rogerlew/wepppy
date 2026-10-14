@@ -727,7 +727,7 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         for record in by_hash.values()
     ]
 
-    assert len(records) == 18
+    assert len(records) == 22
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
@@ -735,6 +735,7 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         "c1d02d73f",
         "e25299022",
         "6781de988",
+        "pending-standalone-edde-reader-floor",
     }
     assert all(
         hashlib.sha256(
@@ -766,6 +767,11 @@ def test_amendment5_reader_floor_accepts_prior_and_new_structures(
     if profile_id == "continental-us":
         expected_records.update({"2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3",
                                  "545e2197c8a67a88da9c796246a2b0572427c8228bcb0e5d3ccd883f11b320a6"})
+    edde_hashes = {
+        "continental-us": {"4a69bb0e6115a1f95e69ca725214bd916fa7411381fb16e37e7b86829fc1c2e6", "44edfc7aabcf4c4be65066c8a0ff881152536dd9656c922f5469d8eb98bdb465"},
+        "canada": {"54b12f64d8ea36c02791a36457d89b67b874901f271ac9a5ecd1e84d764686ac", "073d3c8406625c023220365d9200a5287eff854c5c0d7350d51b40ff998c5e42"},
+    }
+    expected_records.update(edde_hashes.get(profile_id, set()))
     assert set(records) == expected_records
     assert capability_graph_module.capability_structure_sha256(evolved) == (
         _AMENDMENT5_STRUCTURE_HASHES[profile_id]
@@ -1171,3 +1177,27 @@ def test_prism_reader_floor_accepts_new_graph_without_live_catalog():
     assert capability_graph_module.capability_structure_sha256(evolved) == (
         "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3")
     assert "observed_prism_800m" not in baseline.climate_datasets
+
+
+@pytest.mark.parametrize("locale", ["continental-us", "canada"])
+@pytest.mark.parametrize("single", [False, True])
+def test_edde_reader_floor_accepts_additive_graph_without_changing_current_choices(locale, single):
+    from dataclasses import replace
+    from wepppy.nodb.config_builder.resolver import resolve_builder_capability_graph
+    from wepppy.nodb.single_input_policy import single_input_capability_graph
+
+    graph = resolve_builder_capability_graph(locale)
+    if single:
+        graph = single_input_capability_graph(graph, selected_binary="wepp_260803")
+    before = graph.as_config_sections()
+    added = replace(
+        graph,
+        climate_datasets=(*graph.climate_datasets, "future_edde_v2"),
+        climate_station_methods_by_dataset={**graph.climate_station_methods_by_dataset, "future_edde_v2": ("auto", "distance", "multi_factor")},
+        climate_spatial_methods_by_dataset={**graph.climate_spatial_methods_by_dataset, "future_edde_v2": ("single", "multiple")},
+        climate_station_defaults={**graph.climate_station_defaults, "future_edde_v2": "auto"},
+        climate_spatial_defaults={**graph.climate_spatial_defaults, "future_edde_v2": "single"},
+    )
+    added.validate()
+    assert graph.as_config_sections() == before
+    assert "future_edde_v2" not in graph.climate_datasets
