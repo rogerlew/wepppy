@@ -39,3 +39,12 @@ Snapshots:   0 total
 Time:        1.741 s, estimated 3 s
 Ran all test suites matching climate.test.js.
 
+
+Calendar amendment stubtest
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.nodb.core.climate
+Success: no issues found in 1 module
+
+Calendar amendment changed exceptions
+
+Net delta (all changed files): +0
+Result: PASS

@@ -49,6 +49,7 @@ EXPECTED_IDS = {
     "observed_prism_800m",
     "dep_nexrad",
     "future_cmip5",
+    "future_edde_v2",
     "user_defined_cli",
     "continental-us-capabilities",
     "europe",
@@ -438,6 +439,7 @@ def test_description_is_deterministic_and_server_ready() -> None:
         "dep_nexrad",
         "future_cmip5",
         "user_defined_cli",
+        "future_edde_v2",
     ]
     assert first.capability_graphs_by_locale["europe"]["capabilities"][
         "climate_datasets"

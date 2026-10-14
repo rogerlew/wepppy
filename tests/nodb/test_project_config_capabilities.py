@@ -223,6 +223,7 @@ def test_exact_schema_v1_named_preset_projects_only_climate_and_landuse(
                 "dep_nexrad",
                 "future_cmip5",
                 "user_defined_cli",
+                "future_edde_v2",
             ),
             114,
         ),
@@ -235,7 +236,7 @@ def test_exact_schema_v1_named_preset_projects_only_climate_and_landuse(
         (
             "canada",
             "canada",
-            ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+            ("vanilla_cligen", "observed_daymet", "user_defined_cli", "future_edde_v2"),
             29,
         ),
         (

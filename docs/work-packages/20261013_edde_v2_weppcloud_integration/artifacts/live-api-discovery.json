@@ -1,0 +1,31 @@
+{
+  "runid": "edde-ca-20261014",
+  "schema_status": 200,
+  "edde_projection_schema": {
+    "type": "string",
+    "enum": [
+      "WRF-MPI/SSP2-4.5",
+      "WRF-MPI/SSP3-7.0",
+      "WRF-Nor/SSP2-4.5"
+    ],
+    "required_if": {
+      "field": "climate_mode",
+      "op": "eq",
+      "value": 17
+    },
+    "description": "EDDE full years: 2025\u20132099 MPI; 2025\u20132079 Nor."
+  },
+  "defaults_status": 200,
+  "defaults": {
+    "climate_mode": 17,
+    "cligen_seed": 1001,
+    "climate_catalog_id": "future_edde_v2",
+    "climate_station_method": "auto",
+    "climate_spatial_method": "single",
+    "climatestation_mode": -1,
+    "climate_spatialmode": 0,
+    "edde_projection": "WRF-MPI/SSP3-7.0",
+    "future_start_year": 2060,
+    "future_end_year": 2060
+  }
+}
