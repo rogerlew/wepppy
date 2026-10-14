@@ -2436,3 +2436,7 @@ binary, landuse/soil and representation restrictions. Rationale: adding a CONUS
 climate must not break creation of otherwise valid single-input projects. The
 initial ordinary-CONUS reader floor alone is insufficient for rollback after
 this variant is written; the aggregate floor must include both new identities.
+
+## EDDE v2 future climate capability amendment
+
+EDDE-WEPP-01 adds `future_edde_v2` (ClimateMode17) to current live Continental-US and Canada envelopes, ordinary and existing single-input variants. Station methods auto/distance/multi_factor default auto; spatial single/multiple default single. The [EDDE application contract](edde-v2-weppcloud-contract.md) governs projection/period, grid and PRISM eligibility and attribution. Preserve other profiles, existing climate defaults, historical v2 generation and stored graphs. Stored projects gain choices only through existing explicit refresh. Register new exact structures in a standalone reader-floor ancestor and verify direct reopening before exposing current writers. This finite climate addition does not advance or close unrelated Project Config initiatives. Implementation and exact new-identity evidence pending.

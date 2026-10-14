@@ -3,9 +3,9 @@
 ## Quick status
 
 **Started / last updated**: 2026-10-13 21:15 UTC  
-**Current phase**: Ready for integration planning; feasibility closed
+**Current phase**: M1 contract checkpoint and reader-floor design
 **Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
-**Plan**: [Package scope and acceptance](package.md). Execution plan to be authored before implementation.
+**Plan**: [Package scope and acceptance](package.md). [Active ExecPlan](prompts/active/edde_v2_weppcloud_integration_execplan.md).
 
 ## Task board
 
@@ -22,11 +22,11 @@
 
 ### In progress
 
-None; this session scopes future work only.
+Operator authorized execution. Active plan: [ExecPlan](prompts/active/edde_v2_weppcloud_integration_execplan.md). Canonical EDDE-WEPP-01 and both independent contract reviews pass. Standalone checkpoint and capability reader floor precede runtime wiring.
 
 ### Blocked
 
-Scientific conditional-go and executable workflow evidence are available. Integration still needs its ExecPlan, contract/state matrix, explicit supported choices and actual-project acceptance. The unrelated stale SBS assertion is corrected and its full metadata-route module passes 21 tests; original broad results remain failed/incomplete.
+Scientific conditional-go and executable workflow evidence are available. Actual-project acceptance and runtime implementation remain pending. The unrelated stale SBS assertion is corrected and its full metadata-route module passes 21 tests; original broad results remain failed/incomplete.
 
 ## Decisions log
 

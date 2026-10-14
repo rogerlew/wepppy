@@ -702,3 +702,7 @@ its lease and fail closed if ownership is lost. Conflict responses remain
 HTTP409 with the existing `job_active` contract. No lock timeout or ownership
 check is relaxed. This clarifies the request boundary after real SBS uploads
 exposed inherited references to already-released leases.
+
+## EDDE v2 climate amendment
+
+The current US and Canada climate envelopes additionally offer `future_edde_v2`, subject to the additive capability reader-floor rules in project-owned-config-contract.md. Existing stored graphs are not expanded silently. Build-climate reuses its existing authentication, response/errors, queue and replay rules; EDDE requires `edde_projection`, `future_start_year`, `future_end_year` and Single/Multiple selection per [the EDDE application contract](edde-v2-weppcloud-contract.md). Worker grid/source/PRISM preflight precedes daily acquisition. No new endpoint or queue topology. Implementation conformance pending.
