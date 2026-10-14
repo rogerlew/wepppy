@@ -298,6 +298,7 @@ const CONTRIBUTORS = [
   'Jackson Nakae',
   'Sonja Kolstoe',
   'Roger Lew',
+  'Sarah Lewis',
   'Mary E. Miller',
   'Jonay Neris',
   'Pete Robichaud',

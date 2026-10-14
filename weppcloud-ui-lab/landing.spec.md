@@ -170,6 +170,7 @@
      - Jim Frakenberger
      - Sonja Kolstoe
      - Roger Lew
+     - Sarah Lewis
      - Mary E. Miller
      - Jonay Neris
      - Pete Robichaud
