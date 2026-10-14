@@ -1,7 +1,6 @@
 # Observed flow-duration validation
 
-Date: 2026-10-14 UTC. Candidate: master working changes after reviewed checkpoint
-`4e02ee2e0`. Environment: dev Compose weppcloud Python 3.12, host Node/Chromium.
+Date: 2026-10-14 UTC. Implementation: `4969c7323`, after reviewed checkpoint `4e02ee2e0`. Environment: dev Compose weppcloud Python 3.12, host Node/Chromium.
 Highest claim: locally validated; no production deployment.
 
 ## Automated checks
@@ -12,11 +11,13 @@ Highest claim: locally validated; no production deployment.
   limits, missing/malformed/legacy data and parent lineage).
 - Focused flow-duration frontend after fixes: 24 passed.
 - Full frontend after final regression: 986 passed. Lint passes.
-- Full Python suite: running; final result pending. The final area/encoding
-  regressions also passed in a focused rerun after full-suite collection.
+- Full Python suite: 10,812 passed, 126 skipped, 7,696 warnings in 48m02s.
+  The final area/encoding regressions also passed in the 34-test focused rerun
+  after full-suite collection.
 - Broad-exception enforcement versus checkpoint: pass, zero added broad catches.
   The required origin/master comparison fails on preexisting
   wepppy/nodb/core/climate_build_helpers.py (+1), outside this package.
+- Changed documentation lint and whitespace checks pass.
 - Code-quality observe-only command completed; radon unavailable in host runtime.
   Generated root reports were restored to avoid unrelated changes.
 

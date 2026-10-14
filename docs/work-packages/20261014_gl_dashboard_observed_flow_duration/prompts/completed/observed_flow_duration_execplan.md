@@ -15,8 +15,8 @@ observed record and appears once alongside all simulated scenarios.
 - [x] (2026-10-14 UTC) Both reviews approved; checkpoint ancestor 4e02ee2e0.
 - [x] (2026-10-14 UTC) Add tests, bounded bootstrap adapter, observed series and checkbox.
 - [x] (2026-10-14 UTC) Focused tests, frontend gates, real artifact/browser verification and both final reviews pass.
-- [ ] Finish the running broad Python suite and record its result.
-- [ ] Record outcomes and update tracker/board.
+- [x] (2026-10-14 UTC) Broad Python: 10,812 passed, 126 skipped in 48m02s.
+- [x] (2026-10-14 UTC) Retain evidence, close package and update tracker/board.
 
 ## Surprises & Discoveries
 
@@ -38,7 +38,7 @@ silently intersecting dates. Default overlay off preserves existing graph behavi
 
 ## Outcomes & Retrospective
 
-Implemented and locally validated: 731 real observations render correctly on both source plots. Independent correctness and security reviews approve after fixing malformed/legacy area handling. Broad Python suite is still running. No production deployment is requested.
+Implemented and locally validated: 731 real observations render correctly on both source plots. Independent correctness and security reviews approve after fixing malformed/legacy area handling. Broad Python passed 10,812 tests (126 skipped); final focused Python passed 34 tests and all 986 frontend tests pass. Implementation commit: 4969c7323. No production deployment is requested.
 
 ## Context and Orientation
 
@@ -95,7 +95,7 @@ Reload the dashboard after changing uploads or model outputs.
 
 ## Artifacts and Notes
 
-Contract checkpoint and review evidence are under artifacts/. Starting revision:
+Contract checkpoint 4e02ee2e0, implementation 4969c7323 and review/validation evidence are under artifacts/. Starting revision:
 ebaed5a23cc9132424db90a38241f1e9f090fafc.
 
 ## Interfaces and Dependencies
