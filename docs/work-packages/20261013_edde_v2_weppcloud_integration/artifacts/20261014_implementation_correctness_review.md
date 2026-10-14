@@ -1,6 +1,6 @@
 # EDDE integration implementation correctness review
 
-**Disposition: preliminary; implementation and acceptance remain in progress.** Independent reviewer examined the uncommitted candidate over reader-floor checkpoint `85f6ae9f8` on 2026-10-14 UTC. Runtime files were not edited by this reviewer. Findings were sent immediately to the implementer; some fixes appeared during review and still need regression evidence.
+**Current disposition: correctness review passes for runtime commit `d2ca5821b`; broad-suite gate remains ongoing.** Independent reviewer initially examined the uncommitted candidate over reader-floor checkpoint `85f6ae9f8` on 2026-10-14 UTC and subsequently re-reviewed fixes and actual acceptance receipts. Runtime files were not edited by this reviewer. Earlier findings and intermediate coverage limits are retained below; the final disposition supersedes their open status.
 
 ## Initial findings
 
@@ -62,3 +62,19 @@ Read the acceptance scripts and parsed the retained receipts rather than inferri
 - `ca-archive-job.json` shows a finished canonical archive job. Content readback/restore still needs its own byte/mode receipt; archive job success is not that proof.
 
 The full Python suite, fresh US WEPP consumption, completed/failed archive and download readback, negative live eligibility disposition and final candidate/identity receipt remain open at this review checkpoint. The implementer's active acceptance work may subsequently close them. No code finding is raised merely because those runs are still in progress, and this review does not mark them passed prematurely. Targeted changed-grid and published-station report regressions would directly protect the source fixes; record their actual coverage when available.
+
+## Final correctness disposition for `d2ca5821b`
+
+**Pass: no open medium/high correctness findings.** Reviewed the committed runtime candidate and updated receipts on 2026-10-14 UTC. The remaining actionable-error finding is resolved: `EddeSelectionError` carries a safe field/message and the RQ boundary maps it to `invalid_edde_selection` within the existing error envelope before generic CMIP5 handling. The regression covers missing projection, MPI's 2025 lower bound, Nor's 2079 upper bound and AnnualMonthlies. Updated live hostile-request receipts show the actual EDDE range/scaling messages, HTTP 400 and unchanged durable climate/CLI bytes.
+
+The candidate also includes direct regressions proving that a changed query-grid identity rejects before replay and preserves prior publication, and that the report uses the published station instead of a pending selection. The six original source findings remain resolved.
+
+Updated acceptance evidence closes the earlier specific consumer/artifact gaps:
+
+- `artifact-readback.json` now records **53 Canadian Single and 83 US Multiple PRISM** prepared climates with corresponding fresh WEPP water-balance consumers. Every consumer contains 366 finite daily records for 2060, and its precipitation matches its exact prepared CLI. Soil setup is complete for both projects; earlier failed US preparation attempts remain recorded.
+- Twelve `browser-download-hashes.json` receipts return HTTP 200 and match local SHA-256/byte counts for published CLI/provenance, completed and failed attempt status, and canonical archive downloads.
+- `archive-before-restore.json` and `archive-after-restore.json` are equal. The validation script checks every archived climate member against project bytes and all directory modes for both the successful Canadian project and its PRISM-rejected clone, including the retained failed reason. Finished archive/restore jobs are supported by actual payload verification.
+- The Canadian Multiple request fails explicitly because PRISM normals are missing; the previous Single climate remains published, and the failure is browser/download/archive visible. This validates PRISM-negative eligibility without introducing a fallback.
+- `runtime-environment.json` identifies the forest development Compose service identities, NFS run mount, bind-mounted source, worker umask, private attempt-directory mode, native extension hash and existing RQ timeout. These are development-environment receipts, not a production deployment claim.
+
+**Residual risks and coverage limits:** the broad repository Python suite was still running at final review; this disposition does not call that gate passing or close the package on its behalf. Live consumer evidence samples MPI SSP3-7.0 for 2060 at the stated US/Canadian projects; broader source/period eligibility relies on the retained feasibility and validation coverage, not an assertion that every combination was live-tested. PRISM period interpretation remains bound to the documented owned product contract rather than an absent per-response period field. Existing public-source availability, interrupted-worker and multi-file publication crash-window risks remain unchanged. No production deployment is approved by this review.

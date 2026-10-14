@@ -1,0 +1,10 @@
+{
+  "runid": "edde-ca-prism-rejected-20261014",
+  "retained_attempt_files": 100,
+  "all_retained_bytes_unchanged": true,
+  "statuses": {
+    "edde-build-ktmd0p1q": "failed",
+    "edde-build-ffg00w4w": "complete",
+    "edde-build-yct26mw2": "complete"
+  }
+}

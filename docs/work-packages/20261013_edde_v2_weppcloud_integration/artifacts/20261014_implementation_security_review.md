@@ -2,15 +2,15 @@
 
 ## Findings and verdict
 
-No additional concrete code vulnerability was identified in the reviewed candidate. **Preliminary disposition: hold final sign-off for acceptance evidence.** No high or medium vulnerability finding is open; the required artifact-observability and live hostile-request gates remain unverified below. This is not final release approval or authorization to deploy.
+**Final security disposition: PASS for candidate `d2ca5821b6eeb35438eaf8c28c1c794c9a10d5b3`.** No unresolved high, medium, or low security findings. Live request, artifact-observability, publication-retention and environment evidence now close the earlier security acceptance gaps. The broad repository Python suite remains a separate package gate; this review does not call it passing or authorize deployment.
 
-The independent correctness review identified provenance, discovery, and source-binding issues. The current candidate includes the corresponding station-report override, provenance clearing, source error retention, projection/year discovery, and grid/cell comparisons. Their complete closure remains the correctness reviewer's responsibility; security approval does not replace it.
+The independent correctness review has separately passed the same candidate. Its provenance, discovery, source-binding and actionable-error findings are resolved. Security review verified the relevant controls and evidence after that final disposition; this sign-off does not replace correctness or broader quality gates.
 
 ## Metadata
 
 - Reviewer: independent `security_reviewer`, `/root/edde_integration_contract_security`.
 - Date: 2026-10-14 UTC.
-- Candidate: uncommitted runtime changes over `85f6ae9f8`.
+- Candidate: committed runtime `d2ca5821b6eeb35438eaf8c28c1c794c9a10d5b3`; reviewed runtime files remain unchanged after that commit. Later acceptance receipts are named below.
 - Contract ancestor: `75b47f61f`; additive reader floor: `26c9e86ca`. Their ordering and ancestry to candidate HEAD were checked directly.
 - Related artifacts: [contract security review](20261014_contract_security_review.md), [implementation correctness review](20261014_implementation_correctness_review.md), [reader-floor readback](reader-floor-reopen.json), and [page/report readback](browser-readback.json).
 - Scope: EDDE selection/parser, builder and router; capability/catalog/discovery changes; climate/report templates; climate route selection handling; source client/adapter and shared publication precedents; focused tests and acceptance records available at review time.
@@ -27,7 +27,7 @@ Valid legacy and absent/empty EDDE state remain supported. EDDE-specific source 
 | Surface | Evidence and assessment |
 | --- | --- |
 | Input authority | `climate_routes.py:_validate_v2_climate_selection` checks stable catalog membership and rejects numeric attempts to authorize a different stored-graph selection. `climate_input_parser.py` restores its input snapshot on validation failure. `climate_edde_inputs.py` rejects unknown projection combinations, noninteger/bool years, out-of-envelope periods, unsupported locales/spatialization, and incompatible scaling. Worker preflight repeats these checks. |
-| Auth/session/CSRF | The existing authenticated build-climate route and tracked queue remain in use. No auth/session/CSRF code or download/archive authorization was widened. Live negative request evidence is still required; mocked route-auth tests are not claimed as that proof. |
+| Auth/session/CSRF | The existing authenticated build-climate route and tracked queue remain in use. No auth/session/CSRF code or download/archive authorization was widened. Live unauthenticated submission returns 401; authorized malformed requests return 400 with unchanged climate NoDb/CLI bytes. Actual browser submission and artifact downloads use the normal application paths. |
 | Egress and credentials | `EddeClient` is reused unchanged: fixed anonymous public HTTPS origin, `trust_env=False`, no redirects, explicit timeout, safe source keys, ETag/If-Match and byte/hash validation. No payload-supplied endpoint or ambient credential transmission is introduced. Existing PRISM acquisition settings retain their prior authority. |
 | Resource bounds | `_inventory` checks every requested year/month/variable and annual footprint before weather acquisition. Consecutive private temporary caches avoid shared-writer races and whole-period cache accumulation. Request period and existing queue timeout bound the job; a yearly budget is not a whole-job transfer cap. No automatic acquisition retries or fallback model/cell are added. |
 | Failure retention | `_retain_cache` copies JSON identities and per-object attempt records in `finally` before ordinary yearly-cache cleanup. Early attempt status records requested coordinates and projection/years; failure status includes exception type/message. Raw NetCDF cache bytes are the explicitly disposable class. A killed process may leave an incomplete attempt and cache; it cannot legitimately claim completed readiness. |
@@ -35,33 +35,43 @@ Valid legacy and absent/empty EDDE state remain supported. EDDE-specific source 
 | Source integrity | Annual query grid source/hash and watershed cell must equal preflight identities. PRISM checks band count, georeferencing, coverage, mask, finite/order/precipitation requirements and product identifiers. Actual source metadata is retained. Final selected CLI files undergo semantic/date validation and hash attribution before publication. |
 | Persistence/publication | `_inputs` snapshots source/period, station file identity, seed, locale, spatial geometry, scaling settings/map signature and acquisition configuration. `finalize` freshly hydrates under the lock; comparison precedes publication. Only named derived fields change. Real replay/publication tests demonstrate preserved previous CLI/state on scaling failure, supersession and denied replacement. |
 | Reports | Jinja autoescaping and existing run-scoped browse URLs remain in use. Published provenance supplies the report's station and source identity; pending form values do not stand in for published projection/period. Switching away clears active EDDE attribution while retained attempts remain. |
-| Supply chain and permissions | No added dependency, service, queue, privilege or deployment topology. Source client and native binaries follow the owned existing stack. Actual service identity, mounts and archive/restore permission parity remain environment acceptance evidence. |
+| Supply chain and permissions | No added dependency, service, queue, privilege or deployment topology. Source client and native binaries follow the owned existing stack. Recorded worker/RQ/browse services share UID 1000, GID 993 and group 993; worker umask is 0022. Canonical NFS run/source mounts and byte/mode-preserving archive/restore are recorded. |
 
 ## Validation performed
 
-Executed independently:
+Executed independently against the committed runtime candidate:
 
 ```text
 wctl run-pytest tests/nodb/test_climate_edde_build.py tests/microservices/test_rq_engine_climate_routes.py tests/climates/test_edde_client.py --maxfail=1
-53 passed, 1837 warnings in 6.47s
+59 passed, 1837 warnings in 6.66s
 ```
 
-Log: `/home/workdir/wepppy-scratch/edde-integration-20261014/security-review-tests.log`.
+Log: `/home/workdir/wepppy-scratch/edde-integration-20261014/security-review-final-tests.log`. The earlier preliminary candidate passed 53 tests; six added cases cover the changed-grid/report and actionable-error regressions.
 
 The EDDE tests exercise real CLIGEN/native processing, actual NoDb finalization/reload and real filesystem rollback; their remote source/grid acquisition is a fixture. Existing client tests reject unsafe keys, changed identities, corrupt caches, partial downloads and budget overflow, and check ambient credential isolation. Existing route tests cover hidden raw-mode/unsupported-catalog rejection before parsing, using an auth stub. These test boundaries are intentionally distinguished from live source/auth acceptance.
 
-`git diff --check` passed. Reader-floor evidence covers US/Canada ordinary and single-input structures, with direct reopen equality and unchanged stored bytes. Available live records show authenticated climate submissions and page/report readback for Canadian Single and US Multiple projects. These records do not alone prove archive content, negative access behavior, or exact WEPP consumption.
+`git diff --check` passed during source review. Reader-floor evidence covers US/Canada ordinary and single-input structures, with direct reopen equality and unchanged stored bytes. Final live records below extend successful request/page rendering into rejection, exact artifact, archive/restore and consumer evidence.
 
-## Required evidence before final sign-off
+## Final live evidence and observability gate
 
-1. Complete the independent correctness findings and final candidate review; identify the exact reviewed revision or immutable candidate receipt.
-2. Retain live valid and hostile request receipts, including unauthorized/run-access denial and invalid source/period/spatial selections, demonstrating no enqueue or durable input mutation on rejection. Cover old capability graph numeric/catalog bypass attempts.
-3. Exercise actual successful and failed EDDE attempt browser/download paths under normal configured service identity. Preserve retrieved payload hashes; a page returning 200 or showing a projection is insufficient.
-4. Use canonical project archive/restore for both completed and failed attempt records, checking member paths, exact payload bytes and private directory modes. Verify subsequent climate rebuild cleanup retains attempts.
-5. Retain configured identity/mount/umask evidence and actual US/Canada source-to-prepared-CLI-to-fresh-WEPP receipts. Report the existing RQ timeout and actual source footprint honestly; disposition all required quality gates without turning an incomplete/failed run into a pass.
+| Evidence | Verified result |
+| --- | --- |
+| [Hostile requests](hostile-http-no-mutation.json) | Five authenticated invalid projection/period/spatial/scaling submissions return 400 and retain the exact prior climate NoDb/CLI bytes. Unauthenticated submission returns 401. Error fields/messages describe the EDDE correction required. |
+| [Legacy capability rejection](legacy-catalog-rejection.json) | Both numeric-only mode 17 and explicit EDDE catalog requests fail under the old saved capabilities, without durable climate-state change. The compatibility reader does not grant new source authority. |
+| [Browser submission](negative-browser-submission.json), [failed job](negative-job.json) | Actual browser-controlled Canadian Multiple request reaches the worker and fails explicitly on missing PRISM normals. Prior Single publication is preserved; no spatial fallback occurs. |
+| [Download hashes](browser-download-hashes.json) | Twelve actual HTTP 200 downloads match local byte counts and SHA-256: published CLI/provenance, completed/failed attempt status and canonical project archives. |
+| [Before restore](archive-before-restore.json), [after restore](archive-after-restore.json) and `archive_readback.py` | Records are equal: 104 climate members for the completed Canadian project and 117 for its PRISM-rejected clone. Every file hash matches the corresponding canonical archive payload; all directory modes match, including 0700 attempt directories. Both restore jobs finished, and the failed reason survives restore. |
+| [Rebuild retention](retention-readback.json), [job](retention-rebuild-job.json) | A subsequent successful climate build preserves all 100 prior completed/failed attempt files byte-for-byte. The retained inventory now contains two completed attempts and one failed attempt. |
+| [Runtime environment](runtime-environment.json) | Forest development Compose identities/mounts, worker umask, native binary hash and actual RQ climate timeout 216000 seconds are recorded. Private attempt permissions remain service-readable and survive restore. No production parity or deployment is inferred beyond these stated identities/configuration. |
+| [Source acquisition](source-acquisition-summary.json) | Both accepted projects record one requested year, planned weather footprint 1,164,990,696 bytes, source-grid identity/hash and actual native cell. These are live source records; the four-billion-byte budget is per yearly query, not per multiyear job. |
+| [Prepared inputs and consumers](artifact-readback.json) | All 53 Canadian Single and 83 US Multiple prepared climates have corresponding fresh parsed WEPP water-balance output: 366 finite daily rows for 2060 and precipitation matching the exact prepared CLI. Both final WEPP job trees have all nodes finished; earlier failed probes remain retained. |
+
+Comparable artifact convention is the existing climate observed/PRISM staging and publication path. The new EDDE attempt/source/generated inventory is visible under ordinary `climate/edde-build-*` paths. Existing canonical browser/archive paths remain authoritative; no hidden-only project records, custom download authorization, or new archive exclusions were introduced.
+
+No concrete security evidence gap remains for the reviewed integration boundaries. The broader Python suite was still running at final security review. Package closeout must record its actual disposition separately; this security PASS is not a substitute for that gate. Live evidence samples MPI SSP3-7.0 in 2060 at the stated projects, not every supported model/year combination.
 
 ## Residual risk and sign-off
 
 Residual risks are public source availability, authenticated costly multi-year builds within the accepted bounds, interrupted workers, and the existing multi-file publication crash window. Private caches, explicit failures, durable source/attempt evidence and existing finalization rules are appropriate controls; no new threshold or broader authorization flow is requested. No exceptional risk acceptance is proposed.
 
-Security reviewer records preliminary source-review approval with **final security gate pending** the concrete evidence above. No unresolved code vulnerability is waived, and no production deployment is approved.
+Security reviewer signs **PASS** for candidate `d2ca5821b` after final correctness review and the concrete security evidence above. No unresolved finding is waived and no exceptional risk acceptance is required. Package owner retains responsibility for remaining broad quality gates and final handoff; no production deployment is approved.

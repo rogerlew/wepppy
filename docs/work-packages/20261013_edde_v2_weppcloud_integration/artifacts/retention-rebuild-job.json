@@ -1,0 +1,14 @@
+{
+  "job_id": "383409b5-ec86-4740-b3e1-d39430064f84",
+  "runid": "edde-ca-prism-rejected-20261014",
+  "status": "finished",
+  "result": null,
+  "started_at": "2026-10-14 04:50:43.461809",
+  "ended_at": "2026-10-14 04:51:38.347661",
+  "description": "wepppy.rq.project_rq.build_climate_rq('edde-ca-prism-rejected-20261014')",
+  "elapsed_s": 54.885852,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

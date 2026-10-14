@@ -1,0 +1,57 @@
+[
+  {
+    "payload": {
+      "climate_mode": 17,
+      "climate_spatialmode": 0,
+      "edde_projection": "WRF-MPI/SSP3-7.0",
+      "future_start_year": 2060,
+      "future_end_year": 2060,
+      "precip_scaling_mode": 0,
+      "cligen_seed": 1001
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "Invalid climate field values.",
+        "code": "validation_error"
+      },
+      "error_id": "bbcec127736a4580aee0e79a1e3feef2",
+      "errors": [
+        {
+          "code": "invalid_request",
+          "message": "Invalid climate field values."
+        }
+      ]
+    },
+    "climate_state_unchanged": true
+  },
+  {
+    "payload": {
+      "climate_mode": 17,
+      "climate_spatialmode": 0,
+      "edde_projection": "WRF-MPI/SSP3-7.0",
+      "future_start_year": 2060,
+      "future_end_year": 2060,
+      "precip_scaling_mode": 0,
+      "cligen_seed": 1001,
+      "climate_catalog_id": "future_edde_v2"
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "Invalid climate field values.",
+        "code": "validation_error"
+      },
+      "error_id": "80b9acb3ef8547ada1451f903d36ef79",
+      "errors": [
+        {
+          "code": "invalid_request",
+          "message": "Invalid climate field values."
+        }
+      ]
+    },
+    "climate_state_unchanged": true
+  }
+]

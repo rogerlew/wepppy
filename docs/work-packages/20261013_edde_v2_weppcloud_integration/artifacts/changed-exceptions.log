@@ -1,0 +1,41 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: 85f6ae9f8
+Merge base: 85f6ae9f8c2aee738853678bf3c02b903c78dfc1
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 13
+
+Files:
+  M wepppy/climates/edde/cligen.py
+  M wepppy/microservices/rq_engine/climate_routes.py
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py
+  M wepppy/nodb/core/climate.py
+  M wepppy/nodb/core/climate_build_router.py
+  A wepppy/nodb/core/climate_edde_build.py
+  A wepppy/nodb/core/climate_edde_inputs.py
+  M wepppy/nodb/core/climate_input_parser.py
+  M wepppy/nodb/core/climate_mode_build_services.py
+  M wepppy/nodb/locales/capability_graph.py
+  M wepppy/nodb/locales/climate_catalog.py
+  M wepppy/nodb/locales/locale_profiles.py
+  M wepppy/weppcloud/routes/nodb_api/climate_bp.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/climates/edde/cligen.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/climate_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/core/climate_build_router.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/core/climate_edde_build.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/core/climate_edde_inputs.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_input_parser.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_mode_build_services.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/locales/capability_graph.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/locales/climate_catalog.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/locales/locale_profiles.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/climate_bp.py (base=14 current=14 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

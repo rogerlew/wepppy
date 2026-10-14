@@ -40,7 +40,7 @@ Source inventory, coverage, quality, replay and PRISM evidence are retained. Raw
 
 - [ ] Applicable package success criteria and generated-artifact chain passed.
 - [ ] Parameterization ADRs accepted before merging affected implementation.
-- [ ] Correctness/security review artifacts complete with no unresolved medium/high findings.
+- [x] Correctness/security review artifacts complete with no unresolved medium/high findings.
 - [ ] Required implementation tests and actual-project acceptance recorded.
 - [ ] Durable contracts promoted before closure; package and root tracker updated.
 
@@ -67,3 +67,5 @@ Policy-update validation: scoped Markdown lint passed for all nine changed docum
 **M2/M3 and live acceptance (2026-10-14 UTC):** Runtime, API discovery, UI, reports and operator documentation implemented. Canadian Single and US Multiple PRISM builds passed real acquisition through authenticated RQ requests. Canadian full WEPP completed: 53 prepared CLI hashes and 53 parsed water-balance outputs match 2060 daily precipitation. US 83 prepared climates match publication; full WEPP awaits missing source-project soil setup. Five hostile/invalid requests return 400 without changing climate state or published CLI bytes; unauthenticated submission is rejected. Reader-floor reopen passes eight cases. Frontend 980 tests, lint, stubtest and stub inventory pass; latest targeted Python run passes 97 tests. Broad Python suite and final artifact/review gates remain open.
 
 **M4 consumer/archive acceptance:** Canadian Single (53 hillslopes) and US Multiple PRISM (83 hillslopes) now complete full WEPP job trees after finishing the previously unbuilt US soil and landuse inputs through existing APIs. Every prepared CLI matches publication; every parsed daily water-balance output has 366 finite rows and matching 2060 precipitation. Browser downloads match exact local bytes. Canonical archive/restore preserves 104 completed-case and 117 failed-case climate members, including attempt directory mode 0700. Live Canadian PRISM rejection preserves prior publication. Actionable EDDE errors now identify projection, period or scaling corrections.
+
+**Final reviews:** Both independent reviews pass runtime `d2ca5821b` with no unresolved findings. Security independently reran 59 focused tests. Successful rebuild preserves all 100 prior completed/failed attempt files. Only the broad Python gate and final documentation closeout remain.
