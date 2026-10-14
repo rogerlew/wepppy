@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-14
-**Active Packages**: 45
+**Active Packages**: 46
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -368,6 +368,13 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### WMesque Priority Retrieval and Master Catalog Synchronization
+
+**Status**: Scaffolded 2026-10-14; implementation not started.
+**Link**: [Work package](docs/work-packages/20261014_wmesque_catalog_sync/package.md)
+**Scope**: Forest-first v2 priority retrieval, wepp.cloud master catalog, extension adoption, verified sync, and opt-in recurring RQ jobs. Unconfigured deployments retain wepp.cloud.
+**Next**: M1 contracts and fixture design; Kubernetes writer/scheduler activation remains an explicit rollout prerequisite.
 
 ### Feature access governance
 

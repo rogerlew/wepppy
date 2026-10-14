@@ -5,6 +5,8 @@
 - Provide a canonical, code-derived list of dataset IDs that `wepppy` requests through `wmesque_retrieve(...)`.
 - Support repeatable production-to-test-production geodata sync planning.
 
+Catalog authority, extension ownership, and synchronization policy are defined in [WMesque Catalog Governance](wmesque-catalog-governance.md). This inventory does not establish dataset revision identity.
+
 ## How WMesque Resolves a Dataset ID
 - `wmesque2` resolves a request path `dataset` to `/geodata/<dataset>/.vrt`.
 - Sync operations should preserve the full dataset directory tree and adjacent metadata files used by each VRT.
