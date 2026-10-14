@@ -1,3 +1,20 @@
+{% if climate.edde_provenance | default(none) and climate.climate_mode.value == 17 %}
+  {% set edde = climate.edde_provenance %}
+  {% set station_meta = edde.station %}
+  <h5>Published future EDDE v2 climate</h5>
+  <dl class="dl-horizontal">
+    <dt>Projection:</dt><dd>{{ edde.projection }}</dd>
+    <dt>Period:</dt><dd>{{ edde.start_year }}–{{ edde.end_year }}</dd>
+    <dt>CLIGEN seed:</dt><dd>{{ edde.seed if edde.seed is not none else 'Automatic' }}</dd>
+    {% for point in edde.points if point.name == 'ws' %}
+    <dt>Requested location:</dt><dd>{{ point.longitude }}, {{ point.latitude }}</dd>
+    <dt>EDDE native cell:</dt><dd>row {{ point.row }}, column {{ point.col }}</dd>
+    {% endfor %}
+  </dl>
+  <p>EDDE supplies precipitation and temperatures as provided. The 12 km grid limits local elevation effects; no additional bias or elevation correction is applied. Storm structure/intensity, radiation, wind and dewpoint are generated from the CLIGEN station below. The CLI header identifies that station, not the EDDE cell.</p>
+  <p><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ edde.attempt) }}">Source, generation and spatialization evidence</a> · <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/edde-provenance.json') }}">Published file identities and scaling</a></p>
+{% endif %}
+
 {% if climate.is_single_storm %}
   <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
     <p class="wc-alert__body">

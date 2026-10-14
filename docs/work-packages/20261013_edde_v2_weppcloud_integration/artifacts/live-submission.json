@@ -1,0 +1,67 @@
+[
+  {
+    "project": {
+      "original": "/wc1/runs/cr/cryptic-beechnut",
+      "runid": "edde-us-20261014",
+      "root": "/wc1/runs/ed/edde-us-20261014",
+      "config": "disturbed9002_wbt",
+      "location": [
+        -120.79205421178649,
+        47.342277541175264
+      ],
+      "config_refreshed": false
+    },
+    "payload": {
+      "climate_catalog_id": "future_edde_v2",
+      "climate_mode": 17,
+      "climate_spatialmode": 1,
+      "edde_projection": "WRF-MPI/SSP3-7.0",
+      "future_start_year": 2060,
+      "future_end_year": 2060,
+      "precip_scaling_mode": 0,
+      "cligen_seed": 1001
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "Invalid climate field values.",
+        "code": "validation_error"
+      },
+      "error_id": "3bc46abef8ca4a67969bc711767059de",
+      "errors": [
+        {
+          "code": "invalid_request",
+          "message": "Invalid climate field values."
+        }
+      ]
+    }
+  },
+  {
+    "project": {
+      "original": "/wc1/runs/bi/bionic-prerequisite",
+      "runid": "edde-ca-20261014",
+      "root": "/wc1/runs/ed/edde-ca-20261014",
+      "config": "config",
+      "location": [
+        -119.53102853360474,
+        51.00631869090354
+      ],
+      "config_refreshed": true
+    },
+    "payload": {
+      "climate_catalog_id": "future_edde_v2",
+      "climate_mode": 17,
+      "climate_spatialmode": 0,
+      "edde_projection": "WRF-MPI/SSP3-7.0",
+      "future_start_year": 2060,
+      "future_end_year": 2060,
+      "precip_scaling_mode": 0,
+      "cligen_seed": 1001
+    },
+    "status": 200,
+    "response": {
+      "job_id": "4b5fdf11-1dc0-4fd2-bd22-904303590845"
+    }
+  }
+]

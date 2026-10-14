@@ -1,0 +1,27 @@
+{
+  "project": {
+    "original": "/wc1/runs/de/desolate-yea",
+    "runid": "edde-us-current-20261014",
+    "root": "/wc1/runs/ed/edde-us-current-20261014",
+    "config": "config",
+    "location": [
+      -116.89459759775534,
+      46.80147853685344
+    ],
+    "config_refreshed": true
+  },
+  "payload": {
+    "climate_catalog_id": "future_edde_v2",
+    "climate_mode": 17,
+    "climate_spatialmode": 1,
+    "edde_projection": "WRF-MPI/SSP3-7.0",
+    "future_start_year": 2060,
+    "future_end_year": 2060,
+    "precip_scaling_mode": 0,
+    "cligen_seed": 1001
+  },
+  "status": 200,
+  "response": {
+    "job_id": "4f0b49f3-6c0e-4e83-8cac-40f7aa09dd19"
+  }
+}

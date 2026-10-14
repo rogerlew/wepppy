@@ -330,8 +330,8 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
             "op": "in",
             "value": [2, 9, 11, 16],
         }
-        assert fields["future_start_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
-        assert fields["future_end_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
+        assert fields["future_start_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [3, 17]}
+        assert fields["future_end_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [3, 17]}
 
         hints_response = client.get(CONTROLLER_HINTS_PATH)
         assert hints_response.status_code == 200
@@ -701,13 +701,13 @@ def test_build_climate_schema_includes_future_window_fields(monkeypatch: pytest.
     }
     assert request_fields["future_start_year"]["required_if"] == {
         "field": "climate_mode",
-        "op": "eq",
-        "value": 3,
+        "op": "in",
+        "value": [3, 17],
     }
     assert request_fields["future_end_year"]["required_if"] == {
         "field": "climate_mode",
-        "op": "eq",
-        "value": 3,
+        "op": "in",
+        "value": [3, 17],
     }
 
 
@@ -1908,3 +1908,15 @@ def test_v1_live_choices_override_only_the_old_binary_population(monkeypatch):
         operation = client.get(RUN_ENDPOINT_SCHEMA_PATH).json()
     assert controller['fields']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']
     assert operation['request']['properties']['wepp_bin']['enum'] == ['wepp_260803', 'wepp_261010']
+
+
+@pytest.mark.parametrize("selection", ["", "WRF-Nor/SSP2-4.5"])
+def test_edde_controller_defaults_preserve_unselected_or_saved_future_fields(selection):
+    runtime = _sample_runtime()
+    runtime.states.update(climate_mode_code=17, edde_projection=selection,
+                          future_start_year=2060 if selection else "",
+                          future_end_year=2070 if selection else "")
+    defaults = schema_defaults_routes._controller_defaults("climate", runtime)
+    assert defaults["edde_projection"] == selection
+    assert defaults["future_start_year"] == (2060 if selection else "")
+    assert "observed_start_year" not in defaults

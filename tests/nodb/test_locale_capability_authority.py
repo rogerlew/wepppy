@@ -416,6 +416,7 @@ def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> N
                 "dep_nexrad",
                 "future_cmip5",
                 "user_defined_cli",
+                "future_edde_v2",
             ),
             (
                 "cligen-stations-legacy",
@@ -434,7 +435,7 @@ def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> N
         (
             "canada",
             "canada",
-            ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+            ("vanilla_cligen", "observed_daymet", "user_defined_cli", "future_edde_v2"),
             ("cligen-stations-ghcn",),
             "c3s-landcover-2020",
         ),
@@ -689,9 +690,9 @@ def test_stored_schema_v2_graph_validation_is_independent_of_live_catalogs(
 @pytest.mark.parametrize(
     ("profile_id", "expected_sha256"),
     (
-        ("continental-us", "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3"),
+        ("continental-us", "4a69bb0e6115a1f95e69ca725214bd916fa7411381fb16e37e7b86829fc1c2e6"),
         ("europe", "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7"),
-        ("canada", "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4"),
+        ("canada", "54b12f64d8ea36c02791a36457d89b67b874901f271ac9a5ecd1e84d764686ac"),
         ("australia", "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497"),
         ("global-earth", "b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92"),
     ),
@@ -793,7 +794,8 @@ def test_amendment5_runtime_writer_emits_new_cataloged_structures() -> None:
     }
 
     expected = dict(_AMENDMENT5_STRUCTURE_HASHES)
-    expected["continental-us"] = "2c2934682af720fac7d022aa22f830087a10f2f423e4cb329d2a23c88c6ef1d3"
+    expected["continental-us"] = "4a69bb0e6115a1f95e69ca725214bd916fa7411381fb16e37e7b86829fc1c2e6"
+    expected["canada"] = "54b12f64d8ea36c02791a36457d89b67b874901f271ac9a5ecd1e84d764686ac"
     assert emitted == expected
 
 
@@ -1181,7 +1183,7 @@ def test_prism_reader_floor_accepts_new_graph_without_live_catalog():
 
 @pytest.mark.parametrize("locale", ["continental-us", "canada"])
 @pytest.mark.parametrize("single", [False, True])
-def test_edde_reader_floor_accepts_additive_graph_without_changing_current_choices(locale, single):
+def test_edde_reader_floor_accepts_additive_graph_without_changing_stored_choices(locale, single):
     from dataclasses import replace
     from wepppy.nodb.config_builder.resolver import resolve_builder_capability_graph
     from wepppy.nodb.single_input_policy import single_input_capability_graph
@@ -1189,15 +1191,14 @@ def test_edde_reader_floor_accepts_additive_graph_without_changing_current_choic
     graph = resolve_builder_capability_graph(locale)
     if single:
         graph = single_input_capability_graph(graph, selected_binary="wepp_260803")
-    before = graph.as_config_sections()
-    added = replace(
-        graph,
-        climate_datasets=(*graph.climate_datasets, "future_edde_v2"),
-        climate_station_methods_by_dataset={**graph.climate_station_methods_by_dataset, "future_edde_v2": ("auto", "distance", "multi_factor")},
-        climate_spatial_methods_by_dataset={**graph.climate_spatial_methods_by_dataset, "future_edde_v2": ("single", "multiple")},
-        climate_station_defaults={**graph.climate_station_defaults, "future_edde_v2": "auto"},
-        climate_spatial_defaults={**graph.climate_spatial_defaults, "future_edde_v2": "single"},
-    )
-    added.validate()
-    assert graph.as_config_sections() == before
-    assert "future_edde_v2" not in graph.climate_datasets
+    graph.validate()
+    # Reopen the prior graph with its exact stored choices; never refresh implicitly.
+    old = replace(graph,
+        climate_datasets=tuple(x for x in graph.climate_datasets if x != "future_edde_v2"),
+        **{field: {key: value for key, value in getattr(graph, field).items() if key != "future_edde_v2"}
+           for field in ("climate_station_methods_by_dataset", "climate_spatial_methods_by_dataset",
+                         "climate_station_defaults", "climate_spatial_defaults")})
+    before = old.as_config_sections()
+    old.validate()
+    assert old.as_config_sections() == before
+    assert "future_edde_v2" not in old.climate_datasets

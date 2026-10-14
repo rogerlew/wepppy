@@ -177,7 +177,7 @@ _PROFILES = (
         landuse_sources=_CONTINENTAL_US_LANDUSE_IDS,
         climate_sources=(
             "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet", "observed_prism_800m",
-            "dep_nexrad", "future_cmip5", "user_defined_cli",
+            "dep_nexrad", "future_cmip5", "user_defined_cli", "future_edde_v2",
         ),
         climate_station_databases=(
             "cligen-stations-legacy", "cligen-stations-2015", "cligen-stations-ghcn",
@@ -216,7 +216,7 @@ _PROFILES = (
         LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("copernicus-dem-30",), soil_sources=("isric-global",),
         landuse_sources=_C3S_LANDUSE_IDS,
-        climate_sources=("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+        climate_sources=("vanilla_cligen", "observed_daymet", "user_defined_cli", "future_edde_v2"),
         climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(

@@ -1,0 +1,98 @@
+[
+  {
+    "runid": "edde-ca-20261014",
+    "path": "climate/edde-provenance.json",
+    "status": 200,
+    "bytes": 1349,
+    "sha256": "c7062d80635026c7ca94da1c49fa0dd818231f68f1077b5a89d5e2720aae0ce0",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-20261014",
+    "path": "climate/wepp.cli",
+    "status": 200,
+    "bytes": 26941,
+    "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-20261014",
+    "path": "climate/edde-build-ffg00w4w/build-status.json",
+    "status": 200,
+    "bytes": 501,
+    "sha256": "17737e8b920307c1333ab8c271af959e83e9ed38e1c0856b7c38ea0706a49707",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-20261014",
+    "path": "archives/edde-ca-20261014.20261014T043941Z.zip",
+    "status": 200,
+    "bytes": 12292859,
+    "sha256": "7ff34e3e0a842a86775be762ebd1c7f40dbe14f55c531f2e20c77280e2616569",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-us-current-20261014",
+    "path": "climate/edde-provenance.json",
+    "status": 200,
+    "bytes": 33675,
+    "sha256": "8c7fa13c358f988773944765a5f0a6bddb743f19f0efff389d8451dfa8f25274",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-us-current-20261014",
+    "path": "climate/wepp.cli",
+    "status": 200,
+    "bytes": 26938,
+    "sha256": "014b463b51f33c9ee9520d75d948ed61b6f8a11eb05e993057a66f4e26388331",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-us-current-20261014",
+    "path": "climate/edde-build-_3plwlj9/build-status.json",
+    "status": 200,
+    "bytes": 6352,
+    "sha256": "af306c2c6c5b75baecc26abc1222608e325bea277d85eadf1c8d6f82d8852ed5",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "path": "climate/edde-provenance.json",
+    "status": 200,
+    "bytes": 1349,
+    "sha256": "c7062d80635026c7ca94da1c49fa0dd818231f68f1077b5a89d5e2720aae0ce0",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "path": "climate/wepp.cli",
+    "status": 200,
+    "bytes": 26941,
+    "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "path": "climate/edde-build-ffg00w4w/build-status.json",
+    "status": 200,
+    "bytes": 501,
+    "sha256": "17737e8b920307c1333ab8c271af959e83e9ed38e1c0856b7c38ea0706a49707",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "path": "climate/edde-build-ktmd0p1q/build-status.json",
+    "status": 200,
+    "bytes": 4309,
+    "sha256": "a5bbdfcbea1d24a5a56dd501c3cbc30f9e6b5da2604a70d1e400cfdfc5a9e60e",
+    "matches_local": true
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "path": "archives/edde-ca-prism-rejected-20261014.20261014T044813Z.zip",
+    "status": 200,
+    "bytes": 12388189,
+    "sha256": "8b683aeafcbcc6a90a1fa9ec3f93aad5f976ed24ce41909663f7ff0ecdd3db3c",
+    "matches_local": true
+  }
+]

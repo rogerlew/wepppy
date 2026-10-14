@@ -1,0 +1,35 @@
+[
+  {
+    "original": "/wc1/runs/cr/cryptic-beechnut",
+    "runid": "edde-us-20261014",
+    "root": "/wc1/runs/ed/edde-us-20261014",
+    "config": "disturbed9002_wbt",
+    "location": [
+      -120.79205421178649,
+      47.342277541175264
+    ],
+    "config_refreshed": false
+  },
+  {
+    "original": "/wc1/runs/bi/bionic-prerequisite",
+    "runid": "edde-ca-20261014",
+    "root": "/wc1/runs/ed/edde-ca-20261014",
+    "config": "config",
+    "location": [
+      -119.53102853360474,
+      51.00631869090354
+    ],
+    "config_refreshed": true
+  },
+  {
+    "original": "/wc1/runs/de/desolate-yea",
+    "runid": "edde-us-current-20261014",
+    "root": "/wc1/runs/ed/edde-us-current-20261014",
+    "config": "config",
+    "location": [
+      -116.89459759775534,
+      46.80147853685344
+    ],
+    "config_refreshed": true
+  }
+]

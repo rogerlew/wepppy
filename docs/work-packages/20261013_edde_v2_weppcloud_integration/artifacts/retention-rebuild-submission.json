@@ -1,0 +1,16 @@
+{
+  "payload": {
+    "climate_catalog_id": "future_edde_v2",
+    "climate_mode": 17,
+    "climate_spatialmode": 0,
+    "edde_projection": "WRF-MPI/SSP3-7.0",
+    "future_start_year": 2060,
+    "future_end_year": 2060,
+    "precip_scaling_mode": 0,
+    "cligen_seed": 1001
+  },
+  "response": {
+    "job_id": "383409b5-ec86-4740-b3e1-d39430064f84"
+  },
+  "status": 200
+}

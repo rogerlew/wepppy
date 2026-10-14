@@ -762,3 +762,19 @@ def test_build_climate_observed_year_order_failure_returns_comparison_message(
             "message": "Observed end year must be greater than or equal to observed start year (received 1980 < 1981).",
         }
     ]
+
+
+@pytest.mark.parametrize("projection,start,end,scaling,field,expected", [
+    ("", 2060, 2060, 0, "edde_projection", "model/scenario"),
+    ("WRF-MPI/SSP3-7.0", 2024, 2060, 0, "future_start_year", "2025–2099"),
+    ("WRF-Nor/SSP2-4.5", 2060, 2080, 0, "future_end_year", "2025–2079"),
+    ("WRF-MPI/SSP3-7.0", 2060, 2060, 3, "precip_scaling_mode", "AnnualMonthlies"),
+])
+def test_edde_selection_errors_preserve_actionable_fields(projection, start, end, scaling, field, expected):
+    from wepppy.nodb.core.climate_edde_inputs import validate_edde_selection, EddeSelectionError
+    with pytest.raises(EddeSelectionError) as failure:
+        validate_edde_selection(projection, start, end, locales=["us"], spatial_mode=0, scaling_mode=scaling)
+    issues = climate_routes._build_climate_validation_errors(failure.value, payload={"climate_mode":17})
+    assert issues[0]["field"] == field
+    assert issues[0]["code"] == "invalid_edde_selection"
+    assert expected in issues[0]["message"]

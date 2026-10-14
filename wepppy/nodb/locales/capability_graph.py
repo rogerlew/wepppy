@@ -130,7 +130,7 @@ _PROFILE_CONTRACTS: typing.Mapping[str, _ProfileContract] = MappingProxyType({
             + [f"nlcd-{year}" for year in range(2024, 1984, -1)]
             + [f"emapr-vote-{year}" for year in range(2017, 1983, -1)]
         ),
-        (*_V2_CLIMATE_IDS, "observed_prism_800m", "dep_nexrad", "future_cmip5", "user_defined_cli"),
+        (*_V2_CLIMATE_IDS, "observed_prism_800m", "dep_nexrad", "future_cmip5", "user_defined_cli", "future_edde_v2"),
         ("cligen-stations-legacy", "cligen-stations-2015", "cligen-stations-ghcn"),
         "usgs-ned1-2024",
         "ssurgo-gnatsgso-2025",
@@ -154,7 +154,7 @@ _PROFILE_CONTRACTS: typing.Mapping[str, _ProfileContract] = MappingProxyType({
         ("copernicus-dem-30",),
         ("isric-global",),
         _C3S_IDS,
-        ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+        ("vanilla_cligen", "observed_daymet", "user_defined_cli", "future_edde_v2"),
         ("cligen-stations-ghcn",),
         "copernicus-dem-30",
         "isric-global",

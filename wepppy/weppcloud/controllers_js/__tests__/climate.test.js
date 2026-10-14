@@ -280,10 +280,10 @@ describe("Climate controller", () => {
     });
 
     test.each([
-        ["observed_daymet", 9],
-        ["observed_gridmet", 11],
-        ["observed_prism_800m", 16]
-    ])("switching to %s enables interpolated submission and switching back resets it", async (catalogId, mode) => {
+        ["observed_daymet", 9, "Interpolated"],
+        ["observed_gridmet", 11, "Interpolated"],
+        ["observed_prism_800m", 16, "nearest PRISM cell"]
+    ])("switching to %s enables interpolated submission and switching back resets it", async (catalogId, mode, expectedLabel) => {
         climate.datasetMap[catalogId] = {
             catalog_id: catalogId,
             climate_mode: mode,
@@ -296,9 +296,7 @@ describe("Climate controller", () => {
         expect(interpolated.disabled).toBe(true);
         climate.handleDatasetChange(catalogId);
         expect(interpolated.disabled).toBe(false);
-        if (catalogId === "observed_prism_800m") {
-            expect(interpolated.closest("label").textContent).toContain("nearest PRISM cell");
-        }
+        expect(interpolated.closest("label").textContent).toContain(expectedLabel);
         interpolated.checked = true;
         interpolated.dispatchEvent(new Event("change", { bubbles: true }));
         await Promise.resolve();

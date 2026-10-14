@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "payload": "{\"climate_catalog_id\":\"future_edde_v2\",\"climate_mode\":\"17\",\"climate_dataset_choice\":\"future_edde_v2\",\"climatestation_mode\":\"-1\",\"climate_station_selection\":null,\"climate_spatialmode\":\"1\",\"input_years\":\"1\",\"observed_start_year\":\"\",\"observed_end_year\":\"\",\"future_start_year\":\"2060\",\"future_end_year\":\"2060\",\"edde_projection\":\"WRF-MPI/SSP3-7.0\",\"climate_daily_temp_ds\":null,\"cligen_seed\":\"1001\",\"precip_scaling_mode\":\"0\",\"precip_scale_factor\":\"\",\"precip_monthly_scale_factors_0\":\"1.0\",\"precip_monthly_scale_factors_1\":\"1.0\",\"precip_monthly_scale_factors_2\":\"1.0\",\"precip_monthly_scale_factors_3\":\"1.0\",\"precip_monthly_scale_factors_4\":\"1.0\",\"precip_monthly_scale_factors_5\":\"1.0\",\"precip_monthly_scale_factors_6\":\"1.0\",\"precip_monthly_scale_factors_7\":\"1.0\",\"precip_monthly_scale_factors_8\":\"1.0\",\"precip_monthly_scale_factors_9\":\"1.0\",\"precip_monthly_scale_factors_10\":\"1.0\",\"precip_monthly_scale_factors_11\":\"1.0\",\"precip_scale_reference\":\"prism\",\"checkbox_use_gridmet_wind_when_applicable\":true,\"checkbox_adjust_mx_pt5\":false,\"checkbox_silent_pass_observed_quality_guard\":true}",
+  "response": {
+    "job_id": "7958455e-059c-4cc4-a323-f87b0fdc5c2e"
+  }
+}

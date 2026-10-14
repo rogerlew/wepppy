@@ -1,0 +1,20 @@
+[
+  {
+    "runid": "edde-ca-20261014",
+    "page_status": 200,
+    "projection": "WRF-MPI/SSP3-7.0",
+    "visible": true,
+    "report_status": 200,
+    "report_edde": true,
+    "report_projection": true
+  },
+  {
+    "runid": "edde-us-current-20261014",
+    "page_status": 200,
+    "projection": "WRF-MPI/SSP3-7.0",
+    "visible": true,
+    "report_status": 200,
+    "report_edde": true,
+    "report_projection": true
+  }
+]

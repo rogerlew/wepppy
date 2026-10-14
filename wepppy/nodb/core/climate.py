@@ -287,6 +287,7 @@ class ClimateMode(IntEnum):
     SingleStormBatch = 14 # Single Only
     UserDefinedSingleStorm = 15 # Single Only
     Prism800m = 16  # Historic native-cell PRISM, all spatial modes
+    EddeV2 = 17  # Future EDDE daily replay, Single or Multiple PRISM
 
     @staticmethod
     def parse(x: Optional[str]) -> 'ClimateMode':
@@ -300,6 +301,8 @@ class ClimateMode(IntEnum):
             return ClimateMode.Prism800m
         elif x == 'observed_prism':
             return ClimateMode.ObservedPRISM
+        elif x == 'edde_v2':
+            return ClimateMode.EddeV2
         elif x == 'future':
             return ClimateMode.Future
         elif x == 'single_storm':
@@ -803,6 +806,15 @@ class Climate(NoDbBase):
             )
 
     @property
+    def edde_projection(self) -> str:
+        return getattr(self, '_edde_projection', '')
+
+    @property
+    def edde_provenance(self) -> Optional[dict]:
+        # The retained record describes published files, never pending form values.
+        return getattr(self, '_edde_provenance', None)
+
+    @property
     def future_start_year(self) -> Union[str, int]:
         return self._future_start_year
 
@@ -1038,6 +1050,8 @@ class Climate(NoDbBase):
         _assert_supported_climate_mode(mode)
         self._validate_station_catalog_constraints(climate_mode=mode)
         self._climate_mode = mode
+        if mode != ClimateMode.EddeV2:
+            self._edde_provenance = None
 
     @property
     def is_single_storm(self) -> bool:

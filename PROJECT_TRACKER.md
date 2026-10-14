@@ -369,7 +369,7 @@ Feedback mechanisms:
 
 ### EDDE v2 WEPPcloud integration
 
-**Status**: Backlog; raw future EDDE and the precedented CLIGEN hybrid are accepted under ADR-0091, with bias/grid-elevation limitations disclosed and correction outside scope. PRISM repair is complete. Feasibility is closed; integration contracts and actual-project acceptance remain. The unrelated stale SBS test is corrected. Standalone feasibility reviews passed.
+**Status**: Integration implemented; actual Canadian Single and US Multiple PRISM WEPP pipelines pass, with 136 prepared climate/daily consumer readbacks. Completed/failed archive byte and permission restoration passes. Final reviews and broad validation remain in progress; no production deployment. Raw future EDDE and the station hybrid remain accepted under ADR-0091.
 **Link**: [Work package](docs/work-packages/20261013_edde_v2_weppcloud_integration/package.md)
 **Scope**: Locale-scoped availability plus per-project eligibility, validated source/scenario/period controls, existing climate orchestration, provenance, and actual-project acceptance. Single and Multiple PRISM only initially.
 

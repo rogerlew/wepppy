@@ -1,0 +1,14 @@
+{
+  "job_id": "91876540-df75-4295-8732-b71d5cbc1e93",
+  "runid": "edde-us-current-20261014",
+  "status": "finished",
+  "result": null,
+  "started_at": "2026-10-14 04:45:55.947730",
+  "ended_at": "2026-10-14 04:46:06.387718",
+  "description": "wepppy.rq.project_rq.build_soils_rq('edde-us-current-20261014')",
+  "elapsed_s": 10.439988,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

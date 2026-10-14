@@ -37,6 +37,7 @@ class ClimateInputParsingService:
                 "_future_end_year", "_ss_storm_date", "_ss_design_storm_amount_inches",
                 "_ss_duration_of_storm_in_hours", "_ss_max_intensity_inches_per_hour",
                 "_ss_time_to_peak_intensity_pct", "_ss_batch", "_cligen_seed_override",
+                "_edde_projection", "_edde_provenance",
             }
             snapshot = {
                 key: climate.__dict__[key]
@@ -78,6 +79,11 @@ class ClimateInputParsingService:
             climate_mode = ClimateMode(int(raw_climate_mode))
             climate._catalog_id = None
         _assert_supported_climate_mode(climate_mode)
+        if climate_mode == ClimateMode.EddeV2 and catalog_dataset is None:
+            catalog_dataset = climate._resolve_catalog_dataset("future_edde_v2")
+            if catalog_dataset is None:
+                raise ValueError("Future EDDE is unavailable under this project's saved capabilities")
+            climate._catalog_id = catalog_dataset.catalog_id
 
         climate_spatialmode = kwds.get("climate_spatialmode", ClimateSpatialMode.Single)
         if catalog_dataset is not None:
@@ -133,6 +139,8 @@ class ClimateInputParsingService:
                 climatestation_mode=climatestation_mode,
             )
 
+        if climate_mode != ClimateMode.EddeV2:
+            climate._edde_provenance = None
         climate._climate_mode = climate_mode
         climate._climate_spatialmode = climate_spatialmode
         if climatestation_mode is not None:
@@ -210,6 +218,7 @@ class ClimateInputParsingService:
         }
         future_required_modes = {
             ClimateMode.Future,
+            ClimateMode.EddeV2,
         }
 
         if climate_mode in future_required_modes:
@@ -219,7 +228,19 @@ class ClimateInputParsingService:
                 end_key="future_end_year",
                 required=True,
             )
-            climate._set_future_pars_without_lock(**future_pars)
+            if climate_mode == ClimateMode.EddeV2:
+                from .climate_edde_inputs import validate_edde_selection
+                projection = kwds.get("edde_projection", climate.edde_projection)
+                _, _, start, end = validate_edde_selection(
+                    projection, future_pars['start_year'], future_pars['end_year'],
+                    locales=climate.locales, spatial_mode=climate.climate_spatialmode,
+                    scaling_mode=climate.precip_scaling_mode,
+                )
+                climate._edde_projection = projection
+                climate._future_start_year, climate._future_end_year = start, end
+                climate._input_years = end - start + 1
+            else:
+                climate._set_future_pars_without_lock(**future_pars)
             self._clear_year_bounds(
                 climate=climate,
                 start_attr="_observed_start_year",

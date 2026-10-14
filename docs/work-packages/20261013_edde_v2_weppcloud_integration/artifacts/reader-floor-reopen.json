@@ -1,0 +1,69 @@
+{
+  "reader_revision": "26c9e86ca",
+  "cases": [
+    {
+      "locale": "continental-us",
+      "single_inputs": false,
+      "representation": "single-ofe",
+      "structure": "4a69bb0e6115a1f95e69ca725214bd916fa7411381fb16e37e7b86829fc1c2e6",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "continental-us",
+      "single_inputs": false,
+      "representation": "multiple-ofe",
+      "structure": "4a69bb0e6115a1f95e69ca725214bd916fa7411381fb16e37e7b86829fc1c2e6",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "continental-us",
+      "single_inputs": true,
+      "representation": "single-ofe",
+      "structure": "44edfc7aabcf4c4be65066c8a0ff881152536dd9656c922f5469d8eb98bdb465",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "continental-us",
+      "single_inputs": true,
+      "representation": "multiple-ofe",
+      "structure": "44edfc7aabcf4c4be65066c8a0ff881152536dd9656c922f5469d8eb98bdb465",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "canada",
+      "single_inputs": false,
+      "representation": "single-ofe",
+      "structure": "54b12f64d8ea36c02791a36457d89b67b874901f271ac9a5ecd1e84d764686ac",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "canada",
+      "single_inputs": false,
+      "representation": "multiple-ofe",
+      "structure": "54b12f64d8ea36c02791a36457d89b67b874901f271ac9a5ecd1e84d764686ac",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "canada",
+      "single_inputs": true,
+      "representation": "single-ofe",
+      "structure": "073d3c8406625c023220365d9200a5287eff854c5c0d7350d51b40ff998c5e42",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    },
+    {
+      "locale": "canada",
+      "single_inputs": true,
+      "representation": "multiple-ofe",
+      "structure": "073d3c8406625c023220365d9200a5287eff854c5c0d7350d51b40ff998c5e42",
+      "reopened_equal": true,
+      "stored_bytes_unchanged": true
+    }
+  ]
+}

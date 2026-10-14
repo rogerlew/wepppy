@@ -1,0 +1,3047 @@
+[
+  {
+    "runid": "edde-ca-20261014",
+    "projection": "WRF-MPI/SSP3-7.0",
+    "spatial_mode": 0,
+    "provenance": {
+      "projection": "WRF-MPI/SSP3-7.0",
+      "start_year": 2060,
+      "end_year": 2060,
+      "points": [
+        {
+          "name": "ws",
+          "longitude": -119.53102853360474,
+          "latitude": 51.00631869090354,
+          "row": 358,
+          "col": 113,
+          "cell_longitude": -119.54798889160156,
+          "cell_latitude": 50.97726058959961,
+          "projected_distance_m": 3501.883284764186,
+          "edge_cells": 73
+        }
+      ],
+      "station": {
+        "state": "CA",
+        "desc": "Canada    Kamloops A",
+        "par": "CA001163780.par",
+        "latitude": 50.7,
+        "longitude": -120.45,
+        "years": 20.0,
+        "type": 3,
+        "elevation": 1132.0,
+        "tp5": 2.25,
+        "tp6": 4.67,
+        "annual_ppt": 11.208697980012765,
+        "distance_to_query_location": null,
+        "rank_based_on_query_location": null,
+        "id": "CA001163780"
+      },
+      "seed": 1001,
+      "attempt": "edde-build-ffg00w4w",
+      "generated_fields": [
+        "dur",
+        "tp",
+        "ip",
+        "rad",
+        "w-vl",
+        "w-dir",
+        "tdew"
+      ],
+      "scaling": {
+        "precip_scaling_mode": 0,
+        "precip_scale_factor": null,
+        "precip_monthly_scale_factors": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "precip_scale_factor_map": null
+      },
+      "files": {
+        "wepp.cli": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a"
+      }
+    },
+    "files": [
+      {
+        "topaz_id": "22",
+        "wepp_id": 1,
+        "source": "wepp.cli",
+        "prepared": "p1.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H1.wat.dat",
+          "sha256": "5542c95722c65f57f42d9d8d880e50616940f86e45e9a106d00ce4f213ccfc4d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "23",
+        "wepp_id": 2,
+        "source": "wepp.cli",
+        "prepared": "p2.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H2.wat.dat",
+          "sha256": "9e9767f42d800c4f7489fdaad492b79174a83709cc52d0d7ff0725b93a8a5f9a",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "31",
+        "wepp_id": 3,
+        "source": "wepp.cli",
+        "prepared": "p3.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H3.wat.dat",
+          "sha256": "e34e71dc50ab6b4c3d7f6f9aec168053c4b356c44abca42695c502d5f3df7783",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "32",
+        "wepp_id": 4,
+        "source": "wepp.cli",
+        "prepared": "p4.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H4.wat.dat",
+          "sha256": "9a3c4e671082381ebd3810e6904fff745527bb7495f6f8cef47bcbd04bf6b432",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "33",
+        "wepp_id": 5,
+        "source": "wepp.cli",
+        "prepared": "p5.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H5.wat.dat",
+          "sha256": "c3779add76ae5a171342fb77ec093ac09e27f66dfaf509cc94d6d1d3a1b644d6",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "42",
+        "wepp_id": 6,
+        "source": "wepp.cli",
+        "prepared": "p6.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H6.wat.dat",
+          "sha256": "6d588a087260ef7d4c587bcccb0dd3e0404d9244681a078fa64c220d5ea0acc6",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "43",
+        "wepp_id": 7,
+        "source": "wepp.cli",
+        "prepared": "p7.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H7.wat.dat",
+          "sha256": "0a9eca9471adfcb1621079d018afc583c8584ec56edbc561ef2759a10df5236e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "51",
+        "wepp_id": 8,
+        "source": "wepp.cli",
+        "prepared": "p8.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H8.wat.dat",
+          "sha256": "d3f93284bd100783361fdaae318b636e1b22c56e241800ef5680794528b60612",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "52",
+        "wepp_id": 9,
+        "source": "wepp.cli",
+        "prepared": "p9.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H9.wat.dat",
+          "sha256": "911038ecff1e9b73d4d27f266c73ed49c453640b495f02186e190f600d0d785b",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "53",
+        "wepp_id": 10,
+        "source": "wepp.cli",
+        "prepared": "p10.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H10.wat.dat",
+          "sha256": "18d01083bf29357d7d2c8b667ea9f292ecee0033955e83b1170fe36277b347ff",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "62",
+        "wepp_id": 11,
+        "source": "wepp.cli",
+        "prepared": "p11.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H11.wat.dat",
+          "sha256": "a19f2921b07bb1c9985f64ccb9d1468550a9a643b6ec7d6e92973b44de3cb04f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "63",
+        "wepp_id": 12,
+        "source": "wepp.cli",
+        "prepared": "p12.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H12.wat.dat",
+          "sha256": "4e2b45fe6a577bc3145f336b62e5b011bef82827f5cfde91002ebaf3a201f0c6",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "72",
+        "wepp_id": 13,
+        "source": "wepp.cli",
+        "prepared": "p13.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H13.wat.dat",
+          "sha256": "6a18aac67ec9b168e1eeec1d4c2dffe6761dba96a3f3de922d787129c8916b9a",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "73",
+        "wepp_id": 14,
+        "source": "wepp.cli",
+        "prepared": "p14.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H14.wat.dat",
+          "sha256": "b80cdd53a9568212ae9a74435cd630edd21e7313cad3bb9ea9dd68640de34e6d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "81",
+        "wepp_id": 15,
+        "source": "wepp.cli",
+        "prepared": "p15.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H15.wat.dat",
+          "sha256": "3504f75be13c64f3ccd052b3a29b43d18471fb79c1fc97a5b9aa9b2b2e1588ff",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "82",
+        "wepp_id": 16,
+        "source": "wepp.cli",
+        "prepared": "p16.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H16.wat.dat",
+          "sha256": "719f4fea1807be3bd1f74afcce55df1c5e9820ab06c470f84157b1a26bc967f0",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "83",
+        "wepp_id": 17,
+        "source": "wepp.cli",
+        "prepared": "p17.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H17.wat.dat",
+          "sha256": "37d39291b62c387295621dec4deecdb4845d2fec61b22c4abca43f45f2f3b22b",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "91",
+        "wepp_id": 18,
+        "source": "wepp.cli",
+        "prepared": "p18.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H18.wat.dat",
+          "sha256": "011c29ea89a8ea01e20207df880ccf1783264de646a00c01ad4a0bbf78888349",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "92",
+        "wepp_id": 19,
+        "source": "wepp.cli",
+        "prepared": "p19.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H19.wat.dat",
+          "sha256": "8d5389af8ef9d8b6f2db3a743fe5907a6f918e8957c5303a002f3b3dd8194483",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "93",
+        "wepp_id": 20,
+        "source": "wepp.cli",
+        "prepared": "p20.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H20.wat.dat",
+          "sha256": "0d71c6ba769054501f7da7151acf8774d07b9918b4468d6021c6eda07bc7c088",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "102",
+        "wepp_id": 21,
+        "source": "wepp.cli",
+        "prepared": "p21.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H21.wat.dat",
+          "sha256": "07855c7640c88e954f9c66358908fc4efefcf35e08cdbc611e669b4acce4304d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "103",
+        "wepp_id": 22,
+        "source": "wepp.cli",
+        "prepared": "p22.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H22.wat.dat",
+          "sha256": "5e3bab82edc24d2e429da653d73084adf8ade647fb3ca65744b3ddd45176e624",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "112",
+        "wepp_id": 23,
+        "source": "wepp.cli",
+        "prepared": "p23.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H23.wat.dat",
+          "sha256": "646a3088e9fdb886b77206347ef8afd694fd2cf67b86e315723e6df7765f9c8b",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "113",
+        "wepp_id": 24,
+        "source": "wepp.cli",
+        "prepared": "p24.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H24.wat.dat",
+          "sha256": "ca7444d8f9f75f5b1bcbd66794be1d0bcb7116c85e2856cd9b239ec2ada2a4fa",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "122",
+        "wepp_id": 25,
+        "source": "wepp.cli",
+        "prepared": "p25.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H25.wat.dat",
+          "sha256": "383355bc09327133d86326d4147501548a22e7e11e7fe1439a4fa9d2046dd1ec",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "123",
+        "wepp_id": 26,
+        "source": "wepp.cli",
+        "prepared": "p26.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H26.wat.dat",
+          "sha256": "b7ff676640ad56f675a8df83afef270f24abfc3000340b79dead24a8ccee860c",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "132",
+        "wepp_id": 27,
+        "source": "wepp.cli",
+        "prepared": "p27.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H27.wat.dat",
+          "sha256": "a2bd8939042e4fab98fd622760078fd56682c1e15dfc7f1c8f710db3334b4156",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "133",
+        "wepp_id": 28,
+        "source": "wepp.cli",
+        "prepared": "p28.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H28.wat.dat",
+          "sha256": "a3e70b9c72bece6a6e98c4b8954f00d95ccfdd2582ef58ea6bd2f9bbb0b42073",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "141",
+        "wepp_id": 29,
+        "source": "wepp.cli",
+        "prepared": "p29.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H29.wat.dat",
+          "sha256": "1bb394015336e89bfa86aa5f52be7770b70b6b053ec7511958cdd4eb6f78c720",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "142",
+        "wepp_id": 30,
+        "source": "wepp.cli",
+        "prepared": "p30.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H30.wat.dat",
+          "sha256": "1032f2cb550280bfe37e188439769e7bbc87b8b29847bd4a5b4ee6d00ce46bf3",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "143",
+        "wepp_id": 31,
+        "source": "wepp.cli",
+        "prepared": "p31.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H31.wat.dat",
+          "sha256": "94413ef87ea3b34788809461fe511b26eded2c7a809dd8f8167a2f7973cbfe8f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "152",
+        "wepp_id": 32,
+        "source": "wepp.cli",
+        "prepared": "p32.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H32.wat.dat",
+          "sha256": "6f72a6cd04bd8e540713975195ff154756c9f827240b4dbb231ef7a93929e113",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "153",
+        "wepp_id": 33,
+        "source": "wepp.cli",
+        "prepared": "p33.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H33.wat.dat",
+          "sha256": "f5a5daaf282e5b59edb1e70a6f67cc54ebf1e171ef1e630ac81b762b7d7c2678",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "161",
+        "wepp_id": 34,
+        "source": "wepp.cli",
+        "prepared": "p34.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H34.wat.dat",
+          "sha256": "2d1b585717d6412c9dfb5b823d9864e4d0015fc092a3a43099489d4449c0e3c5",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "162",
+        "wepp_id": 35,
+        "source": "wepp.cli",
+        "prepared": "p35.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H35.wat.dat",
+          "sha256": "809c7f30747192d05d894f237655fbc8ee791f309db781f21f6550aaefc407e9",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "163",
+        "wepp_id": 36,
+        "source": "wepp.cli",
+        "prepared": "p36.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H36.wat.dat",
+          "sha256": "3d5775b38b0baf9c55e9d63d503194ca136de0b4e6d4b74a7a27af2f8567f985",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "171",
+        "wepp_id": 37,
+        "source": "wepp.cli",
+        "prepared": "p37.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H37.wat.dat",
+          "sha256": "0b12eed2536ebcf4c7e2c17c5b97693b65a914012b48b73cf5c90a5cbf066b2a",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "172",
+        "wepp_id": 38,
+        "source": "wepp.cli",
+        "prepared": "p38.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H38.wat.dat",
+          "sha256": "b4370f2dcf217c62e33fc447a7723b91f6af28372aee66a1428a4331991ac6a2",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "173",
+        "wepp_id": 39,
+        "source": "wepp.cli",
+        "prepared": "p39.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H39.wat.dat",
+          "sha256": "e05acf4936e8e289647b09ee564ef1c61ff749176e89283f52fee20bc4f4f435",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "182",
+        "wepp_id": 40,
+        "source": "wepp.cli",
+        "prepared": "p40.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H40.wat.dat",
+          "sha256": "21d394479368de71e5c1aa3393d022a201ad21414fc8ef2499419382db00a973",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "183",
+        "wepp_id": 41,
+        "source": "wepp.cli",
+        "prepared": "p41.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H41.wat.dat",
+          "sha256": "8a6e5b9c1e6afc339d9783757b52ad36ca768614a4bd434c51a0fdf5da51d0fb",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "191",
+        "wepp_id": 42,
+        "source": "wepp.cli",
+        "prepared": "p42.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H42.wat.dat",
+          "sha256": "caaac22421b5ee6d155456ca78b5c7c6747229c7f2b6dd719fee4c64640e4cf2",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "192",
+        "wepp_id": 43,
+        "source": "wepp.cli",
+        "prepared": "p43.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H43.wat.dat",
+          "sha256": "2ba675cd45bf0ec50f6d9dfbbd475dc12f2493d24e5897813dc103ced3055127",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "193",
+        "wepp_id": 44,
+        "source": "wepp.cli",
+        "prepared": "p44.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H44.wat.dat",
+          "sha256": "bca796e73dbbbf64c278f6dc2e0034c71db201308109b975d2b2da917d644989",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "201",
+        "wepp_id": 45,
+        "source": "wepp.cli",
+        "prepared": "p45.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H45.wat.dat",
+          "sha256": "d0aaa5b33c4989e70205ec8d69ccd5e2036403cc6adb7a0156fd031beef83135",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "202",
+        "wepp_id": 46,
+        "source": "wepp.cli",
+        "prepared": "p46.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H46.wat.dat",
+          "sha256": "24d0c248ca2899485397698e765fb1eeb5cb333ca65cd013c7aa6bdfdf8144fe",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "203",
+        "wepp_id": 47,
+        "source": "wepp.cli",
+        "prepared": "p47.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H47.wat.dat",
+          "sha256": "af520b71eeedaa23c19e7b6da99b98785d1550853f3e22232221445f0dd8f1df",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "211",
+        "wepp_id": 48,
+        "source": "wepp.cli",
+        "prepared": "p48.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H48.wat.dat",
+          "sha256": "8e4b7ffa5928c26e76a1c6526b1827f6e23580222e3dd632c5a84c9a41c8f14d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "212",
+        "wepp_id": 49,
+        "source": "wepp.cli",
+        "prepared": "p49.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H49.wat.dat",
+          "sha256": "4ed12b7a38f04cb72ebd0b492680ed34916a849e24443a6874849360e4a98bfd",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "213",
+        "wepp_id": 50,
+        "source": "wepp.cli",
+        "prepared": "p50.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H50.wat.dat",
+          "sha256": "a22552728208a3fea0aeca1b5b07e232a2456ebe4e70089895b2cb1ffe0b4e5f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "221",
+        "wepp_id": 51,
+        "source": "wepp.cli",
+        "prepared": "p51.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H51.wat.dat",
+          "sha256": "407ebda04a02b092424ff6eb2ea515c544755ce959fda12c34da5582a4aae1e0",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "222",
+        "wepp_id": 52,
+        "source": "wepp.cli",
+        "prepared": "p52.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H52.wat.dat",
+          "sha256": "1002c120e634495de2398f0478aca5527e2f3e6706e905852740ce9cb28ce5a7",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "223",
+        "wepp_id": 53,
+        "source": "wepp.cli",
+        "prepared": "p53.cli",
+        "sha256": "f6d96fd59a47313fd6fe416f890050c3b36a263fbc0933dffad6b9a3d5c0e29a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H53.wat.dat",
+          "sha256": "933e25e7c8bd2ae71d5d3882d3e8e8bff2a216fc30a27dbfead9d31f41dddc23",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      }
+    ],
+    "soil_setup": {
+      "mode": 0,
+      "initial_sat": 0.75,
+      "built": true
+    }
+  },
+  {
+    "runid": "edde-us-current-20261014",
+    "projection": "WRF-MPI/SSP3-7.0",
+    "spatial_mode": 1,
+    "provenance": {
+      "projection": "WRF-MPI/SSP3-7.0",
+      "start_year": 2060,
+      "end_year": 2060,
+      "points": [
+        {
+          "name": "ws",
+          "longitude": -116.89459759775534,
+          "latitude": 46.80147853685344,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3105.001072452015,
+          "edge_cells": 115
+        },
+        {
+          "name": "291",
+          "longitude": -116.88297759417318,
+          "latitude": 46.81060788145488,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3326.8067455853416,
+          "edge_cells": 115
+        },
+        {
+          "name": "342",
+          "longitude": -116.87969734396505,
+          "latitude": 46.8049462003324,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2651.7924488760245,
+          "edge_cells": 115
+        },
+        {
+          "name": "203",
+          "longitude": -116.89216229475598,
+          "latitude": 46.808271314642425,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3502.0231337654495,
+          "edge_cells": 115
+        },
+        {
+          "name": "232",
+          "longitude": -116.88901325455616,
+          "latitude": 46.80970920191163,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3482.370640627033,
+          "edge_cells": 115
+        },
+        {
+          "name": "242",
+          "longitude": -116.88901325455616,
+          "latitude": 46.807732106916475,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3304.5663731586396,
+          "edge_cells": 115
+        },
+        {
+          "name": "193",
+          "longitude": -116.8958361749891,
+          "latitude": 46.80683342737323,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3573.531075925593,
+          "edge_cells": 115
+        },
+        {
+          "name": "331",
+          "longitude": -116.86736360318244,
+          "latitude": 46.80809157873378,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2687.6201109015005,
+          "edge_cells": 115
+        },
+        {
+          "name": "142",
+          "longitude": -116.89439286489751,
+          "latitude": 46.801351482159404,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3083.935019639318,
+          "edge_cells": 115
+        },
+        {
+          "name": "32",
+          "longitude": -116.91210621602147,
+          "latitude": 46.78400696697468,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3774.025623185045,
+          "edge_cells": 115
+        },
+        {
+          "name": "162",
+          "longitude": -116.89163745472267,
+          "latitude": 46.80476646442375,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3184.098399358396,
+          "edge_cells": 115
+        },
+        {
+          "name": "251",
+          "longitude": -116.9009533653138,
+          "latitude": 46.8103382775919,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 4126.5975577917625,
+          "edge_cells": 115
+        },
+        {
+          "name": "213",
+          "longitude": -116.8979355351223,
+          "latitude": 46.80701316328188,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3702.5974799865444,
+          "edge_cells": 115
+        },
+        {
+          "name": "62",
+          "longitude": -116.90593934563016,
+          "latitude": 46.7873320812847,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3320.7245996158035,
+          "edge_cells": 115
+        },
+        {
+          "name": "233",
+          "longitude": -116.88953809458947,
+          "latitude": 46.8096193339573,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3497.5210843310488,
+          "edge_cells": 115
+        },
+        {
+          "name": "253",
+          "longitude": -116.89714827507235,
+          "latitude": 46.80925986214,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3837.6612933876563,
+          "edge_cells": 115
+        },
+        {
+          "name": "113",
+          "longitude": -116.89780432511398,
+          "latitude": 46.80198055783968,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3333.7101051168547,
+          "edge_cells": 115
+        },
+        {
+          "name": "63",
+          "longitude": -116.9060705556385,
+          "latitude": 46.78885983650823,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3352.7164328190242,
+          "edge_cells": 115
+        },
+        {
+          "name": "112",
+          "longitude": -116.89622980501407,
+          "latitude": 46.801261614205075,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3189.2745427146538,
+          "edge_cells": 115
+        },
+        {
+          "name": "182",
+          "longitude": -116.89150624471435,
+          "latitude": 46.7999135948902,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2811.3951647767626,
+          "edge_cells": 115
+        },
+        {
+          "name": "33",
+          "longitude": -116.91499283620463,
+          "latitude": 46.78508538242658,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3995.6914120523857,
+          "edge_cells": 115
+        },
+        {
+          "name": "262",
+          "longitude": -116.89399923487254,
+          "latitude": 46.80916999418568,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3669.304851920155,
+          "edge_cells": 115
+        },
+        {
+          "name": "263",
+          "longitude": -116.8958361749891,
+          "latitude": 46.81186603281543,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3990.055873218047,
+          "edge_cells": 115
+        },
+        {
+          "name": "132",
+          "longitude": -116.8958361749891,
+          "latitude": 46.802340029656975,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3238.916506900951,
+          "edge_cells": 115
+        },
+        {
+          "name": "53",
+          "longitude": -116.90541450559687,
+          "latitude": 46.795420197173954,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3493.4309839410753,
+          "edge_cells": 115
+        },
+        {
+          "name": "341",
+          "longitude": -116.87339926356542,
+          "latitude": 46.8038677848805,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2339.4551293450213,
+          "edge_cells": 115
+        },
+        {
+          "name": "103",
+          "longitude": -116.89819795513895,
+          "latitude": 46.80108187829643,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3299.744918532062,
+          "edge_cells": 115
+        },
+        {
+          "name": "283",
+          "longitude": -116.88770115447291,
+          "latitude": 46.808900390322705,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3350.9321775700187,
+          "edge_cells": 115
+        },
+        {
+          "name": "211",
+          "longitude": -116.90108457532212,
+          "latitude": 46.80809157873378,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3960.8921913034915,
+          "edge_cells": 115
+        },
+        {
+          "name": "183",
+          "longitude": -116.89111261468938,
+          "latitude": 46.8006325385248,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2839.0147742364297,
+          "edge_cells": 115
+        },
+        {
+          "name": "23",
+          "longitude": -116.91801066639611,
+          "latitude": 46.778884493578154,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 4267.188771364166,
+          "edge_cells": 115
+        },
+        {
+          "name": "133",
+          "longitude": -116.8968858550557,
+          "latitude": 46.802340029656975,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3301.9548573466036,
+          "edge_cells": 115
+        },
+        {
+          "name": "121",
+          "longitude": -116.89242471477263,
+          "latitude": 46.79901491534695,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2806.4881840064804,
+          "edge_cells": 115
+        },
+        {
+          "name": "123",
+          "longitude": -116.89557375497245,
+          "latitude": 46.80108187829643,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3137.0999035245304,
+          "edge_cells": 115
+        },
+        {
+          "name": "293",
+          "longitude": -116.8866514744063,
+          "latitude": 46.80952946600298,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3364.635041349129,
+          "edge_cells": 115
+        },
+        {
+          "name": "83",
+          "longitude": -116.90790749575504,
+          "latitude": 46.7812210603906,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3469.343658847707,
+          "edge_cells": 115
+        },
+        {
+          "name": "82",
+          "longitude": -116.90738265572175,
+          "latitude": 46.780412248801674,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3439.4352269507503,
+          "edge_cells": 115
+        },
+        {
+          "name": "192",
+          "longitude": -116.89452407490583,
+          "latitude": 46.807821974870805,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3583.556577840538,
+          "edge_cells": 115
+        },
+        {
+          "name": "323",
+          "longitude": -116.886126634373,
+          "latitude": 46.807282767144855,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3134.010828383787,
+          "edge_cells": 115
+        },
+        {
+          "name": "332",
+          "longitude": -116.87143111344054,
+          "latitude": 46.806743559418905,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2600.204783802098,
+          "edge_cells": 115
+        },
+        {
+          "name": "272",
+          "longitude": -116.88678268441463,
+          "latitude": 46.81087748531785,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3497.161003888728,
+          "edge_cells": 115
+        },
+        {
+          "name": "223",
+          "longitude": -116.89649222503073,
+          "latitude": 46.80863078645973,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3752.1981252013643,
+          "edge_cells": 115
+        },
+        {
+          "name": "271",
+          "longitude": -116.88350243420649,
+          "latitude": 46.81348365599328,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3631.390325288761,
+          "edge_cells": 115
+        },
+        {
+          "name": "92",
+          "longitude": -116.89937884521389,
+          "latitude": 46.8017109539767,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3413.909914870548,
+          "edge_cells": 115
+        },
+        {
+          "name": "72",
+          "longitude": -116.9081699157717,
+          "latitude": 46.7822994758425,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3479.782654769175,
+          "edge_cells": 115
+        },
+        {
+          "name": "202",
+          "longitude": -116.89137503470603,
+          "latitude": 46.807282767144855,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3378.9133092248876,
+          "edge_cells": 115
+        },
+        {
+          "name": "172",
+          "longitude": -116.88547058433137,
+          "latitude": 46.80144135011373,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2591.1852686667567,
+          "edge_cells": 115
+        },
+        {
+          "name": "151",
+          "longitude": -116.90029731527217,
+          "latitude": 46.8053056721497,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3712.1146091572596,
+          "edge_cells": 115
+        },
+        {
+          "name": "252",
+          "longitude": -116.89859158516393,
+          "latitude": 46.811057221226505,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 4059.7174981932267,
+          "edge_cells": 115
+        },
+        {
+          "name": "292",
+          "longitude": -116.88638905438965,
+          "latitude": 46.808810522368375,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3286.484382383701,
+          "edge_cells": 115
+        },
+        {
+          "name": "212",
+          "longitude": -116.897410695089,
+          "latitude": 46.8081814466881,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3765.017308398857,
+          "edge_cells": 115
+        },
+        {
+          "name": "43",
+          "longitude": -116.91158137598816,
+          "latitude": 46.78059198471033,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3755.8662599357713,
+          "edge_cells": 115
+        },
+        {
+          "name": "173",
+          "longitude": -116.88848841452285,
+          "latitude": 46.80305897329158,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2880.200358835943,
+          "edge_cells": 115
+        },
+        {
+          "name": "302",
+          "longitude": -116.88770115447291,
+          "latitude": 46.80692329532755,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3172.039875453271,
+          "edge_cells": 115
+        },
+        {
+          "name": "231",
+          "longitude": -116.88940688458113,
+          "latitude": 46.8124951084957,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3756.9116886527136,
+          "edge_cells": 115
+        },
+        {
+          "name": "61",
+          "longitude": -116.90029731527217,
+          "latitude": 46.79137613922933,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2980.193933665184,
+          "edge_cells": 115
+        },
+        {
+          "name": "122",
+          "longitude": -116.89596738499742,
+          "latitude": 46.79982372693588,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3079.7144129609787,
+          "edge_cells": 115
+        },
+        {
+          "name": "333",
+          "longitude": -116.87602346373193,
+          "latitude": 46.80908012623135,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2954.6897504581225,
+          "edge_cells": 115
+        },
+        {
+          "name": "22",
+          "longitude": -116.91249984604644,
+          "latitude": 46.776098586994074,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3910.849585877591,
+          "edge_cells": 115
+        },
+        {
+          "name": "73",
+          "longitude": -116.90961322586328,
+          "latitude": 46.78274881561413,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3587.2265156120657,
+          "edge_cells": 115
+        },
+        {
+          "name": "102",
+          "longitude": -116.897410695089,
+          "latitude": 46.799643991027224,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3160.33167061685,
+          "edge_cells": 115
+        },
+        {
+          "name": "81",
+          "longitude": -116.9046272455469,
+          "latitude": 46.782658947659804,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3207.1373949098124,
+          "edge_cells": 115
+        },
+        {
+          "name": "282",
+          "longitude": -116.88796357448956,
+          "latitude": 46.80809157873378,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3288.8503507598903,
+          "edge_cells": 115
+        },
+        {
+          "name": "71",
+          "longitude": -116.90698902569677,
+          "latitude": 46.78490564651793,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3383.6880038967206,
+          "edge_cells": 115
+        },
+        {
+          "name": "261",
+          "longitude": -116.89255592478095,
+          "latitude": 46.811506560998126,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3803.8379972221724,
+          "edge_cells": 115
+        },
+        {
+          "name": "312",
+          "longitude": -116.88376485422314,
+          "latitude": 46.806743559418905,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2983.793835700467,
+          "edge_cells": 115
+        },
+        {
+          "name": "152",
+          "longitude": -116.89714827507235,
+          "latitude": 46.8038677848805,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3424.4092513546775,
+          "edge_cells": 115
+        },
+        {
+          "name": "52",
+          "longitude": -116.9009533653138,
+          "latitude": 46.7945215176307,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3139.333387035114,
+          "edge_cells": 115
+        },
+        {
+          "name": "243",
+          "longitude": -116.88901325455616,
+          "latitude": 46.808810522368375,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3400.927608886188,
+          "edge_cells": 115
+        },
+        {
+          "name": "93",
+          "longitude": -116.90055973528881,
+          "latitude": 46.800812274433454,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3433.2198651187855,
+          "edge_cells": 115
+        },
+        {
+          "name": "42",
+          "longitude": -116.90790749575504,
+          "latitude": 46.7797831731214,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3488.5407735745525,
+          "edge_cells": 115
+        },
+        {
+          "name": "303",
+          "longitude": -116.88704510443128,
+          "latitude": 46.8081814466881,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3256.4281239157203,
+          "edge_cells": 115
+        },
+        {
+          "name": "322",
+          "longitude": -116.8866514744063,
+          "latitude": 46.807192899190525,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3148.891732096943,
+          "edge_cells": 115
+        },
+        {
+          "name": "222",
+          "longitude": -116.89518012494746,
+          "latitude": 46.8085409185054,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3676.5650193524084,
+          "edge_cells": 115
+        },
+        {
+          "name": "343",
+          "longitude": -116.8758922537236,
+          "latitude": 46.80593474782998,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2623.935358678402,
+          "edge_cells": 115
+        },
+        {
+          "name": "313",
+          "longitude": -116.88284638416486,
+          "latitude": 46.808361182596755,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3102.0291318511995,
+          "edge_cells": 115
+        },
+        {
+          "name": "91",
+          "longitude": -116.9020030453804,
+          "latitude": 46.803508313063205,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3693.440271538583,
+          "edge_cells": 115
+        },
+        {
+          "name": "321",
+          "longitude": -116.88468332428143,
+          "latitude": 46.8053056721497,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2890.077287128613,
+          "edge_cells": 115
+        },
+        {
+          "name": "181",
+          "longitude": -116.88730752444793,
+          "latitude": 46.7995541230729,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2541.000758570033,
+          "edge_cells": 115
+        },
+        {
+          "name": "143",
+          "longitude": -116.89439286489751,
+          "latitude": 46.80216029374833,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3140.688668970157,
+          "edge_cells": 115
+        },
+        {
+          "name": "163",
+          "longitude": -116.89662343503905,
+          "latitude": 46.8053056721497,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3499.521506816699,
+          "edge_cells": 115
+        },
+        {
+          "name": "171",
+          "longitude": -116.87982855397337,
+          "latitude": 46.80260963351995,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 2433.0356166764122,
+          "edge_cells": 115
+        },
+        {
+          "name": "273",
+          "longitude": -116.88743873445625,
+          "latitude": 46.81195590076975,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3625.9654404722046,
+          "edge_cells": 115
+        },
+        {
+          "name": "153",
+          "longitude": -116.89727948508067,
+          "latitude": 46.8031488412459,
+          "row": 316,
+          "col": 120,
+          "cell_longitude": -116.86271667480469,
+          "cell_latitude": 46.78421401977539,
+          "projected_distance_m": 3381.4235123076983,
+          "edge_cells": 115
+        }
+      ],
+      "station": {
+        "state": "ID",
+        "desc": "MOSCOW U OF I ID                        106152 0",
+        "par": "id106152.par",
+        "latitude": 46.73,
+        "longitude": -117.0,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2630.0,
+        "tp5": 0.71,
+        "tp6": 1.99,
+        "annual_ppt": 26.67945045943446,
+        "distance_to_query_location": null,
+        "rank_based_on_query_location": null,
+        "id": "id106152"
+      },
+      "seed": 1001,
+      "attempt": "edde-build-_3plwlj9",
+      "generated_fields": [
+        "dur",
+        "tp",
+        "ip",
+        "rad",
+        "w-vl",
+        "w-dir",
+        "tdew"
+      ],
+      "scaling": {
+        "precip_scaling_mode": 0,
+        "precip_scale_factor": null,
+        "precip_monthly_scale_factors": [],
+        "precip_scale_factor_map": null
+      },
+      "files": {
+        "wepp.cli": "014b463b51f33c9ee9520d75d948ed61b6f8a11eb05e993057a66f4e26388331",
+        "_291.cli": "dc989c1084523fb729f3a44c7fd24484b358dabb58e0b65cb17b3ab1b959f68f",
+        "_342.cli": "2843869c4ae40cff2cb87108b33acb7cde8b5b2ce2b12f0a14f6b3101653968c",
+        "_203.cli": "b321b88dc1e36c0e82996afcc808af516054a59bcbc1ee134441956c980fbc07",
+        "_232.cli": "56d1edb4360d364942dc20d8337ae5b2f4e7bd31cea385e359e14bce82076055",
+        "_242.cli": "93b93930468c94c1b9d44d04b5980cc1d31fd23005d19ab7d3c69d79c167a491",
+        "_193.cli": "ae1d678656fb9ae099d4405d1262ed956f00b38d535add97eaf6abf3f13d19ee",
+        "_331.cli": "1d91769cdf5d9b3ea855b05c94c44b38fc954c76f65c62ab2b992528f54fc5c4",
+        "_142.cli": "a46f73809335210bbff885deb063a5869b8de871edad7da17faa1c8e5ad9e1b6",
+        "_32.cli": "0a6b6c2659167a7a336b60702ff3a2ac061f49382095b3fdb4dcb962d12c3751",
+        "_162.cli": "5ecf7f65c1cfe9f661d6f6179f1cc93cffc47a5b1a0e694ab0f1af6900f415c8",
+        "_251.cli": "083fcd77af1a37f9fb6da07a72348c99aa7d7a31b65bfee55e8c30dc0202ada1",
+        "_213.cli": "6fdc6d070713a002b3a2b1577a4bc6ad88debdc57b289a5f74c38abfeb246d7b",
+        "_62.cli": "dbd993b513343e955eba12f14765e421fde6df11de3f0837bbc5653880f136c0",
+        "_233.cli": "604489e7dd158028125d1a503a78b4bbc223e20641b12a5e5bc16e0a355cac9d",
+        "_253.cli": "561ab027f658ace4b14f99886e94e4be4e153ba89579cecb62bf0b421bd2c454",
+        "_113.cli": "37f0b44f1d2ae3e6581934a29c47ddfaea4f501a3b254894d0ba2ca2bedb1eb0",
+        "_63.cli": "534394aa7e1c39fddf1286134244d947372d76e5694830b78b8f11730c536087",
+        "_112.cli": "4bde414783642f5d7ff5e3110660221ec2621c411501f7ba3934761f0287c010",
+        "_182.cli": "20b6d4ca3dfa562239ba03b645badf0a50b33126453fa4e1a24087093bea7d84",
+        "_33.cli": "91d2cc356ebb486d0de5c74951f0678b71e2196dbca1395016d380e2f0e27e2d",
+        "_262.cli": "cd8343cd3f4b20539c3b2717fb941e800cd30a1c7b67e891e33635496eb1a1b4",
+        "_263.cli": "6312ffcd9353c8d3c49290ffe25c8234df1bf1d3455c316574fe719c478cbba8",
+        "_132.cli": "794e34602e6506146a7b2ce1d4a6f1ec32fc89d90f9a4c4fb1f99a38aa437113",
+        "_53.cli": "235577493d3c69d6d106ccb7eb4cb865d3c578db018d4c5b6288107a488c350a",
+        "_341.cli": "43f2673144ea66fa468a1f41f73650cbd1bae0c8944bb8547550939cd526095c",
+        "_103.cli": "aa74a0d7fa4d8dbfe3031ece64ad07a947bfacf86609edef037fc61d44bf8235",
+        "_283.cli": "5cf2f6d11a4a2d81f3c0464b4e55ad45e6578283d2b95f707d2c3b6936aab95e",
+        "_211.cli": "813e980196e88f903200ac24276de22ce2314412dda24fe45432a22b0fd3e9ab",
+        "_183.cli": "bd134bbc30eb2abc1f24040d41fc7f0665c32b2bc81b4da75a67c88487854bf1",
+        "_23.cli": "47d82b44ddfb5a72ae09cdf0bb9e4dcbbdf1ce62cded490b8bfcfa0751744da3",
+        "_133.cli": "fc4e2d3bf2c35880393d22dd1e3fbb5d7ffc4323157b6ad5015d7b1a5ff3fb02",
+        "_121.cli": "d7ce746dd8ee92b07e629580a584a3e51398f5e9652c86361ded7ac1c8982868",
+        "_123.cli": "64a27edfd230bc868d05fc8fc8535dc81061cf9aab16fa27ae1b96c16157a135",
+        "_293.cli": "b8ca86c7e2278aa151202325821e492bde52fa07b7cdfc770713204d0c255e6a",
+        "_83.cli": "909736a1df6e213bb428bd885106154a632bd8f851f0bc794548ec5a0f205305",
+        "_82.cli": "9967155ee7a823fe4f1f11bfcc57905d240acae0a2871ee29274cf7207121bb7",
+        "_192.cli": "8163f3aa3c57309268b861d65874c47b1dcb01f97c8e796992e2c002e7195169",
+        "_323.cli": "b8ca86c7e2278aa151202325821e492bde52fa07b7cdfc770713204d0c255e6a",
+        "_332.cli": "a92806346273be67daedb87d793a4612fd08882ee69efccab1de1a38ad570b17",
+        "_272.cli": "029d07bf86c444176d47a5760c96a4ba8748ffb13fd947338aa973da0bf8c441",
+        "_223.cli": "40cb352f9a02b2f421f52444dbd343261bfe2cbae27a4bd79a11470c665569e4",
+        "_271.cli": "7b696c33c090470ec79e932faae3d5486b4da4a2ba8c0869831ce848eaf88677",
+        "_92.cli": "1f419a7c05d3f57ddf80e382c520dc8293f0ba6f1c99ac72eede5f59476b3309",
+        "_72.cli": "d20b850d6a08aede1f2db4988ebb99a95dcd739baeb55c6055c0ace5a9999b3c",
+        "_202.cli": "3a724fb9f73d06f362dee48e9e0ffba93bbf31c687402cd0d51550af423c23f6",
+        "_172.cli": "2c53d1bba103766b18929c158d9844a2bed0154c0ae722e229d58ab06ec74f74",
+        "_151.cli": "314641237dc41b69d067df3c5d81107b9242a934c7693e928ca72f1e331faafe",
+        "_252.cli": "b833facf6a9277770aedc5cb8ffabae1f1c9de9fb7538d1a733661b7a0e276a7",
+        "_292.cli": "3d60615c95abdef8819121408cdff9d950fc9d5462d81e8bffaace61f6726e80",
+        "_212.cli": "5d327903f9a125c2fa21e3b799dce2c61fed53fb2d6a584e2252b4bbfdb4e915",
+        "_43.cli": "ec19dab0de690cbe7a803c8619215af7caf1a9d6bb2cd9e3ad0e5d7150150f1a",
+        "_173.cli": "b7dcdbaa6285bd3c18d21b5afff2fb6803bd5c5827ff5a22a84530c0d701f0fa",
+        "_302.cli": "232a0ee87ea14ab8eb62b88149d112ad145c58d783cbe86e76ecac450b7f6287",
+        "_231.cli": "f2a1b6f11ab98d33304ffe5560845e5b267263828f89904dcc1e06455d6dc11b",
+        "_61.cli": "6768a285793feda68e93e0da0aa0e29d36b4e2f4c81fee7580bea2496a814885",
+        "_122.cli": "ab9dd165dbdf993a0b0c3bc6943771a761081e34bcf1f86e4e4dce11fb467b2e",
+        "_333.cli": "2fe41992be9094bf1bd1bf8c2b26e9fda91e899ac18db9ed1194b846f36e37b9",
+        "_22.cli": "426fb664e64ca63eda9ae5b08a9addaa093cc1efd840025d71740ea6ea062589",
+        "_73.cli": "0d2d0a97b4affea073e346199d267d4296756f5f3b7be81d30d0812fe85b99e6",
+        "_102.cli": "9a95093bfbd6f2d1a8a782ab2ad6cbb475d0f7db7e37ac98131ce228cb1c6ba2",
+        "_81.cli": "ad63ab3071178305f9959e8754aa69f796b2f6e1a8fd4240a57b0670fe3d9368",
+        "_282.cli": "8681e358aadbda7f20a6ed45471514257977c1484eb3c66cb791375fc98b85de",
+        "_71.cli": "02246d182f21fb839b710bf5b00c17b4976723b2445d4f02b29327e24b771826",
+        "_261.cli": "181a06f06bf6fbc4794093a335a1012686a64fa3a373222385c0e99e34447cee",
+        "_312.cli": "d6627a2b401e9dcf354cdea59efc64d48334c1cebeeb5f9559aa8a1e864af87a",
+        "_152.cli": "0834067c6ad118025751942751ee8a5bd1d10a6c7d4a22b516893c6fd646774b",
+        "_52.cli": "1024bb6103e17e642bc5295e8f14e24155a07d587d89e2f93bb5cb1110da5d33",
+        "_243.cli": "3dfe24825135b71f2cef8ad1e1ab567894a29ede0611024fbdf851ae4cf151d6",
+        "_93.cli": "8a193fa1312c7edc71f52ddce2cd76c8a70266fb9cf5db405636f0a804176bba",
+        "_42.cli": "b16c462176dd4340b6e1fe3c80d71d93d9e84a67e998ec57b702fa1c71be69af",
+        "_303.cli": "be506e01d4a1fa43a6f77173d04983e407aeb71ab46d75c933db9805ca1a139d",
+        "_322.cli": "2d8d2b43a16b6206f148158884afb2eaafe2d855c7c79137b7611a8c19f8b538",
+        "_222.cli": "4d3d1548bed6b1a651d0b09042bb0080b3f442b9808f3fd1b5a2d5d2e94fd7af",
+        "_343.cli": "aa1fb422f470efdea8845c9cd63cc0a0676f4b58cb2055486f0688c58b7f8937",
+        "_313.cli": "289abf5aecc8a13224de21ddb6c90ef24c440bb7401111b42ad2cc629a5af3bb",
+        "_91.cli": "30d64a76de95be2ce02a20b78321cb1a284c2bc39f7c9ed0dfb649e060821c06",
+        "_321.cli": "a7a381562ea25eac2f3dd3ed9c10b85a4ca11f2efc5788a704193bccf7b2bf42",
+        "_181.cli": "75cdcba44144f1d95f9de1000a8af6a2f2e4ae9c08529316d3dce43264e08c6a",
+        "_143.cli": "fa7cebb56252b5ee3a5b687b0563dd519b169a42512ca89109ea555127d01766",
+        "_163.cli": "0686a866514ca6c02b177a9ce0f3dae17686c8b21ba1a1b4757900db513ae70b",
+        "_171.cli": "78eec2829ad0d186f6d6bb807023c568d9f71d7c65c534732c5f24ea0bd6d5f7",
+        "_273.cli": "a6029e2e809a559013f9e90a8c364eb81607d90b2209cfe56a18d8e315a6ac33",
+        "_153.cli": "0f9d9d2dfe431fe238272e71f3f803c45b897e1922f6d5ee95a9389c78f4802d"
+      }
+    },
+    "files": [
+      {
+        "topaz_id": "22",
+        "wepp_id": 1,
+        "source": "_22.cli",
+        "prepared": "p1.cli",
+        "sha256": "426fb664e64ca63eda9ae5b08a9addaa093cc1efd840025d71740ea6ea062589",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H1.wat.dat",
+          "sha256": "689b79ec1bfd5e98ca9a6f96ccb243d018f544ed391bdaa5f2549ce65b5bbc16",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "23",
+        "wepp_id": 2,
+        "source": "_23.cli",
+        "prepared": "p2.cli",
+        "sha256": "47d82b44ddfb5a72ae09cdf0bb9e4dcbbdf1ce62cded490b8bfcfa0751744da3",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H2.wat.dat",
+          "sha256": "1817d1b6477f215351a5ae31967422b4ff8721521790a44f09168cb0622fc2b6",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "32",
+        "wepp_id": 3,
+        "source": "_32.cli",
+        "prepared": "p3.cli",
+        "sha256": "0a6b6c2659167a7a336b60702ff3a2ac061f49382095b3fdb4dcb962d12c3751",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H3.wat.dat",
+          "sha256": "26268745dc5ada5a367a5a119031cd3d44917d6373397603bd264c27aaa13f80",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "33",
+        "wepp_id": 4,
+        "source": "_33.cli",
+        "prepared": "p4.cli",
+        "sha256": "91d2cc356ebb486d0de5c74951f0678b71e2196dbca1395016d380e2f0e27e2d",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H4.wat.dat",
+          "sha256": "42a0b72f1a2c7d300e5e99c8ab57033d9485a5e06ff742938efe3f3770d2b6e6",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "42",
+        "wepp_id": 5,
+        "source": "_42.cli",
+        "prepared": "p5.cli",
+        "sha256": "b16c462176dd4340b6e1fe3c80d71d93d9e84a67e998ec57b702fa1c71be69af",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H5.wat.dat",
+          "sha256": "8d71e0bcf9db6c1b79b4715212d3d63a06a3c53708f874f400d8bac05431156c",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "43",
+        "wepp_id": 6,
+        "source": "_43.cli",
+        "prepared": "p6.cli",
+        "sha256": "ec19dab0de690cbe7a803c8619215af7caf1a9d6bb2cd9e3ad0e5d7150150f1a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H6.wat.dat",
+          "sha256": "5ab3e2b3f3b32f2d6a2476cc091409db4ff4c6ab27b11d81f5a0d517c66bb9ab",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "52",
+        "wepp_id": 7,
+        "source": "_52.cli",
+        "prepared": "p7.cli",
+        "sha256": "1024bb6103e17e642bc5295e8f14e24155a07d587d89e2f93bb5cb1110da5d33",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H7.wat.dat",
+          "sha256": "009fbba1fca51db006beede76636daf2e6508a0474449c28f92ca62401c1530f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "53",
+        "wepp_id": 8,
+        "source": "_53.cli",
+        "prepared": "p8.cli",
+        "sha256": "235577493d3c69d6d106ccb7eb4cb865d3c578db018d4c5b6288107a488c350a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H8.wat.dat",
+          "sha256": "c6264cb103cacf439f19eccc81a91d05d50bbc9845c48e72f6ae004a2531bdb3",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "61",
+        "wepp_id": 9,
+        "source": "_61.cli",
+        "prepared": "p9.cli",
+        "sha256": "6768a285793feda68e93e0da0aa0e29d36b4e2f4c81fee7580bea2496a814885",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H9.wat.dat",
+          "sha256": "c6066bea6802e8c52b33af11bd7c72df9118589cb5e911aee5d3191b1bf9beff",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "62",
+        "wepp_id": 10,
+        "source": "_62.cli",
+        "prepared": "p10.cli",
+        "sha256": "dbd993b513343e955eba12f14765e421fde6df11de3f0837bbc5653880f136c0",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H10.wat.dat",
+          "sha256": "4a09de1c5c42f9ee1c54917caa767f09347731f4e065d336b10cb0ab913e05ce",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "63",
+        "wepp_id": 11,
+        "source": "_63.cli",
+        "prepared": "p11.cli",
+        "sha256": "534394aa7e1c39fddf1286134244d947372d76e5694830b78b8f11730c536087",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H11.wat.dat",
+          "sha256": "1dd877405e46348a492826a75f1b9f04cd3efe8d849fbf861c1b0c3566e2e352",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "71",
+        "wepp_id": 12,
+        "source": "_71.cli",
+        "prepared": "p12.cli",
+        "sha256": "02246d182f21fb839b710bf5b00c17b4976723b2445d4f02b29327e24b771826",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H12.wat.dat",
+          "sha256": "b04f038920266b1a7cfa2a3f915905fb1d1411c5839107b996ef70bb0d48c928",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "72",
+        "wepp_id": 13,
+        "source": "_72.cli",
+        "prepared": "p13.cli",
+        "sha256": "d20b850d6a08aede1f2db4988ebb99a95dcd739baeb55c6055c0ace5a9999b3c",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H13.wat.dat",
+          "sha256": "12d1b0f8c6590ff254f2a44bc32e74fade888b32263037fa3f5f8484251da65a",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "73",
+        "wepp_id": 14,
+        "source": "_73.cli",
+        "prepared": "p14.cli",
+        "sha256": "0d2d0a97b4affea073e346199d267d4296756f5f3b7be81d30d0812fe85b99e6",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H14.wat.dat",
+          "sha256": "135257b34e788c097d87a094756ca74a5ed80b2e2d82df566f68e4d21849227b",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "81",
+        "wepp_id": 15,
+        "source": "_81.cli",
+        "prepared": "p15.cli",
+        "sha256": "ad63ab3071178305f9959e8754aa69f796b2f6e1a8fd4240a57b0670fe3d9368",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H15.wat.dat",
+          "sha256": "ad80aedc4da4b9688b6288369cebecd83ac6209408d249708758f07dfa443006",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "82",
+        "wepp_id": 16,
+        "source": "_82.cli",
+        "prepared": "p16.cli",
+        "sha256": "9967155ee7a823fe4f1f11bfcc57905d240acae0a2871ee29274cf7207121bb7",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H16.wat.dat",
+          "sha256": "161d2a2d65b45d1af7be2473c015809cdd518714468002595743f62d764bbe26",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "83",
+        "wepp_id": 17,
+        "source": "_83.cli",
+        "prepared": "p17.cli",
+        "sha256": "909736a1df6e213bb428bd885106154a632bd8f851f0bc794548ec5a0f205305",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H17.wat.dat",
+          "sha256": "ef57aa2ee95733d93485458338f07bf35a41ce3bfc6a40df1042ce06f19dd22e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "91",
+        "wepp_id": 18,
+        "source": "_91.cli",
+        "prepared": "p18.cli",
+        "sha256": "30d64a76de95be2ce02a20b78321cb1a284c2bc39f7c9ed0dfb649e060821c06",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H18.wat.dat",
+          "sha256": "d3afe7b48d7ac951e040ccd42ee5c2419c4aee0dd1a2c9c25a101cd248024615",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "92",
+        "wepp_id": 19,
+        "source": "_92.cli",
+        "prepared": "p19.cli",
+        "sha256": "1f419a7c05d3f57ddf80e382c520dc8293f0ba6f1c99ac72eede5f59476b3309",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H19.wat.dat",
+          "sha256": "85248d16c3a07a8466e625f035e300e199dfbe50ef5d332a2a53c45708969927",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "93",
+        "wepp_id": 20,
+        "source": "_93.cli",
+        "prepared": "p20.cli",
+        "sha256": "8a193fa1312c7edc71f52ddce2cd76c8a70266fb9cf5db405636f0a804176bba",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H20.wat.dat",
+          "sha256": "56414563ab3444ee20254db4e75e90b9fa4a493acda04b262f90189d397ed85e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "102",
+        "wepp_id": 21,
+        "source": "_102.cli",
+        "prepared": "p21.cli",
+        "sha256": "9a95093bfbd6f2d1a8a782ab2ad6cbb475d0f7db7e37ac98131ce228cb1c6ba2",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H21.wat.dat",
+          "sha256": "066bffbd416d29b9c190c93b6ef25a4f10eb501837708442198a1607a75df657",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "103",
+        "wepp_id": 22,
+        "source": "_103.cli",
+        "prepared": "p22.cli",
+        "sha256": "aa74a0d7fa4d8dbfe3031ece64ad07a947bfacf86609edef037fc61d44bf8235",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H22.wat.dat",
+          "sha256": "3a0ea3c2744134886d74b945f62184f5ca5c7241d33dba5bf58a719546af42d0",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "112",
+        "wepp_id": 23,
+        "source": "_112.cli",
+        "prepared": "p23.cli",
+        "sha256": "4bde414783642f5d7ff5e3110660221ec2621c411501f7ba3934761f0287c010",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H23.wat.dat",
+          "sha256": "a291d5af519f374ea3cb9c1e070289677c8683baabe30ab7ab89d26bde4733cd",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "113",
+        "wepp_id": 24,
+        "source": "_113.cli",
+        "prepared": "p24.cli",
+        "sha256": "37f0b44f1d2ae3e6581934a29c47ddfaea4f501a3b254894d0ba2ca2bedb1eb0",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H24.wat.dat",
+          "sha256": "c0c74e419c73dfbca2e247b6802d18311cea25516db7dfceb353f872647a886c",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "121",
+        "wepp_id": 25,
+        "source": "_121.cli",
+        "prepared": "p25.cli",
+        "sha256": "d7ce746dd8ee92b07e629580a584a3e51398f5e9652c86361ded7ac1c8982868",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H25.wat.dat",
+          "sha256": "df68ca2b2b46a5e008e67327bf059489a70984b864ff2825230ab8ee75a5f3b0",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "122",
+        "wepp_id": 26,
+        "source": "_122.cli",
+        "prepared": "p26.cli",
+        "sha256": "ab9dd165dbdf993a0b0c3bc6943771a761081e34bcf1f86e4e4dce11fb467b2e",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H26.wat.dat",
+          "sha256": "973ab3adf7d8f6e5fef96fb73a45430cc283a678aff88e6dd0baacd6bca58a42",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "123",
+        "wepp_id": 27,
+        "source": "_123.cli",
+        "prepared": "p27.cli",
+        "sha256": "64a27edfd230bc868d05fc8fc8535dc81061cf9aab16fa27ae1b96c16157a135",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H27.wat.dat",
+          "sha256": "c2b51b0059a55372f789b79e33aa4f46cf55defc858a5f1552681f4cce825cc1",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "132",
+        "wepp_id": 28,
+        "source": "_132.cli",
+        "prepared": "p28.cli",
+        "sha256": "794e34602e6506146a7b2ce1d4a6f1ec32fc89d90f9a4c4fb1f99a38aa437113",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H28.wat.dat",
+          "sha256": "340457c3326032c7930636392e6186fa392e8076a3e3fd138190e5b74a3ae09e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "133",
+        "wepp_id": 29,
+        "source": "_133.cli",
+        "prepared": "p29.cli",
+        "sha256": "fc4e2d3bf2c35880393d22dd1e3fbb5d7ffc4323157b6ad5015d7b1a5ff3fb02",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H29.wat.dat",
+          "sha256": "0c200789a5f7407fdee2b4fede3ae3b33a1e2f40ba65c859b829fd133789990d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "142",
+        "wepp_id": 30,
+        "source": "_142.cli",
+        "prepared": "p30.cli",
+        "sha256": "a46f73809335210bbff885deb063a5869b8de871edad7da17faa1c8e5ad9e1b6",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H30.wat.dat",
+          "sha256": "d68b47e7258919b75d716276f8ee4d7d9dd41139cf57ea355d905a1d2f04a064",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "143",
+        "wepp_id": 31,
+        "source": "_143.cli",
+        "prepared": "p31.cli",
+        "sha256": "fa7cebb56252b5ee3a5b687b0563dd519b169a42512ca89109ea555127d01766",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H31.wat.dat",
+          "sha256": "8fc64aade015439865679cd58299b9577f0766227c2c502f4a2b2ce6f7833ff8",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "151",
+        "wepp_id": 32,
+        "source": "_151.cli",
+        "prepared": "p32.cli",
+        "sha256": "314641237dc41b69d067df3c5d81107b9242a934c7693e928ca72f1e331faafe",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H32.wat.dat",
+          "sha256": "804102624e19badc3555fdc846f779e4f35310566ea69cc52809ae56a2a47a88",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "152",
+        "wepp_id": 33,
+        "source": "_152.cli",
+        "prepared": "p33.cli",
+        "sha256": "0834067c6ad118025751942751ee8a5bd1d10a6c7d4a22b516893c6fd646774b",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H33.wat.dat",
+          "sha256": "1fd199c1418b6cca9be94f219480e15a5fb1f52770e8dc68e12c7a6b3ca4aca3",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "153",
+        "wepp_id": 34,
+        "source": "_153.cli",
+        "prepared": "p34.cli",
+        "sha256": "0f9d9d2dfe431fe238272e71f3f803c45b897e1922f6d5ee95a9389c78f4802d",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H34.wat.dat",
+          "sha256": "f5edf20a365c129385e1c2033658e6cb8805d01f47e3d42604f5f1967aaaca30",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "162",
+        "wepp_id": 35,
+        "source": "_162.cli",
+        "prepared": "p35.cli",
+        "sha256": "5ecf7f65c1cfe9f661d6f6179f1cc93cffc47a5b1a0e694ab0f1af6900f415c8",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H35.wat.dat",
+          "sha256": "1d548e7a84db3a92615f9d8de3cf3eef15976cd80875ad356efe0cfad382ae2d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "163",
+        "wepp_id": 36,
+        "source": "_163.cli",
+        "prepared": "p36.cli",
+        "sha256": "0686a866514ca6c02b177a9ce0f3dae17686c8b21ba1a1b4757900db513ae70b",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H36.wat.dat",
+          "sha256": "44cb31a00e4095c565d37528de0781f00c2543ae4f053d19cb239a4549438c33",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "171",
+        "wepp_id": 37,
+        "source": "_171.cli",
+        "prepared": "p37.cli",
+        "sha256": "78eec2829ad0d186f6d6bb807023c568d9f71d7c65c534732c5f24ea0bd6d5f7",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H37.wat.dat",
+          "sha256": "ae9fc7b020234a36523e553ead419ec5b6d0c7a59e5f88f16888a302e16f3d46",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "172",
+        "wepp_id": 38,
+        "source": "_172.cli",
+        "prepared": "p38.cli",
+        "sha256": "2c53d1bba103766b18929c158d9844a2bed0154c0ae722e229d58ab06ec74f74",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H38.wat.dat",
+          "sha256": "85409b307188b1c1d9949229f734b857c11b8a276f526bb69c5e30827c342c3a",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "173",
+        "wepp_id": 39,
+        "source": "_173.cli",
+        "prepared": "p39.cli",
+        "sha256": "b7dcdbaa6285bd3c18d21b5afff2fb6803bd5c5827ff5a22a84530c0d701f0fa",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H39.wat.dat",
+          "sha256": "f7ddefa170118063575252189960f22e409f26110e4c7ad3e43095812d34b05c",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "181",
+        "wepp_id": 40,
+        "source": "_181.cli",
+        "prepared": "p40.cli",
+        "sha256": "75cdcba44144f1d95f9de1000a8af6a2f2e4ae9c08529316d3dce43264e08c6a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H40.wat.dat",
+          "sha256": "b72bb593214c33e2a51641fa70a04beb2974ba5442e70fd3e4bf44b19b6c33cf",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "182",
+        "wepp_id": 41,
+        "source": "_182.cli",
+        "prepared": "p41.cli",
+        "sha256": "20b6d4ca3dfa562239ba03b645badf0a50b33126453fa4e1a24087093bea7d84",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H41.wat.dat",
+          "sha256": "cb0a2dd573debbf47067257fba4fef32f39403023578c54a3d262c781baad5be",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "183",
+        "wepp_id": 42,
+        "source": "_183.cli",
+        "prepared": "p42.cli",
+        "sha256": "bd134bbc30eb2abc1f24040d41fc7f0665c32b2bc81b4da75a67c88487854bf1",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H42.wat.dat",
+          "sha256": "899b14aeda4cb6bc4263f99646cedd5b4b5e03d63c5af59aaebeaf741114f4bc",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "192",
+        "wepp_id": 43,
+        "source": "_192.cli",
+        "prepared": "p43.cli",
+        "sha256": "8163f3aa3c57309268b861d65874c47b1dcb01f97c8e796992e2c002e7195169",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H43.wat.dat",
+          "sha256": "970c452ecf358145be7ff180b95e4479b56f71e3461490407e8e33fbbfeb62ae",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "193",
+        "wepp_id": 44,
+        "source": "_193.cli",
+        "prepared": "p44.cli",
+        "sha256": "ae1d678656fb9ae099d4405d1262ed956f00b38d535add97eaf6abf3f13d19ee",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H44.wat.dat",
+          "sha256": "4c522672b125abc937147e906e9ed9998de87d1f68127a6b9ee17592a6999bec",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "202",
+        "wepp_id": 45,
+        "source": "_202.cli",
+        "prepared": "p45.cli",
+        "sha256": "3a724fb9f73d06f362dee48e9e0ffba93bbf31c687402cd0d51550af423c23f6",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H45.wat.dat",
+          "sha256": "9ccc2e1b2ea8ba37191f2421b027ae020ee683862f749593526b254849086c50",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "203",
+        "wepp_id": 46,
+        "source": "_203.cli",
+        "prepared": "p46.cli",
+        "sha256": "b321b88dc1e36c0e82996afcc808af516054a59bcbc1ee134441956c980fbc07",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H46.wat.dat",
+          "sha256": "6b9bd43034beaca64997430491bbe00e05fbc541a1e0c8e51202d0ce7b9558e3",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "211",
+        "wepp_id": 47,
+        "source": "_211.cli",
+        "prepared": "p47.cli",
+        "sha256": "813e980196e88f903200ac24276de22ce2314412dda24fe45432a22b0fd3e9ab",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H47.wat.dat",
+          "sha256": "d0b399a10516d465038b8065dffd2091c4335f017952ab535c86bbba970309a3",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "212",
+        "wepp_id": 48,
+        "source": "_212.cli",
+        "prepared": "p48.cli",
+        "sha256": "5d327903f9a125c2fa21e3b799dce2c61fed53fb2d6a584e2252b4bbfdb4e915",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H48.wat.dat",
+          "sha256": "62d4d6831f6b341c9472d948d98fce521eaa57368bcde71f9227fc9553608dd0",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "213",
+        "wepp_id": 49,
+        "source": "_213.cli",
+        "prepared": "p49.cli",
+        "sha256": "6fdc6d070713a002b3a2b1577a4bc6ad88debdc57b289a5f74c38abfeb246d7b",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H49.wat.dat",
+          "sha256": "2dfb375b32d82efc0d37e30dc0fdc52933458078c485cf59858379306ba4dc3e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "222",
+        "wepp_id": 50,
+        "source": "_222.cli",
+        "prepared": "p50.cli",
+        "sha256": "4d3d1548bed6b1a651d0b09042bb0080b3f442b9808f3fd1b5a2d5d2e94fd7af",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H50.wat.dat",
+          "sha256": "200f7aaf8dc1e86fb2b5405f0f242655c5406f499b85358d53026b9c797be6dd",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "223",
+        "wepp_id": 51,
+        "source": "_223.cli",
+        "prepared": "p51.cli",
+        "sha256": "40cb352f9a02b2f421f52444dbd343261bfe2cbae27a4bd79a11470c665569e4",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H51.wat.dat",
+          "sha256": "8b3a2f6c87e11d35db2fff81aa207ac0879975001d3a17b5657ad05f6653a874",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "231",
+        "wepp_id": 52,
+        "source": "_231.cli",
+        "prepared": "p52.cli",
+        "sha256": "f2a1b6f11ab98d33304ffe5560845e5b267263828f89904dcc1e06455d6dc11b",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H52.wat.dat",
+          "sha256": "ce5480451ce9ea28373af6fd1fa1d5db733a56cc0893d1983cac03e2868dca08",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "232",
+        "wepp_id": 53,
+        "source": "_232.cli",
+        "prepared": "p53.cli",
+        "sha256": "56d1edb4360d364942dc20d8337ae5b2f4e7bd31cea385e359e14bce82076055",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H53.wat.dat",
+          "sha256": "8526eb8acd9ab072a9de28ca8a49962d1ee97097df925b987c419815f909d6e5",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "233",
+        "wepp_id": 54,
+        "source": "_233.cli",
+        "prepared": "p54.cli",
+        "sha256": "604489e7dd158028125d1a503a78b4bbc223e20641b12a5e5bc16e0a355cac9d",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H54.wat.dat",
+          "sha256": "8487b3165e212be9c8a7a1c784ca82fe811139a43f19ec4714325fdc3ce15738",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "242",
+        "wepp_id": 55,
+        "source": "_242.cli",
+        "prepared": "p55.cli",
+        "sha256": "93b93930468c94c1b9d44d04b5980cc1d31fd23005d19ab7d3c69d79c167a491",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H55.wat.dat",
+          "sha256": "5f97bbcdb2cb8ee27e6c137f83eb438f380b0f8a4c0b4a52a4df3121bb2a034b",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "243",
+        "wepp_id": 56,
+        "source": "_243.cli",
+        "prepared": "p56.cli",
+        "sha256": "3dfe24825135b71f2cef8ad1e1ab567894a29ede0611024fbdf851ae4cf151d6",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H56.wat.dat",
+          "sha256": "7056a5c05788cf94967e2240360ff377234f3c412a076c1cde706c048656a410",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "251",
+        "wepp_id": 57,
+        "source": "_251.cli",
+        "prepared": "p57.cli",
+        "sha256": "083fcd77af1a37f9fb6da07a72348c99aa7d7a31b65bfee55e8c30dc0202ada1",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H57.wat.dat",
+          "sha256": "355efde24d486ab2495a0d0e381da48d3c6afa33189041da2a29dc63a53b5178",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "252",
+        "wepp_id": 58,
+        "source": "_252.cli",
+        "prepared": "p58.cli",
+        "sha256": "b833facf6a9277770aedc5cb8ffabae1f1c9de9fb7538d1a733661b7a0e276a7",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H58.wat.dat",
+          "sha256": "b62c0d05aaa2764ebeeead772fb9e30d5d8f9ed6ea3557ad814f302892089898",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "253",
+        "wepp_id": 59,
+        "source": "_253.cli",
+        "prepared": "p59.cli",
+        "sha256": "561ab027f658ace4b14f99886e94e4be4e153ba89579cecb62bf0b421bd2c454",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H59.wat.dat",
+          "sha256": "258500258a1831409510540b6aae26db1a5b23319a8c7b26545d539b9139e94f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "261",
+        "wepp_id": 60,
+        "source": "_261.cli",
+        "prepared": "p60.cli",
+        "sha256": "181a06f06bf6fbc4794093a335a1012686a64fa3a373222385c0e99e34447cee",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H60.wat.dat",
+          "sha256": "c088e90930df19ed6dbcfc693af8a9a0c8ce671d2c858d4692e7f7b7f4f54457",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "262",
+        "wepp_id": 61,
+        "source": "_262.cli",
+        "prepared": "p61.cli",
+        "sha256": "cd8343cd3f4b20539c3b2717fb941e800cd30a1c7b67e891e33635496eb1a1b4",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H61.wat.dat",
+          "sha256": "f6a977538093ce543c74b833f65189797550badc78562f5c20bf038f1b6a7c11",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "263",
+        "wepp_id": 62,
+        "source": "_263.cli",
+        "prepared": "p62.cli",
+        "sha256": "6312ffcd9353c8d3c49290ffe25c8234df1bf1d3455c316574fe719c478cbba8",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H62.wat.dat",
+          "sha256": "631af5709253c969505d8f0680d4dce750f46865488aaba2c16f3e10932bcbcc",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "271",
+        "wepp_id": 63,
+        "source": "_271.cli",
+        "prepared": "p63.cli",
+        "sha256": "7b696c33c090470ec79e932faae3d5486b4da4a2ba8c0869831ce848eaf88677",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H63.wat.dat",
+          "sha256": "083389f026ebe585664fc1d220f06dab6de2e04e98a557df77a17d031af74593",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "272",
+        "wepp_id": 64,
+        "source": "_272.cli",
+        "prepared": "p64.cli",
+        "sha256": "029d07bf86c444176d47a5760c96a4ba8748ffb13fd947338aa973da0bf8c441",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H64.wat.dat",
+          "sha256": "5074b87507a22ecc4faf821ba84014f5ccaabcf8d031f44b2f7318b64ec35aee",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "273",
+        "wepp_id": 65,
+        "source": "_273.cli",
+        "prepared": "p65.cli",
+        "sha256": "a6029e2e809a559013f9e90a8c364eb81607d90b2209cfe56a18d8e315a6ac33",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H65.wat.dat",
+          "sha256": "44c3dc737ad45f6970b340242c4e5be6d108584529118e18d59d9dd0fb707a14",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "282",
+        "wepp_id": 66,
+        "source": "_282.cli",
+        "prepared": "p66.cli",
+        "sha256": "8681e358aadbda7f20a6ed45471514257977c1484eb3c66cb791375fc98b85de",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H66.wat.dat",
+          "sha256": "535543214087a521069d173986860df7f20ad29217828a55da287f11ca6299c7",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "283",
+        "wepp_id": 67,
+        "source": "_283.cli",
+        "prepared": "p67.cli",
+        "sha256": "5cf2f6d11a4a2d81f3c0464b4e55ad45e6578283d2b95f707d2c3b6936aab95e",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H67.wat.dat",
+          "sha256": "ac5cf9b5e32134b93ff13f827165287520edff5819ee77ff6c6d5f9d6ecd8539",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "291",
+        "wepp_id": 68,
+        "source": "_291.cli",
+        "prepared": "p68.cli",
+        "sha256": "dc989c1084523fb729f3a44c7fd24484b358dabb58e0b65cb17b3ab1b959f68f",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H68.wat.dat",
+          "sha256": "8cecfc3c6d2d1f083a6a888ff9e1a60f1d1141ae6bd72a6cc9f1820d2cccef4f",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "292",
+        "wepp_id": 69,
+        "source": "_292.cli",
+        "prepared": "p69.cli",
+        "sha256": "3d60615c95abdef8819121408cdff9d950fc9d5462d81e8bffaace61f6726e80",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H69.wat.dat",
+          "sha256": "ad8585e69fd8487ebcab632f23ce2d67d65732a10c5843188f3e39e2467b981d",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "293",
+        "wepp_id": 70,
+        "source": "_293.cli",
+        "prepared": "p70.cli",
+        "sha256": "b8ca86c7e2278aa151202325821e492bde52fa07b7cdfc770713204d0c255e6a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H70.wat.dat",
+          "sha256": "9504be8524d5b4e2fa5280a40b7396bb13ba7a0b3b6eded7e8da7f1fe4f99386",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "302",
+        "wepp_id": 71,
+        "source": "_302.cli",
+        "prepared": "p71.cli",
+        "sha256": "232a0ee87ea14ab8eb62b88149d112ad145c58d783cbe86e76ecac450b7f6287",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H71.wat.dat",
+          "sha256": "ce15e0225bfe9c4fc84c4efa00d165d3a4bfe0e58dfc1d36c4ab8ba45da55b77",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "303",
+        "wepp_id": 72,
+        "source": "_303.cli",
+        "prepared": "p72.cli",
+        "sha256": "be506e01d4a1fa43a6f77173d04983e407aeb71ab46d75c933db9805ca1a139d",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H72.wat.dat",
+          "sha256": "08a2e939adb40270f414a871226370b8ec45896e711099e01d159538c3ca11b5",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "312",
+        "wepp_id": 73,
+        "source": "_312.cli",
+        "prepared": "p73.cli",
+        "sha256": "d6627a2b401e9dcf354cdea59efc64d48334c1cebeeb5f9559aa8a1e864af87a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H73.wat.dat",
+          "sha256": "e2ce5a3352763d237a098db2992714719843f14829ecc4649998708fe9cc6d77",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "313",
+        "wepp_id": 74,
+        "source": "_313.cli",
+        "prepared": "p74.cli",
+        "sha256": "289abf5aecc8a13224de21ddb6c90ef24c440bb7401111b42ad2cc629a5af3bb",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H74.wat.dat",
+          "sha256": "6eb81913b17413dbd8b922d570d9b8f1f4a0b8eb705ab6e944a7babb13c23e99",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "321",
+        "wepp_id": 75,
+        "source": "_321.cli",
+        "prepared": "p75.cli",
+        "sha256": "a7a381562ea25eac2f3dd3ed9c10b85a4ca11f2efc5788a704193bccf7b2bf42",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H75.wat.dat",
+          "sha256": "cd920f4a99d564b551b6a816c1816658aa558c553d9d02be1495b5513afec67e",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "322",
+        "wepp_id": 76,
+        "source": "_322.cli",
+        "prepared": "p76.cli",
+        "sha256": "2d8d2b43a16b6206f148158884afb2eaafe2d855c7c79137b7611a8c19f8b538",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H76.wat.dat",
+          "sha256": "8a08fb7d7ace62a577b325f60ca3ca20d61f69dff9224d7e476c84a3a21ea775",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "323",
+        "wepp_id": 77,
+        "source": "_323.cli",
+        "prepared": "p77.cli",
+        "sha256": "b8ca86c7e2278aa151202325821e492bde52fa07b7cdfc770713204d0c255e6a",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H77.wat.dat",
+          "sha256": "e476b25c4aad68336afcfbd0a09d4eff4c7d59bce38d0d1210bae1ecd9bf66f1",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "331",
+        "wepp_id": 78,
+        "source": "_331.cli",
+        "prepared": "p78.cli",
+        "sha256": "1d91769cdf5d9b3ea855b05c94c44b38fc954c76f65c62ab2b992528f54fc5c4",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H78.wat.dat",
+          "sha256": "c69ae2ad42f6907e519c73374ca6f0c77bbc3ab8a3efebedb7c78a3a9bfb6b46",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "332",
+        "wepp_id": 79,
+        "source": "_332.cli",
+        "prepared": "p79.cli",
+        "sha256": "a92806346273be67daedb87d793a4612fd08882ee69efccab1de1a38ad570b17",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H79.wat.dat",
+          "sha256": "54dd7ee650e114245cbc269cfc67591b5a006fe83c7c115bf80d8e3d9ecd7795",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "333",
+        "wepp_id": 80,
+        "source": "_333.cli",
+        "prepared": "p80.cli",
+        "sha256": "2fe41992be9094bf1bd1bf8c2b26e9fda91e899ac18db9ed1194b846f36e37b9",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H80.wat.dat",
+          "sha256": "5adb48976ece5933c069ce4fa33bbea45b4ee6045dbbebc2a04b815cc1f7f4b5",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "341",
+        "wepp_id": 81,
+        "source": "_341.cli",
+        "prepared": "p81.cli",
+        "sha256": "43f2673144ea66fa468a1f41f73650cbd1bae0c8944bb8547550939cd526095c",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H81.wat.dat",
+          "sha256": "fed5383ec8d75ac34447c7524a6f4543b6d23ee8cb97f353ed33067462c5dab7",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "342",
+        "wepp_id": 82,
+        "source": "_342.cli",
+        "prepared": "p82.cli",
+        "sha256": "2843869c4ae40cff2cb87108b33acb7cde8b5b2ce2b12f0a14f6b3101653968c",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H82.wat.dat",
+          "sha256": "a5798eea39b35b85a804969d651e1dc66e95f01b9a86fc1ebff49f723c780f11",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      },
+      {
+        "topaz_id": "343",
+        "wepp_id": 83,
+        "source": "_343.cli",
+        "prepared": "p83.cli",
+        "sha256": "aa1fb422f470efdea8845c9cd63cc0a0676f4b58cb2055486f0688c58b7f8937",
+        "days": 366,
+        "consumer": {
+          "file": "wepp/output/H83.wat.dat",
+          "sha256": "525cc97f2dea715d1b8dd6fb1578cefb2c7843ae2a5f7c8a735bd456afb084ca",
+          "rows": 366,
+          "precip_matches_cli": true
+        }
+      }
+    ],
+    "soil_setup": {
+      "mode": 0,
+      "initial_sat": 0.75,
+      "built": true
+    }
+  }
+]

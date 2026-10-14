@@ -1,0 +1,14 @@
+{
+  "job_id": "2ba8c807-76a5-4fcf-98c3-d4cef210666f",
+  "runid": "edde-us-current-20261014",
+  "status": "finished",
+  "result": null,
+  "started_at": "2026-10-14 04:48:12.614727",
+  "ended_at": "2026-10-14 04:48:15.303833",
+  "description": "wepppy.rq.project_rq.build_landuse_rq('edde-us-current-20261014')",
+  "elapsed_s": 2.689106,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

@@ -1,0 +1,109 @@
+[
+  {
+    "change": {
+      "edde_projection": "../../etc/passwd"
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "Select an available EDDE driving model/scenario",
+        "code": "validation_error"
+      },
+      "error_id": "fa39b433f2b44355b72f18280e1955e6",
+      "errors": [
+        {
+          "code": "invalid_edde_selection",
+          "message": "Select an available EDDE driving model/scenario",
+          "field": "edde_projection"
+        }
+      ]
+    },
+    "unchanged": true
+  },
+  {
+    "change": {
+      "future_start_year": 2024
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "EDDE years must be ordered full calendar years within 2025\u20132099",
+        "code": "validation_error"
+      },
+      "error_id": "175c73adb438437998b095b16553344a",
+      "errors": [
+        {
+          "code": "invalid_edde_selection",
+          "message": "EDDE years must be ordered full calendar years within 2025\u20132099",
+          "field": "future_start_year"
+        }
+      ]
+    },
+    "unchanged": true
+  },
+  {
+    "change": {
+      "future_end_year": 2100
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "EDDE years must be ordered full calendar years within 2025\u20132099",
+        "code": "validation_error"
+      },
+      "error_id": "6dedf41250634976bd1129a76917d507",
+      "errors": [
+        {
+          "code": "invalid_edde_selection",
+          "message": "EDDE years must be ordered full calendar years within 2025\u20132099",
+          "field": "future_end_year"
+        }
+      ]
+    },
+    "unchanged": true
+  },
+  {
+    "change": {
+      "climate_spatialmode": 2
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Climate spatial method is not supported by this project.",
+        "details": "Unsupported climate spatial method: 2",
+        "code": "unsupported_capability"
+      },
+      "error_id": "2f0cb4d94cb942d9893b4a0fc64631b1"
+    },
+    "unchanged": true
+  },
+  {
+    "change": {
+      "precip_scaling_mode": 3
+    },
+    "status": 400,
+    "response": {
+      "error": {
+        "message": "Validation failed",
+        "details": "AnnualMonthlies scaling requires observed data and is unavailable for future EDDE",
+        "code": "validation_error"
+      },
+      "error_id": "2562dfcd5d834711805eb8882b6b274f",
+      "errors": [
+        {
+          "code": "invalid_edde_selection",
+          "message": "AnnualMonthlies scaling requires observed data and is unavailable for future EDDE",
+          "field": "precip_scaling_mode"
+        }
+      ]
+    },
+    "unchanged": true
+  },
+  {
+    "case": "unauthenticated",
+    "status": 401
+  }
+]

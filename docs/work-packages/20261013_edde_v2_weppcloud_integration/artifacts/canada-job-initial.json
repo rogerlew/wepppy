@@ -1,0 +1,14 @@
+{
+  "job_id": "4b5fdf11-1dc0-4fd2-bd22-904303590845",
+  "runid": "edde-ca-20261014",
+  "status": "finished",
+  "result": null,
+  "started_at": "2026-10-14 04:32:23.164784",
+  "ended_at": "2026-10-14 04:33:21.388314",
+  "description": "wepppy.rq.project_rq.build_climate_rq('edde-ca-20261014')",
+  "elapsed_s": 58.22353,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

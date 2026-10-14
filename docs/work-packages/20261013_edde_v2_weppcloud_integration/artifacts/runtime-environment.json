@@ -1,0 +1,32 @@
+{
+  "environment": "forest development Compose; no production deployment",
+  "services": {
+    "rq-worker": {
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ]
+    },
+    "rq-engine": {
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ]
+    },
+    "browse": {
+      "uid": 1000,
+      "gid": 993,
+      "groups": [
+        993
+      ]
+    }
+  },
+  "worker_umask": "0022",
+  "run_mount": "/wc1 NFS4 rw; canonical /wc1/runs/ed acceptance clones",
+  "source_mount": "/workdir/wepppy bind rw",
+  "attempt_directory_mode": "0700 before and after canonical restore",
+  "native_wepppyo3_sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
+  "rq_climate_timeout_seconds": 216000
+}

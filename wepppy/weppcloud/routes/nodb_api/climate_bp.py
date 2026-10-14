@@ -163,6 +163,7 @@ def _apply_climate_selection_pair(
         missing = object()
         snapshot_mode = getattr(climate, '_climate_mode', missing)
         snapshot_catalog_id = getattr(climate, '_catalog_id', missing)
+        snapshot_edde_provenance = getattr(climate, '_edde_provenance', missing)
         dataset = _resolve_valid_climate_selection(
             climate,
             catalog_id=catalog_id,
@@ -176,7 +177,13 @@ def _apply_climate_selection_pair(
         try:
             climate._climate_mode = mode_member
             climate._catalog_id = dataset.catalog_id
+            if mode_member != ClimateMode.EddeV2:
+                climate._edde_provenance = None
         except (AttributeError, RuntimeError, TypeError, ValueError):
+            if snapshot_edde_provenance is missing:
+                climate.__dict__.pop('_edde_provenance', None)
+            else:
+                climate._edde_provenance = snapshot_edde_provenance
             if snapshot_mode is missing:
                 if hasattr(climate, '_climate_mode'):
                     delattr(climate, '_climate_mode')

@@ -70,7 +70,7 @@ def normalize_daily(table: pd.DataFrame, manifests: list[dict]) -> pd.DataFrame:
 
 
 def build_climate(table: pd.DataFrame, manifests: list[dict], station, output: str | Path,
-                  *, seed: int) -> dict:
+                  *, seed: int | None) -> dict:
     """Generate in a new directory; preserve failed diagnostics and source input."""
     root=Path(output)
     root.mkdir(parents=True,exist_ok=False)

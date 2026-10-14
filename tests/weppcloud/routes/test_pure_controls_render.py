@@ -805,6 +805,12 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'name="cligen_seed"' in rendered
     assert 'value="24680"' in rendered
 
+    assert 'name="edde_projection"' in rendered
+    assert 'value="" selected' in rendered
+    climate.edde_projection = "WRF-MPI/SSP3-7.0"
+    selected_rendered = template.render(climate=climate, climate_catalog=catalog)
+    assert 'value="WRF-MPI/SSP3-7.0" selected' in selected_rendered
+
     climate.uses_tenerife_station_catalog = True
     tenerife_rendered = template.render(climate=climate, climate_catalog=catalog)
     assert 'id="cligen_seed"' in tenerife_rendered

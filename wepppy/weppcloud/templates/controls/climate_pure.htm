@@ -397,6 +397,20 @@
        ) }}
   </section>
 
+  <section class="wc-stack" id="edde_projection_container" data-climate-section="edde_projection" hidden>
+    {{ ui.select_field(
+         "edde_projection",
+         "EDDE driving model and scenario",
+         [("", "Select a projection"),
+          ("WRF-MPI/SSP2-4.5", "WRF-MPI · SSP2-4.5 (2025–2099)"),
+          ("WRF-MPI/SSP3-7.0", "WRF-MPI · SSP3-7.0 (2025–2099)"),
+          ("WRF-Nor/SSP2-4.5", "WRF-Nor · SSP2-4.5 (2025–2079)")],
+         selected=climate.edde_projection | default(''),
+         extra_control_class="disable-readonly"
+       ) }}
+    <p class="wc-text-muted">EDDE supplies future precipitation and temperatures on a 12 km grid. Local elevation effects and model bias are not corrected. Storm structure, radiation, wind and dewpoint come from the selected CLIGEN station. Canadian coverage is partial; each required project location is checked. Annual-monthly observed-reference scaling is unavailable.</p>
+  </section>
+
   <section class="wc-stack" id="climate_upload_section" data-climate-section="upload">
     <div class="wc-field">
       <label class="wc-field__label" for="input_upload_cli">Upload CLIGEN `.cli` file</label>

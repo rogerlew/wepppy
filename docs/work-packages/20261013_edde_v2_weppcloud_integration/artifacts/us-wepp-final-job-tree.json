@@ -1,0 +1,270 @@
+{
+  "job_id": "16758432-2acb-4d7d-8626-ce045f12d74c",
+  "runid": "edde-us-current-20261014",
+  "status": "finished",
+  "result": "Unserializable return value",
+  "started_at": "2026-10-14 04:48:55.827766",
+  "ended_at": "2026-10-14 04:48:56.937968",
+  "description": "wepppy.rq.wepp_rq.run_wepp_rq('edde-us-current-20261014')",
+  "elapsed_s": 1.110202,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {
+    "0": [
+      {
+        "job_id": "b004908a-786a-4629-87cd-2109e6dd6ad7",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:48:56.812665",
+        "ended_at": "2026-10-14 04:48:57.257726",
+        "description": "wepppy.rq.wepp_rq._prep_slopes_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.445061,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "6ce6e402-8164-44d0-9cd7-8d0ceb47acb1",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:48:56.811989",
+        "ended_at": "2026-10-14 04:48:57.495577",
+        "description": "wepppy.rq.wepp_rq._prep_managements_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.683588,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "6da12b57-2b4b-493c-814a-11bf8adb8d0f",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:48:56.813263",
+        "ended_at": "2026-10-14 04:49:25.289072",
+        "description": "wepppy.rq.wepp_rq._prep_soils_rq('edde-us-current-20261014')",
+        "elapsed_s": 28.475809,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "826ad745-8656-47ba-8559-891b5fafc241",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:48:56.826386",
+        "ended_at": "2026-10-14 04:48:57.179050",
+        "description": "wepppy.rq.wepp_rq._prep_climates_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.352664,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "926b0ccd-3e83-42da-a820-d74e253739a6",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:25.326529",
+        "ended_at": "2026-10-14 04:49:25.996240",
+        "description": "wepppy.rq.wepp_rq._prep_remaining_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.669711,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "1": [
+      {
+        "job_id": "2c313045-c466-4df7-b014-bdf571335d48",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:26.033248",
+        "ended_at": "2026-10-14 04:49:26.596352",
+        "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.563104,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "2": [
+      {
+        "job_id": "365dced5-2039-48d1-ba1f-4753938903b5",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:26.635532",
+        "ended_at": "2026-10-14 04:49:27.042036",
+        "description": "wepppy.rq.wepp_rq._prep_watershed_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.406504,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "0680cc21-9c37-49b0-9957-2b04266881d8",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:26.635429",
+        "ended_at": "2026-10-14 04:49:27.571358",
+        "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.935929,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "e4516732-2915-44b9-b01d-31dbe0df0503",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:27.614886",
+        "ended_at": "2026-10-14 04:49:28.756607",
+        "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('edde-us-current-20261014')",
+        "elapsed_s": 1.141721,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "3": [
+      {
+        "job_id": "020d10b7-165c-4ca9-8e59-83f889a1b0bf",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": [
+          true,
+          3.985412359237671
+        ],
+        "started_at": "2026-10-14 04:49:27.083182",
+        "ended_at": "2026-10-14 04:49:31.135625",
+        "description": "wepppy.rq.wepp_rq.run_watershed_rq('edde-us-current-20261014', wepp_bin='wepp_260803')",
+        "elapsed_s": 4.052443,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "4": [
+      {
+        "job_id": "07632a52-6c10-48f8-aafc-0aeb99f77f3a",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:31.198582",
+        "ended_at": "2026-10-14 04:49:31.456253",
+        "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.257671,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "5e7f39cf-8689-4d60-b061-6f8250e4ee34",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:31.197058",
+        "ended_at": "2026-10-14 04:49:31.792882",
+        "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.595824,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "843ce77a-3dec-4d26-a81d-dcda00b709ce",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:31.197173",
+        "ended_at": "2026-10-14 04:49:31.860365",
+        "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('edde-us-current-20261014')",
+        "elapsed_s": 0.663192,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "e7e2cc05-c563-4ff8-a429-a80ac1146bb6",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:31.502316",
+        "ended_at": "2026-10-14 04:49:36.214111",
+        "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('edde-us-current-20261014')",
+        "elapsed_s": 4.711795,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      },
+      {
+        "job_id": "1b87b53c-835a-402b-a57d-53e3b2bc6360",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:36.259578",
+        "ended_at": "2026-10-14 04:49:37.815779",
+        "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('edde-us-current-20261014')",
+        "elapsed_s": 1.556201,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "5": [
+      {
+        "job_id": "3cca8faf-687d-429b-b1a8-427a33556ce3",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:37.857546",
+        "ended_at": "2026-10-14 04:49:40.694191",
+        "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('edde-us-current-20261014')",
+        "elapsed_s": 2.836645,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ],
+    "6": [
+      {
+        "job_id": "6269e29d-cdf0-414a-9ebe-90f17cd3e5e9",
+        "runid": "edde-us-current-20261014",
+        "status": "finished",
+        "result": null,
+        "started_at": "2026-10-14 04:49:40.736140",
+        "ended_at": "2026-10-14 04:49:40.942411",
+        "description": "wepppy.rq.wepp_rq._log_complete_rq('edde-us-current-20261014', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+        "elapsed_s": 0.206271,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {}
+      }
+    ]
+  }
+}

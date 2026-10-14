@@ -11,9 +11,9 @@ Expose Future EDDE v2 in eligible US/Canadian projects using the accepted raw so
 
 
 - [x] Inspect existing catalog, parser, build router, PRISM staging, capability authorities and RQ build path; identify additive mode17 and one combined projection field.
-- [ ] M1: Complete canonical contracts, two independent reviews, standalone checkpoint and additive capability reader floor.
-- [ ] M2: Wire catalog/profile authority, atomic parsing and staged EDDE build with project/grid/PRISM eligibility, source acquisition and supersession checks.
-- [ ] M3: Add UI projection control, provenance/report visibility, user/operator documentation and regression coverage.
+- [x] M1: Complete canonical contracts, two independent reviews, standalone checkpoint and additive capability reader floor.
+- [x] M2: Wire catalog/profile authority, atomic parsing and staged EDDE build with project/grid/PRISM eligibility, source acquisition and supersession checks.
+- [x] M3: Add UI projection control, provenance/report visibility, user/operator documentation and regression coverage.
 - [ ] M4: Validate actual US/Canada job-to-WEPP artifacts, negative cases, compatibility, browser/archive, required gates and independent correctness/security review; commit handoff.
 
 ## Surprises & Discoveries
@@ -70,6 +70,8 @@ No new dependency, service, queue, provider or scientific correction. Public cli
 ## Outcomes & Retrospective
 
 
-Execution started; no integration implementation or deployment claimed. Contracts and independent pre-implementation review are next.
+M1–M3 implemented. Contract checkpoint `75b47f61f` and reader floor `26c9e86ca` precede writer changes. Actual Canadian Single and US Multiple PRISM climate jobs passed. All 53 Canadian hillslope WEPP water-balance files contain the requested 366 days of 2060 and precipitation matching their prepared CLI files; all 83 US prepared CLI hashes match published spatial climates. US full WEPP initially stopped because the copied source project had never built soils; build those through the existing API and retry. M4 full-suite, failed-attempt/archive evidence and final reviews remain in progress. No production deployment.
 
 Contract review amendment (2026-10-14 UTC): clarified scaling availability and atomic publication, normal validation/provenance, optional application seed and failed source-cache diagnostics. These resolve integration gaps without changing scientific policy.
+
+Acceptance discoveries (2026-10-14 UTC): existing Wmesque PRISM 800m M4 products are 1991–2020, verified from original provider XML; response metadata has no explicit period, so record the provider product contract and actual acquired hashes. An older US saved graph correctly rejects EDDE until an explicit supported capability refresh. Reader-floor reopening passes all eight US/Canada, ordinary/single-input, single/multiple-OFE cases with unchanged config bytes.

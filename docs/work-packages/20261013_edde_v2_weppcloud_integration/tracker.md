@@ -3,7 +3,7 @@
 ## Quick status
 
 **Started / last updated**: 2026-10-13 21:15 UTC  
-**Current phase**: M1 contract checkpoint and reader-floor design
+**Current phase**: M4 actual-project acceptance and final validation
 **Security impact**: high for planned implementation; dedicated review required before implementation closeout.  
 **Plan**: [Package scope and acceptance](package.md). [Active ExecPlan](prompts/active/edde_v2_weppcloud_integration_execplan.md).
 
@@ -15,9 +15,9 @@
 
 ### Ready / backlog
 
-- [ ] M1: Accept feasibility handoff; author ExecPlan and contract/state matrix.
-- [ ] M2: Wire additive state, eligibility, and climate build orchestration.
-- [ ] M3: Add locale-scoped UI and source provenance in reports/downloads.
+- [x] M1: Accept feasibility handoff; author ExecPlan and contract/state matrix.
+- [x] M2: Wire additive state, eligibility, and climate build orchestration.
+- [x] M3: Add locale-scoped UI and source provenance in reports/downloads.
 - [ ] M4: Validate actual projects, legacy behavior, artifacts, reviews, and rollout handoff.
 
 ### In progress
@@ -26,7 +26,7 @@ Operator authorized execution. Active plan: [ExecPlan](prompts/active/edde_v2_we
 
 ### Blocked
 
-Scientific conditional-go and executable workflow evidence are available. Actual-project acceptance and runtime implementation remain pending. The unrelated stale SBS assertion is corrected and its full metadata-route module passes 21 tests; original broad results remain failed/incomplete.
+No external blocker. The integration full suite is running; final review and remaining retention checks are in progress. Earlier failed/incomplete broad runs remain historical evidence.
 
 ## Decisions log
 
@@ -63,3 +63,7 @@ Policy-update validation: scoped Markdown lint passed for all nine changed docum
 **2026-10-14 UTC — Feasibility handoff complete:** The stale SBS assertion is corrected against the existing upload contract; 21 metadata-route tests pass. Feasibility closed with conditional-go and explicit broad-suite coverage limits. No remaining scientific correction/auxiliary-field study is required. Author the integration ExecPlan and contracts before runtime work; retain full-suite and actual U.S./Canadian acceptance gates.
 
 **M1 checkpoint (2026-10-14 UTC):** Contract ancestor `75b47f61f`; standalone reader floor `26c9e86ca`. Four additive US/Canada ordinary/single-input structures registered; all 18 older entries unchanged. Capability suite passes 79 tests after updating exact catalog-count/hash expectations. No live writer exposure yet.
+
+**M2/M3 and live acceptance (2026-10-14 UTC):** Runtime, API discovery, UI, reports and operator documentation implemented. Canadian Single and US Multiple PRISM builds passed real acquisition through authenticated RQ requests. Canadian full WEPP completed: 53 prepared CLI hashes and 53 parsed water-balance outputs match 2060 daily precipitation. US 83 prepared climates match publication; full WEPP awaits missing source-project soil setup. Five hostile/invalid requests return 400 without changing climate state or published CLI bytes; unauthenticated submission is rejected. Reader-floor reopen passes eight cases. Frontend 980 tests, lint, stubtest and stub inventory pass; latest targeted Python run passes 97 tests. Broad Python suite and final artifact/review gates remain open.
+
+**M4 consumer/archive acceptance:** Canadian Single (53 hillslopes) and US Multiple PRISM (83 hillslopes) now complete full WEPP job trees after finishing the previously unbuilt US soil and landuse inputs through existing APIs. Every prepared CLI matches publication; every parsed daily water-balance output has 366 finite rows and matching 2060 precipitation. Browser downloads match exact local bytes. Canonical archive/restore preserves 104 completed-case and 117 failed-case climate members, including attempt directory mode 0700. Live Canadian PRISM rejection preserves prior publication. Actionable EDDE errors now identify projection, period or scaling corrections.

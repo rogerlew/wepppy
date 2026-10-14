@@ -1,6 +1,6 @@
 # EDDE v2 WEPPcloud integration
 
-**Status**: Backlog — scientific policy accepted; integration contracts, execution and acceptance pending
+**Status**: Implemented — actual US/Canada WEPP acceptance passed; final reviews and broad validation in progress
 **Timezone**: UTC
 
 ## Overview

@@ -473,6 +473,9 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "climate_mode": _enum_name(getattr(climate, "climate_mode", None)),
         "climate_catalog_id": str(getattr(climate, "catalog_id", "") or "").strip() or None,
         "cligen_seed": getattr(climate, "cligen_seed", None),
+        "edde_projection": getattr(climate, "edde_projection", ""),
+        "future_start_year": getattr(climate, "future_start_year", ""),
+        "future_end_year": getattr(climate, "future_end_year", ""),
         "climate_station_mode_code": _enum_int(getattr(climate, "climatestation_mode", None)),
         "climate_spatial_mode_code": _enum_int(getattr(climate, "climate_spatialmode", None)),
         "climate_has_station": bool(getattr(climate, "has_station", False)),
@@ -876,7 +879,10 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
                     defaults["climate_station_method"] = station_method
                 if spatial_method is not None:
                     defaults["climate_spatial_method"] = spatial_method
-        if resolved_mode == 3:
+        if resolved_mode == 17:
+            defaults.update({key: runtime.states.get(key, "") for key in
+                             ("edde_projection", "future_start_year", "future_end_year")})
+        elif resolved_mode == 3:
             defaults.update(
                 {
                     "future_start_year": 2040,
@@ -993,6 +999,7 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "0": "Synthetic CLIGEN",
                     "2": "Observed station",
                     "3": "Future CMIP5",
+                    "17": "Future EDDE v2",
                     "5": "Stochastic PRISM",
                     "6": "Observed database",
                     "9": "Observed DAYMET",
@@ -1123,19 +1130,25 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "constraint_mode": "static",
                     "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                 },
+                "edde_projection": {
+                    "type": "string",
+                    "enum": ["WRF-MPI/SSP2-4.5", "WRF-MPI/SSP3-7.0", "WRF-Nor/SSP2-4.5"],
+                    "required_if": _predicate("climate_mode", "eq", 17),
+                    "description": "EDDE full years: 2025–2099 MPI; 2025–2079 Nor.",
+                },
                 "future_start_year": {
                     "type": "integer",
                     "minimum": 2006,
                     "maximum": 2099,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "eq", 3),
+                    "required_if": _predicate("climate_mode", "in", [3, 17]),
                 },
                 "future_end_year": {
                     "type": "integer",
                     "minimum": 2006,
                     "maximum": 2099,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "eq", 3),
+                    "required_if": _predicate("climate_mode", "in", [3, 17]),
                 },
                 "cligen_seed": {
                     "type": "integer",
@@ -2242,6 +2255,7 @@ def _available_climate_modes(runtime: RuntimeState) -> list[int]:
         11,  # GridMetPRISM
         12,  # UserDefined
         13,  # DepNexrad
+        17,  # EddeV2
     }
 
     current_mode_raw = runtime.states.get("climate_mode_code")
@@ -3615,19 +3629,25 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "constraint_mode": "static",
                             "required_if": _predicate("climate_mode", "in", [2, 9, 11, 16]),
                         },
+                        "edde_projection": {
+                            "type": "string",
+                            "enum": ["WRF-MPI/SSP2-4.5", "WRF-MPI/SSP3-7.0", "WRF-Nor/SSP2-4.5"],
+                            "required_if": _predicate("climate_mode", "eq", 17),
+                            "description": "Future EDDE full years: 2025–2099 for MPI; 2025–2079 for Nor.",
+                        },
                         "future_start_year": {
                             "type": "integer",
                             "minimum": 2006,
                             "maximum": 2099,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "eq", 3),
+                            "required_if": _predicate("climate_mode", "in", [3, 17]),
                         },
                         "future_end_year": {
                             "type": "integer",
                             "minimum": 2006,
                             "maximum": 2099,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "eq", 3),
+                            "required_if": _predicate("climate_mode", "in", [3, 17]),
                         },
                     },
                     "additional_properties": True,

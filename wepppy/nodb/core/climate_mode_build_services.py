@@ -54,6 +54,10 @@ class ClimateModeBuildServices:
             run_prism800m_build(climate, attrs=attrs)
             self._run_prism_revision_if_multiple(climate, verbose=verbose)
 
+        elif climate_mode == ClimateMode.EddeV2:
+            from .climate_edde_build import run_edde_build
+            run_edde_build(climate, attrs=attrs)
+
         elif climate_mode == ClimateMode.Future:
             climate._build_climate_future(verbose=verbose, attrs=attrs)
 

@@ -1,0 +1,18 @@
+[
+  {
+    "runid": "edde-ca-20261014",
+    "archive_name": "edde-ca-20261014.20261014T043941Z.zip",
+    "status": 200,
+    "response": {
+      "job_id": "cdf107dd-1d5b-4fbf-8b4a-e70d86ebcfb2"
+    }
+  },
+  {
+    "runid": "edde-ca-prism-rejected-20261014",
+    "archive_name": "edde-ca-prism-rejected-20261014.20261014T044813Z.zip",
+    "status": 200,
+    "response": {
+      "job_id": "1e73e290-fcb4-4150-917e-3a20aa8b3fbb"
+    }
+  }
+]

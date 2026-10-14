@@ -56,7 +56,7 @@ _OBSERVED_YEAR_REQUIRED_MODES = frozenset(
         ClimateMode.DepNexrad,
     )
 )
-_FUTURE_YEAR_REQUIRED_MODES = frozenset((ClimateMode.Future,))
+_FUTURE_YEAR_REQUIRED_MODES = frozenset((ClimateMode.Future, ClimateMode.EddeV2))
 _CLIMATE_YEAR_MAX_SPAN = 1000
 _OBSERVED_YEAR_MIN = 1980
 _FUTURE_YEAR_MIN = 2006
@@ -102,6 +102,11 @@ def _build_climate_validation_errors(
     *,
     payload: dict[str, object] | None = None,
 ) -> list[dict[str, str]]:
+    from wepppy.nodb.core.climate_edde_inputs import EddeSelectionError
+
+    if isinstance(exc, EddeSelectionError):
+        return [_validation_issue(field=exc.field, code="invalid_edde_selection", message=str(exc))]
+
     message = str(exc).strip()
 
     if isinstance(exc, KeyError):
