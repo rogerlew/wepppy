@@ -89,5 +89,25 @@
     "0cbc60f3c4850e589a11999504e621041f129255d8d2e38df7ae07f9c69f5f5c",
     "0db17e1ff4a0f5d847bea34af977989db64aae670d91ee13f882ab221cf0c9ab",
     "0db17e1ff4a0f5d847bea34af977989db64aae670d91ee13f882ab221cf0c9ab"
+  ],
+  "canonical_job_tree_readback": [
+    {
+      "job_id": "3fa440f7-eb62-4ffd-a525-15313c2a9876",
+      "status": "finished",
+      "children": {},
+      "elapsed_s": 0.126063
+    },
+    {
+      "job_id": "55d3df6e-7680-4a95-b1df-048b77cbbc2e",
+      "status": "failed",
+      "children": {},
+      "elapsed_s": 0.077938
+    },
+    {
+      "job_id": "11ad9858-0044-4241-913c-5a2c946d5c56",
+      "status": "finished",
+      "children": {},
+      "elapsed_s": 0.121258
+    }
   ]
 }

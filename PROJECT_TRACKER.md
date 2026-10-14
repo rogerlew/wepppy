@@ -371,10 +371,10 @@ Feedback mechanisms:
 
 ### WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: M1–M4 implemented and reviewed 2026-10-14; M5 forest acceptance in progress.
+**Status**: M1–M5 complete on forest, 2026-10-14; production rollout pending.
 **Link**: [Work package](docs/work-packages/20261014_wmesque_catalog_sync/package.md)
 **Scope**: Forest-first v2 priority retrieval, wepp.cloud master catalog, extension adoption, verified sync, and opt-in recurring RQ jobs. Unconfigured deployments retain wepp.cloud.
-**Next**: Finish M5 evidence and regression gates; M6 master publication and Kubernetes writer/scheduler activation remain separately authorized rollout work.
+**Next**: Separately authorized M6 master publication, then receiving-deployment writer/scheduler activation. Full regression gate: 10,846 passed, 126 skipped.
 
 ### Feature access governance
 

@@ -2,6 +2,10 @@
 
 > Static analysis, 2026-10-14. Proposed sequencing, not an active execution plan.
 
+This is the pre-implementation snapshot. Implemented interfaces are authoritative
+in the [catalog contract](../schemas/wmesque-catalog-contract.md); current execution
+and acceptance are in the [package tracker](../work-packages/20261014_wmesque_catalog_sync/tracker.md).
+
 ## Scope and Conclusion
 
 Implement and validate in the forest WEPPpy checkout first, publish compatible

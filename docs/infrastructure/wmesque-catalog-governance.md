@@ -8,6 +8,9 @@ Adopted 2026-10-14. This document establishes governance; it does not implement
 catalog versioning, endpoint failover, or scheduled synchronization. The initial
 participants are wepp.cloud and the deployment maintained at
 `/workdir/open-wepp-org/`.
+Implementation interfaces and operator procedures are maintained in the
+[catalog contract](../schemas/wmesque-catalog-contract.md) and
+[operations guide](wmesque-operations.md).
 
 ## Catalog Authority and Extensions
 

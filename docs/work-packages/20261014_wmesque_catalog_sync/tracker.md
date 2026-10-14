@@ -3,9 +3,9 @@
 ## Quick Status
 
 **Started**: 2026-10-14 20:16 UTC
-**Updated**: 2026-10-14 20:57 UTC
-**Phase**: M1–M4 implemented/reviewed; M5 artifact acceptance passed, image/broad gates running
-**Next milestone**: Finish M5 gates, then separately authorized M6 rollout
+**Updated**: 2026-10-14 21:24 UTC
+**Phase**: M1–M5 complete on forest; rollout pending
+**Next milestone**: Separately authorized M6 master rollout
 **Security**: High; independent implementation review approved, findings closed
 **Plan**: [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md)
 
@@ -16,7 +16,7 @@
 - [x] M2: Implement compatible server metadata and publication fixtures on forest.
 - [x] M3: Implement client priority/failover and provenance on forest.
 - [x] M4: Implement manual sync/RQ wrapper with scheduling disabled.
-- [ ] M5: Validate forest scheduled integration, downstream artifacts, and Compose parity.
+- [x] M5: Validate forest scheduled integration, downstream artifacts, and Compose parity.
 - [ ] M6: Complete independent reviews and publish compatible support on wepp.cloud when authorized.
 - [ ] M7: Canary receiving deployment sync and local-first routing when authorized.
 - [ ] M8: Enable recurrence, validate recovery, and close with evidence.
@@ -40,7 +40,7 @@
 
 ## Verification Checklist
 
-- [ ] Focused tests and broad `wctl run-pytest tests --maxfail=1` gate.
+- [x] Focused tests and broad `wctl run-pytest tests --maxfail=1` gate.
 - [x] Stub checks if interfaces change; changed-code exception checks.
 - [x] RQ dependency catalog, graph check, and actual job tree.
 - [x] Real raster/source checks, downstream prepared inputs, and fresh representative output.
@@ -92,3 +92,21 @@ See [acceptance evidence](artifacts/20261014_forest_acceptance.md). Broad suite 
 image validation remain in progress. Read-only forest1 checks found matching
 identity/mount ownership and the same missing SSH client; Dockerfiles now add it
 without changing identity, credentials, or mounts.
+
+### 2026-10-14 21:24 UTC — M1–M5 complete
+
+Implementation committed as `c138a8bab`, following contract checkpoint `193df8b8c`.
+Broad gate finished successfully: **10,846 passed, 126 skipped** in 48m55s.
+Final focused service/scheduler suite: **72 passed, 1 legacy opt-in skip**;
+EDDE/helpers: **59 passed**; fresh-image suite: **67 passed**, no skips. A real
+EDDE normals acquisition also verified written source/revision maps. Rebuilt-image
+WEPP execution and native report readback passed. The canonical job-tree helper
+confirmed the expected successful/failed/recovered fixture jobs with no children.
+
+Only the forest batch worker was recreated and WMesque v2 restarted; post-restart
+local raster readback passed. Defaults remain wepp.cloud-only and sync disabled.
+Forest1 was inspected read-only; wepp.cloud and Kubernetes were not deployed.
+The developer task UID lacks an SSH passwd entry, so export/credentials/identity
+and large-resource validation remain explicit rollout gates, without a workaround.
+Docs/Compose/graph/stub/exception checks passed; no open medium/high review finding.
+The package stays open for M6–M8 and its active plan is retained.

@@ -3,7 +3,7 @@
 
 This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
-current together with the package tracker. Status: executing M1–M5; forest restarts authorized. M6–M8 remain pending.
+current together with the package tracker. Status: M1–M5 complete on forest. M6–M8 remain pending and are not authorized by the forest execution instruction.
 
 ## Purpose / Big Picture
 
@@ -24,7 +24,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-14 UTC) M2: Compatible server manifest, immutable publication, and revision support; real GDAL fixtures pass.
 - [x] (2026-10-14 UTC) M3: Ordered client configuration, deadline transport, validated publication, and additive EDDE provenance; focused regressions pass.
 - [x] (2026-10-14 UTC) M4: Manual sync and disabled/coalesced scheduled RQ integration; actual batch jobs validate adoption and failure recovery.
-- [ ] M5: Validate forest integration and production-equivalent Compose behavior.
+- [x] (2026-10-14 21:24 UTC) M5: Forest scheduled integration, NFS interruption/concurrent reads, rebuilt model inputs/output, and fresh Compose image validated; broad suite 10,846 passed/126 skipped.
 - [ ] M6: Complete reviews and authorized wepp.cloud publication.
 - [ ] M7: Complete authorized receiving-deployment canary.
 - [ ] M8: Enable recurrence/local-first routing and retain recovery evidence.
@@ -87,10 +87,21 @@ M1–M4 implementation and independent reviews are complete. Forest real schedul
 jobs, adoption, concurrent retrieval, SIGKILL during copy, and retry all passed.
 An isolated project rebuilt DEM/landuse/soils/spatial climate and prepared inputs;
 a fresh 100-year WEPP hillslope run yielded five loss rows and 36,525 daily water
-rows through production interchange/report readers. M5 image and broad-regression
-checks are still running. See `artifacts/20261014_forest_acceptance.md` and retained
+rows through production interchange/report readers. The fresh image passed 67
+focused checks and a fresh model execution/readback; final service/scheduler tests
+passed 72 with one legacy opt-in skip. The broad suite passed 10,846 tests with
+126 skips. Implementation commit: `c138a8bab`. See
+`artifacts/20261014_forest_acceptance.md` and retained
 JSON/CSV evidence. No production or Kubernetes activation is claimed; M6–M8 keep
 the package open and recurrence remains disabled.
+
+The batch worker was recreated from the canonical forest build, and WMesque v2
+was restarted and validated with an actual local NLCD request. Other deployment
+services were not restarted. The source project and live geodata catalog were
+not changed. Forest1 parity was inspected read-only; no production rollout is
+implied by successful local fixture transfer. Master export, task credentials,
+SSH identity/home, large-source capacity, and Kubernetes writer access remain
+explicit M6/M7 activation gates.
 
 ## Context and Orientation
 

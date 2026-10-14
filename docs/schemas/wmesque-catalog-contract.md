@@ -1,7 +1,8 @@
 # WMesque Catalog and Retrieval Contract
 
-Status: accepted for M1–M5 implementation by operator instruction on 2026-10-14;
-implementation conformance pending. Governance: [catalog policy](../infrastructure/wmesque-catalog-governance.md).
+Status: implemented and validated on forest for M1–M5, 2026-10-14. Production and
+receiving-deployment activation remain pending. Governance:
+[catalog policy](../infrastructure/wmesque-catalog-governance.md).
 
 ## Client Routing and Compatibility
 

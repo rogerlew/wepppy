@@ -1,6 +1,6 @@
 # WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: Open — M1–M4 implemented and reviewed; M5 forest acceptance in progress
+**Status**: Open — M1–M5 complete on forest; M6–M8 rollout pending
 **Started**: 2026-10-14 20:16 UTC
 **Owner**: Roger Lew
 **Implementation location**: forest WEPPpy checkout
@@ -13,7 +13,7 @@ from wepp.cloud and may maintain local extensions. When master adopts an
 extension, ordinary synchronization takes ownership under the same identifier.
 
 The operator authorized M1–M5 and forest restarts. Implementation and independent
-reviews are complete; forest acceptance and regression results are recorded in
+reviews are complete; passing forest acceptance and regression results are recorded in
 the tracker. M6–M8 production/receiving deployment activation remains separate.
 
 ## Authority and References
@@ -69,8 +69,8 @@ interrupted-copy recovery, raster readback, and an isolated project execution.
 - [x] Revision mismatches are explicit; old clients remain compatible with upgraded servers.
 - [x] Sync is repeatable, overlap-safe, observable, and disabled by default.
 - [x] Local extensions survive sync; adopted identifiers transition through ordinary sync.
-- [ ] Forest real-worker tests validate complete publication and downstream artifacts.
-- [ ] Required regression, correctness, and security gates pass with no open medium/high findings.
+- [x] Forest real-worker tests validate complete publication and downstream artifacts.
+- [x] Required regression, correctness, and security gates pass with no open medium/high findings.
 - [ ] Authorized rollout and recovery evidence exists for each activated deployment.
 
 ## Security Impact and Review Gate

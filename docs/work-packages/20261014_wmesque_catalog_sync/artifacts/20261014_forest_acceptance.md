@@ -1,6 +1,6 @@
 # Forest acceptance — M1–M5
 
-Date: 2026-10-14 UTC. Contract checkpoint: `193df8b8c`.
+Date: 2026-10-14 UTC. Contract checkpoint: `193df8b8c`; implementation: `c138a8bab`.
 Scope: forest implementation and isolated acceptance; no wepp.cloud or Kubernetes
 deployment. Default routing remains wepp.cloud and recurring sync remains disabled.
 
@@ -37,6 +37,7 @@ The scripts fail on unmet acceptance conditions; they do not skip remote errors.
 | `downstream_acceptance.py` | Rebuilds actual soil summaries/files and PRISM spatial climate before repeating model preparation/execution |
 | `mod_projected_acceptance.py` | Projected EPSG:32611 request matches NLCD pixels; tree-canopy raster 195×199, range 0–89 |
 | `output_readback.py` | Production native interchange and report dataframe reader validate fresh loss and daily-water outputs |
+| `edde_provenance_acceptance.py` | Real PRISM acquisition writes/readbacks additive EDDE endpoint/revision maps with 12 monthly values per variable; legacy revisions correctly remain null |
 
 Initial scheduled jobs were `700fe961-02f6-49ac-8a23-6ffda505b53c` (finished),
 `3e800c2f-6820-44b1-bd8b-3f5d115f7387` (intentional failure), and
@@ -70,7 +71,13 @@ Focused service/scheduler result: **72 passed, 1 skipped** (the preexisting opt-
 network smoke). EDDE/helper regression: **59 passed**. Both stubtest modules,
 stub completeness, RQ graph, and changed exception checks pass. The real acceptance
 scripts supply network/artifact evidence independently of the skipped legacy smoke.
-Broad suite and fresh image validation results will be recorded before handoff.
+Broad suite: **10,846 passed, 126 skipped**, exit 0, in 2935.63 seconds (48m55s).
+The broad run started during implementation and collected the original regression
+set; the final focused run above covers the additional review fixes and cases.
+Docs lint, Compose configuration validation, RQ graph, stub completeness, and
+changed-production exception enforcement all passed. Independent correctness and
+security reviews have no open medium/high findings. M1–M5 are complete; M6–M8
+remain deployment work requiring their own authorization and environment gates.
 
 Fresh image validation: canonical `wctl build weppcloud` succeeded, image
 `sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf`.
@@ -78,6 +85,11 @@ A one-shot `rq-worker-batch` passed its real native interchange startup prefligh
 and **67 focused tests**, with no skips. The idle batch worker was recreated using
 `wctl up -d --no-deps rq-worker-batch`; the scheduled acceptance was repeated
 successfully against that worker. Final job details live in `forest-rq-evidence.json`.
+The canonical `wepppy.rq.job_info.get_wepppy_rq_job_info` readback confirms all
+three final statuses and empty child trees; the intentional failure is isolated
+from the succeeding retry job.
+A fresh hillslope execution inside the rebuilt batch container also succeeded;
+native report readback again verified five loss rows and 36,525 daily-water rows.
 `wctl restart wmesque2` loaded the final server code, followed by actual local NLCD
 readback: 195×199 pixels, range 21–90. The old image remains tagged
 `wepppy-dev:wmesque-before-m5`; no image or service on forest1/wepp.cloud was changed.
@@ -87,8 +99,12 @@ no daemon or Python dependency. A real UID-1000 SSH invocation reports
 `No user exists for uid 1000`, confirming the documented development identity
 prerequisite. No remote-SSH success is inferred from local fixture or unit tests.
 
-Code-quality observability ran, but local radon was unavailable and the report
-did not produce changed-file metrics. It is observe-only, not correctness evidence.
+Post-commit code-quality observability analyzed 12 changed files: no red bands,
+four yellow. Client maximum function length improved 105→101; server processing
+grew 129→141 due to early validation and revision resolution in the existing
+processing sequence. Keeping that bounded sequence avoids an unrelated refactor;
+new catalog/RQ/HTTP modules remain green. Radon was unavailable, so no cyclomatic
+complexity claim is made. Telemetry is observe-only, not correctness evidence.
 
 ## Rollout limits
 

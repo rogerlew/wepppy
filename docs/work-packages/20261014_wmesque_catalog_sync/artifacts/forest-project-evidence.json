@@ -23,7 +23,7 @@
   "execution": [
     true,
     "67",
-    1.860280990600586
+    1.557527780532837
   ],
   "dem": {
     "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/dem/dem.tif",
@@ -270,5 +270,30 @@
       "endpoint": "https://wepp.cloud/webservices/wmesque2",
       "revision": null
     }
+  },
+  "edde_normal_provenance": {
+    "path": "/wc1/runs/wm/wmesque-acceptance-1792010682/climate/wmesque-edde-provenance/prism-normals.json",
+    "endpoint": null,
+    "serving_endpoints": {
+      "ppt": "https://wepp.cloud/webservices/wmesque2",
+      "tmin": "https://wepp.cloud/webservices/wmesque2",
+      "tmax": "https://wepp.cloud/webservices/wmesque2"
+    },
+    "dataset_revisions": {
+      "ppt": null,
+      "tmin": null,
+      "tmax": null
+    },
+    "sha256": {
+      "ppt": "05a4908a4aa5b6e1dbfdef5dec831d391ae4a57c177cd9c78098494630d247cc",
+      "tmin": "a4218e2594be46fddcff029ef3b5cc0b54b70ff54a278e0d8a6c194cbd0c877c",
+      "tmax": "3ebfd688bd4d87bae4ba9a7825ad62b439b4f10c144d62a8e603124dc375e1f6"
+    },
+    "monthly_values_per_variable": 12
+  },
+  "fresh_image_model_check": {
+    "python": "3.12.15",
+    "service": "rq-worker-batch",
+    "success": true
   }
 }
