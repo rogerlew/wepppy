@@ -2,6 +2,16 @@
 
 ## Quick Status
 
+Follow-up (2026-10-15 UTC): operator approved Forest PostgreSQL's move to
+`docker_forest-postgres-ssd`. Stopped data/metadata and table counts match;
+durability, public health and RAID6 backups verified. Four unchanged latency
+gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms. Runner-02 passes eight
+stubtest modules, completeness and 77 runtime tests with 648 verified LFS assets.
+Generated CI now targets `remote-ci` with isolated runtime and separate full
+isolation job. Full Forest suite is running; hosted workflow acceptance is pending;
+no broad-suite or isolation pass claimed yet. Thresholds and recurrence unchanged.
+See [follow-up evidence](artifacts/20261015_validation_followup.md).
+
 Final checkpoint (2026-10-15 UTC): operational rollout and recovery accepted;
 full validation closeout blocked. Receiving PR199 at846f0f81 restores healthy
 local-first admission,33/33 replicas and18/18 nodes. Live sync/full artifact

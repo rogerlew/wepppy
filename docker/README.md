@@ -243,10 +243,40 @@ docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --buil
 | Aspect | Dev (`docker-compose.dev.yml`) | Prod (`docker-compose.prod.yml`) |
 |--------|-------------------------------|----------------------------------|
 | **Redis storage** | Bind mount: `.docker-data/redis` | Named volume: `redis-data` |
-| **Postgres data** | Bind mount: `.docker-data/postgres` | Named volume: `postgres-data` |
+| **Postgres data** | `.docker-data/postgres` by default; `POSTGRES_DATA_SOURCE` can select `forest-postgres-ssd` | Named volume: `postgres-data` |
 | **Postgres backups** | Bind mount: `.docker-data/postgres-backups` | Named volume: `postgres-backups` |
 | **Code** | Bind-mounted (live reload) | Baked into image |
 | **Container names** | `wepppy-*` prefix | `docker-*-1` (compose default) |
+
+### Dev PostgreSQL storage
+
+Forest uses `POSTGRES_DATA_SOURCE=forest-postgres-ssd` in `docker/.env` to keep
+durable PostgreSQL commits on the SSD-backed Docker data root. Other dev
+deployments retain the bind-mount default. This setting selects storage; it
+does not migrate data. Quiesce consumers, back up and stop PostgreSQL, copy the
+complete data directory preserving ownership and modes, verify it, and only
+then recreate the service with the new source. Never select an empty volume
+for an existing database. Keep `fsync` and `synchronous_commit` enabled.
+Backups remain on the original RAID6-backed backup path. After writes resume,
+rollback requires copying the current stopped database back; the retained old
+directory is no longer current.
+
+### Isolated Python CI runtime
+
+`docker-compose.test.yml` provides the pinned common runtime plus disposable
+PostgreSQL and Redis for runner-02's stubtest and isolation jobs. It uses an
+internal network with no host ports, runtime secrets, or Docker socket. Check
+out and verify Git LFS assets before starting it: the source bind mount hides
+the image's repository files. Use a unique `COMPOSE_PROJECT_NAME` per job and
+`wctl --compose-file docker/docker-compose.test.yml` for all commands. Finish
+with `down --volumes --remove-orphans` using that same project name.
+
+The runtime image pin is independent of production deployment. Update it when
+native/Python dependencies change, then run the actual stubtest and isolation
+gates. Do not add production mounts or credentials to satisfy CI. The full
+isolation gate retains its five iterations and per-file checks; its longer job
+does not change test thresholds or claim randomized coverage when the optional
+randomization plugin is absent.
 
 ## Redis durability policy + RQ DB9 deploy flush policy
 

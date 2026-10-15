@@ -1,0 +1,47 @@
+# Isolated CI runtime; no Forest mounts, host credentials, or published ports.
+services:
+  weppcloud:
+    image: ghcr.io/rogerlew/wepppy@sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc
+    user: "${UID:-1000}:${GID:-1000}"
+    entrypoint: ["/bin/sleep", "infinity"]
+    working_dir: /workdir/wepppy
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      PYTHONPATH: /workdir/wepppy
+      HOME: /tmp
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: wepppy
+      POSTGRES_DB: wepppy
+      POSTGRES_PASSWORD: local-ci-only
+      SECRET_KEY: local-ci-only
+      SECURITY_PASSWORD_SALT: local-ci-only
+    volumes:
+      - ..:/workdir/wepppy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: wepppy
+      POSTGRES_DB: wepppy
+      POSTGRES_PASSWORD: local-ci-only
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U wepppy -d wepppy"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  redis:
+    image: redis:7
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+networks:
+  default:
+    internal: true

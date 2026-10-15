@@ -38,6 +38,14 @@ The script:
 3. Inspect the diff under `.github/workflows/` + `readme.md`.
 4. For validations (e.g., in CI), use `scripts/build_forest_workflows.py --check`.
 
+Jobs with `forest_bootstrap: false` in their source spec supply their own setup
+and cleanup. Use this for standalone CI runtimes that must not inherit Forest's
+host environment. Stubtest uses this mode on `remote-ci` (runner-02), with
+`docker/docker-compose.test.yml`, verified LFS inputs, and a unique Compose
+project per job. Its full isolation check is a separate, longer job. The pinned
+common image supplies dependencies; update its digest when those dependencies
+change and validate both stubtest and isolation against the candidate image.
+
 ### Why keep the builder under `scripts/`?
 
 `scripts/build_forest_workflows.py` is used repo-wide (not just by GitHub Actions), so it intentionally lives in `scripts/` alongside other tooling. Keeping it there avoids special-casing `.github/` during linting or packaging.

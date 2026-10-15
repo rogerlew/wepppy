@@ -65,6 +65,12 @@ def build_workflow(spec: Dict[str, Any], bootstrap: Dict[str, Any]) -> Dict[str,
 
     jobs = result.get("jobs", {})
     for job_name, job in jobs.items():
+        # Standalone CI runtimes must not inherit Forest host env or cleanup.
+        bootstrap_mode = job.pop("forest_bootstrap", "true")
+        if bootstrap_mode not in (True, False, "true", "false"):
+            raise ValueError(f"Invalid forest_bootstrap for job {job_name}")
+        if bootstrap_mode in (False, "false"):
+            continue
         job_env = copy.deepcopy(bootstrap_env)
         job_env.update(job.get("env", {}))
         job["env"] = job_env
