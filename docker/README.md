@@ -269,7 +269,10 @@ internal network with no host ports, runtime secrets, or Docker socket. Check
 out and verify Git LFS assets before starting it: the source bind mount hides
 the image's repository files. Use a unique `COMPOSE_PROJECT_NAME` per job and
 `wctl --compose-file docker/docker-compose.test.yml` for all commands. Finish
-with `down --volumes --remove-orphans` using that same project name.
+with `down --volumes --remove-orphans` using that same project name. Lifecycle
+locks use the existing `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR` setting under `/tmp`;
+transport authentication tests create fixture-owned account data rather than
+reading deployment accounts.
 
 The runtime image pin is independent of production deployment. Update it when
 native/Python dependencies change, then run the actual stubtest and isolation

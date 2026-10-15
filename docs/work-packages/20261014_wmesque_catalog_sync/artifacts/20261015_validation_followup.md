@@ -139,3 +139,18 @@ before verification. Cleanup now requires successful wctl installation, so an
 earlier preflight failure does not produce an unrelated missing-command error.
 The direct full-isolation qualification was stopped and its disposable stack
 removed when hosted acceptance started; no isolation pass is claimed.
+
+Corrected source `5325742bf` runs in
+[GitHub run 38763492543](https://github.com/rogerlew/wepppy/actions/runs/38763492543).
+The `stubtest` job (116520586851) passed on runner-02, including explicit LFS
+materialization, verification, eight modules, completeness and cleanup. The
+separate baseline job failed after 505 passes because its unprivileged runtime
+cannot create the default `/wc1` lifecycle lock directory. The CI-only setting
+now directs locks to `/tmp/rq-lifecycle-locks`, preserving real lock semantics.
+A focused rerun exposed transport tests reading deployment account tables;
+fixture-owned SQLite accounts now exercise real principal resolution, with the
+legacy MCP account-lookup boundary mapped to the same test identity. All ten
+transport integration tests pass on runner-02 (1.13 seconds). Neither change
+weakens production authentication, test assertions, or container privileges.
+Full Forest regression and a corrected hosted baseline/isolation run remain
+pending; this receipt is not a full workflow or M7 closeout claim.

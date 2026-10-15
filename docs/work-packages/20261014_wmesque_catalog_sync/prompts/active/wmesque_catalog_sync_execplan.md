@@ -21,7 +21,9 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Local stubtest repaired: two undefined `Optional` annotations now use `float | None`; all eight default modules and test-stub completeness pass.
 - [x] (2026-10-15 UTC) Operator approved and Forest completed PostgreSQL migration to `docker_forest-postgres-ssd`; stopped bytes/metadata and database counts match, durability preserved, backups and public health restored. All four latency gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms.
 - [x] (2026-10-15 UTC) Runner-02 pinned isolated runtime passes eight stubtest modules, completeness, and 77 database/catalog/NoDb tests with 648 verified LFS assets. Generated workflow preserves the full isolation gate as a separate long job.
-- [ ] Full Forest regression, hosted workflow and full isolation validation in progress. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [x] (2026-10-15 UTC) Hosted stubtest job 116520586851 passes on runner-02 at `5325742bf`, including LFS materialization and cleanup. First hosted preflight caught fetched-but-unmaterialized LFS objects; explicit checkout corrected it without bypassing verification.
+- [x] (2026-10-15 UTC) Hosted baseline exposed `/wc1` lock permissions and deployment-account dependencies. CI uses the existing writable lock-directory setting; isolated account fixtures preserve real identity resolution. Ten runner transport integration tests pass.
+- [ ] Full Forest regression remains running; corrected hosted baseline/isolation is pending. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
@@ -45,6 +47,11 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+Fresh CI exposed transport authentication tests reading Forest account tables,
+plus a default lifecycle lock directory outside the unprivileged container
+write area. Use fixture-owned account data and the existing lock-directory
+setting; no production mounts, credentials, or privileges are needed.
 
 Follow-up measurements separate SQL execute (about 1.7 ms p95) from durable
 commit (30–42 ms p95, up to 80 ms). File-sync p95 is 89.47 ms on the PostgreSQL

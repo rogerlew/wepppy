@@ -139,6 +139,32 @@ def integration_auth_environment(monkeypatch: pytest.MonkeyPatch) -> Iterable[No
 
 
 @pytest.fixture(autouse=True)
+def integration_accounts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Resolve transport test identities without reading deployment accounts."""
+    import sqlalchemy as sa
+
+    from wepppy.weppcloud.utils import feature_access_identity
+    from wepppy.weppcloud.utils.feature_access_schema import metadata, users, roles, roles_users
+
+    engine = sa.create_engine(f"sqlite:///{tmp_path / 'accounts.sqlite'}")
+    metadata.create_all(engine)
+    with engine.begin() as connection:
+        connection.execute(users.insert(), {"id": 42, "active": True})
+        connection.execute(roles.insert(), {"id": 1, "name": "User"})
+        connection.execute(roles_users.insert(), {"user_id": 42, "role_id": 1})
+    monkeypatch.setattr(feature_access_identity, "account_engine", lambda: engine)
+    # Legacy MCP subjects use Flask's account lookup before the shared resolver.
+    monkeypatch.setattr(
+        rq_session_routes, "_resolve_user_id_from_fs_uniquifier",
+        lambda subject: 42 if subject == "42" else None,
+    )
+    try:
+        yield engine
+    finally:
+        engine.dispose()
+
+
+@pytest.fixture(autouse=True)
 def integration_redis(monkeypatch: pytest.MonkeyPatch) -> IntegrationRedisDouble:
     redis_double = IntegrationRedisDouble()
 

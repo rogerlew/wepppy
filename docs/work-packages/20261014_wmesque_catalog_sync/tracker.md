@@ -8,7 +8,9 @@ durability, public health and RAID6 backups verified. Four unchanged latency
 gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms. Runner-02 passes eight
 stubtest modules, completeness and 77 runtime tests with 648 verified LFS assets.
 Generated CI now targets `remote-ci` with isolated runtime and separate full
-isolation job. Full Forest suite is running; hosted workflow acceptance is pending;
+isolation job. Hosted stubtest job 116520586851 passes at `5325742bf`. Full Forest
+suite remains running; hosted baseline exposed lock-directory and account-fixture
+prerequisites, now corrected with ten runner integration tests passing;
 no broad-suite or isolation pass claimed yet. Thresholds and recurrence unchanged.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 

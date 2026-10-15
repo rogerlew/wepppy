@@ -17,6 +17,7 @@ services:
       POSTGRES_PASSWORD: local-ci-only
       SECRET_KEY: local-ci-only
       SECURITY_PASSWORD_SALT: local-ci-only
+      WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR: /tmp/rq-lifecycle-locks
     volumes:
       - ..:/workdir/wepppy
     depends_on:
