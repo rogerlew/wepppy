@@ -26,7 +26,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Second hosted baseline exposed missing development `SITE_PREFIX`; CI now uses `/weppcloud`, matching Forest. All ten runner d-Tale tests pass without assertion changes.
 - [x] (2026-10-15 UTC) Full Forest regression passes: 10,872 passed, 126 skipped in 2,836.09 seconds, including all catalog latency checks.
 - [x] (2026-10-15 UTC) Final configuration `f8ce2bb92` passes hosted stubtest job `116535294278`, including cleanup.
-- [ ] Final hosted baseline/isolation acceptance remains pending in run `38767752658` at `f8ce2bb92`. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [ ] Hosted run `38767752658` baseline failed after 2,844 passes on ignored management fixtures; isolation did not start. Operator requires committed fixtures. Exact snapshots and the test reference are corrected; clean-checkout validation and hosted rerun remain pending. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
@@ -50,6 +50,10 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+The management corpus test read ignored Forest-only disturbed matrix output.
+Commit the exact small inputs as dedicated fixtures with provenance; passing
+on a persistent development checkout does not establish clean CI portability.
 
 Fresh CI exposed transport authentication tests reading Forest account tables,
 plus a default lifecycle lock directory outside the unprivileged container
@@ -115,6 +119,11 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+- Decision: Commit the two management corpus fixtures and reference their
+  dedicated directory. Rationale: the operator explicitly requires committed
+  fixtures, and ignored generated outputs made the test depend on local state.
+  Preserve source bytes and assertions. Date/Author: 2026-10-15, Roger/Codex.
 
 - Decision: Preserve synchronous database durability and the existing latency
   threshold; prepare a reversible Forest storage move for operator approval.

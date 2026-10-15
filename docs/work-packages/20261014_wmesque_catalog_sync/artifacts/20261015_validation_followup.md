@@ -184,3 +184,13 @@ modules. Final CI configuration is `f8ce2bb92`;
 passed its stubtest job `116535294278`, including cleanup. The longer hosted
 baseline/isolation job `116536188415` remains open; no
 full-workflow or random-order pass is claimed. Recurring sync remains disabled.
+
+### Committed management fixtures
+
+Hosted run `38767752658` passed stubtest but its baseline stopped at 2,844
+passed/53 skipped: `test_management_corpus_materializes_reparsed_inventory`
+read ignored Forest-only `disturbed_matrix0/runs/p1.man` and `p2.man`. Isolation
+never started. The operator required committed fixtures. Both exact inputs now
+live under `tests/nodb/mods/fixtures/ag_fields_management_corpus/`, with hashes
+and provenance; the test reads that directory. No runtime behavior or test
+assertions changed. Clean-checkout validation and a new hosted run are pending.

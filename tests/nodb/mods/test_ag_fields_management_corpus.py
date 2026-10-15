@@ -20,7 +20,7 @@ from wepppy.wepp.management import read_management
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
 FIXTURE_RUNS = (
-    Path(__file__).resolve().parents[2] / "disturbed" / "disturbed_matrix0" / "runs"
+    Path(__file__).resolve().parent / "fixtures" / "ag_fields_management_corpus"
 )
 
 

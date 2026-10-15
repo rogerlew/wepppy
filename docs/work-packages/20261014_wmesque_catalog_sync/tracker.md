@@ -9,7 +9,9 @@ Hosted runner-02 stubtest passes all eight modules and completeness. CI uses a
 pinned isolated runtime, verified LFS inputs, test-owned accounts, writable
 lifecycle locks and the development URL prefix. Final configuration `f8ce2bb92`
 passes hosted stubtest in run `38767752658`; its longer baseline/isolation
-acceptance remains open. Requested latency and runner blockers are resolved; no full-workflow or
+baseline failed on ignored management fixtures after 2,844 passes. The operator
+required committed fixtures; exact inputs and test references are now corrected.
+Clean-checkout validation and a new hosted run remain pending. No full-workflow or
 random-order pass is claimed. Recurrence remains disabled.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 
