@@ -198,14 +198,61 @@ def test_empty_and_malformed_catalog(tmp_path):
     with pytest.raises(ValueError): catalog.read_catalog(tmp_path)
 
 
-def test_ssh_transfer_uses_verified_host_and_protected_arguments(tmp_path, monkeypatch):
+def test_ssh_transfer_uses_verified_host_and_inspectable_arguments(tmp_path, monkeypatch):
     calls=[]
     monkeypatch.setattr(catalog.subprocess, "run", lambda args, **kwargs: calls.append((args,kwargs)))
     catalog._copy("sync@wepp1:/geodata", ".wmesque/catalog.json", tmp_path / "catalog.json")
-    assert "--protect-args" in calls[0][0]
+    assert "--no-protect-args" in calls[0][0]
     assert "StrictHostKeyChecking=yes" in calls[0][0][6]
     assert calls[0][1]["timeout"] == 330
     with pytest.raises(ValueError): catalog._copy("-bad:/tmp", "x", tmp_path / "x")
+
+
+@pytest.mark.parametrize("relative", ["../escape", "/absolute", "a/../b", "a b", "a;id", "a$(id)", "a`id`", "a\\b", "a\nb", "-option"])
+def test_remote_transfer_rejects_unsafe_paths(tmp_path, monkeypatch, relative):
+    monkeypatch.setattr(catalog.subprocess, "run", lambda *a, **k: pytest.fail("Rejected before process execution"))
+    with pytest.raises(ValueError, match="remote transfer path"):
+        catalog._copy("sync@wepp1:/geodata", relative, tmp_path / "target")
+
+
+def test_restricted_rsync_real_transfer(tmp_path, monkeypatch):
+    """Exercise real rsync/rrsync protocol; only SSH transport is local plumbing."""
+    import os
+    import sys
+    rrsync = shutil.which("rrsync")
+    if not rrsync or not shutil.which("rsync"):
+        pytest.skip("Requires installed rsync and rrsync")
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / ".wmesque").mkdir()
+    expected = b'{"schema_version":1,"datasets":{}}'
+    (source / ".wmesque/catalog.json").write_bytes(expected)
+    scripts = tmp_path / "bin"
+    scripts.mkdir()
+    ssh = scripts / "ssh"
+    ssh.write_text(
+        f"#!{sys.executable}\n"
+        "import os, shlex, sys\n"
+        "args = sys.argv[1:]\n"
+        "while args[0].startswith('-'):\n"
+        "    option = args.pop(0)\n"
+        "    if option == '-l': args.pop(0)\n"
+        "args.pop(0)\n"
+        "os.environ['SSH_ORIGINAL_COMMAND'] = shlex.join(args)\n"
+        f"os.execv({rrsync!r}, [{rrsync!r}, '-ro', {str(source)!r}])\n"
+    )
+    ssh.chmod(0o755)
+    monkeypatch.setenv("PATH", str(scripts) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("RSYNC_PROTECT_ARGS", "1")
+    target = tmp_path / "catalog.json"
+    catalog._copy("sync@fixture:/.", ".wmesque/catalog.json", target)
+    assert target.read_bytes() == expected
+    payload = source / ".wmesque/releases" / ("a" * 64)
+    payload.mkdir(parents=True)
+    (payload / "payload.bin").write_bytes(b"complete release transfer")
+    destination = tmp_path / "release"
+    catalog._copy("sync@fixture:/.", f".wmesque/releases/{'a' * 64}/", destination)
+    assert (destination / "payload.bin").read_bytes() == b"complete release transfer"
 
 
 def test_disguised_nested_vrt_cannot_escape(tmp_path):
