@@ -10,6 +10,7 @@ services:
     environment:
       PYTHONPATH: /workdir/wepppy
       HOME: /tmp
+      SITE_PREFIX: /weppcloud
       REDIS_HOST: redis
       POSTGRES_HOST: postgres
       POSTGRES_USER: wepppy

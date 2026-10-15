@@ -23,6 +23,8 @@ closeout remains subject to those results.
 - Source: `docker/docker-compose.dev.yml`, `docker/docker-compose.test.yml`,
   `.github/forest_workflows/stubtest.yml`, its generated workflow,
   `scripts/build_forest_workflows.py`, and `wepppy/nodb/core/wepp.pyi`.
+  Supplemental hosted-runtime review also covers `tests/integration/conftest.py`
+  and the test Compose lock-directory override above `5325742bf`.
 - Operational evidence and limits: [validation follow-up](20261015_validation_followup.md).
   Unrelated infrastructure documentation and generated docs index are excluded.
 - Independent [correctness review](20261015_validation_correctness_review.md):
@@ -120,6 +122,34 @@ remain pending at this sign-off. Do not equate an isolation-checker exit code
 with a passing broad suite or randomized coverage when its optional plugin is
 absent. Functional acceptance remains separate from this security approval.
 
+## Hosted runtime follow-up
+
+The hosted stubtest job in run `38763492543` passed all eight modules and
+completeness after explicit LFS materialization. Its baseline job subsequently
+exposed test-runtime assumptions about `/wc1` and deployment account data.
+Reviewed the bounded corrections above `5325742bf`; no new security finding.
+
+- The test Compose service sets the existing
+  `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR=/tmp/rq-lifecycle-locks` configuration. Locks
+  stay in the disposable container, with unchanged locking code. No production
+  setting, host mount, privilege or permission is added.
+- The function-scoped integration fixture creates a real SQLite database under
+  `tmp_path`, using the canonical account/feature schema. It seeds synthetic
+  account 42 with the ordinary `User` role and replaces only the account-engine
+  provider; the shared account-principal lookup and JWT/authorization code still
+  execute. No administrator role or feature entitlement is granted.
+- Legacy MCP identity lookup otherwise enters Flask's deployment database.
+  Its fixture double maps only synthetic subject `"42"` to account 42 and
+  returns `None` for other subjects. This is a test input boundary, not an
+  authorization result replacement. It does not establish coverage of the real
+  Flask `fs_uniquifier` query. The engine is disposed and pytest monkeypatch
+  restores both providers after each test.
+- Independently read `/tmp/m7-runner-auth-tests.log`: all ten integration
+  tests pass in 1.13 seconds, including valid transport flows and existing
+  revocation, retired-secret, cross-origin and token-class denials. No assertion
+  or production authentication implementation changed. Broad hosted baseline
+  and isolation acceptance remain pending.
+
 ## Residual risk and sign-off
 
 The preexisting persistent runner can retain effects of earlier PR jobs and
@@ -134,4 +164,5 @@ risk acceptance beyond the explicit storage approval is inferred.
 
 Final security sign-off: independent `validation_security`, 2026-10-15 UTC,
 **approved for source integration** after final exact-diff review and closure
-of SEC-V03. No outstanding medium/high finding or new risk waiver is required.
+of SEC-V03, including the bounded hosted-runtime follow-up above. No outstanding
+medium/high finding or new risk waiver is required.

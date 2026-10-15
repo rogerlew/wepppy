@@ -89,9 +89,9 @@ the subsequent explicit approval supplies it.
 
 ## Stubtest
 
-GitHub currently registers runner-01 with `ghcr-builder` and runner-02 with
+Initial inspection found runner-01 with `ghcr-builder` and runner-02 with
 `remote-ci`; neither has `homelab`, which the generated Stubtest workflow
-requires. Preserve the dedicated builder boundary from
+previously required. Preserve the dedicated builder boundary from
 `.github/workflows/AGENTS.md`. Do not change labels merely to make a job start.
 
 Runner-02 has Docker but had no WEPPpy runtime or dev checkout. Operator confirmed
@@ -154,3 +154,15 @@ transport integration tests pass on runner-02 (1.13 seconds). Neither change
 weakens production authentication, test assertions, or container privileges.
 Full Forest regression and a corrected hosted baseline/isolation run remain
 pending; this receipt is not a full workflow or M7 closeout claim.
+
+Corrected prerequisites are committed as `16809c47a`; hosted acceptance is
+[run 38765914499](https://github.com/rogerlew/wepppy/actions/runs/38765914499).
+Forest transport/generator checks pass (12 tests in 0.76 seconds); stub
+completeness, workflow regeneration freshness and changed-doc lint pass.
+
+Run `38765914499` again passed hosted stubtest. Its baseline stopped at 661
+passed/33 skipped on a d-Tale redirect: the fresh runtime lacked Forest's
+`SITE_PREFIX=/weppcloud` setting. Adding that same non-secret setting to test
+Compose preserves the expected proxy URL contract; all ten d-Tale tests pass
+on runner-02 (3.01 seconds). No URL assertion or production default changed.
+The failed job removed its isolated containers and volumes successfully.

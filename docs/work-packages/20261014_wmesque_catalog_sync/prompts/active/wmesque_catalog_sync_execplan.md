@@ -23,6 +23,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Runner-02 pinned isolated runtime passes eight stubtest modules, completeness, and 77 database/catalog/NoDb tests with 648 verified LFS assets. Generated workflow preserves the full isolation gate as a separate long job.
 - [x] (2026-10-15 UTC) Hosted stubtest job 116520586851 passes on runner-02 at `5325742bf`, including LFS materialization and cleanup. First hosted preflight caught fetched-but-unmaterialized LFS objects; explicit checkout corrected it without bypassing verification.
 - [x] (2026-10-15 UTC) Hosted baseline exposed `/wc1` lock permissions and deployment-account dependencies. CI uses the existing writable lock-directory setting; isolated account fixtures preserve real identity resolution. Ten runner transport integration tests pass.
+- [x] (2026-10-15 UTC) Second hosted baseline exposed missing development `SITE_PREFIX`; CI now uses `/weppcloud`, matching Forest. All ten runner d-Tale tests pass without assertion changes.
 - [ ] Full Forest regression remains running; corrected hosted baseline/isolation is pending. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
@@ -184,17 +185,18 @@ connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
 
-Validation follow-up: local stubtest now passes all eight modules after the
-minimal annotation correction. Marker latency remains variable; durable commit
-and filesystem probes identify the storage path as the leading cause. The
-storage move was approved and completed with verified data preservation.
-Runner-02 passes direct stubtest and runtime checks; no runner labels or latency
-thresholds changed. Full regression and hosted CI acceptance remain pending.
-The PostgreSQL module subsequently passed all 24 tests, confirming variability
-rather than closure. The CI job also has a 20-minute timeout around an isolation
-command that defaults to five full-suite runs plus per-file checks; account for
-this when restoring the runner. Local broad isolation was interrupted after
-scope inspection and is not claimed as passed.
+Validation follow-up: Forest PostgreSQL now uses the approved SSD-backed named
+volume, with matching stopped data/metadata and table counts, unchanged durable
+commit settings, restored health, and RAID6 backups. All four unchanged latency
+gates pass; READONLY added p95 is 5.81 ms and TTL 4.73 ms. Stubtest passes all
+eight modules locally and on hosted runner-02 after the annotation correction.
+The isolated CI runtime preserves the dedicated builder boundary and test
+thresholds. Fresh-run prerequisites exposed by CI are corrected through explicit
+LFS materialization, the existing writable lock-directory setting, and test-owned
+account fixtures. Ten transport tests pass on runner-02; all twelve focused
+transport/generator tests pass on Forest. Full Forest regression and hosted
+baseline/isolation still need final results. Earlier interrupted isolation runs
+are not passes, and no randomized coverage is claimed without the plugin.
 
 Final runtime checkpoint: receiving PR199 at846f0f81 restores healthy admission
 after actual local-first/master-only/local-first recovery acceptance. Live sync,
