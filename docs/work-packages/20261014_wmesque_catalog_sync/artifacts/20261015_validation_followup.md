@@ -193,4 +193,14 @@ read ignored Forest-only `disturbed_matrix0/runs/p1.man` and `p2.man`. Isolation
 never started. The operator required committed fixtures. Both exact inputs now
 live under `tests/nodb/mods/fixtures/ag_fields_management_corpus/`, with hashes
 and provenance; the test reads that directory. No runtime behavior or test
-assertions changed. Clean-checkout validation and a new hosted run are pending.
+assertions changed. Commit `24dcc083e` contains both fixtures as ordinary Git
+files, not LFS pointers. Their SHA-256 values match the original inputs.
+
+Focused test passes on Forest (1 passed, 8.82 seconds) and runner-02 (1 passed,
+8.62 seconds). Runner validation used a fresh `git archive 24dcc083e` extraction,
+confirmed the old ignored directory was absent, and used the pinned isolated
+runtime. The generated two-OFE management file was reparsed and its inventory
+and hashes checked by the unchanged test. The temporary Compose stack was
+removed with its volumes. The hosted baseline/isolation workflow will be
+restarted after this receipt is committed; no broad-suite pass is claimed for
+the fixture correction yet.

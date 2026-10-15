@@ -8,10 +8,11 @@ data, durability and backups. All four latency gates pass (READONLY added p95
 Hosted runner-02 stubtest passes all eight modules and completeness. CI uses a
 pinned isolated runtime, verified LFS inputs, test-owned accounts, writable
 lifecycle locks and the development URL prefix. Final configuration `f8ce2bb92`
-passes hosted stubtest in run `38767752658`; its longer baseline/isolation
-baseline failed on ignored management fixtures after 2,844 passes. The operator
-required committed fixtures; exact inputs and test references are now corrected.
-Clean-checkout validation and a new hosted run remain pending. No full-workflow or
+passes hosted stubtest in run `38767752658`; the baseline failed on ignored management fixtures after 2,844 passes. The operator
+required committed fixtures; `24dcc083e` commits the exact inputs and fixes the
+test reference. Focused tests pass on Forest and a fresh committed-source
+extraction on runner-02 with the old ignored directory absent. Hosted rerun
+remains pending. No full-workflow or
 random-order pass is claimed. Recurrence remains disabled.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 
