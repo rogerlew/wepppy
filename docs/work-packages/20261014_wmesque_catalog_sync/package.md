@@ -1,6 +1,6 @@
 # WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: Open — M1–M5 complete on forest; M6–M8 rollout pending
+**Status**: Open — M1–M6 complete; M7–M8 receiving rollout pending
 **Started**: 2026-10-14 20:16 UTC
 **Owner**: Roger Lew
 **Implementation location**: forest WEPPpy checkout
@@ -12,9 +12,7 @@ wepp.cloud as the default. Receiving deployments synchronize master resources
 from wepp.cloud and may maintain local extensions. When master adopts an
 extension, ordinary synchronization takes ownership under the same identifier.
 
-The operator authorized M1–M5 and forest restarts. Implementation and independent
-reviews are complete; passing forest acceptance and regression results are recorded in
-the tracker. M6–M8 production/receiving deployment activation remains separate.
+The operator authorized M1–M5 on forest and subsequently M6 on wepp1, wepp2, and wepp3. Implementation, reviews, forest acceptance, and master production rollout are complete; evidence is recorded in the tracker. M7 receiving deployment and M8 recurrence remain pending.
 
 ## Authority and References
 

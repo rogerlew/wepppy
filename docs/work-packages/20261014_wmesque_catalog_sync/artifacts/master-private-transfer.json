@@ -1,0 +1,10 @@
+{
+  "started_at": "2026-10-15T03:30:11.017746+00:00",
+  "dry_run": false,
+  "last_success": "2026-10-15T03:30:14.540328+00:00",
+  "status": "success",
+  "updates": {
+    "tenerife/136_MDT25_TF": "aa96d31fe8aff11778b84be268798c04295e0d3de758649ec6e666d854fee295"
+  },
+  "finished_at": "2026-10-15T03:30:14.545396+00:00"
+}

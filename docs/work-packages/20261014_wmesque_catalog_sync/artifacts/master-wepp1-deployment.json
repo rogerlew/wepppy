@@ -1,0 +1,347 @@
+{
+  "host": "wepp1",
+  "time": "2026-10-15T03:42:11.302968+00:00",
+  "revision": "052019426172670634bea13b13dd8ef36d48bc94",
+  "containers": [
+    {
+      "name": "/docker-caddy-1",
+      "service": "caddy",
+      "image": "sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90",
+      "started_at": "2026-10-15T03:28:35.608579864Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-profile-playback-1",
+      "service": "profile-playback",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:28:34.617746745Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_ENDPOINTS": ""
+      }
+    },
+    {
+      "name": "/docker-weppcloud-1",
+      "service": "weppcloud",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.734477865Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_ENABLED": "false"
+      }
+    },
+    {
+      "name": "/docker-rq-worker-1",
+      "service": "rq-worker",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:28:30.749827313Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_ENABLED": "false"
+      }
+    },
+    {
+      "name": "/docker-rq-engine-1",
+      "service": "rq-engine",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.732912117Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_SOURCE": ""
+      }
+    },
+    {
+      "name": "/docker-rq-worker-batch-1",
+      "service": "rq-worker-batch",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:28:30.747153214Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_ENABLED": "false"
+      }
+    },
+    {
+      "name": "/docker-browse-1",
+      "service": "browse",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.752887228Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_DESTINATION": "/geodata"
+      }
+    },
+    {
+      "name": "/docker-dtale-1",
+      "service": "dtale",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.763776164Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_ENABLED": "false"
+      }
+    },
+    {
+      "name": "/docker-query-engine-1",
+      "service": "query-engine",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.76137473Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_SOURCE": ""
+      }
+    },
+    {
+      "name": "/docker-download-1",
+      "service": "download",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.758868405Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400"
+      }
+    },
+    {
+      "name": "/wepppy-scheduler",
+      "service": "scheduler",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.757606242Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400"
+      }
+    },
+    {
+      "name": "/docker-wmesque-1",
+      "service": "wmesque",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.757265878Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_DESTINATION": "/geodata"
+      }
+    },
+    {
+      "name": "/docker-metquery-1",
+      "service": "metquery",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.754747936Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400"
+      }
+    },
+    {
+      "name": "/docker-elevationquery-1",
+      "service": "elevationquery",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.73346014Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_SOURCE": ""
+      }
+    },
+    {
+      "name": "/docker-wmesque2-1",
+      "service": "wmesque2",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.749966017Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_DESTINATION": "/geodata",
+        "WMESQUE_SYNC_SOURCE": ""
+      }
+    },
+    {
+      "name": "/docker-shape-converter-1",
+      "service": "shape-converter",
+      "image": "sha256:dfd1a26c005251cec8a2855815648164ccbaa2920d68b9a4f9f975d470080d90",
+      "started_at": "2026-10-15T03:27:59.747571711Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {
+        "WMESQUE_SYNC_ENABLED": "false",
+        "WMESQUE_ENDPOINTS": "",
+        "WMESQUE_SYNC_INTERVAL_SECONDS": "86400",
+        "WMESQUE_SYNC_SOURCE": "",
+        "WMESQUE_SYNC_DESTINATION": "/geodata"
+      }
+    },
+    {
+      "name": "/docker-status-1",
+      "service": "status",
+      "image": "sha256:105ae1c15849c0ec5ec1abe48edafc3462310de5e747cc7338a0a82fa9ad2c67",
+      "started_at": "2026-10-15T03:28:30.585735491Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-preflight-1",
+      "service": "preflight",
+      "image": "sha256:7cbab31aa2d77591ae390ffd74ba848a477cb5f550b91117bfa3856c85182705",
+      "started_at": "2026-10-15T03:28:30.586598435Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-postgres-backup-1",
+      "service": "postgres-backup",
+      "image": "sha256:c482971e06a84ca61d677321488dee4034e8979c6311d72f065be07f4e886760",
+      "started_at": "2026-10-15T03:27:59.76269883Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/weppcloudr",
+      "service": "weppcloudr",
+      "image": "sha256:5a4d1486c959709dd2587ca0dcf06d36dc5f212f38e352414a979f00214bf833",
+      "started_at": "2026-10-15T03:27:53.817269029Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-fcgiwrap-1",
+      "service": "fcgiwrap",
+      "image": "sha256:a884061bca25dd3956665dc07e477e2d09b4789729ed0c09fa6528e00e82234e",
+      "started_at": "2026-10-15T03:27:53.818333311Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-cap-1",
+      "service": "cap",
+      "image": "sha256:c1a2cdd22708781045bfc4a885667a070e78ee181a4f471f868096d266c6ae28",
+      "started_at": "2026-10-15T03:27:53.812051442Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-postgres-1",
+      "service": "postgres",
+      "image": "sha256:c482971e06a84ca61d677321488dee4034e8979c6311d72f065be07f4e886760",
+      "started_at": "2026-10-15T03:27:53.814481274Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-redis-1",
+      "service": "redis",
+      "image": "sha256:646a47c903c5c45f99081094d8c3ba51ec2a1091babf42dc5a928cef024e6fcd",
+      "started_at": "2026-10-15T03:27:53.813168641Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/wepppy-f-esri",
+      "service": "f-esri",
+      "image": "sha256:7ed8fd486756a551b9795d6476c24a5152c7c1c19622859e4e6211627ae9519e",
+      "started_at": "2026-08-11T01:12:07.580509642Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    }
+  ]
+}

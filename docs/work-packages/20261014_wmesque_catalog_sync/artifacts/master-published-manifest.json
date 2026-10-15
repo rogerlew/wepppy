@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "dataset": "tenerife/136_MDT25_TF",
+  "entrypoint": "data/tenerife/136_MDT25_TF/.vrt",
+  "files": [
+    {
+      "path": "data/tenerife/136_MDT25_TF/.vrt",
+      "size": 1498,
+      "sha256": "432c1397c54839cac04f6332545879a01dfa91b0cbb9527f7eba3353f11486e6"
+    },
+    {
+      "path": "data/tenerife/136_MDT25_TF/136_MDT25_TF.tif",
+      "size": 37491667,
+      "sha256": "66cc86872d3a205c6ab659adda21bca6d4fc128105530690a622a3da2f44f455"
+    }
+  ],
+  "revision": "aa96d31fe8aff11778b84be268798c04295e0d3de758649ec6e666d854fee295"
+}

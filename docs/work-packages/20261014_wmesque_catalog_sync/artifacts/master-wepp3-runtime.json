@@ -1,0 +1,51 @@
+{
+  "uid": 1002,
+  "gid": 130,
+  "user": "roger",
+  "revision": "aa96d31fe8aff11778b84be268798c04295e0d3de758649ec6e666d854fee295",
+  "sync_enabled": false,
+  "rasters": {
+    "tenerife/136_MDT25_TF": {
+      "shape": [
+        187,
+        161
+      ],
+      "range": [
+        2043.2005615234375,
+        3704.739990234375
+      ],
+      "nodata": -10000000000.0,
+      "geotransform": [
+        338206.954353997,
+        30.0,
+        0.0,
+        3131540.2923472435,
+        0.0,
+        -30.0
+      ],
+      "revision": "aa96d31fe8aff11778b84be268798c04295e0d3de758649ec6e666d854fee295"
+    },
+    "nlcd/2019": {
+      "shape": [
+        195,
+        199
+      ],
+      "range": [
+        21.0,
+        90.0
+      ],
+      "nodata": 250.0,
+      "geotransform": [
+        545932.9971643023,
+        30.0,
+        0.0,
+        5016432.315382109,
+        0.0,
+        -30.0
+      ],
+      "revision": null
+    }
+  },
+  "legacy_unpinned_request": "passed",
+  "wrong_revision_status": 409
+}

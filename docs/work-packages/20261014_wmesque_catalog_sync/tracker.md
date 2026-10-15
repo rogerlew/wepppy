@@ -3,9 +3,9 @@
 ## Quick Status
 
 **Started**: 2026-10-14 20:16 UTC
-**Updated**: 2026-10-14 21:24 UTC
-**Phase**: M1–M5 complete on forest; rollout pending
-**Next milestone**: Separately authorized M6 master rollout
+**Updated**: 2026-10-15 04:04 UTC
+**Phase**: M1–M6 complete; receiving rollout pending
+**Next milestone**: M7 receiving-deployment access and canary
 **Security**: High; independent implementation review approved, findings closed
 **Plan**: [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md)
 
@@ -17,7 +17,7 @@
 - [x] M3: Implement client priority/failover and provenance on forest.
 - [x] M4: Implement manual sync/RQ wrapper with scheduling disabled.
 - [x] M5: Validate forest scheduled integration, downstream artifacts, and Compose parity.
-- [ ] M6: Complete independent reviews and publish compatible support on wepp.cloud when authorized.
+- [x] M6: Reviews approved; all three production hosts deployed; master publication and private export validated.
 - [ ] M7: Canary receiving deployment sync and local-first routing when authorized.
 - [ ] M8: Enable recurrence, validate recovery, and close with evidence.
 
@@ -32,7 +32,7 @@
 
 | Issue | Impact | Next action |
 | --- | --- | --- |
-| Master transfer export/access not yet activated | Live remote sync cannot be enabled | Verify task SSH identity, credentials, trust, source closure/capacity in M6/M7; NED remote VRTs require materialization |
+| Master export validated under operator SSH access; receiver credentials pending | Receiving task cannot yet pull | Validate actual task identity/trust/writer access in M7; broader resources, including NED materialization, need bounded publication |
 | Kubernetes geodata is read-only for compute workers | Sync cannot run on ordinary workers as configured | Select smallest authorized writer path before rollout |
 | Kubernetes scheduler dry-run and three-task assertion | Naive activation enables unrelated jobs or fails readiness | Define sync-only activation in deployment repo |
 | Replica lag and unpinned requests | Different runs may use different revisions | Document behavior and provenance; do not claim name-based reproducibility |
@@ -48,7 +48,8 @@
 - [x] Operator documentation and fallback/timeout ADR.
 - [x] [Correctness review](artifacts/20261014_correctness_review.md) complete.
 - [x] [Security review](artifacts/20261014_security_review.md) complete.
-- [ ] Authorized rollout and rollback evidence; no open medium/high findings.
+- [x] M6 authorized master rollout and rollback-layout evidence; no open medium/high findings.
+- [ ] M7/M8 receiving rollout, recurrence, and recovery evidence.
 
 ## Progress Notes
 
@@ -110,3 +111,19 @@ The developer task UID lacks an SSH passwd entry, so export/credentials/identity
 and large-resource validation remain explicit rollout gates, without a workaround.
 Docs/Compose/graph/stub/exception checks passed; no open medium/high review finding.
 The package stays open for M6–M8 and its active plan is retained.
+
+### 2026-10-15 03:12 UTC — M6 authorized
+
+Operator authorized production deployment on wepp1, wepp2, and wepp3. Host identities and clean checkouts verified at `84337c967`. Queue and deployment-delta checks precede activation. Installed RQ rejects the runbook’s `rq-info --detailed` flag; direct read-only started-registry inspection supplies the required gate evidence.
+
+### 2026-10-15 03:31 UTC — Master publication validated
+
+wepp1 canonical deployment completed and released the global queue fence. Tenerife publication and repeat publication passed; pinned pixels/geospatial metadata match the baseline, original hashes are unchanged, and old-image retrieval remains compatible. Actual tailnet rsync verified the full release in 3.5 seconds. wepp2 is building; wepp3 awaits its ordered deployment. See [M6 evidence](artifacts/20261015_master_rollout.md).
+
+### 2026-10-15 03:42 UTC — wepp2 complete, wepp3 building
+
+wepp2 deployed successfully and its actual batch runtime passed managed/legacy raster and revision checks. Old idle pools needed a second SIGTERM after unregistering; zero started jobs and the owned queue fence were verified before that bounded recovery. The canonical script then completed and resumed dequeueing. wepp3 preflight passed and its fork/archive-only build is underway.
+
+### 2026-10-15 04:04 UTC — M6 complete
+
+All three hosts deployed `052019426` through their canonical presets and scripts, in order. All actual runtimes passed managed/legacy raster and revision checks. The initial Tenerife release and private source transfer are verified; old-image retrieval remains compatible. Global queue suspension/fence is cleared. wepp3 unrelated containers were unchanged. See [rollout evidence](artifacts/20261015_master_rollout.md), including shutdown recovery and the separate documentation-indexing failure. M7/M8 remain pending; defaults stay remote-only and sync disabled.

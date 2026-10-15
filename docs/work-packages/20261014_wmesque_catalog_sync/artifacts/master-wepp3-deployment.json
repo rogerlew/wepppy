@@ -1,0 +1,17 @@
+{
+  "host": "wepp3",
+  "time": "2026-10-15T04:04:03.979575+00:00",
+  "revision": "052019426172670634bea13b13dd8ef36d48bc94",
+  "containers": [
+    {
+      "name": "/docker-rq-worker-fork-archive-1",
+      "service": "rq-worker-fork-archive",
+      "image": "sha256:9782d6812bac55348daaacdec6b9b7141676ec4f472cf60efc9b05d8a2ecb69d",
+      "started_at": "2026-10-15T04:03:33.515608337Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    }
+  ]
+}

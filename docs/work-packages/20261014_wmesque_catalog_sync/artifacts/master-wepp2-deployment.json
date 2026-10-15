@@ -1,0 +1,37 @@
+{
+  "host": "wepp2",
+  "time": "2026-10-15T03:42:10.930971+00:00",
+  "revision": "052019426172670634bea13b13dd8ef36d48bc94",
+  "containers": [
+    {
+      "name": "/docker-rq-worker-batch-1",
+      "service": "rq-worker-batch",
+      "image": "sha256:33106aea90640cab41d5fb1ace1ace14dc2c9f7a2fd9c98bea9eaac5fe750d22",
+      "started_at": "2026-10-15T03:40:51.339129323Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/docker-rq-worker-1",
+      "service": "rq-worker",
+      "image": "sha256:33106aea90640cab41d5fb1ace1ace14dc2c9f7a2fd9c98bea9eaac5fe750d22",
+      "started_at": "2026-10-15T03:40:51.33851943Z",
+      "running": true,
+      "health": null,
+      "restart_count": 0,
+      "wmesque_environment": {}
+    },
+    {
+      "name": "/weppcloudr",
+      "service": "weppcloudr",
+      "image": "sha256:caad1d8b0a618b24967ceb02632f2aa9570e07a78771f69f9764a05b8a7385eb",
+      "started_at": "2026-10-15T03:40:20.632402202Z",
+      "running": true,
+      "health": "healthy",
+      "restart_count": 0,
+      "wmesque_environment": {}
+    }
+  ]
+}

@@ -122,3 +122,25 @@ Kubernetes changes use open-wepp-org's procedures. Its current compute workers
 mount geodata read-only and its scheduler is dry-run-only with a fixed-task
 readiness assertion: establish the authorized writer and sync-only activation
 before rollout. Do not enable unrelated GC/database jobs as a side effect.
+
+## Master Publication Rollout (2026-10-15)
+
+The first managed master resource is `tenerife/136_MDT25_TF`, revision
+`aa96d31fe8aff11778b84be268798c04295e0d3de758649ec6e666d854fee295`.
+Other datasets retain legacy retrieval until separately published. Do not infer
+that the complete geodata inventory is managed from this initial publication.
+
+The verified private source is `roger@wepp1:/geodata`, reached over the shared
+tailnet using existing operator SSH access with strict host-key checking.
+This is a verified operator transfer path, not a provisioned receiver service
+credential. Configure and validate the actual receiving task's credentials,
+normal passwd/home, known-host trust, and destination write access during its
+canary. Do not copy operator credentials into containers or enable master pulls.
+
+Original source directories remain unchanged. The previous production image
+successfully retrieved the published resource through its original path with
+read-only geodata access, validating layout compatibility for code rollback.
+Use the canonical deployment recovery procedure and retained image references;
+keep release directories and source data intact. See the
+[master rollout evidence](../work-packages/20261014_wmesque_catalog_sync/artifacts/20261015_master_rollout.md)
+for commands, revision, actual transfer and raster readback, and deployment status.

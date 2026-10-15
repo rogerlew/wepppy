@@ -3,7 +3,7 @@
 
 This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
-current together with the package tracker. Status: M1–M5 complete on forest. M6–M8 remain pending and are not authorized by the forest execution instruction.
+current together with the package tracker. Status: M1–M6 complete; production deployed on wepp1, wepp2, and wepp3. M7–M8 remain pending.
 
 ## Purpose / Big Picture
 
@@ -25,11 +25,15 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-14 UTC) M3: Ordered client configuration, deadline transport, validated publication, and additive EDDE provenance; focused regressions pass.
 - [x] (2026-10-14 UTC) M4: Manual sync and disabled/coalesced scheduled RQ integration; actual batch jobs validate adoption and failure recovery.
 - [x] (2026-10-14 21:24 UTC) M5: Forest scheduled integration, NFS interruption/concurrent reads, rebuilt model inputs/output, and fresh Compose image validated; broad suite 10,846 passed/126 skipped.
-- [ ] M6: Complete reviews and authorized wepp.cloud publication.
+- [x] (2026-10-15 03:31 UTC) M6 master: wepp1 deployed; verified Tenerife publication, unchanged pixels/source files, private tailnet transfer, and old-image rollback-layout acceptance passed.
+- [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
+- [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
 - [ ] M7: Complete authorized receiving-deployment canary.
 - [ ] M8: Enable recurrence/local-first routing and retain recovery evidence.
 
 ## Surprises & Discoveries
+
+Production Git LFS 2.3.4 stalled on a release-notes PDF. Seeding the verified object from forest resolved it without skipping LFS validation. The canonical failed-pull rollback left 410 candidate-created untracked files; each matched its candidate Git blob and was preserved outside the checkout before retry. The operator skill’s `rq-info --detailed` flag is unsupported by installed RQ; direct read-only registry inspection supplied its gate.
 
 
 The existing `wepppy/tools/scheduler.py` already supports interval-based RQ
@@ -44,8 +48,7 @@ Forest and forest1 existing worker images contain rsync but not ssh. The smalles
 repair adds the standard OS client package to both Dockerfiles, with no new
 service or credential mount. Forest1's existing worker identity and umask match
 forest (1000:993, 0022); its deployment was inspected read-only. Forest fixtures
-exercise existing NFSv4.2 `/wc1` storage. Actual master export credentials and
-Kubernetes write permissions remain later rollout checks.
+exercise existing NFSv4.2 `/wc1` storage. At forest acceptance, actual master export access and Kubernetes write permissions remained rollout checks. M6 now verifies operator export access; receiving task credentials and Kubernetes write permissions remain M7.
 
 Live NED VRTs reference mutable `/vsicurl/` sources. Managed publication correctly
 rejects them until materialized; legacy retrieval remains available. The isolated
@@ -54,6 +57,10 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+On 2026-10-15, M6 initially published the existing Tenerife 25 m DEM because its 37.5 MB local dependency closure is bounded and independently verifiable. Mutable remote NED mosaics remain legacy-readable until materialized. Existing operator SSH access establishes the private source without new accounts or privileges; actual receiver task credentials and writer access stay in M7.
+
+On 2026-10-15, Roger authorized M6 deployment to wepp1, wepp2, and wepp3. Execute the canonical host-local production script in that order, preserving queue gates, runtime identities, remote-only defaults, and disabled master synchronization. Receiving rollout and recurrence remain M7/M8.
 
 
 On 2026-10-14, Roger selected wepp.cloud master authority, extension-only local
@@ -82,6 +89,8 @@ connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
 
+M6 master acceptance passed on wepp1 at 2026-10-15 03:31 UTC. The initial managed resource is `tenerife/136_MDT25_TF`; other datasets remain legacy-readable. Existing operator SSH access over the tailnet successfully transferred and verified its 37.5 MB release. Actual receiver task credentials and writer configuration remain M7. wepp2 and wepp3 rollout and actual-runtime acceptance also passed; see `artifacts/20261015_master_rollout.md`.
+
 
 M1–M4 implementation and independent reviews are complete. Forest real scheduled
 jobs, adoption, concurrent retrieval, SIGKILL during copy, and retry all passed.
@@ -92,16 +101,13 @@ focused checks and a fresh model execution/readback; final service/scheduler tes
 passed 72 with one legacy opt-in skip. The broad suite passed 10,846 tests with
 126 skips. Implementation commit: `c138a8bab`. See
 `artifacts/20261014_forest_acceptance.md` and retained
-JSON/CSV evidence. No production or Kubernetes activation is claimed; M6–M8 keep
-the package open and recurrence remains disabled.
+JSON/CSV evidence. That forest acceptance did not claim production or Kubernetes activation. M6 now supplies production evidence; M7–M8 keep the package open and recurrence remains disabled.
 
 The batch worker was recreated from the canonical forest build, and WMesque v2
 was restarted and validated with an actual local NLCD request. Other deployment
 services were not restarted. The source project and live geodata catalog were
 not changed. Forest1 parity was inspected read-only; no production rollout is
-implied by successful local fixture transfer. Master export, task credentials,
-SSH identity/home, large-source capacity, and Kubernetes writer access remain
-explicit M6/M7 activation gates.
+implied by successful local fixture transfer. M6 subsequently verified the master export for its initial bounded release. Receiving task credentials, SSH identity/home, broader-source capacity, and Kubernetes writer access remain explicit M7 activation gates.
 
 ## Context and Orientation
 
@@ -326,3 +332,7 @@ to narrow M1 transport design; runtime access remains to be validated.
 Execution update: 2026-10-14 UTC — operator authorized M1–M5 and forest stack restarts. Concrete interfaces and policy now live in `docs/schemas/wmesque-catalog-contract.md` and ADR-0094. M5 failure injection uses isolated services/data; M6 production actions remain excluded.
 
 Execution update: M2–M4 code and focused tests exist; M5 real-worker integration underway. Interfaces are implemented in `wepppy/webservices/wmesque_catalog.py` and `wepppy/rq/wmesque_rq.py`; scheduler snapshots administrative source/destination into jobs. Initial focused checks passed (16 + 41); one pre-existing opt-in remote smoke skipped.
+
+Execution update: 2026-10-15 03:12 UTC — M6 authorized. All three production checkouts are clean at `84337c967`; forest candidate is `052019426`. Production preflight is checking the intervening deployment delta, queue state, and actual geodata mounts.
+
+Execution update: 2026-10-15 04:04 UTC — M6 completed on all three authorized hosts. Canonical deployments and actual-runtime retrieval passed; master publication and private tailnet transfer verified. Old idle RQ pools on wepp2/wepp3 required a second SIGTERM after confirming no target jobs. No fence remains. A separate docs-indexing failure is recorded in the rollout evidence. M7/M8 remain pending.
