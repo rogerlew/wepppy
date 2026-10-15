@@ -256,7 +256,7 @@ def test_provider_role_identity_changes_registry_revision_and_manifest_provenanc
 @pytest.mark.parametrize("binary_id", ["wepp_dcc52a6", "wepp_260803"])
 def test_registered_wepp_binary_pairs_execute_without_mocking(binary_id: str, tmp_path: Path) -> None:
     bin_root = Path(__file__).parents[2] / "wepp_runner" / "bin"
-    fixture_root = Path(__file__).parents[1] / "wepp" / "interchange" / "fixtures" / "deductive-futurist" / "wepp" / "runs"
+    fixture_root = Path(__file__).parents[1] / "wepp" / "fixtures" / "deductive_futurist_inputs" / "runs"
     required = (
         "p1.run", "p1.man", "p1.slp", "p1.cli", "p1.sol", "chan.inp",
         "chntyp.txt", "gwcoeff.txt", "pmetpara.txt", "snow.txt", "wepp_ui.txt",

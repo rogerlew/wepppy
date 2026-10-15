@@ -27,7 +27,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Full Forest regression passes: 10,872 passed, 126 skipped in 2,836.09 seconds, including all catalog latency checks.
 - [x] (2026-10-15 UTC) Final configuration `f8ce2bb92` passes hosted stubtest job `116535294278`, including cleanup.
 - [x] (2026-10-15 UTC) Commit `24dcc083e` supplies exact committed management fixtures, resolving the baseline failure after 2,844 passes. Focused tests pass on Forest and a fresh committed-source extraction on runner-02 with ignored matrix data absent.
-- [ ] Hosted baseline/isolation rerun remains pending after the committed-fixture correction. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [ ] Run `38792764959` passed stubtest but baseline failed after 5,022 passes on ignored binary inputs. The binary and two seed-generator test modules now reference dedicated committed fixtures; focused validation and hosted rerun are pending. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
@@ -51,6 +51,11 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+The next clean baseline exposed another ignored input family: the registered
+binary and two seed-generator modules used local `deductive-futurist` data.
+Commit their bounded input set together; keep optional full interchange-output
+fixtures outside this correction.
 
 The management corpus test read ignored Forest-only disturbed matrix output.
 Commit the exact small inputs as dedicated fixtures with provenance; passing

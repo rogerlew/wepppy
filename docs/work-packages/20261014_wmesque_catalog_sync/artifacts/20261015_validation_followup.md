@@ -204,3 +204,18 @@ and hashes checked by the unchanged test. The temporary Compose stack was
 removed with its volumes. The hosted baseline/isolation workflow will be
 restarted after this receipt is committed; no broad-suite pass is claimed for
 the fixture correction yet.
+
+### Committed binary and seed-generator fixtures
+
+Run `38792764959` passed stubtest, then baseline stopped after 5,022 passes
+and 237 skips: registered binary execution read ignored
+`deductive-futurist/wepp/runs/p1.run`. Isolation never started. Two later test
+modules also unconditionally read the same local input set.
+
+The required `p1` inputs/shared parameters and `pw0` parser/mutation inputs
+are now copied byte-for-byte into
+`tests/wepp/fixtures/deductive_futurist_inputs/runs/`, with provenance and
+SHA256SUMS. All three modules reference these committed fixtures. Assertions,
+registered binaries, and production behavior are unchanged. The `pw0` subset
+is for seed parsing/mutation only, not a complete executable watershed.
+Focused validation and the next hosted run remain pending.

@@ -28,10 +28,8 @@ pytestmark = pytest.mark.integration
 FIXTURE_RUNS_DIR = (
     Path(__file__).resolve().parents[1]
     / "wepp"
-    / "interchange"
     / "fixtures"
-    / "deductive-futurist"
-    / "wepp"
+    / "deductive_futurist_inputs"
     / "runs"
 )
 
