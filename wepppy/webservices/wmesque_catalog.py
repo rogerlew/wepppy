@@ -317,9 +317,12 @@ def _copy(source: str, relative: str, target: Path) -> None:
         return
     if not _REMOTE.fullmatch(source) or ".." in source.split(":", 1)[1].split("/"):
         raise ValueError("Source must be an absolute local root or user@tailnet-host:/absolute/root")
+    if not re.fullmatch(r"[A-Za-z0-9_.][A-Za-z0-9_./-]*", relative) or ".." in relative.split("/"):
+        raise ValueError("Invalid remote transfer path")
     remote = source.rstrip("/") + "/" + relative
-    # No shell; protected rsync arguments and preprovisioned SSH host trust.
-    args = ["rsync", "-rt", "--links", "--protect-args", "--timeout=300", "-e",
+    # rrsync must inspect paths, so secluded arguments (-s) are incompatible.
+    # Both remote path components are shell-safe; disable inherited -s as well.
+    args = ["rsync", "-rt", "--links", "--no-protect-args", "--timeout=300", "-e",
             "ssh -oBatchMode=yes -oStrictHostKeyChecking=yes -oConnectTimeout=30", "--"]
     if relative.endswith("/"):
         target.mkdir()

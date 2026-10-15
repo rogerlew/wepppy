@@ -18,6 +18,8 @@ sync/adoption followed by downstream project input and output readback.
 
 ## Progress
 
+- [x] (2026-10-15 UTC) M7 restricted master key/branches explicitly authorized and installed; source-overlay dry-run/transfer/hash/full-raster/convergence and negative shell/upload checks passed. Independent source/security/QA reviews found no blocking defect. GitHub authentication blocks corrected-image publication; final M7 acceptance remains pending.
+
 
 - [x] (2026-10-14 20:16 UTC) Governance, static assessment, and work-package scaffold prepared.
 - [x] (2026-10-14 UTC) M1: Concrete contract/ADR accepted and independently reviewed; checkpoint `193df8b8c`.
@@ -28,10 +30,22 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 03:31 UTC) M6 master: wepp1 deployed; verified Tenerife publication, unchanged pixels/source files, private tailnet transfer, and old-image rollback-layout acceptance passed.
 - [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
 - [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
-- [ ] M7: Complete authorized receiving-deployment canary.
+- [ ] M7: Complete authorized receiving-deployment canary (iMac baseline and hpc fixture/write acceptance passed; restricted SSH compatibility correction in progress).
 - [ ] M8: Enable recurrence/local-first routing and retain recovery evidence.
 
 ## Surprises & Discoveries
+
+M7 iMac inspection confirmed geodata is read-only at Kubernetes and NFS export
+layers, and compute cannot connect to master TCP22. Roger selected a bounded
+container on existing hpc, preserving all compute mounts. Its exact candidate
+image passed local adoption/extension/convergence/corrupt-transfer fixtures and
+a real destination write/fsync/read/cleanup probe as UID:GID 1000:993, umask 0022.
+Master remains the two-file 37,493,165-byte Tenerife release. The proposed
+read-only rrsync credential exposed a real incompatibility: the helper forces
+`--protect-args`, while installed rrsync rejects `-s`. The source correction
+validates shell-safe relative paths and explicitly disables secluded arguments;
+server path inspection, strict trust and read-only restrictions are preserved.
+The actual SSH credential and rebuilt-image acceptance remain pending.
 
 Production Git LFS 2.3.4 stalled on a release-notes PDF. Seeding the verified object from forest resolved it without skipping LFS validation. The canonical failed-pull rollback left 410 candidate-created untracked files; each matched its candidate Git blob and was preserved outside the checkout before retry. The operator skill’s `rq-info --detailed` flag is unsupported by installed RQ; direct read-only registry inspection supplied its gate.
 
@@ -57,6 +71,19 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+Latest 2026-10-15 authority update: Roger explicitly approved both the restricted
+master public key and M7 branches. Branches `codex/wmesque-m7-rsync` and
+`codex/wmesque-m7-receiver` now exist. Dedicated credential is restricted to
+hpc 100.104.131.11 and `/usr/bin/rrsync -ro /geodata`; operator private keys were
+not copied. Preserve strict trust and read-only compute/NFS export boundaries.
+
+On 2026-10-15 UTC Roger authorized the bounded hpc writer and M7 deployment.
+Master credential changes and new PR branch creation remain separately gated.
+Use the existing storage host rather than expanding NFS/compute write authority
+or Kubernetes tailnet access. Prepare the rrsync compatibility correction in
+`/Users/roger/src/wepppy-wmesque-m7` at detached candidate 31c6d5d19; preserve the
+unrelated dirty original iMac checkout. No new branch has been created.
 
 On 2026-10-15, M6 initially published the existing Tenerife 25 m DEM because its 37.5 MB local dependency closure is bounded and independently verifiable. Mutable remote NED mosaics remain legacy-readable until materialized. Existing operator SSH access establishes the private source without new accounts or privileges; actual receiver task credentials and writer access stay in M7.
 
@@ -88,6 +115,21 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+Latest M7 checkpoint: actual restricted source-overlay transfer and repeat
+convergence succeeded into isolated hpc `/home/roger/wmesque-m7-canary`.
+Both files/37,493,165 bytes verify; full GDAL array is rows2747 x columns3255,
+EPSG:32628. Non-rsync shell and upload requests are rejected. Source correction
+passed 33 focused tests and real protocol regression with master rrsync; independent
+QA/security reviews approve source/credential design. The iMac GitHub CLI token
+is invalid, preventing canonical publication/protected PR. Operator reauthentication
+is required; corrected-image, live serving/fallback and rollback are still pending.
+
+M7 is not complete. Existing candidate is downloaded on hpc; isolated raster
+fixtures and destination identity/write checks pass. No master credential,
+cluster image/routing or recurrence has changed. The receiving execution record
+is open-wepp-org `docs/work-packages/20261014-wmesque-receiver-canary/`.
+The actual transfer, local-service parity, fallback and rollback remain gates.
 
 M6 master acceptance passed on wepp1 at 2026-10-15 03:31 UTC. The initial managed resource is `tenerife/136_MDT25_TF`; other datasets remain legacy-readable. Existing operator SSH access over the tailnet successfully transferred and verified its 37.5 MB release. Actual receiver task credentials and writer configuration remain M7. wepp2 and wepp3 rollout and actual-runtime acceptance also passed; see `artifacts/20261015_master_rollout.md`.
 

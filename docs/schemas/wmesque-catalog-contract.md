@@ -71,9 +71,15 @@ Missing resource is 404; invalid IDs are 400. No bulk download API is introduced
 `sync_catalog(source, destination, *, dry_run=False)` pulls the master's managed
 catalog and referenced immutable releases. Source is an absolute local root for
 fixtures or an administrator-configured `user@tailnet-host:/absolute/root` over
-SSH. Reuse rsync with argument protection and noninteractive SSH; source config
+SSH. Reuse rsync with shell-safe validated remote paths and noninteractive SSH; source config
 is never browser input. Require host-key verification and existing authorized
-credentials; never auto-accept unknown host keys. Validate transferred paths,
+credentials; never auto-accept unknown host keys. Remote root and generated
+relative paths must contain only ASCII letters, digits, underscore, dot, slash
+and hyphen, with no traversal components. Explicitly disable rsync secluded
+arguments (`--no-protect-args`): the restricted `rrsync` server must inspect paths
+and rejects `--protect-args`. This preserves argument safety through validation
+and argv execution without weakening the server's read-only/path restriction.
+Validate transferred paths,
 VRT dependency containment, and hashes before asking GDAL to open them, then raster readability
 before publishing any catalog changes. No delete or reverse-sync operation.
 

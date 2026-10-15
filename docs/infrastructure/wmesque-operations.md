@@ -59,6 +59,11 @@ All initial deployments are assumed to share one tailnet. Provision read access
 to the master's export, SSH credentials and known-host trust, and destination
 write access for the actual task identity. SSH is noninteractive and requires
 host verification. Never bypass host checks to make a sync succeed.
+Restricted `rrsync -ro /geodata` credentials require ordinary inspectable rsync
+arguments. The helper validates shell-safe paths and explicitly disables secluded
+arguments, which rrsync rejects. For a restricted export rooted at `/geodata`,
+use source `sync@tailnet-host:/.`; its paths are relative to that export root.
+Retain the read-only forced command and source-host restriction on the credential.
 Both runtime Dockerfiles install `openssh-client` alongside the existing rsync
 transport. Older images may lack it: check `command -v ssh` in the actual task
 container and rebuild through the normal deployment workflow before activation.

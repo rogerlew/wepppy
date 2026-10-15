@@ -2,6 +2,12 @@
 
 ## Quick Status
 
+Current M7 checkpoint (2026-10-15 UTC): bounded hpc writer, restricted master key
+and branches explicitly approved. Actual isolated receiver transfer/readback and
+convergence pass; source correction passes 33 focused tests and independent
+QA/security reviews. GitHub authentication on the iMac blocks corrected-image
+publication/protected PR. Live service/routing/rollback remain pending; M8 disabled.
+
 **Started**: 2026-10-14 20:16 UTC
 **Updated**: 2026-10-15 04:04 UTC
 **Phase**: M1–M6 complete; receiving rollout pending
@@ -52,6 +58,47 @@
 - [ ] M7/M8 receiving rollout, recurrence, and recovery evidence.
 
 ## Progress Notes
+
+### Latest M7 execution — restricted-key acceptance complete, publication held
+
+Roger approved the restricted master public-key entry and M7 branches. Both
+completed. Real receiver source-overlay transfer passed dry-run, copy, complete
+hash verification, full GDAL readback and repeat convergence. Shell execution
+and rsync upload dry-run failed at rrsync as required. Retained evidence lives in
+the receiving package `artifacts/20261015_transfer_evidence.md`; source QA is
+`artifacts/20261015_m7_qa_review.md`, and independent security review is in the
+receiving package. The iMac's `gh auth status` reports an invalid credential;
+operator reauthentication is the external publication blocker. No corrected
+immutable image, live geodata publication, cluster promotion or local-first
+routing has occurred. No master service restart or policy broadening occurred.
+
+### 2026-10-15 UTC — Authorized iMac/hpc M7 execution
+
+Roger selected and authorized the bounded hpc container and M7 deployment;
+master credential and PR branch permissions remain separately pending.
+Cluster/Flux healthy; all 15 workers idle, zero started/scheduled jobs, retained
+deferred counts default=11 and batch=3. Candidate 31c6d5d19/digest 97b1abe5...
+downloaded on hpc. Actual UID:GID 1000:993/home /home/roger/umask 0022 passed
+destination write/fsync/read/cleanup and isolated full-raster adoption, extension,
+convergence and corrupt-transfer recovery checks. Original datasets unchanged.
+
+Confirmed failure: installed master rrsync rejects `--protect-args` (`-s`).
+Prepared a minimal client correction with safe remote-path validation and explicit
+`--no-protect-args`; preserve strict SSH trust and server-side read-only/path
+enforcement. Source/tests/docs live in detached `/Users/roger/src/wepppy-wmesque-m7`;
+the original dirty checkout is preserved. Actual restricted SSH transfer and
+rebuilt-image deployment are still unverified. Receiving records:
+open-wepp-org `docs/work-packages/20261014-wmesque-receiver-canary/`.
+
+Focused source-overlay acceptance passed 33 catalog tests in the published
+candidate image on hpc; the real rsync protocol regression also passed against
+the exact master rrsync script. Canonical wctl/full-suite execution is blocked
+on the iMac (no wctl); this was explicitly an isolated image test, not that gate.
+No rebuilt image, master credential installation, GitOps promotion or live
+receiving transfer is claimed. Do not promote the old candidate digest before
+publishing the corrected source. Original checkout remains untouched; detached
+checkout also shows an unrelated TIFFW artifact change from checkout/filtering,
+which is excluded from this work.
 
 ### 2026-10-14 20:24 UTC — Shared tailnet assumption
 
