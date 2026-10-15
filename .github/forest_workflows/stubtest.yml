@@ -42,6 +42,7 @@ jobs:
         lfs: true
     - name: Verify materialized inputs
       run: |
+        git lfs checkout
         git lfs fsck
         python3 tools/verify_lfs_materialized.py --tracked
     - name: Install wctl shim
@@ -51,6 +52,7 @@ jobs:
         mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+      id: wctl
     - name: Start isolated test runtime
       run: wctl --compose-file docker/docker-compose.test.yml up -d --wait
     - name: Run stubtest suite
@@ -58,7 +60,7 @@ jobs:
     - name: Check pytest stubs completeness
       run: wctl --compose-file docker/docker-compose.test.yml check-test-stubs
     - name: Remove isolated test runtime
-      if: always()
+      if: always() && steps.wctl.outcome == 'success'
       run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
   test-isolation:
     forest_bootstrap: false
@@ -79,6 +81,7 @@ jobs:
         lfs: true
     - name: Verify materialized inputs
       run: |
+        git lfs checkout
         git lfs fsck
         python3 tools/verify_lfs_materialized.py --tracked
     - name: Install wctl shim
@@ -88,6 +91,7 @@ jobs:
         mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+      id: wctl
     - name: Start isolated test runtime
       run: wctl --compose-file docker/docker-compose.test.yml up -d --wait
     - name: Check baseline suite
@@ -110,7 +114,7 @@ jobs:
         if-no-files-found: warn
         retention-days: 7
     - name: Remove isolated test runtime
-      if: always()
+      if: always() && steps.wctl.outcome == 'success'
       run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
 permissions:
   contents: read

@@ -128,3 +128,14 @@ Runner qualification: 648 tracked LFS assets pass materialization and fsck;
 regressions pass. Generator freshness, changed-file exception enforcement,
 Markdown lint and diff whitespace checks pass. Full Forest and full isolation
 results remain pending; no random-order coverage is claimed.
+
+### Hosted workflow checkpoint
+
+Source integration `db903ce0e` started run `38762839809` on runner-02, proving
+label matching. Its checkout downloaded all LFS objects (`git lfs fsck` passed)
+but left 648 pointer files; materialization verification correctly blocked the
+job before runtime startup. The follow-up explicitly runs `git lfs checkout`
+before verification. Cleanup now requires successful wctl installation, so an
+earlier preflight failure does not produce an unrelated missing-command error.
+The direct full-isolation qualification was stopped and its disposable stack
+removed when hosted acceptance started; no isolation pass is claimed.
