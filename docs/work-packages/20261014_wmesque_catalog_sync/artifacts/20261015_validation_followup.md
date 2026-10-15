@@ -218,4 +218,12 @@ are now copied byte-for-byte into
 SHA256SUMS. All three modules reference these committed fixtures. Assertions,
 registered binaries, and production behavior are unchanged. The `pw0` subset
 is for seed parsing/mutation only, not a complete executable watershed.
-Focused validation and the next hosted run remain pending.
+Commit `9ce4195f8` contains the fixtures and three reference changes. The three
+complete test modules pass on Forest (89 passed, 20.97 seconds) and runner-02
+(89 passed, 18.44 seconds), including actual execution of both registered
+watershed/hillslope binary pairs and the single/multiple-OFE mutation tests.
+Runner validation overlaid the exact committed test/fixture paths on the prior
+clean archive; the ignored `deductive-futurist` directory was confirmed absent,
+and all 16 fixture hashes passed. Its isolated containers/volumes were removed.
+The next hosted baseline/isolation run remains pending; no broad pass is claimed
+from the focused checks.

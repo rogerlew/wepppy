@@ -11,8 +11,9 @@ lifecycle locks and the development URL prefix. Final configuration `f8ce2bb92`
 passes hosted stubtest. Run `38792764959` then failed after 5,022 passes on
 ignored binary inputs; isolation did not start. The earlier management-fixture
 correction passed. The binary and two seed-generator modules now use dedicated
-committed inputs with hashes/provenance. Focused validation and the next hosted
-run remain pending; no full-workflow or random-order pass is claimed.
+committed inputs with hashes/provenance (`9ce4195f8`). All 89 tests in these
+modules pass on Forest and runner-02 with ignored source data absent. The next
+hosted run remains pending; no full-workflow or random-order pass is claimed.
 Recurrence remains disabled.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 
