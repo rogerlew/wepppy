@@ -336,3 +336,9 @@ Execution update: M2–M4 code and focused tests exist; M5 real-worker integrati
 Execution update: 2026-10-15 03:12 UTC — M6 authorized. All three production checkouts are clean at `84337c967`; forest candidate is `052019426`. Production preflight is checking the intervening deployment delta, queue state, and actual geodata mounts.
 
 Execution update: 2026-10-15 04:04 UTC — M6 completed on all three authorized hosts. Canonical deployments and actual-runtime retrieval passed; master publication and private tailnet transfer verified. Old idle RQ pools on wepp2/wepp3 required a second SIGTERM after confirming no target jobs. No fence remains. A separate docs-indexing failure is recorded in the rollout evidence. M7/M8 remain pending.
+
+Handoff preparation: read-only forest inspection found no local Kubernetes
+administration tools or kubeconfig. The receiving repository documents the iMac
+as management root of trust and dev-01 for Linux builds. The recommended M7
+execution handoff is `../m7_imac_handoff.md`; it preserves receiving-repository
+controls and does not assert new deployment authorization. M7 remains pending.

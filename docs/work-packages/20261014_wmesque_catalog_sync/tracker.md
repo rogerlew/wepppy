@@ -127,3 +127,12 @@ wepp2 deployed successfully and its actual batch runtime passed managed/legacy r
 ### 2026-10-15 04:04 UTC — M6 complete
 
 All three hosts deployed `052019426` through their canonical presets and scripts, in order. All actual runtimes passed managed/legacy raster and revision checks. The initial Tenerife release and private source transfer are verified; old-image retrieval remains compatible. Global queue suspension/fence is cleared. wepp3 unrelated containers were unchanged. See [rollout evidence](artifacts/20261015_master_rollout.md), including shutdown recovery and the separate documentation-indexing failure. M7/M8 remain pending; defaults stay remote-only and sync disabled.
+
+### M7 administration handoff preparation
+
+Read-only forest inspection found no kubectl, Flux CLI, Talos CLI, configured
+KUBECONFIG, or default kubeconfig. The open-wepp-org deployment architecture
+identifies the iMac as management root of trust and dev-01 as its Linux build
+node. Recommended execution location: administrative iMac. Prepared the
+[M7 agent handoff](prompts/m7_imac_handoff.md); this is preparation, not M7
+execution or a new live-change grant. No cluster configuration was changed.
