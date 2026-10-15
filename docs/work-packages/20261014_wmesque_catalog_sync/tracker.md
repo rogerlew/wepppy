@@ -5,8 +5,16 @@
 Current M7 checkpoint (2026-10-15 UTC): bounded hpc writer, restricted master key
 and branches explicitly approved. Actual isolated receiver transfer/readback and
 convergence pass; source correction passes 33 focused tests and independent
-QA/security reviews. GitHub authentication on the iMac blocks corrected-image
-publication/protected PR. Live service/routing/rollback remain pending; M8 disabled.
+QA/security reviews. GitHub access is restored; source `467901f08` pushed and
+build `38683704256` started. Promotion is held: the canonical native dependency
+pin fails the candidate's startup hash/API checks, and the common-image delta
+contains unrelated model-default changes and new saved-state reader floors.
+Operator subsequently selected the full current-state upgrade. Validated native
+release `0515272453e36fe071c7812fb9d8ca2cf1642d08` is now published and the
+canonical image workflow pin updated; rebuilt-image/recovery gates remain.
+Live service/routing/rollback remain pending; M8 disabled. Receiving evidence:
+`docs/work-packages/20261014-wmesque-receiver-canary/artifacts/image-delta-review.md`
+in the open-wepp-org repository.
 
 **Started**: 2026-10-14 20:16 UTC
 **Updated**: 2026-10-15 04:04 UTC

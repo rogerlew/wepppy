@@ -18,6 +18,10 @@ sync/adoption followed by downstream project input and output readback.
 
 ## Progress
 
+- [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
+- [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
+- [ ] Rebuild and validate exact paired image, PRISM cache configuration and compatible recovery before full promotion.
+
 - [x] (2026-10-15 UTC) M7 restricted master key/branches explicitly authorized and installed; source-overlay dry-run/transfer/hash/full-raster/convergence and negative shell/upload checks passed. Independent source/security/QA reviews found no blocking defect. GitHub authentication blocks corrected-image publication; final M7 acceptance remains pending.
 
 
@@ -34,6 +38,15 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence/local-first routing and retain recovery evidence.
 
 ## Surprises & Discoveries
+
+The published Kubernetes candidate contains native artifact `c6b746bb...`, but
+its startup preflight requires `103f2096...`; direct execution fails and the
+soil anisotropy API is absent. The canonical workflow still pins the older
+WEPPpyo3 source. Its deployed-to-candidate delta also changes model defaults and
+adds saved-state readers, so the deployed `7288e8fe5` image cannot be treated as
+an unconditional rollback target. These findings supersede the authentication
+blocker and earlier source-only approvals; see the receiving package's
+`artifacts/image-delta-review.md` for the independent image-level gate.
 
 M7 iMac inspection confirmed geodata is read-only at Kubernetes and NFS export
 layers, and compute cannot connect to master TCP22. Roger selected a bounded
@@ -71,6 +84,19 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+- Decision: Execute the full current-state openwepp upgrade, not a scoped backport.
+  Rationale: Roger explicitly accepted the other deploying changes and requested
+  matching current state. Correct native packaging and PRISM configuration while
+  preserving existing runtime identities and M8 exclusion. The prior scope hold
+  is resolved; exact-image/recovery gates are not waived.
+  Date/Author: 2026-10-15, Roger/Codex.
+
+- Decision: Hold common-runtime promotion pending operator choice of scoped
+  backport or broader runtime upgrade. Remove the unapplied candidate transform.
+  Rationale: M7 authority does not authorize unrelated model-default changes;
+  the exact-image startup check also fails. Do not weaken that check.
+  Date/Author: 2026-10-15, Codex.
 
 Latest 2026-10-15 authority update: Roger explicitly approved both the restricted
 master public key and M7 branches. Branches `codex/wmesque-m7-rsync` and
@@ -115,6 +141,11 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+M7 remains incomplete after GitHub access restoration. Source publication is
+underway, but no live receiving image/routing/geodata promotion occurred.
+The image-level review caught a stale native dependency pin before deployment;
+focused WMesque tests alone did not establish common-runtime compatibility.
 
 Latest M7 checkpoint: actual restricted source-overlay transfer and repeat
 convergence succeeded into isolated hpc `/home/roger/wmesque-m7-canary`.
