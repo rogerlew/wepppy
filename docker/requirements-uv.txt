@@ -141,7 +141,7 @@ notebook==6.4.12
 numexpr==2.10.0
 numpy==1.26.0
 authlib==1.6.12
-oauthlib==3.2.2
+oauthlib==4.0.0
 olefile==0.46
 openpyxl==3.0.9
 owslib==0.31.0
