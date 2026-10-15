@@ -12,8 +12,10 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture()
-def ash_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def ash_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, record_nodb_cache_clear):
     import wepppy.rq.project_rq as project
+
+    record_nodb_cache_clear(project)
 
     published = []
     run_total_calls = []

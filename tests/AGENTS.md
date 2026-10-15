@@ -47,6 +47,11 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 - Need a clean environment variable? Use `monkeypatch.setenv` and `monkeypatch.delenv` inside tests.
 - Reuse the shared factories in `tests/factories/` whenever you need RedisPrep/Queue/NoDb stubs. `rq_environment` (imported in `tests/conftest.py`) provides recorder-backed helpers so blueprints can assert on queued jobs without copy/pasting mocks.
 
+- RQ orchestration unit tests can explicitly request `wepp_cache_clear_calls`
+  or the module-targeted `record_nodb_cache_clear` fixture from
+  `tests/rq/conftest.py` to record scoped invalidation without deployment
+  filesystem access. Cache-behavior tests retain their real/ordering boundaries.
+
 ### Module Stub Management
 
 **Critical**: When creating stubs for `wepppy` modules via `sys.modules` to isolate tests from heavy dependencies, follow these rules:

@@ -48,7 +48,9 @@ class DummyRedis:
         return 1
 
 
-def test_bootstrap_enable_rq_initializes_and_releases_lock(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_bootstrap_enable_rq_initializes_and_releases_lock(
+    monkeypatch: pytest.MonkeyPatch, wepp_cache_clear_calls: list[tuple[str, str]],
+) -> None:
     store = {
         bootstrap_git_lock_key("ab-run"): json.dumps({"token": "lock-1"}),
         bootstrap_enable_job_key("ab-run"): "job-1",
@@ -69,6 +71,8 @@ def test_bootstrap_enable_rq_initializes_and_releases_lock(monkeypatch: pytest.M
     monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis(store))
 
     result = wepp_rq.bootstrap_enable_rq("ab-run", actor="user:1", lock_token="lock-1")
+
+    assert wepp_cache_clear_calls == [("ab-run", "wepp.nodb")]
 
     assert result == {"enabled": True, "runid": "ab-run"}
     assert init_calls == ["called"]
@@ -115,7 +119,9 @@ def test_bootstrap_enable_rq_clears_scoped_cache_before_wepp_hydration(
     ]
 
 
-def test_bootstrap_enable_rq_skips_init_when_already_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_bootstrap_enable_rq_skips_init_when_already_enabled(
+    monkeypatch: pytest.MonkeyPatch, wepp_cache_clear_calls: list[tuple[str, str]],
+) -> None:
     store = {
         bootstrap_git_lock_key("ab-run"): json.dumps({"token": "lock-2"}),
         bootstrap_enable_job_key("ab-run"): "job-2",
@@ -136,6 +142,8 @@ def test_bootstrap_enable_rq_skips_init_when_already_enabled(monkeypatch: pytest
     monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis(store))
 
     result = wepp_rq.bootstrap_enable_rq("ab-run", actor="user:1", lock_token="lock-2")
+
+    assert wepp_cache_clear_calls == [("ab-run", "wepp.nodb")]
 
     assert result == {"enabled": True, "runid": "ab-run"}
     assert init_calls == []

@@ -1,0 +1,15 @@
+# CI-only extension of the accepted common runtime; no image publication.
+FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS node_runtime
+FROM ghcr.io/rogerlew/wepppy@sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc
+USER root
+COPY --from=node_runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node_runtime /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+COPY wepppy/weppcloud/static-src/package.json wepppy/weppcloud/static-src/package-lock.json /opt/wepppy-ci/
+ENV NODE_PATH=/opt/wepppy-ci/node_modules \
+    PLAYWRIGHT_BROWSERS_PATH=/opt/wepppy-ci/browsers
+RUN cd /opt/wepppy-ci && npm ci --legacy-peer-deps && \
+    node node_modules/playwright/cli.js install --with-deps chromium && \
+    chmod -R a+rX /opt/wepppy-ci && npm cache clean --force
+
+USER roger

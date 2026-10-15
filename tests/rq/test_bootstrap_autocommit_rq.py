@@ -361,7 +361,9 @@ def test_log_prep_complete_uses_timeout_aligned_lock_and_releases_on_failure(
     assert any("EXCEPTION" in message for message in published)
 
 
-def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prep_watershed_enqueue_uses_prep_only_pipeline(
+    monkeypatch: pytest.MonkeyPatch, wepp_cache_clear_calls: list[tuple[str, str]],
+) -> None:
     monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
     monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
@@ -418,6 +420,8 @@ def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.Monk
 
     final_job = wepp_rq.prep_wepp_watershed_rq("ab-run")
 
+    assert wepp_cache_clear_calls == [("ab-run", "wepp.nodb")]
+
     assert final_job.id == "job-final"
     assert called == {
         "queue_type": "_DummyQueue",
@@ -429,7 +433,9 @@ def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.Monk
     }
 
 
-def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_standard_watershed_enqueue_sets_autocommit(
+    monkeypatch: pytest.MonkeyPatch, wepp_cache_clear_calls: list[tuple[str, str]],
+) -> None:
     monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
     monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
@@ -458,6 +464,7 @@ def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPa
 
     wepp_rq.run_wepp_watershed_rq("ab-run")
 
+    assert wepp_cache_clear_calls == [("ab-run", "wepp.nodb")]
     assert recovery_calls == [("/tmp/run", ("watershed",))]
     assert warnings
     assert warnings[-1] == "Recovered mixed NoDir roots before run_wepp_watershed_rq(ab-run): watershed"
@@ -491,7 +498,9 @@ def test_noprep_watershed_enqueue_keeps_autocommit_disabled(monkeypatch: pytest.
     assert calls[0]["kwargs"] is None
 
 
-def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_wepp_rq_locked_run_publishes_exception_status(
+    monkeypatch: pytest.MonkeyPatch, wepp_cache_clear_calls: list[tuple[str, str]],
+) -> None:
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 0)
     monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
@@ -518,6 +527,7 @@ def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.M
     with pytest.raises(RuntimeError, match="ab-run is locked"):
         wepp_rq.run_wepp_rq("ab-run")
 
+    assert wepp_cache_clear_calls == [("ab-run", "wepp.nodb")]
     assert any(
         channel == "ab-run:wepp" and "EXCEPTION run_wepp_rq(ab-run)" in message
         for channel, message in published

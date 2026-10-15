@@ -28,7 +28,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Final configuration `f8ce2bb92` passes hosted stubtest job `116535294278`, including cleanup.
 - [x] (2026-10-15 UTC) Commit `24dcc083e` supplies exact committed management fixtures, resolving the baseline failure after 2,844 passes. Focused tests pass on Forest and a fresh committed-source extraction on runner-02 with ignored matrix data absent.
 - [x] (2026-10-15 UTC) Resolved run `38792764959` missing binary inputs in `9ce4195f8`. The binary and two seed-generator test modules use dedicated committed fixtures; 89 tests pass on both Forest and runner-02 with the ignored source absent and all 16 hashes verified.
-- [ ] Hosted baseline/isolation rerun remains pending after the binary/seed fixture correction. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [ ] Run `38797621501` passed stubtest then failed after 5,843 baseline passes on a unit test using the real cache/run-directory boundary. Affected orchestration tests now explicitly record scoped invalidation; 19 focused browser/schema/CSRF tests and 4,693 remaining-group tests pass on runner-02. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
@@ -52,6 +52,16 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+A broader clean-runner probe found unit tests using real cache and configuration
+lock paths despite mocked controllers. It also found missing Node and generated
+controller assets. Use explicit test-boundary fixtures and temporary paths; extend
+only the CI image with existing Node 20 and locked Playwright/Chromium dependencies,
+invoke the canonical controller builder, and initialize the disposable account
+schema from current models plus the canonical preferences migration for named
+constraints. Fresh migrations assume an existing account table; the bootstrap
+refuses nonempty databases. The common production runtime and isolation controls stay
+unchanged.
 
 The next clean baseline exposed another ignored input family: the registered
 binary and two seed-generator modules used local `deductive-futurist` data.
@@ -126,6 +136,14 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+- Decision: Make clean CI prerequisites explicit: committed inputs, opt-in unit
+  boundary fixtures, generated controllers, existing locked browser dependencies,
+  and a disposable schema from current models plus the canonical preferences
+  migration for named constraints. Rationale: broad runner probes
+  demonstrate dependence on Forest-local state; preserve actual integration
+  behavior, assertions, privileges, and thresholds instead of skipping tests.
+  Date/Author: 2026-10-15, Codex.
 
 - Decision: Commit the two management corpus fixtures and reference their
   dedicated directory. Rationale: the operator explicitly requires committed
@@ -202,6 +220,12 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+Clean-runner follow-up: explicit unit boundaries and CI prerequisites resolve
+the discovered failures. The final remaining-group check passes 4,693 tests
+(83 skips, 12 subtests); 19 focused database/browser/CSRF tests also pass.
+The disposable-schema refusal preserves the logical schema/data hash.
+These bounded results do not replace full hosted baseline/isolation acceptance.
 
 Validation follow-up: Forest PostgreSQL now uses the approved SSD-backed named
 volume, with matching stopped data/metadata and table counts, unchanged durable

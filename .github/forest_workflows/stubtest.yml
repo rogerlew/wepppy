@@ -9,6 +9,10 @@ on:
     - .github/workflows/stubtest.yml
     - .github/forest_workflows/stubtest.yml
     - docker/docker-compose.test.yml
+    - docker/Dockerfile.test
+    - tests/bootstrap_ci_database.py
+    - wepppy/weppcloud/static-src/package.json
+    - wepppy/weppcloud/static-src/package-lock.json
     - scripts/build_forest_workflows.py
   push:
     branches:
@@ -21,6 +25,10 @@ on:
     - .github/workflows/stubtest.yml
     - .github/forest_workflows/stubtest.yml
     - docker/docker-compose.test.yml
+    - docker/Dockerfile.test
+    - tests/bootstrap_ci_database.py
+    - wepppy/weppcloud/static-src/package.json
+    - wepppy/weppcloud/static-src/package-lock.json
     - scripts/build_forest_workflows.py
   workflow_dispatch: null
 jobs:
@@ -54,14 +62,14 @@ jobs:
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
       id: wctl
     - name: Start isolated test runtime
-      run: wctl --compose-file docker/docker-compose.test.yml up -d --wait
+      run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
     - name: Run stubtest suite
       run: wctl --compose-file docker/docker-compose.test.yml run-stubtest
     - name: Check pytest stubs completeness
       run: wctl --compose-file docker/docker-compose.test.yml check-test-stubs
     - name: Remove isolated test runtime
       if: always() && steps.wctl.outcome == 'success'
-      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
+      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans --rmi local
   test-isolation:
     forest_bootstrap: false
     needs: stubtest
@@ -93,7 +101,13 @@ jobs:
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
       id: wctl
     - name: Start isolated test runtime
-      run: wctl --compose-file docker/docker-compose.test.yml up -d --wait
+      run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud
+        /opt/venv/bin/python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Initialize disposable account schema
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud
+        /opt/venv/bin/python tests/bootstrap_ci_database.py
     - name: Check baseline suite
       run: wctl --compose-file docker/docker-compose.test.yml run-pytest tests --maxfail=1
     - name: Check pytest isolation
@@ -115,6 +129,6 @@ jobs:
         retention-days: 7
     - name: Remove isolated test runtime
       if: always() && steps.wctl.outcome == 'success'
-      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
+      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans --rmi local
 permissions:
   contents: read

@@ -43,8 +43,12 @@ and cleanup. Use this for standalone CI runtimes that must not inherit Forest's
 host environment. Stubtest uses this mode on `remote-ci` (runner-02), with
 `docker/docker-compose.test.yml`, verified LFS inputs, and a unique Compose
 project per job. Its full isolation check is a separate, longer job. The pinned
-common image supplies dependencies; update its digest when those dependencies
-change and validate both stubtest and isolation against the candidate image.
+common image supplies Python/native dependencies; `docker/Dockerfile.test` adds
+the existing Node 20 runtime by pinned digest and provisions Playwright/Chromium
+from the static-src lockfile outside the checkout mount. The longer job builds
+controller assets and creates the disposable account schema before pytest.
+Update the image pins when dependencies change and validate both stubtest and
+isolation; cleanup removes the job-local built image.
 
 ### Why keep the builder under `scripts/`?
 

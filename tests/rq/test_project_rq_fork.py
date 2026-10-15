@@ -1109,8 +1109,10 @@ def test_clean_env_for_system_tools_uses_sanitized_path(monkeypatch: pytest.Monk
     assert "/custom/bin" not in env["PATH"]
 
 
-def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
 
     worker_job = SimpleNamespace(
         id="job-fork",
@@ -1220,6 +1222,8 @@ def test_fork_rq_skip_omni_completes_when_controller_is_absent(
 ) -> None:
     import wepppy.rq.project_rq as project
 
+    monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
+
     destination = tmp_path / "destination"
     destination.mkdir()
     published: list[str] = []
@@ -1263,8 +1267,10 @@ def test_fork_rq_skip_omni_completes_when_controller_is_absent(
     assert reset_marker_calls == [(("new-run", str(destination), "source-run:fork"), {})]
 
 
-def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
 
     monkeypatch.setattr(
         project,
@@ -1374,8 +1380,10 @@ def test_run_rsync_with_bounded_output_limits_summary_and_failure_tails() -> Non
     assert published == [error_text]
 
 
-def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
 
     reset_calls: list[tuple[str, str, str]] = []
     monkeypatch.setattr(
@@ -1464,9 +1472,11 @@ def test_fork_rq_holds_top_level_config_guard_while_copying_owned_bytes(
 
 
 def test_fork_rq_reset_marker_failure_emits_fork_failed(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
 ) -> None:
     import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
 
     published: list[str] = []
     monkeypatch.setattr(

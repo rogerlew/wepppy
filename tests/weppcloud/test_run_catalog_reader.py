@@ -194,7 +194,8 @@ def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
     thread.start()
     source_root = Path(__file__).parents[2]
     static_source = source_root / "wepppy/weppcloud/static-src"
-    environment = dict(os.environ, PLAYWRIGHT_BROWSERS_PATH=str(static_source / ".playwright-browsers"))
+    environment = dict(os.environ)
+    environment.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(static_source / ".playwright-browsers"))
     javascript = """const { chromium } = require('playwright');
 (async () => {
   const browser = await chromium.launch({headless: true});

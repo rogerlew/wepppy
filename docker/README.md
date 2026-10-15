@@ -263,19 +263,35 @@ directory is no longer current.
 
 ### Isolated Python CI runtime
 
-`docker-compose.test.yml` provides the pinned common runtime plus disposable
+`docker-compose.test.yml` builds `Dockerfile.test` from the pinned common runtime
+and the existing Node 20 test dependency, plus disposable
 PostgreSQL and Redis for runner-02's stubtest and isolation jobs. It uses an
 internal network with no host ports, runtime secrets, or Docker socket. Check
 out and verify Git LFS assets before starting it: the source bind mount hides
 the image's repository files. Use a unique `COMPOSE_PROJECT_NAME` per job and
-`wctl --compose-file docker/docker-compose.test.yml` for all commands. Finish
-with `down --volumes --remove-orphans` using that same project name. Lifecycle
+`wctl --compose-file docker/docker-compose.test.yml` for all commands. Start
+with `up -d --build --wait`. Finish
+with `down --volumes --remove-orphans --rmi local` using that same project name. Lifecycle
 locks use the existing `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR` setting under `/tmp`;
 `SITE_PREFIX=/weppcloud` matches the development stack;
 transport authentication tests create fixture-owned account data rather than
 reading deployment accounts.
 
-The runtime image pin is independent of production deployment. Update it when
+The CI image is built locally and is not published. `Dockerfile.test` pins the
+common image and Node image by digest. Node/npm plus the existing static-src
+lockfile provision Playwright/Chromium under `/opt/wepppy-ci`, outside the checkout
+bind mount. Image construction installs browser system dependencies as root;
+the image restores its original user and Compose runs tests without privileges.
+Before baseline/isolation, run the existing
+`wepppy/weppcloud/controllers_js/build_controllers_js.py` builder inside the
+test container: the checkout mount hides image-baked generated assets. Initialize
+the empty disposable account database with `tests/bootstrap_ci_database.py`.
+It refuses existing tables and creates the current model schema, using the
+canonical preferences migration for its named-constraint contract. Legacy
+migrations assume a pre-existing account schema; this CI bootstrap is not a
+production migration procedure or validation of the complete migration history.
+
+The runtime image pins are independent of production deployment. Update them when
 native/Python dependencies change, then run the actual stubtest and isolation
 gates. Do not add production mounts or credentials to satisfy CI. The full
 isolation gate retains its five iterations and per-file checks; its longer job

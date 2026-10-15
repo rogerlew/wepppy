@@ -227,3 +227,62 @@ clean archive; the ignored `deductive-futurist` directory was confirmed absent,
 and all 16 fixture hashes passed. Its isolated containers/volumes were removed.
 The next hosted baseline/isolation run remains pending; no broad pass is claimed
 from the focused checks.
+
+### RQ unit-test cache boundary
+
+Run `38797621501` passed stubtest and reached 5,843 baseline passes/268 skips
+before `test_prep_watershed_enqueue_uses_prep_only_pipeline` tried to resolve
+the real `/wc1/runs/ab/ab-run` directory. The unit test stubbed controllers
+and `get_wd` in the RQ module, but not `clear_nodb_file_cache`, which resolves
+its own path. The affected orchestration tests now use a function-scoped recording
+fixture and assert the exact `ab-run`/`wepp.nodb` cache-clear request. Existing
+cache-before-hydration tests retain their own ordering assertions. No production
+cache invalidation or queue wiring changes. Focused and broader remaining-group
+checks on runner-02 are pending before another hosted run.
+
+The broader remaining-group probe caught further instances in Omni, ash/debris,
+and fork unit tests. Explicit cache recorders and pytest-owned lock/work roots
+replace deployment state dependencies; real guard behavior and existing ordering
+assertions remain. Two land/soil guard tests also now use temporary work roots.
+
+It also proved the pinned common runtime lacks Node and that a fresh checkout
+hides the image's generated controller bundle. The minimal CI-only image extends
+the same common digest with official Node 20/npm (matching the existing
+dev dependency), pinned by digest, plus Playwright/Chromium from the existing
+static-src lockfile. The workflow runs the existing controller
+builder before baseline/isolation and removes the job-local image on cleanup.
+No new service, dependency family, host mount, runtime permission, or
+production image change is introduced. Runtime network isolation remains intact;
+image construction downloads locked npm dependencies and browser/system packages.
+
+The expanded probe reached 4,683 passes, 83 skips, two failures and eight setup
+errors. It cleared the RQ and controller failures and exposed three remaining
+prerequisites: Playwright/Chromium, the account schema, and a valid run-context
+boundary for a CSRF unit test. The CI image places browser dependencies outside
+the checkout bind mount; the browser test honors an explicit browser path while
+preserving its local default. The CSRF test stubs only run-context loading and
+retains its rejection assertion. The disposable database is initialized from
+current application models plus the canonical preferences migration. A fresh `flask db upgrade`
+probe failed because the migration history assumes an existing `user` table;
+this bootstrap is explicitly confined to CI, not production migration guidance.
+A subsequent `create_all()` probe exposed unnamed model PK/FK constraints for
+preferences, while the integration contract requires migration-defined names.
+`tests/bootstrap_ci_database.py` now refuses any existing tables, creates the
+other model tables, and invokes the existing preferences migration in the same
+transaction. No production schema changes or assertions are weakened.
+Focused runner acceptance passes: 19 tests cover PostgreSQL preferences
+constraints/concurrency, the real file-to-SQL-to-HTTP-to-Chromium path, and the
+CSRF route contract (22.89 seconds). Forest passes 173 RQ/generator tests; its
+separate browser check still lacks the expected local Chromium executable
+(15 passes before that setup failure). The accepted browser evidence comes from
+the newly provisioned isolated runner. The final remaining-group runner check passes **4,693 tests, 83 skips,
+12 subtests** in 335.95 seconds with the canonical `--maxfail=1` gate. It covers
+RQ, scripts, services, shape conversion, soils, top-level tests, tools, WEPP,
+WEPP runner and WEPPcloud. The bootstrap repeat-refusal preserves identical
+logical schema/data hashes (see security review). Full hosted baseline and
+isolation remain pending; this bounded group is not a full-suite pass.
+The same rebuilt image passes all eight stubtest modules and stub completeness.
+
+The temporary qualification stack, its volumes, network and job-local image
+were removed after validation. The next hosted run will use the committed
+workflow; final hosted baseline/full-isolation closeout remains open.

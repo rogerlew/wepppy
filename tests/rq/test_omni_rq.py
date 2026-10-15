@@ -205,7 +205,9 @@ def test_run_omni_scenarios_rq_stops_on_nodir_preflight_error(
 def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_metadata(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ):
+    record_nodb_cache_clear(omni_rq)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
 
@@ -357,7 +359,9 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
 def test_run_omni_scenarios_rejects_timeout_workload_before_rq_mutation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ) -> None:
+    record_nodb_cache_clear(omni_rq)
     parent_job = SimpleNamespace(id="job-invalid-scenario", meta={}, saves=0)
     parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
@@ -579,7 +583,9 @@ def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
 def test_run_omni_scenario_rq_derives_dependency_metadata_from_helpers(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ):
+    record_nodb_cache_clear(omni_rq)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-42"))
@@ -813,7 +819,9 @@ def test_delete_omni_contrasts_rq_clears_scoped_cache_before_hydration(
 def test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ):
+    record_nodb_cache_clear(omni_rq)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-62", meta={}, save=lambda: None))
@@ -897,7 +905,9 @@ def test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries(
 def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_delete_enabled(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ) -> None:
+    record_nodb_cache_clear(omni_rq)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         omni_rq.StatusMessenger,
@@ -1098,7 +1108,9 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
 def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ) -> None:
+    record_nodb_cache_clear(omni_rq)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         omni_rq.StatusMessenger,
@@ -1230,7 +1242,9 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
 def test_run_omni_contrasts_rejects_timeout_workload_before_rerun_or_rq_mutation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    record_nodb_cache_clear,
 ) -> None:
+    record_nodb_cache_clear(omni_rq)
     parent_job = SimpleNamespace(id="job-invalid-contrast", meta={}, saves=0)
     parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)

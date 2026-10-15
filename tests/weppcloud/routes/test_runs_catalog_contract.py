@@ -127,6 +127,8 @@ def test_delete_route_rejects_missing_csrf_before_dependencies(
         "current_user",
         SimpleNamespace(is_authenticated=True, get_id=lambda: "7"),
     )
+    # This CSRF unit test assumes a valid run; context loading has separate coverage.
+    monkeypatch.setattr(project_module, "load_run_context", lambda *_args, **_kwargs: None)
     app.register_blueprint(project_module.project_bp)
     CSRFProtect(app)
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import shutil
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -9,6 +10,17 @@ import pytest
 import wepppy.rq.land_and_soil_rq as land_and_soil_rq
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def land_soil_work_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    """Keep real directory/NoDir operations under pytest's temporary root."""
+    def path(value: str) -> Path:
+        assert value == "/wc1/land_and_soil_rq"
+        return tmp_path
+
+    monkeypatch.setattr(land_and_soil_rq, "Path", path)
+    return tmp_path
 
 
 def test_require_directory_root_rejects_archive_form(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -64,10 +76,10 @@ def test_run_with_directory_root_lock_executes_callback_for_directory_root(
 
 
 def test_land_and_soil_rq_aborts_before_landuse_build_on_archive_root(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, land_soil_work_root: Path,
 ) -> None:
     job_id = "unit-nodir-guard"
-    target_wd = land_and_soil_rq.Path("/wc1/land_and_soil_rq") / job_id
+    target_wd = land_soil_work_root / job_id
 
     monkeypatch.setattr(land_and_soil_rq, "get_current_job", lambda: SimpleNamespace(id=job_id))
     monkeypatch.setattr(land_and_soil_rq.StatusMessenger, "publish", lambda *_args, **_kwargs: None)
@@ -117,10 +129,10 @@ def test_land_and_soil_rq_aborts_before_landuse_build_on_archive_root(
 
 
 def test_land_and_soil_rq_aborts_on_soils_guard_after_landuse_build(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, land_soil_work_root: Path,
 ) -> None:
     job_id = "unit-nodir-soils-guard"
-    target_wd = land_and_soil_rq.Path("/wc1/land_and_soil_rq") / job_id
+    target_wd = land_soil_work_root / job_id
 
     monkeypatch.setattr(land_and_soil_rq, "get_current_job", lambda: SimpleNamespace(id=job_id))
     monkeypatch.setattr(land_and_soil_rq.StatusMessenger, "publish", lambda *_args, **_kwargs: None)

@@ -5,9 +5,9 @@
 **Security gate: pass for source integration.** One medium finding in the new
 diagnostics export was corrected and directly verified. No unresolved medium
 or high finding remains in the reviewed changes. Storage and CI controls pass
-source and live boundary inspection. This approval does not claim the full
-Forest suite, full isolation run, or hosted workflow has passed; M7 functional
-closeout remains subject to those results.
+source and live boundary inspection. Forest's recorded baseline suite passed;
+the latest complete hosted baseline/isolation remains open. This source
+approval does not close M7's remaining functional validation gates.
 
 | ID | Severity | Surface | Disposition |
 | --- | --- | --- | --- |
@@ -117,8 +117,8 @@ data remains under its existing authorization and observability contracts.
   an ordinary diagnostic file retained its exact contents. Only synthetic,
   nonsecret probe files were used, and the temporary probes were removed.
 
-The full Forest suite, full runner isolation and hosted workflow outcomes
-remain pending at this sign-off. Do not equate an isolation-checker exit code
+At the initial source sign-off, the full Forest suite, full runner isolation
+and hosted workflow outcomes were pending. Do not equate an isolation-checker exit code
 with a passing broad suite or randomized coverage when its optional plugin is
 absent. Functional acceptance remains separate from this security approval.
 
@@ -150,6 +150,105 @@ Reviewed the bounded corrections above `5325742bf`; no new security finding.
   or production authentication implementation changed. Broad hosted baseline
   and isolation acceptance remain pending.
 
+## Clean-runner image and RQ fixture follow-up
+
+Reviewed the working delta above `b1b522f2e` on 2026-10-15 UTC: new
+`docker/Dockerfile.test`, test Compose build wiring, canonical/generated
+workflow, `tests/rq/conftest.py` and the seven edited RQ test modules. **Approved
+for source integration; no new security finding.** The actual clean-runner
+failures justify these bounded prerequisites without broadening production
+mounts, privileges, dependencies or execution paths.
+
+- Dependency precedent is `docker/Dockerfile.dev:59`: Node 20 already supplies
+  controller-test execution. The CI extension pins the official
+  `node:20-bookworm-slim` image and accepted common runtime by SHA-256. The
+  initial Node-only extension was subsequently expanded to install the existing
+  locked browser-test dependencies, reviewed below. No credentials, image
+  publication, or image-builder cache sharing is introduced.
+- The existing Python controller builder runs inside the same container and
+  generates the ordinary assets within the checkout. Cleanup adds `--rmi local`
+  to the existing unique-project Compose teardown; no daemon-wide prune or
+  production image deletion is introduced.
+- Independently inspected the rebuilt runner container: UID:GID `1000:993`,
+  no privileged mode, all capabilities dropped, no new privileges, checkout-only
+  mount, no published ports, and an internal network. Node reports `v20.20.2`.
+- Cache recorders are explicitly requested, function-scoped fixtures rather
+  than global/autouse bypasses. Bootstrap tests assert the exact scoped request;
+  cache-order tests retain their own boundaries. Temporary work roots keep
+  directory creation/removal away from `/wc1`. Production cache invalidation,
+  NoDir locks, fork cleanup, and queue wiring are unchanged. These orchestration
+  fixtures do not claim to test the real filesystem cache implementation.
+- Workflow regeneration and whitespace checks pass. Independently read the
+  earlier Forest regression receipt: 10,872 passed, 126 skipped in 2,836.09
+  seconds. That run predates these latest fixture/image changes. Subsequent
+  direct runner results and their acceptance limits are recorded below.
+
+### Browser and disposable account prerequisites
+
+The remaining-group probe subsequently recorded 4,683 passes, two failures and
+eight errors: missing browser/runtime inputs, a missing test-run context, and
+an empty account schema. Reviewed the resulting source corrections; no new
+medium/high security finding in the changed execution boundaries.
+
+- The root build context supplies only the existing static-src package manifest
+  and lockfile through explicit `COPY` operands. No checkout, `.env`, credential
+  file or host path is copied wholesale. Node/npm come from the pinned official
+  image; `npm ci` uses the unchanged lockfile. Playwright installs its matching
+  Chromium and OS dependencies during image construction. `USER root` is limited
+  to construction; final `USER roger` and Compose's explicit UID, capability
+  drop, no-new-privileges, internal network and mount boundaries remain intact.
+- Modules and browsers live under `/opt/wepppy-ci`, outside the source mount,
+  with read/execute permissions rather than world-write permissions. The browser
+  test now honors the explicit `PLAYWRIGHT_BROWSERS_PATH`; its default remains
+  the existing checkout location. This does not alter production configuration.
+- `tests/bootstrap_ci_database.py` replaces the initial `db.create_all()` step,
+  which did not preserve the preferences migration's named constraints. It
+  checks for existing tables in the default schema before any creation. One
+  transaction creates current model tables except preferences, then invokes
+  the canonical preferences migration through Alembic `Operations`. It never
+  drops existing objects, stamps migration history, or changes account data.
+  This initializes the disposable internal PostgreSQL service; it is not a
+  deployment bootstrap or proof of the complete production migration chain.
+- The CSRF unit test supplies its assumed valid run-context boundary but keeps
+  real `CSRFProtect`, the missing-token request and its 400 assertion. It does
+  not disable CSRF or alter the production route, decorators, or authorization.
+- The build log reports 43 npm advisories for the existing lockfile (38 high,
+  four moderate, one low). Package versions are unchanged. This inherited
+  dependency telemetry is not a claim that advisories were remediated or a
+  complete exploitability assessment. Test code already executes within the
+  same isolated runtime; no production endpoint or new host authority exposes
+  these packages. Dependency maintenance remains a separate existing concern.
+
+Direct final prerequisite evidence:
+
+- Independently read `/tmp/m7-final-remaining-runner.log`: the remaining runner
+  group passed 4,693 tests and 12 subtests, with 83 skips and 1,581 warnings in
+  335.95 seconds. All eight stubtest modules and stub completeness also passed.
+  This is bounded direct runtime acceptance, not complete hosted baseline or
+  isolation acceptance.
+- `/tmp/m7-ci-final-focused.log`: all 19 preferences, catalog-reader/browser,
+  and catalog-route tests passed with nine warnings in 22.89 seconds on a newly
+  recreated disposable database. The real browser consumer and named database
+  constraints were exercised without weakening their assertions.
+- Independently inspected browser image `aa784e4fc3d8...` running as UID:GID
+  `1000:993`: privileged mode remains false, all capabilities are dropped,
+  no-new-privileges is set, only the checkout is mounted, no ports are published,
+  and the network is internal. `/opt/wepppy-ci` and its browser directory are
+  root-owned mode `0755`; the test process cannot rewrite those installed inputs.
+- Independently ran the bootstrap again against that populated CI database:
+  exit 1 with `RuntimeError: CI bootstrap requires an empty database`. Full
+  logical schema/data dump SHA-256 was identical before and after:
+  `b263b3f497dc4d3184d933fceda949d7f8553009771fa6caabec09c471e7c89d`.
+  Only PostgreSQL's random restrict/unrestrict tokens were normalized; no data
+  contents were printed or retained in repository artifacts. Rejection occurs
+  before mutation. The guard's exact scope is default-schema tables, not every
+  possible schema/object in an arbitrary database.
+
+The final workflow delta adds `exec -T` to asset construction and database
+bootstrap, preserving noninteractive execution without changing permissions or
+coverage. Source integration remains approved; direct remaining-group acceptance
+passes. Complete hosted baseline and isolation acceptance remain pending.
+
 ## Residual risk and sign-off
 
 The preexisting persistent runner can retain effects of earlier PR jobs and
@@ -164,5 +263,5 @@ risk acceptance beyond the explicit storage approval is inferred.
 
 Final security sign-off: independent `validation_security`, 2026-10-15 UTC,
 **approved for source integration** after final exact-diff review and closure
-of SEC-V03, including the bounded hosted-runtime follow-up above. No outstanding
-medium/high finding or new risk waiver is required.
+of SEC-V03, including the bounded hosted-runtime, image and RQ fixture follow-ups
+above. No outstanding medium/high finding or new risk waiver is required.

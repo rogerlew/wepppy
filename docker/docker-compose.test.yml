@@ -1,7 +1,9 @@
 # Isolated CI runtime; no Forest mounts, host credentials, or published ports.
 services:
   weppcloud:
-    image: ghcr.io/rogerlew/wepppy@sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test
     user: "${UID:-1000}:${GID:-1000}"
     entrypoint: ["/bin/sleep", "infinity"]
     working_dir: /workdir/wepppy

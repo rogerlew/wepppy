@@ -8,13 +8,14 @@ data, durability and backups. All four latency gates pass (READONLY added p95
 Hosted runner-02 stubtest passes all eight modules and completeness. CI uses a
 pinned isolated runtime, verified LFS inputs, test-owned accounts, writable
 lifecycle locks and the development URL prefix. Final configuration `f8ce2bb92`
-passes hosted stubtest. Run `38792764959` then failed after 5,022 passes on
-ignored binary inputs; isolation did not start. The earlier management-fixture
-correction passed. The binary and two seed-generator modules now use dedicated
-committed inputs with hashes/provenance (`9ce4195f8`). All 89 tests in these
-modules pass on Forest and runner-02 with ignored source data absent. The next
-hosted run remains pending; no full-workflow or random-order pass is claimed.
-Recurrence remains disabled.
+passes hosted stubtest. Run `38797621501` reached 5,843 passes/268 skips, then
+a mocked RQ unit test called the real run-directory/cache boundary. Affected
+orchestration tests now use explicit cache boundaries and temporary work/lock
+paths. The broader runner probe cleared those failures and exposed missing
+browser dependencies, generated assets, and disposable database schema. CI
+prerequisites are now explicit; 19 focused database/browser/CSRF tests and
+4,693 remaining-group tests pass (83 skips, 12 subtests);
+no full-workflow or random-order pass is claimed. Recurrence remains disabled.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 
 Final checkpoint (2026-10-15 UTC): operational rollout and recovery accepted;
