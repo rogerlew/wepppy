@@ -85,7 +85,8 @@ Recheck the live inventory and transfer size before copying if master has grown.
 5. Retrieve the resource through the receiving WMesque service and compare
    pixels, CRS, bounds, resolution, nodata, and revision with master. The M6
    bbox `[-16.65, 28.25, -16.60, 28.30]` at 30 m produced a 187 by 161 raster
-   in EPSG:32628. Confirm local extensions survive. Use isolated fixtures for
+   in EPSG:32628 (187 rows, 161 columns; verified by M7 master GDAL readback).
+   Confirm local extensions survive. Use isolated fixtures for
    adoption/interruption checks; never publish a fake resource to live master.
 6. Test an explicit ordered endpoint list: actual internal local service first,
    `https://wepp.cloud/webservices/wmesque2` second. Prove local success,
@@ -102,8 +103,12 @@ Recheck the live inventory and transfer size before copying if master has grown.
 
 ## Rollback and exit criteria
 
-Restore wepp.cloud-only client routing and the previous image/configuration
-through the canonical GitOps recovery procedure. Account for any active manual
+Restore wepp.cloud-only client routing through the canonical GitOps recovery
+procedure, retaining a compatible current-reader image. M7's authorized full
+runtime upgrade introduced PRISM/EDDE reader floors; the old image is not a safe
+rollback after new state is written. The validated paired image and receiver
+recovery procedure are recorded in `docs/infrastructure/wmesque-operations.md`.
+Account for any active manual
 sync before changing its writer configuration. Retain verified releases,
 original datasets, and local extensions; do not delete data for rollback.
 Local-only extensions still require explicit local access if remote-only routing

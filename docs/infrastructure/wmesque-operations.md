@@ -149,3 +149,35 @@ Use the canonical deployment recovery procedure and retained image references;
 keep release directories and source data intact. See the
 [master rollout evidence](../work-packages/20261014_wmesque_catalog_sync/artifacts/20261015_master_rollout.md)
 for commands, revision, actual transfer and raster readback, and deployment status.
+
+## openwepp Receiving Deployment (2026-10-15)
+
+The authorized receiving writer is a bounded manual Docker container on existing
+`hpc`, UID:GID1000:993, umask0022, writing `/tank/geodata`. All Kubernetes
+compute exports/mounts remain read-only. Dedicated SSH trust stays on hpc; the
+master key is source-address restricted and forces `rrsync -ro /geodata`.
+Its source `roger@100.127.248.45:/.` is relative to that export, not host root.
+Use open-wepp-org `operations/wmesque-sync.sh` and
+`docs/operations/wmesque-receiver.md` for the governed manual workflow.
+
+Paired runtime `a217f7342`/native `0515272` is published as
+`sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc`.
+The native startup check compares installed interchange SHA256/API against the
+Python contract; it is not a catalog-sync check. The previous workflow pin
+produced an incompatible library; correcting the pin preserved the check and
+passed actual native/model/Parquet acceptance. PRISM uses retained writable
+`/wc1/cache/prism` without changing identities or mounts.
+
+Live restricted sync, release hashes/full raster, convergence, local/master
+pixel parity,404/outage fallback and revision rejection passed. Receiving
+web/rq-engine/worker templates explicitly select the internal WMesque2 service
+then wepp.cloud. Unconfigured deployments remain master-only. Recurrence remains
+disabled; no scheduler timer/readiness activation is authorized by M7.
+
+Recovery removes only the endpoint-list settings through protected Git/Flux,
+retaining this compatible image, releases, originals and local extensions.
+Do not restore old readers after new PRISM/EDDE state is written. Use the
+receiving admission-stop/drain procedure for rolling consumers; RQ1.16.2
+suspension alone does not stop an already-blocking dequeue. No queue/job cleanup
+is part of recovery. Broader current-runtime regressions require compatible
+forward repair, not an unconditional old-image rollback.
