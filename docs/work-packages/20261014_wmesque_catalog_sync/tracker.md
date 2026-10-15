@@ -2,17 +2,15 @@
 
 ## Quick Status
 
-Follow-up (2026-10-15 UTC): operator approved Forest PostgreSQL's move to
-`docker_forest-postgres-ssd`. Stopped data/metadata and table counts match;
-durability, public health and RAID6 backups verified. Four unchanged latency
-gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms. Runner-02 passes eight
-stubtest modules, completeness and 77 runtime tests with 648 verified LFS assets.
-Generated CI now targets `remote-ci` with isolated runtime and separate full
-isolation job. Hosted stubtest job 116520586851 passes at `5325742bf`. Full Forest
-suite remains running; hosted baseline exposed lock-directory and account-fixture
-prerequisites plus the missing development URL prefix. These are corrected;
-ten transport and ten d-Tale runner tests pass;
-no broad-suite or isolation pass claimed yet. Thresholds and recurrence unchanged.
+Follow-up (2026-10-15 UTC): approved Forest PostgreSQL SSD migration preserves
+data, durability and backups. All four latency gates pass (READONLY added p95
+5.81 ms, TTL 4.73 ms); the full Forest suite passes **10,872 tests, 126 skipped**.
+Hosted runner-02 stubtest passes all eight modules and completeness. CI uses a
+pinned isolated runtime, verified LFS inputs, test-owned accounts, writable
+lifecycle locks and the development URL prefix. Final configuration `f8ce2bb92`
+passes hosted stubtest in run `38767752658`; its longer baseline/isolation
+acceptance remains open. Requested latency and runner blockers are resolved; no full-workflow or
+random-order pass is claimed. Recurrence remains disabled.
 See [follow-up evidence](artifacts/20261015_validation_followup.md).
 
 Final checkpoint (2026-10-15 UTC): operational rollout and recovery accepted;
@@ -50,7 +48,7 @@ in the open-wepp-org repository.
 **Started**: 2026-10-14 20:16 UTC
 **Updated**: 2026-10-15 UTC
 **Phase**: M1–M6 complete; M7 operational acceptance passed, validation closeout blocked
-**Next milestone**: M7 baseline latency-test disposition; M8 remains excluded
+**Next milestone**: hosted baseline/isolation acceptance; M8 remains excluded
 **Security**: High; independent implementation review approved, findings closed
 **Plan**: [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md)
 

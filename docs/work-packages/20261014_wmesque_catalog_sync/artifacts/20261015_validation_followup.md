@@ -1,7 +1,8 @@
 # M7 validation follow-up
 
-Status: approved storage move complete; runner validation in progress. No
-threshold waiver. The full Forest regression suite is running.
+Status: approved storage move complete; Forest full regression and hosted
+stubtest pass. Longer hosted baseline/isolation remains in progress. No
+threshold waiver.
 
 ## Scope and evidence
 
@@ -166,3 +167,20 @@ passed/33 skipped on a d-Tale redirect: the fresh runtime lacked Forest's
 Compose preserves the expected proxy URL contract; all ten d-Tale tests pass
 on runner-02 (3.01 seconds). No URL assertion or production default changed.
 The failed job removed its isolated containers and volumes successfully.
+
+### Final Forest regression receipt
+
+`wctl run-pytest tests --maxfail=1` completed successfully: **10,872 passed,
+126 skipped**, 7,699 warnings, 2,836.09 seconds. The full PostgreSQL catalog
+module passed at 98%, including the original failing latency path. The suite
+started before the later test-fixture changes; those pass separately in the
+12-test Forest and 10-test runner checks above. No tests or thresholds were
+removed to obtain this result.
+
+The two requested blockers are resolved: latency now passes in both focused
+and full Forest runs, and the matching runner executes all eight stubtest
+modules. Final CI configuration is `f8ce2bb92`;
+[run 38767752658](https://github.com/rogerlew/wepppy/actions/runs/38767752658)
+passed its stubtest job `116535294278`, including cleanup. The longer hosted
+baseline/isolation job `116536188415` remains open; no
+full-workflow or random-order pass is claimed. Recurring sync remains disabled.

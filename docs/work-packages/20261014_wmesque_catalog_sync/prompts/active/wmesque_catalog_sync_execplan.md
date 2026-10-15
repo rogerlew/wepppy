@@ -24,13 +24,15 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Hosted stubtest job 116520586851 passes on runner-02 at `5325742bf`, including LFS materialization and cleanup. First hosted preflight caught fetched-but-unmaterialized LFS objects; explicit checkout corrected it without bypassing verification.
 - [x] (2026-10-15 UTC) Hosted baseline exposed `/wc1` lock permissions and deployment-account dependencies. CI uses the existing writable lock-directory setting; isolated account fixtures preserve real identity resolution. Ten runner transport integration tests pass.
 - [x] (2026-10-15 UTC) Second hosted baseline exposed missing development `SITE_PREFIX`; CI now uses `/weppcloud`, matching Forest. All ten runner d-Tale tests pass without assertion changes.
-- [ ] Full Forest regression remains running; corrected hosted baseline/isolation is pending. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [x] (2026-10-15 UTC) Full Forest regression passes: 10,872 passed, 126 skipped in 2,836.09 seconds, including all catalog latency checks.
+- [x] (2026-10-15 UTC) Final configuration `f8ce2bb92` passes hosted stubtest job `116535294278`, including cleanup.
+- [ ] Final hosted baseline/isolation acceptance remains pending in run `38767752658` at `f8ce2bb92`. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
 - [x] (2026-10-15 UTC) Live restricted hpc sync, complete release hashes/raster read, convergence and unchanged original/local-extension hashes pass; local/master parity,404/outage fallback and wrong-revision rejection pass.
 - [x] (2026-10-15 UTC) Deployed local-first/remote-only recovery/local-first acceptance passes; PR199 restored admission at846f0f81. All33 replicas available,18 nodes Ready, public health OK; actual web/batch default routing and existing-project reads pass; no RQ fence remains.
-- [ ] Resolve broad-validation failure: unchanged forest31c6d5d suite10664 passed/126 skipped/1 failed at98%; run-catalog READONLY notification p95 overhead reproduces123.88ms versus50ms limit. No threshold waiver or full-suite pass claimed; stubtest also lacks homelab runner.
+- [x] (2026-10-15 UTC) Resolved original broad-validation failure (READONLY 123.88 ms versus 50 ms) through the approved storage migration, verified in the full Forest suite. Hosted stubtest now has a qualified matching runner; no threshold waiver.
 
 - [x] (2026-10-15 UTC) M7 restricted master key/branches explicitly authorized and installed; source-overlay dry-run/transfer/hash/full-raster/convergence and negative shell/upload checks passed. Independent source/security/QA reviews found no blocking defect. GitHub authentication blocks corrected-image publication; final M7 acceptance remains pending.
 
@@ -44,7 +46,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 03:31 UTC) M6 master: wepp1 deployed; verified Tenerife publication, unchanged pixels/source files, private tailnet transfer, and old-image rollback-layout acceptance passed.
 - [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
 - [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
-- [ ] M7: Operational canary and recovery accepted; validation closeout awaits baseline latency-test investigation/operator disposition.
+- [ ] M7: Operational canary, recovery, full Forest regression and hosted stubtest accepted; final hosted baseline/isolation remains pending.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
@@ -194,8 +196,8 @@ The isolated CI runtime preserves the dedicated builder boundary and test
 thresholds. Fresh-run prerequisites exposed by CI are corrected through explicit
 LFS materialization, the existing writable lock-directory setting, and test-owned
 account fixtures. Ten transport tests pass on runner-02; all twelve focused
-transport/generator tests pass on Forest. Full Forest regression and hosted
-baseline/isolation still need final results. Earlier interrupted isolation runs
+transport/generator tests pass on Forest. Full Forest regression passes 10,872 tests with 126 skips; final hosted
+baseline/isolation still needs results. Earlier interrupted isolation runs
 are not passes, and no randomized coverage is claimed without the plugin.
 
 Final runtime checkpoint: receiving PR199 at846f0f81 restores healthy admission
