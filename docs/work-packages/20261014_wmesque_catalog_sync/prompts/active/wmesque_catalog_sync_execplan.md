@@ -3,7 +3,7 @@
 
 This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
-current together with the package tracker. Status: M1–M6 complete; production deployed on wepp1, wepp2, and wepp3. M7–M8 remain pending.
+current together with the package tracker. Status: M1–M6 complete; M7 operational rollout accepted, broad-validation closeout blocked; M8 disabled.
 
 ## Purpose / Big Picture
 
@@ -20,7 +20,10 @@ sync/adoption followed by downstream project input and output readback.
 
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
-- [ ] Rebuild and validate exact paired image, PRISM cache configuration and compatible recovery before full promotion.
+- [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
+- [x] (2026-10-15 UTC) Live restricted hpc sync, complete release hashes/raster read, convergence and unchanged original/local-extension hashes pass; local/master parity,404/outage fallback and wrong-revision rejection pass.
+- [x] (2026-10-15 UTC) Deployed local-first/remote-only recovery/local-first acceptance passes; PR199 restored admission at846f0f81. All33 replicas available,18 nodes Ready, public health OK; actual web/batch default routing and existing-project reads pass; no RQ fence remains.
+- [ ] Resolve broad-validation failure: unchanged forest31c6d5d suite10664 passed/126 skipped/1 failed at98%; run-catalog READONLY notification p95 overhead reproduces123.88ms versus50ms limit. No threshold waiver or full-suite pass claimed; stubtest also lacks homelab runner.
 
 - [x] (2026-10-15 UTC) M7 restricted master key/branches explicitly authorized and installed; source-overlay dry-run/transfer/hash/full-raster/convergence and negative shell/upload checks passed. Independent source/security/QA reviews found no blocking defect. GitHub authentication blocks corrected-image publication; final M7 acceptance remains pending.
 
@@ -34,10 +37,18 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 03:31 UTC) M6 master: wepp1 deployed; verified Tenerife publication, unchanged pixels/source files, private tailnet transfer, and old-image rollback-layout acceptance passed.
 - [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
 - [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
-- [ ] M7: Complete authorized receiving-deployment canary (iMac baseline and hpc fixture/write acceptance passed; restricted SSH compatibility correction in progress).
-- [ ] M8: Enable recurrence/local-first routing and retain recovery evidence.
+- [ ] M7: Operational canary and recovery accepted; validation closeout awaits baseline latency-test investigation/operator disposition.
+- [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+The RQ1.16.2 blocking dequeue loop may not observe a suspension flag until
+after dequeue. An owned fence was acquired then safely resumed before any
+restart; use the already-tested GitOps admission-stop/drain sequence for routing
+promotion/recovery instead. No queue/job data was removed. Local-service traffic
+needed a narrowly scoped paired TCP8030 policy between the five web/RQ consumers
+and WMesque2; unrelated d-Tale access remains denied. Actual master raster shape
+is187 rows/161 columns, correcting the earlier width/height interpretation.
 
 The published Kubernetes candidate contains native artifact `c6b746bb...`, but
 its startup preflight requires `103f2096...`; direct execution fails and the
@@ -84,6 +95,13 @@ currently installed `wepp_261010`. Native output lacks optional interception
 storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
+
+- Decision: Recover M7 by reverting only routing while retaining the paired
+  current-reader runtime and verified data. Stop admission during the exercise.
+  Rationale: Old readers cannot safely consume newly persisted PRISM/EDDE state;
+  native pairing and actual model output passed. RQ suspension alone does not
+  close dequeue races. Full-runtime regressions need compatible forward repair.
+  Date/Author: 2026-10-15, Codex, independently reviewed.
 
 - Decision: Execute the full current-state openwepp upgrade, not a scoped backport.
   Rationale: Roger explicitly accepted the other deploying changes and requested
@@ -141,6 +159,29 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+Final runtime checkpoint: receiving PR199 at846f0f81 restores healthy admission
+after actual local-first/master-only/local-first recovery acceptance. Live sync,
+hash/full-raster readback, parity/fallback/revision checks, existing-project reads
+with unchanged NoDb hashes, and fresh WEPP/native-Parquet artifacts pass. All33
+replicas and18 nodes healthy; RQ15 idle, no fence/suspension, deferred/failure
+registries preserved; scheduler dry-run and syncfalse retained. M7 operational
+acceptance passes, but full closeout remains open: the unchanged forest baseline
+suite failed after10664 passes/126 skips on the READONLY marker-notification
+latency test; isolated rerun reproduces123.88ms p95 overhead versus50ms limit.
+No unrelated fix or threshold relaxation was attempted; cause remains undiagnosed.
+This supersedes in-progress checkpoints below without erasing their history.
+
+Latest checkpoint supersedes the historical holds below: full runtime deployed,
+public health restored, live receiver sync and service parity/fallback accepted.
+Receiving source PR653 merged; immutable runtime digest is
+`sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc`.
+The remaining M7 routing recovery exercise is underway with admission drained;
+M8 stays disabled. Durable detailed receipts live in open-wepp-org
+`docs/work-packages/20261014-wmesque-receiver-canary/artifacts/current-runtime-rollout.md`.
+Exact-image65-test suite passes without application/native overlays. The broad
+baseline suite is still running on unchanged forest31c6d5d; stubtest CI is queued
+because no runner has its requested homelab label, not represented as passed.
 
 M7 remains incomplete after GitHub access restoration. Source publication is
 underway, but no live receiving image/routing/geodata promotion occurred.

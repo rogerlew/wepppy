@@ -2,6 +2,24 @@
 
 ## Quick Status
 
+Final checkpoint (2026-10-15 UTC): operational rollout and recovery accepted;
+full validation closeout blocked. Receiving PR199 at846f0f81 restores healthy
+local-first admission,33/33 replicas and18/18 nodes. Live sync/full artifact
+checks, actual local/master/local routing, existing-project reads and model
+outputs pass; RQ resumed, recurrence disabled. Baseline full suite10664 passed,
+126 skipped,1 failed at98%; isolated READONLY notification-latency test reproduces
+123.88ms p95 overhead versus50ms limit. Cause undiagnosed; no threshold waiver.
+Exact-image65 tests pass separately. Stubtest lacks its homelab runner. Historical
+checkpoints below are retained, not current blockers except these validation items.
+
+Latest checkpoint supersedes historical holds below: source PR653 merged,
+paired current runtime5f46ed68 deployed through receiving PR192–194; actual
+native/model/Parquet and65 focused tests pass. Restricted live sync and repeat,
+complete hash/raster verification, unchanged originals/extensions, local/master
+parity and404/outage/revision checks pass. Local-first default receipt passes;
+remote-only recovery is underway with admission drained via PR195–197.
+M8 remains disabled; full forest baseline suite still running.
+
 Current M7 checkpoint (2026-10-15 UTC): bounded hpc writer, restricted master key
 and branches explicitly approved. Actual isolated receiver transfer/readback and
 convergence pass; source correction passes 33 focused tests and independent
@@ -17,9 +35,9 @@ Live service/routing/rollback remain pending; M8 disabled. Receiving evidence:
 in the open-wepp-org repository.
 
 **Started**: 2026-10-14 20:16 UTC
-**Updated**: 2026-10-15 04:04 UTC
-**Phase**: M1–M6 complete; receiving rollout pending
-**Next milestone**: M7 receiving-deployment access and canary
+**Updated**: 2026-10-15 UTC
+**Phase**: M1–M6 complete; M7 operational acceptance passed, validation closeout blocked
+**Next milestone**: M7 baseline latency-test disposition; M8 remains excluded
 **Security**: High; independent implementation review approved, findings closed
 **Plan**: [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md)
 
@@ -32,7 +50,7 @@ in the open-wepp-org repository.
 - [x] M4: Implement manual sync/RQ wrapper with scheduling disabled.
 - [x] M5: Validate forest scheduled integration, downstream artifacts, and Compose parity.
 - [x] M6: Reviews approved; all three production hosts deployed; master publication and private export validated.
-- [ ] M7: Canary receiving deployment sync and local-first routing when authorized.
+- [ ] M7: Operational sync/local-first/recovery accepted; full validation closeout blocked by reproducible baseline latency test.
 - [ ] M8: Enable recurrence, validate recovery, and close with evidence.
 
 ## Decisions
