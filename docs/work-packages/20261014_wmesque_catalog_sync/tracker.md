@@ -2,6 +2,17 @@
 
 ## Quick Status
 
+2026-10-16: **M7 complete by operator-approved scope revision. M8 pending;
+recurring sync remains disabled.** Rollout/recovery, latency, full baseline and
+matching stubtest are accepted. Latest hosted baseline: 10,690 passed, 329 skipped.
+General isolation's 18 state findings remain open in a separate work item;
+automatic CI keeps one baseline, exhaustive isolation moves to weekly/manual.
+See [M7 closeout](artifacts/20261016_m7_closeout.md) and
+[isolation backlog](../../dev-notes/test-isolation-followup.md).
+
+Historical checkpoints below retain their original status; this decision
+supersedes their M7 validation holds.
+
 2026-10-16: hosted baseline and all five repeat suites passed (10,671 tests,
 329 skips each). Per-file isolation remains open: checker observation defects,
 collection-time stubs, and a strict BLC helper contract mismatch are repaired.

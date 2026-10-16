@@ -5,6 +5,26 @@ Without a randomization plugin, the repeats retain collection order and do not
 establish shuffled-order coverage. `--json` retains structured failure details;
 `--log-dir` retains each pytest stdout/stderr stream.
 
+## CI cadence and repair loop
+
+The automatic `Stubtest` workflow runs API stub checks and one full baseline
+suite on runner-02 (`remote-ci`). Exhaustive isolation belongs to
+`.github/forest_workflows/test-isolation.yml`, generated into the matching
+workflow: manual dispatch or Saturday at 08:17 UTC. It retains the baseline,
+five repeats, per-file execution/state checks, diagnostics, and cleanup. It does
+not run on pushes or pull requests. Existing assertions and failure reporting
+remain enforced within that workflow.
+
+Operator decision, 2026-10-16: repository-wide isolation maintenance is separate
+from WMesque M7 acceptance. The baseline, latency, stubtest and operational rollout
+evidence satisfy that milestone. Five unchanged-order repeats plus a late state
+scan took 4h42m without adding shuffled-order evidence; they are unsuitable as
+the repair loop. Run affected files with `--iterations 1` first, inspect execution
+and state findings, then use exhaustive validation for periodic assurance.
+Do not claim shuffled-order coverage unless a randomization plugin actually ran.
+The [open isolation work item](test-isolation-followup.md) retains unresolved
+findings; moving cadence does not turn those results into passes.
+
 ## State boundary
 
 Snapshots bracket collection and execution: after pytest/plugins/root conftest

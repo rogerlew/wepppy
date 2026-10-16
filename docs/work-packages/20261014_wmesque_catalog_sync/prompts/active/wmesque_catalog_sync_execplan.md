@@ -18,9 +18,11 @@ sync/adoption followed by downstream project input and output readback.
 
 ## Progress
 
+- [x] (2026-10-16 UTC) Operator accepts M7 based on operational rollout/recovery, latency, full baseline and matching stubtest. See `artifacts/20261016_m7_closeout.md`. General isolation findings move to `docs/dev-notes/test-isolation-followup.md`; exhaustive CI becomes weekly/manual, automatic CI retains one baseline.
+
 - [x] (2026-10-16 UTC) Hosted `38825109720` baseline passes 10,671 tests/329 skips; all five unchanged-order repeats pass.
 - [x] (2026-10-16 UTC) Repair lazy snapshot imports, framework/native initialization findings, persistent report/Daymet/soil stubs, and strict BLC helper forwarding. Matching runner passes 15 focused per-file checks including real WBT; additional checker regressions pass 27 tests. Final-source collection rechecks pass all 36 flagged files; four additional files pass actual combined/per-file isolation with no findings.
-- [ ] Fresh hosted full baseline/isolation acceptance: repair `6a5f05572` pushed, run `38860272720` queued; M7 remains open.
+- [x] Hosted `38860272720` baseline passes 10,690 tests/329 skips and stubtest passes; exhaustive isolation reports 18 state findings, transferred to the separate backlog under the revised acceptance scope.
 
 - [x] (2026-10-15 UTC) Local stubtest repaired: two undefined `Optional` annotations now use `float | None`; all eight default modules and test-stub completeness pass.
 - [x] (2026-10-15 UTC) Operator approved and Forest completed PostgreSQL migration to `docker_forest-postgres-ssd`; stopped bytes/metadata and database counts match, durability preserved, backups and public health restored. All four latency gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms.
@@ -52,10 +54,14 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 03:31 UTC) M6 master: wepp1 deployed; verified Tenerife publication, unchanged pixels/source files, private tailnet transfer, and old-image rollback-layout acceptance passed.
 - [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
 - [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
-- [ ] M7: Operational canary, recovery, full Forest regression and hosted stubtest accepted; final hosted baseline/isolation remains pending.
+- [x] M7: Operational canary, recovery, latency, full Forest/hosted baseline and hosted stubtest accepted. General isolation is a separate backlog, not an M7 gate.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+2026-10-16: the latest hosted job took 4h42m despite all test executions passing.
+Its five full repeats used unchanged order; final findings concern environment
+and test-module state. This expanded M7 into unrelated repository maintenance.
 
 The per-file checker invoked lazy module attributes while observing singleton
 state, crashing after six files had passed pytest. Its pre-startup/post-shutdown
@@ -147,6 +153,13 @@ storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
 
+- Decision (2026-10-16, operator approval): accept M7 on rollout/recovery,
+  latency, baseline and stubtest evidence. Retain isolation findings separately
+  and move exhaustive CI to weekly/manual; keep one automatic baseline. This
+  supersedes the earlier full-isolation closeout gate without representing a
+  failed state scan as passing. Rationale: the original rollout obligations are
+  met, while unchanged-order repetitions delay unrelated fixture debugging.
+
 - Decision (2026-10-16, Codex): retain collection-time leak detection and the
   full gate, fix observer lifecycle and native initialization classification,
   and make incomplete execution fail explicitly. Correct the BLC helper under
@@ -235,6 +248,12 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+2026-10-16 closeout: M7 accepted; M8 remains pending and disabled. Latest hosted
+baseline passes 10,690 tests/329 skips and matching stubtest passes. The 18 general
+isolation findings remain open outside this milestone. Future isolation repairs
+start with affected-file execution, then periodic exhaustive qualification.
+See `artifacts/20261016_m7_closeout.md`; earlier observations below are historical.
 
 2026-10-16: hosted baseline and all five unchanged-order repeats pass. The
 remaining per-file gate exposed checker observation/lifecycle defects and a

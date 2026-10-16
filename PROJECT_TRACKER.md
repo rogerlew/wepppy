@@ -371,10 +371,16 @@ Feedback mechanisms:
 
 ### WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: M1–M6 complete, 2026-10-15; wepp1/wepp2/wepp3 deployed and master publication verified.
+**Status**: M1–M7 complete, 2026-10-16; receiving rollout/recovery, latency, baseline and stubtest accepted.
 **Link**: [Work package](docs/work-packages/20261014_wmesque_catalog_sync/package.md)
 **Scope**: Forest-first v2 priority retrieval, wepp.cloud master catalog, extension adoption, verified sync, and opt-in recurring RQ jobs. Unconfigured deployments retain wepp.cloud.
-**Next**: M7 receiving task credentials/writer access and local-first canary, then M8 recurrence. Master defaults remain remote-only with sync disabled. Full regression gate: 10,846 passed, 126 skipped.
+**Next**: M8 recurrence remains pending and disabled. Hosted baseline: 10,690 passed, 329 skipped. [M7 closeout](docs/work-packages/20261014_wmesque_catalog_sync/artifacts/20261016_m7_closeout.md) separates repository-wide isolation maintenance.
+
+### Repository test-isolation maintenance
+
+**Status**: Open backlog, separated from WMesque M7 by operator approval on 2026-10-16.
+**Link**: [Work item and affected files](docs/dev-notes/test-isolation-followup.md)
+**Next**: Repair 18 state findings using affected-file execution first. Exhaustive isolation runs weekly/manual; automatic CI retains stubtest and one baseline.
 
 ### Feature access governance
 

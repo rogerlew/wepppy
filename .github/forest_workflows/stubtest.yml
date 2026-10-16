@@ -70,7 +70,7 @@ jobs:
     - name: Remove isolated test runtime
       if: always() && steps.wctl.outcome == 'success'
       run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans --rmi local
-  test-isolation:
+  test-baseline:
     forest_bootstrap: false
     needs: stubtest
     runs-on:
@@ -78,9 +78,9 @@ jobs:
     - Linux
     - X64
     - remote-ci
-    timeout-minutes: 360
+    timeout-minutes: 90
     env:
-      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-test-isolation
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-test-baseline
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -110,23 +110,6 @@ jobs:
         /opt/venv/bin/python tests/bootstrap_ci_database.py
     - name: Check baseline suite
       run: wctl --compose-file docker/docker-compose.test.yml run-pytest tests --maxfail=1
-    - name: Check pytest isolation
-      run: wctl --compose-file docker/docker-compose.test.yml check-test-isolation
-        --max-workers 2 --json --log-dir /workdir/wepppy/.pytest_cache/isolation
-    - name: Archive isolation diagnostics without following symlinks
-      if: always()
-      run: |
-        if [ -e .pytest_cache ] || [ -L .pytest_cache ]; then
-          tar -cf "${RUNNER_TEMP}/test-isolation.tar" -- .pytest_cache
-        fi
-    - name: Upload isolation diagnostics
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-isolation-${{ github.run_id }}-${{ github.run_attempt }}
-        path: ${{ runner.temp }}/test-isolation.tar
-        if-no-files-found: warn
-        retention-days: 7
     - name: Remove isolated test runtime
       if: always() && steps.wctl.outcome == 'success'
       run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans --rmi local

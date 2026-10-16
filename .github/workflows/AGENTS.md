@@ -42,7 +42,9 @@ Jobs with `forest_bootstrap: false` in their source spec supply their own setup
 and cleanup. Use this for standalone CI runtimes that must not inherit Forest's
 host environment. Stubtest uses this mode on `remote-ci` (runner-02), with
 `docker/docker-compose.test.yml`, verified LFS inputs, and a unique Compose
-project per job. Its full isolation check is a separate, longer job. The pinned
+project per job. Automatic checks run stubtest and one full baseline. Exhaustive
+isolation runs in `test-isolation.yml` on weekly/manual triggers only; see
+`docs/dev-notes/test-isolation.md` for the repair loop and acceptance scope. The pinned
 common image supplies Python/native dependencies; `docker/Dockerfile.test` adds
 the existing Node 20 runtime by pinned digest and provisions Playwright/Chromium
 from the static-src lockfile outside the checkout mount. The longer job builds
