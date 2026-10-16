@@ -369,12 +369,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### WMesque Priority Retrieval and Master Catalog Synchronization
-
-**Status**: M1–M7 complete, 2026-10-16; receiving rollout/recovery, latency, baseline and stubtest accepted.
-**Link**: [Work package](docs/work-packages/20261014_wmesque_catalog_sync/package.md)
-**Scope**: Forest-first v2 priority retrieval, wepp.cloud master catalog, extension adoption, verified sync, and opt-in recurring RQ jobs. Unconfigured deployments retain wepp.cloud.
-**Next**: M8 recurrence remains pending and disabled. Hosted baseline: 10,690 passed, 329 skipped. [M7 closeout](docs/work-packages/20261014_wmesque_catalog_sync/artifacts/20261016_m7_closeout.md) separates repository-wide isolation maintenance.
 
 ### Repository test-isolation maintenance
 
@@ -1574,6 +1568,14 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### WMesque Priority Retrieval and Master Catalog Synchronization
+
+**Status**: Complete — M1–M8 accepted, 2026-10-16; daily hpc recurrence enabled.
+**Link**: [Work package](docs/work-packages/20261014_wmesque_catalog_sync/package.md)
+**Scope**: Forest-first v2 priority retrieval, wepp.cloud master catalog, extension adoption, verified sync, and opt-in recurring RQ jobs. Unconfigured deployments retain wepp.cloud.
+**Next**: Operate daily hpc receiver per open-wepp-org runbook. [M8 closeout](docs/work-packages/20261014_wmesque_catalog_sync/artifacts/20261016_m8_closeout.md) records two actual timer cycles, complete raster verification and recovery. General repository isolation remains separate.
+
 
 ### EDDE v2 WEPPcloud integration
 

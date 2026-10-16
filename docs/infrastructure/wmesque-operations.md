@@ -152,13 +152,18 @@ for commands, revision, actual transfer and raster readback, and deployment stat
 
 ## openwepp Receiving Deployment (2026-10-15)
 
-The authorized receiving writer is a bounded manual Docker container on existing
+The authorized receiving writer is a bounded Docker container on existing
 `hpc`, UID:GID1000:993, umask0022, writing `/tank/geodata`. All Kubernetes
 compute exports/mounts remain read-only. Dedicated SSH trust stays on hpc; the
 master key is source-address restricted and forces `rrsync -ro /geodata`.
 Its source `roger@100.127.248.45:/.` is relative to that export, not host root.
 Use open-wepp-org `operations/wmesque-sync.sh` and
-`docs/operations/wmesque-receiver.md` for the governed manual workflow.
+`docs/operations/wmesque-receiver.md` for manual operation and daily recurrence.
+M8 installs that script unchanged at `/usr/local/libexec/openwepp/wmesque-sync.sh`
+and the repository's `operations/systemd/wmesque-sync.{service,timer}` on hpc.
+The existing systemd timer starts after activation and then daily; inspect its
+journal together with `.wmesque/sync-status.json`. Disable the timer to stop
+future starts, then account for any active container before recovery.
 
 Paired runtime `a217f7342`/native `0515272` is published as
 `sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc`.
@@ -171,8 +176,10 @@ passed actual native/model/Parquet acceptance. PRISM uses retained writable
 Live restricted sync, release hashes/full raster, convergence, local/master
 pixel parity,404/outage fallback and revision rejection passed. Receiving
 web/rq-engine/worker templates explicitly select the internal WMesque2 service
-then wepp.cloud. Unconfigured deployments remain master-only. Recurrence remains
-disabled; no scheduler timer/readiness activation is authorized by M7.
+then wepp.cloud. Unconfigured deployments remain master-only. Recurrence is
+enabled on hpc under the separate M8 grant (2026-10-16), with two real
+timer-started cycles, full release/raster verification and recovery accepted.
+Kubernetes scheduler dry-run/readiness and its disabled sync flag are unchanged.
 
 Recovery removes only the endpoint-list settings through protected Git/Flux,
 retaining this compatible image, releases, originals and local extensions.

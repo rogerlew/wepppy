@@ -2,6 +2,23 @@
 
 ## Quick Status
 
+**COMPLETE — M1–M8 accepted, 2026-10-16 UTC.** Daily hpc timer enabled. The
+unchanged repository script and installed systemd units are retained in
+open-wepp-org PR201. Two timer-started cycles, verified release/full raster,
+explicit failure, duplicate rejection and idle disable/re-enable pass. Final
+independent security review has no findings. See
+[M8 closeout](artifacts/20261016_m8_closeout.md). Historical holds and pending
+statements below are superseded; general isolation remains separate.
+
+
+2026-10-16 M8 execution: operator authorized forest-to-hpc activation and required
+open-wepp-org to retain the deployed script. Receiver source1408cdb and PR201
+retain byte-identical operations/wmesque-sync.sh plus daily systemd units.
+Pre-apply review, actual dry run and isolated update/recovery fixtures pass;
+units installed, startup failure preserves catalog, first timer cycle pending.
+Kubernetes scheduling/mounts and master authorization are unchanged.
+
+
 2026-10-16: **M7 complete by operator-approved scope revision. M8 pending;
 recurring sync remains disabled.** Rollout/recovery, latency, full baseline and
 matching stubtest are accepted. Latest hosted baseline: 10,690 passed, 329 skipped.
@@ -75,10 +92,10 @@ in the open-wepp-org repository.
 
 **Started**: 2026-10-14 20:16 UTC
 **Updated**: 2026-10-15 UTC
-**Phase**: M1–M6 complete; M7 operational acceptance passed, validation closeout blocked
-**Next milestone**: hosted baseline/isolation acceptance; M8 remains excluded
+**Phase**: Complete — M1–M8 accepted
+**Next milestone**: None; operate daily hpc sync per the receiving runbook
 **Security**: High; independent implementation review approved, findings closed
-**Plan**: [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md)
+**Plan**: [Completed ExecPlan](prompts/completed/wmesque_catalog_sync_execplan.md)
 
 ## Task Board
 
@@ -89,8 +106,8 @@ in the open-wepp-org repository.
 - [x] M4: Implement manual sync/RQ wrapper with scheduling disabled.
 - [x] M5: Validate forest scheduled integration, downstream artifacts, and Compose parity.
 - [x] M6: Reviews approved; all three production hosts deployed; master publication and private export validated.
-- [ ] M7: Operational sync/local-first/recovery accepted; full validation closeout blocked by reproducible baseline latency test.
-- [ ] M8: Enable recurrence, validate recovery, and close with evidence.
+- [x] M7: Operational sync/local-first/recovery, latency, full baseline and matching stubtest accepted; general isolation separated by operator approval.
+- [x] M8: Daily hpc recurrence enabled; actual timer/artifact/failure/rollback gates pass; receiving PR201 merged as3d29658.
 
 ## Decisions
 
@@ -99,7 +116,11 @@ in the open-wepp-org repository.
 - **2026-10-14 20:16 UTC** — Operator requires unconfigured deployments to use wepp.cloud. Authority: governance, “Deployment Endpoint Defaults.” Local service installation alone must not change routing.
 - **2026-10-14 20:16 UTC** — Scaffold only this session. Interface details in the assessment remain proposals until M1 resolves them; no invented production access or writer permissions.
 
-## Risks and Open Decisions
+## Historical Risks and Open Decisions
+
+M7/M8 resolved writer, credential and scheduling placement through the existing
+hpc receiver. The table below preserves initial planning risks; broader dataset
+publication/materialization remains separate operator work.
 
 | Issue | Impact | Next action |
 | --- | --- | --- |

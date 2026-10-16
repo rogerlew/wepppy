@@ -3,7 +3,7 @@
 
 This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
-current together with the package tracker. Status: M1–M6 complete; M7 operational rollout accepted, broad-validation closeout blocked; M8 disabled.
+current together with the package tracker. Status: COMPLETE — M1–M8 accepted; daily hpc recurrence enabled on 2026-10-16.
 
 ## Purpose / Big Picture
 
@@ -34,7 +34,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 UTC) Final configuration `f8ce2bb92` passes hosted stubtest job `116535294278`, including cleanup.
 - [x] (2026-10-15 UTC) Commit `24dcc083e` supplies exact committed management fixtures, resolving the baseline failure after 2,844 passes. Focused tests pass on Forest and a fresh committed-source extraction on runner-02 with ignored matrix data absent.
 - [x] (2026-10-15 UTC) Resolved run `38792764959` missing binary inputs in `9ce4195f8`. The binary and two seed-generator test modules use dedicated committed fixtures; 89 tests pass on both Forest and runner-02 with the ignored source absent and all 16 hashes verified.
-- [ ] Run `38797621501` passed stubtest then failed after 5,843 baseline passes on a unit test using the real cache/run-directory boundary. Affected orchestration tests now explicitly record scoped invalidation; 19 focused browser/schema/CSRF tests and 4,693 remaining-group tests pass on runner-02. See `artifacts/20261015_validation_followup.md` and retained raw samples.
+- [x] Historical failure resolved by subsequent passing baseline: run `38797621501` passed stubtest then failed after 5,843 baseline passes on a unit test using the real cache/run-directory boundary. Affected orchestration tests now explicitly record scoped invalidation; 19 focused browser/schema/CSRF tests and 4,693 remaining-group tests pass on runner-02. See `artifacts/20261015_validation_followup.md` and retained raw samples.
 - [x] (2026-10-15 UTC) GitHub restored; source `467901f08` pushed; canonical build `38683704256` started. Exact published candidate fails native startup preflight; no cluster promotion performed.
 - [x] (2026-10-15 UTC) Operator selected full current-state openwepp upgrade, including other current behavior changes. Published validated native release `0515272453e36fe071c7812fb9d8ca2cf1642d08`; canonical workflow pin corrected to pair interchange and climate releases.
 - [x] (2026-10-15 UTC) Paired image5f46ed68 built from a217f7342/native0515272; native hashes/API, PRISM cache,65 exact-image tests and actual worker WEPP/Parquet readback pass. Full current-runtime rollout restored healthy admission via receiving PR192–194.
@@ -55,7 +55,7 @@ sync/adoption followed by downstream project input and output readback.
 - [x] (2026-10-15 03:41 UTC) M6 wepp2: canonical deployment, worker registration, queue resume, and actual batch-runtime retrieval checks passed.
 - [x] (2026-10-15 04:04 UTC) M6 complete: wepp3 deployed and actual runtime checks passed; all three hosts validated, private export proven, rollback-layout evidence retained.
 - [x] M7: Operational canary, recovery, latency, full Forest/hosted baseline and hosted stubtest accepted. General isolation is a separate backlog, not an M7 gate.
-- [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
+- [x] (2026-10-16 UTC) M8 complete: versioned open-wepp-org script/systemd units deployed on hpc; two actual timer cycles, full release/raster readback, failure/catalog preservation, duplicate rejection and idle timer disable/re-enable pass. Daily recurrence enabled. See artifacts/20261016_m8_closeout.md and receiving PR201.
 
 ## Surprises & Discoveries
 
@@ -153,6 +153,8 @@ storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
 
+- Decision (2026-10-16, operator grant): execute M8 from forest over SSH to hpc; retain deployed operations/wmesque-sync.sh and timer/service configuration in open-wepp-org. Reuse the proven hpc writer instead of changing Kubernetes mounts or enabling unrelated scheduler tasks.
+
 - Decision (2026-10-16, operator approval): accept M7 on rollout/recovery,
   latency, baseline and stubtest evidence. Retain isolation findings separately
   and move exhaustive CI to weekly/manual; keep one automatic baseline. This
@@ -248,6 +250,14 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+2026-10-16 final closure: M1–M8 complete. Daily hpc receiver enabled; the unchanged
+script and installed units are retained in open-wepp-org PR201 with complete live
+receipts and final independent security PASS. No Kubernetes or master changes.
+Timer execution, artifact readback and bounded recovery establish acceptance;
+general test-isolation maintenance remains a separate backlog. Archive this plan.
+
+Earlier checkpoints below are retained history, superseded by this closeout.
 
 2026-10-16 closeout: M7 accepted; M8 remains pending and disabled. Latest hosted
 baseline passes 10,690 tests/329 skips and matching stubtest passes. The 18 general

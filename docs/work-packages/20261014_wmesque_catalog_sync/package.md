@@ -1,6 +1,6 @@
 # WMesque Priority Retrieval and Master Catalog Synchronization
 
-**Status**: Open — M1–M7 complete; M8 recurrence pending and disabled
+**Status**: Complete — M1–M8 accepted, 2026-10-16; daily hpc recurrence enabled
 **Started**: 2026-10-14 20:16 UTC
 **Owner**: Roger Lew
 **Implementation location**: forest WEPPpy checkout
@@ -12,14 +12,14 @@ wepp.cloud as the default. Receiving deployments synchronize master resources
 from wepp.cloud and may maintain local extensions. When master adopts an
 extension, ordinary synchronization takes ownership under the same identifier.
 
-The operator authorized M1–M5 on forest and subsequently M6 on wepp1, wepp2, and wepp3. Implementation, reviews, forest acceptance, and master production rollout are complete; evidence is recorded in the tracker. M7 is accepted under the operator-approved [closeout](artifacts/20261016_m7_closeout.md). General test-isolation maintenance is separate; M8 recurrence remains pending and disabled.
+The operator authorized M1–M5 on forest and subsequently M6 on wepp1, wepp2, and wepp3. Implementation, reviews, forest acceptance, and master production rollout are complete; evidence is recorded in the tracker. M7 is accepted under the operator-approved [closeout](artifacts/20261016_m7_closeout.md). General test-isolation maintenance is separate. [M8 closeout](artifacts/20261016_m8_closeout.md) records daily hpc recurrence and actual timer/artifact/recovery acceptance.
 
 ## Authority and References
 
 - [Catalog governance](../../infrastructure/wmesque-catalog-governance.md) is the durable authority for ownership, adoption, consistency, and deployment defaults.
 - [Static assessment](../../infrastructure/wmesque-implementation-assessment.md) records source evidence, proposed interfaces, rollout constraints, and tests.
 - [Dataset inventory](../../infrastructure/wmesque-dataset-sync-manifest.md) identifies requested resources, not verified revision identity.
-- [Active ExecPlan](prompts/active/wmesque_catalog_sync_execplan.md) governs execution; [tracker](tracker.md) records status.
+- [Completed ExecPlan](prompts/completed/wmesque_catalog_sync_execplan.md) governs execution; [tracker](tracker.md) records status.
 
 ## Objectives and Scope
 

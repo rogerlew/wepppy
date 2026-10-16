@@ -75,7 +75,11 @@ local service and priority failover independently of synchronization scheduling.
   deployment validation; tailnet membership alone does not establish them.
 - Non-wepp.cloud deployments may run cron-style scheduled RQ tasks to pull
   changes from wepp.cloud. Scheduling and execution belong to the receiving
-  deployment; wepp.cloud remains the publication source.
+  deployment; wepp.cloud remains the publication source. An existing dedicated
+  receiver may instead schedule the same sync CLI with its host timer. For
+  openwepp, the operator approved the existing hpc writer's daily systemd timer
+  on 2026-10-16, preserving read-only Kubernetes geodata rather than adding a
+  writable RQ worker solely for scheduling.
 - Synchronization must be repeatable and prevent overlapping publication of the
   same resource. Failed attempts must leave previously verified resources usable
   and report failures explicitly. Adoption of a local extension is normal
