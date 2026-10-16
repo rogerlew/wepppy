@@ -1,0 +1,12 @@
+# New-project NoScaling default
+
+Scope: explicitly initialize otherwise unset scaling to NoScaling after existing
+configuration resolution. Existing projects, getters, templates, configured
+precedence, numerical operations and the prior EDDE fix are outside this change.
+Complexity budget: one constructor assignment branch, focused tests and docs;
+no new infrastructure or dependencies. Security impact: none; no dedicated
+security review required. Completion requires constructor/reload and rendered
+radio evidence, existing EDDE regression, and independent correctness review.
+
+The [checkpoint](artifacts/20261016_contract_decision.md) records the approved
+behavior. Implementation is pending checkpoint commit authorization.

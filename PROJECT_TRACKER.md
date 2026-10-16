@@ -7,6 +7,8 @@
 
 ## Purpose
 
+Checkpoint reviewed: [New-project NoScaling default](docs/work-packages/20261016_climate_no_scaling_default/package.md) — explicitly initialize otherwise unset precipitation scaling; configured choices and existing projects remain unchanged. Both contract reviews passed; checkpoint commit authorization precedes implementation.
+
 Completed (code/local): [Observed flow-duration overlay](docs/work-packages/20261014_gl_dashboard_observed_flow_duration/package.md) — optional full-record measured distribution on hillslope and outlet plots, implemented in `4969c7323` after checkpoint `4e02ee2e0`. Real-project browser verification and both independent reviews pass; 10,812 Python tests and 986 frontend tests pass. No production deployment.
 
 Completed (code/focused validation): [Selected onboarding audit corrections](docs/work-packages/20261013_onboarding_audit_corrections/package.md) — D01/D02/D13/D14/D18; AgFields 261010 default, editable unknown SBS palettes, ORCID deferral, Mariana contact and official FAQ. Reviewed checkpoint b4be200b4; 182 passed/1 skipped. Other 13 audit dispositions remain open; no production rollout.

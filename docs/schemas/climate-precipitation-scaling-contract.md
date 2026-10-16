@@ -1,13 +1,32 @@
-# Climate precipitation scale-map authority
+# Climate precipitation scaling defaults and scale-map authority
 
 ## Authority and scope
 
 The spatial precipitation scale map is configuration-owned and immutable to
-browser/API climate submissions. This contract covers `Climate.precip_scale_factor_map`,
+browser/API climate submissions. This contract covers the new-project
+`Climate.precip_scaling_mode` default, `Climate.precip_scale_factor_map`,
 the persisted `_precip_scale_factor_map`, and the corresponding climate control.
 It does not change scalar/monthly scaling, raster values, or climate dataset selection.
 
 ## Resolution and persistence
+
+For new projects, after resolving all configured scaling factors, maps and an
+explicit `precip_scale_mode` using existing precedence, an otherwise unset mode
+MUST be stored as `ClimatePrecipScalingMode.NoScaling` (0). The climate control
+MUST render "No scaling" checked for that default. Configured modes and factors
+retain their meaning. This decision does not migrate existing stored `None`
+values or change their established unscaled execution behavior.
+
+The operator approved this default on 2026-10-16 to eliminate the blank radio
+selection in new projects. Explicit initialization was chosen over a template
+fallback so persisted state and presentation agree. Implementation conformance
+is pending. See [ADR-0096](../adrs/ADR-0096-new-project-no-scaling-default.md).
+
+This initialization default applies only after existing configuration readers
+and mode parsing succeed. Missing or reader-admitted empty settings that leave
+the mode unset select NoScaling. Invalid configured modes retain explicit parse
+failure; invalid factor/map inputs retain their existing reader and selected-mode
+validation behavior. Do not catch configuration failures to select NoScaling.
 
 Resolve the effective map using the run's canonical configuration reader and
 path-token expansion. Preserve the existing initialization precedence: the first
