@@ -18,6 +18,10 @@ sync/adoption followed by downstream project input and output readback.
 
 ## Progress
 
+- [x] (2026-10-16 UTC) Hosted `38825109720` baseline passes 10,671 tests/329 skips; all five unchanged-order repeats pass.
+- [x] (2026-10-16 UTC) Repair lazy snapshot imports, framework/native initialization findings, persistent report/Daymet/soil stubs, and strict BLC helper forwarding. Matching runner passes 15 focused per-file checks including real WBT; additional checker regressions pass 27 tests. Final-source collection rechecks pass all 36 flagged files; four additional files pass actual combined/per-file isolation with no findings.
+- [ ] Fresh hosted full baseline/isolation acceptance after the repair; M7 remains open.
+
 - [x] (2026-10-15 UTC) Local stubtest repaired: two undefined `Optional` annotations now use `float | None`; all eight default modules and test-stub completeness pass.
 - [x] (2026-10-15 UTC) Operator approved and Forest completed PostgreSQL migration to `docker_forest-postgres-ssd`; stopped bytes/metadata and database counts match, durability preserved, backups and public health restored. All four latency gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms.
 - [x] (2026-10-15 UTC) Runner-02 pinned isolated runtime passes eight stubtest modules, completeness, and 77 database/catalog/NoDb tests with 648 verified LFS assets. Generated workflow preserves the full isolation gate as a separate long job.
@@ -52,6 +56,12 @@ sync/adoption followed by downstream project input and output readback.
 - [ ] M8: Enable recurrence under a separate grant; receiving local-first/recovery already verified in M7.
 
 ## Surprises & Discoveries
+
+The per-file checker invoked lazy module attributes while observing singleton
+state, crashing after six files had passed pytest. Its pre-startup/post-shutdown
+snapshot also counted pytest and native-library initialization as pollution.
+Two opt-in real WBT tests exposed missing strict-failure forwarding in the
+TerrainProcessor helper; the broad suite had skipped those cases.
 
 A broader clean-runner probe found unit tests using real cache and configuration
 lock paths despite mocked controllers. It also found missing Node and generated
@@ -137,6 +147,11 @@ storage; readback checks the required water-balance fields explicitly.
 
 ## Decision Log
 
+- Decision (2026-10-16, Codex): retain collection-time leak detection and the
+  full gate, fix observer lifecycle and native initialization classification,
+  and make incomplete execution fail explicitly. Correct the BLC helper under
+  ADR-0095 without relaxing diagnostics or adding configuration flags.
+
 - Decision: Make clean CI prerequisites explicit: committed inputs, opt-in unit
   boundary fixtures, generated controllers, existing locked browser dependencies,
   and a disposable schema from current models plus the canonical preferences
@@ -220,6 +235,12 @@ trickling-header test showed ordinary idle timeouts can starve fallback. DNS and
 connection setup are explicitly outside a universal wall-clock guarantee.
 
 ## Outcomes & Retrospective
+
+2026-10-16: hosted baseline and all five unchanged-order repeats pass. The
+remaining per-file gate exposed checker observation/lifecycle defects and a
+strict BLC helper mismatch. Focused corrections retain collection leak detection
+and diagnostic validation; see `artifacts/20261016_isolation_followup.md` and
+the separate 20261016 correctness/security reviews. Full isolation remains open.
 
 Clean-runner follow-up: explicit unit boundaries and CI prerequisites resolve
 the discovered failures. The final remaining-group check passes 4,693 tests

@@ -76,7 +76,9 @@ class _FlowStackEmulatorStub:
         blc_dist: int | None = None,
         blc_max_cost: float | None = None,
         blc_fill: bool = True,
+        blc_fail_on_unresolved: bool = False,
     ) -> None:
+        self.blc_fail_on_unresolved = blc_fail_on_unresolved
         self.calls.append(f"relief:{fill_or_breach}:{blc_dist}:{blc_max_cost}:{blc_fill}")
 
     def _create_flow_vector(self) -> None:
@@ -109,6 +111,7 @@ def test_phase1_derive_flow_stack_executes_in_order() -> None:
         reproject_streams_geojson=lambda geojson_path: wgs_calls.append(geojson_path),
     )
 
+    assert emulator.blc_fail_on_unresolved is True
     assert emulator.calls == [
         "relief:breach_least_cost:500:7.5:False",
         "flow_vector",

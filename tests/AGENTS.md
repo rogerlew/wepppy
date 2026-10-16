@@ -54,6 +54,10 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 
 ### Module Stub Management
 
+The [isolation checker](../docs/dev-notes/test-isolation.md) measures collection
+and test execution separately from pytest startup/shutdown. Do not retain
+collection-time dependency stubs when the canonical runtime supplies real libraries.
+
 **Critical**: When creating stubs for `wepppy` modules via `sys.modules` to isolate tests from heavy dependencies, follow these rules:
 
 1. **Prefer shared fixtures over per-test stubs.** If multiple tests need the same stub, create a session-scoped fixture in `conftest.py` rather than duplicating stub logic.

@@ -5,6 +5,8 @@ from importlib import import_module
 from pathlib import Path
 import uuid
 
+import os
+
 import pytest
 
 pytest.importorskip("flask")
@@ -14,7 +16,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMixin
 from flask_security.utils import login_user
 
-rq_info_details_module = import_module("wepppy.weppcloud.routes.rq.info_details.routes")
+# App initialization exports its asset version; keep collection environment scoped.
+with pytest.MonkeyPatch.context() as _collection_env:
+    _collection_env.setenv("ASSET_VERSION", os.environ.get("ASSET_VERSION", "test"))
+    rq_info_details_module = import_module("wepppy.weppcloud.routes.rq.info_details.routes")
 
 pytestmark = pytest.mark.routes
 

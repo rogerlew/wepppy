@@ -4,18 +4,23 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import uuid
 
+import os
+
 import pytest
 import sqlalchemy as sa
 from sqlalchemy import event
 from sqlalchemy.exc import IntegrityError
 
-from wepppy.weppcloud.app import (
-    Run,
-    User,
-    UserPreferences,
-    app,
-    db,
-)
+# App initialization exports its asset version; keep collection environment scoped.
+with pytest.MonkeyPatch.context() as _collection_env:
+    _collection_env.setenv("ASSET_VERSION", os.environ.get("ASSET_VERSION", "test"))
+    from wepppy.weppcloud.app import (
+        Run,
+        User,
+        UserPreferences,
+        app,
+        db,
+    )
 from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.weppcloud.user_preferences import (

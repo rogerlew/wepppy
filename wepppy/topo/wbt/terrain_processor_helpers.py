@@ -87,7 +87,9 @@ def derive_flow_stack(
         fill_or_breach: Conditioning strategy used for relief generation.
         blc_dist: Optional least-cost breach distance value.
         blc_max_cost: Optional least-cost cumulative cost limit.
-        blc_fill: Whether least-cost breach should fill unresolved pits.
+        blc_fill: Whether least-cost breach should fill unresolved pits. False
+            also requests failure on unresolved depressions, as required by the
+            strict conditioning diagnostics contract.
         polygonize_streams: Hook for stream raster polygonization.
         reproject_streams_geojson: Hook that creates a WGS84 stream GeoJSON.
 
@@ -114,6 +116,7 @@ def derive_flow_stack(
         blc_dist=blc_dist,
         blc_max_cost=blc_max_cost,
         blc_fill=blc_fill,
+        blc_fail_on_unresolved=(fill_or_breach == "breach_least_cost" and not blc_fill),
     )
     emulator._create_flow_vector()
     emulator._create_flow_accumulation()

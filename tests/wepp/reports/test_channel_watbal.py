@@ -1,51 +1,12 @@
 from __future__ import annotations
 
-import contextlib
 import shutil
-import sys
-import types
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from tests.stubs import ensure_geopandas_stub
 
-if "deprecated" not in sys.modules:
-    module = types.ModuleType("deprecated")
-
-    def _noop_deprecated(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    module.deprecated = _noop_deprecated
-    sys.modules["deprecated"] = module
-
-sys.modules.setdefault("utm", types.ModuleType("utm"))
-sys.modules.setdefault("pyproj", types.ModuleType("pyproj"))
-
-if "rasterio" not in sys.modules:
-    rasterio_module = types.ModuleType("rasterio")
-
-    class _Env(contextlib.AbstractContextManager):  # pragma: no cover - stub
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            return False
-
-    rasterio_module.Env = _Env
-    warp_module = types.ModuleType("rasterio.warp")
-    warp_module.reproject = lambda *args, **kwargs: None  # pragma: no cover - stub
-
-    class _Resampling:  # pragma: no cover - stub
-        nearest = 0
-
-    warp_module.Resampling = _Resampling
-    warp_module.calculate_default_transform = lambda *args, **kwargs: (None, None, None)
-    sys.modules["rasterio"] = rasterio_module
-    sys.modules["rasterio.warp"] = warp_module
-
-ensure_geopandas_stub()
 
 from wepppy.wepp.reports.channel_watbal import ChannelWatbalReport
 

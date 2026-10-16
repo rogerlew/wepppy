@@ -112,7 +112,7 @@ jobs:
       run: wctl --compose-file docker/docker-compose.test.yml run-pytest tests --maxfail=1
     - name: Check pytest isolation
       run: wctl --compose-file docker/docker-compose.test.yml check-test-isolation
-        --max-workers 2 --log-dir /workdir/wepppy/.pytest_cache/isolation
+        --max-workers 2 --json --log-dir /workdir/wepppy/.pytest_cache/isolation
     - name: Archive isolation diagnostics without following symlinks
       if: always()
       run: |

@@ -11,21 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-if "deprecated" not in sys.modules:
-    deprecated_stub = types.ModuleType("deprecated")
-
-    def _deprecated(*d_args, **d_kwargs):
-        if d_args and callable(d_args[0]) and not d_kwargs:
-            return d_args[0]
-
-        def _decorator(func):
-            return func
-
-        return _decorator
-
-    deprecated_stub.deprecated = _deprecated
-    sys.modules["deprecated"] = deprecated_stub
-
 REPO_ROOT = Path(__file__).resolve().parents[4]
 WEPP_SOIL_UTIL_PATH = (
     REPO_ROOT / "wepppy" / "wepp" / "soils" / "utils" / "wepp_soil_util.py"

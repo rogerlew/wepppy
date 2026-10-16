@@ -74,6 +74,9 @@ nonnegative number), `fill` (boolean), and `fail_on_unresolved` (boolean).
 
 WEPPcloud requires `fill=false`, `fail_on_unresolved=true`, and
 `fallback_fill_used=false`. Fallback fields serve standalone WBT callers only.
+The TerrainProcessor flow-stack helper forwards `fail_on_unresolved=true`
+when least-cost breach is requested with `blc_fill=false`; see
+[ADR-0095](../adrs/ADR-0095-terrain-helper-strict-least-cost-breach.md).
 
 ### TopazConditionDem
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import shutil
 import sys
-import types
 from pathlib import Path
 
 import duckdb
@@ -12,7 +11,6 @@ import pandas as pd
 import pytest
 import pyarrow.parquet as pq
 
-from tests.stubs import ensure_geopandas_stub
 
 from tests.wepp.interchange.module_loader import PROJECT_OUTPUT
 
@@ -20,43 +18,6 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-if "deprecated" not in sys.modules:
-    module = types.ModuleType("deprecated")
-
-    def _noop_deprecated(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    module.deprecated = _noop_deprecated
-    sys.modules["deprecated"] = module
-
-sys.modules.setdefault("utm", types.ModuleType("utm"))
-sys.modules.setdefault("pyproj", types.ModuleType("pyproj"))
-ensure_geopandas_stub()
-
-if "rasterio" not in sys.modules:
-    rasterio_module = types.ModuleType("rasterio")
-
-    class _Env:
-        def __enter__(self):  # pragma: no cover - stub
-            return self
-
-        def __exit__(self, exc_type, exc_val, exc_tb):  # pragma: no cover - stub
-            return False
-
-    rasterio_module.Env = _Env
-    warp_module = types.ModuleType("rasterio.warp")
-    warp_module.reproject = lambda *args, **kwargs: None  # pragma: no cover - stub
-    warp_module.calculate_default_transform = lambda *args, **kwargs: (None, None, None)
-
-    class _Resampling:  # pragma: no cover - stub
-        nearest = 0
-
-    warp_module.Resampling = _Resampling
-    sys.modules["rasterio"] = rasterio_module
-    sys.modules["rasterio.warp"] = warp_module
 
 from wepppy.wepp.reports import return_periods as return_periods_module
 from wepppy.wepp.reports.return_periods import (

@@ -2,7 +2,7 @@
 """Test isolation checker tooling.
 
 This script implements the ``wctl check-test-isolation`` workflow specified in
-``docs/dev-notes/test-tooling-spec.md``. It orchestrates three phases:
+``docs/dev-notes/test-isolation.md``. It orchestrates three phases:
 
 1. Random-order fuzzing of the requested pytest targets
 2. Per-file isolation runs to surface files that only fail when run in suite
@@ -29,6 +29,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -39,6 +40,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+
+import pytest
 
 try:
     import tomllib  # Python 3.11+
@@ -306,15 +309,64 @@ def scan_filesystem(repo_root: Path, ignore_patterns: Sequence[str]) -> Tuple[Se
     return files, dirs
 
 
+def is_native_support_module(attributes: Dict[str, Any]) -> bool:
+    """Recognize observed Cython/SWIG/pybind helper modules, not replacements.
+
+    These native libraries create fileless modules during ordinary import.
+    Keep this bounded inventory in sync with docs/dev-notes/test-isolation.md.
+    """
+    name = attributes.get("__name__", "")
+    if name == "_openssl":
+        return all((type(attributes.get(key)).__module__, type(attributes.get(key)).__name__)
+                   == ("_cffi_backend", expected) for key, expected in (("ffi", "FFI"), ("lib", "Lib")))
+    if name == "cython_runtime":
+        return set(attributes) <= {
+            "__name__", "__doc__", "__package__", "__loader__", "__spec__",
+            "cline_in_traceback",
+        }
+    if re.fullmatch(r"_cython_\d+_\d+_\d+(?:limited)?(?:nofinalize)?", name):
+        return isinstance(attributes.get("cython_function_or_method"), type)
+    if name == "swig_runtime_data4":
+        return type(attributes.get("type_pointer_capsule")).__name__ == "PyCapsule"
+    if name == "duckdb.duckdb.typing":
+        return isinstance(attributes.get("DuckDBPyType"), type)
+    if name == "duckdb.duckdb.functional":
+        return isinstance(attributes.get("PythonUDFType"), type)
+    return False
+
+
+def module_attributes(module: Any) -> Dict[str, Any]:
+    attributes = vars(module) if module is not None else {}
+    # Cryptography publishes a transparent deprecation proxy around a real module.
+    if (type(module).__module__, type(module).__name__) == ("cryptography.utils", "_ModuleWithDeprecations"):
+        wrapped = attributes.get("_module")
+        if wrapped is not None:
+            return vars(wrapped)
+    if (type(module).__module__, type(module).__name__) == ("passlib.utils.compat", "_LazyOverlayModule"):
+        wrapped = attributes.get("_LazyOverlayModule__proxy")
+        if wrapped is not None:
+            return vars(wrapped)
+    return attributes
+
+
 def classify_module(module: Any) -> Tuple[bool, bool, bool, Optional[str]]:
-    file_path = getattr(module, "__file__", None)
+    attributes = module_attributes(module)
+    file_path = attributes.get("__file__")
     has_file = bool(file_path)
-    is_package = bool(getattr(module, "__path__", None))
-    spec = getattr(module, "__spec__", None)
+    is_package = bool(attributes.get("__path__"))
+    spec = attributes.get("__spec__")
     loader_name = None
     if spec and getattr(spec, "loader", None):
         loader_name = spec.loader.__class__.__name__
-    is_stub = not has_file and not is_package and loader_name is None
+    native_cffi_library = (type(module).__module__, type(module).__name__) == ("_cffi_backend", "Lib")
+    dependency_proxy = (type(module).__module__, type(module).__name__) in {
+        ("Cython.Shadow", "CythonDotParallel"),
+        ("Cython.Shadow", "CythonCImports"),
+        ("Cython.Shadow", "CythonDotImportedFromElsewhere"),
+        ("passlib.registry", "_PasslibRegistryProxy"),
+    }
+    is_stub = (not native_cffi_library and not dependency_proxy and not has_file and not is_package and loader_name is None
+               and not is_native_support_module(attributes))
     return has_file, is_package, is_stub, loader_name
 
 
@@ -323,10 +375,13 @@ def capture_singleton_snapshot() -> Dict[str, Dict[str, int]]:
     for name, module in list(sys.modules.items()):
         if not name.startswith(("wepppy.", "tests.", "wepppy")):
             continue
+        if module is None:
+            continue
         module_entries: Dict[str, int] = {}
         for attr in WATCHED_SINGLETON_ATTRS:
-            if hasattr(module, attr):
-                value = getattr(module, attr)
+            # Observing a lazy module must not import new modules or mutate state.
+            if attr in vars(module):
+                value = vars(module)[attr]
                 try:
                     size = len(value)  # type: ignore[arg-type]
                 except TypeError:
@@ -425,7 +480,7 @@ def create_module_snapshot() -> Dict[str, Dict[str, Any]]:
     snapshot: Dict[str, Dict[str, Any]] = {}
     for name, module in list(sys.modules.items()):
         has_file, is_package, is_stub, loader_name = classify_module(module)
-        file_path = getattr(module, "__file__", None)
+        file_path = module_attributes(module).get("__file__")
         snapshot[name] = {
             "name": name,
             "file": file_path,
@@ -479,6 +534,23 @@ def compute_state_diff(before: StateSnapshot, after: StateSnapshot) -> StateDiff
         modules = module_diff(before.modules, after.modules)
     if before.env is not None and after.env is not None:
         env = diff_env(before.env, after.env)
+        # Import-only defaults from the observed Pint/Rasterio initialization.
+        # Never suppress changes/removals, or additions without the real import.
+        before_modules, after_modules = before.modules or {}, after.modules or {}
+        pint = after_modules.get("pint", {}).get("file")
+        if "pint" not in before_modules and pint and env.added.get("PINT_ARRAY_PROTOCOL_FALLBACK") == "0":
+            env.added.pop("PINT_ARRAY_PROTOCOL_FALLBACK")
+        if any(name not in before_modules and after_modules.get(name, {}).get("file")
+               for name in ("threadpoolctl", "sklearn")) and env.added.get("KMP_DUPLICATE_LIB_OK") == "True":
+            env.added.pop("KMP_DUPLICATE_LIB_OK")
+        geospatial_import = any(name not in before_modules and after_modules.get(name, {}).get("file")
+                                for name in ("rasterio", "pyogrio", "fiona"))
+        certifi = after_modules.get("certifi", {}).get("file")
+        if geospatial_import and certifi:
+            bundle = str(Path(certifi).with_name("cacert.pem"))
+            for key in ("GDAL_CURL_CA_BUNDLE", "PROJ_CURL_CA_BUNDLE"):
+                if env.added.get(key) == bundle:
+                    env.added.pop(key)
     if before.singletons is not None and after.singletons is not None:
         singletons = diff_singletons(before.singletons, after.singletons)
     if before.filesystem_files is not None and after.filesystem_files is not None:
@@ -495,6 +567,9 @@ class RecorderPlugin:
     """pytest plugin to capture outcome details."""
 
     def __init__(self) -> None:
+        self.after_snapshot = None
+        self.before_snapshot = None
+        self.snapshot_options = None
         self.failures: List[FailureEntry] = []
         self.errors: List[FailureEntry] = []
         self.skips: List[str] = []
@@ -502,6 +577,12 @@ class RecorderPlugin:
         self.files: Set[str] = set()
         self.collected: int = 0
         self._start = time.time()
+
+    # Snapshot after pytest/plugins/root conftest initialization, before collection.
+    @pytest.hookimpl(trylast=True)
+    def pytest_sessionstart(self, session: Any) -> None:
+        if self.snapshot_options is not None:
+            self.before_snapshot = capture_state(**self.snapshot_options)
 
     # pytest hooks
     def pytest_itemcollected(self, item: Any) -> None:  # pragma: no cover - exercised via pytest
@@ -526,9 +607,12 @@ class RecorderPlugin:
                 FailureEntry(nodeid=nodeid, when=report.when, longrepr=_safe_longrepr(report))
             )
 
+    @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Any, exitstatus: Any) -> None:  # pragma: no cover - requires pytest run
         self.collected = getattr(session, "testscollected", self.collected)
         self.duration = time.time() - self._start
+        if self.snapshot_options is not None:
+            self.after_snapshot = capture_state(**self.snapshot_options)
 
 
 def _safe_longrepr(report: Any) -> Optional[str]:
@@ -589,7 +673,7 @@ def run_pytest_worker(config: Dict[str, Any]) -> Tuple[PytestOutcome, int]:
     enable_fs_scan = bool(config.get("enable_fs_scan", False))
     ignore_patterns = config.get("ignore_patterns", list(DEFAULT_FS_IGNORE))
 
-    before_snapshot = capture_state(
+    recorder.snapshot_options = dict(
         enable_state_scan=enable_state_scan,
         enable_fs_scan=enable_fs_scan,
         ignore_patterns=ignore_patterns,
@@ -597,15 +681,11 @@ def run_pytest_worker(config: Dict[str, Any]) -> Tuple[PytestOutcome, int]:
 
     exit_code = pytest.main(args, plugins=[recorder])
 
-    after_snapshot = capture_state(
-        enable_state_scan=enable_state_scan,
-        enable_fs_scan=enable_fs_scan,
-        ignore_patterns=ignore_patterns,
-    )
-
     state_diff = None
     if enable_state_scan or enable_fs_scan:
-        state_diff = compute_state_diff(before_snapshot, after_snapshot)
+        if recorder.before_snapshot is None or recorder.after_snapshot is None:
+            raise RuntimeError("Requested isolation snapshots were not captured")
+        state_diff = compute_state_diff(recorder.before_snapshot, recorder.after_snapshot)
 
     json_data: Optional[Dict[str, Any]] = None
     if json_report_enabled and json_report_path and json_report_path.exists():
@@ -848,6 +928,15 @@ def summarize_random_runs(random_runs: List[RandomRunResult], *, verbose: bool) 
     issues: List[IssueRecord] = []
     if not random_runs:
         return issues
+    for index, run in enumerate(random_runs):
+        if run.outcome.exit_code != 0:
+            issues.append(IssueRecord(
+                key=make_issue_key("run-failure", str(index)),
+                description=f"Pytest iteration {index + 1} failed (exit {run.outcome.exit_code})",
+                details={"exit_code": run.outcome.exit_code,
+                         "failures": [dataclasses.asdict(e) for e in run.outcome.failures],
+                         "errors": [dataclasses.asdict(e) for e in run.outcome.errors]},
+            ))
     first_failures = random_runs[0].outcome.failed_nodeids()
     divergent = False
     for result in random_runs[1:]:
@@ -885,12 +974,13 @@ def summarize_file_isolation(
         file_path = result.file_path
         baseline = baseline_failures.get(file_path, set())
         current = result.outcome.failed_nodeids()
-        if current != baseline:
+        if current != baseline or result.outcome.exit_code != 0:
             details = {
                 "file": file_path,
                 "baseline_failures": sorted(baseline),
                 "isolated_failures": sorted(current),
                 "exit_code": result.outcome.exit_code,
+                "errors": [dataclasses.asdict(e) for e in result.outcome.errors],
             }
             issues.append(
                 IssueRecord(
@@ -911,7 +1001,7 @@ def summarize_pollution(file_results: List[FileIsolationResult]) -> List[IssueRe
         file_path = result.file_path
 
         if diff.modules and not diff.modules.is_empty():
-            for record in diff.modules.suspicious or diff.modules.added:
+            for record in diff.modules.suspicious + diff.modules.replaced:
                 issues.append(
                     IssueRecord(
                         key=make_issue_key("pollution", "module", file_path, record.name),
@@ -922,7 +1012,6 @@ def summarize_pollution(file_results: List[FileIsolationResult]) -> List[IssueRe
                         },
                     )
                 )
-                break
 
         if diff.env and not diff.env.is_empty():
             issues.append(
@@ -974,10 +1063,17 @@ def write_log(log_dir: Optional[Path], name: str, stdout: str, stderr: str) -> N
     (log_dir / f"{safe_name}.err").write_text(stderr)
 
 
+def positive_iterations(value: str) -> int:
+    iterations = int(value)
+    if iterations < 1:
+        raise argparse.ArgumentTypeError("iterations must be at least 1")
+    return iterations
+
+
 def parse_args(argv: Optional[Sequence[str]]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Detect pytest isolation issues.")
     parser.add_argument("paths", nargs="*", default=["tests"], help="Pytest targets to execute.")
-    parser.add_argument("--iterations", type=int, default=5, help="Random-order iterations (default: 5).")
+    parser.add_argument("--iterations", type=positive_iterations, default=5, help="Random-order iterations (default: 5).")
     parser.add_argument(
         "--shuffle-scope",
         choices=("module", "node"),
@@ -1066,7 +1162,8 @@ def orchestrate(args: argparse.Namespace) -> int:
     print("🔍 Test Isolation Check")
     print("=====================================================================")
     print()
-    print(f"Running {args.iterations} iterations with random ordering...")
+    ordering = "random ordering" if random_plugin else "unchanged ordering"
+    print(f"Running {args.iterations} iterations with {ordering}...")
     for idx, seed in enumerate(seeds, start=1):
         config = {
             "targets": targets,
@@ -1085,7 +1182,8 @@ def orchestrate(args: argparse.Namespace) -> int:
         status_symbol = "✓" if outcome.exit_code == 0 else "✗"
         failure_count = len(outcome.failures) + len(outcome.errors)
         message = f"  {status_symbol} Seed {seed}: "
-        message += "All tests passed" if failure_count == 0 else f"{failure_count} failure(s)"
+        message += ("All tests passed" if outcome.exit_code == 0
+                    else f"{failure_count} failure report(s); pytest exit {outcome.exit_code}")
         print(message)
         write_log(log_dir, f"phaseA_seed{seed}", outcome.stdout, outcome.stderr)
 
@@ -1142,7 +1240,7 @@ def orchestrate(args: argparse.Namespace) -> int:
 
     all_issues = []
     for issue in order_issues + file_issues + pollution_issues:
-        if baseline.allows(issue.key):
+        if issue.key.startswith(("run-failure|", "file-isolation|")) or baseline.allows(issue.key):
             all_issues.append(issue)
 
     for issue in all_issues:
@@ -1171,6 +1269,9 @@ def orchestrate(args: argparse.Namespace) -> int:
         }
         print(json.dumps(json_payload, indent=2))
 
+    outcomes = [run.outcome for run in random_runs] + [result.outcome for result in file_results]
+    if not args.allow_failures and any(outcome.exit_code > 1 for outcome in outcomes):
+        return ExitCode.TOOL_ERROR.value
     return ExitCode.ISSUES_FOUND.value if (all_issues and not args.allow_failures) else ExitCode.CLEAN.value
 
 

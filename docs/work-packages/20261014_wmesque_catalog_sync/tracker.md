@@ -2,6 +2,17 @@
 
 ## Quick Status
 
+2026-10-16: hosted baseline and all five repeat suites passed (10,671 tests,
+329 skips each). Per-file isolation remains open: checker observation defects,
+collection-time stubs, and a strict BLC helper contract mismatch are repaired.
+Matching runner passes 15 focused per-file checks; fresh full hosted acceptance
+remains pending. All 36 audit-flagged files pass final collection rechecks;
+four additional files pass actual combined/per-file isolation. Temporary runner
+resources are removed.
+See [isolation follow-up](artifacts/20261016_isolation_followup.md),
+[correctness review](artifacts/20261016_isolation_correctness_review.md), and
+[security review](artifacts/20261016_isolation_security_review.md).
+
 Follow-up (2026-10-15 UTC): approved Forest PostgreSQL SSD migration preserves
 data, durability and backups. All four latency gates pass (READONLY added p95
 5.81 ms, TTL 4.73 ms); the full Forest suite passes **10,872 tests, 126 skipped**.
