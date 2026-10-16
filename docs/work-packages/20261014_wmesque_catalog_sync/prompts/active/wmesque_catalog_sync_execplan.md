@@ -20,7 +20,7 @@ sync/adoption followed by downstream project input and output readback.
 
 - [x] (2026-10-16 UTC) Hosted `38825109720` baseline passes 10,671 tests/329 skips; all five unchanged-order repeats pass.
 - [x] (2026-10-16 UTC) Repair lazy snapshot imports, framework/native initialization findings, persistent report/Daymet/soil stubs, and strict BLC helper forwarding. Matching runner passes 15 focused per-file checks including real WBT; additional checker regressions pass 27 tests. Final-source collection rechecks pass all 36 flagged files; four additional files pass actual combined/per-file isolation with no findings.
-- [ ] Fresh hosted full baseline/isolation acceptance after the repair; M7 remains open.
+- [ ] Fresh hosted full baseline/isolation acceptance: repair `6a5f05572` pushed, run `38860272720` queued; M7 remains open.
 
 - [x] (2026-10-15 UTC) Local stubtest repaired: two undefined `Optional` annotations now use `float | None`; all eight default modules and test-stub completeness pass.
 - [x] (2026-10-15 UTC) Operator approved and Forest completed PostgreSQL migration to `docker_forest-postgres-ssd`; stopped bytes/metadata and database counts match, durability preserved, backups and public health restored. All four latency gates pass: READONLY added p95 5.81 ms, TTL 4.73 ms.

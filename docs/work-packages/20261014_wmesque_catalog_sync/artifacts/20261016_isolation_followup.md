@@ -53,3 +53,7 @@ per-file execution with `issues: []` (24.33-second combined run). Collection-onl
 is not acceptance of test bodies. Runner-02's owned temporary stack, volumes,
 and local image were removed; no project containers remain.
 Full hosted isolation acceptance remains open; no thresholds or repetitions changed.
+
+Repair committed and pushed as `6a5f05572`. Fresh hosted run
+[38860272720](https://github.com/rogerlew/wepppy/actions/runs/38860272720)
+is queued; its full acceptance result is pending.

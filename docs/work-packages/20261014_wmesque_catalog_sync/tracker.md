@@ -8,7 +8,8 @@ collection-time stubs, and a strict BLC helper contract mismatch are repaired.
 Matching runner passes 15 focused per-file checks; fresh full hosted acceptance
 remains pending. All 36 audit-flagged files pass final collection rechecks;
 four additional files pass actual combined/per-file isolation. Temporary runner
-resources are removed.
+resources are removed. Repair `6a5f05572` is pushed; hosted run
+[38860272720](https://github.com/rogerlew/wepppy/actions/runs/38860272720) is queued.
 See [isolation follow-up](artifacts/20261016_isolation_followup.md),
 [correctness review](artifacts/20261016_isolation_correctness_review.md), and
 [security review](artifacts/20261016_isolation_security_review.md).

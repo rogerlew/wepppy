@@ -100,15 +100,19 @@ Review of the resulting bounded changes found no new correctness defect:
 
 - Remove the additional module-level `deprecated` stub from
   `tests/wepp/soils/utils/test_wepp_soil_util.py`; test bodies/assertions remain.
-- Limit recognition of `cython.parallel` to the observed Cython class and inspect
-  Passlib's stored backing module directly. Real-object and bare-name-stub
+- Limit recognition of Cython parallel/cimports/import proxies and Passlib's
+  registry proxy to their observed concrete class module/name. Inspect Passlib's
+  compatibility backing module directly. Actual-library and bare-name-stub
   regressions distinguish these from arbitrary Python stubs; replacements still
-  produce findings.
+  produce findings. All module findings are now reported, avoiding the earlier
+  first-finding-only output that hid additional helper objects.
 - Accept `KMP_DUPLICATE_LIB_OK=True` only with a newly imported file-backed
   Threadpoolctl/Scikit-learn module, and the existing exact Certifi-path defaults
-  with a newly imported Pyogrio module. New regressions preserve additions without
-  that import and changes to existing values. The canonical inventory documents
-  each addition; no global environment suppression is introduced.
+  with newly imported Pyogrio/Fiona modules. `/tmp/m7-shape-probe.log` directly
+  shows Fiona loaded by the shape-converter test and both defaults matching the
+  loaded Certifi path. New regressions preserve additions without that import
+  and changes to existing values. The canonical inventory documents each
+  addition; no global environment suppression is introduced.
 - The RQ-info and PostgreSQL-preference tests use `MonkeyPatch.context()` around
   application import to supply a temporary asset version and restore the previous
   environment on both success and failure. Existing values are preserved. Their
@@ -116,11 +120,13 @@ Review of the resulting bounded changes found no new correctness defect:
 
 `/tmp/m7-audit-followup-tests.log` records **98 passed** in 19.21 seconds across
 the checker and three changed test files. Subsequent
-`/tmp/m7-checker-audit-tests.log` records **25 passed** in 17.99 seconds, including
-the additional dependency-default and real-proxy regressions. The affected-file
-collection recheck and `/tmp/m7-audit-isolation-final.log` are still in progress
-at this follow-up review; the latter's combined execution passes, but its final
-per-file/state outcome is not yet claimed.
+`/tmp/m7-checker-audit-tests.log` records **27 passed** in 17.51 seconds, including
+the final dependency-default and real-proxy regressions.
+`/tmp/m7-collection-recheck.log` passes all **36 affected-file collection checks**
+with `issues: []`. `/tmp/m7-audit-isolation-final.log` passes the combined actual
+execution in **24.33 seconds**, then all **four per-file execution checks**, with
+no failures/errors and final `issues: []`. These directly close the focused
+collection and execution conditions for the final reviewed changes.
 
 Collection-only diagnostics do not replace the complete execution gate. Hosted
 baseline/five-repeat success predates these revisions, and no randomization
