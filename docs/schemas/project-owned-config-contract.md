@@ -554,7 +554,22 @@ defaults to 2015; every other exposed locale exposes and defaults only to GHCN.
 User-Defined Climate MUST be available for every exposed locale. Europe MUST
 expose exactly Vanilla CLIGEN, E-OBS Modified (Europe), and User-Defined Climate.
 The unchanged numeric runtime modes are 13 for DEP NEXRAD Breakpoint, 3 for
-Future CMIP5, and 12 for User-Defined Climate.
+Future MACA CMIP5, and 12 for User-Defined Climate.
+
+The display name for `future_cmip5` is **Future MACA CMIP5**. Describe the
+MACAv2-METDATA product and credit Katherine Hegewisch and John Abatzoglou's
+Climatology Lab at UC Merced, originally developed at the University of Idaho.
+Identify Idaho separately as the serving infrastructure, rather than implying
+that the researchers' role ended when they moved. The operator approved this
+attribution on 2026-10-16. Stable catalog/mode identifiers, capability choices
+and existing GFDL-ESM2G/RCP8.5 selection are unchanged by this wording update.
+Source: [UC Merced dataset attribution](https://sites.ucmerced.edu/khegewisch/datasets)
+and [MACA provider documentation](https://www.climatologylab.org/maca.html).
+
+Within the existing `future_cmip5` capability, model/scenario selection follows
+[MACA selection](maca-cmip5-selection-contract.md). This adds a run-level
+selection field, not a capability axis or a new dataset choice. Saved capability
+eligibility and catalog/mode identifiers remain authoritative and unchanged.
 
 The station-database stable/runtime mappings are
 `cligen-stations-legacy` -> `legacy`, `cligen-stations-2015` ->

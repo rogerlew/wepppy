@@ -1,0 +1,552 @@
+{
+  "scope": "Read-only service diagnosis; two dates at longitude -116, latitude 47. No CLI or WEPP execution.",
+  "original_probe_summary": {
+    "total": 40,
+    "passed": 38
+  },
+  "original_ccsm4_failures": [
+    {
+      "model": "CCSM4",
+      "scenario": "rcp45",
+      "variable": "pr",
+      "start": "2030-01-01",
+      "end": "2030-01-02",
+      "status": 500,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r1i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02",
+      "ok": false,
+      "error": "500 Server Error: Internal Server Error for url: https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r1i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02"
+    },
+    {
+      "model": "CCSM4",
+      "scenario": "rcp85",
+      "variable": "pr",
+      "start": "2030-01-01",
+      "end": "2030-01-02",
+      "status": 500,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r1i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02",
+      "ok": false,
+      "error": "500 Server Error: Internal Server Error for url: https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r1i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02"
+    }
+  ],
+  "reproduced_error_body": "<h1>Server Error (500)</h1>",
+  "corrected_member_results": [
+    {
+      "checked_utc": "2026-10-16T19:15:27.165409+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "pr",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#pr(mm):Precipitation",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_pr_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "pr(mm)": [
+              "10.13645649",
+              "22.74900436"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:15:27.166816+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "tasmax",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_tasmax_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=air_temperature&variable-name=tasmax&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#tasmax(K):Daily Maximum Near-Surface Air Temperature",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_tasmax_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "tasmax(K)": [
+              "272.03805542",
+              "274.93353271"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:15:27.167493+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "tasmin",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_tasmin_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=air_temperature&variable-name=tasmin&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#tasmin(K):Daily Minimum Near-Surface Air Temperature",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_tasmin_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "tasmin(K)": [
+              "269.08523560",
+              "271.96673584"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:15:48.274680+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "rsds",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_rsds_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=surface_downwelling_shortwave_flux_in_air&variable-name=rsds&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#rsds(Wm-2):Surface Downwelling Shortwave Radiation",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_rsds_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "rsds(Wm-2)": [
+              "51.52042770",
+              "40.42546082"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:15:48.594629+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "uas",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_uas_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=eastward_wind&variable-name=uas&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#uas(ms-1):Eastward Wind",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_uas_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "uas(ms-1)": [
+              "2.26124549",
+              "5.89659929"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:15:48.645274+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "vas",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_vas_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=northward_wind&variable-name=vas&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#vas(ms-1):Northward Wind",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_vas_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "vas(ms-1)": [
+              "7.49141645",
+              "5.13528109"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:09.853342+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp45",
+      "variable": "huss",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_huss_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc&variable=specific_humidity&variable-name=huss&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#huss(kgkg-1):Daily Mean Near-Surface Specific Humidity",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_huss_CCSM4_r6i1p1_rcp45_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "huss(kgkg-1)": [
+              "0.00318936",
+              "0.00399694"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:09.957109+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "pr",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_pr_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=precipitation&variable-name=pr&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#pr(mm):Precipitation",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_pr_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "pr(mm)": [
+              "0.36335444",
+              "6.97916985"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:10.132988+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "tasmax",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_tasmax_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=air_temperature&variable-name=tasmax&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#tasmax(K):Daily Maximum Near-Surface Air Temperature",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_tasmax_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "tasmax(K)": [
+              "274.84133911",
+              "275.38955688"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:31.313631+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "tasmin",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_tasmin_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=air_temperature&variable-name=tasmin&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#tasmin(K):Daily Minimum Near-Surface Air Temperature",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_tasmin_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "tasmin(K)": [
+              "272.18032837",
+              "272.75241089"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:31.332342+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "rsds",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_rsds_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=surface_downwelling_shortwave_flux_in_air&variable-name=rsds&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#rsds(Wm-2):Surface Downwelling Shortwave Radiation",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_rsds_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "rsds(Wm-2)": [
+              "36.31703568",
+              "45.41559601"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:33.322039+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "uas",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_uas_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=eastward_wind&variable-name=uas&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#uas(ms-1):Eastward Wind",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_uas_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "uas(ms-1)": [
+              "3.26221418",
+              "3.26274371"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:49.434393+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "vas",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_vas_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=northward_wind&variable-name=vas&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#vas(ms-1):Northward Wind",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_vas_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "vas(ms-1)": [
+              "4.18267584",
+              "6.41559076"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    },
+    {
+      "checked_utc": "2026-10-16T19:16:53.691370+00:00",
+      "model": "CCSM4",
+      "member": "r6i1p1",
+      "scenario": "rcp85",
+      "variable": "huss",
+      "status": 200,
+      "url": "https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&lat=47&lon=-116&positive-east-longitude=True&data-path=PATH_TO_DODS%2Fagg_macav2metdata_huss_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc&variable=specific_humidity&variable-name=huss&start-date=2030-01-01&end-date=2030-01-02",
+      "response": {
+        "data": [
+          {
+            "metadata": [
+              "#Variables:",
+              "#huss(kgkg-1):Daily Mean Near-Surface Specific Humidity",
+              "#Data Extracted for Average over Grid Cell w/ center: 46.9794 Latitude, -115.9806 Longitude (closest value to Latitude:47.0, Longitude:-116.0) ",
+              "#Original Data File(s):",
+              "#agg_macav2metdata_huss_CCSM4_r6i1p1_rcp85_2006_2099_CONUS_daily.nc#fillmismatch ",
+              "#===============================================",
+              ""
+            ],
+            "lat_lon": [
+              "46.9794",
+              "-115.9806"
+            ],
+            "yyyy-mm-dd": [
+              "2030-01-01",
+              "2030-01-02"
+            ],
+            "huss(kgkg-1)": [
+              "0.00356715",
+              "0.00345682"
+            ]
+          }
+        ]
+      },
+      "ok": true
+    }
+  ]
+}

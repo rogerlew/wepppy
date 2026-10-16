@@ -622,7 +622,7 @@ remain historical references and are not the normative target profile.
       "enum_labels": {
         "0": "Vanilla (synthetic CLIGEN)",
         "2": "Observed (station file)",
-        "3": "Future CMIP5",
+        "3": "Future MACA CMIP5",
         "5": "Stochastic PRISM",
         "6": "Observed Database",
         "11": "GridMet+PRISM"
@@ -1898,6 +1898,13 @@ as not applied, committed/recovered, or explicitly indeterminate.
   `updated_at` remain stable for the same domain snapshot.
 
 ## Cross-Endpoint Consistency
+
+Future MACA climate submissions may include `maca_projection` under the
+[MACA selection contract](maca-cmip5-selection-contract.md). Omission preserves
+the saved choice (legacy absence resolves to GFDL-ESM2G/RCP8.5); invalid explicit
+values produce the existing validation envelope with field `maca_projection`
+and code `invalid_maca_selection`. Dataset/mode authority and queue wiring are
+unchanged. Implementation conformance for this additive field is pending.
 - All endpoints in this contract MUST emit the same `deployment_revision` for
   a stable deployment/configuration snapshot.
 - Run-scoped endpoints in this contract MUST emit:
