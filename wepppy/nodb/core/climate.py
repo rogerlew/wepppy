@@ -83,6 +83,9 @@ import requests
 
 
 from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
+from wepppy.climates.maca_catalog import (
+    DEFAULT_PROJECTION, PROJECTION_OPTIONS, ensemble_member, parse_projection,
+)
 
 from wepppy.climates.prism import prism_mod
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
@@ -421,6 +424,7 @@ class Climate(NoDbBase):
             self._cligen_seed_override = None
             self._observed_start_year = ''
             self._observed_end_year = ''
+            self._maca_projection = DEFAULT_PROJECTION
             self._future_start_year = ''
             self._future_end_year = ''
             self._ss_storm_date = '4 15 01'
@@ -475,6 +479,9 @@ class Climate(NoDbBase):
             if self.config_get_str('climate', 'precip_scale_mode', None) is not None:
                 self._precip_scaling_mode = ClimatePrecipScalingMode.parse(
                     self.config_get_str('climate', 'precip_scale_mode'))
+
+            if self._precip_scaling_mode is None:
+                self._precip_scaling_mode = ClimatePrecipScalingMode.NoScaling
 
             self._climate_daily_temp_ds = None
 
@@ -804,6 +811,20 @@ class Climate(NoDbBase):
                 extra={"runid": self.runid},
                 exc_info=True,
             )
+
+    @property
+    def maca_projection(self) -> str:
+        return getattr(self, '_maca_projection', DEFAULT_PROJECTION)
+
+    @property
+    def maca_projection_options(self) -> tuple[tuple[str, str], ...]:
+        return PROJECTION_OPTIONS
+
+    @property
+    def maca_projection_selected(self) -> str:
+        # An invalid saved value must not make HTML select the first valid model.
+        value = self.maca_projection
+        return value if isinstance(value, str) and value in dict(PROJECTION_OPTIONS) else ''
 
     @property
     def edde_projection(self) -> str:
@@ -1547,6 +1568,7 @@ class Climate(NoDbBase):
     def _build_climate_future(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
             self.set_attrs(attrs)
+            model, scenario = parse_projection(self.maca_projection)
             self.logger.info('  running _build_climate_future')
 
             watershed = self.watershed_instance
@@ -1585,13 +1607,15 @@ class Climate(NoDbBase):
             cli_fn = 'wepp.cli'
             prn_fn = 'ws.prn'
             self.logger.info(
-                f'    fetching CMIP5 RCP8.5 time series and building future CLI (prn={prn_fn}, cli={cli_fn})'
+                f'    fetching MACA {model} {ensemble_member(model)} {scenario} '
+                f'and building future CLI (prn={prn_fn}, cli={cli_fn})'
             )
 
             build_future(
                 cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
                 adjust_mx_pt5=self.adjust_mx_pt5,
                 randseed=self.cligen_seed,
+                model=model, scenario=scenario,
             )
             self.logger.info('    CMIP5/CLIGEN processing complete')
 

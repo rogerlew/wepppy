@@ -13,7 +13,7 @@ import requests
 import pandas as pd
 
 from wepppy.all_your_base import isfloat, try_parse
-
+from wepppy.climates.maca_catalog import ensemble_member
 
 def parse_datetime(x):
     """
@@ -54,7 +54,7 @@ _url_template = \
     '&lat={lat}'\
     '&lon={lng}'\
     '&positive-east-longitude=True'\
-    '&data-path=PATH_TO_DODS/agg_macav2metdata_{variable_name}_{model}_r1i1p1_{scenario}_CONUS_daily.nc'\
+    '&data-path=PATH_TO_DODS/agg_macav2metdata_{variable_name}_{model}_{member}_{scenario}_CONUS_daily.nc'\
     '&variable={variable}'\
     '&variable-name={variable_name}'\
     '&start-date={start_date}'\
@@ -71,7 +71,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
     start_date = parse_datetime(start_date)
     end_date = parse_datetime(end_date)
     
- #   assert model in ['GFDL-ESM2G', 'GFDL-ESM2M']
+    member = ensemble_member(model)
     
     assert scenario in ["rcp45_2006_2099",
                         "rcp85_2006_2099",
@@ -98,7 +98,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
     # build url for query
     url = _url_template.format(lat=lat, lng=lng, 
                                start_date=start_date, end_date=end_date, 
-                               model=model, scenario=scenario,
+                               model=model, member=member, scenario=scenario,
                                variable=variables_d[variable_name], 
                                variable_name=variable_name)
 

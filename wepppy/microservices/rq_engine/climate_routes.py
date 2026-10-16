@@ -104,6 +104,11 @@ def _build_climate_validation_errors(
 ) -> list[dict[str, str]]:
     from wepppy.nodb.core.climate_edde_inputs import EddeSelectionError
 
+    from wepppy.climates.maca_catalog import MacaSelectionError
+
+    if isinstance(exc, MacaSelectionError):
+        return [_validation_issue(field=exc.field, code="invalid_maca_selection", message=str(exc))]
+
     if isinstance(exc, EddeSelectionError):
         return [_validation_issue(field=exc.field, code="invalid_edde_selection", message=str(exc))]
 

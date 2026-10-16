@@ -40,7 +40,7 @@ def _inputs(climate):
         raise ValueError('Selected EDDE auxiliary station is unavailable')
     result['station_identity'] = file_signature(station.parpath)
     scale_map = result['precip_scale_factor_map']
-    result['scale_map_identity'] = file_signature(scale_map) if int(climate.precip_scaling_mode) == 4 else None
+    result['scale_map_identity'] = file_signature(scale_map) if result['precip_scaling_mode'] == 4 else None
     return result
 
 
@@ -119,7 +119,7 @@ def _scale(stage, filenames, inputs):
     from .climate import ClimatePrecipScalingMode as Mode
     from wepppy.all_your_base.geo import RasterDatasetInterpolator
     mode = inputs['precip_scaling_mode']
-    if mode == Mode.NoScaling:
+    if mode is None or mode == Mode.NoScaling:
         return filenames
     raster = RasterDatasetInterpolator(inputs['precip_scale_factor_map']) if mode == Mode.Spatial else None
     result = {}

@@ -18,6 +18,8 @@ pytestmark = pytest.mark.unit
 
 
 class _DummyClimate:
+    maca_projection = Climate.maca_projection
+
     def __init__(self) -> None:
         self.events: list[object] = []
         self._catalog: dict[str, object] = {}

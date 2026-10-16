@@ -199,29 +199,30 @@ for source inspection and recovery details.
 **Notes**
 - Not marked RAP-compatible in the current catalog.
 
-## Future CMIP5
+## Future MACA CMIP5
 
-**Suitable for**
-- Climate-change impact analysis using projected (not historical observed) climate forcing.
+Use this option for climate-change impact analysis with approximately 4 km
+MACAv2-METDATA projections. Select **MACA driving model and scenario** above
+**Future start year** and **Future end year**. Twenty models are available with
+RCP4.5 and RCP8.5, for complete years from **2006 through 2099**. New projects
+and older projects without a saved choice use **GFDL-ESM2G · RCP8.5**.
 
-**Data it uses**
-- CMIP5/RCP8.5 timeseries retrieval.
-- CLIGEN station + generated observed-style `.prn` -> `.cli` workflow.
+MACA supplies daily precipitation and maximum/minimum temperatures. The selected
+CLIGEN station supplies storm structure and the remaining weather characteristics.
+The existing PRN representation rounds rain to 0.254 mm and temperatures to
+whole Fahrenheit degrees before CLIGEN processing.
 
-**Where available**
-- Blocked in GHCN-only configured locales (`au`, `alaska`, `hawaii`, `nigeria`).
-- Future-year inputs are constrained in code to **2006 to 2099**.
+The data provider is Katherine Hegewisch and John Abatzoglou's Climatology Lab
+at UC Merced; MACA was originally developed at the University of Idaho and is
+served through Idaho infrastructure. CCSM4 uses its published r6i1p1 ensemble
+member; the other offered models use r1i1p1.
 
-**Station selection modes available**
-- Auto (`-1`), Distance ranking (`0`), Multi-factor ranking (`1`).
-
-**Spatial modes available**
-- Single (`0`), Multiple (`1`).
-
-**Notes**
-- Labeled experimental in current help text.
-- Not marked RAP-compatible in the current catalog.
-
+Auto, Distance ranking and Multi-factor ranking station choices remain available,
+with the existing Single and Multiple spatial choices. This dataset is not
+RAP-compatible and remains unavailable in configured GHCN-only locales
+(`au`, `alaska`, `hawaii`, `nigeria`). If a saved selection is invalid, choose a
+valid projection explicitly before building. A provider failure does not switch
+to another model automatically.
 ## User-Defined Climate (.cli)
 
 **Suitable for**

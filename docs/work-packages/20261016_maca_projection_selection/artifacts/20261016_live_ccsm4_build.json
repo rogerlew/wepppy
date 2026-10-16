@@ -1,0 +1,31 @@
+{
+  "checked_utc": "2026-10-16T20:39:14.171121+00:00",
+  "model": "CCSM4",
+  "member": "r6i1p1",
+  "scenario": "RCP4.5",
+  "longitude": -116,
+  "latitude": 47,
+  "start": "2030-01-01",
+  "end": "2030-12-31",
+  "days": 365,
+  "max_abs_error": {
+    "prcp": 0.15990725000000072,
+    "tmax": 0.3211547900000138,
+    "tmin": 0.321032710000031
+  },
+  "files": {
+    "climate/ws.prn": {
+      "bytes": 11680,
+      "sha256": "7dc02e8de6a8e9137226640fe61d21590debfd9b9e6cfd63af52c9a518e2991d"
+    },
+    "climate/wepp.cli": {
+      "bytes": 26864,
+      "sha256": "e5b2c7c8fe9a60e9d12f4485c61050c0821a292581ff69a659bbbb5e09b46d81"
+    },
+    "wepp/runs/p1.cli": {
+      "bytes": 26864,
+      "sha256": "e5b2c7c8fe9a60e9d12f4485c61050c0821a292581ff69a659bbbb5e09b46d81"
+    }
+  },
+  "status": "passed"
+}

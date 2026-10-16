@@ -778,3 +778,34 @@ def test_edde_selection_errors_preserve_actionable_fields(projection, start, end
     assert issues[0]["field"] == field
     assert issues[0]["code"] == "invalid_edde_selection"
     assert expected in issues[0]["message"]
+
+
+def test_maca_selection_error_retains_field_and_code():
+    from wepppy.climates.maca_catalog import MacaSelectionError
+    issues = climate_routes._build_climate_validation_errors(MacaSelectionError("Select a supported projection"))
+    assert issues == [{"field": "maca_projection", "code": "invalid_maca_selection", "message": "Select a supported projection"}]
+
+
+def test_invalid_maca_selection_returns_400_before_enqueue(monkeypatch):
+    from wepppy.climates.maca_catalog import parse_projection
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+        climate_mode = climate_routes.ClimateMode.Future
+
+        def parse_inputs(self, payload):
+            parse_projection(payload["maca_projection"])
+
+    monkeypatch.setattr(climate_routes.Climate, "getInstance", lambda wd: DummyClimate())
+    def unexpected_queue(*args, **kwargs):
+        pytest.fail("Invalid MACA selection reached the queue")
+    monkeypatch.setattr(climate_routes, "Queue", unexpected_queue)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={
+            "climate_mode": "3", "maca_projection": "", "future_start_year": "2030", "future_end_year": "2031",
+        })
+    assert response.status_code == 400
+    assert response.json()["errors"][0]["code"] == "invalid_maca_selection"
+    assert response.json()["errors"][0]["field"] == "maca_projection"

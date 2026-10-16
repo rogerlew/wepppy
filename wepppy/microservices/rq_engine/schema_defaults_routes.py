@@ -998,7 +998,7 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                 "enum_labels": {
                     "0": "Synthetic CLIGEN",
                     "2": "Observed station",
-                    "3": "Future CMIP5",
+                    "3": "Future MACA CMIP5",
                     "17": "Future EDDE v2",
                     "5": "Stochastic PRISM",
                     "6": "Observed database",

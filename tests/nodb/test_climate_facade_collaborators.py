@@ -290,7 +290,10 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
         *,
         adjust_mx_pt5: bool,
         randseed: int | None,
+        model: str,
+        scenario: str,
     ) -> None:
+        captured["projection"] = (model, scenario)
         captured["build_args"] = (
             ws_lng,
             ws_lat,
@@ -320,6 +323,7 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
     climate._climatestation = "STA-1"
     climate._adjust_mx_pt5 = True
     climate._silent_pass_observed_quality_guard = True
+    climate._maca_projection = "CCSM4/RCP4.5"
     climate._future_start_year = 2030
     climate._future_end_year = 2031
     climate._cligen_seed_override = 24680
@@ -331,6 +335,7 @@ def test_future_build_does_not_apply_observed_silent_pass_flag(
 
     climate._build_climate_future(attrs={"mode": "future"})
 
+    assert captured["projection"] == ("CCSM4", "rcp45_2006_2099")
     assert captured["attrs"] == {"mode": "future"}
     assert captured["build_args"] == (
         -116.2,

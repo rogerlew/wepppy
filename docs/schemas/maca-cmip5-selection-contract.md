@@ -3,7 +3,7 @@
 ## Authority and scope
 
 The operator approved implementing the MACA model/scenario selector and CCSM4
-client correction on 2026-10-16. Implementation is pending. Preserve
+client correction on 2026-10-16. Preserve
 `future_cmip5`, ClimateMode.Future=3, existing locale/capability eligibility,
 spatial behavior, CLIGEN processing, scaling, auth and queue wiring. This is a
 selection feature, not a climate pipeline or publication refactor.
@@ -78,3 +78,16 @@ for working, failed and completed builds using existing status/publication paths
 Read back the exact wepp/runs/p*.cli copied by WeppPrepService.prep_climates.
 Exercise canonical archive_rq/restore_archive_rq and compare restored artifact
 bytes and saved selection. These are regression checks, not publication changes.
+
+## Developer and operator notes
+
+`wepppy.climates.maca_catalog` owns exact projection tokens, options and member
+resolution. The Climate parser saves `_maca_projection` atomically; the Future
+builder resolves it again and passes model/scenario to `build_future`.
+Do not infer the generated source from a pending form selection: inspect the
+build log's model/member/scenario and generated climate files.
+
+Keep selection-aware readers when rolling back: older code ignores the new field
+and would rebuild a nondefault project using the old fixed projection. Reset
+such projects explicitly before a rollback that removes this support. No bulk
+migration or deployment is part of this change.

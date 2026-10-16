@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted by the operator; implementation pending the contract checkpoint.
+Accepted by the operator; implemented and locally validated after checkpoint
+`88c8c9fdc`. Production deployment remains separate.
 
 ## Decision and provenance
 

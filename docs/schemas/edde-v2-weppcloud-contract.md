@@ -26,6 +26,11 @@ Generate daily precipitation/Tmax/Tmin with the accepted EDDE adapter; CLIGEN su
 
 ## Presentation, errors and evidence
 
+Place the EDDE driving model/scenario selector before the future start/end year
+inputs so users see the projection's supported year range before entering dates
+(operator-requested presentation order, 2026-10-16). This ordering does not alter
+field identifiers, visibility rules, selection values or validation.
+
 Use the existing catalog radio, year controls, spatial controls, station/seed controls and one labeled projection select. Show partial Canadian coverage, coarse-grid elevation/bias limitations and hybrid field attribution. Read-only controls remain read-only. Reports/downloads expose actual selected model/scenario/period, requested point/native cell, station/seed, source identities, generation/PRISM diagnostics and build provenance; never infer EDDE location from the station header. Existing browser/download/archive authorization is unchanged.
 
 Local invalid input uses the existing validation error envelope before enqueue. Unsupported locale/projection/spatial/period selections are expected validation failures. Worker errors distinguish native-cell eligibility, missing source records, invalid data/normals, acquisition errors and superseded inputs in retained attempt status and job error text. Do not return successful readiness for failed attempts or hide a previously retained failure.

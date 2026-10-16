@@ -19,7 +19,8 @@ values or change their established unscaled execution behavior.
 
 The operator approved this default on 2026-10-16 to eliminate the blank radio
 selection in new projects. Explicit initialization was chosen over a template
-fallback so persisted state and presentation agree. Implementation conformance
+fallback so persisted state and presentation agree. Constructor, persistence
+and rendered-radio conformance are locally validated; production deployment
 is pending. See [ADR-0096](../adrs/ADR-0096-new-project-no-scaling-default.md).
 
 This initialization default applies only after existing configuration readers

@@ -39,7 +39,7 @@ describe("Climate controller", () => {
                             "group": "default",
                             "climate_mode": 3,
                             "description": "Dataset B description",
-                            "inputs": ["stochastic_years"],
+                            "inputs": ["stochastic_years", "maca_projection"],
                             "station_modes": [-1, 0, 1],
                             "spatial_modes": [0],
                             "rap_compatible": true
@@ -82,6 +82,12 @@ describe("Climate controller", () => {
 
                 <div id="section_stochastic" data-climate-section="stochastic_years"></div>
                 <div id="section_spatial" data-climate-section="spatial_mode"></div>
+                <div id="section_maca" data-climate-section="maca_projection" hidden>
+                    <select name="maca_projection" id="maca_projection">
+                        <option value="GFDL-ESM2G/RCP8.5">Default</option>
+                        <option value="CCSM4/RCP4.5">CCSM4 RCP4.5</option>
+                    </select>
+                </div>
 
                 <div id="precip_scalar" data-precip-section="1" hidden></div>
                 <div id="precip_monthly" data-precip-section="2" hidden></div>
@@ -414,6 +420,25 @@ describe("Climate controller", () => {
         );
 
         serializeSpy.mockRestore();
+    });
+
+    test("MACA selection becomes visible and is submitted with the build", async () => {
+        expect(document.getElementById("section_maca").hidden).toBe(true);
+        const radio = document.querySelector('input[value="dataset_b"]');
+        radio.checked = true;
+        radio.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(document.getElementById("section_maca").hidden).toBe(false);
+        document.getElementById("maca_projection").value = "CCSM4/RCP4.5";
+        document.getElementById("btn_build_climate").dispatchEvent(new Event("click", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(postJsonMock).toHaveBeenLastCalledWith(
+            "/rq-engine/api/runs/test/cfg/build-climate",
+            expect.objectContaining({ maca_projection: "CCSM4/RCP4.5" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
     });
 
     test("build serializes explicit CLIGEN seed and preserves blank reset", async () => {

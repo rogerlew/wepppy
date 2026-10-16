@@ -7,6 +7,7 @@ pytest.importorskip("rasterio", reason="rasterio required for climate catalog te
 
 from wepppy.nodb.locales.climate_catalog import available_climate_datasets, get_climate_dataset
 from wepppy.nodb.core.climate import Climate, ClimateMode, ClimateSpatialMode, ClimateStationMode
+from wepppy.nodb.core.climate import ClimatePrecipScalingMode
 
 
 def test_available_climate_datasets_default_locale():
@@ -110,7 +111,7 @@ def climate_factory(tmp_path, monkeypatch, request):
 
     created = []
 
-    def _create(locales=('us',), mods=None, cligen_db="ghcn"):
+    def _create(locales=('us',), mods=None, cligen_db="ghcn", scaling_config=""):
         run_dir = tmp_path / f'run_{len(created)}'
         run_dir.mkdir()
         cfg_path = run_dir / '0.cfg'
@@ -134,7 +135,7 @@ def climate_factory(tmp_path, monkeypatch, request):
             use_gridmet_wind_when_applicable = true
             """
         ).strip()
-        cfg_path.write_text(cfg_text + "\n", encoding="utf-8")
+        cfg_path.write_text(cfg_text + "\n" + scaling_config + "\n", encoding="utf-8")
 
         climate = Climate(str(run_dir), '0.cfg')
         stub = types.SimpleNamespace(mods=list(mods or []), _locales=list(locales))
@@ -153,6 +154,44 @@ def climate_factory(tmp_path, monkeypatch, request):
 
     request.addfinalizer(_finalize)
     return _create
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize('scaling_config, expected', [
+    ('', 0),
+    ('precip_scale_mode =', 0),
+    ('precip_scale_mode = None', 0),
+    ('precip_scale_mode = null', 0),
+    ('precip_scale_mode = no_scaling', 0),
+    ('precip_scale_mode = scalar', 1),
+    ('precip_scale_mode = monthlies', 2),
+    ('precip_scale_mode = annual_monthlies', 3),
+    ('precip_scale_mode = spatial', 4),
+    ('precip_scale_factor = 1.2', 1),
+    ('precip_scale_factor_map = /tmp/scaling.tif', 4),
+    ('precip_scale_factor = 1.2\nprecip_scale_factor_map = /tmp/scaling.tif', 4),
+    ('precip_scale_factor = 1.2\nprecip_scale_mode = no_scaling', 0),
+    ('gridmet_precip_scale_factor = 1.2', 1),
+    ('daymet_precip_scale_factor = 1.2', 1),
+    ('gridmet_precip_scale_factor_map = /tmp/scaling.tif', 4),
+    ('daymet_precip_scale_factor_map = /tmp/scaling.tif', 4),
+])
+def test_new_project_scaling_default_and_precedence(climate_factory, monkeypatch, scaling_config, expected):
+    climate = climate_factory(scaling_config=scaling_config)
+    assert climate.precip_scaling_mode is ClimatePrecipScalingMode(expected)
+    monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
+    reloaded = Climate.load_detached(climate.wd)
+    assert reloaded._precip_scaling_mode is ClimatePrecipScalingMode(expected)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize('scaling_config, error', [
+    ('precip_scale_mode = invalid', KeyError),
+    ('precip_scale_factor = invalid', ValueError),
+])
+def test_new_project_invalid_scaling_does_not_default(climate_factory, scaling_config, error):
+    with pytest.raises(error):
+        climate_factory(scaling_config=scaling_config)
 
 
 def _baseline_form() -> dict[str, str]:
@@ -382,3 +421,42 @@ def test_tenerife_catalog_parse_inputs_accepts_user_defined_cli(climate_factory)
     assert climate.catalog_id == "user_defined_cli"
     assert climate.climate_mode == ClimateMode.UserDefined
     assert climate.climate_spatialmode == ClimateSpatialMode.Single
+
+
+@pytest.mark.integration
+def test_maca_selection_persists_and_legacy_defaults(climate_factory, monkeypatch):
+    from wepppy.climates.maca_catalog import DEFAULT_PROJECTION
+    climate = climate_factory()
+    assert climate.maca_projection == DEFAULT_PROJECTION
+    payload = _baseline_form()
+    payload.update(climate_mode="3", climate_spatialmode="0", maca_projection="CCSM4/RCP4.5")
+    climate.parse_inputs(payload)
+    monkeypatch.setattr('wepppy.nodb.base.redis_nodb_cache_client', None)
+    assert Climate.load_detached(climate.wd).maca_projection == "CCSM4/RCP4.5"
+    del payload['maca_projection']
+    climate.parse_inputs(payload)
+    assert climate.maca_projection == "CCSM4/RCP4.5"
+    with climate.locked():
+        del climate._maca_projection
+    assert Climate.load_detached(climate.wd).maca_projection == DEFAULT_PROJECTION
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize('invalid', ['', None, 3, [], '../../CCSM4/RCP4.5', 'CCSM4/rcp45', 'unknown/RCP8.5'])
+def test_maca_invalid_selection_rolls_back(climate_factory, invalid):
+    from wepppy.climates.maca_catalog import MacaSelectionError
+    climate = climate_factory()
+    before = (climate.maca_projection, climate.future_start_year, climate.climate_mode)
+    payload = _baseline_form()
+    payload.update(climate_mode="3", climate_spatialmode="0", maca_projection=invalid)
+    with pytest.raises(MacaSelectionError):
+        climate.parse_inputs(payload)
+    assert (climate.maca_projection, climate.future_start_year, climate.climate_mode) == before
+    with climate.locked():
+        climate._maca_projection = invalid
+    assert climate.maca_projection_selected == ''
+    del payload['maca_projection']
+    with pytest.raises(MacaSelectionError):
+        climate.parse_inputs(payload)
+    payload['climate_mode'] = '0'
+    climate.parse_inputs(payload)  # Hidden selector has no authority in other modes.

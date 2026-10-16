@@ -3,8 +3,10 @@
 ## Progress
 
 - 2026-10-16 UTC: Operator explicitly requested selector implementation and client patch.
-- Contract, ADR and ExecPlan prepared; independent checkpoint reviews pending.
-- Implementation, focused/generated-output/live checks and final review pending.
+- Contract/ADR independently approved; checkpoint committed as `0dab11743`.
+- Selector/client implementation and final correctness review completed.
+- Focused/native/live checks passed; broad gate incomplete due to missing browser.
+- Evidence: `artifacts/20261016_validation.md` and live build JSON.
 
 ## Decisions
 

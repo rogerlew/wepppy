@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Active: [MACA model/scenario selection](docs/work-packages/20261016_maca_projection_selection/package.md) — implement the approved selector and CCSM4 r6i1p1 client correction, preserving GFDL-ESM2G/RCP8.5 compatibility. Contract checkpoint review pending; no production deployment.
+Implemented locally: [MACA model/scenario selection](docs/work-packages/20261016_maca_projection_selection/package.md) — 40-pair selector, CCSM4 r6i1p1 correction, focused/native/live checks passed. Broad gate blocked by missing Playwright Chromium; not deployed.
 
 Implemented/focused validation: [New-project NoScaling default](docs/work-packages/20261016_climate_no_scaling_default/package.md) — explicitly initialize otherwise unset precipitation scaling after checkpoint `88c8c9fdc`; configured choices and existing projects remain unchanged. All 291 distinct focused tests and final review passed; broad suite reached 10,734 passed/126 skipped before a missing Playwright Chromium failure in the run-catalog browser test. No production deployment.
 

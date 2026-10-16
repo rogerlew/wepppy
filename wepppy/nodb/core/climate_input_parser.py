@@ -37,7 +37,7 @@ class ClimateInputParsingService:
                 "_future_end_year", "_ss_storm_date", "_ss_design_storm_amount_inches",
                 "_ss_duration_of_storm_in_hours", "_ss_max_intensity_inches_per_hour",
                 "_ss_time_to_peak_intensity_pct", "_ss_batch", "_cligen_seed_override",
-                "_edde_projection", "_edde_provenance",
+                "_edde_projection", "_edde_provenance", "_maca_projection",
             }
             snapshot = {
                 key: climate.__dict__[key]
@@ -240,6 +240,11 @@ class ClimateInputParsingService:
                 climate._edde_projection = projection
                 climate._future_start_year, climate._future_end_year = start, end
             else:
+                from wepppy.climates.maca_catalog import parse_projection
+
+                projection = kwds.get("maca_projection", climate.maca_projection)
+                parse_projection(projection)
+                climate._maca_projection = projection
                 climate._set_future_pars_without_lock(**future_pars)
             self._clear_year_bounds(
                 climate=climate,

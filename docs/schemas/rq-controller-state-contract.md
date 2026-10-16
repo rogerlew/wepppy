@@ -1904,7 +1904,8 @@ Future MACA climate submissions may include `maca_projection` under the
 the saved choice (legacy absence resolves to GFDL-ESM2G/RCP8.5); invalid explicit
 values produce the existing validation envelope with field `maca_projection`
 and code `invalid_maca_selection`. Dataset/mode authority and queue wiring are
-unchanged. Implementation conformance for this additive field is pending.
+unchanged. Conformance is covered by climate parser persistence/rollback tests
+and RQ field-error/no-enqueue tests.
 - All endpoints in this contract MUST emit the same `deployment_revision` for
   a stable deployment/configuration snapshot.
 - Run-scoped endpoints in this contract MUST emit:

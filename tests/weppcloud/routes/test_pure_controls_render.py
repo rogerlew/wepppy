@@ -783,6 +783,10 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     rendered = template.render(climate=climate, climate_catalog=catalog)
 
     assert 'id="climate_catalog_data"' in rendered
+    scaling_radios = re.findall(r'<input\b[^>]*name="precip_scaling_mode"[^>]*>', rendered)
+    checked_scaling = [radio for radio in scaling_radios if re.search(r'\bchecked\b', radio)]
+    assert len(checked_scaling) == 1
+    assert 'id="climate_precipscaling_mode0"' in checked_scaling[0]
     assert 'id="climate_catalog_id"' in rendered
     assert 'name="climate_catalog_id"' in rendered
     assert 'id="climate_mode"' in rendered
@@ -810,6 +814,16 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     climate.edde_projection = "WRF-MPI/SSP3-7.0"
     selected_rendered = template.render(climate=climate, climate_catalog=catalog)
     assert 'value="WRF-MPI/SSP3-7.0" selected' in selected_rendered
+
+    from wepppy.climates.maca_catalog import PROJECTION_OPTIONS
+    climate.maca_projection_options = PROJECTION_OPTIONS
+    for selected in ('GFDL-ESM2G/RCP8.5', 'CCSM4/RCP4.5', ''):
+        climate.maca_projection_selected = selected
+        maca_rendered = template.render(climate=climate, climate_catalog=catalog)
+        select = re.search(r'<select[^>]*name="maca_projection".*?</select>', maca_rendered, re.S).group()
+        assert select.count('<option') == 41
+        assert f'value="{selected}" selected' in select
+        assert maca_rendered.index('id="maca_projection_container"') < maca_rendered.index('id="future_years_container"')
 
     climate.uses_tenerife_station_catalog = True
     tenerife_rendered = template.render(climate=climate, climate_catalog=catalog)

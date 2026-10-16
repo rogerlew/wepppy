@@ -14,9 +14,9 @@ ensemble member r6i1p1. An ensemble member identifies one simulation realization
 
 - [x] Inspect current form/parser/builder/client and retain live CCSM4 diagnosis.
 - [x] Draft canonical contract, ADR and preimplementation checkpoint.
-- [ ] Obtain independent reviews and commit documentation checkpoint.
-- [ ] Implement registry, client patch, parser/persistence, UI and build propagation.
-- [ ] Validate generated artifacts, bounded live data, UI, regression and final review.
+- [x] Obtain independent reviews and commit documentation checkpoint.
+- [x] Implement registry, client patch, parser/persistence, UI and build propagation.
+- [x] Validate generated artifacts, bounded live data, UI, regression and final review.
 
 ## Surprises & Discoveries
 
@@ -35,7 +35,9 @@ run logs/PRN/CLI as outputs; no new artifact format is necessary for selection.
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation. No deployment is requested or claimed.
+Implementation and focused/native/live validation completed. See
+`../../artifacts/20261016_validation.md` for evidence and the incomplete broad
+gate due to missing Playwright Chromium. No production deployment performed.
 
 ## Context and orientation
 
@@ -102,3 +104,12 @@ client scenario token. Existing dependencies and serving endpoint are sufficient
 
 Initial plan authored 2026-10-16 UTC from the operator's accepted selection and
 attribution decisions; implementation remains pending checkpoint review.
+
+## Completion update
+
+Checkpoint committed as `0dab11743`; implementation follows it. Independent final
+review has no remaining blockers after real failed-state evidence was added.
+Live source readback accounts for existing Fahrenheit/PRN quantization; no
+scientific processing changed. Tests, live hashes, browser prerequisite limitation
+and exact consumer scope are recorded in the validation artifact. Operator/user
+and developer documentation updated with the selector and rollback behavior.

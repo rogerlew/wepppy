@@ -9,4 +9,6 @@ security review required. Completion requires constructor/reload and rendered
 radio evidence, existing EDDE regression, and independent correctness review.
 
 The [checkpoint](artifacts/20261016_contract_decision.md) records the approved
-behavior. Implementation is pending checkpoint commit authorization.
+behavior. Implementation followed authorized checkpoint `88c8c9fdc`.
+Focused validation passed 291 distinct tests. The broad suite and final review are
+recorded in the tracker; no production deployment is claimed.

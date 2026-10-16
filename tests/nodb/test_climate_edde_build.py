@@ -76,10 +76,14 @@ def prepared(tmp_path, monkeypatch):
     Climate._instances.pop(str(tmp_path), None)
 
 
-def test_real_replay_publication_and_reload(prepared):
+@pytest.mark.parametrize('scaling_mode', [None, ClimatePrecipScalingMode.NoScaling])
+def test_real_replay_publication_and_reload(prepared, scaling_mode):
     c = prepared
+    with c.locked():
+        c._precip_scaling_mode = scaling_mode
     service.run_edde_build(c)
     current = Climate.getInstance(c.wd)
+    assert current.precip_scaling_mode == scaling_mode
     assert current.cli_fn == 'wepp.cli'
     assert current.edde_provenance['projection'] == 'WRF-MPI/SSP2-4.5'
     frame = service.read_cli(Path(c.cli_dir)/current.cli_fn)
@@ -117,6 +121,19 @@ def test_failed_build_preserves_previous_publication(prepared, monkeypatch, fail
     assert restored.edde_provenance is None
     status = json.loads(next(Path(c.cli_dir).glob('edde-build-*/build-status.json')).read_text())
     assert status['state'] == ('superseded' if failure == 'superseded' else 'failed')
+
+
+def test_none_and_no_scaling_preserve_identical_precipitation(prepared):
+    c = prepared
+    with c.locked():
+        c._precip_scaling_mode = None
+    service.run_edde_build(c)
+    unscaled = service.read_cli(Path(c.cli_dir) / c.cli_fn).prcp.copy()
+    with c.locked():
+        c._precip_scaling_mode = ClimatePrecipScalingMode.NoScaling
+    service.run_edde_build(c)
+    explicit = service.read_cli(Path(c.cli_dir) / c.cli_fn).prcp
+    pd.testing.assert_series_equal(unscaled, explicit)
 
 
 def test_parser_failure_rolls_back_selection(prepared):

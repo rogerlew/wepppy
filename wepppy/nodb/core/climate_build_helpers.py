@@ -26,7 +26,7 @@ from wepppy.all_your_base import NCPU
 from wepppy.all_your_base.geo import read_raster
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.climates.cligen import ClimateFile, Cligen, CligenStationsManager, df_to_prn
-from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
+from wepppy.climates.downscaled_nmme_client import retrieve_timeseries as retrieve_maca_timeseries
 from wepppy.climates.gridmet import (
     retrieve_historical_precip as gridmet_retrieve_historical_precip,
 )
@@ -746,8 +746,14 @@ def build_future(
     cli_fn: str,
     adjust_mx_pt5: bool = False,
     randseed: int | None = None,
+    *,
+    model: str = "GFDL-ESM2G",
+    scenario: str = "rcp85_2006_2099",
 ) -> None:
-    df = retrieve_rcp85_timeseries(lng, lat, datetime(start_year, 1, 1), datetime(end_year, 12, 31))
+    df = retrieve_maca_timeseries(
+        lng, lat, datetime(start_year, 1, 1), datetime(end_year, 12, 31),
+        model=model, scenario=scenario,
+    )
     df_to_prn(df, _join(cli_dir, prn_fn), "pr(mm)", "tasmax(degc)", "tasmin(degc)")
     _run_observed_with_quality_guard_handling(
         cligen,

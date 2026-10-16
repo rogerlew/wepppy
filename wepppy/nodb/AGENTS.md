@@ -13,6 +13,9 @@ Canonical behavioral contract:
   regression evidence must read combined managements and prepared WEPP inputs.
   Cover edits regenerate managements; summary rebuild preserves canopy and both ground overrides.
   Applying configured cover defaults also regenerates once, including retries.
+* Future MACA selection/default/member behavior follows
+  `docs/schemas/maca-cmip5-selection-contract.md`; preserve the saved projection
+  through parser rollback and generated/prepared climate readback.
 * Uploaded soil preparation follows `docs/schemas/single-user-defined-inputs-contract.md`;
   preserve admitted versions and explicit hydraulic values through single/MOFE preparation.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
