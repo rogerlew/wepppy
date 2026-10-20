@@ -559,8 +559,9 @@ Global temporal control model:
 - Return-period filtering uses nearest available Weibull `T` where `T >= requested_interval` (one available interval may satisfy at most one requested interval).
 - Rank-only lookup sources derive `T` using the canonical WEPP return-period defaults (`method=cta`, Gringorten correction enabled) before applying interval matching.
 - Event materialization pivots selected measures to selector-token-suffixed columns (for example `q_2015_01_16_mm` or `runoff_rp2_mm`) so output geometry remains normalized to canonical carrier feature counts.
-- H.wat Ep, Es, Er, ET and Dp follow the [hillslope water aggregation contract](../../../../docs/schemas/hillslope-water-aggregation-contract.md): reduce local-area-weighted daily depths before temporal aggregation. Derive ET from components before selection. This exception applies to all supported temporal modes and H.wat-backed scopes; implementation conformance is pending.
-- Other measures retain terminal OFE (`max(ofe_id)`) selection as the deterministic per-slice representative before pivoting.
+- H.wat P, RM, Irr, Ep, Es, Er, ET, Dp, Q and latqcc follow the [hillslope water aggregation contract](../../../../docs/schemas/hillslope-water-aggregation-contract.md): reduce local fluxes by daily area weighting and Q/latqcc by native outlet volume before temporal aggregation. Discover full native topology before event filtering and preserve exact joined-source bindings. Derive ET from components before selection. This exception applies to all supported temporal modes and H.wat-backed scopes; implementation conformance is pending.
+- Other measures retain legacy terminal OFE (`max(ofe_id)`) selection as the deterministic per-slice representative before pivoting.
+- Stock/profile annual sums and QOFE/transfer/Tile reductions remain legacy diagnostics, not certified physical water budgets. Missing known outlet observations for selected Q/latqcc fields fail materialization; local-only selections retain represented-day weighting. Absent dates retain null metrics and geometry.
 - Remaining conflicting duplicates for the same `{key, event_token, measure}` slice are contract failures (`materialization_error`).
 
 Mixed-layer temporal compatibility:

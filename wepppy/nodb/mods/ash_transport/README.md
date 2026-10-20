@@ -111,3 +111,24 @@ Watanabe static mode computes each daily transport increment as `delta_M = (A / 
 ## Credits / License
 
 Ash transport calibrations originate from Srivastava et al. (2023) and Watanabe et al. (2025) wildfire ash transport studies. The module ships under the University of Idaho BSD‑3 Clause license, and authorship follows the policy outlined in `AGENTS.md`; retain research citations within calibration notebooks under `dev/`.
+
+## Physical water inputs and historical results
+
+The [hillslope water contract](../../../../docs/schemas/hillslope-water-aggregation-contract.md)
+defines the pending MOFE accounting correction: models use physical terminal
+WAT runoff, while AshPost subtracts PASS-exported contributions from its
+PASS-based watershed baseline. These quantities can differ on subthreshold days;
+calibration and WEPP thresholds remain unchanged.
+
+Fresh model outputs must carry physical-WAT input algorithm/source provenance;
+fresh post outputs require that model provenance to match current WAT and bind
+actual model files plus WAT, PASS and totalwatsed3 hashes and consumed identity/area
+mapping. Reconcile daily same-scope PASS runoff with the watershed baseline before
+publication; disagreeing generations fail instead of being silently mixed. Unavailable dependencies
+allow historical reading, never verified publication. Empty/never-used model
+outputs retain the successful no-data outcome without requiring provenance.
+Historical artifacts remain accessible with an explicit unverified warning.
+Rebuilding post summaries alone does not correct old model inputs. Regenerate
+the model explicitly before corrected postprocessing. Missing or nonfinite
+required daily runoff is an input error, never zero transport. Implementation
+conformance to this amendment is pending.

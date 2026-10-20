@@ -194,7 +194,9 @@ Null columns. Sort by Topaz/year and preserve pandas schema metadata.
 ET components and Dp follow the daily local-area weighting and input policy in
 the [hillslope water aggregation contract](hillslope-water-aggregation-contract.md).
 This is an explicit exception to the earlier historical-sum preservation rule.
-P, QOFE and latqcc retain independent Topaz/year sums; null/NaN flux becomes zero.
+P uses daily local-area weighting; surface runoff uses physical terminal WAT Q,
+and lateral uses terminal local volume divided by full native hill area. Select
+outlets per native ID before mapped-volume combination. QOFE stays diagnostic.
 Area_m2 retains first-observed WEPP/OFE areas summed per mapped Topaz.
 Average annual iteration retains `max(number_of_years - 1, 1)` as its divisor.
 Implementation conformance to the correction is pending.

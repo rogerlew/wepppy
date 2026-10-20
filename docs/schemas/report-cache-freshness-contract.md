@@ -212,8 +212,8 @@ ancestor for its other behavior; this refinement precedes normalization code.
 ## MOFE aggregation compatibility amendment
 
 The [hillslope water aggregation contract](hillslope-water-aggregation-contract.md)
-is a bounded exception to historical calculation preservation: only ET and Dp
-change. Its additive aggregation marker is required for a verified current
+is a bounded exception to historical calculation preservation: P, physical terminal Q and outlet-equivalent lateral now join corrected ET/Dp.
+The required marker is `mofe-water-v2`. Its additive aggregation marker is required for a verified current
 hillslope cache, independently of matching dependency hashes. Older compatible
 caches retain historical_unverified access when dependencies are unavailable;
 with dependencies present they rebuild when the native API is available. The

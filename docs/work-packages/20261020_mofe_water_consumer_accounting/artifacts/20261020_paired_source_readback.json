@@ -1,0 +1,232 @@
+{
+  "sources": {
+    "wat": {
+      "path": "/wc1/runs/up/up-pedantry/wepp/output/interchange/H.wat.parquet",
+      "sha256": "8c83c4ec1926edb177f4d1e6dfce4553d96c32931628ba3ef9fe4c4445ff789a",
+      "bytes": 24035389
+    },
+    "pass": {
+      "path": "/wc1/runs/up/up-pedantry/wepp/output/interchange/H.pass.parquet",
+      "sha256": "72bb7b9b4f3633c22966d74c498be5a50f45cdffb4f6e75cf017476a2bd0f441",
+      "bytes": 17610377
+    }
+  },
+  "duplicates": {
+    "w": 0,
+    "p": 0
+  },
+  "provenance_limit": "Configured binary name is not proof of the producer binary hash; no lineage inferred from Q/QOFE ratios.",
+  "configured_binary": "wepp_250915",
+  "summary": {
+    "terminal_days": 328800,
+    "unmatched_pass_days": 0,
+    "max_abs_q_difference_mm": 0.9952729,
+    "mean_abs_q_difference_mm": 0.0006153920321840041,
+    "positive_wat_zero_pass_days": 1096
+  },
+  "by_event": [
+    {
+      "event": "EVENT",
+      "day_count": 18214,
+      "sum_terminal_q_mm": 211199.20870199002,
+      "sum_pass_q_mm": 211199.20482349047,
+      "max_abs_difference_mm": 0.0026864801922812376
+    },
+    {
+      "event": "NO EVENT",
+      "day_count": 38706,
+      "sum_terminal_q_mm": 1.8244419729999999,
+      "sum_pass_q_mm": 0.0,
+      "max_abs_difference_mm": 0.4987943
+    },
+    {
+      "event": "SUBEVENT",
+      "day_count": 271880,
+      "sum_terminal_q_mm": 198.393203296,
+      "sum_pass_q_mm": 0.0,
+      "max_abs_difference_mm": 0.9952729
+    }
+  ],
+  "largest_discrepancies": [
+    {
+      "wepp_id": 156,
+      "year": 2023,
+      "julian": 283,
+      "sim_day_index": 1379,
+      "Q": 0.9952729,
+      "QOFE": 2.985819,
+      "terminal_area": 23700.83,
+      "hill_area": 71102.49,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 14.4575063,
+      "sbrunv": 14.469
+    },
+    {
+      "wepp_id": 3,
+      "year": 2024,
+      "julian": 305,
+      "sim_day_index": 1766,
+      "Q": 0.9798669,
+      "QOFE": 1.959734,
+      "terminal_area": 2250.0,
+      "hill_area": 4500.0,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 2.9925,
+      "sbrunv": 3.0002
+    },
+    {
+      "wepp_id": 69,
+      "year": 2022,
+      "julian": 134,
+      "sim_day_index": 865,
+      "Q": 0.8713367,
+      "QOFE": 1.742673,
+      "terminal_area": 69315.15,
+      "hill_area": 138630.3,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 1314.215244,
+      "sbrunv": 1314.4
+    },
+    {
+      "wepp_id": 1,
+      "year": 2024,
+      "julian": 305,
+      "sim_day_index": 1766,
+      "Q": 0.8688344,
+      "QOFE": 1.737669,
+      "terminal_area": 16650.21,
+      "hill_area": 33300.42,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 18.814737299999997,
+      "sbrunv": 18.77
+    },
+    {
+      "wepp_id": 13,
+      "year": 2024,
+      "julian": 305,
+      "sim_day_index": 1766,
+      "Q": 0.863109,
+      "QOFE": 2.589327,
+      "terminal_area": 17699.85,
+      "hill_area": 53099.549999999996,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 28.1427615,
+      "sbrunv": 28.202
+    },
+    {
+      "wepp_id": 129,
+      "year": 2022,
+      "julian": 156,
+      "sim_day_index": 887,
+      "Q": 0.8544015,
+      "QOFE": 2.563205,
+      "terminal_area": 44401.41,
+      "hill_area": 133204.23,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 747.2757303,
+      "sbrunv": 747.39
+    },
+    {
+      "wepp_id": 30,
+      "year": 2021,
+      "julian": 314,
+      "sim_day_index": 680,
+      "Q": 0.843636,
+      "QOFE": 1.687272,
+      "terminal_area": 17546.88,
+      "hill_area": 35093.76,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 110.89628160000002,
+      "sbrunv": 110.94
+    },
+    {
+      "wepp_id": 98,
+      "year": 2020,
+      "julian": 284,
+      "sim_day_index": 284,
+      "Q": 0.8233161,
+      "QOFE": 2.469948,
+      "terminal_area": 13805.4,
+      "hill_area": 41416.2,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 22.640856,
+      "sbrunv": 22.658
+    },
+    {
+      "wepp_id": 10,
+      "year": 2023,
+      "julian": 284,
+      "sim_day_index": 1380,
+      "Q": 0.7532701,
+      "QOFE": 2.25981,
+      "terminal_area": 16500.24,
+      "hill_area": 49500.72,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 20.130292800000003,
+      "sbrunv": 20.168
+    },
+    {
+      "wepp_id": 69,
+      "year": 2025,
+      "julian": 47,
+      "sim_day_index": 1874,
+      "Q": 0.7243376,
+      "QOFE": 1.448675,
+      "terminal_area": 69315.15,
+      "hill_area": 138630.3,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 1147.1657324999999,
+      "sbrunv": 1147.1
+    },
+    {
+      "wepp_id": 225,
+      "year": 2022,
+      "julian": 125,
+      "sim_day_index": 856,
+      "Q": 0.7217278,
+      "QOFE": 1.443456,
+      "terminal_area": 4948.54,
+      "hill_area": 9897.08,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 58.640199,
+      "sbrunv": 58.661
+    },
+    {
+      "wepp_id": 75,
+      "year": 2020,
+      "julian": 285,
+      "sim_day_index": 285,
+      "Q": 0.6980926,
+      "QOFE": 1.396185,
+      "terminal_area": 10352.49,
+      "hill_area": 20704.98,
+      "event": "SUBEVENT",
+      "runvol": 0.0,
+      "pass_q": 0.0,
+      "wat_lateral_volume": 1.5528735,
+      "sbrunv": 1.5697
+    }
+  ]
+}
