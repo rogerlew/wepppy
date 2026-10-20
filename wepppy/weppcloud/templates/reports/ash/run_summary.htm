@@ -1,4 +1,9 @@
 <section class="wc-stack">
+{% set water_warning = ash.water_accounting_warning %}
+{% if water_warning %}
+<p role="status" class="wc-status-warning">{{ water_warning }}</p>
+{% endif %}
+
   {% if ash.has_watershed_summaries %}
   <a class="wc-link wc-link--file" href="{{ url_for_run('watar.report_ash', runid=runid, config=config) }}""
                target=" _blank" rel="noopener">

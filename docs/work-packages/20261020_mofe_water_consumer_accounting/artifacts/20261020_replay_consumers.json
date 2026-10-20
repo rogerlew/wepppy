@@ -1,0 +1,186 @@
+[
+  {
+    "variant": "five-year",
+    "rows": 5481,
+    "days": 1827,
+    "areas": {
+      "1": 6749.17,
+      "2": 13498.35,
+      "3": 20247.53
+    },
+    "annual": [
+      {
+        "TopazID": 105,
+        "WaterYear": 2020,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 1457.1999999999998,
+        "Percolation (mm)": 13.01439508872316,
+        "Surface Runoff (mm)": 587.07049,
+        "Lateral Flow (mm)": 221.3150546523587,
+        "Transpiration + Evaporation (mm)": 501.4849898617238
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2021,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2166.5,
+        "Percolation (mm)": 17.519707999999998,
+        "Surface Runoff (mm)": 1265.988196208,
+        "Lateral Flow (mm)": 338.69008363738277,
+        "Transpiration + Evaporation (mm)": 533.1599912285575
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2022,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2537.6,
+        "Percolation (mm)": 17.519707999999998,
+        "Surface Runoff (mm)": 1465.5502907,
+        "Lateral Flow (mm)": 455.0701123766978,
+        "Transpiration + Evaporation (mm)": 627.2633263793969
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2023,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2035.8999999999999,
+        "Percolation (mm)": 17.519707999999998,
+        "Surface Runoff (mm)": 1155.36983124,
+        "Lateral Flow (mm)": 380.0200938435685,
+        "Transpiration + Evaporation (mm)": 466.5166643972535
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2024,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2584.8999999999996,
+        "Percolation (mm)": 17.5677072,
+        "Surface Runoff (mm)": 1547.68940793,
+        "Lateral Flow (mm)": 418.29010329410625,
+        "Transpiration + Evaporation (mm)": 615.5883205576978
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2025,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 1265.6999999999998,
+        "Percolation (mm)": 4.4159264,
+        "Surface Runoff (mm)": 935.3028655,
+        "Lateral Flow (mm)": 136.40003368312915,
+        "Transpiration + Evaporation (mm)": 90.00833387784432
+      }
+    ],
+    "export_columns": [
+      "key",
+      "P_yr2020",
+      "P_yr2021",
+      "P_yr2022",
+      "P_yr2023",
+      "P_yr2024",
+      "Q_yr2020",
+      "Q_yr2021",
+      "Q_yr2022",
+      "Q_yr2023",
+      "Q_yr2024",
+      "latqcc_yr2020",
+      "latqcc_yr2021",
+      "latqcc_yr2022",
+      "latqcc_yr2023",
+      "latqcc_yr2024"
+    ],
+    "source_sha256": "845c29a959de574c700596ca72fed8c11f0401b71a6ff117281933b9e6de012a",
+    "native_sha256": "60b8da3c77aa8465e262b8978ac173ba681d14745de7aec74392db9308c5c5eb"
+  },
+  {
+    "variant": "hourly",
+    "rows": 5481,
+    "days": 1827,
+    "areas": {
+      "1": 6749.17,
+      "2": 13498.35,
+      "3": 20247.53
+    },
+    "annual": [
+      {
+        "TopazID": 105,
+        "WaterYear": 2020,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 1457.1999999999998,
+        "Percolation (mm)": 6.70752,
+        "Surface Runoff (mm)": 84.532739604,
+        "Lateral Flow (mm)": 936.7102313146914,
+        "Transpiration + Evaporation (mm)": 464.2750042116258
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2021,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2166.5,
+        "Percolation (mm)": 8.9352,
+        "Surface Runoff (mm)": 231.2452389,
+        "Lateral Flow (mm)": 1407.8703476647145,
+        "Transpiration + Evaporation (mm)": 495.7800004519071
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2022,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2537.6,
+        "Percolation (mm)": 8.9352,
+        "Surface Runoff (mm)": 183.043812559,
+        "Lateral Flow (mm)": 1745.7354310983685,
+        "Transpiration + Evaporation (mm)": 626.5716741107863
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2023,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2035.8999999999999,
+        "Percolation (mm)": 8.9352,
+        "Surface Runoff (mm)": 127.41013441,
+        "Lateral Flow (mm)": 1435.885354582844,
+        "Transpiration + Evaporation (mm)": 415.81667359837803
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2024,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 2584.8999999999996,
+        "Percolation (mm)": 8.959679999999999,
+        "Surface Runoff (mm)": 356.0027951,
+        "Lateral Flow (mm)": 1660.0504099389923,
+        "Transpiration + Evaporation (mm)": 601.6433385092745
+      },
+      {
+        "TopazID": 105,
+        "WaterYear": 2025,
+        "Area_m2": 40495.05,
+        "Precipitation (mm)": 1265.6999999999998,
+        "Percolation (mm)": 2.25216,
+        "Surface Runoff (mm)": 256.8006199,
+        "Lateral Flow (mm)": 659.9001629581886,
+        "Transpiration + Evaporation (mm)": 100.48166725068866
+      }
+    ],
+    "export_columns": [
+      "key",
+      "P_yr2020",
+      "P_yr2021",
+      "P_yr2022",
+      "P_yr2023",
+      "P_yr2024",
+      "Q_yr2020",
+      "Q_yr2021",
+      "Q_yr2022",
+      "Q_yr2023",
+      "Q_yr2024",
+      "latqcc_yr2020",
+      "latqcc_yr2021",
+      "latqcc_yr2022",
+      "latqcc_yr2023",
+      "latqcc_yr2024"
+    ],
+    "source_sha256": "fc3ceda1673beac7c989d370b40475e0ca906b585666081d6144dda99b72b080",
+    "native_sha256": "60b8da3c77aa8465e262b8978ac173ba681d14745de7aec74392db9308c5c5eb"
+  }
+]

@@ -53,7 +53,7 @@ def run(tmp_path, monkeypatch):
     ])
     _table(root / "wepp/output/interchange/H.wat.parquet", [
         {"wepp_id": 1, "ofe_id": 1, "sim_day_index": 1, "water_year": 2001,
-         "P": 1.0, "Dp": 0.5, "QOFE": 0.2, "latqcc": 0.1,
+         "P": 1.0, "Dp": 0.5, "Q": 0.2, "QOFE": 0.2, "latqcc": 0.1,
          "Ep": 0.05, "Es": 0.03, "Er": 0.02, "Area": 1000.0},
     ])
     owner = object.__new__(Watershed)

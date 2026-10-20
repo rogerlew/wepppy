@@ -33,7 +33,6 @@ from wepppy.query_engine.activate import update_catalog_entry
 from .ashpost_documentation import generate_ashpost_documentation
 from .ashpost_versioning import (
     ASHPOST_VERSION,
-    remove_incompatible_outputs,
     write_version_manifest,
 )
 
@@ -166,7 +165,7 @@ def watershed_daily_aggregated(
         burn_class = ash.meta[topaz_id]['burn_class']
         area_ha = watershed.hillslope_area(topaz_id) / 10000
         path = Path(ash.ash_dir) / f'H{wepp_id}_ash.parquet'
-        if path.exists():
+        if path.exists() and pq.read_metadata(path).num_rows:
             manifest.append((os.path.relpath(path, root), int(topaz_id), area_ha, burn_class))
     if not manifest:
         return None
@@ -192,13 +191,19 @@ def watershed_daily_aggregated(
         meta = ash.meta.get(str(topaz_id), ash.meta.get(topaz_id, {}))
         if meta.get('ash_type') is not None:
             ash_wepp_ids.append(int(translator.wepp(top=topaz_id)))
+    from .water_provenance import post_inputs, publish_post_proof
+    mapping = {'manifest': [list(entry) for entry in manifest], 'ash_wepp_ids': ash_wepp_ids}
+    water_proof = post_inputs(root, manifest, mapping)
     native = require_wepppyo3_interchange('AshPost', 'ashpost_to_parquet')
     result = native.ashpost_to_parquet(
         str(root), str(Path(ash.ash_dir) / 'post'), manifest, list(recurrence),
         hydrology_path=optional_path('totalwatsed3.parquet'),
-        wat_path=optional_path('H.wat.parquet'), ash_wepp_ids=ash_wepp_ids,
+        pass_path=optional_path('H.pass.parquet'), ash_wepp_ids=ash_wepp_ids,
         field_metadata=metadata,
     )
+    if post_inputs(root, manifest, mapping) != water_proof:
+        raise ValueError('Ash water inputs changed during postprocessing')
+    publish_post_proof(root, water_proof)
     if warning := result.get('streamflow_exceedance'):
         ash.logger.warning(
             "AshPost: corrected streamflow exceeds original on %d day(s); max overage %.4f mm. Samples:\n%s",
@@ -289,7 +294,6 @@ class AshPost(NoDbBase):
     def run_post(self, recurrence: Sequence[int] = (1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)) -> None:
         with self.locked():
             ash_post_path = Path(self.ash_post_dir)
-            remove_incompatible_outputs(ash_post_path, version=ASHPOST_VERSION)
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res

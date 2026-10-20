@@ -29,7 +29,7 @@
 - If you adjust CLI/WEPP file naming conventions, update both the model and post-processing loaders (the native AshPost manifest contract).
 
 ## Post-Processing (AshPost)
-1. **Version Gate**: `_join(ash_dir, 'post')` is cleared when the stored manifest major version mismatches `ASHPOST_VERSION`. Bump the constant for schema-breaking changes only.
+1. **Version Gate**: retain historical post outputs until validated native publication succeeds. Numerical refresh must not clear the directory; incompatible schema migrations require an explicit compatibility plan.
 2. **Aggregation**: Processes every `H{wepp_id}_ash.parquet`, joins metadata, casts numeric types (uint8/uint16), converts per-area metrics to totals, and computes cumulative transport.
 3. **Statistics**: Builds daily, annual, burn-class, and cumulative tables; calculates Weibull-based return periods in the required native kernel.
 4. **Output**: Writes parquet files with Arrow metadata (`units`, `description`, dataset version info) and renders `post/README.md` documenting schema previews.
@@ -84,7 +84,7 @@
 ## Debugging & Troubleshooting
 - Enable verbose logging by raising Redis DB 15 log level or swapping `MULTIPROCESSING = False` to run serially.
 - Verify raster alignment issues by checking cropped files in `ash/`.
-- When outputs disappear, check `ashpost_version.json`; a major version bump triggers deletion and regeneration.
+- Failed admission/native validation must preserve historical post bytes. Check `water_accounting.json` for numerical provenance and `ashpost_version.json` for schema identity.
 - If `AshPost` skips hillslopes, inspect `ash.meta` for missing `ash_type` or `ini_ash_load`. These fields are populated during simulation setup.
 
 ## Coding Standards & Housekeeping

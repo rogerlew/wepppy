@@ -383,7 +383,8 @@ def test_hillslope_queue_bounds_loaded_inputs_and_releases_them(ash_module, monk
 
     def load(*args, **kwargs):
         nonlocal peak
-        assert kwargs == {'collapse': 'daily'}
+        assert kwargs['collapse'] == 'daily'
+        assert isinstance(kwargs['_source_fingerprint_cache'], dict)
         water = Water()
         refs.append(weakref.ref(water))
         peak = max(peak, sum(ref() is not None for ref in refs))
@@ -411,6 +412,7 @@ def test_hillslope_queue_bounds_loaded_inputs_and_releases_them(ash_module, monk
 
     monkeypatch.setattr(module, 'MULTIPROCESSING', True)
     monkeypatch.setattr(module, 'NCPU', 3)
+    monkeypatch.setattr('wepppy.nodb.mods.ash_transport.water_provenance.bind_model_source', lambda frame, cache: None)
     monkeypatch.setattr(module, 'load_hill_wat_dataframe', load)
     monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
     items = [{'prefix': f'H{i}'} for i in range(30)]
@@ -445,6 +447,7 @@ def test_hillslope_queue_cancels_pending_and_propagates_load_failure(ash_module,
 
     monkeypatch.setattr(module, 'MULTIPROCESSING', True)
     monkeypatch.setattr(module, 'NCPU', 2)
+    monkeypatch.setattr('wepppy.nodb.mods.ash_transport.water_provenance.bind_model_source', lambda frame, cache: None)
     monkeypatch.setattr(module, 'load_hill_wat_dataframe', load)
     monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
     with pytest.raises(ValueError, match='bad hill input'):
@@ -476,6 +479,7 @@ def test_hillslope_queue_propagates_model_failure_and_cancels_pending(ash_module
 
     monkeypatch.setattr(module, 'MULTIPROCESSING', True)
     monkeypatch.setattr(module, 'NCPU', 2)
+    monkeypatch.setattr('wepppy.nodb.mods.ash_transport.water_provenance.bind_model_source', lambda frame, cache: None)
     monkeypatch.setattr(module, 'load_hill_wat_dataframe', lambda *a, **kw: object())
     monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
     with pytest.raises(RuntimeError, match='model failed'):

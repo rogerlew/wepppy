@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import logging
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -15,6 +16,36 @@ from .versioning import schema_with_version
 from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _wat_source_signature(path: Path) -> tuple[int, int, int, int, int]:
+    stat = path.stat()
+    return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+
+def _daily_source_fingerprint(
+    path: str, signature: tuple[int, ...], cache: dict | None = None,
+) -> str:
+    """Bind a digest before reading, amortized across hills in one generation."""
+    identity = (path, signature)
+    if cache:
+        if cache['identity'] != identity:
+            raise ValueError("Ash WAT source changed between hillslope loads")
+        return cache['digest']
+    source = Path(path)
+    if _wat_source_signature(source) != signature:
+        raise ValueError("H.wat changed before daily loading")
+    digest = hashlib.sha256()
+    with source.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    if _wat_source_signature(source) != signature:
+        raise ValueError("H.wat changed during input fingerprinting")
+    value = digest.hexdigest()
+    if cache is not None:
+        cache.update(identity=identity, digest=value)
+    return value
+
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -230,6 +261,7 @@ def load_hill_wat_dataframe(
     wepp_id: int,
     *,
     collapse: str | None = "daily",
+    _source_fingerprint_cache: dict | None = None,
 ) -> pd.DataFrame:
     """
     Load a hillslope WAT time series for the provided WEPP output directory and hillslope id.
@@ -242,7 +274,9 @@ def load_hill_wat_dataframe(
         Integer hillslope identifier (WEPP id).
     collapse
          ``"daily"`` (default) returns one record per simulation day aggregated across OFEs
-         using ``Area`` (m^2) as weights by converting mm measures to m^3, aggregating, and converting back to mm. 
+         with local area-weighted fields, physical terminal Q, and terminal lateral
+         volume divided by full hillslope area. QOFE/transfer/Tile fields retain
+         diagnostic reductions; they are not whole-hillslope external fluxes.
         ``None`` returns the raw OFE-level records using
          the original schema emitted by the interchange writer.
     """
@@ -264,6 +298,12 @@ def load_hill_wat_dataframe(
     if normalized_collapse not in (None, "daily"):
         raise ValueError(f"Unsupported collapse value: {collapse!r}")
 
+    source_signature = _wat_source_signature(wat_path)
+    source_digest = None
+    if normalized_collapse == "daily":
+        source_digest = _daily_source_fingerprint(
+            str(wat_path), source_signature, _source_fingerprint_cache
+        )
     wepp_id_int = int(wepp_id)
     alias_map = _resolve_column_aliases(wat_path)
 
@@ -290,6 +330,35 @@ def load_hill_wat_dataframe(
             area_column = alias_map["Area"]
             if area_column is None:
                 raise KeyError(f"Column 'Area' not found in {wat_path}")
+            # Full-source geometry precedes daily selection. Q is already a
+            # whole-hill depth; lateral is a terminal local-area depth.
+            quoted_path = wat_path.as_posix().replace("'", "''")
+            geometry_query = f"""
+                SELECT "{alias_map['ofe_id']}" AS ofe,
+                       MIN("{area_column}") AS area,
+                       COUNT(DISTINCT "{area_column}") AS area_count,
+                       BOOL_OR("{area_column}" IS NULL OR NOT isfinite("{area_column}")
+                               OR "{area_column}" <= 0) AS invalid
+                FROM read_parquet('{quoted_path}')
+                WHERE "{alias_map['wepp_id']}" = {wepp_id_int}
+                GROUP BY 1
+            """
+            geometry = con.execute(geometry_query).fetchall()
+            if any(ofe is None or count != 1 or invalid for ofe, _, count, invalid in geometry):
+                raise ValueError("H.wat requires stationary finite positive Area and OFE identity")
+            terminal = max((row[0] for row in geometry), default=0)
+            hill_area = sum(row[1] for row in geometry)
+            if not np.isfinite(hill_area):
+                raise ValueError("H.wat area overflow")
+            duplicate = con.execute(f"""
+                SELECT COUNT(*) FROM (
+                    SELECT "{alias_map['year']}", "{alias_map['julian']}", "{alias_map['ofe_id']}"
+                    FROM read_parquet('{quoted_path}')
+                    WHERE "{alias_map['wepp_id']}" = {wepp_id_int}
+                    GROUP BY ALL HAVING COUNT(*) > 1)
+            """).fetchone()[0]
+            if duplicate:
+                raise ValueError("Duplicate H.wat daily OFE observation")
             mm_volume_expr = ",\n                    ".join(
                 f'SUM("{alias_map[column]}" * 0.001 * "{area_column}") AS "{column}_volume"'
                 if alias_map[column] is not None
@@ -306,6 +375,12 @@ def load_hill_wat_dataframe(
                     "{alias_map['day_of_month']}" AS day_of_month,
                     "{alias_map['water_year']}" AS water_year,
                     SUM("{area_column}") AS Area,
+                    COUNT(*) FILTER (WHERE "{alias_map['ofe_id']}" = {terminal}) AS __terminal_count,
+                    MAX(CASE WHEN "{alias_map['ofe_id']}" = {terminal}
+                        THEN "{alias_map['Q']}" END) AS __outlet_q,
+                    MAX(CASE WHEN "{alias_map['ofe_id']}" = {terminal}
+                        THEN "{alias_map['latqcc']}" * "{area_column}" / NULLIF({hill_area}, 0)
+                        END) AS __outlet_lateral,
                     {mm_volume_expr}
                 FROM read_parquet('{wat_path.as_posix()}')
                 WHERE "{alias_map['wepp_id']}" = {wepp_id_int}
@@ -326,6 +401,11 @@ def load_hill_wat_dataframe(
             if frame.empty:
                 frame = _empty_wat_dataframe()
             else:
+                terminal_count = frame.pop("__terminal_count")
+                outlet_q = frame.pop("__outlet_q").to_numpy(dtype=np.float64)
+                outlet_lateral = frame.pop("__outlet_lateral").to_numpy(dtype=np.float64)
+                if (terminal_count != 1).any() or not np.isfinite(outlet_q).all() or not np.isfinite(outlet_lateral).all():
+                    raise ValueError("Missing or nonfinite known H.wat terminal observation")
                 area = frame["Area"].to_numpy(dtype=np.float64, copy=False)
                 for column in DAILY_MM_COLUMNS:
                     volume_col = f"{column}_volume"
@@ -335,6 +415,8 @@ def load_hill_wat_dataframe(
                     depths *= 1000.0
                     frame[column] = depths
 
+                frame["Q"] = outlet_q
+                frame["latqcc"] = outlet_lateral
                 length = len(frame)
                 frame["ofe_id"] = np.zeros(length, dtype=np.int16)
                 frame["OFE"] = np.zeros(length, dtype=np.int16)
@@ -343,6 +425,12 @@ def load_hill_wat_dataframe(
     finally:
         con.close()
 
+    if source_signature != _wat_source_signature(wat_path):
+        raise ValueError("H.wat changed during daily loading")
+    frame.attrs["source_signature"] = source_signature
+    if source_digest is not None:
+        frame.attrs["water_source_sha256"] = source_digest
+    frame.attrs["water_aggregation"] = "mofe-water-v2" if normalized_collapse == "daily" else "raw"
     frame.attrs["source_path"] = str(wat_path)
     frame.attrs["wepp_id"] = wepp_id_int
     frame.attrs["collapse"] = "daily" if normalized_collapse == "daily" else "raw"

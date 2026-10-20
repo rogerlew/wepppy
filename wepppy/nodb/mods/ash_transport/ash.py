@@ -20,6 +20,7 @@ Outputs and downstream integrations:
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 import shutil
 from glob import glob
 import os
@@ -84,10 +85,15 @@ from .ash_multi_year_model_alex import BlackAshModel as BlackAshModelAlex
 
 def _run_hillslope_work(work_items, cli_df, output_dir, logger):
     """Load one hill in the parent per available slot and release pool state here."""
+    from .water_provenance import bind_model_source
+    source_cache = {}
     def load_work(item):
-        return dict(item, cli_df=cli_df, hill_wat_df=load_hill_wat_dataframe(
-            output_dir, int(item['prefix'][1:]), collapse="daily"
-        ))
+        frame = load_hill_wat_dataframe(
+            output_dir, int(item['prefix'][1:]), collapse="daily",
+            _source_fingerprint_cache=source_cache
+        )
+        bind_model_source(frame, source_cache)
+        return dict(item, cli_df=cli_df, hill_wat_df=frame)
 
     total = len(work_items)
     if not MULTIPROCESSING or not total:
@@ -446,6 +452,37 @@ class Ash(NoDbBase):
             instance._anu_black_ash_model_pars.ash_type = AshType.BLACK
 
         return instance
+
+    @property
+    def water_accounting_warning(self):
+        from .water_provenance import historical_warning
+        if not self.has_ash_results:
+            return None
+        try:
+            watershed = Watershed.getInstance(self.wd)
+            translator = watershed.translator_factory()
+            manifest, selected = [], []
+            for topaz_id in watershed._subs_summary:
+                native = int(translator.wepp(top=topaz_id))
+                meta = self.meta.get(str(topaz_id), self.meta.get(topaz_id, {}))
+                if meta.get('ash_type') is not None:
+                    selected.append(native)
+                path = Path(self.ash_dir) / f'H{native}_ash.parquet'
+                if path.exists():
+                    import pyarrow.parquet as pq
+                    if pq.read_metadata(path).num_rows:
+                        manifest.append([str(path.relative_to(self.wd)), int(topaz_id),
+                                         watershed.hillslope_area(topaz_id) / 10000,
+                                         meta['burn_class']])
+            mapping = {'manifest': manifest, 'ash_wepp_ids': selected}
+        except RuntimeError as exc:
+            if 'No sub_ids/chn_ids available for translator' not in str(exc):
+                raise
+            mapping = None
+        except (OSError, ValueError, KeyError, TypeError):
+            # Archived mapping prerequisites may be absent; retain historical reads.
+            mapping = None
+        return historical_warning(Path(self.wd), mapping)
 
     @property
     def has_ash_results(self) -> bool:

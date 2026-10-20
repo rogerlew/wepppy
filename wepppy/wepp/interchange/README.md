@@ -222,3 +222,17 @@ format.
 - [WEPPpyo3-only cutover package](../../../docs/work-packages/20260715_wepppyo3_only_interchange/package.md)
 - [Query engine](../../query_engine/README.md)
 - [WEPPpy architecture](../../../ARCHITECTURE.md)
+
+### Physical daily water for consumers
+
+`load_hill_wat_dataframe(..., collapse="daily")` weights local measurements by
+represented OFE area, selects physical terminal WAT Q, and divides terminal
+lateral volume by the complete native hillslope area. Missing known terminals,
+duplicate daily OFEs and invalid geometry fail explicitly. Raw interchange and
+`collapse=None` retain their schemas. Corrected frames carry `mofe-water-v2` and
+source identity metadata plus a pre-read SHA256 for downstream Ash provenance.
+An explicit Ash batch cache shares the digest across hills; fresh batches and
+standalone loads always recompute it. A later
+source hash must never be attached to an older loaded dataframe. QOFE is a version-sensitive
+diagnostic, never an inferred replacement for physical runoff. See the
+[water aggregation contract](../../../docs/schemas/hillslope-water-aggregation-contract.md).

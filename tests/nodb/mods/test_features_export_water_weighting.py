@@ -10,7 +10,7 @@ pytestmark = pytest.mark.unit
 
 def water_frame():
     return pd.DataFrame({
-        'key': [1]*4, 'ofe_id': [1, 2, 1, 2], 'year': [2001]*4,
+        'key': [1]*4, 'wepp_id': [1]*4, 'ofe_id': [1, 2, 1, 2], 'year': [2001]*4,
         'julian': [1, 1, 2, 2], 'Area': [250., 750.]*2,
         'Ep': [1., 4.]*2, 'Es': [.5, 1.]*2, 'Er': [.5, 1.]*2,
         'ET': [2., 6.]*2, 'Dp': [4., 8.]*2, 'Q': [11., 22.]*2,
@@ -48,7 +48,12 @@ def test_invalid_area_is_not_a_terminal_or_equal_weight_fallback(area):
 
 def test_sparse_day_uses_its_own_area_and_subdivision_is_invariant():
     frame = water_frame().drop(index=3)
-    result = materialize(frame, 'yearly').iloc[0]
+    with pytest.raises(MaterializationContractError, match='terminal'):
+        materialize(frame, 'yearly')
+    result = materialize_temporal_layer_wide(
+        frame=frame, layer_id='wepp.interchange.hill_wat', temporal_mode='yearly',
+        selected_columns=('ET', 'Dp'), unit_mapping={}, join_key_column='key',
+        event_selector=None).frame.iloc[0]
     assert result['ET_yr2001'] == 7.
     assert result['Dp_yr2001'] == 11.
     split = water_frame()
@@ -195,12 +200,12 @@ def test_real_parquet_core_derives_selected_et_without_exporting_area(tmp_path, 
     assert long.frame['Dp'].iloc[0] == (7. if mode == 'event' else 14.)
 
 
-def test_routed_only_selection_retains_existing_area_independent_behavior():
+def test_outlet_selection_requires_valid_full_area():
     frame = water_frame(); frame.Area = float('nan')
-    result = materialize_temporal_layer_wide(frame=frame,layer_id='wepp.interchange.hill_wat',
-        temporal_mode='yearly',selected_columns=('Q',),unit_mapping={},join_key_column='key',
-        event_selector=None).frame
-    assert result.Q_yr2001.iloc[0] == 44.
+    with pytest.raises(MaterializationContractError, match='Area'):
+        materialize_temporal_layer_wide(frame=frame,layer_id='wepp.interchange.hill_wat',
+            temporal_mode='yearly',selected_columns=('Q',),unit_mapping={},join_key_column='key',
+            event_selector=None)
 
 
 def test_et_only_selection_rejects_hidden_infinite_components():
@@ -211,3 +216,35 @@ def test_et_only_selection_rejects_hidden_infinite_components():
         materialize_temporal_layer_wide(frame=frame,layer_id='wepp.interchange.hill_wat',
             temporal_mode='yearly',selected_columns=('ET',),unit_mapping={},join_key_column='key',
             event_selector=None)
+
+
+def test_physical_fields_with_full_topology_before_filter_and_mapping():
+    from wepppy.nodb.mods.features_export.temporal_wide_materializer import prepare_water_geometry
+    frame=water_frame()
+    frame['P']=[2.,10.]*2
+    frame['latqcc']=[100.,6.]*2
+    frame=prepare_water_geometry(frame)
+    # Omit upstream on the selected date: lateral still uses full 1000 m2.
+    frame=frame.loc[(frame.julian==2) & (frame.ofe_id==2)].copy()
+    result=materialize_temporal_layer_wide(
+        frame=frame,layer_id='wepp.interchange.hill_wat',temporal_mode='yearly',
+        selected_columns=('P','Q','latqcc'),unit_mapping={},join_key_column='key',
+        event_selector=None).frame.iloc[0]
+    assert result['P_yr2001']==10.
+    assert result['Q_yr2001']==22.
+    assert result['latqcc_yr2001']==4.5
+
+
+def test_physical_outlets_merge_native_volumes_not_max_ofe():
+    from wepppy.nodb.mods.features_export.temporal_wide_materializer import prepare_water_geometry
+    frame=pd.DataFrame(dict(key=[9]*3,wepp_id=[1,1,2],ofe_id=[1,2,1],
+        year=[2001]*3,julian=[1]*3,Area=[250.,750.,2000.],
+        P=[2.,10.,20.],Q=[99.,8.,2.],latqcc=[99.,6.,3.]))
+    frame=prepare_water_geometry(frame)
+    result=materialize_temporal_layer_wide(
+        frame=frame,layer_id='wepp.interchange.hill_wat',temporal_mode='event',
+        selected_columns=('P','Q','latqcc'),unit_mapping={},join_key_column='key',
+        event_selector=None).frame.iloc[0]
+    assert result['P_2001_01_01']==16.
+    assert result['Q_2001_01_01']==4.
+    assert result['latqcc_2001_01_01']==3.5

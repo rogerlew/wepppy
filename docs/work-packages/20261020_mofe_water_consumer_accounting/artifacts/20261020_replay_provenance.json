@@ -1,0 +1,56 @@
+[
+  {
+    "root": "/wc1/runs/mo/mofe-water-replay-20261020",
+    "source": "up-pedantry native hill5",
+    "geometry": "lengths44.315/88.63/132.945m; width152.3m unchanged",
+    "binary": "wepp_261010_hill",
+    "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+    "inputs": {
+      "p5.cli": "11ff6b73c73b941aed1ae1542af5281fe968ce979047398b02b48e8aca91ecb5",
+      "p5.man": "ad126c440e625364bf8c3e45abc66a786e8ef0bc12da3ed04df7370492b0fb20",
+      "p5.run": "2a196af7e578b7e2a0b6bde0e7d19f3065df5646b90704cae74d714f36820ce2",
+      "p5.slp": "7b9ddc7e01d6d0f8993081b7764e2e9db6c49dc66ced143fbc804f8962abc4d3",
+      "p5.sol": "f3dc7556a653915021f65e646a6e3846686a29fe642812a8bd6bcfd32df6af77"
+    },
+    "wat_header": " DAILY WATER BALANCE",
+    "stdout_tail": "025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 16 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 17 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 18 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 19 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 20 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 21 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 22 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 23 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 26 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 27 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 28 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 29 mar 2025  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n",
+    "stderr": "\nProgram received signal SIGFPE: Floating-point exception - erroneous arithmetic operation.\n\nBacktrace for this error:\n#0  0x741dcb623e59 in ???\n#1  0x741dcb622e75 in ???\n#2  0x741dcb24532f in ???\n\tat ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0\n#3  0x42109f in evap_\n\tat /home/workdir/wepp-forest-release-20261009/src/evap.for:293\n#4  0x4852dc in watbal_\n\tat /home/workdir/wepp-forest-release-20261009/src/watbal.for:495\n#5  0x410400 in contin_\n\tat /home/workdir/wepp-forest-release-20261009/src/contin.for:1075\n#6  0x45db51 in MAIN__\n\tat /home/workdir/wepp-forest-release-20261009/src/main.for:381\n#7  0x402358 in main\n\tat /home/workdir/wepp-forest-release-20261009/src/main.for:585\n"
+  },
+  {
+    "root": "/wc1/runs/mo/mofe-water-replay-five-year-20261020",
+    "source": "up-pedantry native hill5",
+    "geometry": "lengths44.315/88.63/132.945m; width152.3m unchanged",
+    "binary": "wepp_261010_hill",
+    "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+    "inputs": {
+      "p5.cli": "11ff6b73c73b941aed1ae1542af5281fe968ce979047398b02b48e8aca91ecb5",
+      "p5.man": "ad126c440e625364bf8c3e45abc66a786e8ef0bc12da3ed04df7370492b0fb20",
+      "p5.run": "9a4f66820ab23110087e6375f0b526f532931663bf30c8dfda7fb4c4ae8de9c6",
+      "p5.slp": "7b9ddc7e01d6d0f8993081b7764e2e9db6c49dc66ced143fbc804f8962abc4d3",
+      "p5.sol": "f3dc7556a653915021f65e646a6e3846686a29fe642812a8bd6bcfd32df6af77"
+    },
+    "wat_header": " DAILY WATER BALANCE",
+    "stdout_tail": " runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 21 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 22 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 23 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 24 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 25 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 26 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 27 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 28 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 29 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 30 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 31 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n\n Hillslope SUCCESSFUL simulation - returning to DOS\n\n\n WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY\n",
+    "stderr": ""
+  },
+  {
+    "root": "/wc1/runs/mo/mofe-water-replay-hourly-20261020",
+    "source": "up-pedantry native hill5",
+    "geometry": "lengths44.315/88.63/132.945m; width152.3m unchanged",
+    "binary": "wepp_261010_hill",
+    "binary_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+    "inputs": {
+      "p5.cli": "11ff6b73c73b941aed1ae1542af5281fe968ce979047398b02b48e8aca91ecb5",
+      "p5.man": "ad126c440e625364bf8c3e45abc66a786e8ef0bc12da3ed04df7370492b0fb20",
+      "p5.run": "9a4f66820ab23110087e6375f0b526f532931663bf30c8dfda7fb4c4ae8de9c6",
+      "p5.slp": "7b9ddc7e01d6d0f8993081b7764e2e9db6c49dc66ced143fbc804f8962abc4d3",
+      "p5.sol": "f3dc7556a653915021f65e646a6e3846686a29fe642812a8bd6bcfd32df6af77",
+      "pmetpara.txt": "305b7d6e7566f8a213f7b87c27c716b42b5ff5984b74a26d7f8a26739614b61e",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "wat_header": " DAILY WATER BALANCE - HOURLY SEEPAGE UPDATE FROM UI",
+    "stdout_tail": " runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 21 nov 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 22 nov 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 23 nov 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 25 nov 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 25 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 26 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 27 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 28 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 29 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 30 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n 31 dec 2024  routing runoff & erosion event on OFEs 1 to          3 of hillslope          1\n\n Hillslope SUCCESSFUL simulation - returning to DOS\n\n\n WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY\n",
+    "stderr": ""
+  }
+]

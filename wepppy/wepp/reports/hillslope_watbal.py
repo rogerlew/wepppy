@@ -38,7 +38,7 @@ class HillslopeWatbalReport(ReportBase):
     _ROADS_SEGMENT_MANIFEST_REL_PATH = Path("wepp/roads/segments/roads.segment.pass.manifest.json")
     _CACHE_KEY = "hillslope_watbal_summary"
     _CACHE_VERSION = "1"
-    _AGGREGATION_VERSION = "mofe-area-v1"
+    _AGGREGATION_VERSION = "mofe-water-v2"
     _MEASURE_MAP = OrderedDict(
         [
             ("Precipitation (mm)", "precip_mm"),

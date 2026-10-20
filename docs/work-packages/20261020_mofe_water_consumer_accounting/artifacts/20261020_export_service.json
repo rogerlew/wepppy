@@ -1,0 +1,124 @@
+[
+  {
+    "format": "csv",
+    "date": "2022-11-04",
+    "result": {
+      "artifact_id": "47718494d8504d05ab77fb3c974c9408",
+      "artifact_relpath": "export/features/artifacts/47718494d8504d05ab77fb3c974c9408/features_export.csv.zip",
+      "download_url": "/rq-engine/api/runs/mofe-water-replay-five-year-20261020/canada-wbt-mofe/export/features/job/water-replay-csv/download",
+      "cache_hit": false,
+      "source_job_id": null,
+      "manifest_relpath": "export/features/jobs/water-replay-csv/manifest.json",
+      "warnings": []
+    },
+    "packaged_rows": 1,
+    "oracle": {
+      "P": 111.79999999999998,
+      "Q": 122.4746,
+      "latqcc": 2.1700005358679637
+    },
+    "observed": [
+      {
+        "topaz_id": 41,
+        "wepp_id": 5,
+        "P_2022_11_04_mm": 111.8,
+        "Q_2022_11_04_mm": 122.4746,
+        "latqcc_2022_11_04_mm": 2.1700005359,
+        "output_scope": "baseline",
+        "omni_scenario": null,
+        "omni_contrast_id": null
+      }
+    ],
+    "sha256": "8a81ee0e543adf67feba91515fabcab1fe7ed9d46b0f0d38c94041a4ad489906"
+  },
+  {
+    "format": "parquet",
+    "date": "2022-11-04",
+    "result": {
+      "artifact_id": "df0a4903d198428c81fdc19a648ad182",
+      "artifact_relpath": "export/features/artifacts/df0a4903d198428c81fdc19a648ad182/features_export.parquet.zip",
+      "download_url": "/rq-engine/api/runs/mofe-water-replay-five-year-20261020/canada-wbt-mofe/export/features/job/water-replay-parquet/download",
+      "cache_hit": false,
+      "source_job_id": null,
+      "manifest_relpath": "export/features/jobs/water-replay-parquet/manifest.json",
+      "warnings": []
+    },
+    "packaged_rows": 1,
+    "oracle": {
+      "P": 111.79999999999998,
+      "Q": 122.4746,
+      "latqcc": 2.1700005358679637
+    },
+    "observed": [
+      {
+        "topaz_id": 41,
+        "wepp_id": 5,
+        "P_2022_11_04_mm": 111.8,
+        "Q_2022_11_04_mm": 122.4746,
+        "latqcc_2022_11_04_mm": 2.1700005359,
+        "output_scope": "baseline",
+        "omni_scenario": null,
+        "omni_contrast_id": null
+      }
+    ],
+    "sha256": "0fc8ec04f73e6238353120500edd976f29dbad918fd8b6e975c68bd191d6c37f"
+  },
+  {
+    "format": "geojson",
+    "date": "2022-11-04",
+    "result": {
+      "artifact_id": "8e8a3f49f10d48eaa50439b70c0db4da",
+      "artifact_relpath": "export/features/artifacts/8e8a3f49f10d48eaa50439b70c0db4da/features_export.geojson.zip",
+      "download_url": "/rq-engine/api/runs/mofe-water-replay-five-year-20261020/canada-wbt-mofe/export/features/job/water-replay-geojson/download",
+      "cache_hit": false,
+      "source_job_id": null,
+      "manifest_relpath": "export/features/jobs/water-replay-geojson/manifest.json",
+      "warnings": []
+    },
+    "packaged_rows": 255,
+    "oracle": {
+      "P": 111.79999999999998,
+      "Q": 122.4746,
+      "latqcc": 2.1700005358679637
+    },
+    "observed": [
+      {
+        "P_2022_11_04_mm": 111.8,
+        "Q_2022_11_04_mm": 122.4746,
+        "latqcc_2022_11_04_mm": 2.1700005359,
+        "topaz_id": 41.0,
+        "wepp_id": 5.0
+      }
+    ],
+    "sha256": "53d08a3c9179e2eb6ad66a4d895ea9dba0a88c47cda45ab43d7ed4e42a44f4be"
+  },
+  {
+    "format": "geoparquet",
+    "date": "2022-11-04",
+    "result": {
+      "artifact_id": "1c58d65dc9dc455e86af5e0bf3a56dbf",
+      "artifact_relpath": "export/features/artifacts/1c58d65dc9dc455e86af5e0bf3a56dbf/features_export.geoparquet.zip",
+      "download_url": "/rq-engine/api/runs/mofe-water-replay-five-year-20261020/canada-wbt-mofe/export/features/job/water-replay-geoparquet/download",
+      "cache_hit": false,
+      "source_job_id": null,
+      "manifest_relpath": "export/features/jobs/water-replay-geoparquet/manifest.json",
+      "warnings": []
+    },
+    "packaged_rows": 255,
+    "oracle": {
+      "P": 111.79999999999998,
+      "Q": 122.4746,
+      "latqcc": 2.1700005358679637
+    },
+    "observed": [
+      {
+        "P_2022_11_04_mm": 111.8,
+        "Q_2022_11_04_mm": 122.4746,
+        "latqcc_2022_11_04_mm": 2.1700005359,
+        "topaz_id": 41.0,
+        "wepp_id": 5.0
+      }
+    ],
+    "sha256": "6b34f75ed263975570908173bb308f5bceb33282e0ad8abe4c8da4570c69d79a"
+  }
+]

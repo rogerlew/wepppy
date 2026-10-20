@@ -773,6 +773,8 @@ def _build_mofe_chain_summary(
         "rows": int(chain_df.shape[0]),
         "days": int(first_df.shape[0]),
         "strict_chain_invariants_contract_scope": "non-channel_non-contour_only",
+        "qofe_normalization_provenance": "unverified_from_interchange; local-area QOFE assumption is not valid for current Q aliases",
+        "pass_reconciliation_interpretation": "diagnostic_only; PASS event thresholds can omit positive physical WAT runoff; discrepancies do not prove leakage",
         "strict_chain_invariants_applicable": None,
         "strict_chain_invariants_applicability": "unknown_from_interchange",
         "adjacent_chain_checks_interpretation": "diagnostic_when_applicability_unknown",

@@ -44,6 +44,7 @@ def _write_h_wat_parquet(path: Path) -> None:
                             "water_year": water_year,
                             "P": 1.0 * scale,
                             "Dp": 0.5 * scale,
+                            "Q": 0.2 * scale,
                             "QOFE": 0.2 * scale,
                             "latqcc": 0.1 * scale,
                             "Ep": 0.05 * scale,
@@ -91,12 +92,12 @@ def test_hillslope_watbal_aggregates_from_interchange(tmp_path, monkeypatch):
     assert len(avg_rows) == 2
     first = dict(avg_rows[0].row)
     assert first["TopazID"] == 101
-    assert np.isclose(first["Precipitation (mm)"], 12.0)
+    assert np.isclose(first["Precipitation (mm)"], 6.0)
 
     yearly_rows = list(report.yearly_iter())
     assert [row.row["Year"] for row in yearly_rows] == [2000, 2001]
-    assert np.isclose(yearly_rows[0].row["Lateral Flow (mm)"], 0.4)
-    assert np.isclose(yearly_rows[1].row["Surface Runoff (mm)"], 1.6)
+    assert np.isclose(yearly_rows[0].row["Lateral Flow (mm)"], 0.08)
+    assert np.isclose(yearly_rows[1].row["Surface Runoff (mm)"], 0.8)
 
 
 def test_local_ofe_weighting_then_unequal_hillslope_weighting(tmp_path):
@@ -110,7 +111,7 @@ def test_local_ofe_weighting_then_unequal_hillslope_weighting(tmp_path):
         "Area": [250., 750., 500., 1500.],
         "Ep": [1., 4., 2., 8.], "Es": [.5, 1., 1., 2.],
         "Er": [.5, 1., 1., 2.], "Dp": [4., 8., 8., 16.],
-        "P": [0.]*4, "QOFE": [0.]*4, "latqcc": [0.]*4,
+        "P": [0.]*4, "Q": [0.]*4, "QOFE": [0.]*4, "latqcc": [0.]*4,
     }).to_parquet(source,index=False)
     report = HillslopeWatbalReport(tmp_path)
     hills = [row.row for row in report.avg_annual_iter()]

@@ -100,10 +100,21 @@ Runoff before adding modeled ash replacement. Bind native IDs and dates exactly;
 missing required PASS rows/files for selected ash hills and dates actually used
 fail rather than falling back to WAT/QOFE. Never-used/empty model output retains
 the existing successful no-data outcome without requiring PASS or provenance.
-Preserve existing clipping and NaN policy after source correction.
+Preserve existing clipping after source correction. If any same-scope PASS
+contribution is NULL/NaN/nonfinite, the correction is unavailable even if the
+selected subset is finite: an unverifiable total cannot certify numeric subtraction.
+Infinite input values fail. A missing baseline date, empty supplied baseline, or
+nonpositive/nonfinite baseline area yields unavailable correction or explicit
+reconciliation failure, never numeric zero.
 
 Persisted Ash model and post artifacts require distinct numerical provenance.
-Fresh model runs record physical-WAT algorithm identity and source fingerprint;
+Fresh model runs record physical-WAT algorithm identity and a source fingerprint
+captured before the daily queries, never a later hash attached to an older frame.
+The Ash parent batch memoizes one pre-read digest by source identity; each new
+batch or standalone daily load computes a fresh digest. Metadata
+checks detect ordinary drift. A metadata-signature collision retains the pre-read
+digest; final post admission independently hashes current sources and requires
+an exact match, including when metadata alone did not expose replacement;
 fresh post runs require corrected model provenance whose WAT fingerprint matches
 the current source. Post generation must reconcile the full same-scope daily PASS runvol sum to
 the totalwatsed3 Runoff baseline used, failing on disagreement rather than
@@ -112,7 +123,7 @@ certifies the subtraction basis, not historical producer identity. Floating-poin
 comparison allows only accumulation roundoff (rtol 1e-10, atol 1e-8 m3).
 Post provenance binds actual model artifact hashes, the
 current WAT, PASS and totalwatsed3 hashes, the consumed native-to-feature
-identity/area mapping, and the post algorithm identity.
+identity/area mapping, selected subtraction native IDs, and the post algorithm identity.
 Changed dependencies make model/post results stale; unavailable dependencies
 permit only historical/unverified reading with a warning, not fresh publication.
 Old artifacts remain downloadable as historical/unverified with a visible warning;

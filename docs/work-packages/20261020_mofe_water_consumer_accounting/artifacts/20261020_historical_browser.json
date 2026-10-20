@@ -1,0 +1,12 @@
+[
+  {
+    "view": "ash",
+    "status": 200,
+    "warning": "Historical ash results: physical water accounting is unverified or stale. Regenerate the ash model to refresh these results."
+  },
+  {
+    "view": "ash_contaminant",
+    "status": 200,
+    "warning": "Historical ash results: physical water accounting is unverified or stale. Regenerate the ash model to refresh these results."
+  }
+]

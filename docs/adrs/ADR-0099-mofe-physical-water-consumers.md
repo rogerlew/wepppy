@@ -2,8 +2,10 @@
 
 ## Status
 
-Accepted operator direction on 2026-10-20; contract review and implementation
-conformance pending. No production rollout or historical regeneration authorized.
+Accepted on 2026-10-20 after operator selection and two independent contract
+reviews. Implementation conformance has focused, native and generated-artifact
+evidence; broad regression closeout is tracked in the work package. No production
+rollout or historical regeneration is authorized.
 
 ## Decision and rationale
 

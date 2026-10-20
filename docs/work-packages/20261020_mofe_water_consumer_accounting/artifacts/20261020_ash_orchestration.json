@@ -1,0 +1,27 @@
+{
+  "baseline": "constructed one-hill PASS baseline, not routed watershed",
+  "rows": 452,
+  "water_warning": null,
+  "mapping": {
+    "ash_wepp_ids": [
+      5
+    ],
+    "manifest": [
+      [
+        "ash/H5_ash.parquet",
+        41,
+        4.05,
+        3
+      ]
+    ]
+  },
+  "outputs": {
+    "hillslope_annuals.parquet": "6b24a1deef09ca52d440669518dbe3cdd4e70d667697f611b1a57e9072283d91",
+    "watershed_annuals.parquet": "8af666268574142e31b9ad0805bff67d7c139f58e34208e22d72d8604ad8b8aa",
+    "watershed_cumulatives.parquet": "cf28f15f84aa42cd953042f3be8a739dd334aa09931e35520de013e66d747454",
+    "watershed_daily.parquet": "4af069cc70a0b216fae41d921464d885143ee29d42f9e37fa1601788e42ee149",
+    "watershed_daily_by_burn_class.parquet": "70a750fb1ef5777d40ca5c6e4fc30c306c18fae57ad3bbe1506c33d2f731b2a7"
+  },
+  "schema_manifest": true,
+  "documentation": true
+}

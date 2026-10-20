@@ -27,7 +27,7 @@ Primary consumers include incident hydrologists, Burned Area Emergency Response 
 
 ### 3. Post-Processing and Documentation
 - After hillslope simulations finish, `Ash` ensures an `AshPost` controller exists and invokes `AshPost.run_post`.
-- `AshPost` removes incompatible outputs when the schema version changes (`ASHPOST_VERSION`) and requires `wepppyo3.wepp_interchange.ashpost_to_parquet`. Rust streams hillslope batches into the existing five annual, daily, burn-class, and cumulative parquet tables; Python supplies semantic metadata and persists compact return-period dictionaries. There is no Python aggregation fallback.
+- `AshPost` preserves existing outputs through input admission and native validation and requires `wepppyo3.wepp_interchange.ashpost_to_parquet`. Rust streams hillslope batches into the existing five annual, daily, burn-class, and cumulative parquet tables; Python supplies semantic metadata and persists compact return-period dictionaries. There is no Python aggregation fallback.
 - Each output uses the existing individual-file writer, following the hillslope interchange -> totalwatsed3 pattern. An ordinary failure propagates; rerunning regenerates outputs. No new multi-file transaction or recovery mechanism is involved.
 - Markdown documentation (`ash/post/README.md`) is regenerated from actual parquet schemas using `generate_ashpost_documentation`, keeping analysts aligned with the precise column definitions.
 
@@ -88,7 +88,7 @@ Watanabe static mode computes each daily transport increment as `delta_M = (A / 
 - **Code layout:** Core controllers live in `ash.py` and `ashpost.py`. Calibrations reside in `ash_multi_year_model.py` (Srivastava 2023) and `ash_multi_year_model_alex.py` (Watanabe 2025); auxiliary utilities include `wind_transport_thresholds.py`, `ashpost_versioning.py`, and `ashpost_documentation.py`.
 - **Concurrency:** Hillslope simulations parallelize through `createProcessPoolExecutor`. Set `ash.MULTIPROCESSING = False` when debugging to run serially.
 - **Calibration data:** Default parameter tables ship in `data/`, while provenance artifacts (spreadsheets, notebooks) live under `dev/`.
-- **Versioning:** Bump `ASHPOST_VERSION` alongside schema changes. `remove_incompatible_outputs` clears stale parquet files before regeneration, and `write_version_manifest` records the active version.
+- **Versioning:** Bump `ASHPOST_VERSION` alongside schema changes. `write_version_manifest` records the active version after successful publication. Numerical refresh never deletes historical artifacts before validation; explicit incompatible-schema migrations require a separate compatibility plan.
 - **Serialization:** Add new public attributes or helpers to `__all__` in `__init__.py` so legacy NoDb payloads hydrate cleanly. Use `nodb_setter` on mutating properties to persist changes.
 - **Testing:** Run `wctl run-pytest tests/nodb/mods/test_ash_transport_run_ash.py tests/nodb/mods/test_ashpost_no_data.py tests/nodb/mods/test_ash_multi_year_model_alex_static.py`. Native schema, numeric, recurrence, and writer tests live in `wepppyo3/tests/wepp_interchange/test_ashpost.py`. The module-local `tests/` directory contains historical fixture data.
 
@@ -132,3 +132,14 @@ Rebuilding post summaries alone does not correct old model inputs. Regenerate
 the model explicitly before corrected postprocessing. Missing or nonfinite
 required daily runoff is an input error, never zero transport. Implementation
 conformance to this amendment is pending.
+
+Historical water-accounting notices appear in the run control, results links,
+watershed and contaminant reports. Raw map/query payloads and direct artifact
+downloads retain their established schemas; these surfaces do not certify
+freshness. Consult the visible run/report notice and `ash/post/water_accounting.json`.
+Freshness includes full model-to-native/Topaz associations, selected PASS hills,
+source and model hashes, and every published post Parquet. WAT is fingerprinted
+before daily queries and memoized only across hills in one parent batch (fresh runs rehash),
+with metadata drift checks per load. Model proof never replaces that captured
+digest by hashing the pathname after loading. Final post admission independently
+hashes current sources, rejecting any mixed or stale generation.

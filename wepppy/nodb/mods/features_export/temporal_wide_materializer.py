@@ -782,27 +782,59 @@ def derive_water_et(frame: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def prepare_water_geometry(frame: pd.DataFrame) -> pd.DataFrame:
+    """Retain full native topology before any temporal selector or mapped join."""
+    result = frame.copy()
+    ofe = next((name for name in ("ofe_id", "OFE", "OFE (#)") if name in frame), None)
+    if "wepp_id" not in frame or ofe is None or "Area" not in frame:
+        return result  # Local-only legacy selections do not require outlet keys.
+    if frame.empty:
+        result.attrs["hwat_geometry"] = {}
+        return result
+    area = pd.to_numeric(frame["Area"], errors="coerce")
+    if (~np.isfinite(area) | (area <= 0)).any():
+        raise MaterializationContractError("H.wat Area must be finite and positive.")
+    if frame[["wepp_id", ofe]].isna().any().any():
+        raise MaterializationContractError("H.wat outlet geometry requires native IDs.")
+    groups = frame.groupby(["wepp_id", ofe])["Area"]
+    if (groups.nunique() != 1).any():
+        raise MaterializationContractError("H.wat Area must be stationary.")
+    areas = groups.first().reset_index()
+    geometry = {}
+    for native, rows in areas.groupby("wepp_id"):
+        total = rows.Area.sum()
+        if not np.isfinite(total):
+            raise MaterializationContractError("H.wat area overflow.")
+        geometry[native] = (rows[ofe].max(), total)
+    result.attrs["hwat_geometry"] = geometry
+    return result
+
+
 def _daily_water_fluxes(
     frame: pd.DataFrame, key: str, layer_id: str, mode: str,
     event_selector: NormalizedTemporalEvent | None, selected_columns: cabc.Sequence[str],
 ) -> pd.DataFrame:
-    """Reduce only local WAT fluxes; routed measures use the existing reducer."""
+    """Reduce local depths and independently selected native outlet volumes."""
     names = frame.attrs.get("hwat_columns")
     if names is None:
         if layer_id != "wepp.interchange.hill_wat":
             return pd.DataFrame()
         names = {name: name for name in frame.columns}
-    local = [names[name] for name in ("Ep", "Es", "Er", "ET", "Dp")
+    local = [names[name] for name in ("P", "RM", "Irr", "Ep", "Es", "Er", "ET", "Dp")
              if name in names and names[name] in selected_columns]
-    if not local:
+    outlets = [name for name in ("Q", "latqcc")
+               if name in names and names[name] in selected_columns]
+    if not local and not outlets:
         return pd.DataFrame()
+    geometry = frame.attrs.get("hwat_geometry")
     identity = frame.attrs.get("hwat_source_key")
     if identity is not None:
         # Left-join absence is not a malformed WAT observation. Keep the
         # geometry in the base table and leave its local metrics null.
         frame = frame.loc[frame[identity].notna()].copy()
         if frame.empty:
-            return pd.DataFrame(columns=[key, "__features_export_temporal_token__", *local])
+            return pd.DataFrame(columns=[key, "__features_export_temporal_token__", *local,
+                                         *(names[name] for name in outlets)])
     area_column = names.get("Area")
     if area_column is None or area_column not in frame:
         raise MaterializationContractError("H.wat local flux aggregation requires Area.")
@@ -843,6 +875,38 @@ def _daily_water_fluxes(
     result = grouped[local].div(grouped["__water_area__"], axis=0)
     if not np.isfinite(grouped.to_numpy()).all() or not np.isfinite(result.to_numpy()).all():
         raise MaterializationContractError("H.wat local flux aggregate overflow.")
+    if outlets:
+        ofe = next((name for name in ("ofe_id", "OFE", "OFE (#)") if name in daily_frame), None)
+        if "wepp_id" not in daily_frame or ofe is None:
+            raise MaterializationContractError("H.wat outlets require native WEPP/OFE identity.")
+        if geometry is None:
+            geometry = prepare_water_geometry(daily_frame).attrs["hwat_geometry"]
+        routing = pd.DataFrame({key: frame[key], token: water_tokens,
+                                "__water_day__": days, "native": daily_frame.wepp_id,
+                                "ofe": daily_frame[ofe], "area": area})
+        try:
+            routing["terminal"] = routing.native.map(lambda value: geometry[value][0])
+            routing["hill_area"] = routing.native.map(lambda value: geometry[value][1])
+        except KeyError as exc:
+            raise MaterializationContractError("Missing full H.wat outlet geometry.") from exc
+        native_keys = [key, token, "__water_day__", "native"]
+        if routing.duplicated([*native_keys, "ofe"]).any():
+            raise MaterializationContractError("Duplicate H.wat daily native OFE observation.")
+        selected = routing.ofe == routing.terminal
+        terminals = routing.loc[selected].copy()
+        if len(terminals) != len(routing[native_keys].drop_duplicates()):
+            raise MaterializationContractError("Missing known H.wat terminal observation.")
+        for field in outlets:
+            values = pd.to_numeric(daily_frame.loc[selected, field], errors="raise")
+            if not np.isfinite(values).all():
+                raise MaterializationContractError("Nonfinite H.wat terminal flux.")
+            terminals[names[field]] = values * terminals["hill_area" if field == "Q" else "area"]
+        totals = terminals.groupby([key, token, "__water_day__"], dropna=False)[
+            [*(names[field] for field in outlets), "hill_area"]].sum()
+        for field in outlets:
+            result[names[field]] = totals[names[field]] / totals.hill_area
+        if not np.isfinite(result.to_numpy()).all():
+            raise MaterializationContractError("H.wat outlet aggregate overflow.")
     result = result.reset_index().drop(columns="__water_day__")
     result.attrs["ordered_tokens"] = water_order
     return result

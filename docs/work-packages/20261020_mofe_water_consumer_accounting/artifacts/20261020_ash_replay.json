@@ -1,0 +1,292 @@
+{
+  "baseline": "constructed single-hill equivalent from fresh replay PASS; not a routed watershed replay",
+  "days": 1827,
+  "model_rows": 452,
+  "post_rows": 452,
+  "area_m2": 40495.05,
+  "proof": {
+    "algorithm": "mofe-water-v2",
+    "mapping": {
+      "ash_wepp_ids": [
+        5
+      ],
+      "manifest": [
+        [
+          "ash/H5_ash.parquet",
+          41,
+          4.049505,
+          3
+        ]
+      ]
+    },
+    "models": {
+      "ash/H5_ash.parquet": "3e433307984b56253200a3b0e9446fcae10858f1e81ccb5c45823060ecd93242"
+    },
+    "outputs": {
+      "hillslope_annuals.parquet": "084e03c077dd3e258cc6098acfbf3d1422c53a13aa8f5d2bee2cabcac63e37cc",
+      "watershed_annuals.parquet": "13d0d354304c8d266de31ef29e394fb63075750b4446962e6b82ffd10d778481",
+      "watershed_cumulatives.parquet": "12c0ff806a83a0bc86393eb7cd384c3af8ab537d7b943e0d57283441e3d3dfb0",
+      "watershed_daily.parquet": "a968e49dc62e88cd546458a4405bf772f3e74ed8d8794c07d48b99bdd30d150e",
+      "watershed_daily_by_burn_class.parquet": "4e5e16780f5426669c44bcc0d1149ad7671b893455173cfa6bdbd0328a438e6f"
+    },
+    "sources": {
+      "H.pass.parquet": "38ecd6ad9adfc17a9af679591f32d1d7694f78531df0235a99fc0dcbde9c52e4",
+      "H.wat.parquet": "ccd015456de99e7907a11d119c426d0d575f1374807c322feee95258f965f606",
+      "totalwatsed3.parquet": "28b6aeb9bcc65a60e016de173dc9d8cdc473cfaf9390a916a6af178550abbc7d"
+    }
+  },
+  "native_result": {
+    "input_rows": 452,
+    "rows_written": {
+      "hillslope_annuals.parquet": 1,
+      "watershed_annuals.parquet": 5,
+      "watershed_daily.parquet": 452,
+      "watershed_daily_by_burn_class.parquet": 452,
+      "watershed_cumulatives.parquet": 5
+    },
+    "return_periods": {
+      "ash_transport (tonne)": {
+        "2": {
+          "ash_transport (tonne)": 0,
+          "probability": 0,
+          "rank": 0,
+          "ri": 0
+        },
+        "5": {
+          "ash_transport (tonne)": 0,
+          "probability": 0,
+          "rank": 0,
+          "ri": 0
+        }
+      },
+      "water_transport (tonne)": {
+        "2": {
+          "probability": 0,
+          "rank": 0,
+          "ri": 0,
+          "water_transport (tonne)": 0
+        },
+        "5": {
+          "probability": 0,
+          "rank": 0,
+          "ri": 0,
+          "water_transport (tonne)": 0
+        }
+      },
+      "wind_transport (tonne)": {
+        "2": {
+          "probability": 0,
+          "rank": 0,
+          "ri": 0,
+          "wind_transport (tonne)": 0
+        },
+        "5": {
+          "probability": 0,
+          "rank": 0,
+          "ri": 0,
+          "wind_transport (tonne)": 0
+        }
+      }
+    },
+    "cum_return_periods": {
+      "cum_ash_transport (tonne)": {
+        "2": {
+          "cum_ash_transport (tonne)": 40.2936465286217,
+          "probability": 33.33333333333333,
+          "rank": 2,
+          "ri": 3.0,
+          "year0": 2021
+        },
+        "5": {
+          "cum_ash_transport (tonne)": 40.37061305146059,
+          "probability": 16.666666666666664,
+          "rank": 1,
+          "ri": 6.0,
+          "year0": 2020
+        }
+      },
+      "cum_water_transport (tonne)": {
+        "2": {
+          "cum_water_transport (tonne)": 40.2936465286217,
+          "probability": 33.33333333333333,
+          "rank": 2,
+          "ri": 3.0,
+          "year0": 2021
+        },
+        "5": {
+          "cum_water_transport (tonne)": 40.37061305146059,
+          "probability": 16.666666666666664,
+          "rank": 1,
+          "ri": 6.0,
+          "year0": 2020
+        }
+      },
+      "cum_wind_transport (tonne)": {
+        "2": {
+          "cum_wind_transport (tonne)": 0.0,
+          "probability": 50.0,
+          "rank": 3,
+          "ri": 2.0,
+          "year0": 2024
+        },
+        "5": {
+          "cum_wind_transport (tonne)": 0.0,
+          "probability": 50.0,
+          "rank": 3,
+          "ri": 2.0,
+          "year0": 2024
+        }
+      },
+      "days_from_fire (days)": {
+        "2": {
+          "days_from_fire (days)": 101,
+          "probability": 33.33333333333333,
+          "rank": 2,
+          "ri": 3.0,
+          "year0": 2023
+        },
+        "5": {
+          "days_from_fire (days)": 112,
+          "probability": 16.666666666666664,
+          "rank": 1,
+          "ri": 6.0,
+          "year0": 2022
+        }
+      }
+    },
+    "burn_class_return_periods": {
+      "1": {
+        "ash_transport (tonne)": {
+          "2": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          },
+          "5": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          }
+        },
+        "water_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          }
+        },
+        "wind_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          }
+        }
+      },
+      "2": {
+        "ash_transport (tonne)": {
+          "2": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          },
+          "5": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          }
+        },
+        "water_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          }
+        },
+        "wind_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          }
+        }
+      },
+      "3": {
+        "ash_transport (tonne)": {
+          "2": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          },
+          "5": {
+            "ash_transport (tonne)": 0.0,
+            "probability": 0,
+            "rank": 0,
+            "ri": 0
+          }
+        },
+        "water_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "water_transport (tonne)": 0.0
+          }
+        },
+        "wind_transport (tonne)": {
+          "2": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          },
+          "5": {
+            "probability": 0,
+            "rank": 0,
+            "ri": 0,
+            "wind_transport (tonne)": 0.0
+          }
+        }
+      }
+    }
+  }
+}

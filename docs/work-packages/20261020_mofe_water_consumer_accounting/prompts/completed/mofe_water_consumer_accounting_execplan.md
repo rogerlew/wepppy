@@ -7,8 +7,9 @@ must see local precipitation/losses and outlet runoff/lateral flow expressed ove
 the same hillslope area in reports, maps, exports and Ash/WATAR inputs.
 
 Execution was authorized on 2026-10-20. The prior scaffold-only restriction is
-superseded. M1 is in progress: the operator selected physical WAT runoff after paired
-source inspection; canonical amendments are undergoing independent review.
+superseded. Physical WAT runoff is ratified at checkpoint `6e689a902`.
+M1–M5 are complete; development artifact, performance and regression acceptance
+is recorded in the final validation receipt.
 The supplied workbook remains evidence, not permission to change WEPP physics,
 source schemas, calibration or annualization.
 ## Progress
@@ -19,13 +20,13 @@ source schemas, calibration or annualization.
   scaffold package, tracker, and execution plan.
 - [x] (2026-10-20 20:21 UTC) M0: scoped docs lint (5 files), relative links,
   spelling previews, receipt assertions and whitespace checks pass.
-- [ ] M1: ratify source/field semantics, compatibility and canonical amendments;
+- [x] M1: ratify source/field semantics, compatibility and canonical amendments;
   obtain two independent contract reviews and commit standalone checkpoint.
-- [ ] M2: add failing boundary tests; correct native report and daily loader.
-- [ ] M3: correct dashboard selected/base and Features Export field reductions.
-- [ ] M4: correct affected Ash/AshPost flow paths and disposition all diagnostic,
+- [x] M2: add failing boundary tests; correct native report and daily loader.
+- [x] M3: correct dashboard selected/base and Features Export field reductions.
+- [x] M4: correct affected Ash/AshPost flow paths and disposition all diagnostic,
   legacy and audit-tool findings.
-- [ ] M5: paired native release, actual-project artifact validation, performance,
+- [x] M5: paired native release, actual-project artifact validation, performance,
   focused/broad gates, independent correctness review and closeout.
 - [x] (2026-10-20) Execution authorized; base revisions and unrelated dirt recorded.
 - [x] (2026-10-20) M1 preliminary paired-source readback retained: 328,800 MOFE
@@ -33,7 +34,7 @@ source schemas, calibration or annualization.
 - [x] (2026-10-20) Independent preliminary source and compatibility reviews invoked.
 - [x] (2026-10-20) Operator selected physical WAT runoff; PASS remains AshPost
   subtraction authority. Canonical amendments and ADR-0099 prepared.
-- [ ] Independent review disposition and standalone checkpoint.
+- [x] Independent review disposition and standalone checkpoint `6e689a902`.
 ## Surprises & Discoveries
 
 The recent ET/Dp correction did not correct routed fields by design. A live
@@ -78,13 +79,18 @@ selection is now an explicit pending operator question because paired output
 shows physical WAT runoff and routed PASS runoff differ. Do not silently adopt
 PASS as a universal replacement or reconstruct its threshold from WAT Q.
 ## Outcomes & Retrospective
-Execution has reached M1 source decision preparation, not implementation.
-The original audit and native counterexample remain intact. A new reproducible
-paired-source receipt establishes the threshold distinction; preliminary reviews
-identify source, sparse-terminal and Ash freshness obligations. Canonical
-amendments and ADR-0099 now record physical WAT choice; final ratification and
-checkpoint are pending.
-M2-M5 remain unexecuted. No production files or original project outputs changed.
+Physical WAT runoff now propagates through native reports, daily loaders,
+selected/base dashboard queries, feature exports and Ash models. AshPost
+subtracts the corresponding PASS contribution, with separate model/post lineage.
+Both independent final reviewers closed all high/medium findings. Native and
+focused Python gates, actual replay Parquet/export/Ash readbacks and live
+HTML/CSV/query/download checks pass. Complete cold-report timing meets the
+single-OFE budget; the documented MOFE cold regression preserves fast cache hits.
+The resumed broad gate passed 10,703 tests (126 skipped), supplementing the
+previously passed disturbed matrices and final 33-test provenance run. Package
+execution is complete; production deployment was not performed.
+The six-year replay SIGFPE and missing contour runtime certification remain
+explicit scientific evidence limits, not consumer fallback permissions.
 ## Context and Orientation
 
 WEPPpy root is `/workdir/wepppy`; native Rust is `/workdir/wepppyo3`; model
@@ -279,3 +285,26 @@ before canonical amendments, ratification and checkpoint. M2-M5 remain pending.
 
 2026-10-20 revision: physical WAT source choice approved; review findings refine
 selected-field validation, source freshness, no-data states and legacy admission.
+
+2026-10-20 implementation progress: M1 ratified in `6e689a902` (upstream schema
+exception `04f1c4d26`). M2–M4 implementation is undergoing independent review;
+M5 remains active. Targeted consumer/Ash/SQL suites and 987 frontend tests passed.
+Review fixes address duplicate native days, uncertifiable PASS totals, historical
+refresh admission and complete Ash mapping/source identity. Six-year isolated
+H5 replay encountered evap.for SIGFPE in 2025; bounded five-year daily and hourly
+replays completed, pending serialized consumer readback. This is a fixture/model
+limitation, not evidence of consumer acceptance or authorization to alter physics.
+
+2026-10-20 late validation: pre-read WAT fingerprints are reused only inside an
+explicit Ash batch. The broad gate exposed same-tick metadata ambiguity; focused
+collision/recovery tests and independent review close the resulting provenance
+finding. Final native release is 54d0867, paired hash 60b8da3c77aa8465e262b8978ac173ba681d14745de7aec74392db9308c5c5eb.
+Final performance, browser, export, actual Ash facade and review receipts live in
+artifacts/20261020_validation.md and its sibling JSON receipts. The broad suite
+resumes after retaining passed expensive disturbed matrices; see that receipt for
+exact coverage and environment correction.
+
+Final revision: M5 complete. Final independent reviews close every high/medium
+finding; stubtest and docs gates pass. Full broad-gate history and combined
+coverage are retained in artifacts/20261020_validation.md. The plan is archived
+with original projects untouched and explicit scientific evidence limitations.

@@ -167,6 +167,9 @@ class AshModel:
         # Create an empty list to store DataFrames
         dfs = []
 
+        from .water_provenance import model_input_proof, write_model_proof
+        water_proof = model_input_proof(hill_wat_df)
+
         years = hill_wat_df['year'].to_numpy(dtype=np.int32, copy=False)
         months = hill_wat_df['month'].to_numpy(dtype=np.int16, copy=False)
         days = hill_wat_df['day_of_month'].to_numpy(dtype=np.int16, copy=False)
@@ -212,6 +215,7 @@ class AshModel:
 
         out_fn = _join(out_dir, f'{prefix}_ash.parquet')
         all_dfs.to_parquet(out_fn)
+        write_model_proof(out_fn, water_proof)
 
         return out_fn
 

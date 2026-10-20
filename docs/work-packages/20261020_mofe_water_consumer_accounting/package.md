@@ -1,9 +1,9 @@
 # MOFE Water Consumer Accounting
 
-**Status**: Execution authorized; M1 contracts reviewed; implementation pending.
+**Status**: Complete (2026-10-20); development acceptance validated.
 **Started**: 2026-10-20 20:15 UTC.
 **Owner**: WEPPpy/wepppyo3 maintainers; requesting operator.
-**Plan**: [ExecPlan](prompts/active/mofe_water_consumer_accounting_execplan.md).
+**Plan**: [ExecPlan](prompts/completed/mofe_water_consumer_accounting_execplan.md).
 **Tracking**: [Tracker](tracker.md).
 
 ## Purpose
@@ -18,8 +18,9 @@ The operator requested execution on 2026-10-20, superseding the prior scaffold
 instruction. M1 paired-source investigation found that physical WAT runoff and
 PASS-exported runoff differ because of model event thresholds. The operator selected physical WAT runoff; see the
 [contract preparation](artifacts/20261020_contract_decision.md).
-Canonical amendments and ADR-0099 passed two independent reviews. Production
-code, native releases, deployments and existing project outputs remain unchanged.
+Canonical amendments and ADR-0099 passed two independent reviews. Implementation and the paired native release now pass generated-output and
+browser validation. Production deployments and original project outputs remain
+unchanged.
 
 ## Evidence and scope
 
@@ -120,10 +121,13 @@ aggregation framework, unrelated GeoJSON-envelope repair or wholesale legacy R
 deletion. If provenance cannot resolve a field, document that blocker instead
 of inventing a fallback that hides an unknown normalization.
 
-**Security impact**: none for this scaffold; provisionally low for future
-cross-file source selection and cache changes. Re-triage actual implementation;
-a dedicated security artifact is required if impact becomes high. Independent
+**Security impact**: low; existing authenticated routes, contained native paths,
+publication permissions and output schemas remain intact. No new process,
+service, dependency, privilege or deployment topology. Independent
 correctness review and artifact readback are mandatory for execution closeout.
 
-**Highest claim**: M1 source investigation with retained paired-output evidence.
-This package is not implemented; contract ratification remains pending.
+**Highest claim**: implemented physical WAT accounting with reviewed contracts,
+focused and broad regressions plus actual generated/browser/export readback.
+Report performance and independent review are complete. See the
+[validation receipt](artifacts/20261020_validation.md) for combined gate coverage
+and retained scientific limits. No production rollout.

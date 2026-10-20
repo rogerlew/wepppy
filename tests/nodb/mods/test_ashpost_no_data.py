@@ -27,7 +27,6 @@ def test_run_post_treats_no_data_as_success_and_updates_catalog(
         yield ashpost
 
     ashpost.locked = noop_lock
-    monkeypatch.setattr(ashpost_module, "remove_incompatible_outputs", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(ashpost_module, "watershed_daily_aggregated", lambda *_args, **_kwargs: None)
 
     def fail_if_called(*_args, **_kwargs) -> None:
@@ -77,11 +76,14 @@ def test_native_manifest_preserves_watershed_order_and_independent_ash_ids(monke
                     cum_return_periods={'cum':{}},burn_class_return_periods={})
     monkeypatch.setattr(ashpost_module,'require_wepppyo3_interchange',
         lambda *args: SimpleNamespace(ashpost_to_parquet=native))
+    from wepppy.nodb.mods.ash_transport import water_provenance
+    monkeypatch.setattr(water_provenance, 'post_inputs', lambda *args: {})
+    monkeypatch.setattr(water_provenance, 'publish_post_proof', lambda *args: None)
     result = ashpost_module.watershed_daily_aggregated(str(tmp_path),recurrence=[2])
     args, kwargs = calls[0]
     assert args[2] == [('ash/H2_ash.parquet',22,2.,2),('ash/H1_ash.parquet',11,1.,1)]
     assert kwargs['ash_wepp_ids'] == [2,3]
-    assert kwargs['hydrology_path'] is None and kwargs['wat_path'] is None
+    assert kwargs['hydrology_path'] is None and kwargs['pass_path'] is None
     assert kwargs['field_metadata']['wind_transport (tonne)']['units'] == 'tonne'
     assert result == ({'daily':{}},{'cum':{}},{})
 
@@ -93,6 +95,9 @@ def test_native_failure_does_not_publish_metadata_or_catalog(monkeypatch, tmp_pa
     def lock():
         yield
     ashpost.locked = lock
+    output = tmp_path/'ash/post/watershed_daily.parquet'
+    output.parent.mkdir(parents=True)
+    output.write_bytes(b'historical unversioned output')
     def fail(*args, **kwargs):
         raise ValueError('invalid native input')
     def unexpected(*args, **kwargs):
@@ -103,3 +108,4 @@ def test_native_failure_does_not_publish_metadata_or_catalog(monkeypatch, tmp_pa
     monkeypatch.setattr(ashpost_module,'update_catalog_entry',unexpected)
     with pytest.raises(ValueError,match='invalid native input'):
         ashpost.run_post()
+    assert output.read_bytes() == b'historical unversioned output'

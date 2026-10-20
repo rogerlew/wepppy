@@ -282,6 +282,10 @@ calc_watbal <- function(link){
     dplyr::mutate_if(is.character,as.numeric)
   
   
+  if (length(unique(a$OFE)) > 1L) {
+    stop("Legacy calc_watbal does not support MOFE closure; use the physical hillslope water report.")
+  }
+
   a <- a %>%  dplyr::mutate(wb = P-Q-Ep - Es- Er - Dp - latqcc +
                               dplyr::lag(Total_Soil_Water) - Total_Soil_Water +
                               dplyr::lag(frozwt) - frozwt+ dplyr::lag(Snow_Water) - Snow_Water) %>%

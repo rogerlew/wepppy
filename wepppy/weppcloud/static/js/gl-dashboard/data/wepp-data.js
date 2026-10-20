@@ -63,10 +63,9 @@ export function createWeppDataManager({
   const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_Saturation', 'event_peakro', 'event_tdet'];
   const WEPP_CHANNEL_MODES = ['channel_discharge_volume', 'channel_soil_loss'];
 
-  function eventEtExpression() {
+  function eventLocalExpression(components) {
     // Local OFE depths become one daily hillslope depth. Invalid data stays
     // unavailable through the map/range consumers instead of becoming zero.
-    const components = ['Ep', 'Es', 'Er'];
     const depth = components.map((c) =>
       `(CASE WHEN isnan(wat.${c}) THEN 0 ELSE COALESCE(wat.${c}, 0) END)`
     ).join(' + ');
@@ -74,6 +73,21 @@ export function createWeppDataManager({
     const area = 'SUM(wat.Area)';
     const infinite = components.map((c) => `isinf(wat.${c})`).join(' OR ');
     return `CASE WHEN COUNT(*) FILTER (WHERE wat.Area IS NULL OR NOT isfinite(wat.Area) OR wat.Area <= 0 OR ${infinite}) > 0 OR NOT isfinite(${volume}) OR NOT isfinite(${area}) THEN NULL ELSE ${volume} / NULLIF(${area}, 0) END`;
+  }
+
+  function eventRunoffExpression() {
+    // Query Engine binds dataset 0 as this in-memory relation. Correlated
+    // topology reads precede WHERE date filtering and never open a file path.
+    const source = '"__wepp_source_0"';
+    const terminal = `(SELECT MAX(t.ofe_id) FROM ${source} t WHERE t.wepp_id = wat.wepp_id)`;
+    const area = `(SELECT CASE WHEN BOOL_OR(g.invalid) THEN NULL ELSE SUM(g.area) END FROM (SELECT ofe_id, MIN(Area) AS area, COUNT(DISTINCT Area) != 1 OR BOOL_OR(Area IS NULL OR NOT isfinite(Area) OR Area <= 0) AS invalid FROM ${source} WHERE wepp_id = wat.wepp_id GROUP BY ofe_id) g)`;
+    const isTerminal = `wat.ofe_id = ${terminal}`;
+    const volume = `SUM(CASE WHEN ${isTerminal} THEN wat.Q * ${area} ELSE 0 END)`;
+    const denominator = `SUM(CASE WHEN ${isTerminal} THEN ${area} ELSE 0 END)`;
+    const terminalCount = `(SELECT COUNT(*) FROM ${source} d WHERE d.wepp_id = wat.wepp_id AND d.year = wat.year AND d.month = wat.month AND d.day_of_month = wat.day_of_month AND d.ofe_id = ${terminal})`;
+    const missing = `BOOL_OR(${terminalCount} != 1)`;
+    const invalid = `COUNT(*) FILTER (WHERE ${area} IS NULL OR (${isTerminal} AND (wat.Q IS NULL OR NOT isfinite(wat.Q)))) > 0`;
+    return `CASE WHEN ${missing} OR ${invalid} OR NOT isfinite(${volume}) OR NOT isfinite(${denominator}) THEN NULL ELSE ${volume} / NULLIF(${denominator}, 0) END`;
   }
 
   function buildStatExpression(stat, expr) {
@@ -563,7 +577,7 @@ export function createWeppDataManager({
       let max = -Infinity;
       for (const key of Object.keys(summary)) {
         const row = summary[key];
-        if (mode === 'event_ET' && row[mode] == null) continue;
+        if (['event_P', 'event_Q', 'event_ET'].includes(mode) && row[mode] == null) continue;
         const v = Number(row[mode]);
         if (Number.isFinite(v)) {
           if (v < min) min = v;
@@ -601,7 +615,7 @@ export function createWeppDataManager({
         const scenarioRow = state.weppEventSummary[topazId];
         const baseRow = state.baseSummaryCache.weppEvent[topazId];
         if (!scenarioRow || !baseRow) continue;
-        if (mode === 'event_ET' && (scenarioRow[mode] == null || baseRow[mode] == null)) continue;
+        if (['event_P', 'event_Q', 'event_ET'].includes(mode) && (scenarioRow[mode] == null || baseRow[mode] == null)) continue;
         const scenarioValue = Number(scenarioRow[mode]);
         const baseValue = Number(baseRow[mode]);
         if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
@@ -610,7 +624,7 @@ export function createWeppDataManager({
       const range = computeRobustRange(diffs);
       if (range) {
         nextDiffRanges[mode] = range;
-      } else if (mode === 'event_ET') {
+      } else if (['event_P', 'event_Q', 'event_ET'].includes(mode)) {
         delete nextDiffRanges[mode];
       }
     }
@@ -640,11 +654,10 @@ export function createWeppDataManager({
 
       if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
         const parquetPath = WEPP_EVENT_WAT_PATH;
-        const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
-            ? eventEtExpression()
-            : `SUM(wat.${watColumn})`;
+            ? eventLocalExpression(['Ep', 'Es', 'Er'])
+            : mode === 'event_P' ? eventLocalExpression(['P']) : eventRunoffExpression();
         filters = [
           { column: 'wat.year', op: '=', value: year },
           { column: 'wat.month', op: '=', value: month },
@@ -770,11 +783,10 @@ export function createWeppDataManager({
 
       if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
         const parquetPath = WEPP_EVENT_WAT_PATH;
-        const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
-            ? eventEtExpression()
-            : `SUM(wat.${watColumn})`;
+            ? eventLocalExpression(['Ep', 'Es', 'Er'])
+            : mode === 'event_P' ? eventLocalExpression(['P']) : eventRunoffExpression();
         const filters = [
           { column: 'wat.year', op: '=', value: year },
           { column: 'wat.month', op: '=', value: month },

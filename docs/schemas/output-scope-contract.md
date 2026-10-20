@@ -213,7 +213,9 @@ on normal write failure; process termination or unlink failure can leave residue
 AshPost memory optimization follows the existing hillslope interchange ->
 totalwatsed3 pattern: produce complete files individually using established
 writer behavior, then aggregate completed inputs. Preserve filenames, schemas,
-scientific results, normal error propagation, and regeneration on retry.
+scientific results except the explicit physical-WAT/PASS subtraction correction
+in the [water aggregation contract](hillslope-water-aggregation-contract.md),
+normal error propagation, and regeneration on retry.
 No new multi-file transaction, all-five staging barrier, rollback/recovery
 system, generation layout, migration, or NFS-specific publication mechanism is
 required. The operator confirmed this scope on 2026-09-08 because the established

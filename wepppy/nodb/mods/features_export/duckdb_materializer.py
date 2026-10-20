@@ -88,6 +88,7 @@ def materialize_layer_attributes(
     water_columns = ({name: name for name in merged.columns}
                      if _source_id in water_source_ids else None)
     water_identity = merged.attrs.get("hwat_source_key")
+    water_geometry = merged.attrs.get("hwat_geometry")
     merged = merged.copy()
     unit_mapping: dict[str, str] = {}
     for column_name, display_unit in source_units.items():
@@ -110,6 +111,7 @@ def materialize_layer_attributes(
             used_names.add(renamed)
 
         if source_id in water_source_ids:
+            water_geometry = right.attrs.get("hwat_geometry")
             water_columns = {name: rename_map.get(name, name) for name in right.columns}
             source_identity = right.attrs["hwat_source_key"]
             water_identity = rename_map.get(source_identity, source_identity)
@@ -150,6 +152,8 @@ def materialize_layer_attributes(
     if water_columns is not None:
         merged.attrs["hwat_columns"] = water_columns
         merged.attrs["hwat_source_key"] = water_identity
+        if water_geometry is not None:
+            merged.attrs["hwat_geometry"] = water_geometry
     return merged, unit_mapping
 
 

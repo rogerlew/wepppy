@@ -179,3 +179,14 @@ project's observation and area; simulated sources remain scenario-owned. Reads
 are capped at 16 MiB and 100,000 rows with explicit rejection, never truncation.
 No model-fit computation or query-catalog refresh is required. Reload after
 uploads change. No run files are written by this feature.
+
+## Physical MOFE event water
+
+Selected and comparison event P/ET use local OFE area weighting. Event Q selects
+the known terminal OFE separately for each native hill, then combines volumes
+and full native footprints after feature mapping. Full-source topology is read
+before date filtering. Missing/duplicate terminals or invalid geometry/fluxes
+remain unavailable through ranges, differences, colors and tooltips. The emitted
+payload uses Query Engine dataset0's bound relation for topology subqueries;
+`test_gl_dashboard_et_sql.py` executes both builders' SQL against real DuckDB.
+See the [water aggregation contract](../../../../../docs/schemas/hillslope-water-aggregation-contract.md).

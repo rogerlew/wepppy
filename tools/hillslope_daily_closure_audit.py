@@ -1042,6 +1042,7 @@ def build_summary(
             n_ofe_max = int(np.nanmax(n_ofe_vals))
 
     return {
+        "water_source_interpretation": "PASS-exported runoff; event filtering can differ from physical terminal WAT Q. Q/QOFE diagnostics do not certify physical outlet closure.",
         "source": str(source_path),
         "wepp_id": int(wepp_id),
         "topaz_id": None if topaz_id is None else int(topaz_id),

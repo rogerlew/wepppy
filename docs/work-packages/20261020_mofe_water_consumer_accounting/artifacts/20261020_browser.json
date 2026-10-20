@@ -1,0 +1,218 @@
+{
+  "reportStatus": 200,
+  "csvStatus": 200,
+  "browseStatus": 200,
+  "reportRows": [
+    [
+      41,
+      2409.56,
+      17.51143053774463,
+      1391.3942163156,
+      389.95709629744863,
+      566.8043252604948
+    ]
+  ],
+  "downloads": [
+    {
+      "run": "mofe-water-replay-five-year-20261020",
+      "relpath": "wepp/reports/cache/hillslope_watbal_summary.parquet",
+      "status": 200,
+      "sha256": "a2fc410131ff0db62c5fb98cf4223c4f1bcf94c5373e0ad6a19592b0448db0a6"
+    },
+    {
+      "run": "mofe-water-replay-five-year-20261020",
+      "relpath": "export/features/artifacts/47718494d8504d05ab77fb3c974c9408/features_export.csv.zip",
+      "status": 200,
+      "sha256": "8a81ee0e543adf67feba91515fabcab1fe7ed9d46b0f0d38c94041a4ad489906"
+    },
+    {
+      "run": "mofe-water-replay-five-year-20261020",
+      "relpath": "export/features/artifacts/df0a4903d198428c81fdc19a648ad182/features_export.parquet.zip",
+      "status": 200,
+      "sha256": "0fc8ec04f73e6238353120500edd976f29dbad918fd8b6e975c68bd191d6c37f"
+    },
+    {
+      "run": "mofe-water-replay-five-year-20261020",
+      "relpath": "export/features/artifacts/8e8a3f49f10d48eaa50439b70c0db4da/features_export.geojson.zip",
+      "status": 200,
+      "sha256": "53d08a3c9179e2eb6ad66a4d895ea9dba0a88c47cda45ab43d7ed4e42a44f4be"
+    },
+    {
+      "run": "mofe-water-replay-five-year-20261020",
+      "relpath": "export/features/artifacts/1c58d65dc9dc455e86af5e0bf3a56dbf/features_export.geoparquet.zip",
+      "status": 200,
+      "sha256": "6b34f75ed263975570908173bb308f5bceb33282e0ad8abe4c8da4570c69d79a"
+    }
+  ],
+  "events": {
+    "event_P": {
+      "refreshed": true,
+      "state": {
+        "weppEventSelectedDate": "2022-11-04",
+        "comparisonMode": true,
+        "currentScenarioPath": "validation",
+        "baseSummaryCache": {
+          "weppEvent": {
+            "41": {
+              "event_P": 111.79999999999998
+            }
+          }
+        },
+        "weppEventSummary": {
+          "41": {
+            "event_P": 111.79999999999998
+          }
+        },
+        "weppEventRanges": {
+          "event_P": {
+            "min": 111.79999999999998,
+            "max": 111.80099999999999
+          },
+          "event_Q": {
+            "min": 0,
+            "max": 1
+          },
+          "event_ET": {
+            "min": 0,
+            "max": 1
+          },
+          "event_Saturation": {
+            "min": 0,
+            "max": 100
+          },
+          "event_peakro": {
+            "min": 0,
+            "max": 1
+          },
+          "event_tdet": {
+            "min": 0,
+            "max": 1
+          }
+        },
+        "comparisonDiffRanges": {
+          "event_P": {
+            "min": 0,
+            "max": 0,
+            "p5": 0,
+            "p95": 0
+          }
+        }
+      }
+    },
+    "event_Q": {
+      "refreshed": true,
+      "state": {
+        "weppEventSelectedDate": "2022-11-04",
+        "comparisonMode": true,
+        "currentScenarioPath": "validation",
+        "baseSummaryCache": {
+          "weppEvent": {
+            "41": {
+              "event_Q": 122.4746
+            }
+          }
+        },
+        "weppEventSummary": {
+          "41": {
+            "event_Q": 122.4746
+          }
+        },
+        "weppEventRanges": {
+          "event_P": {
+            "min": 0,
+            "max": 1
+          },
+          "event_Q": {
+            "min": 122.4746,
+            "max": 122.4756
+          },
+          "event_ET": {
+            "min": 0,
+            "max": 1
+          },
+          "event_Saturation": {
+            "min": 0,
+            "max": 100
+          },
+          "event_peakro": {
+            "min": 0,
+            "max": 1
+          },
+          "event_tdet": {
+            "min": 0,
+            "max": 1
+          }
+        },
+        "comparisonDiffRanges": {
+          "event_Q": {
+            "min": 0,
+            "max": 0,
+            "p5": 0,
+            "p95": 0
+          }
+        }
+      }
+    },
+    "event_ET": {
+      "refreshed": true,
+      "state": {
+        "weppEventSelectedDate": "2022-11-04",
+        "comparisonMode": true,
+        "currentScenarioPath": "validation",
+        "baseSummaryCache": {
+          "weppEvent": {
+            "41": {
+              "event_ET": 1.6099999999999997
+            }
+          }
+        },
+        "weppEventSummary": {
+          "41": {
+            "event_ET": 1.6099999999999997
+          }
+        },
+        "weppEventRanges": {
+          "event_P": {
+            "min": 0,
+            "max": 1
+          },
+          "event_Q": {
+            "min": 0,
+            "max": 1
+          },
+          "event_ET": {
+            "min": 1.6099999999999997,
+            "max": 1.6109999999999995
+          },
+          "event_Saturation": {
+            "min": 0,
+            "max": 100
+          },
+          "event_peakro": {
+            "min": 0,
+            "max": 1
+          },
+          "event_tdet": {
+            "min": 0,
+            "max": 1
+          }
+        },
+        "comparisonDiffRanges": {
+          "event_ET": {
+            "min": 0,
+            "max": 0,
+            "p5": 0,
+            "p95": 0
+          }
+        }
+      }
+    }
+  },
+  "oracle": {
+    "event_P": 111.79999999999998,
+    "event_Q": 122.4746,
+    "event_ET": 1.6099999999999997
+  },
+  "annual_divisor": 5,
+  "native_sha256": "60b8da3c77aa8465e262b8978ac173ba681d14745de7aec74392db9308c5c5eb"
+}

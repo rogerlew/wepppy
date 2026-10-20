@@ -550,7 +550,7 @@ export function createLayerUtils({
   }
 
   function weppEventValue(mode, row) {
-    if (!row || (mode === 'event_ET' && row[mode] == null)) return null;
+    if (!row || (['event_P', 'event_Q', 'event_ET'].includes(mode) && row[mode] == null)) return null;
     const v = Number(row[mode]);
     return Number.isFinite(v) ? v : null;
   }
@@ -698,7 +698,7 @@ export function createLayerUtils({
 
   function weppEventFillColor(mode, row) {
     const state = getState();
-    if (!row || (mode === 'event_ET' && row[mode] == null)) return [128, 128, 128, 200];
+    if (!row || (['event_P', 'event_Q', 'event_ET'].includes(mode) && row[mode] == null)) return [128, 128, 128, 200];
     const value = Number(row[mode]);
     if (!Number.isFinite(value)) return [128, 128, 128, 200];
     const range = state.weppEventRanges[mode] || { min: 0, max: 1 };
@@ -1516,7 +1516,7 @@ export function createLayerUtils({
           label = `Precipitation: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
         } else if (weppEventOverlay.mode === 'event_Q') {
           label = `Runoff: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        } else if (weppEventOverlay.mode === 'event_ET') {
+        } else if (['event_P', 'event_Q', 'event_ET'].includes(weppEventOverlay.mode)) {
           label = `Total ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
         } else if (weppEventOverlay.mode === 'event_Saturation') {
           label = `Saturation: ${typeof val === 'number' ? val.toFixed(2) : val}%`;

@@ -61,6 +61,13 @@ def materialize_carrier_layer_core(
             "No source tables were available for carrier layer materialization.",
             details=f"layer={layer.layer_id!r}; output_layer_id={layer.output_layer_id!r}",
         )
+    from .temporal_wide_materializer import prepare_water_geometry
+
+    discovered_sources = tuple(
+        replace(source, dataframe=prepare_water_geometry(source.dataframe))
+        if source.source_id in {"wepp_hill_wat", "ag_fields_hill_wat"} else source
+        for source in discovered_sources
+    )
     discovered_sources = _apply_temporal_selector_filtering(
         layer=layer,
         request_plan=request_plan,

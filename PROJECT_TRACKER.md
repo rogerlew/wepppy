@@ -1578,6 +1578,14 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### MOFE water consumer accounting
+
+**Status**: Complete (2026-10-20).
+**Link**: [Work package](docs/work-packages/20261020_mofe_water_consumer_accounting/package.md) | [Validation](docs/work-packages/20261020_mofe_water_consumer_accounting/artifacts/20261020_validation.md)
+**Delivered**: Physical terminal WAT runoff, local precipitation and outlet lateral accounting across reports, maps, loaders, exports and Ash; PASS-based AshPost subtraction with verified model/post provenance. Paired native release, generated/browser artifacts, performance and independent reviews complete.
+**Validation**: Resumed broad suite 10,703 passed/126 skipped plus previously passed disturbed matrices; final provenance suite 33 passed. Scientific and timing limits retained; no production rollout.
+
+
 ### MOFE ET and deep-percolation area weighting
 
 **Status**: Closed 2026-10-20; M0-M5 implemented and validated in development.

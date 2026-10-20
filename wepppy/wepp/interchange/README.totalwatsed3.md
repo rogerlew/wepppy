@@ -108,3 +108,14 @@ This mirrors the physics in WEPP: the numerator reconstructs the actual cubic me
 - Summing those volumes and dividing by the aggregated `runvol` (m³) cancels the units, giving m³ m⁻³, matching the physical definition of volumetric concentration.
 
 Consequently `sed_vol_conc` is a direct, unit-consistent translation of the WEPP physics into the aggregated daily dataset, with specific-gravity metadata baked in so per-class volumetric columns can be added without re-litigating the derivation.
+
+## Physical runoff versus diagnostics
+
+Named `Runoff` retains threshold-filtered PASS volume over watershed area.
+Raw `Q` and `QOFE` columns retain their all-OFE local-area volume sums and are
+explicitly labeled internal/version-sensitive diagnostics; neither certifies
+physical hillslope outlet runoff or whole-system closure. Physical WAT consumers
+use terminal Q separately. Sparse-day TotalWatSed lateral behavior remains a
+legacy limitation. AshPost subtracts the PASS contribution already present in
+this baseline before adding modeled ash runoff; it verifies numerical agreement
+and source/model provenance before publishing corrected results.

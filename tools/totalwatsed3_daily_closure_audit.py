@@ -529,6 +529,7 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
     top_runoff = audit.iloc[int(np.argmax(audit["audit_runoff_reported_mm"].to_numpy(dtype=np.float64, copy=False)))]
 
     return {
+        "water_source_interpretation": "PASS-exported runoff; event filtering can differ from physical terminal WAT Q. Q/QOFE diagnostics do not certify physical outlet closure.",
         "source": str(source_path),
         "rows": int(audit.shape[0]),
         "date_min": {

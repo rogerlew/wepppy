@@ -173,7 +173,7 @@ for the spatial formula.
 
 ### Cache migration and CSV
 
-The paired native writer marks summaries `mofe-area-v1`. With source and mapping
+The paired native writer marks summaries `mofe-water-v2`. With source and mapping
 available, the next report request rebuilds an older summary even when its input
 hashes match. Unavailable historical dependencies retain the existing
 `historical_unverified` policy; those retained rows are not certified corrected.
@@ -184,3 +184,8 @@ The CSV request (`avg_annual_watbal/?format=csv`) uses the same annual
 iterator/header as HTML, including its existing annual divisor. Both requests
 validate or build the summary. Direct project-browse downloads of cached
 Parquet do not trigger validation or rebuilding.
+
+Physical MOFE water accounting uses area-weighted local precipitation, ET and
+percolation, terminal WAT Q, and terminal lateral volume divided by the complete
+native hillslope footprint. Raw QOFE remains a producer-version diagnostic.
+Missing or duplicated terminal days fail before replacing a report cache.

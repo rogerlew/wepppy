@@ -3,6 +3,11 @@
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set description %}
+{% set water_warning = ash.water_accounting_warning %}
+{% if water_warning %}
+<p role="status" class="wc-status-warning">{{ water_warning }}</p>
+{% endif %}
+
   <p class="wc-text-muted">
     Run the Wildfire Ash Transport And Risk (WATAR) workflow to simulate hillslope ash depletion,
     transport, and watershed summaries. Run WEPP first so hydrologic inputs are available.

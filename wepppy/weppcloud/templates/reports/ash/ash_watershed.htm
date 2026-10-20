@@ -1,6 +1,10 @@
 {% extends "reports/_base_report.htm" %}
 {% block report_title %}Ash Transport Model (Experimental){% endblock %}
 {% block report_content %}
+{% set water_warning = ash.water_accounting_warning %}
+{% if water_warning %}
+<p role="status" class="wc-status-warning">{{ water_warning }}</p>
+{% endif %}
 {% if burn_class_summary is mapping %}
   {% set _burn_summary = burn_class_summary %}
 {% else %}

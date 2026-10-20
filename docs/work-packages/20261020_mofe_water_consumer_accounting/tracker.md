@@ -2,10 +2,10 @@
 
 ## Status
 - Started: 2026-10-20 20:15 UTC.
-- Phase: M1 source decision preparation; implementation not started.
+- Phase: M1–M5 complete; development acceptance validated.
 - Authority: operator requested execution on 2026-10-20, superseding scaffold-only scope.
-- Plan: [Active ExecPlan](prompts/active/mofe_water_consumer_accounting_execplan.md).
-- Highest claim: paired-source investigation; physical WAT selected; checkpoint review pending.
+- Plan: [Completed ExecPlan](prompts/completed/mofe_water_consumer_accounting_execplan.md).
+- Highest claim: physical WAT contract ratified at checkpoint `6e689a902`; implementation, artifact, performance and combined regression gates pass.
 ## Task board
 
 - [x] Inspect workbook formulas, dates, area basis and missing records.
@@ -13,12 +13,12 @@
 - [x] Retain workbook hash and actual native counterexample receipt.
 - [x] Scaffold package and executable plan; register on project board.
 - [x] Validate scaffold docs, links, spelling and whitespace before handoff.
-- [ ] M1: resolve runoff provenance/field matrix, current contract amendments,
+- [x] M1: resolve runoff provenance/field matrix, current contract amendments,
   ADR, independent reviews and standalone ancestor checkpoint.
-- [ ] M2: native report and daily-loader fixes with failing boundary tests.
-- [ ] M3: dashboard selected/base and Features Export corrections.
-- [ ] M4: Ash/AshPost reconciliation, legacy/diagnostic/tool dispositions.
-- [ ] M5: release pairing, actual-project artifact readback, gates and closeout.
+- [x] M2: native report and daily-loader fixes with failing boundary tests.
+- [x] M3: dashboard selected/base and Features Export corrections.
+- [x] M4: Ash/AshPost reconciliation, legacy/diagnostic/tool dispositions.
+- [x] M5: release pairing, actual-project artifact readback, gates and closeout.
 
 ## Findings and dependencies
 
@@ -78,3 +78,48 @@ prepared; independent review findings addressed, final approval pending.
 
 2026-10-20 20:45 UTC: Both independent reviewers approve current amendments;
 all medium/high checkpoint findings resolved. Standalone commit follows.
+
+2026-10-20 execution update: checkpoint `6e689a902` follows both independent
+approvals; upstream schema exception is `wepp-forest` commit `04f1c4d26`.
+Native/report, daily loader, dashboard, export and Ash changes are implemented.
+Targeted Python suites passed (46 consumer tests, 21 Ash tests, 8 emitted-SQL
+tests); frontend passed 987 tests. Correctness review identified duplicate
+observation, unavailable PASS reconciliation, historical preservation and
+mapping/source provenance gaps; fixes are under regression validation.
+The isolated unequal-length H5 six-year replay failed in evap.for in 2025;
+five-year bounded daily and hourly-presence replays completed. No original run
+or production deployment was modified. Artifact readback, native release pairing,
+performance and broad gates remain pending; completion is not claimed.
+
+2026-10-20 21:15 UTC: Both final independent reviews close all high/medium
+findings. Native 163, crate 107+17, expanded Python 230, paired/cache/archive 79,
+Ash/tool follow-up 32 and frontend 987 tests passed. Live report/CSV/browse and
+five artifact downloads pass; selected/base P/Q/ET agree with raw replay oracle.
+Actual export service passed four formats on a nonzero wet day. The actual Ash
+model/post check uses an explicitly constructed one-hill PASS baseline, not
+routed watershed acceptance. Broad gate and complete cold-report target remain
+active. Development web workers were gracefully reloaded after paired preflight;
+no production process was changed.
+
+2026-10-20 final release validation: native `54d0867` and SHA256
+`60b8da3c77aa8465e262b8978ac173ba681d14745de7aec74392db9308c5c5eb`
+are paired in startup/image pins. Complete report rebuild meets the single-OFE
+budget at 1.88s, with settled means 12.67ms (single)/14.23ms (MOFE). Actual
+`AshPost.run_post` facade persistence/catalog/documentation checks pass.
+The broad gate's first run stopped on its old SHA assertion after 506 passes;
+the assertion was updated and the repeated gate has cleared that test.
+
+Final provenance correction: the full gate exposed same-tick metadata drift.
+WAT hashes now precede daily queries and are memoized only inside an Ash batch;
+fresh runs rehash. Independent review verified fail-closed replacement and
+successful fresh regeneration under deliberately identical source metadata.
+Focused boundary/orchestration regressions: 33 passed. Broad resume remains active.
+
+Closeout: resumed broad suite passed 10,703 tests with 126 skips in 1,201.09s.
+The two omitted disturbed matrices passed in the preceding full run; final
+provenance corrections passed 33 focused tests. Stubtest, stub completeness,
+changed exception enforcement, frontend lint/tests and scoped docs checks pass.
+All independent high/medium findings are closed. M1–M5 are complete; plan archived.
+No push, production deployment or original-project repair. Six-year evap.for
+SIGFPE, contour runtime coverage and large-MOFE cold timing remain disclosed
+limits in artifacts/20261020_validation.md, not unresolved consumer defects.

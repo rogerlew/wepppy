@@ -1,6 +1,10 @@
 {% extends "reports/_base_report.htm" %}
 {% block report_title %}Ash Contaminant Analysis{% endblock %}
 {% block report_content %}
+{% set water_warning = ash.water_accounting_warning %}
+{% if water_warning %}
+<p role="status" class="wc-status-warning">{{ water_warning }}</p>
+{% endif %}
 {% set all_contaminants = [] %}
 {% for contaminant, _, _, _, _ in ash.contaminants_iter() %}
   {% set _ = all_contaminants.append(contaminant) %}
