@@ -11,7 +11,9 @@ Users comparing multiple overland flow elements (OFEs, sequential sections of a 
 - [x] (2026-10-20 UTC) Audit and scope captured.
 - [x] (2026-10-20 UTC) Canonical amendment and two reviews committed as `14c7eebb1`.
 - [x] (2026-10-20 UTC) Interpretation/reference guides, description metadata, and interface corrections implemented; native release `3b63064`.
-- [ ] Generated artifact, discovery, regression and independent correctness evidence.
+- [x] (2026-10-20 UTC) Generated artifact, isolated discovery/browser, focused/native/frontend and independent source correctness evidence.
+- [ ] Authorized active-catalog publication and actual-runtime discovery evidence.
+- [ ] Record the outcome of the ongoing broad regression sweep.
 - [ ] Close package and update project tracker.
 
 ## Surprises & Discoveries
