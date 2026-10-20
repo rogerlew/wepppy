@@ -690,3 +690,21 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.technical_reference.weppcloud_wbt.iterative_first_order_link_prune_enduser
+  - doc_id: usersum.weppcloud.water_balance_and_runoff
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/water-balance-and-runoff.md
+    title: Understanding water balance and runoff
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.water_balance_and_runoff
+  - doc_id: usersum.weppcloud.water_pass_variables
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/water-pass-variables.md
+    title: "Water and PASS variables: ET, Dp and runoff"
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.water_pass_variables

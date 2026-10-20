@@ -11,7 +11,7 @@ from .versioning import INTERCHANGE_VERSION, read_version_manifest
 
 HILLSLOPE_DOC_ORDER: List[Tuple[str, str]] = [
     ("H.element.parquet", "Daily hillslope element hydrology and sediment metrics."),
-    ("H.wat.parquet", "Hillslope water balance per OFE; aligns with wat.out content."),
+    ("H.wat.parquet", "Daily water fields per native hillslope/OFE, including hourly-model runs; local and cumulative depths require different aggregation."),
     ("H.pass.parquet", "Event/subevent sediment and runoff delivery by hillslope (PASS)."),
     ("H.loss.parquet", "Average annual particle class fractions at the hillslope outlet."),
     ("H.soil.parquet", "Daily soil state variables per OFE from soil.dat."),
@@ -25,7 +25,7 @@ WATERSHED_DOC_ORDER: List[Tuple[str, str]] = [
     ("ebe_pw0.parquet", "Watershed event-by-event runoff and sediment delivery."),
     (
         "totalwatsed3.parquet",
-        "Derived daily watershed summary from hillslope PASS/WAT; in MOFE runs latqcc uses only the outlet-facing (last) OFE per hillslope-day to avoid internal routing double-counting.",
+        "Summed daily hillslope contributions, not routed watershed outlet discharge; named Runoff uses threshold-filtered PASS; in MOFE runs latqcc uses only the outlet-facing (last) OFE per hillslope-day to avoid internal routing double-counting.",
     ),
     ("soil_pw0.parquet", "Watershed soil-profile state variables."),
     ("loss_pw0.hill.parquet", "Average annual hillslope loss summary."),
@@ -111,7 +111,7 @@ def _table_preview_markdown(table: pa.Table) -> str:
         return str(value)
 
     rows = [" | ".join(_format_value(value) for value in row) for row in df.values.tolist()]
-    return "\n".join([headers, separator, units_row, *rows])
+    return "\n".join(line.rstrip() for line in [headers, separator, units_row, *rows])
 
 
 def _summarize_file(parquet_path: Path, description: str) -> str:
@@ -135,10 +135,27 @@ def generate_interchange_documentation(interchange_dir: Path | str, to_readme_md
 
     manifest_version = read_version_manifest(base)
     if manifest_version is None:
-        version_text = f"{INTERCHANGE_VERSION} (manifest missing)"
+        version_text = f"unknown (manifest missing; documentation generator {INTERCHANGE_VERSION})"
     else:
         version_text = str(manifest_version)
     sections.append(f"_Interchange Version: {version_text}_\n")
+    sections.append(
+        "## Understanding these outputs\n\n"
+        "This is a run-specific column reference with at most three sample rows per file. "
+        "For interpretation, open WEPPcloud Help (Usersum) and search for "
+        "**Understanding water balance and runoff** or **Water and PASS variables**. "
+        "The same guides are linked from WEPP Results.\n\n"
+        "H.wat contains daily native hillslope/OFE rows. Area is the local OFE area, "
+        "not the denominator of every depth: terminal Q is physical whole-hill runoff; "
+        "terminal latqcc needs terminal-area weighting; ET and Dp need all-OFE area weighting. "
+        "H.pass is threshold-filtered delivery, not a complete physical water budget.\n\n"
+        "Interchange version describes schema layout, not the model executable or "
+        "report accounting version. A missing manifest does not identify the original "
+        "file version. Metadata below is read from the actual files and may retain "
+        "historical descriptions or incorrect unit labels (notably PASS sediment fractions). "
+        "Regenerating this README does not rewrite data, refresh old reports, "
+        "or certify producer normalization or accounting provenance.\n"
+    )
     existing_companion_docs = [
         (doc_name, description) for doc_name, description in COMPANION_DOCS if (base / doc_name).exists()
     ]

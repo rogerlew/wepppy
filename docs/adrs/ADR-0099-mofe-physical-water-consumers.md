@@ -4,7 +4,9 @@
 
 Accepted on 2026-10-20 after operator selection and two independent contract
 reviews. Implementation conformance has focused, native and generated-artifact
-evidence; broad regression closeout is tracked in the work package. No production
+evidence; broad regression closeout completed in WEPPpy `1ecf04735` with native
+release `54d0867` (10,703 passed, 126 skipped). The closed package records contour
+coverage limits and the independent six-year model replay failure. No production
 rollout or historical regeneration is authorized.
 
 ## Decision and rationale

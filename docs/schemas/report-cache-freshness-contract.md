@@ -222,4 +222,4 @@ an explicit exception. A callable writer with an absent/wrong marker fails.
 Native candidate metadata must prove
 the corrected algorithm before publication. Version-1 envelopes, attempt
 visibility, permissions, atomicity and other report contracts remain unchanged.
-Implementation conformance is pending.
+Implementation conformance was validated in WEPPpy `1ecf04735` with paired native release `54d0867`. Production deployment and historical regeneration remain separate actions.

@@ -615,3 +615,34 @@ def test_usersum_vendor_route_renders_markdown(usersum_client) -> None:
         "/usersum/vendor/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md"
     )
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize("query", ["latqcc", "QOFE", "SUBEVENT", "deep percolation", "ET", "H.wat", "H.pass"])
+def test_water_guides_are_user_visible_in_fresh_catalog(usersum_client, monkeypatch, tmp_path, query):
+    from wepppy.weppcloud.usersum_docs.docs_contracts import load_and_validate_contracts
+    from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
+
+    root = Path(__file__).resolve().parents[3]
+    base = root / "wepppy/weppcloud/routes/usersum"
+    contracts = load_and_validate_contracts(base_dir=base, repo_root=root, require_local_files=True, require_vendor_files=True)
+    index_path = tmp_path / "docs_index.json"
+    write_generated_index(build_generated_index(contracts, repo_root=root), index_path)
+    monkeypatch.setattr(runtime_catalog, "_doc_index_path", lambda _base: index_path)
+    usersum_client.application.config["USERSUM_SEARCH_DISABLE_POSTGRES"] = "true"
+    runtime_catalog.load_runtime_catalog.cache_clear()
+    usersum_routes._catalog.cache_clear()
+    try:
+        response = usersum_client.get("/usersum/api/search", query_string={"q": query, "role": "user"})
+        assert response.status_code == 200
+        ids = {row["doc_id"] for row in response.get_json()["results"]}
+        assert "usersum.weppcloud.water_pass_variables" in ids
+        for doc_id in ("water_pass_variables", "water_balance_and_runoff"):
+            response = usersum_client.get("/usersum/doc/usersum.weppcloud." + doc_id)
+            assert response.status_code == 200
+            body = response.get_data(as_text=True)
+            assert "Role:" in body
+            assert runtime_catalog.load_runtime_catalog(usersum_base_dir=base, repo_root=root).docs_by_id["usersum.weppcloud." + doc_id]["min_role"] == "user"
+            assert "Understanding water balance and runoff" in body
+    finally:
+        usersum_routes._catalog.cache_clear()
+        runtime_catalog.load_runtime_catalog.cache_clear()

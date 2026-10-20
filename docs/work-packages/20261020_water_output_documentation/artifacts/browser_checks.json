@@ -1,0 +1,54 @@
+{
+  "scope": "isolated Flask process with fresh temporary catalog; NOT active catalog publication",
+  "results": [
+    {
+      "slug": "water_balance_and_runoff",
+      "status": 200,
+      "heading": "Understanding water balance and runoff",
+      "bodyWidth": 1440,
+      "viewport": 1440
+    },
+    {
+      "slug": "water_pass_variables",
+      "status": 200,
+      "heading": "Water and PASS variables: ET, Dp and runoff",
+      "bodyWidth": 1440,
+      "viewport": 1440
+    },
+    {
+      "query": "latqcc",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "QOFE",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "SUBEVENT",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "deep percolation",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "ET",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "H.wat",
+      "status": 200,
+      "referenceLinks": 2
+    },
+    {
+      "query": "H.pass",
+      "status": 200,
+      "referenceLinks": 2
+    }
+  ]
+}

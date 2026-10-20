@@ -1,6 +1,9 @@
 {% extends "reports/_base_report.htm" %}
 {% block report_title %}Average annual water balance{% endblock %}
 {% block report_content %}
+<p class="wc-text-muted">Current accounting uses physical terminal WAT Q for hillslope runoff, including small runoff omitted by PASS. ET and deep percolation are area weighted. Channel results have a separate routing boundary. Historical or unverified cached reports may predate this accounting; documentation alone does not refresh them.
+  {{ usersum_doc_link('weppcloud', 'water-balance-and-runoff.md', 'Understanding water balance and runoff') }}.
+</p>
 {% macro render_units(units) -%}
   {% if units %}
     {{ unitizer_units(units) | safe }}
@@ -71,7 +74,7 @@
     hill_rpt,
     'hillslopes',
     'Hillslope water balance',
-    'Calculated from aggregated hillslope water balance (.wat.dat) totals averaged across the simulation period.'
+    'Calculated from H.wat interchange. Totals are divided by the number of water-year bins minus one (minimum divisor one).'
 ) }}
 
 {% if chn_rpt %}

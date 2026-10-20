@@ -2,7 +2,7 @@
 > Fuses WEPP hillslope water, sediment, and ash-transport outputs into a single daily table served as `totalwatsed3.parquet`.
 
 ## Overview
-`totalwatsed3.parquet` is produced by `wepppy.wepp.interchange.totalwatsed3.run_totalwatsed3`. The helper reads the per-hillslope interchange artifacts emitted by WEPP (`H.pass.parquet`, `H.wat.parquet`) and, when present, optional soil/element diagnostics (`H.soil.parquet`, `H.element.parquet`) plus WEPP–Ash Transport summaries under `<run>/ash`. The rows are grouped by simulation date (`year`, `julian`, `sim_day_index`, etc.) so that each record represents the watershed-wide totals for a given day:
+`totalwatsed3.parquet` is produced by `wepppy.wepp.interchange.totalwatsed3.run_totalwatsed3`. The helper reads the per-hillslope interchange artifacts emitted by WEPP (`H.pass.parquet`, `H.wat.parquet`) and, when present, optional soil/element diagnostics (`H.soil.parquet`, `H.element.parquet`) plus WEPP–Ash Transport summaries under `<run>/ash`. The rows are grouped by simulation date (`year`, `julian`, `sim_day_index`, etc.) so that each record represents summed hillslope contributions for a given day, not routed watershed outlet flow:
 
 - Most hydrologic volumes (m³) are summed from `H.wat`, then converted back to depths (mm) via watershed area.
 - `Runoff` depth is computed from `H.pass` runoff volume (`runvol`) over aggregated watershed area.
@@ -51,8 +51,9 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `QRain`, `QSnow`: area-weighted runoff-partition depths from `H.element` when available (null when absent).
 - MOFE aggregation rules (multi-OFE hillslopes): per-OFE columns in `H.wat` are not all physically summable across OFEs without producing a non-canonical total. `totalwatsed3` handles this by:
   - **`latqcc`**: uses only the outlet-facing (last) OFE per hillslope/day to avoid counting internal lateral-routing transfers multiple times. The native producer tracks the maximum OFE for one hillslope at a time and contributes only that OFE to the daily lateral-flow sum.
-  - **`Runoff` (the user-facing column)**: computed from `H.pass.runvol` volume divided by aggregated watershed area, not from summed `Q` or `QOFE`. `runvol` is the canonical hillslope runoff volume under both legacy and `wepp_260516`+ builds.
-  - **`Q` and `QOFE` aggregate columns** (the literal `SUM(col * 0.001 * Area)` over OFEs): retained for diagnostic continuity but **not** the canonical hillslope totals. Under `wepp_260516` and later, per-OFE `QOFE = Q` in `H.wat`, so the two aggregates are equal post-fix. Under legacy builds the per-OFE `QOFE` was inflated by an OFE-count-scaled factor that did not appear in `Q`; see the canonical definitions for the per-OFE `Q`, `QOFE`, and `Area` columns in the main interchange README [§H.wat Multi-OFE Schema Semantics](README.md#hwat-multi-ofe-schema-semantics) and the historical context in `/workdir/wepp-forest/docs/20260504-stakeholder-watbalance.md` §QOFE: canonical definition.
+  - **`Runoff` (the user-facing column)**: computed from `H.pass.runvol` volume divided by aggregated watershed area, not from summed `Q` or `QOFE`. `runvol` is threshold-filtered delivery volume, not all physical runoff.
+  - **`Q` and `QOFE` aggregate columns** (the literal `SUM(col * 0.001 * Area)` over OFEs): retained for diagnostic continuity but **not** the canonical hillslope totals. QOFE normalization is producer-version-dependent: older local normalization and current Q aliases both exist. The discrepancy depends on geometry, not a universal OFE-count factor. See [Water and PASS variables](../../weppcloud/routes/usersum/weppcloud/water-pass-variables.md) and the [current aggregation contract](../../../docs/schemas/hillslope-water-aggregation-contract.md).
+
 - Ash transport columns when the ash directory is available:
   - Totals and per-area masses: `wind_transport`, `water_transport`, `ash_transport`, `transportable_ash` (+ `_per_ha`).
   - Per-ash-type masses: `{wind,water,ash}_transport_{black,white}` (+ `_per_ha` via per-type area).

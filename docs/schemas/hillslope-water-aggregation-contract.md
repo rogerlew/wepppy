@@ -4,7 +4,9 @@
 
 On 2026-10-20 the operator authorized MOFE water consumer correction and selected
 **physical WAT runoff**, retaining subthreshold runoff omitted from PASS export.
-Implementation conformance to this amendment is pending. Earlier ET/Dp conformance
+Implementation conformance was validated in WEPPpy `1ecf04735` with native
+release `54d0867`; contour runtime coverage and the six-year model failure remain
+limitations recorded in the 20261020 consumer-accounting validation artifact. Earlier ET/Dp conformance
 remains established. Deployment and historical regeneration are separate actions.
 This governs native hillslope reports, daily loaders/Ash inputs, selected and
 comparison dashboard events, and H.wat Features Export across baseline, Roads

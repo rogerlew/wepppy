@@ -236,3 +236,14 @@ standalone loads always recompute it. A later
 source hash must never be attached to an older loaded dataframe. QOFE is a version-sensitive
 diagnostic, never an inferred replacement for physical runoff. See the
 [water aggregation contract](../../../docs/schemas/hillslope-water-aggregation-contract.md).
+
+## User interpretation and metadata maintenance
+
+Start with [Understanding water balance and runoff](../../weppcloud/routes/usersum/weppcloud/water-balance-and-runoff.md)
+and [Water and PASS variables](../../weppcloud/routes/usersum/weppcloud/water-pass-variables.md).
+The run-specific README is a bounded schema/sample reference, not a provenance
+certificate. Python facade descriptions and native Arrow descriptions must agree.
+Description updates do not change machine unit labels, convert old files, or
+certify old report caches. Inherited PASS sediment-fraction unit labels are known
+incorrect; the reference documents physical fractions while compatibility work
+on project-unit exports remains separate.

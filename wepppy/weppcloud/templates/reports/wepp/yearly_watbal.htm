@@ -1,6 +1,9 @@
 {% extends "reports/_base_report.htm" %}
 {% block report_title %}Yearly water balance{% endblock %}
 {% block report_content %}
+<p class="wc-text-muted">Runoff uses threshold-filtered hillslope PASS delivery through totalwatsed3. These summed hillslope contributions are not routed watershed outlet discharge. The default excludes the first two available water-year bins, which can include partial bins.
+  {{ usersum_doc_link('weppcloud', 'water-balance-and-runoff.md', 'Understanding water balance and runoff') }}.
+</p>
 {% macro render_units(units) -%}
   {% if units %}
     {{ unitizer_units(units) | safe }}

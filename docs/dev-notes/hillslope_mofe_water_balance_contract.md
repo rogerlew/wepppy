@@ -1,5 +1,16 @@
 # Hillslope MOFE Water-Balance Contract
 
+## Producer-version limitation
+
+The QOFE equations below describe a diagnostic audit that assumes local-area
+QOFE normalization. They are not valid unchanged for producers that write QOFE
+as an alias of cumulative Q. Verify the writer before interpreting these
+residuals. Current consumers follow the [hillslope aggregation contract](../schemas/hillslope-water-aggregation-contract.md): terminal Q is physical hillslope runoff,
+while terminal latqcc requires local-area scaling. Source paths/line numbers
+below are historical evidence from the audit revision, not current navigation.
+Unexported interception evaporation and missing boundary stocks prevent these
+exported-term residuals from certifying complete model closure.
+
 ## Purpose
 This contract defines the **full physical daily water-balance closure audit** for MOFE (multi-OFE hillslope) diagnostics in `tools/hillslope_mofe_daily_closure_audit.py`.
 

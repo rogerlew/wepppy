@@ -1,0 +1,15 @@
+{
+  "H.wat.parquet": {
+    "rows": 6576,
+    "sha256": "8f3a577dfe502f254cc6edf4bf71891da6b5e93c225ddd8bf45d0eb3e7bcbe86",
+    "schema_metadata_parity": true
+  },
+  "H.pass.parquet": {
+    "rows": 6576,
+    "sha256": "596125a6a6ec4df2e03ff5054fd131c4f41747c778f8d69705e5ff6be062c38f",
+    "schema_metadata_parity": true
+  },
+  "scratch": "/tmp/water-docs-gqn9beth",
+  "parquet_directory": "/tmp/water-docs-gqn9beth/interchange",
+  "namespace": "weppcloud development container"
+}

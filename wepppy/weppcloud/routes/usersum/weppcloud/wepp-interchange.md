@@ -1,5 +1,11 @@
 # WEPP Interchange Outputs
 
+For water analysis, start with [Understanding water balance and runoff](water-balance-and-runoff.md)
+and the [Water and PASS variables](water-pass-variables.md) reference. These explain
+ET, deep percolation, OFE area weighting, physical runoff versus PASS delivery,
+and why different reports can have different runoff totals.
+
+
 WEPP interchange is the machine-friendly export of WEPP results. WEPPcloud converts WEPP text reports into Parquet tables so dashboards, reports, and analysis tools can open the results quickly without reparsing the raw text files each time.
 
 ## What This Page Helps You Do
@@ -38,7 +44,7 @@ For most users, the practical result is that WEPP outputs open faster, compare m
 
 | File | What it usually represents | Common use |
 | --- | --- | --- |
-| `H.wat.parquet` | Hillslope water-balance results | Review runoff, infiltration, and water-balance behavior by hillslope |
+| `H.wat.parquet` | Daily water fields by native hillslope and OFE | Review local ET/Dp, transfers, terminal runoff and storage with the interpretation guide |
 | `H.soil.parquet` | Hillslope soil-state results | Review modeled soil-water and soil-condition variables |
 | `H.pass.parquet` | Hillslope daily runoff and sediment-pass results | Compare daily hillslope response across hillslopes |
 | `H.ebe.parquet` | Hillslope event-by-event results | Review hillslope response for runoff-producing events |
@@ -77,3 +83,12 @@ For most users, the practical result is that WEPP outputs open faster, compare m
 - [WEPPcloud Runs Directory Structure](weppcloud-runs-directory-structure.md)
 - [Profile JWT Dataset Access (Python/R)](profile-jwt-dataset-access-python-r.md)
 - [WEPP Model](wepp-model.md)
+
+## Water-file grain and interpretation
+
+H.wat contains one native hillslope/OFE/day row, including for hourly internal
+water-balance runs. It does not provide a direct infiltration column. P, RM,
+ET components and Dp are local depths; terminal Q and latqcc require different
+spatial treatment. H.pass is daily threshold-filtered delivery with EVENT,
+SUBEVENT and NO EVENT layouts. See the variable reference before combining
+rows or converting depths to volumes.

@@ -9,8 +9,8 @@ Users comparing multiple overland flow elements (OFEs, sequential sections of a 
 ## Progress
 
 - [x] (2026-10-20 UTC) Audit and scope captured.
-- [ ] Canonical amendment, two independent reviews, and standalone checkpoint commit.
-- [ ] Interpretation guide, field reference, metadata and interface corrections.
+- [x] (2026-10-20 UTC) Canonical amendment and two reviews committed as `14c7eebb1`.
+- [x] (2026-10-20 UTC) Interpretation/reference guides, description metadata, and interface corrections implemented; native release `3b63064`.
 - [ ] Generated artifact, discovery, regression and independent correctness evidence.
 - [ ] Close package and update project tracker.
 
@@ -24,7 +24,7 @@ On 2026-10-20 the operator authorized executing the audited documentation correc
 
 ## Outcomes & Retrospective
 
-Implementation pending. Completion requires evidence from rendered documents and generated files, not merely source edits.
+Implementation and generated Parquet metadata parity are established. Runtime index publication awaits an explicit operator exception. Completion requires evidence from rendered documents and generated files, not merely source edits.
 
 ## Context and Orientation
 
@@ -67,3 +67,9 @@ Use existing Usersum helpers, Arrow schemas, Markdown renderer, wctl and native 
 Review identified the stale generated index as a publication blocker. Explicit operator permission to edit the dirty index is pending. If granted, back it up and merge only the package's affected entries from a fresh build without vendor sync, then validate the actual newly loaded catalog; otherwise record discovery publication as incomplete. A deployment must reload process catalog caches. Temporary index validation is not active-runtime discovery evidence.
 
 Machine-readable unit edits can change downstream values and names. Restrict this package to description metadata; document verified physical units and explicitly identify inherited machine-label defects. Correcting those labels requires separately scoped conversion/suffix/cache compatibility evidence. Usersum AGENTS now explicitly names specification.md as canonical.
+
+The final discovery check found that the existing in-memory search matches ET
+inside unrelated words such as parameters and getting. The reference title now
+adds the descriptive subtitle “ET, Dp and runoff” so it appears on the first
+results page for ET without altering the search engine. This is document-authoring
+within the approved publication scope; no ranking or authorization logic changes.

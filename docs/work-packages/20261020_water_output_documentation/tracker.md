@@ -1,12 +1,12 @@
 # Water output documentation tracker
 
-Status: Active — contract checkpoint preparation.
+Status: Active — implementation and validation; index publication awaits operator exception.
 
 - Starting WEPPpy revision: `1ecf04735`; native revision: `54d0867`.
 - Audit: `docs/dev-notes/20261020_water_output_documentation_audit.md`.
 - Active plan: [water_output_documentation_execplan.md](prompts/active/water_output_documentation_execplan.md).
-- Contract checkpoint: pending independent reviews.
-- Implementation, artifact validation, and final review: pending.
+- Contract checkpoint: `14c7eebb1`, two independent reviews approved after disposition.
+- Implementation written; focused 281 checks passed, native Python 163 passed, interchange/reports 105 passed (1 skipped), fresh temporary-catalog discovery 7 passed; isolated Chromium checks passed. Native paired release `3b63064`; final review and broad validation underway.
 
 ## Decisions
 

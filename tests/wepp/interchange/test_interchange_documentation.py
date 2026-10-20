@@ -75,3 +75,16 @@ def test_documentation_reads_only_first_preview_batch(tmp_path, monkeypatch, row
         assert "2003" not in markdown
     else:
         assert "_No rows_" in markdown
+
+
+def test_documentation_warns_about_historical_metadata_without_rewriting_it(tmp_path):
+    schema = pa.schema([pa.field("Q", pa.float64(), metadata={b"description": b"Daily runoff over eff length"})])
+    pq.write_table(pa.Table.from_arrays([pa.array([8.0])], schema=schema), tmp_path / "H.wat.parquet")
+    before = (tmp_path / "H.wat.parquet").read_bytes()
+    markdown = generate_interchange_documentation(tmp_path)
+    assert "Interchange Version: unknown (manifest missing" in markdown
+    assert "Water and PASS variables" in markdown
+    assert "not the model executable" in markdown
+    assert "Daily runoff over eff length" in markdown
+    assert "Regenerating this README does not rewrite data" in markdown
+    assert before == (tmp_path / "H.wat.parquet").read_bytes()

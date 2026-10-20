@@ -199,7 +199,7 @@ and lateral uses terminal local volume divided by full native hill area. Select
 outlets per native ID before mapped-volume combination. QOFE stays diagnostic.
 Area_m2 retains first-observed WEPP/OFE areas summed per mapped Topaz.
 Average annual iteration retains `max(number_of_years - 1, 1)` as its divisor.
-Implementation conformance to the correction is pending.
+Implementation conformance was validated in WEPPpy `1ecf04735` with paired native release `54d0867`. This does not imply production deployment or historical regeneration.
 
 Canonical H.wat keys are integers. Malformed/nonintegral/out-of-range keys,
 unsupported numeric layouts, and infinite metrics fail explicitly. Existing

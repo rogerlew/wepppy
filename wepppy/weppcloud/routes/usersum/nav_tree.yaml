@@ -165,6 +165,10 @@ roots:
         children:
           - key: usersum.weppcloud.weppcloud_runs_directory_structure
             doc_id: usersum.weppcloud.weppcloud_runs_directory_structure
+          - key: usersum.weppcloud.water_balance_and_runoff
+            doc_id: usersum.weppcloud.water_balance_and_runoff
+          - key: usersum.weppcloud.water_pass_variables
+            doc_id: usersum.weppcloud.water_pass_variables
           - key: usersum.weppcloud.wepp_interchange
             doc_id: usersum.weppcloud.wepp_interchange
           - key: usersum.weppcloud.sbs_map_preparation

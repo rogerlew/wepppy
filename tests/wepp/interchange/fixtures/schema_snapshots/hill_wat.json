@@ -76,7 +76,7 @@
     },
     {
       "metadata": {
-        "description": "Daily runoff over eff length",
+        "description": "Producer-normalized cumulative runoff; terminal Q is physical whole-hillslope depth for supported hillslope writers; do not area-scale terminal Q again",
         "units": "mm"
       },
       "name": "Q",
@@ -139,7 +139,7 @@
     },
     {
       "metadata": {
-        "description": "Lateral subsurface flow",
+        "description": "Local OFE lateral outflow depth; whole-hill export uses terminal value times terminal area divided by full hill area",
         "units": "mm"
       },
       "name": "latqcc",
@@ -175,7 +175,7 @@
     },
     {
       "metadata": {
-        "description": "Daily runoff scaled to single OFE",
+        "description": "Version-sensitive runoff diagnostic: historical local normalization or current Q alias; not a universal local depth",
         "units": "mm"
       },
       "name": "QOFE",
@@ -202,7 +202,7 @@
     },
     {
       "metadata": {
-        "description": "Area that depths apply over",
+        "description": "Local OFE area; not the denominator of cumulative Q",
         "units": "m^2"
       },
       "name": "Area",

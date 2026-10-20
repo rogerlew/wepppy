@@ -5112,3 +5112,27 @@ def test_soil_anisotropy_template_eligibility(jinja_env, multi_ofe, hourly, enab
     assert 'max="100"' in upper and 'max="10"' in lower
     assert 'disable-readonly' in upper
     assert 'Values above 10 can cause numerical instabilities.' in rendered
+
+
+@pytest.mark.parametrize("single_storm", [False, True])
+@pytest.mark.parametrize("has_readme", [False, True])
+def test_water_interpretation_help_does_not_require_run_readme(jinja_env, single_storm, has_readme):
+    rendered = jinja_env.get_template("controls/wepp_reports.htm").render(
+        climate=SimpleNamespace(is_single_storm=single_storm, ss_batch_storms=None, mods=set()),
+        prep=SimpleNamespace(has_sbs=False), runid="test-run", config="test-config",
+        interchange_readme_exists=has_readme, totalwatsed3_exists=False, totalwatsed2_exists=False,
+    )
+    assert "Understanding water balance and runoff" in rendered
+    assert ("Output files, columns, and sample data" in rendered) == has_readme
+    assert "Interchange README (schema + preview)" not in rendered
+
+
+@pytest.mark.parametrize("ready", [False, True])
+def test_roads_water_help_available_with_pending_or_ready_resources(jinja_env, ready):
+    rendered = jinja_env.get_template("controls/roads_reports.htm").render(
+        roads_status={}, roads_run_summary={"status": "completed" if ready else "pending"},
+        roads_report_resources={"status": "ready" if ready else "pending", "missing_relpaths": []},
+        roads_report_links=[{"href": "/roads-scoped-report?output_scope=roads", "label": "Scoped report"}],
+    )
+    assert "Understanding water balance and runoff" in rendered
+    assert ('href="/roads-scoped-report?output_scope=roads"' in rendered) == ready

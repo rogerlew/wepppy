@@ -4588,4 +4588,4 @@ If this tracker format isn't working or you have suggestions:
   Implementation `aa2d1cd2a`; full suite 9,977 passed / 99 skipped; live Redis
   validation and independent reviews passed. Deployment separate.
 
-- Active: [Water output interpretation and discovery](docs/work-packages/20261020_water_output_documentation/package.md) — user guides, metadata and Results/Usersum discovery corrections.
+- Active: [Water output interpretation and discovery](docs/work-packages/20261020_water_output_documentation/package.md) — guide/reference, native metadata and UI corrections implemented; validation and dirty-index publication gate active.

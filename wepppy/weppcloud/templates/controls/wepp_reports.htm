@@ -10,6 +10,8 @@
   <p class="wc-text-muted">
     For help choosing which report, export, or output to open first, see
     {{ usersum_doc_link('weppcloud', 'wepp-run-results.md', 'WEPP Run Results guidance') }}.
+    For area weighting and differences between water and PASS outputs, see
+    {{ usersum_doc_link('weppcloud', 'water-balance-and-runoff.md', 'Understanding water balance and runoff') }}.
   </p>
 {% endset %}
 
@@ -60,7 +62,7 @@
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/interchange/README.md') }}"
                target="_blank"
                rel="noopener">
-              Interchange README (schema + preview)
+              Output files, columns, and sample data
             </a>
             {% endif %}
             {% if not climate.ss_batch_storms %}
@@ -137,7 +139,7 @@
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/interchange/README.md') }}"
                target="_blank"
                rel="noopener">
-              Interchange README (schema + preview)
+              Output files, columns, and sample data
             </a>
             {% endif %}
             {% if storm_event_analyzer_ready|default(false) %}

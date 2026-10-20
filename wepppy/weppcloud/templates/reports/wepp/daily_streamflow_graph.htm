@@ -121,6 +121,9 @@
 {% endblock %}
 
 {% block report_content %}
+<p class="wc-text-muted">This graph uses summed hillslope contributions from totalwatsed3, including threshold-filtered PASS runoff. It is not a routed watershed outlet hydrograph.
+  {{ usersum_doc_link('weppcloud', 'water-balance-and-runoff.md', 'Understanding water balance and runoff') }}.
+</p>
 {% set output_scope_value = output_scope | default('baseline', true) %}
 <header class="wc-stack">
   <h1 class="wc-heading__title">Daily streamflow</h1>

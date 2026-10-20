@@ -81,7 +81,7 @@
     },
     {
       "metadata": {
-        "description": "Runoff depth",
+        "description": "EVENT internal terminal runoff depth on producer effective-flow basis; use runvol for area aggregation",
         "units": "m"
       },
       "name": "runoff",
@@ -90,7 +90,7 @@
     },
     {
       "metadata": {
-        "description": "Runoff volume",
+        "description": "Threshold-filtered PASS surface runoff volume; not all physical WAT runoff",
         "units": "m^3"
       },
       "name": "runvol",
@@ -99,7 +99,7 @@
     },
     {
       "metadata": {
-        "description": "Subsurface runoff depth",
+        "description": "Terminal local subsurface depth when emitted by PASS event filtering",
         "units": "m"
       },
       "name": "sbrunf",
@@ -108,7 +108,7 @@
     },
     {
       "metadata": {
-        "description": "Subsurface runoff volume",
+        "description": "Exported terminal subsurface volume after PASS event filtering",
         "units": "m^3"
       },
       "name": "sbrunv",
@@ -207,7 +207,7 @@
     },
     {
       "metadata": {
-        "description": "Friction flow 1",
+        "description": "Clay sediment fraction (dimensionless); legacy m^3/s unit label is incorrect",
         "units": "m^3/s"
       },
       "name": "clot",
@@ -216,7 +216,7 @@
     },
     {
       "metadata": {
-        "description": "% of exiting sediment in the silt size class",
+        "description": "Silt sediment fraction (dimensionless); legacy percent unit label is incorrect",
         "units": "%"
       },
       "name": "slot",
@@ -225,7 +225,7 @@
     },
     {
       "metadata": {
-        "description": "% of exiting sediment in the small aggregate size class",
+        "description": "Small aggregate sediment fraction (dimensionless); legacy percent unit label is incorrect",
         "units": "%"
       },
       "name": "saot",
@@ -234,7 +234,7 @@
     },
     {
       "metadata": {
-        "description": "% of exiting sediment in the large aggregate size class",
+        "description": "Large aggregate sediment fraction (dimensionless); legacy percent unit label is incorrect",
         "units": "%"
       },
       "name": "laot",
@@ -243,7 +243,7 @@
     },
     {
       "metadata": {
-        "description": "% of exiting sediment in the sand size class",
+        "description": "Sand sediment fraction (dimensionless); legacy percent unit label is incorrect",
         "units": "%"
       },
       "name": "sdot",
@@ -252,7 +252,7 @@
     },
     {
       "metadata": {
-        "description": "Groundwater baseflow"
+        "description": "Daily groundwater baseflow volume in m^3; legacy machine-unit metadata absent"
       },
       "name": "gwbfv",
       "nullable": true,
@@ -260,7 +260,7 @@
     },
     {
       "metadata": {
-        "description": "Groundwater deep seepage"
+        "description": "Daily groundwater deep-seepage volume in m^3; legacy machine-unit metadata absent"
       },
       "name": "gwdsv",
       "nullable": true,
