@@ -99,6 +99,28 @@ def test_hillslope_watbal_aggregates_from_interchange(tmp_path, monkeypatch):
     assert np.isclose(yearly_rows[1].row["Surface Runoff (mm)"], 1.6)
 
 
+def test_local_ofe_weighting_then_unequal_hillslope_weighting(tmp_path):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    source = tmp_path / "wepp/output/interchange/H.wat.parquet"
+    source.parent.mkdir(parents=True)
+    pd.DataFrame({
+        "wepp_id": [1, 1, 2, 2], "ofe_id": [1, 2, 1, 2],
+        "water_year": [2001]*4, "sim_day_index": [1]*4,
+        "Area": [250., 750., 500., 1500.],
+        "Ep": [1., 4., 2., 8.], "Es": [.5, 1., 1., 2.],
+        "Er": [.5, 1., 1., 2.], "Dp": [4., 8., 8., 16.],
+        "P": [0.]*4, "QOFE": [0.]*4, "latqcc": [0.]*4,
+    }).to_parquet(source,index=False)
+    report = HillslopeWatbalReport(tmp_path)
+    hills = [row.row for row in report.avg_annual_iter()]
+    np.testing.assert_allclose(
+        [hill["Transpiration + Evaporation (mm)"] for hill in hills], [5., 10.])
+    watershed = next(report.yearly_iter()).row
+    assert watershed["Transpiration + Evaporation (mm)"] == pytest.approx(25/3)
+    assert watershed["Percolation (mm)"] == pytest.approx(35/3)
+
+
 def test_hillslope_watbal_uses_cache(tmp_path, monkeypatch):
     from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
 

@@ -13,7 +13,8 @@ the WEPP simulation or its raw outputs.
 
 The operator requested execution on 2026-10-20 after the scaffold turn.
 M1-M5 are now authorized, including the necessary local contract checkpoint.
-The package stays open until later implementation and validation are complete.
+M0-M5 completed on 2026-10-20 20:01 UTC; implementation and development validation
+are accepted. See the retained validation and correctness-review artifacts.
 The mathematical intent is a correction, not a faithful preservation of the
 known wrong sums. No surrogate production algorithm is planned.
 
@@ -29,7 +30,7 @@ known wrong sums. No surrogate production algorithm is planned.
 - [x] (2026-10-20) M2: correct native report ET/Dp and cache compatibility.
 - [x] (2026-10-20) M3: correct both dashboard event ET queries.
 - [x] (2026-10-20) M4: correct Features Export ET/Dp spatial reduction.
-- [ ] M5: fresh generated outputs, quality gates, independent correctness review,
+- [x] (2026-10-20 20:01 UTC) M5: fresh generated outputs, quality gates, independent correctness review,
   release/cache recovery handoff, and documentation.
 
 ## Surprises & Discoveries
@@ -47,6 +48,14 @@ The baseline two-OFE counterexample returned report ET/Dp 8/12 mm and export
 These prior observations need retained repeatable evidence during execution.
 
 ## Decision Log
+
+2026-10-20: Real GeoParquet readback exposed a pre-existing ID-domain collision:
+WEPP 3 / Topaz 31 data attached to WEPP 31 / Topaz 163 geometry. Independent
+review reproduced this on the contract checkpoint. Repair the geometry boundary
+to use its resolved identity domain, rejecting missing or non-bijective mappings.
+This enforces the existing one-attachment identity contract without changing
+schemas. Validate both domains and serialized real polygons before M5 closure.
+Bump export cache semantics to v3 so intermediate v2 exports cannot be reused.
 
 2026-10-20: Execution request authorizes M1-M5 and local coordinated release.
 Two independent contract reviews approved the standalone checkpoint before
@@ -83,8 +92,11 @@ Cache markers prevent silent reuse of old numerical results. The disabled R
 balance is removed. Independent review findings on joined WAT identity, missing
 observations/date columns, and ET-only infinite components have regression fixes.
 The report CSV adapter was repaired to complete the planned generated-output
-acceptance. Final native release and live development validation passed; broad regression
-disposition remains in M5;
+acceptance. Final native release and live development validation passed. Broad
+coverage completed in segments: 10,818 passed/126 skipped before a browser-path
+environment failure, then all 2,023 WEPPcloud tests passed with the correct
+existing browser path scoped to that process. Final export tests pass 112;
+geometry-domain conformance is verified across all 455 serialized polygons;
 no production deployment or original-project regeneration is claimed.
 
 Measured final candidate on the current representative 75,354,414-byte,
@@ -337,3 +349,6 @@ is permitted by this plan.
 Revision note: initial scaffold on 2026-10-20 18:45 UTC; separates completed
 inactive R cleanup from planned, contract-gated aggregation remediation.
 Validated scaffold and recorded inactive-only R readback at 18:50 UTC.
+
+Closeout: M0-M5 complete; retained validation documents the paired release,
+cache recovery, final gates and separate GeoJSON envelope follow-up.

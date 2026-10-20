@@ -34,7 +34,9 @@
 | COR-04 | Medium | ET-only selection hid opposing infinite components as NaN/zero | Validate hidden Ep/Es/Er whenever ET selected; conflicting-infinity regression |
 | COR-05 | Medium | Missing primary-table dates discarded valid joined WAT dates | Reduce local stream first; retain its keys independently of generic dates; all three modes tested |
 
-All five findings are resolved. Reviewer independently repeated COR-04 and
+| COR-06 | High, pre-existing | Consolidated Topaz key attached to a numerically overlapping WEPP geometry key | Retarget at resolved geometry boundary; reject missing/non-bijective mappings; v3 cache; both-domain regressions and all 455 real polygons verified |
+
+All six findings are resolved. Reviewer independently repeated COR-04 and
 confirmed `MaterializationContractError`; repeated COR-05 probes return ET5/Dp7 in all three modes. Native single-OFE state and exact
 signed-integer row-group geometry proof pass review; unsupported metadata uses
 the projected key scan, with full value validation in the main pass. CSV adapter
@@ -50,12 +52,15 @@ independent daily SQL, then verifies report/export consumption. The native relea
 manifest binds source-file and library hashes. Report attempts remain under normal
 project paths; existing canonical archive/restore regression verifies bytes and
 provenance. Live authenticated browser/download acceptance passed: all455 report/event
-rows match independent source SQL; four downloads match retained artifact hashes.
+rows match independent source SQL; five downloads match retained artifact hashes.
 See `20261020_live_validation.json` and `20261020_live_oracle.json`.
 
 ## Verdict
 
-Code correctness: **pass**, no open high or medium findings. Final package
-acceptance is conditional on completed quality-gate disposition and live HTTP
-readback after the development reload. No production deployment or historical
+Code correctness: **pass**, no open high or medium findings. COR-06 was
+independently reproduced on the contract checkpoint and reviewed as a bounded
+conformance repair. Final focused tests pass 112; serialized GeoParquet identities
+and all 455 dissolved geometries match the original source. Live HTTP readback
+after the development reload passed. Broad-gate disposition is recorded in
+[validation](20261020_validation.md). No production deployment or historical
 repair is established by this review.

@@ -3574,3 +3574,44 @@ def test_companion_rejects_unproven_legacy_source_without_conversion(tmp_path, m
         )
     assert (error.value.status_code, error.value.code) == (409, "changed_source")
     assert artifact.read_bytes() == b"legacy-source"
+
+
+@pytest.mark.parametrize("geometry_key,geometry_ids", [("WeppID", ["3", "31"]), ("TopazID", ["31", "163"])])
+def test_geometry_attachment_uses_resolved_identity_domain(geometry_key, geometry_ids):
+    from wepppy.nodb.mods.features_export.geometry_carriers import CanonicalGeometryCarrier, attach_geometry_once
+
+    key = service._CONSOLIDATED_JOIN_KEY_COLUMN
+    core = pd.DataFrame({key: ["31"], "wepp_id": [3], "topaz_id": [31], "ET": [3.61]})
+    geometry = gpd.GeoDataFrame({key: geometry_ids, "geometry": [Point(3, 0), Point(31, 0)]}, crs=4326)
+    aligned = service._align_core_to_geometry_identity(
+        core, geometry_key_column=geometry_key, carrier_layer="sbs_map-subcatchments"
+    )
+    result = attach_geometry_once(
+        core_table=aligned,
+        geometry_carrier=CanonicalGeometryCarrier("sbs_map-subcatchments", "fixture", geometry_key, geometry),
+        allow_non_unique_keys=True,
+    )
+    observed = result.loc[result.ET.notna()]
+    assert len(observed) == 1
+    assert observed.geometry.iloc[0].equals(Point(3, 0))
+    assert result.ET.isna().sum() == 1
+
+
+@pytest.mark.parametrize("identities", [[3, None], [3, 3]])
+def test_geometry_identity_rejects_missing_or_collapsing_mapping(identities):
+    core = pd.DataFrame({service._CONSOLIDATED_JOIN_KEY_COLUMN: ["31", "163"], "wepp_id": identities})
+    with pytest.raises(MaterializationContractError, match="complete and one-to-one"):
+        service._align_core_to_geometry_identity(
+            core, geometry_key_column="WeppID", carrier_layer="sbs_map-subcatchments"
+        )
+
+
+def test_geometry_identity_rejects_missing_column_and_preserves_other_carriers():
+    core = pd.DataFrame({service._CONSOLIDATED_JOIN_KEY_COLUMN: ["31"]})
+    with pytest.raises(MaterializationContractError, match="missing the resolved"):
+        service._align_core_to_geometry_identity(
+            core, geometry_key_column="WeppID", carrier_layer="sbs_map-subcatchments"
+        )
+    assert service._align_core_to_geometry_identity(
+        core, geometry_key_column="WeppID", carrier_layer="ag_fields_subfields_geojson"
+    ) is core

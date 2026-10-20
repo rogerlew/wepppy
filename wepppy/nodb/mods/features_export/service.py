@@ -1540,8 +1540,13 @@ def _build_key_first_materialized_layer_payload(
         candidate_key_tokens=candidate_key_tokens,
     )
     geometry_keys = set(geometry_carrier.dataframe[_CONSOLIDATED_JOIN_KEY_COLUMN].tolist())
-    core_for_geometry = carrier_core.dataframe[
-        carrier_core.dataframe[_CONSOLIDATED_JOIN_KEY_COLUMN].isin(geometry_keys)
+    aligned_core = _align_core_to_geometry_identity(
+        carrier_core.dataframe,
+        geometry_key_column=geometry_carrier.key_column,
+        carrier_layer=layer.carrier_layer,
+    )
+    core_for_geometry = aligned_core[
+        aligned_core[_CONSOLIDATED_JOIN_KEY_COLUMN].isin(geometry_keys)
     ].reset_index(drop=True)
     if core_for_geometry.empty:
         if layer.temporal_mode != "event":
@@ -1700,6 +1705,43 @@ def _carrier_selected_columns(
         ]
 
     return tuple(_dedupe_identity_selected_columns(selected_columns))
+
+
+def _align_core_to_geometry_identity(
+    frame: pd.DataFrame,
+    *,
+    geometry_key_column: str,
+    carrier_layer: str | None,
+) -> pd.DataFrame:
+    """Retarget merged hill/channel keys to the resolved geometry ID domain."""
+    if carrier_layer not in {"sbs_map-subcatchments", "chan_map-channels"}:
+        return frame
+    identity_column = {
+        "topazid": _TOPAZ_ID_COLUMN,
+        "weppid": _WEPP_ID_COLUMN,
+    }.get(_normalize_join_token(geometry_key_column))
+    if identity_column is None:
+        return frame
+    if identity_column not in frame.columns:
+        raise MaterializationContractError(
+            "Carrier core is missing the resolved geometry identity.",
+            details=f"identity_column={identity_column!r}",
+        )
+    identities = frame[identity_column].map(_canonical_join_value)
+    keys = frame[_CONSOLIDATED_JOIN_KEY_COLUMN].map(_canonical_join_value)
+    mapping = pd.DataFrame({"key": keys, "identity": identities}).drop_duplicates()
+    if (
+        mapping.isna().any().any()
+        or mapping["key"].duplicated().any()
+        or mapping["identity"].duplicated().any()
+    ):
+        raise MaterializationContractError(
+            "Carrier geometry identity mapping must be complete and one-to-one.",
+            details=f"identity_column={identity_column!r}",
+        )
+    result = frame.copy()
+    result[_CONSOLIDATED_JOIN_KEY_COLUMN] = identities
+    return result
 
 
 def _backfill_identity_from_geometry_key(

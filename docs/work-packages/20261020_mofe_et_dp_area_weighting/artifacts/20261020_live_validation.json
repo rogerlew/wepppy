@@ -11,21 +11,27 @@
     },
     {
       "run": "mofe-et-dp-export-20261020",
-      "relpath": "export/features/artifacts/b439320f39dd471db0850989f64e3e1d/features_export.csv.zip",
+      "relpath": "export/features/artifacts/cea79021bbb0477f94a20924696e29f9/features_export.csv.zip",
       "status": 200,
-      "sha256": "bb7d5b7a89a21001eb8ae42684f5f996e9614e3ed7adc6fea5e360d0613745df"
+      "sha256": "35c0927cdd3b252be769ddb39d2626ef6c8b753c2b938c1a31670e43c8483be9"
     },
     {
       "run": "mofe-et-dp-export-20261020",
-      "relpath": "export/features/artifacts/89fc1f570aec429390906ad9f88c7dee/features_export.parquet.zip",
+      "relpath": "export/features/artifacts/5373c3fdeaa742d180230d758ea2005d/features_export.parquet.zip",
       "status": 200,
-      "sha256": "8b7b860b090d6eb915aaf73eed796e5caf22f76a3059a4666dac3bcf8899b076"
+      "sha256": "234da848b528fb6164285571366768782abaf44d7c42ea445f4f058042855ed4"
     },
     {
       "run": "mofe-et-dp-export-20261020",
-      "relpath": "export/features/artifacts/1ff90cb28c214aecaf50e8ac2550a82e/features_export.geojson.zip",
+      "relpath": "export/features/artifacts/999deb09b9fc47839dc5bdb7e7d44738/features_export.geojson.zip",
       "status": 200,
-      "sha256": "7c0a1a665d92d1c17898daaba9dbee79056b623e3e61c8281af09672337a936a"
+      "sha256": "d944cca049758828ea68990e98fa77aa696b41542ac29debd691f2ce53b3a043"
+    },
+    {
+      "run": "mofe-et-dp-export-20261020",
+      "relpath": "export/features/artifacts/acdf7f20befa41eb8c819bc65c9dd3d5/features_export.geoparquet.zip",
+      "status": 200,
+      "sha256": "7f0d9bfa034b82fb6786aafb1acc95392093f8881106e50dea096948010f9702"
     }
   ],
   "report_hills": 455,
@@ -33,19 +39,19 @@
   "baseline_hills": 455,
   "retained_live_receipt": "/wc1/runs/mo/mofe-et-dp-validation-20261020/mofe-validation/live-browser-receipt.json",
   "native_commit": "5e42716230dd6f02d218bfbe10509d501edb93a8",
-  "web_reload": "SIGHUP to development Gunicorn master8; workers212-215 replaced by1131976-1131979; pytest exec process unaffected",
+  "web_reload": "Graceful SIGHUP to verified development Gunicorn master PID 8 after final geometry conformance repair; full live checks repeated.",
   "files": {
     "live-browser-receipt.json": {
-      "bytes": 112716,
-      "sha256": "134e9b990f33128d80e9d55bcf2980538ffd5aa21e780787d8d5c7b82e85e5b5"
+      "bytes": 112986,
+      "sha256": "8c18fa763d7a050ef9e670824377390a0e5d3384dc175ea82eccad82561ba16e"
     },
     "live-report.csv": {
       "bytes": 36597,
       "sha256": "d9bc105fede03dfda178f3b47893ffa1c55d92e81f002d7c77ac8641b3978b9e"
     },
     "live-report-browser.png": {
-      "bytes": 115589,
-      "sha256": "d6d2e3750df334f7e3bb3c12e6d277886729e95ed4a2a4cd42a3d32d5894fd01"
+      "bytes": 115518,
+      "sha256": "a9ff550718cb1589a4d7dc31365ad3694e85b9bb9390e7231d3da0833e262945"
     },
     "receipt.json": {
       "bytes": 2660,

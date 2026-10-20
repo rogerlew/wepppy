@@ -2,11 +2,11 @@
 
 ## Status
 
-- **Started**: 2026-10-20 18:45 UTC; **updated**: 2026-10-20 (implementation validation).
-- **Phase**: M1-M4 implemented; M5 release and runtime validation in progress.
-- **Next milestone**: M5 final quality gates, native release pairing and live development acceptance.
+- **Started**: 2026-10-20 18:45 UTC; **updated**: 2026-10-20 20:01 UTC (closed).
+- **Phase**: M0-M5 complete; development acceptance passed.
+- **Next milestone**: none in this package; production rollout requires separate authorization.
 - **Security impact**: none at scoped numerical boundary; re-triage expansion.
-- **Plan**: [Active ExecPlan](prompts/active/mofe_et_dp_area_weighting_execplan.md).
+- **Plan**: [Completed ExecPlan](prompts/completed/mofe_et_dp_area_weighting_execplan.md).
 
 ## Task Board
 
@@ -16,14 +16,14 @@
 - [x] Scaffold package, tracker, execution plan, and project-board entry.
 - [x] Remove disabled raw balance and map chunks from `new_report.Rmd`.
 
-### Ready
+### Implementation completed
 
 - [x] M1: canonical contract, ADR, state/input matrices, independent reviews,
   contract checkpoint, and failing heterogeneous-OFE regression cases.
 - [x] M2: native hillslope report ET/Dp aggregation and cache migration.
 - [x] M3: selected-run and comparison-baseline dashboard ET queries.
 - [x] M4: Features Export field-specific ET/Dp spatial reduction and cache identity.
-- [ ] M5: native release/facade verification, fresh MOFE project outputs,
+- [x] M5: native release/facade verification, fresh MOFE project outputs,
   correctness review, required quality gates, and documented recovery handoff.
 
 ### Validation of This Scaffold
@@ -96,12 +96,38 @@ Final native commit `5e42716230dd6f02d218bfbe10509d501edb93a8` and startup pin
 pass fresh-process import. Graceful reload replaced only development Gunicorn
 workers, preserving the running pytest process. Live HTML/CSV and selected/base
 event results match independent source SQL for all 455 hills. Normal scoped
-browse/download access returns four byte-identical artifacts. Production export
-service readback covers one real MOFE hill across CSV/Parquet/GeoJSON; geospatial
+browse/download access returns five byte-identical artifacts. Production export
+service readback covers one real MOFE hill across CSV/Parquet/GeoJSON/GeoParquet; geospatial
 output retains all 455 geometries with null water metrics for absent observations.
 
-Independent correctness review closes COR-01 through COR-05. Focused export
+Independent correctness review closes COR-01 through COR-06. Focused export
 regressions pass 107 tests after the final joined-date fix; paired startup,
 report/cache, SQL and export checks passed 99 before that final fix. Native
 release tests pass 72; Rust passes 107 unit and 17 writer tests; Jest passes
-119 suites/987 tests. Full Python suite remains running. See retained artifacts.
+119 suites/987 tests. Broad Python coverage passed in the documented segments. See retained artifacts.
+
+
+## Final conformance evidence
+
+COR-06 was a pre-existing cross-domain geometry join: WEPP3 / Topaz31 data
+attached to WEPP31 / Topaz163. Geometry-boundary retargeting now requires a
+complete one-to-one identity mapping. Final service/water/carrier tests pass 112;
+all 455 serialized GeoParquet identities and independently dissolved polygons
+match source geometry. CSV, Parquet, GeoJSON and GeoParquet match ET3.61/Dp0 for
+the actual observed hill. Export cache v3 excludes earlier products.
+
+The final graceful development reload was followed by authenticated HTML/CSV,
+selected/baseline event queries and five byte-identical artifact downloads.
+All 455 report/event values match independent source SQL. Unequal hillslope-area
+watershed averaging has a separate regression (14 report tests pass).
+
+The full Python run passed 10,818 tests with 126 skips before a missing Playwright
+browser path stopped it. The entire WEPPcloud segment passed all 2,023 tests with the
+correct existing browser path scoped to that process. No global environment
+change or browser installation was introduced. Final disposition is retained in
+[validation](artifacts/20261020_validation.md).
+
+Follow-up: the existing GeoJSON writer emits a payload envelope around its
+FeatureCollection. Standard standalone GeoJSON compatibility requires separate
+format-contract work; numerical validation uses its collection and GIS-readable
+acceptance uses GeoParquet. Production rollout and bulk repairs remain excluded.

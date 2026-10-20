@@ -10,7 +10,10 @@ Hillslope water ET, Ep, Es, Er, and Dp use each OFE's local area to calculate
 daily feature depths before event/yearly/annual-average reduction. ET is derived
 from Ep+Es+Er; hidden area and date columns remain available when only ET is
 selected. Routed water fields retain their terminal-OFE rule. The export cache
-version `features-export-mofe-area-v2` prevents reuse of older numerical results.
+version `features-export-mofe-area-v3` prevents reuse of older numerical results.
+Spatial attachment aligns the consolidated hill/channel key to the geometry
+source’s resolved WEPP or Topaz identity; incomplete or ambiguous mappings fail
+explicitly so overlapping numeric IDs cannot attach metrics to another polygon.
 See [spatial and temporal reduction](specification.md) and the
 [water aggregation contract](../../../../docs/schemas/hillslope-water-aggregation-contract.md)
 for invalid-input and joined-source behavior.

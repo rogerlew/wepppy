@@ -1,9 +1,9 @@
 # MOFE ET and Deep-Percolation Area Weighting
 
-**Status**: Open; M1-M4 implemented, M5 validation in progress
+**Status**: Closed; M0-M5 complete, development acceptance passed (2026-10-20 20:01 UTC)
 **Started**: 2026-10-20 18:45 UTC
 **Owner**: WEPPpy/wepppyo3 maintainers; requesting operator
-**Execution**: [ExecPlan](prompts/active/mofe_et_dp_area_weighting_execplan.md)
+**Execution**: [ExecPlan](prompts/completed/mofe_et_dp_area_weighting_execplan.md)
 **Tracking**: [Tracker](tracker.md)
 
 ## Overview
@@ -15,8 +15,8 @@ report sums depths, dashboard event ET sums depths, and Features Export selects
 only the terminal OFE. Correct the consumers to use each OFE's own area.
 
 The operator requested the scaffold and then execution. The three fixes and
-disabled raw-water-balance removal are implemented; final development acceptance
-is in progress. Production deployment and bulk historical repair are excluded.
+disabled raw-water-balance removal are implemented; development acceptance
+has passed. Production deployment and bulk historical repair are excluded.
 
 ## Scope
 
@@ -100,8 +100,11 @@ tests encode or omit the defective spatial behavior. Capture old and new
 outputs without overwriting the evidence. Deployment and existing-project
 repair are separate claims and require separate evidence.
 
-Highest current claim: **diagnosed**, with package scaffold and inactive R
-cleanup complete; aggregation remediation remains pending.
+Highest current claim: **implemented and validated in development**. Native and
+Python release pins are paired; real report, event-query, export and authenticated
+download artifacts pass independent readback. See the
+[validation and release handoff](artifacts/20261020_validation.md). Production
+deployment and historical-project repair are separate, unperformed claims.
 
 ## Complexity Budget
 

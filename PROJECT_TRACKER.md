@@ -373,12 +373,11 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### MOFE ET and deep-percolation area weighting
+### Features Export standalone GeoJSON compatibility
 
-**Status**: Implemented with live development acceptance (2026-10-20); final broad regression gate running.
-**Link**: [Work package](docs/work-packages/20261020_mofe_et_dp_area_weighting/package.md)
-**Scope**: Correct native hillslope-report, dashboard event/comparison ET, and Features Export area accounting; preserve TotalWatSed and routed-field semantics. Disabled raw-balance/map blocks removed from the default R report.
-**Next**: Finish broad regression disposition and package closeout; production rollout and bulk historical repair remain separate.
+**Status**: Backlog; existing format limitation observed during MOFE validation.
+**Evidence**: [Serialized export readback](docs/work-packages/20261020_mofe_et_dp_area_weighting/artifacts/20261020_validation.md#scientific-and-serialized-evidence).
+**Next**: Review the ZIP writer’s payload envelope against the standalone GeoJSON contract and validate with a GIS reader; preserve materialized numerical values.
 
 ### Repository test-isolation maintenance
 
@@ -1578,6 +1577,13 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### MOFE ET and deep-percolation area weighting
+
+**Status**: Closed 2026-10-20; M0-M5 implemented and validated in development.
+**Link**: [Work package](docs/work-packages/20261020_mofe_et_dp_area_weighting/package.md) | [Validation and release handoff](docs/work-packages/20261020_mofe_et_dp_area_weighting/artifacts/20261020_validation.md)
+**Scope**: Native report, dashboard selected/base ET and Features Export use local OFE area; caches versioned, disabled raw R balance removed. Real 455-hill reports/events and spatial exports pass independent artifact readback; broad tests passed in documented segments.
+**Next**: Separate authorized production rollout; standalone GeoJSON envelope follow-up remains in backlog.
 
 ### WMesque Priority Retrieval and Master Catalog Synchronization
 

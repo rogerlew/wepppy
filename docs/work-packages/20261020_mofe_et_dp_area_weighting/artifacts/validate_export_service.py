@@ -34,7 +34,7 @@ expected = {
 }
 receipts=[]
 layer='wepp.interchange.hill_wat'
-for fmt in ['csv','parquet','geojson']:
+for fmt in ['csv','parquet','geojson','geoparquet']:
     payload={'format':fmt,'units':'si','layers':[layer],
              'temporal':{'mode':'event','event':{'selector':'date','dates':['2002-07-01']}},
              'column_selection':{layer:{'include':['ET','Dp']}}}
@@ -46,6 +46,18 @@ for fmt in ['csv','parquet','geojson']:
         with archive.open(name) as member:
             if fmt=='csv': frame=pd.read_csv(member)
             elif fmt=='parquet': frame=pd.read_parquet(member)
+            elif fmt=='geoparquet':
+                import geopandas as gpd
+                frame=gpd.read_parquet(member)
+                assert len(frame) == 455 and frame.geometry.notna().all()
+                assert frame.crs.to_epsg() == 4326
+                original=gpd.read_file(root/'dem/wbt/subcatchments.WGS.geojson')
+                original=original.dissolve(by='WeppID').sort_index().reset_index()
+                frame=frame.sort_values('wepp_id').reset_index(drop=True)
+                np.testing.assert_array_equal(frame.wepp_id,original.WeppID)
+                np.testing.assert_array_equal(frame.topaz_id,original.TopazID)
+                assert frame.geometry.geom_equals(original.geometry).all()
+                frame=pd.DataFrame(frame.drop(columns=frame.geometry.name))
             else:
                 document=json.load(member)
                 collection=document.get('feature_collection',document)
@@ -54,6 +66,7 @@ for fmt in ['csv','parquet','geojson']:
     et_column = next(c for c in frame if c.startswith('ET_2002_07_01'))
     frame = frame.loc[frame[et_column].notna()]
     assert len(frame) == 1
+    assert frame.wepp_id.iloc[0] == 3 and frame.topaz_id.iloc[0] == 31
     for metric, value in expected.items():
         column = next(c for c in frame if c.startswith(metric+'_2002_07_01'))
         np.testing.assert_allclose(frame[column],value,rtol=1e-12)
