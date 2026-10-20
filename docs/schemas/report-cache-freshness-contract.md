@@ -60,7 +60,7 @@ inputs and incoherent reads remain explicit errors, not historical-cache fallbac
 | Complete readable dependencies, valid matching provenance | Reuse compact rows after verifying identity. |
 | Complete dependencies, changed identity | Rebuild through the native/query producer. Never return prior rows as current on rebuild failure. |
 | Complete dependencies, legacy rows without provenance | Rebuild once when the existing required producer is available; never invent past provenance. |
-| Legacy water-balance rows, native API unavailable | Preserve existing legacy availability only when the old source-newer-than-cache rule permits it; log historical/unverified use. A newer source still requires the producer and fails explicitly if unavailable. |
+| Legacy water-balance rows (including unmarked MOFE summaries), native API unavailable | Preserve existing legacy availability only when the old source-newer-than-cache rule permits it; log historical/unverified use. A newer source still requires the producer and fails explicitly if unavailable. |
 | Required source data removed, compatible cache retained | Preserve historical report access. Log historical/unverified use; never label it current or manufacture missing hashes. For verified caches, an observable change in a still-available dependency disallows historical fallback. |
 | Cache absent or invalid, required input absent | Preserve explicit missing-input failure. |
 | Present empty required sources | Preserve existing empty report/schema behavior and native/query validation. |
@@ -208,3 +208,18 @@ Complete and partial relocations, absolute local and parent entries, existing
 current-root references, forbidden paths and query/observation agreement require
 real regression coverage. The initial report publication checkpoint remains the
 ancestor for its other behavior; this refinement precedes normalization code.
+
+## MOFE aggregation compatibility amendment
+
+The [hillslope water aggregation contract](hillslope-water-aggregation-contract.md)
+is a bounded exception to historical calculation preservation: only ET and Dp
+change. Its additive aggregation marker is required for a verified current
+hillslope cache, independently of matching dependency hashes. Older compatible
+caches retain historical_unverified access when dependencies are unavailable;
+with dependencies present they rebuild when the native API is available. The
+existing native-unavailable source-newer guard and historical warning remain
+an explicit exception. A callable writer with an absent/wrong marker fails.
+Native candidate metadata must prove
+the corrected algorithm before publication. Version-1 envelopes, attempt
+visibility, permissions, atomicity and other report contracts remain unchanged.
+Implementation conformance is pending.

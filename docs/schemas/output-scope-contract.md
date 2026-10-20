@@ -177,7 +177,9 @@ defaults and source data while correcting those two user-visible defects.
 legacy-cache reads. Content provenance, historical availability and publication
 follow the [report cache freshness contract](report-cache-freshness-contract.md)
 (implemented). That amendment replaces mtime-only currentness for
-new verified caches while retaining the legacy native-unavailable rule. Required native
+new verified caches while retaining the legacy native-API-unavailable historical
+rule, including unmarked MOFE summaries. A callable old writer must instead
+fail marker validation under the aggregation contract. Required native
 `hillslope_watbal_wepp_ids` discovers distinct IDs in bounded batches;
 `hillslope_watbal_to_parquet` produces the compact summary atomically.
 WEPPpy retains translator policy and Roads manifest/raw-ID logging. There is
@@ -189,13 +191,13 @@ The ordered columns remain `TopazID`, `WaterYear`, `Area_m2`,
 are nullable Int64; metrics are nullable Float64. Empty caches retain nullable
 Null columns. Sort by Topaz/year and preserve pandas schema metadata.
 
-Null/NaN flux and area values become zero. Area is the first value per
-WEPP/OFE, summed per WEPP and then mapped Topaz. Null/NaN OFE rows contribute
-flux but no area. Sum P, Dp, QOFE, latqcc, Ep, Es, and Er independently per
-Topaz/year; combined evaporation is `(sum(Ep) + sum(Es)) + sum(Er)`.
+ET components and Dp follow the daily local-area weighting and input policy in
+the [hillslope water aggregation contract](hillslope-water-aggregation-contract.md).
+This is an explicit exception to the earlier historical-sum preservation rule.
+P, QOFE and latqcc retain independent Topaz/year sums; null/NaN flux becomes zero.
+Area_m2 retains first-observed WEPP/OFE areas summed per mapped Topaz.
 Average annual iteration retains `max(number_of_years - 1, 1)` as its divisor.
-These historical semantics are preserved to avoid changing reported science
-while removing full-source materialization from large-worker post-processing.
+Implementation conformance to the correction is pending.
 
 Canonical H.wat keys are integers. Malformed/nonintegral/out-of-range keys,
 unsupported numeric layouts, and infinite metrics fail explicitly. Existing

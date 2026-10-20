@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-14
+**Last Updated**: 2026-10-20
 **Active Packages**: 46
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -373,6 +373,12 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### MOFE ET and deep-percolation area weighting
+
+**Status**: Scaffold ready (2026-10-20); aggregation implementation pending.
+**Link**: [Work package](docs/work-packages/20261020_mofe_et_dp_area_weighting/package.md)
+**Scope**: Correct native hillslope-report, dashboard event/comparison ET, and Features Export area accounting; preserve TotalWatSed and routed-field semantics. Disabled raw-balance/map blocks removed from the default R report.
+**Next**: Contract/ADR checkpoint, heterogeneous-OFE regressions, cache compatibility, and fresh artifact validation.
 
 ### Repository test-isolation maintenance
 
