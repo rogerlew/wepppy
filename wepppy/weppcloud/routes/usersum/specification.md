@@ -414,3 +414,15 @@ Recommended validation commands:
 ## Known Follow-Ups
 
 - Formal Alembic-managed usersum search migrations are not yet implemented; v1 uses runtime idempotent DDL bootstrap.
+
+## Water output interpretation publication
+
+Implementation conformance: pending (2026-10-20 documentation package).
+
+Publish **Understanding water balance and runoff** and **Water and PASS variables** as active user-role documents under Technical Reference. They explain local OFE versus whole-hillslope normalization, physical WAT runoff versus threshold-filtered PASS delivery, routed watershed outputs, date support, storage and producer/version limitations using the hillslope-water-aggregation contract and ADR-0099. Scientific formulas and output scope remain unchanged.
+
+WEPP Results provides interpretation help independently of run-specific README existence, for single-storm and continuous results. The existing conditional README link is labeled **Output files, columns, and sample data**. Water reports and daily streamflow help identify their runoff source and link to interpretation. Existing prefix-safe URL helpers, access checks and baseline/Roads scopes remain in force. Missing or historical run artifacts never prevent access to general guidance and never imply current accounting conformance.
+
+Generated interchange README text explains its per-file metadata/sample role, the distinct meanings of interchange schema version, model provenance and report accounting version, and points readers to user guidance. Previews remain bounded to three rows. Metadata descriptions must agree with the current scientific contract without changing column names, types or values. Regenerating documentation does not rewrite or certify historical data.
+
+The rationale is to make scientific meaning discoverable before users combine fields in a spreadsheet; schemas and sample rows alone cannot communicate normalization and event filtering. Validate user-role nav/search, rendered contextual links, absent/present/legacy artifacts and actual generated metadata before claiming completion.

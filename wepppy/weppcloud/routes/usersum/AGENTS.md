@@ -59,3 +59,8 @@
   - `tests/weppcloud/test_usersum_template_wiring.py`
 - Run after usersum route/template/link logic edits:
   - `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py`
+
+## Canonical specification
+
+[specification.md](specification.md) governs Usersum publication, navigation,
+search, visibility and link resolution.

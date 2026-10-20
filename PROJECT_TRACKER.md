@@ -4587,3 +4587,5 @@ If this tracker format isn't working or you have suggestions:
 - Completed 2026-09-28: [Watershed runtime budget](docs/work-packages/20260928_watershed_timeout_scaling/package.md).
   Implementation `aa2d1cd2a`; full suite 9,977 passed / 99 skipped; live Redis
   validation and independent reviews passed. Deployment separate.
+
+- Active: [Water output interpretation and discovery](docs/work-packages/20261020_water_output_documentation/package.md) — user guides, metadata and Results/Usersum discovery corrections.
