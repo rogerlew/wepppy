@@ -375,10 +375,10 @@ Feedback mechanisms:
 
 ### MOFE ET and deep-percolation area weighting
 
-**Status**: Scaffold ready (2026-10-20); aggregation implementation pending.
+**Status**: Implemented with live development acceptance (2026-10-20); final broad regression gate running.
 **Link**: [Work package](docs/work-packages/20261020_mofe_et_dp_area_weighting/package.md)
 **Scope**: Correct native hillslope-report, dashboard event/comparison ET, and Features Export area accounting; preserve TotalWatSed and routed-field semantics. Disabled raw-balance/map blocks removed from the default R report.
-**Next**: Contract/ADR checkpoint, heterogeneous-OFE regressions, cache compatibility, and fresh artifact validation.
+**Next**: Finish broad regression disposition and package closeout; production rollout and bulk historical repair remain separate.
 
 ### Repository test-isolation maintenance
 

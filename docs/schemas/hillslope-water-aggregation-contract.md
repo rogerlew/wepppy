@@ -3,7 +3,8 @@
 ## Scope and status
 
 Approved scope: operator requested correction of MOFE ET/Dp consumers and then
-execution of the work package on 2026-10-20. Implementation conformance is pending.
+execution of the work package on 2026-10-20. Numerical conformance is verified
+in development; rollout and bulk historical repair remain separate.
 This contract governs local water fluxes in hillslope water-balance reports,
 dashboard event ET (selected and comparison runs), and H.wat Features Export.
 It amends the historical numerical preservation rule in the

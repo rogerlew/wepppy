@@ -1,0 +1,87 @@
+{
+  "source": "/wc1/runs/mo/mofe-et-dp-validation-20261020/wepp/output/interchange/H.wat.parquet",
+  "source_sha256": "e6783c21665859cf33382f592f3b007c7f059780e3a0b6736af9982a6f7caf44",
+  "native_module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+  "native_sha256": "669579b0e95bc035ce318b1ea49e288b10c20fcbf3e9e7e78739f46931a5be02",
+  "input_rows": 8557275,
+  "hills": 455,
+  "summary_rows": 10465,
+  "native_seconds": 5.389648291980848,
+  "warm_seconds": 0.56889992300421,
+  "warm_status": "current",
+  "sample_wepp_id": 3,
+  "sample_rows": 40175,
+  "sample_days": 8035,
+  "daily_loader_parity": true,
+  "all_hill_year_oracle_parity": true,
+  "export_calendar_oracle_parity": true,
+  "outputs": "/wc1/runs/mo/mofe-et-dp-validation-20261020/mofe-validation",
+  "cache": "/wc1/runs/mo/mofe-et-dp-validation-20261020/wepp/reports/cache/hillslope_watbal_summary.parquet",
+  "exports": {
+    "event": [
+      {
+        "key": 3,
+        "ET_2002_01_01": 0.61,
+        "ET_2002_01_02": 0.52,
+        "Dp_2002_01_01": 0.0,
+        "Dp_2002_01_02": 0.0
+      }
+    ],
+    "yearly": [
+      {
+        "key": 3,
+        "ET_yr2002": 727.156,
+        "ET_yr2003": 738.2059999999999,
+        "ET_yr2004": 757.982,
+        "ET_yr2005": 708.284,
+        "ET_yr2006": 733.3299999999999,
+        "ET_yr2007": 689.8639999999999,
+        "ET_yr2008": 681.4639999999999,
+        "ET_yr2009": 735.362,
+        "ET_yr2010": 647.4499999999999,
+        "ET_yr2011": 626.7919999999999,
+        "ET_yr2012": 671.6619999999999,
+        "ET_yr2013": 658.8879999999999,
+        "ET_yr2014": 706.486,
+        "ET_yr2015": 734.9979999999999,
+        "ET_yr2016": 688.986,
+        "ET_yr2017": 687.8439999999999,
+        "ET_yr2018": 714.4079999999999,
+        "ET_yr2019": 690.414,
+        "ET_yr2020": 670.5139999999999,
+        "ET_yr2021": 690.944,
+        "ET_yr2022": 670.7579999999999,
+        "ET_yr2023": 701.9739999999999,
+        "Dp_yr2002": 0.0,
+        "Dp_yr2003": 0.0,
+        "Dp_yr2004": 0.0,
+        "Dp_yr2005": 0.0,
+        "Dp_yr2006": 0.0,
+        "Dp_yr2007": 0.0,
+        "Dp_yr2008": 0.0,
+        "Dp_yr2009": 0.0,
+        "Dp_yr2010": 0.0,
+        "Dp_yr2011": 0.0,
+        "Dp_yr2012": 0.0,
+        "Dp_yr2013": 0.0,
+        "Dp_yr2014": 0.0,
+        "Dp_yr2015": 0.0,
+        "Dp_yr2016": 0.0,
+        "Dp_yr2017": 0.0,
+        "Dp_yr2018": 0.0,
+        "Dp_yr2019": 0.0,
+        "Dp_yr2020": 0.0,
+        "Dp_yr2021": 0.0,
+        "Dp_yr2022": 0.0,
+        "Dp_yr2023": 0.0
+      }
+    ],
+    "annual_average": [
+      {
+        "key": 3,
+        "ET": 696.9893636363636,
+        "Dp": 0.0
+      }
+    ]
+  }
+}

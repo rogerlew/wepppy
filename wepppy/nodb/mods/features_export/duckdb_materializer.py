@@ -73,6 +73,8 @@ def materialize_layer_attributes(
             context_label=f"layer={layer_id};source={source.source_id}",
             allow_non_unique_keys=allow_non_unique_keys,
         )
+        if source.source_id in {"wepp_hill_wat", "ag_fields_hill_wat"}:
+            source_frame.attrs["hwat_source_key"] = source_key
         staged_tables.append((source.source_id, source_frame, dict(source.units_by_column)))
 
     if not staged_tables:
@@ -82,6 +84,10 @@ def materialize_layer_attributes(
         )
 
     _source_id, merged, source_units = staged_tables[0]
+    water_source_ids = {"wepp_hill_wat", "ag_fields_hill_wat"}
+    water_columns = ({name: name for name in merged.columns}
+                     if _source_id in water_source_ids else None)
+    water_identity = merged.attrs.get("hwat_source_key")
     merged = merged.copy()
     unit_mapping: dict[str, str] = {}
     for column_name, display_unit in source_units.items():
@@ -103,6 +109,10 @@ def materialize_layer_attributes(
             rename_map[column_name] = renamed
             used_names.add(renamed)
 
+        if source_id in water_source_ids:
+            water_columns = {name: rename_map.get(name, name) for name in right.columns}
+            source_identity = right.attrs["hwat_source_key"]
+            water_identity = rename_map.get(source_identity, source_identity)
         if rename_map:
             right = right.rename(columns=rename_map)
 
@@ -137,6 +147,9 @@ def materialize_layer_attributes(
             if resolved_column in merged.columns:
                 unit_mapping[resolved_column] = display_unit.strip()
 
+    if water_columns is not None:
+        merged.attrs["hwat_columns"] = water_columns
+        merged.attrs["hwat_source_key"] = water_identity
     return merged, unit_mapping
 
 

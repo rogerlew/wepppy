@@ -1,0 +1,1 @@
+{"binary": "/workdir/wepppyo3/target/release/libwepp_interchange_rust.so", "source": "/wc1/runs/th/thespian-cleanness/wepp/output/interchange/H.wat.parquet", "bytes": 75354414, "rows": 3566829, "hills": 217, "seconds": [1.24880997906439, 1.2049980491865426, 1.2491573570296168], "peak_rss_kib": 81292}

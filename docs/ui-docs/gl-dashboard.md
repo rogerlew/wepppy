@@ -30,6 +30,12 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 3. RAP (Rangeland Analysis Platform) timeseries exploration
 4. WATAR (Wildfire Ash Transport) overlay visualization
 5. OpenET evapotranspiration overlays (monthly) and yearly ET trends
+
+WEPP event ET is a daily hillslope depth in mm: the sum of OFE ET volume
+contributions divided by their summed local areas. Selected and comparison runs
+use the same calculation. Invalid area or infinite flux makes event ET
+unavailable (gray), and unavailable values are excluded from ranges and
+comparison differences. This does not change OpenET products.
 6. Multi-scenario comparison with differential colormaps
 
 **Key Features:**

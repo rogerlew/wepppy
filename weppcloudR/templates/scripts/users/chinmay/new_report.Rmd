@@ -188,27 +188,6 @@ totalwatsed_wbal%>%
 ```
 
 
-<!-- #### Hillslope water balance   -->
-
-<!-- Figure below shows a long term (simulation period) change in storage for each simulated hillslope in the watershed.   -->
-
-```{r, echo=FALSE, message=FALSE,warning=FALSE}
-##switched off in the report asked by Erin.
-# watfilepaths <- gethillwatfiles(params$proj_runid)
-# future::plan(multisession, workers = 6)
-# watbal<- furrr::future_map(watfilepaths, calc_watbal)%>%
-#   dplyr::bind_rows() %>%
-#   dplyr::mutate_if(is.list, purrr::simplify_all) %>%
-#   tidyr::unnest(cols = c("wb", "WeppID"))
-# shp <- get_geometry(params$proj_runid)
-# Hwatbal_spdf = dplyr::left_join(shp, watbal, by = c("WeppID")) %>% dplyr::rename("wepp_id" = "WeppID")
-```
-
-```{r, echo=FALSE, fig.cap="Change in storage (mm) for each hillslope."}
-# make_leaflet_map(Hwatbal_spdf, wb,col_pal_type = "Numeric",unit = "mm")
-
-```
-
 #### Composition of streamflow
 
 The figure below shows the total simulated streamflow for each water year divided into baseflow, lateral flow, and runoff, and the percentage of each relative to the streamflow. For the entire simulation period, the average <span class="baseflow">baseflow was `r round(mean(perc_flow$PercentBaseflow))`%</span>, <span class="lateral">lateral flow was `r round(mean(perc_flow$PercentLateral))`%</span>, and <span class="runoff">runoff was `r round(mean(perc_flow$PercentRunoff))`%</span>. 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import collections.abc as cabc
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import pandas as pd
@@ -13,7 +13,7 @@ from .contracts import ExportWarning, NormalizedTemporalEvent, ResolvedExportPla
 from .discovery import DiscoveredSourceFrame, discover_layer_sources
 from .duckdb_materializer import materialize_layer_attributes
 from .join_planner import MaterializationContractError, canonical_join_value
-from .temporal_wide_materializer import materialize_temporal_layer_wide
+from .temporal_wide_materializer import materialize_temporal_layer_wide, derive_water_et
 
 
 @dataclass(frozen=True)
@@ -67,6 +67,15 @@ def materialize_carrier_layer_core(
         sources=discovered_sources,
     )
 
+    # Derive before selection/join so the advertised ET measure exists and keeps
+    # the WAT source's provenance even when another table has colliding names.
+    water_sources = {"wepp_hill_wat", "ag_fields_hill_wat"}
+    discovered_sources = tuple(
+        replace(source, dataframe=derive_water_et(source.dataframe),
+                units_by_column={**source.units_by_column, "ET": "mm"})
+        if source.source_id in water_sources else source
+        for source in discovered_sources
+    )
     join_contract = _as_mapping(catalog_layer_raw.get("join"))
     allow_non_unique_layer_keys = _join_allows_non_unique_keys(join_contract) or (
         layer.temporal_mode in {"annual_average", "event", "yearly"}

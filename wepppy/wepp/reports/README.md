@@ -25,7 +25,8 @@ Water-balance summaries use the required streaming native producer and also
 verify the effective WEPP-to-Topaz mapping, including Roads segment targets.
 Touching or hard-linking unchanged inputs does not rebuild either report. Actual
 source or mapping changes rebuild before returning new rows. Scientific columns,
-units, calculations and baseline/Roads scope are unchanged.
+units and baseline/Roads scope are unchanged. Hillslope ET and Dp use the
+area-weighting contract described below.
 
 Retained reports remain available after required source files are archived or
 removed, provided no remaining verified dependency is known to have changed.
@@ -158,23 +159,28 @@ observable drift but do not provide arbitrary-writer snapshot isolation.
 `HillslopeWatbalReport` requires the paired native hillslope-watbal API when a
 cache must be rebuilt. Rust streams projected H.wat batches and writes the
 compact Topaz/year summary; Python loads only that summary for report iterators.
-Existing baseline/Roads mappings, cache version, source freshness, legacy reads,
-headers, units, and average divisors remain unchanged. Large-run processing no
+Existing baseline/Roads mappings, headers, units, and average divisors remain
+unchanged. ET components and Dp are weighted by each OFE's local area for each
+hill/day, then summed over time. Translated native IDs sharing one reported hill
+are combined before the daily division. Large-run processing no
 longer creates a source-sized pandas dataframe. Missing native support fails
 explicitly; update the paired release and startup pin together.
 
 See the [summary cache contract](../../../docs/schemas/output-scope-contract.md#hillslope-water-balance-summary-cache)
-for exact fields, null behavior, and publication expectations.
+for exact fields, null behavior, and publication expectations, and the
+[water aggregation contract](../../../docs/schemas/hillslope-water-aggregation-contract.md)
+for the spatial formula.
 
-### Current CSV limitation
+### Cache migration and CSV
 
-The hillslope water-balance CSV request (`avg_annual_watbal/?format=csv`)
-currently returns HTTP 500 because its existing CSV adapter does not implement
-the report's row iterator. The HTML report remains usable. For data access,
-open the HTML report to build or validate its summary, then use project browse
-to download `wepp/reports/cache/hillslope_watbal_summary.parquet` (or the
-`_roads` variant for Roads). This compact file contains Topaz/year rows in its
-stored metric units; project display-unit conversion is separate. A direct
-download returns the retained file and does not itself rebuild or validate it.
-The CSV adapter limitation is separate from cache freshness; rebuilding inputs
-does not repair that adapter.
+The paired native writer marks summaries `mofe-area-v1`. With source and mapping
+available, the next report request rebuilds an older summary even when its input
+hashes match. Unavailable historical dependencies retain the existing
+`historical_unverified` policy; those retained rows are not certified corrected.
+A callable old writer cannot publish a replacement without the new marker.
+No bulk deletion or WEPP rerun is required.
+
+The CSV request (`avg_annual_watbal/?format=csv`) uses the same annual
+iterator/header as HTML, including its existing annual divisor. Both requests
+validate or build the summary. Direct project-browse downloads of cached
+Parquet do not trigger validation or rebuilding.

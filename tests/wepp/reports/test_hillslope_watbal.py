@@ -295,3 +295,28 @@ def test_hillslope_watbal_unknown_baseline_id_fails(tmp_path):
     frame = pd.read_parquet(source);frame["wepp_id"] = 99;frame.to_parquet(source,index=False)
     with pytest.raises(KeyError):
         HillslopeWatbalReport(tmp_path)
+
+
+def test_hillslope_csv_dataframe_preserves_annual_identity_and_values(tmp_path):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    _write_h_wat_parquet(tmp_path / "wepp/output/interchange/H.wat.parquet")
+    report = HillslopeWatbalReport(tmp_path)
+    frame = report.to_dataframe()
+    assert list(frame.columns) == report.avg_annual_header
+    assert frame.to_dict(orient="records") == [dict(row.row) for row in report.avg_annual_iter()]
+    assert frame["TopazID"].tolist() == [101, 202]
+    assert frame["Percolation (mm)"].tolist() == [3., 3.]
+    np.testing.assert_allclose(frame["Transpiration + Evaporation (mm)"], [.6, .6])
+
+
+def test_hillslope_empty_csv_dataframe_and_optional_parquet(tmp_path):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    source = tmp_path / 'wepp/output/interchange/H.wat.parquet'
+    _write_h_wat_parquet(source)
+    pd.read_parquet(source).iloc[:0].to_parquet(source,index=False)
+    report = HillslopeWatbalReport(tmp_path)
+    output = tmp_path/'export.parquet'
+    frame = report.to_dataframe(output,index=False)
+    assert frame.empty
+    assert list(frame.columns) == report.avg_annual_header
+    pd.testing.assert_frame_equal(pd.read_parquet(output),frame)

@@ -169,8 +169,8 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profil
 Production Python services also fail startup unless the vendored
 `wepppyo3.wepp_interchange` shared object matches the SHA-256 pinned in
 `docker/wepppyo3-interchange-preflight.py`. The openwepp image publication workflow
-pins WEPPpyo3 `0515272453e36fe071c7812fb9d8ca2cf1642d08`, pairing interchange
-SHA-256 `103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633`
+pins WEPPpyo3 `5e42716230dd6f02d218bfbe10509d501edb93a8`, pairing interchange
+SHA-256 `669579b0e95bc035ce318b1ea49e288b10c20fcbf3e9e7e78739f46931a5be02`
 with climate SHA-256 `da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882`.
 Verify actual image imports before promotion. Update that pin together with the
 canonical `wepppyo3/release/linux/py312` artifact whenever the native

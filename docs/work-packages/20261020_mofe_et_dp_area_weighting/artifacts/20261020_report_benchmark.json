@@ -1,0 +1,14 @@
+{
+  "source_bytes": 75354414,
+  "explicit_binary": "/workdir/wepppyo3/target/release/libwepp_interchange_rust.so",
+  "first_seconds": 1.8894748690072447,
+  "settled_seconds": [
+    0.015033137984573841,
+    0.01224016910418868,
+    0.0118358398322016,
+    0.011401337804272771,
+    0.011281525017693639
+  ],
+  "settled_mean_ms": 12.358401948586106,
+  "status": "current"
+}

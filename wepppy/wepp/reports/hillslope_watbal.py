@@ -38,6 +38,7 @@ class HillslopeWatbalReport(ReportBase):
     _ROADS_SEGMENT_MANIFEST_REL_PATH = Path("wepp/roads/segments/roads.segment.pass.manifest.json")
     _CACHE_KEY = "hillslope_watbal_summary"
     _CACHE_VERSION = "1"
+    _AGGREGATION_VERSION = "mofe-area-v1"
     _MEASURE_MAP = OrderedDict(
         [
             ("Precipitation (mm)", "precip_mm"),
@@ -141,9 +142,13 @@ class HillslopeWatbalReport(ReportBase):
                     if dependencies["mapping"] is None:
                         missing.append("Watershed translator prerequisites")
                     return self._historical(dataframe, f"missing {', '.join(missing)}")
-                return dataframe
+                if proof.get("aggregation_version") == self._AGGREGATION_VERSION:
+                    return dataframe
+                # Matching bytes do not verify obsolete numerical semantics.
+                # Keep rows only for the existing explicitly historical fallback.
             # A known mismatch cannot fall through to the older legacy location.
-            dataframe = None
+            if verdict is None:
+                dataframe = None
         if dataframe is not None and before["sha256"] is None:
             return self._historical(dataframe, f"missing source {source}")
         try:
@@ -214,7 +219,8 @@ class HillslopeWatbalReport(ReportBase):
             if before != after:
                 raise RuntimeError("Report dependencies changed during native build")
             dataframe = table.to_pandas()
-            attempt.publish(table, before, source_ids=ids)
+            attempt.publish(table, before, source_ids=ids,
+                            aggregation_version=self._AGGREGATION_VERSION)
             return dataframe
 
     def _resolve_mapping(self, wepp_ids: list[int]) -> dict[int, int]:
@@ -314,7 +320,11 @@ class HillslopeWatbalReport(ReportBase):
         native.hillslope_watbal_to_parquet(
             str(source_path), str(candidate), mapping, pandas_metadata=metadata
         )
-        return pq.read_table(candidate)
+        table = pq.read_table(candidate)
+        marker = (table.schema.metadata or {}).get(b"hillslope_watbal_aggregation")
+        if marker != self._AGGREGATION_VERSION.encode():
+            raise ValueError("Native hillslope summary lacks corrected MOFE aggregation marker")
+        return table
 
     def _load_roads_segment_target_map(self) -> dict[int, int]:
         """Return Roads segment run ID -> target hillslope WEPP ID map when available."""
@@ -397,6 +407,20 @@ class HillslopeWatbalReport(ReportBase):
                 total = float(group[label].sum())
                 record[label] = total / divisor
             yield RowData(record)
+
+    def to_dataframe(self, fp=None, *, write_header=True, run_descriptors=None,
+                     **to_parquet_kwargs) -> pd.DataFrame:
+        """Export the same hillslope annual rows and labels as the HTML table."""
+        dataframe = pd.DataFrame(
+            [dict(row.row) for row in self.avg_annual_iter()],
+            columns=self.avg_annual_header,
+        )
+        if write_header and run_descriptors:
+            for name, value in reversed(run_descriptors):
+                dataframe.insert(0, name, value)
+        if fp is not None:
+            dataframe.to_parquet(fp, **to_parquet_kwargs)
+        return dataframe
 
     def yearly_iter(self) -> Iterator[RowData]:
         """Yield watershed-wide yearly totals."""

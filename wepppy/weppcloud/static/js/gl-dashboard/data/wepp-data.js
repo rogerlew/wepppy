@@ -63,6 +63,19 @@ export function createWeppDataManager({
   const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_Saturation', 'event_peakro', 'event_tdet'];
   const WEPP_CHANNEL_MODES = ['channel_discharge_volume', 'channel_soil_loss'];
 
+  function eventEtExpression() {
+    // Local OFE depths become one daily hillslope depth. Invalid data stays
+    // unavailable through the map/range consumers instead of becoming zero.
+    const components = ['Ep', 'Es', 'Er'];
+    const depth = components.map((c) =>
+      `(CASE WHEN isnan(wat.${c}) THEN 0 ELSE COALESCE(wat.${c}, 0) END)`
+    ).join(' + ');
+    const volume = `SUM((${depth}) * wat.Area)`;
+    const area = 'SUM(wat.Area)';
+    const infinite = components.map((c) => `isinf(wat.${c})`).join(' OR ');
+    return `CASE WHEN COUNT(*) FILTER (WHERE wat.Area IS NULL OR NOT isfinite(wat.Area) OR wat.Area <= 0 OR ${infinite}) > 0 OR NOT isfinite(${volume}) OR NOT isfinite(${area}) THEN NULL ELSE ${volume} / NULLIF(${area}, 0) END`;
+  }
+
   function buildStatExpression(stat, expr) {
     if (stat === 'p90') return `quantile(${expr}, 0.9)`;
     if (stat === 'sd') return `stddev_samp(${expr})`;
@@ -550,6 +563,7 @@ export function createWeppDataManager({
       let max = -Infinity;
       for (const key of Object.keys(summary)) {
         const row = summary[key];
+        if (mode === 'event_ET' && row[mode] == null) continue;
         const v = Number(row[mode]);
         if (Number.isFinite(v)) {
           if (v < min) min = v;
@@ -587,6 +601,7 @@ export function createWeppDataManager({
         const scenarioRow = state.weppEventSummary[topazId];
         const baseRow = state.baseSummaryCache.weppEvent[topazId];
         if (!scenarioRow || !baseRow) continue;
+        if (mode === 'event_ET' && (scenarioRow[mode] == null || baseRow[mode] == null)) continue;
         const scenarioValue = Number(scenarioRow[mode]);
         const baseValue = Number(baseRow[mode]);
         if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
@@ -595,6 +610,8 @@ export function createWeppDataManager({
       const range = computeRobustRange(diffs);
       if (range) {
         nextDiffRanges[mode] = range;
+      } else if (mode === 'event_ET') {
+        delete nextDiffRanges[mode];
       }
     }
     setState({ comparisonDiffRanges: nextDiffRanges });
@@ -626,7 +643,7 @@ export function createWeppDataManager({
         const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
-            ? '(SUM(wat.Ep) + SUM(wat.Es) + SUM(wat.Er))'
+            ? eventEtExpression()
             : `SUM(wat.${watColumn})`;
         filters = [
           { column: 'wat.year', op: '=', value: year },
@@ -756,7 +773,7 @@ export function createWeppDataManager({
         const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
-            ? '(SUM(wat.Ep) + SUM(wat.Es) + SUM(wat.Er))'
+            ? eventEtExpression()
             : `SUM(wat.${watColumn})`;
         const filters = [
           { column: 'wat.year', op: '=', value: year },

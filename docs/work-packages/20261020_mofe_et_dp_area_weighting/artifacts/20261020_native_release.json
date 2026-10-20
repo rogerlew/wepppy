@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-20",
+  "source_base": "0515272453e36fe071c7812fb9d8ca2cf1642d08",
+  "contract_checkpoint_wepppy": "9651d7af6",
+  "source_file": "wepp_interchange/src/hillslope_watbal.rs",
+  "source_sha256": "87fc4fef071fd43cbce50a8288b2fd67b175d16d1f4503d9db746a2a77464917",
+  "binary": "release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+  "binary_sha256": "669579b0e95bc035ce318b1ea49e288b10c20fcbf3e9e7e78739f46931a5be02",
+  "build_command": "PYO3_PYTHON=/usr/bin/python3.12 cargo build --release -p wepp_interchange_rust",
+  "publication": "sibling staging, mode0755, atomic rename; development only",
+  "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+  "python": "Python 3.12.3",
+  "tests": {
+    "cargo_unit": 107,
+    "cargo_writer": 17,
+    "python_hillslope_totalwatsed_release": 72
+  },
+  "paired_wepppy_package": "docs/work-packages/20261020_mofe_et_dp_area_weighting",
+  "production_deployed": false
+}

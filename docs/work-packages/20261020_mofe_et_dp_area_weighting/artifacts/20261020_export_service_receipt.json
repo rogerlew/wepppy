@@ -1,0 +1,110 @@
+[
+  {
+    "format": "csv",
+    "result": {
+      "artifact_id": "b439320f39dd471db0850989f64e3e1d",
+      "artifact_relpath": "export/features/artifacts/b439320f39dd471db0850989f64e3e1d/features_export.csv.zip",
+      "download_url": "/rq-engine/api/runs/mofe-et-dp-export-20261020/canada-wbt-mofe/export/features/job/mofe-real-csv/download",
+      "cache_hit": true,
+      "source_job_id": "mofe-real-csv",
+      "manifest_relpath": "export/features/jobs/mofe-real-csv/manifest.json",
+      "warnings": []
+    },
+    "columns": [
+      "topaz_id",
+      "wepp_id",
+      "Dp_2002_07_01_mm",
+      "ET_2002_07_01_mm",
+      "output_scope",
+      "omni_scenario",
+      "omni_contrast_id"
+    ],
+    "packaged_rows": 1,
+    "observed_rows": [
+      {
+        "topaz_id": 31,
+        "wepp_id": 3,
+        "Dp_2002_07_01_mm": 0.0,
+        "ET_2002_07_01_mm": 3.61,
+        "output_scope": "baseline",
+        "omni_scenario": null,
+        "omni_contrast_id": null
+      }
+    ],
+    "oracle": {
+      "ET": 3.61,
+      "Dp": 0.0
+    },
+    "sha256": "bb7d5b7a89a21001eb8ae42684f5f996e9614e3ed7adc6fea5e360d0613745df"
+  },
+  {
+    "format": "parquet",
+    "result": {
+      "artifact_id": "89fc1f570aec429390906ad9f88c7dee",
+      "artifact_relpath": "export/features/artifacts/89fc1f570aec429390906ad9f88c7dee/features_export.parquet.zip",
+      "download_url": "/rq-engine/api/runs/mofe-et-dp-export-20261020/canada-wbt-mofe/export/features/job/mofe-real-parquet/download",
+      "cache_hit": true,
+      "source_job_id": "mofe-real-parquet",
+      "manifest_relpath": "export/features/jobs/mofe-real-parquet/manifest.json",
+      "warnings": []
+    },
+    "columns": [
+      "topaz_id",
+      "wepp_id",
+      "Dp_2002_07_01_mm",
+      "ET_2002_07_01_mm",
+      "output_scope",
+      "omni_scenario",
+      "omni_contrast_id"
+    ],
+    "packaged_rows": 1,
+    "observed_rows": [
+      {
+        "topaz_id": 31,
+        "wepp_id": 3,
+        "Dp_2002_07_01_mm": 0.0,
+        "ET_2002_07_01_mm": 3.61,
+        "output_scope": "baseline",
+        "omni_scenario": null,
+        "omni_contrast_id": null
+      }
+    ],
+    "oracle": {
+      "ET": 3.61,
+      "Dp": 0.0
+    },
+    "sha256": "8b7b860b090d6eb915aaf73eed796e5caf22f76a3059a4666dac3bcf8899b076"
+  },
+  {
+    "format": "geojson",
+    "result": {
+      "artifact_id": "1ff90cb28c214aecaf50e8ac2550a82e",
+      "artifact_relpath": "export/features/artifacts/1ff90cb28c214aecaf50e8ac2550a82e/features_export.geojson.zip",
+      "download_url": "/rq-engine/api/runs/mofe-et-dp-export-20261020/canada-wbt-mofe/export/features/job/mofe-real-geojson/download",
+      "cache_hit": true,
+      "source_job_id": "mofe-real-geojson",
+      "manifest_relpath": "export/features/jobs/mofe-real-geojson/manifest.json",
+      "warnings": []
+    },
+    "columns": [
+      "Dp_2002_07_01_mm",
+      "ET_2002_07_01_mm",
+      "topaz_id",
+      "wepp_id"
+    ],
+    "packaged_rows": 455,
+    "observed_rows": [
+      {
+        "Dp_2002_07_01_mm": 0.0,
+        "ET_2002_07_01_mm": 3.61,
+        "topaz_id": 31.0,
+        "wepp_id": 3.0
+      }
+    ],
+    "oracle": {
+      "ET": 3.61,
+      "Dp": 0.0
+    },
+    "sha256": "7c0a1a665d92d1c17898daaba9dbee79056b623e3e61c8281af09672337a936a"
+  }
+]

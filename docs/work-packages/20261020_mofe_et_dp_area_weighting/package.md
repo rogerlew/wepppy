@@ -1,9 +1,9 @@
 # MOFE ET and Deep-Percolation Area Weighting
 
-**Status**: Open; scaffolded, implementation not started  
-**Started**: 2026-10-20 18:45 UTC  
-**Owner**: WEPPpy/wepppyo3 maintainers; requesting operator  
-**Execution**: [ExecPlan](prompts/active/mofe_et_dp_area_weighting_execplan.md)  
+**Status**: Open; M1-M4 implemented, M5 validation in progress
+**Started**: 2026-10-20 18:45 UTC
+**Owner**: WEPPpy/wepppyo3 maintainers; requesting operator
+**Execution**: [ExecPlan](prompts/active/mofe_et_dp_area_weighting_execplan.md)
 **Tracking**: [Tracker](tracker.md)
 
 ## Overview
@@ -14,9 +14,9 @@ consumers incorrectly turn them into hillslope values: the native water-balance
 report sums depths, dashboard event ET sums depths, and Features Export selects
 only the terminal OFE. Correct the consumers to use each OFE's own area.
 
-The operator requested a scaffold for those three fixes and immediate removal
-of the disabled raw-water-balance section in `new_report.Rmd`. This package
-does not claim implementation, deployment, or repair of existing projects.
+The operator requested the scaffold and then execution. The three fixes and
+disabled raw-water-balance removal are implemented; final development acceptance
+is in progress. Production deployment and bulk historical repair are excluded.
 
 ## Scope
 

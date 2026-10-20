@@ -6,6 +6,15 @@
 
 Features Export lets you build a repeatable export request, save/share it as profile text, and rerun it against the current run. The UI is profile-based: every setting in the form maps to a profile request payload.
 
+Hillslope water ET, Ep, Es, Er, and Dp use each OFE's local area to calculate
+daily feature depths before event/yearly/annual-average reduction. ET is derived
+from Ep+Es+Er; hidden area and date columns remain available when only ET is
+selected. Routed water fields retain their terminal-OFE rule. The export cache
+version `features-export-mofe-area-v2` prevents reuse of older numerical results.
+See [spatial and temporal reduction](specification.md) and the
+[water aggregation contract](../../../../docs/schemas/hillslope-water-aggregation-contract.md)
+for invalid-input and joined-source behavior.
+
 ## Profile-Based Workflow
 
 1. Choose a preset profile or paste profile YAML/JSON text.

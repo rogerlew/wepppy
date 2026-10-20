@@ -1,0 +1,59 @@
+{
+  "reportStatus": 200,
+  "csvStatus": 200,
+  "browseStatus": 200,
+  "downloads": [
+    {
+      "run": "mofe-et-dp-validation-20261020",
+      "relpath": "wepp/reports/cache/hillslope_watbal_summary.parquet",
+      "status": 200,
+      "sha256": "f41c4a294567ce1a3e0c248d4c6d36cdbe4ce475bc23b326d969bd21d1e7dd42"
+    },
+    {
+      "run": "mofe-et-dp-export-20261020",
+      "relpath": "export/features/artifacts/b439320f39dd471db0850989f64e3e1d/features_export.csv.zip",
+      "status": 200,
+      "sha256": "bb7d5b7a89a21001eb8ae42684f5f996e9614e3ed7adc6fea5e360d0613745df"
+    },
+    {
+      "run": "mofe-et-dp-export-20261020",
+      "relpath": "export/features/artifacts/89fc1f570aec429390906ad9f88c7dee/features_export.parquet.zip",
+      "status": 200,
+      "sha256": "8b7b860b090d6eb915aaf73eed796e5caf22f76a3059a4666dac3bcf8899b076"
+    },
+    {
+      "run": "mofe-et-dp-export-20261020",
+      "relpath": "export/features/artifacts/1ff90cb28c214aecaf50e8ac2550a82e/features_export.geojson.zip",
+      "status": 200,
+      "sha256": "7c0a1a665d92d1c17898daaba9dbee79056b623e3e61c8281af09672337a936a"
+    }
+  ],
+  "report_hills": 455,
+  "event_hills": 455,
+  "baseline_hills": 455,
+  "retained_live_receipt": "/wc1/runs/mo/mofe-et-dp-validation-20261020/mofe-validation/live-browser-receipt.json",
+  "native_commit": "5e42716230dd6f02d218bfbe10509d501edb93a8",
+  "web_reload": "SIGHUP to development Gunicorn master8; workers212-215 replaced by1131976-1131979; pytest exec process unaffected",
+  "files": {
+    "live-browser-receipt.json": {
+      "bytes": 112716,
+      "sha256": "134e9b990f33128d80e9d55bcf2980538ffd5aa21e780787d8d5c7b82e85e5b5"
+    },
+    "live-report.csv": {
+      "bytes": 36597,
+      "sha256": "d9bc105fede03dfda178f3b47893ffa1c55d92e81f002d7c77ac8641b3978b9e"
+    },
+    "live-report-browser.png": {
+      "bytes": 115589,
+      "sha256": "d6d2e3750df334f7e3bb3c12e6d277886729e95ed4a2a4cd42a3d32d5894fd01"
+    },
+    "receipt.json": {
+      "bytes": 2660,
+      "sha256": "4a8e47fc965caf135e23cf4cb0d851e9cb676626d54cd03eb2cedf60c9de450e"
+    },
+    "fresh-native.parquet": {
+      "bytes": 211565,
+      "sha256": "4da3c7de6a83249caeaf7840b66a221952f28f4a4022a239ea9bf6e77f4f396c"
+    }
+  }
+}

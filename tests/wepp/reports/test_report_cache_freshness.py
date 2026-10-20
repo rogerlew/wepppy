@@ -679,3 +679,66 @@ def test_missing_catalog_changed_complete_inputs_rebuild_in_one_call(run, monkey
     assert report.cache_status == "built"
     assert _rows(report)[0]["Avg Runoff Depth (mm/yr)"] == 900.0
     assert list(counts.values()) == [2, 2, 2]
+
+
+def test_mofe_unmarked_matching_cache_rebuilds_and_then_reuses(run):
+    report = HillslopeWatbalReport(run)
+    cache = run / 'wepp/reports/cache/hillslope_watbal_summary.parquet'
+    table = pq.read_table(cache)
+    metadata = dict(table.schema.metadata)
+    proof = json.loads(metadata[freshness._METADATA_KEY])
+    proof.pop('aggregation_version')
+    metadata[freshness._METADATA_KEY] = json.dumps(proof).encode()
+    pq.write_table(table.replace_schema_metadata(metadata), cache)
+    old = cache.read_bytes()
+    rebuilt = HillslopeWatbalReport(run)
+    assert rebuilt.cache_status == 'built'
+    assert cache.read_bytes() != old
+    assert _rows(rebuilt) == _rows(report)
+    assert HillslopeWatbalReport(run).cache_status == 'current'
+
+
+def test_obsolete_native_marker_cannot_replace_published_cache(run, monkeypatch):
+    from wepppy.wepp.reports import hillslope_watbal as module
+    from types import SimpleNamespace
+    HillslopeWatbalReport(run)
+    cache = run / 'wepp/reports/cache/hillslope_watbal_summary.parquet'
+    prior = cache.read_bytes()
+    native = module.require_wepppyo3_interchange('test')
+    def obsolete(source, output, mapping, **kwargs):
+        native.hillslope_watbal_to_parquet(source, output, mapping, **kwargs)
+        table = pq.read_table(output)
+        metadata = dict(table.schema.metadata)
+        metadata.pop(b'hillslope_watbal_aggregation')
+        pq.write_table(table.replace_schema_metadata(metadata), output)
+    monkeypatch.setattr(module, 'require_wepppyo3_interchange', lambda *args: SimpleNamespace(
+        hillslope_watbal_wepp_ids=native.hillslope_watbal_wepp_ids,
+        hillslope_watbal_to_parquet=obsolete,
+    ))
+    _rewrite(run / 'wepp/output/interchange/H.wat.parquet', 'Ep', 2.)
+    with pytest.raises(ValueError, match='aggregation marker'):
+        HillslopeWatbalReport(run)
+    assert cache.read_bytes() == prior
+    statuses = [json.loads(p.read_text())['status'] for p in cache.parent.glob('*.attempts/*/status.json')]
+    assert 'failed' in statuses
+
+
+def test_unmarked_cache_native_api_absence_is_only_historical(run, monkeypatch):
+    from wepppy.wepp.reports import hillslope_watbal as module
+    HillslopeWatbalReport(run)
+    cache = run/'wepp/reports/cache/hillslope_watbal_summary.parquet'
+    table = pq.read_table(cache); metadata = dict(table.schema.metadata)
+    proof = json.loads(metadata[freshness._METADATA_KEY]); proof.pop('aggregation_version')
+    metadata[freshness._METADATA_KEY] = json.dumps(proof).encode()
+    pq.write_table(table.replace_schema_metadata(metadata),cache)
+    prior = cache.read_bytes()
+    def unavailable(*args):
+        raise module.WeppInterchangeUnavailableError('unavailable in this test')
+    monkeypatch.setattr(module,'require_wepppyo3_interchange',unavailable)
+    assert HillslopeWatbalReport(run).cache_status == 'historical_unverified'
+    assert cache.read_bytes() == prior
+    source = run/'wepp/output/interchange/H.wat.parquet'
+    timestamp = cache.stat().st_mtime_ns + 1_000_000_000
+    os.utime(source,ns=(timestamp,timestamp))
+    with pytest.raises(module.WeppInterchangeUnavailableError):
+        HillslopeWatbalReport(run)

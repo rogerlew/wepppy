@@ -24,11 +24,11 @@ known wrong sums. No surrogate production algorithm is planned.
 - [x] (2026-10-20 18:45 UTC) M0: remove disabled raw balance/map from `new_report.Rmd`.
 - [x] (2026-10-20 18:50 UTC) M0: documentation lint and link/readback checks pass;
   executable R statements are identical before and after inactive-only deletion.
-- [ ] M1: canonical contracts, ADR, input/state matrices, independent reviews,
+- [x] (2026-10-20) M1: canonical contracts, ADR, input/state matrices, independent reviews,
   committed contract checkpoint, and regression fixtures.
-- [ ] M2: correct native report ET/Dp and cache compatibility.
-- [ ] M3: correct both dashboard event ET queries.
-- [ ] M4: correct Features Export ET/Dp spatial reduction.
+- [x] (2026-10-20) M2: correct native report ET/Dp and cache compatibility.
+- [x] (2026-10-20) M3: correct both dashboard event ET queries.
+- [x] (2026-10-20) M4: correct Features Export ET/Dp spatial reduction.
 - [ ] M5: fresh generated outputs, quality gates, independent correctness review,
   release/cache recovery handoff, and documentation.
 
@@ -48,6 +48,18 @@ These prior observations need retained repeatable evidence during execution.
 
 ## Decision Log
 
+2026-10-20: Execution request authorizes M1-M5 and local coordinated release.
+Two independent contract reviews approved the standalone checkpoint before
+implementation. Production deployment and bulk historical repair remain excluded.
+
+2026-10-20: M5 exposed the advertised CSV path's inherited NotImplementedError.
+Use HillslopeWatbalReport's existing annual iterator/header in its own adapter;
+retain existing annualization. Reviewer accepted this bounded conformance fix.
+
+2026-10-20: Preserve the existing cold/settled performance budget. Single-OFE
+identity permits annual-only state; exact signed-integer row-group bounds prove
+unique geometry where available, with row scanning for other layouts.
+
 
 2026-10-20 18:45 UTC: The operator requested scaffolding fixes 1-3 and deleting
 the disabled raw balance in `new_report.Rmd`. Preserve the old standalone R
@@ -65,12 +77,23 @@ for separate disposition rather than silently expanding scope.
 ## Outcomes & Retrospective
 
 
-Scaffold and disabled R cleanup only; four package documents and the project
-tracker pass scoped documentation lint. Exact extracted executable R statements
-match HEAD after removal of inactive chunks; no R rendering or broad tests were
-needed for this comment-only cleanup. No ET/Dp consumer fix, candidate native
-release, deployment, or existing-project repair has occurred. Update this
-section at each milestone with the highest evidence-supported status.
+M1-M4 implemented after reviewed contract checkpoint `9651d7af6`. Native report,
+both dashboard event branches, and Features Export use the daily area oracle.
+Cache markers prevent silent reuse of old numerical results. The disabled R
+balance is removed. Independent review findings on joined WAT identity, missing
+observations/date columns, and ET-only infinite components have regression fixes.
+The report CSV adapter was repaired to complete the planned generated-output
+acceptance. Final native release and live development validation passed; broad regression
+disposition remains in M5;
+no production deployment or original-project regeneration is claimed.
+
+Measured final candidate on the current representative 75,354,414-byte,
+217-hill source: native 1.20-1.25 s, report rebuild 1.89 s, settled report
+12.4 ms. These OS-cache-warm storage measurements are not cold-disk claims.
+Original daily buffering cost 2.8 s and about 758 MiB peak RSS; single-OFE
+annual state with exact row-group geometry proof reduces native peak RSS to
+about 79 MiB. Missing/nonconstant statistics use a projected geometry scan.
+
 
 ## Context and Orientation
 

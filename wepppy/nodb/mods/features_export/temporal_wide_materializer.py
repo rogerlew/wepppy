@@ -6,6 +6,7 @@ import collections.abc as cabc
 from dataclasses import dataclass
 import re
 
+import numpy as np
 import pandas as pd
 
 from .column_selection import identity_column_token, normalize_join_token
@@ -107,6 +108,12 @@ def materialize_temporal_layer_wide(
             },
         )
 
+    # Local WAT dates are independent of the primary joined source's dates.
+    # Resolve them before generic filtering can discard valid observations.
+    local_flux = _daily_water_fluxes(
+        working, join_key_column, layer_id, mode, event_selector, selected_columns,
+    )
+    identity_source = working
     temporal_tokens, ordered_tokens, temporal_column = _resolve_temporal_tokens(
         frame=working,
         temporal_mode=mode,
@@ -125,7 +132,7 @@ def materialize_temporal_layer_wide(
             )
             ordered_tokens = _ordered_observed_tokens(temporal_tokens)
             temporal_column = None
-        else:
+        elif local_flux.empty:
             raise MaterializationContractError(
                 "Temporal wide materialization could not resolve selector dimension column.",
                 details=(
@@ -134,15 +141,20 @@ def materialize_temporal_layer_wide(
                     "(calendar_year, year, or fire_year)"
                 ),
             )
+        else:
+            # Only the local stream has usable dates. Routed fields retain an
+            # empty generic stream rather than borrowing dates from WAT.
+            temporal_tokens = pd.Series(pd.NA, index=working.index, dtype="string")
 
     working["__features_export_temporal_token__"] = temporal_tokens
     working = working.loc[working["__features_export_temporal_token__"].notna()].reset_index(drop=True)
-    if working.empty:
+    if working.empty and local_flux.empty:
         return TemporalWideMaterialization(
             frame=working,
             selected_columns=(),
             unit_mapping={},
         )
+    local_tokens = local_flux.attrs.get("ordered_tokens", ordered_tokens)
     working = _collapse_terminal_ofe_rows(
         frame=working,
         join_key_column=join_key_column,
@@ -164,8 +176,12 @@ def materialize_temporal_layer_wide(
         identity_columns=identity_columns,
     )
 
+    identity_rows = working
+    if not local_flux.empty:
+        admitted_keys = pd.concat([working[join_key_column], local_flux[join_key_column]])
+        identity_rows = identity_source.loc[identity_source[join_key_column].isin(admitted_keys)]
     base = _collapse_identity_columns(
-        frame=working,
+        frame=identity_rows,
         join_key_column=join_key_column,
         identity_columns=identity_columns,
         layer_id=layer_id,
@@ -176,11 +192,14 @@ def materialize_temporal_layer_wide(
         averaged_unit_mapping: dict[str, str] = {}
         for measure_column in measure_columns:
             averaged = _collapse_measure_annual_average(
-                frame=working,
+                frame=local_flux if measure_column in local_flux.columns else working,
                 join_key_column=join_key_column,
                 measure_column=measure_column,
                 layer_id=layer_id,
             )
+            if averaged.empty and measure_column in local_flux.columns:
+                averaged = pd.DataFrame({join_key_column: base[join_key_column],
+                                         measure_column: np.nan})
             if averaged.empty:
                 continue
 
@@ -207,18 +226,22 @@ def materialize_temporal_layer_wide(
     wide_unit_mapping: dict[str, str] = {}
     for measure_column in measure_columns:
         pivoted = _pivot_measure_wide(
-            frame=working,
+            frame=local_flux if measure_column in local_flux.columns else working,
             join_key_column=join_key_column,
             measure_column=measure_column,
-            ordered_tokens=ordered_tokens,
+            ordered_tokens=local_tokens if measure_column in local_flux.columns else ordered_tokens,
             layer_id=layer_id,
             temporal_mode=mode,
         )
+        if pivoted.empty and measure_column in local_flux.columns:
+            pivoted = pd.DataFrame({join_key_column: base[join_key_column],
+                                    **{token: np.nan for token in local_tokens}})
         if pivoted.empty:
             continue
 
         rename_map: dict[str, str] = {}
-        for token in ordered_tokens:
+        measure_tokens = local_tokens if measure_column in local_flux.columns else ordered_tokens
+        for token in measure_tokens:
             if token not in pivoted.columns:
                 continue
             wide_column_name = f"{measure_column}_{token}"
@@ -747,3 +770,79 @@ __all__ = [
     "TemporalWideMaterialization",
     "materialize_temporal_layer_wide",
 ]
+
+
+def derive_water_et(frame: pd.DataFrame) -> pd.DataFrame:
+    """Derive the advertised local ET depth without changing interchange files."""
+    if not {"Ep", "Es", "Er"}.issubset(frame.columns):
+        raise MaterializationContractError("H.wat ET requires Ep, Es and Er.")
+    result = frame.copy()
+    components = result[["Ep", "Es", "Er"]].apply(pd.to_numeric, errors="raise").fillna(0.0)
+    result["ET"] = components.sum(axis=1)
+    return result
+
+
+def _daily_water_fluxes(
+    frame: pd.DataFrame, key: str, layer_id: str, mode: str,
+    event_selector: NormalizedTemporalEvent | None, selected_columns: cabc.Sequence[str],
+) -> pd.DataFrame:
+    """Reduce only local WAT fluxes; routed measures use the existing reducer."""
+    names = frame.attrs.get("hwat_columns")
+    if names is None:
+        if layer_id != "wepp.interchange.hill_wat":
+            return pd.DataFrame()
+        names = {name: name for name in frame.columns}
+    local = [names[name] for name in ("Ep", "Es", "Er", "ET", "Dp")
+             if name in names and names[name] in selected_columns]
+    if not local:
+        return pd.DataFrame()
+    identity = frame.attrs.get("hwat_source_key")
+    if identity is not None:
+        # Left-join absence is not a malformed WAT observation. Keep the
+        # geometry in the base table and leave its local metrics null.
+        frame = frame.loc[frame[identity].notna()].copy()
+        if frame.empty:
+            return pd.DataFrame(columns=[key, "__features_export_temporal_token__", *local])
+    area_column = names.get("Area")
+    if area_column is None or area_column not in frame:
+        raise MaterializationContractError("H.wat local flux aggregation requires Area.")
+    area = pd.to_numeric(frame[area_column], errors="coerce")
+    if (~np.isfinite(area) | (area <= 0)).any():
+        raise MaterializationContractError("H.wat Area must be finite and positive.")
+    # Use the WAT source's own daily identity, not a colliding joined year/date.
+    daily_frame = frame[list(names.values())].rename(
+        columns={actual: name for name, actual in names.items()}
+    )
+    days, _, _ = _resolve_temporal_tokens(
+        frame=daily_frame, temporal_mode="event", event_selector=None, layer_id=layer_id,
+    )
+    if days is None or days.isna().any():
+        raise MaterializationContractError("H.wat local flux aggregation requires valid daily dates.")
+    validation_columns = list(local)
+    if names.get("ET") in local:
+        validation_columns.extend(names[name] for name in ("Ep", "Es", "Er")
+                                  if name in names and names[name] not in validation_columns)
+    try:
+        values = frame[validation_columns].apply(pd.to_numeric, errors="raise").fillna(0.0)
+    except (TypeError, ValueError) as exc:
+        raise MaterializationContractError("H.wat local flux must be numeric.") from exc
+    if not np.isfinite(values.to_numpy()).all():
+        raise MaterializationContractError("H.wat local flux must be finite.")
+    token = "__features_export_temporal_token__"
+    weighted = values[local].mul(area, axis=0)
+    weighted[key] = frame[key]
+    water_tokens, water_order, _ = _resolve_temporal_tokens(
+        frame=daily_frame, temporal_mode=mode, event_selector=event_selector, layer_id=layer_id,
+    )
+    if water_tokens is None or water_tokens.isna().any():
+        raise MaterializationContractError("H.wat local flux requires valid temporal identity.")
+    weighted[token] = water_tokens
+    weighted["__water_day__"] = days
+    weighted["__water_area__"] = area
+    grouped = weighted.groupby([key, token, "__water_day__"], dropna=False).sum()
+    result = grouped[local].div(grouped["__water_area__"], axis=0)
+    if not np.isfinite(grouped.to_numpy()).all() or not np.isfinite(result.to_numpy()).all():
+        raise MaterializationContractError("H.wat local flux aggregate overflow.")
+    result = result.reset_index().drop(columns="__water_day__")
+    result.attrs["ordered_tokens"] = water_order
+    return result
