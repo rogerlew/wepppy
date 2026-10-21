@@ -1,8 +1,8 @@
 # Watershed physical water repair
 
-**Status**: Scaffolded, 2026-10-21 21:53 UTC; execution pending.
-**Authority**: Operator requested committing the audit and scaffolding repairs.
-This turn does not implement model changes or publish a release.
+**Status**: Active execution, 2026-10-21.
+**Authority**: Operator explicitly requested executing this package. Source repair
+and local validation are authorized; release publication remains separate.
 
 [Active ExecPlan](prompts/active/repair_execplan.md) · [Tracker](tracker.md) ·
 [Acceptance matrix](artifacts/acceptance-matrix.md)
@@ -24,7 +24,7 @@ and targeted probes establish reproducible failures, not hydrologic certificatio
 
 ## Scope and complexity budget
 
-Future execution repairs these four paths on the native remote-default branch,
+Execution repairs these four paths on the native remote-default branch,
 with portable failing regressions, reviewed scientific contracts, one change
 per experimental lane, and combined hillslope/PASS/watershed accounting.
 Dp/ET remain local fluxes; internal surface/lateral transfers cancel by volume;
@@ -44,8 +44,7 @@ justify a general routing rewrite or relaxed tolerance.
 Formulas, cutoffs and area conversions will change. A parameterization ADR is
 required before production edits are promoted; draft it during M1 and record
 exact equations, volume/timing authority, alternatives, decision owner and
-implementer. Do not reserve an ADR number or invent an approved solution in this
-scaffold. Flat peak/volume/duration inconsistency, positive/negative channel-local
+implementer. ADR-0101 records the accepted narrow contracts and the operator decision to preserve MC dynamics. Flat peak/volume/duration inconsistency, positive/negative channel-local
 exchange, soil availability limits and groundwater state timing need explicit
 contracts. No compensation through altered ET/Dp or balancing residual exports.
 
@@ -105,8 +104,16 @@ monitoring window in this local-repair phase.
 
 ## Highest claim and deliverables
 
-Current highest claim: diagnosed predecessor defects and a validated scaffold.
+Current highest claim: three validated narrow corrections and an MC-preserving continuity audit with a separately tested interior-state execution correction. Complete watershed closure remains open.
 Planned deliverables: ADR/contracts, portable regressions, four attributable
 repairs, combined generated-output ledgers, independent reviews, and an operator
 handoff recording supported geometries, remaining scientific limits and release
 readiness. No field-calibration or universal watershed-validity claim is implied.
+
+## MC authority decision
+
+Preserve Muskingum-Cunge dynamics and its numerical storage meaning. The operator
+rejected a change to geometric-volume authority and authorized the consistency
+audit. Geometric mismatch alone is not an MC water-creation/loss finding.
+See [current findings](artifacts/mc-continuity-findings.md) for the derivation,
+actual cascade-transfer discrepancy and narrow interior-state correction.

@@ -1,0 +1,2 @@
+pass_family=legacy_ascii (inferred from /home/workdir/watershed-physical-water-repair-20261021/mc-guard-candidate/src/wepp.json when present)
+p1	rc=0	success=1	expected_year=3	years=[1 2 3]	last= WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY	wd=/tmp/p1_host_smoke_mJaJMG

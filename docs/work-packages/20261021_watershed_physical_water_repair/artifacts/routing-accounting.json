@@ -1,0 +1,242 @@
+[
+  {
+    "lane": "wpa01-observed",
+    "case": "daily-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": -1178.8779845966787,
+        "absolute_sum": 1178.945220169368,
+        "max_abs": 32.19754707377177
+      },
+      "output_gap_rect": {
+        "signed_sum": -366.4903772633864,
+        "absolute_sum": 2566.3729797526184,
+        "max_abs": 29.112052616663277
+      },
+      "storage_residual_rect": {
+        "signed_sum": -812.3873486966307,
+        "absolute_sum": 2021.8704515816644,
+        "max_abs": 4.860373688005552
+      },
+      "input_gap_trap": {
+        "signed_sum": -1178.9297297263092,
+        "absolute_sum": 1904.8819505465299,
+        "max_abs": 32.23710435097871
+      },
+      "output_gap_trap": {
+        "signed_sum": -366.54212238382206,
+        "absolute_sum": 2200.955678199906,
+        "max_abs": 29.15160987363197
+      },
+      "storage_residual_trap": {
+        "signed_sum": -812.3873487058257,
+        "absolute_sum": 2037.0054309091684,
+        "max_abs": 4.8372322710288245
+      }
+    },
+    "negative_local_days": 9819,
+    "negative_local_volume": -11237.46390419174
+  },
+  {
+    "lane": "wpa01-observed",
+    "case": "hourly-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": -383.9654045340451,
+        "absolute_sum": 383.99398690173075,
+        "max_abs": 12.653947347390869
+      },
+      "output_gap_rect": {
+        "signed_sum": -381.7311649894199,
+        "absolute_sum": 726.0134938683727,
+        "max_abs": 13.723430308513286
+      },
+      "storage_residual_rect": {
+        "signed_sum": -2.2345921424208726,
+        "absolute_sum": 438.7921653098474,
+        "max_abs": 3.899391726046815
+      },
+      "input_gap_trap": {
+        "signed_sum": -384.18854217401827,
+        "absolute_sum": 937.7125377118284,
+        "max_abs": 11.266300498480092
+      },
+      "output_gap_trap": {
+        "signed_sum": -381.9543026372647,
+        "absolute_sum": 957.3541440744929,
+        "max_abs": 12.335783327929619
+      },
+      "storage_residual_trap": {
+        "signed_sum": -2.2345921345492634,
+        "absolute_sum": 445.99052684080254,
+        "max_abs": 2.65298114136931
+      }
+    },
+    "negative_local_days": 9584,
+    "negative_local_volume": -20176.91233769292
+  },
+  {
+    "lane": "wpa02-observed",
+    "case": "daily-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": -90071.43507104664,
+        "absolute_sum": 90071.4417594545,
+        "max_abs": 196.931480224128
+      },
+      "output_gap_rect": {
+        "signed_sum": -88801.86162880149,
+        "absolute_sum": 88909.86131452597,
+        "max_abs": 193.87801267113537
+      },
+      "storage_residual_rect": {
+        "signed_sum": -1269.5737344522618,
+        "absolute_sum": 2078.448221405999,
+        "max_abs": 43.32498490334252
+      },
+      "input_gap_trap": {
+        "signed_sum": -90071.4582582328,
+        "absolute_sum": 90216.80144797056,
+        "max_abs": 196.93727829593274
+      },
+      "output_gap_trap": {
+        "signed_sum": -88801.88481598765,
+        "absolute_sum": 88912.84181610937,
+        "max_abs": 193.8838107304182
+      },
+      "storage_residual_trap": {
+        "signed_sum": -1269.5737344522622,
+        "absolute_sum": 2084.1456226174714,
+        "max_abs": 43.32498490334442
+      }
+    },
+    "negative_local_days": 9819,
+    "negative_local_volume": -11237.46390419174
+  },
+  {
+    "lane": "wpa02-observed",
+    "case": "hourly-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": -92591.25753961525,
+        "absolute_sum": 92591.26206682136,
+        "max_abs": 196.91667150147265
+      },
+      "output_gap_rect": {
+        "signed_sum": -92471.52359101964,
+        "absolute_sum": 92544.55628544622,
+        "max_abs": 196.56542815314617
+      },
+      "storage_residual_rect": {
+        "signed_sum": -119.73374087622369,
+        "absolute_sum": 429.3237780244426,
+        "max_abs": 43.52943147852881
+      },
+      "input_gap_trap": {
+        "signed_sum": -92591.45129315695,
+        "absolute_sum": 92735.92622886482,
+        "max_abs": 196.95666037827073
+      },
+      "output_gap_trap": {
+        "signed_sum": -92471.71734463118,
+        "absolute_sum": 92648.26745553271,
+        "max_abs": 196.6054170257413
+      },
+      "storage_residual_trap": {
+        "signed_sum": -119.73374080637436,
+        "absolute_sum": 434.27873546788635,
+        "max_abs": 43.5294314776266
+      }
+    },
+    "negative_local_days": 9584,
+    "negative_local_volume": -20176.91233769292
+  },
+  {
+    "lane": "combined-observed",
+    "case": "daily-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": 0.010638941979127787,
+        "absolute_sum": 0.07852768688276372,
+        "max_abs": 0.0011229559231651365
+      },
+      "output_gap_rect": {
+        "signed_sum": 821.521564523969,
+        "absolute_sum": 2051.288306261993,
+        "max_abs": 4.8372330740094185
+      },
+      "storage_residual_rect": {
+        "signed_sum": -821.5106429544578,
+        "absolute_sum": 2051.277866520715,
+        "max_abs": 4.837167323079484
+      },
+      "input_gap_trap": {
+        "signed_sum": -0.04110618765179771,
+        "absolute_sum": 792.0984349796498,
+        "max_abs": 4.053054904119563
+      },
+      "output_gap_trap": {
+        "signed_sum": 821.4698193948021,
+        "absolute_sum": 1634.117749127938,
+        "max_abs": 3.3692193229217082
+      },
+      "storage_residual_trap": {
+        "signed_sum": -821.5106429549217,
+        "absolute_sum": 2064.5866780150445,
+        "max_abs": 4.837167626066275
+      }
+    },
+    "negative_local_days": 9819,
+    "negative_local_volume": -11237.46390419174
+  },
+  {
+    "lane": "combined-observed",
+    "case": "hourly-upper60",
+    "days": 16071,
+    "observation_parity": true,
+    "metrics": {
+      "input_gap_rect": {
+        "signed_sum": -0.009884542540617118,
+        "absolute_sum": 0.04594854516749666,
+        "max_abs": 0.0011430191011641
+      },
+      "output_gap_rect": {
+        "signed_sum": 4.5488637849397975,
+        "absolute_sum": 437.55862118713594,
+        "max_abs": 3.0150948055089657
+      },
+      "storage_residual_rect": {
+        "signed_sum": -4.558920880132714,
+        "absolute_sum": 437.5627378214161,
+        "max_abs": 3.0150516670347542
+      },
+      "input_gap_trap": {
+        "signed_sum": -0.23302565751130744,
+        "absolute_sum": 591.723193845884,
+        "max_abs": 3.8394450456343634
+      },
+      "output_gap_trap": {
+        "signed_sum": 4.325722662097849,
+        "absolute_sum": 652.3575096175377,
+        "max_abs": 2.8842060323804617
+      },
+      "storage_residual_trap": {
+        "signed_sum": -4.558920872261449,
+        "absolute_sum": 443.2169576843618,
+        "max_abs": 2.9977518622973776
+      }
+    },
+    "negative_local_days": 9584,
+    "negative_local_volume": -20202.562229337636
+  }
+]

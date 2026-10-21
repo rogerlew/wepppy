@@ -1,0 +1,67 @@
+[
+  {
+    "lane": "baseline",
+    "executed_cell_steps": 0,
+    "initial_nodes": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "final_nodes": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "exported_volume_m3": 0.0,
+    "first_K_X": null,
+    "fixed_coefficient_initial_storage_m3": 1262.1805419921875,
+    "fixed_coefficient_final_storage_m3": 0.0,
+    "continuity_residual_m3": 1262.1805419921875
+  },
+  {
+    "lane": "interior_guard",
+    "executed_cell_steps": 1152,
+    "initial_nodes": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "final_nodes": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.1193011613640909e-40,
+      1.4314066229994537e-38,
+      9.090106101627348e-37,
+      3.8219419504248617e-35,
+      1.1968518893152784e-33
+    ],
+    "exported_volume_m3": 1262.1798553708627,
+    "first_K_X": [
+      1262.1805419921875,
+      0.23073482513427734
+    ],
+    "fixed_coefficient_initial_storage_m3": 1262.1805419921875,
+    "fixed_coefficient_final_storage_m3": 1.2114905308555024e-30,
+    "continuity_residual_m3": 0.0006866213248031272
+  }
+]

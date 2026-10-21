@@ -1,0 +1,63 @@
+{
+  "scope": "Independent raw-field verification of existing baseline cascade-v2; no source edit or candidate replay claim.",
+  "parser_sha256": "7f56ff16d69d7b140f86988fc43bc57fa0800ae03f991b8e7dc51cf2e8d2afd4",
+  "receipt_sha256": "d3ad5a383fc13085f2ccf708339792ae2231e30567715c5549e62dd53ede97ef",
+  "results": [
+    {
+      "case": "4-1-1",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "4-1-2",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "4-2-1",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "4-2-2",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "5-1-1",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "5-1-2",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "5-2-1",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    },
+    {
+      "case": "5-2-2",
+      "channels": 2,
+      "days_per_channel": 3,
+      "all_435_upstream_outlet_samples_equal_downstream_inlet": true,
+      "all_3_daily_volume_transfers_exact": true
+    }
+  ]
+}

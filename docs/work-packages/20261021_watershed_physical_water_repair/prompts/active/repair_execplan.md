@@ -16,8 +16,7 @@ contributions, under-delivery by flat source hydrographs, discarded hourly
 infiltration remainders and initial groundwater scaled by terminal OFE area.
 
 The operator requested committing the audit and scaffolding this package on
-2026-10-21. This turn creates the plan only. Execution remains pending. Once
-execution is requested, proceed through the milestones without routine additional
+2026-10-21. Execution was explicitly requested on 2026-10-21. Proceed through the milestones without routine additional
 confirmation, within the defined source-repair scope. Ash, dated release
 publication, production deployment and original-project repair are excluded.
 
@@ -26,10 +25,14 @@ publication, production deployment and original-project repair are excluded.
 
 - [x] (2026-10-21 21:53 UTC) Commit predecessor audit at `e85d582ed`.
 - [x] (2026-10-21) Scaffold scope, acceptance matrix and execution milestones.
-- [ ] M1: freeze baseline; portable failing tests; proposed contracts/ADR and scientific review.
-- [ ] M2a: repair WPA-04 groundwater initialization in an isolated lane.
-- [ ] M2b: repair WPA-03 hourly infiltration allocation in an isolated lane.
-- [ ] M2c: repair WPA-02 flat source reconstruction in an isolated lane.
+- [x] (2026-10-21) Execution authorized; native default checkout verified clean.
+- [x] M1 baseline: 88 existing tests pass; portable probes reproduce four defects (15 failures, six controls).
+- [x] M1 portable inputs: complete retained parameter decks and deterministic wet/dry/snow generator; two-year paired baseline succeeds.
+- [x] M1 narrow contract review: independent science/QA reviews retained; ADR-0101 drafted. Groundwater, hourly allocation and flat cells approved for isolated experiments.
+- [ ] M1 routing contract: source-cell/solver quadrature, channel sink timing and storage remain unratified; this blocks routing promotion, not the three reviewed narrow lanes.
+- [x] M2a: groundwater correction, six full 44-year replays with unchanged WAT and narrow review/gates pass.
+- [x] M2b: signed allocation, 44-year replays, native zero-remainder/observation parity and narrow review/gates pass.
+- [ ] M2c: source-cell correction and 29 paired replay checks pass; solver-consumption boundary remains open.
 - [ ] M2d: repair WPA-01 channel-local rate assembly in an isolated lane.
 - [ ] M3: combined paired runs and independently closed transfer/storage ledgers.
 - [ ] M4: native gates, independent correctness/QA reviews and release-readiness documentation.
@@ -70,9 +73,8 @@ report-only balancing terms, wider tolerances or post-hoc outlet normalization.
 ## Outcomes & Retrospective
 
 
-Scaffold complete; all implementation, review and repaired-model claims remain
-pending. The concrete next milestone is portable defect reproduction and a
-reviewed scientific contract. No native sources or vendored binaries changed.
+Three narrow corrections are implemented as candidates and under validation.
+Complete routing repair and release readiness remain pending. Three native source routines have changed; no vendored binaries changed. The next milestone is the operator-authorized MC continuity and coupling audit.
 
 ## Context and Orientation
 
@@ -316,8 +318,7 @@ scientific payloads; no silent fallback, clamp or guard may replace a real repai
 The predecessor package is the immutable baseline; keep all new evidence here
 and in the native incident record. Expected deliverables are baseline provenance,
 portable repro references, ADR/contract review, lane results, complete ledgers,
-corruption controls, correctness/QA reviews and the repair handoff. Current files
-are a scaffold only; no execution receipts or review approvals are asserted.
+corruption controls, correctness/QA reviews and the repair handoff. Execution receipts and independent review artifacts are retained here; full routing approval remains pending.
 
 ## Interfaces and Dependencies
 
@@ -334,3 +335,51 @@ a compatibility and downstream artifact-regeneration plan before changing it.
 2026-10-21 21:53 UTC — Initial scaffold on operator request, linked to audit commit
 `e85d582ed`. Defines four repair lanes, independent physical acceptance and explicit
 scaffold/release boundaries; execution has not started.
+
+2026-10-21 — Activated on explicit execution request. Baseline tests and independent
+scientific preflight review started before source mutations.
+
+2026-10-21 — Independent scientific review approves three narrow contracts while
+identifying unresolved channel/solver boundaries. Split M1 ratification by lane
+so those approved corrections can be tested without treating the channel contract
+as approved. Source-cell sums do not certify solver consumption. The positive
+local-source experiment remains only in an isolated tree and preserves negative
+exchange solely as a comparator; it is not a promotable signed-exchange repair.
+
+## MC-preserving continuation — 2026-10-21
+
+The operator rejected changing channel-volume authority and authorized preserving
+Muskingum-Cunge while auditing its continuity and interfaces. This decision
+supersedes geometric-equality acceptance language above and the recommendation
+in `artifacts/routing-scope-review.md`; ADR-0101 records the durable contract.
+
+Observe the actual recurrence at each segment/time step for MC4 and MC5. Separate
+its weighted discharge increment from endpoint storage changes caused by varying
+K/X. At day boundaries separate coefficient changes, discharge-grid interpolation
+and changed upstream boundary values. Compare integrated native inlet/outlet
+fluxes, clipping and publication without redefining storage or changing routing.
+Trace a cascade's rate transfer and daily-volume transfer independently. Apply
+only demonstrated implementation corrections supported by this derivation; no
+replacement routing scheme or geometric-volume authority is authorized.
+
+Validated narrow checkpoint: 361 native tests passed, four known channel tests
+remain strict expected failures, 12 watchlist cases and both smoke checks pass.
+All 29 final paired replays pass date/finite/transfer checks, including the corrected
+400-year generator. Native hourly observations have zero allocation remainders
+and unchanged scientific outputs for single, two and three OFEs over 44 years.
+These results do not establish full watershed closure.
+
+2026-10-21 — MC-preserving continuation identifies a dry-boundary skip defect in
+actual WSHCHR. Six seeded interior-state tests fail on baseline; two dry controls
+pass. The minimal eligibility correction makes all eight pass, including MC5,
+without changing recurrence, coefficients or storage meaning. Actual WSHCQI/WSHCHR
+cascade controls preserve both interfaces exactly but expose upstream publication
+versus rate-integral disagreement. Three narrow lanes and this guard are distinct
+from the still-open signed-exchange/publication repair.
+
+2026-10-21 — Final guard candidate: 369 native tests pass, four known channel-local
+tests remain expected failures; 12 watchlist cases and both profile smokes pass.
+All 29 fresh paired replays pass date/transfer validation, including 400 years.
+Guard-only effects are small in retained runs but visible in keyed routing output;
+retain `repair-handoff.md` and parity receipts. Full source/exchange/publication
+closure remains open; the package stays active.

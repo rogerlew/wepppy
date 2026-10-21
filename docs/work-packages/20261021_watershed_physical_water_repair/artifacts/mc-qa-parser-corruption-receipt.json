@@ -1,0 +1,148 @@
+{
+  "tool_sha256": "2f0d8a3f0c27509a0641d09f651375a61e48223e1012ba7b8683b9388e04aaa9",
+  "baseline_day2": {
+    "day": 2,
+    "segments": 8,
+    "native_step_count": 1152,
+    "max_step_residual_m3": 4.9427078920416534e-05,
+    "sum_step_residual_m3": 0.0029394063015537597,
+    "max_step_scale_m3": 75.00000779691618,
+    "mc_increment_sum_m3": 2756.29747557595,
+    "endpoint_mc_start_m3": 538.8582753051539,
+    "endpoint_mc_end_m3": 3295.1557508811043,
+    "within_day_coefficient_revaluation_m3": 0.0,
+    "endpoint_identity_residual_m3": 4.547473508864641e-13,
+    "day_boundary_combined_jump_m3": 0.0,
+    "top_trapezoid_m3": 0.0,
+    "lateral_trapezoid_m3": 11939.999583363533,
+    "lateral_rectangle_m3": 12239.99959230423,
+    "outlet_trapezoid_m3": 9183.699392527342,
+    "daily_input_account_m3": 12240.0,
+    "published_outlet_m3": 10175.853515625,
+    "published_minus_routed_m3": 992.1541230976582,
+    "outlet_clipping_volume_m3": 0.0,
+    "initial_outlet_boundary_difference_m3s": 0.0,
+    "initial_nodes": [
+      0.0,
+      0.01249999925494194,
+      0.02499999850988388,
+      0.03750000149011612,
+      0.04999999701976776,
+      0.0624999925494194,
+      0.07499999552965164,
+      0.08749998360872269,
+      0.09999997168779373
+    ],
+    "final_nodes": [
+      0.0,
+      0.13358446955680847,
+      0.24858097732067108,
+      0.32723307609558105,
+      0.36848369240760803,
+      0.38837218284606934,
+      0.40178194642066956,
+      0.41431450843811035,
+      0.4268152415752411
+    ],
+    "first_segment_coefficients": [
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ]
+    ],
+    "last_segment_coefficients": [
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ],
+      [
+        1262.1805419921875,
+        0.23073482513427734
+      ]
+    ],
+    "reported_geometry_start_m3": 1341.9833984375,
+    "reported_geometry_end_m3": 3406.1298828125
+  },
+  "mutations": [
+    {
+      "mutation": "missing_middle_segment_step",
+      "rejected": false,
+      "day2_step_count": 1151,
+      "day2_endpoint_identity_residual_m3": 4.547473508864641e-13,
+      "day2_outlet_trapezoid_m3": 9183.699392527342
+    },
+    {
+      "mutation": "duplicate_middle_segment_step",
+      "rejected": false,
+      "day2_step_count": 1153,
+      "day2_endpoint_identity_residual_m3": 4.547473508864641e-13,
+      "day2_outlet_trapezoid_m3": 9183.699392527342
+    },
+    {
+      "mutation": "swapped_boundary_times",
+      "rejected": false,
+      "day2_step_count": 1152,
+      "day2_endpoint_identity_residual_m3": 4.547473508864641e-13,
+      "day2_outlet_trapezoid_m3": 9183.699392527342
+    },
+    {
+      "mutation": "nonfinite_outlet",
+      "rejected": false,
+      "day2_step_count": 1152,
+      "day2_endpoint_identity_residual_m3": 4.547473508864641e-13,
+      "day2_outlet_trapezoid_m3": NaN
+    }
+  ]
+}

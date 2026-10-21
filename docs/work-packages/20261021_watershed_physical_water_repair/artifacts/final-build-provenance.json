@@ -1,0 +1,26 @@
+{
+  "candidate": "narrow-candidate-v4",
+  "baseline_native_commit": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "binaries": {
+    "wepp": "0f491417ffa6719e0bc080a63bdc5b765f173822a8222d9db68de92bec2818be",
+    "wepp_hill": "af5521a817891e7d6a3a6ad76d69441bbfb9d08cebf4c94e6f4537024ffae081"
+  },
+  "source_sha256": {
+    "contin.for": "bf5b21b8e50800aad1d91c8caee550776e7b5e5b36a42260347874f73a02414f",
+    "watbal_hourly.for": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+    "chrqin.for": "1a987474cca1e1e9f0a2973fe6eeeb9cb75036aa11abb27baba672abbf0739d5"
+  },
+  "validated_cases": 29,
+  "validated_periods": {
+    "2": 10,
+    "44": 18,
+    "400": 1
+  },
+  "gates": {
+    "native_tests_passed": 361,
+    "known_channel_xfailed": 4,
+    "watchlist_passed": 12,
+    "smokes_passed": 2
+  },
+  "release_ready": false
+}

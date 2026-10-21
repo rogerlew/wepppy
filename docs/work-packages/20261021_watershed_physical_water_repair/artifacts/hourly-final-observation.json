@@ -1,0 +1,32 @@
+[
+  {
+    "case": "hourly-single",
+    "rows": 385704,
+    "ofes": 1,
+    "all_remainders_zero": true,
+    "scientific_output_parity": true,
+    "allocation_rounding_max_m": 3.725290298570334e-09,
+    "allocation_rounding_signed_sum_m": 1.5854867845752233e-07,
+    "bounded_rounding": true
+  },
+  {
+    "case": "hourly-upper60",
+    "rows": 771408,
+    "ofes": 2,
+    "all_remainders_zero": true,
+    "scientific_output_parity": true,
+    "allocation_rounding_max_m": 3.725290354406746e-09,
+    "allocation_rounding_signed_sum_m": -5.206808327028244e-06,
+    "bounded_rounding": true
+  },
+  {
+    "case": "hourly-three",
+    "rows": 1157112,
+    "ofes": 3,
+    "all_remainders_zero": true,
+    "scientific_output_parity": true,
+    "allocation_rounding_max_m": 3.7252904094842165e-09,
+    "allocation_rounding_signed_sum_m": 2.3599199445987257e-07,
+    "bounded_rounding": true
+  }
+]

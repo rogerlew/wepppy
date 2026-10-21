@@ -1,0 +1,17 @@
+{
+  "cases": 3473,
+  "rng": "numpy.default_rng(101)",
+  "candidates": 4000,
+  "layer_counts": "1..10",
+  "status": 0,
+  "maximum_absolute_storage_residual_m": 3.893202205063062e-09,
+  "maximum_fraction_of_derived_rounding_bound": 0.9999997712054801,
+  "bound": "sum(half ULP of final binary32 stores) + gamma(40*n+10)*(initial inventory + demand), binary64 gamma(k)=k*eps/(1-k*eps)",
+  "files": {
+    "probe.for": "17315845b0eb596668d5de4208d11b62f1814fdf4f0e2d780422a4cefc5b90a7",
+    "probe": "b9f287855de0a52fbab0fa9de96b5fec4b7e0ef2e5cdb8e67cc02cdb3eaf68e3",
+    "inputs.txt": "ca59464dc98ef3312c90f3ab47ef755d78526fe0122f9a10580d15e76a2c88d2",
+    "stdout.txt": "243072826e70b355f43d27f5b79f4f476ab9544edc4ab3abea61dccd9db41764",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

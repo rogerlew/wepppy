@@ -1,0 +1,488 @@
+{
+  "scope": "Same synthetic forcing/grid controls; only diagnostic writes differ. Q trajectory parity, not release replay or source-assembly parity.",
+  "compile_command": [
+    "/usr/bin/gfortran",
+    "-O2",
+    "-fno-align-commons",
+    "-mcmodel=medium",
+    "-ffixed-form",
+    "-ffixed-line-length-72",
+    "-finit-local-zero",
+    "-ffpe-trap=invalid,zero,overflow",
+    "-I/workdir/wepp-forest-release-20261009/src",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-v1/driver.for",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/control.for",
+    "/workdir/wepp-forest-release-20261009/src/chrstate.for",
+    "/workdir/wepp-forest-release-20261009/src/chrqin.for",
+    "/workdir/wepp-forest-release-20261009/src/mixpass.for",
+    "/workdir/wepp-forest-release-20261009/src/eqroot.for",
+    "/workdir/wepp-forest-release-20261009/src/mann.for",
+    "/workdir/wepp-forest-release-20261009/src/wepp_observe.for",
+    "-no-pie",
+    "-o",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/control"
+  ],
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "control_binary_sha256": "6fef05838b37f5e2df75914f483bb541218e1a70cf8f3a4d29e104f0ca60452b",
+  "observed_binary_sha256": "b94c2fd88510580e007b4af50035eafe79018ac71c9af4ac0e649bd786f0fdf5",
+  "source_hashes": {
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-v1/driver.for": "53037198ef3c7aa26dd809612bda9a3d916757d5df95591c10cd1129a50dcbcd",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/control.for": "7245c3c9c504591631600ccd76fc651aa7edfeb3a0356cc5cb58d3500d8229ac",
+    "/workdir/wepp-forest-release-20261009/src/chrstate.for": "53a96173344407b0cd73a11333920af012e4cd970f3d3b59b7cf7e9689e36128",
+    "/workdir/wepp-forest-release-20261009/src/chrqin.for": "1a987474cca1e1e9f0a2973fe6eeeb9cb75036aa11abb27baba672abbf0739d5",
+    "/workdir/wepp-forest-release-20261009/src/mixpass.for": "83b33c45ef5863187d3f15b8e8a3f1dd41fc4c7444051292d00ed248d6f97a66",
+    "/workdir/wepp-forest-release-20261009/src/eqroot.for": "7f2ef9de7bc77c06da6848a5158208fdf57ee373a6b176fec33988d0b1f71770",
+    "/workdir/wepp-forest-release-20261009/src/mann.for": "f761fe3bcc9eef525f06937421e8d05bddd11833dcc20e773210161e9aa2dc93",
+    "/workdir/wepp-forest-release-20261009/src/wepp_observe.for": "cf09555683b7ca16571fffccc5fa12f8e90bff861c2152b4dfc6c47db4473ba1"
+  },
+  "results": [
+    {
+      "case": "4-1-0-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-1-0-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-1-8-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-1-8-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-2-0-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-2-0-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-2-8-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "4-2-8-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-1-0-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-1-0-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-1-8-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-1-8-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-2-0-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 20,
+          "step_rows": 2880,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-2-0-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 35,
+          "step_rows": 5040,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 16,
+          "step_rows": 2304,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-2-8-1",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    },
+    {
+      "case": "5-2-8-2",
+      "exact_q_parity": true,
+      "q_rows": 432,
+      "days": [
+        {
+          "day": 1,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 2,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        },
+        {
+          "day": 3,
+          "segments": 8,
+          "step_rows": 1152,
+          "complete_finite_unique": true,
+          "routed_minus_raw_outlet_m3": 0.0
+        }
+      ]
+    }
+  ]
+}

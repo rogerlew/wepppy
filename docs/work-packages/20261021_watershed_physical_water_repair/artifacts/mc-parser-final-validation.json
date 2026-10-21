@@ -1,0 +1,32 @@
+[
+  {
+    "case": "missing_step",
+    "rejected": true,
+    "reason": "Incomplete or reordered recurrence records 1"
+  },
+  {
+    "case": "duplicate_step",
+    "rejected": true,
+    "reason": "Incomplete or reordered recurrence records 1"
+  },
+  {
+    "case": "missing_boundary",
+    "rejected": true,
+    "reason": "Incomplete or reordered boundaries 1"
+  },
+  {
+    "case": "duplicate_publication",
+    "rejected": true,
+    "reason": "Duplicate publication day 1"
+  },
+  {
+    "case": "nonfinite_outlet",
+    "rejected": true,
+    "reason": "Nonfinite native observation 1"
+  },
+  {
+    "case": "missing_entire_channel",
+    "rejected": true,
+    "reason": "Missing complete channel/day set"
+  }
+]

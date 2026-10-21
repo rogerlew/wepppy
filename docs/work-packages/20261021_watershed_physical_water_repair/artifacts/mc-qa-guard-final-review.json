@@ -1,0 +1,179 @@
+{
+  "tool_sha256": "9639bb5c8725eea51d4f6cd8cc876f326d906c534d8ec84dbf485cbd3ce5f0c5",
+  "cascade_tool_sha256": "bd8770f14fc66a4ad224284c63ff29368c14bf7c35bc88ac12f063cdfc1d2f6a",
+  "source_sha256": "1b3a5d7dc2c6aa9837230667d4e3ba9c203e05b1992c197c3a9ccafb6f1e9bad",
+  "test_sha256": "ef17534bbb34e63ec9f1613ed2843e5ce6218d52220959512c30a711725bdb52",
+  "cases": [
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-1-0-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "9b6e7d0069f0e0e6df7dcdf907a2b554d59d38f441d1014de57f13b32ef73090"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-1-0-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "503516d0f1b2ae3c95976847093df2cd536f465473257f6c5276620fc4c56a60"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-1-8-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "3904a16c129431fcbd287cbf9ec8c12c8d4232ce3c632e3154696e87e3c19361"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-1-8-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "3791305fd16faf938a174e733cc2d7bdd1af37c45dddc2a1d7ca4497b2320453"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-2-0-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "44920b63888feb242b5c6ef41621ae5f68f70129f7c9e99208cdd5278147b134"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-2-0-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "503516d0f1b2ae3c95976847093df2cd536f465473257f6c5276620fc4c56a60"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-2-8-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "295898155cdf0b2dbbd4d823e38687371d670a169bf32d1e16da2559c15bccc3"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "4-2-8-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "3791305fd16faf938a174e733cc2d7bdd1af37c45dddc2a1d7ca4497b2320453"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-1-0-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "07af5eb89c78b3628a42b0640ecdda871fbfba0d2c3fef1ecf6c0741ea9ad878"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-1-0-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "a41f700bbe5f51572f679ed6080be669730eecaeb9831cc031e1547ade2d434a"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-1-8-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "84063a43b61125c49d44e103223faf4608f6629ea8b4d87d2950f37bdd6afa58"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-1-8-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "a17fb7b70c07b1961f03a0c4296bdf093339731e548cd790944d281d685ae1d0"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-2-0-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "7bf649fbadfff42432d4571c90fda6b5075ed194d1c0847868edb6215bb6d69f"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-2-0-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "a41f700bbe5f51572f679ed6080be669730eecaeb9831cc031e1547ade2d434a"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-2-8-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "cab58a42daf0889e655919eca9c9c0eb14e9f235fdb2d48339083f4516c19f58"
+    },
+    {
+      "lane": "mc-continuity-final",
+      "case": "5-2-8-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "a17fb7b70c07b1961f03a0c4296bdf093339731e548cd790944d281d685ae1d0"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "4-1-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "078266d41e42737a111215c89a9c62aaf1e99a49c4ddc457d82855e517c20415"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "4-1-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "b5979a9c70a0d53ccc9663144cf74419398071b96a5069aec5fe9b9ce873ff5a"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "4-2-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "a886f04b916bf647dcacf34822f2ae16085ce057a474e0d0fc94ab2f2e186857"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "4-2-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "b5979a9c70a0d53ccc9663144cf74419398071b96a5069aec5fe9b9ce873ff5a"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "5-1-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "c76552eb40bf8437acd286e0b6d4fea159082304f4881cc513da07d62405601e"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "5-1-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "1a863e1932a799309f794d916c9126635c6c1a9b15566068110299c42023d2b4"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "5-2-1.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "50f172e2f519492c9af2c1468c1c63b2c50b8b232f86da64e9035ec2c78e31cf"
+    },
+    {
+      "lane": "mc-cascade-final",
+      "case": "5-2-2.stdout",
+      "summary_equal": true,
+      "guard_unchanged_observations": true,
+      "stdout_sha256": "1a863e1932a799309f794d916c9126635c6c1a9b15566068110299c42023d2b4"
+    }
+  ],
+  "exact_cascade_rate_samples": 3480,
+  "exact_cascade_daily_transfers": 24,
+  "missing_entire_expected_channel_rejected": "Missing complete channel/day set"
+}

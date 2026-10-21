@@ -1,0 +1,23 @@
+{
+  "source_head": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "changed_source_sha256": {
+    "contin.for": "bf5b21b8e50800aad1d91c8caee550776e7b5e5b36a42260347874f73a02414f",
+    "watbal_hourly.for": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+    "chrqin.for": "1a987474cca1e1e9f0a2973fe6eeeb9cb75036aa11abb27baba672abbf0739d5",
+    "wshchr.for": "1b3a5d7dc2c6aa9837230667d4e3ba9c203e05b1992c197c3a9ccafb6f1e9bad"
+  },
+  "binaries": {
+    "wepp": {
+      "path": "/workdir/watershed-physical-water-repair-20261021/mc-guard-candidate/src/wepp",
+      "sha256": "8072d6a4cbd3fb099fba3fc1dc0269c89d4b91ee40f02945d3c7685b76dd00ce",
+      "interpreter": "[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]"
+    },
+    "wepp_hill": {
+      "path": "/workdir/watershed-physical-water-repair-20261021/mc-guard-candidate/src/wepp_hill",
+      "sha256": "636df16ef2d2ba7ea1d9a413892a5018e480f243574cca908bc5d2f09dbf07ff",
+      "interpreter": "[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]"
+    }
+  }
+}

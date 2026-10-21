@@ -1,0 +1,254 @@
+[
+  {
+    "fixed_grid": 0,
+    "path": 1,
+    "rows": [
+      {
+        "day": 1,
+        "K": 615.664917,
+        "X": 0.248603523,
+        "start": {
+          "full_geometry": 1655.7903331784592,
+          "mc_algebraic": 1092.8912206177317,
+          "nodes": 35
+        },
+        "end": {
+          "full_geometry": 1655.7902636821555,
+          "mc_algebraic": 1092.8911387590629,
+          "nodes": 35
+        },
+        "input": 8639.99219,
+        "out": 8640.01074,
+        "full_geometry_residual": -0.018480503695172956,
+        "mc_residual": -0.018468141330004073
+      },
+      {
+        "day": 2,
+        "K": 601.915771,
+        "X": 0.0585951209,
+        "start": {
+          "full_geometry": 1653.8243053091537,
+          "mc_algebraic": 628.4845884113831,
+          "nodes": 20
+        },
+        "end": {
+          "full_geometry": 5056.247844091134,
+          "mc_algebraic": 3472.440961876225,
+          "nodes": 20
+        },
+        "input": 11939.9941,
+        "out": 9096.05371,
+        "full_geometry_residual": -558.4831487819802,
+        "mc_residual": -0.015983464842065587
+      },
+      {
+        "day": 3,
+        "K": 601.915771,
+        "X": 0.0585951209,
+        "start": {
+          "full_geometry": 5056.247844091134,
+          "mc_algebraic": 3472.440961876225,
+          "nodes": 20
+        },
+        "end": {
+          "full_geometry": 1653.8245674934062,
+          "mc_algebraic": 628.4847655864825,
+          "nodes": 20
+        },
+        "input": 8939.99219,
+        "out": 11783.9795,
+        "full_geometry_residual": 558.435966597729,
+        "mc_residual": -0.031113710255795013
+      }
+    ]
+  },
+  {
+    "fixed_grid": 0,
+    "path": 2,
+    "rows": [
+      {
+        "day": 1,
+        "K": 615.664917,
+        "X": 0.248603523,
+        "start": {
+          "full_geometry": 2683.9669293031984,
+          "mc_algebraic": 2154.827231048272,
+          "nodes": 35
+        },
+        "end": {
+          "full_geometry": 2683.9669293031984,
+          "mc_algebraic": 2154.827231048272,
+          "nodes": 35
+        },
+        "input": 8640.01074,
+        "out": 8640.01074,
+        "full_geometry_residual": 0.0,
+        "mc_residual": 0.0
+      },
+      {
+        "day": 2,
+        "K": 614.825378,
+        "X": -0.0771160722,
+        "start": {
+          "full_geometry": 2683.966929303199,
+          "mc_algebraic": 983.7206146372059,
+          "nodes": 16
+        },
+        "end": {
+          "full_geometry": 6805.382482834894,
+          "mc_algebraic": 4283.012442313927,
+          "nodes": 16
+        },
+        "input": 11940.0107,
+        "out": 8640.71777,
+        "full_geometry_residual": -822.1226235316935,
+        "mc_residual": 0.0011023232805200678
+      },
+      {
+        "day": 3,
+        "K": 614.825378,
+        "X": -0.0771160722,
+        "start": {
+          "full_geometry": 6805.382482834894,
+          "mc_algebraic": 4283.012442313927,
+          "nodes": 16
+        },
+        "end": {
+          "full_geometry": 2683.966815236664,
+          "mc_algebraic": 983.7205454448733,
+          "nodes": 16
+        },
+        "input": 8940.01074,
+        "out": 12239.3086,
+        "full_geometry_residual": 822.1178075982298,
+        "mc_residual": -0.005963130946838646
+      }
+    ]
+  },
+  {
+    "fixed_grid": 8,
+    "path": 1,
+    "rows": [
+      {
+        "day": 1,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 1643.2382235121997,
+          "mc_algebraic": 538.8583487967974,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 1643.2381031284613,
+          "mc_algebraic": 538.8582744045457,
+          "nodes": 8
+        },
+        "input": 8639.99219,
+        "out": 8640.01074,
+        "full_geometry_residual": -0.018429616260391413,
+        "mc_residual": -0.01847560774717749
+      },
+      {
+        "day": 2,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 1643.2381031284613,
+          "mc_algebraic": 538.8582744045457,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 5367.906441061625,
+          "mc_algebraic": 3295.155744794769,
+          "nodes": 8
+        },
+        "input": 11939.9941,
+        "out": 9183.71191,
+        "full_geometry_residual": -968.3861479331636,
+        "mc_residual": -0.015280390223324503
+      },
+      {
+        "day": 3,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 5367.906441061625,
+          "mc_algebraic": 3295.155744794769,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 1643.2381031284613,
+          "mc_algebraic": 538.8582744045457,
+          "nodes": 8
+        },
+        "input": 8939.99219,
+        "out": 11696.3174,
+        "full_geometry_residual": 968.3431279331644,
+        "mc_residual": -0.02773960977583556
+      }
+    ]
+  },
+  {
+    "fixed_grid": 8,
+    "path": 2,
+    "rows": [
+      {
+        "day": 1,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 2683.966929303199,
+          "mc_algebraic": 1009.7444420974444,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 2683.966818916229,
+          "mc_algebraic": 1009.7443734539373,
+          "nodes": 8
+        },
+        "input": 8640.01074,
+        "out": 8640.01074,
+        "full_geometry_residual": 0.00011038696993637132,
+        "mc_residual": 6.864350712021405e-05
+      },
+      {
+        "day": 2,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 2683.966818916229,
+          "mc_algebraic": 1009.7443734539373,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 6643.599832357542,
+          "mc_algebraic": 4309.743419108039,
+          "nodes": 8
+        },
+        "input": 11940.0107,
+        "out": 8640.01074,
+        "full_geometry_residual": -659.6330534413123,
+        "mc_residual": 0.0009143458992184605
+      },
+      {
+        "day": 3,
+        "K": 1262.18054,
+        "X": 0.230734825,
+        "start": {
+          "full_geometry": 6643.599832357542,
+          "mc_algebraic": 4309.743419108039,
+          "nodes": 8
+        },
+        "end": {
+          "full_geometry": 2683.966818916229,
+          "mc_algebraic": 1009.7443734539373,
+          "nodes": 8
+        },
+        "input": 8940.01074,
+        "out": 12240.0137,
+        "full_geometry_residual": 659.6300534413135,
+        "mc_residual": -0.003914345898010652
+      }
+    ]
+  }
+]

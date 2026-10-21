@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Scaffolded: [Watershed physical water repair](docs/work-packages/20261021_watershed_physical_water_repair/package.md) — four native repair lanes for channel-local rate assembly, flat hydrograph volume, hourly infiltration allocation and groundwater initialization. Portable regressions, ADR/scientific review and independent combined accounting required. Execution pending; Ash excluded.
+Active: [Watershed physical water repair](docs/work-packages/20261021_watershed_physical_water_repair/package.md) — four native repair lanes for channel-local rate assembly, flat hydrograph volume, hourly infiltration allocation and groundwater initialization. Portable regressions, ADR/scientific review and independent combined accounting required. Three narrow corrections validated; MC-preserving audit identifies publication/transfer mismatch and a tested interior-state execution correction. Full routing closure remains open. Ash excluded.
 
 Completed (diagnostic audit): [Watershed physical water audit](docs/work-packages/20261021_watershed_physical_water_audit/package.md) — eighteen 44-year watershed cases, OFE/PASS accounting and native observations identify four unresolved defects in channel rate construction, flat hydrographs, hourly infiltration allocation and initial groundwater area. Ash excluded. Watershed correctness not certified; no model repair or deployment.
 

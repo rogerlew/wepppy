@@ -1,0 +1,125 @@
+{
+  "scope": "Driver observes completed-call COMMON publication; control WSHCHR has same prescribed forcing/grid and no internal diagnostic writes.",
+  "compile_command": [
+    "/usr/bin/gfortran",
+    "-O2",
+    "-fno-align-commons",
+    "-mcmodel=medium",
+    "-ffixed-form",
+    "-ffixed-line-length-72",
+    "-finit-local-zero",
+    "-ffpe-trap=invalid,zero,overflow",
+    "-I/workdir/wepp-forest-release-20261009/src",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/publication-driver.for",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/control.for",
+    "/workdir/wepp-forest-release-20261009/src/chrstate.for",
+    "/workdir/wepp-forest-release-20261009/src/chrqin.for",
+    "/workdir/wepp-forest-release-20261009/src/mixpass.for",
+    "/workdir/wepp-forest-release-20261009/src/eqroot.for",
+    "/workdir/wepp-forest-release-20261009/src/mann.for",
+    "/workdir/wepp-forest-release-20261009/src/wepp_observe.for",
+    "-no-pie",
+    "-o",
+    "/workdir/watershed-physical-water-repair-20261021/mc-continuity-qa-v1/publication-control"
+  ],
+  "binary_sha256": "a39099a70f3ba351a5559d716fb58f14da1efcf3355f6b83f01597d4bef2c472",
+  "driver_sha256": "ab6075fb518d5a12e3ef3b455d5d93ea21e2723cc6d621d80bb3536e5263e41e",
+  "results": [
+    {
+      "case": "4-1-0-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-1-0-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-1-8-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-1-8-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-2-0-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-2-0-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-2-8-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "4-2-8-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-1-0-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-1-0-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-1-8-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-1-8-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-2-0-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-2-0-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-2-8-1",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    },
+    {
+      "case": "5-2-8-2",
+      "exact_q_parity": true,
+      "exact_publication_parity": true,
+      "publication_rows": 3
+    }
+  ]
+}

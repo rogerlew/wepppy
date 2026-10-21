@@ -1,0 +1,195 @@
+[
+  {
+    "group": "calendar",
+    "case": "hourly-upper60-400",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-cascade",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-short",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-side",
+    "changed_run_artifacts": [
+      {
+        "file": "chan.out",
+        "old_lines": 1599516,
+        "new_lines": 1599516,
+        "changed_lines": 8,
+        "first_changes": [
+          {
+            "line": 534946,
+            "old": "       1994         182           2           1      69600.      3.51E-06",
+            "new": "       1994         182           2           1      69600.      3.50E-06"
+          },
+          {
+            "line": 534973,
+            "old": "       1994         182           2           1      85800.      3.49E-06",
+            "new": "       1994         182           2           1      85800.      3.50E-06"
+          },
+          {
+            "line": 822197,
+            "old": "       2002         293           2           1      30000.      1.55E-06",
+            "new": "       2002         293           2           1      30000.      1.54E-06"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group": "networks",
+    "case": "daily-tributaries",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-cascade",
+    "changed_run_artifacts": [
+      {
+        "file": "chan.out",
+        "old_lines": 4458427,
+        "new_lines": 4459428,
+        "changed_lines": 3180039,
+        "first_changes": [
+          {
+            "line": 165786,
+            "old": "       1981         224           5           2       4800.      2.05E-08",
+            "new": "       1981         224           5           2       4800.      2.04E-08"
+          },
+          {
+            "line": 274661,
+            "old": "       1982         246           5           2        600.      2.34E-08",
+            "new": "       1982         246           5           2        600.      0.00E+00"
+          },
+          {
+            "line": 274663,
+            "old": "       1982         246           5           2       1800.      1.12E-07",
+            "new": "       1982         246           5           2       1800.      1.11E-07"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group": "networks",
+    "case": "hourly-short",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-side",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-tributaries",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-equal",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-lower60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-single",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-three",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-upper60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-equal",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-lower60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-single",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-three",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-upper60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-equal",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-lower60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-single",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-three",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-upper60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-equal",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-lower60",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-single",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-three",
+    "changed_run_artifacts": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-upper60",
+    "changed_run_artifacts": []
+  }
+]

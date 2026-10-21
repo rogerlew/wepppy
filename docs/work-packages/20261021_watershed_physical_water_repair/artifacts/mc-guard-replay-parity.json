@@ -1,0 +1,178 @@
+[
+  {
+    "group": "calendar",
+    "case": "hourly-upper60-400",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-cascade",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-short",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "daily-side",
+    "all_outputs_identical": false,
+    "changed_outputs": [
+      "chnwb.txt"
+    ]
+  },
+  {
+    "group": "networks",
+    "case": "daily-tributaries",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-cascade",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-short",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-side",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "networks",
+    "case": "hourly-tributaries",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-equal",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-lower60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-single",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-three",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "daily-upper60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-equal",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-lower60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-single",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-three",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "portable",
+    "case": "hourly-upper60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-equal",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-lower60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-single",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-three",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "daily-upper60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-equal",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-lower60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-single",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-three",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  },
+  {
+    "group": "release-matrix",
+    "case": "hourly-upper60",
+    "all_outputs_identical": true,
+    "changed_outputs": []
+  }
+]

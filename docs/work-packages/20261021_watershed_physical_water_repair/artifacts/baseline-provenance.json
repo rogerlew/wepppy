@@ -1,0 +1,12 @@
+{
+  "native_head": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "native_branch": "wepp_260430_negmeltfix_comparator",
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "baseline_tests": "88 passed in 5.63s",
+  "portable_defect_tests": "15 failed, 6 passed in 2.03s",
+  "binary_sha256": {
+    "wepp_261021": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+    "wepp_261021_hill": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+  },
+  "baseline_inputs": "Prior audit input manifests retained unchanged under /workdir/watershed-physical-water-audit-20261021; supplementary only. Portable full-deck generator pending."
+}

@@ -1,0 +1,119 @@
+[
+  {
+    "year_day_element_id": [
+      1981,
+      224,
+      5,
+      2
+    ],
+    "old_samples": 144,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 1.000000000000009e-10,
+    "old_peak_m3s": 5.52e-08,
+    "new_peak_m3s": 5.52e-08
+  },
+  {
+    "year_day_element_id": [
+      1982,
+      246,
+      5,
+      2
+    ],
+    "old_samples": 144,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 2.34e-08,
+    "old_peak_m3s": 7.54e-06,
+    "new_peak_m3s": 7.54e-06
+  },
+  {
+    "year_day_element_id": [
+      1992,
+      176,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.45e-07
+  },
+  {
+    "year_day_element_id": [
+      1992,
+      177,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.46e-07
+  },
+  {
+    "year_day_element_id": [
+      1992,
+      178,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.29e-07
+  },
+  {
+    "year_day_element_id": [
+      1992,
+      179,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.25e-07
+  },
+  {
+    "year_day_element_id": [
+      2021,
+      181,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.46e-07
+  },
+  {
+    "year_day_element_id": [
+      2021,
+      182,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.33e-07
+  },
+  {
+    "year_day_element_id": [
+      2023,
+      187,
+      5,
+      2
+    ],
+    "old_samples": 1,
+    "new_samples": 144,
+    "max_shared_rate_difference_m3s": 0.0,
+    "old_peak_m3s": 0.0,
+    "new_peak_m3s": 1.85e-07
+  }
+]

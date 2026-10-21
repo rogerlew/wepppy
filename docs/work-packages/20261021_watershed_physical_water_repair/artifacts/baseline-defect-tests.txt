@@ -1,0 +1,394 @@
+.FFFFF...FFFFFF..FFFF                                                    [100%]
+=================================== FAILURES ===================================
+___________ test_initial_groundwater_uses_entire_hillslope[lengths1] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-roger/pytest-121/test_initial_groundwater_uses_1')
+lengths = [60, 40]
+
+    @pytest.mark.parametrize('lengths', [[100], [60, 40], [20, 30, 50]])
+    def test_initial_groundwater_uses_entire_hillslope(tmp_path, lengths):
+        code = block('contin.for',
+            'CAS calculations using daily deep percolation.\n',
+            'CAS   End adding\n')
+        values = probe(tmp_path, """      program groundwater
+          integer nplane,iplane,ihill,sdate,i,lr_bf
+          real fwidth(3),slplen(3),sep(3),gwstrv2(1),gwstrv3(1)
+          real gwbfv(1),gwdsv(1),igwstrv,igwstrd,ibfv,idsv
+          real bfcoeff,dscoeff
+          read(*,*) nplane
+          read(*,*) slplen(1:nplane)
+          fwidth=100.
+          sep=0.
+          gwstrv2=0.
+          ibfv=0.
+          idsv=0.
+          igwstrd=100.
+          bfcoeff=0.04
+          dscoeff=0.
+          sdate=1
+          i=1
+          ihill=1
+          lr_bf=1
+          do iplane=1,nplane
+    """ + code + """      enddo
+          write(*,*) gwbfv(1)
+          end
+    """, str(len(lengths))+'\n'+' '.join(map(str,lengths))+'\n')
+>       assert values == pytest.approx([40.0], abs=1.e-5)
+E       assert [16.0] == approx([40.0 ± 1.0e-05])
+E         
+E         comparison failed. Mismatched elements: 1 / 1:
+E         Max absolute difference: 24.0
+E         Max relative difference: 1.5
+E         Index | Obtained | Expected      
+E         0     | 16.0     | 40.0 ± 1.0e-05
+
+tests/test_physical_water.py:60: AssertionError
+___________ test_initial_groundwater_uses_entire_hillslope[lengths2] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-roger/pytest-121/test_initial_groundwater_uses_2')
+lengths = [20, 30, 50]
+
+    @pytest.mark.parametrize('lengths', [[100], [60, 40], [20, 30, 50]])
+    def test_initial_groundwater_uses_entire_hillslope(tmp_path, lengths):
+        code = block('contin.for',
+            'CAS calculations using daily deep percolation.\n',
+            'CAS   End adding\n')
+        values = probe(tmp_path, """      program groundwater
+          integer nplane,iplane,ihill,sdate,i,lr_bf
+          real fwidth(3),slplen(3),sep(3),gwstrv2(1),gwstrv3(1)
+          real gwbfv(1),gwdsv(1),igwstrv,igwstrd,ibfv,idsv
+          real bfcoeff,dscoeff
+          read(*,*) nplane
+          read(*,*) slplen(1:nplane)
+          fwidth=100.
+          sep=0.
+          gwstrv2=0.
+          ibfv=0.
+          idsv=0.
+          igwstrd=100.
+          bfcoeff=0.04
+          dscoeff=0.
+          sdate=1
+          i=1
+          ihill=1
+          lr_bf=1
+          do iplane=1,nplane
+    """ + code + """      enddo
+          write(*,*) gwbfv(1)
+          end
+    """, str(len(lengths))+'\n'+' '.join(map(str,lengths))+'\n')
+>       assert values == pytest.approx([40.0], abs=1.e-5)
+E       assert [20.0] == approx([40.0 ± 1.0e-05])
+E         
+E         comparison failed. Mismatched elements: 1 / 1:
+E         Max absolute difference: 20.0
+E         Max relative difference: 1.0
+E         Index | Obtained | Expected      
+E         0     | 20.0     | 40.0 ± 1.0e-05
+
+tests/test_physical_water.py:60: AssertionError
+_________ test_hourly_infiltration_has_no_unallocated_remainder[1e-06] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-roger/pytest-121/test_hourly_infiltration_has_n0')
+infiltration = 1e-06
+
+    @pytest.mark.parametrize('infiltration', [1.e-6, 1.e-5, 1.1e-5, 1.e-3])
+    def test_hourly_infiltration_has_no_unallocated_remainder(tmp_path, infiltration):
+        code = block('watbal_hourly.for',
+            'c         All infiltrated water stays in the first layer if it is the only layer  \n',
+            'c       Commented by S. Dun, Jan. 18, 2011\nc       *** L1 ENDIF ***')
+        result = probe(tmp_path, """      program infiltration
+          integer iplane,nsl(1),i
+          real st(3,1),solthk(3,1),dg(3,1),tillay(2,1)
+          real xfin,hrfin,tmpvr1
+          read(*,*) xfin
+          hrfin=xfin
+          iplane=1
+          nsl=3
+          st=0.
+          dg=0.1
+          solthk(:,1)=(/0.1,0.2,0.3/)
+          tillay=0.3
+    """ + code + """      write(*,*) sum(st),xfin
+          end
+    """, str(infiltration)+'\n')
+>       assert result[0] == pytest.approx(infiltration, rel=3.e-7)
+E       assert 3.33333332e-07 == 1e-06 ± 1.0e-12
+E         
+E         comparison failed
+E         Obtained: 3.33333332e-07
+E         Expected: 1e-06 ± 1.0e-12
+
+tests/test_physical_water.py:83: AssertionError
+_________ test_hourly_infiltration_has_no_unallocated_remainder[1e-05] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-roger/pytest-121/test_hourly_infiltration_has_n1')
+infiltration = 1e-05
+
+    @pytest.mark.parametrize('infiltration', [1.e-6, 1.e-5, 1.1e-5, 1.e-3])
+    def test_hourly_infiltration_has_no_unallocated_remainder(tmp_path, infiltration):
+        code = block('watbal_hourly.for',
+            'c         All infiltrated water stays in the first layer if it is the only layer  \n',
+            'c       Commented by S. Dun, Jan. 18, 2011\nc       *** L1 ENDIF ***')
+        result = probe(tmp_path, """      program infiltration
+          integer iplane,nsl(1),i
+          real st(3,1),solthk(3,1),dg(3,1),tillay(2,1)
+          real xfin,hrfin,tmpvr1
+          read(*,*) xfin
+          hrfin=xfin
+          iplane=1
+          nsl=3
+          st=0.
+          dg=0.1
+          solthk(:,1)=(/0.1,0.2,0.3/)
+          tillay=0.3
+    """ + code + """      write(*,*) sum(st),xfin
+          end
+    """, str(infiltration)+'\n')
+>       assert result[0] == pytest.approx(infiltration, rel=3.e-7)
+E       assert 3.3333331e-06 == 1e-05 ± 3.0e-12
+E         
+E         comparison failed
+E         Obtained: 3.3333331e-06
+E         Expected: 1e-05 ± 3.0e-12
+
+tests/test_physical_water.py:83: AssertionError
+________ test_hourly_infiltration_has_no_unallocated_remainder[1.1e-05] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-roger/pytest-121/test_hourly_infiltration_has_n2')
+infiltration = 1.1e-05
+
+    @pytest.mark.parametrize('infiltration', [1.e-6, 1.e-5, 1.1e-5, 1.e-3])
+    def test_hourly_infiltration_has_no_unallocated_remainder(tmp_path, infiltration):
+        code = block('watbal_hourly.for',
+            'c         All infiltrated water stays in the first layer if it is the only layer  \n',
+            'c       Commented by S. Dun, Jan. 18, 2011\nc       *** L1 ENDIF ***')
+        result = probe(tmp_path, """      program infiltration
+          integer iplane,nsl(1),i
+          real st(3,1),solthk(3,1),dg(3,1),tillay(2,1)
+          real xfin,hrfin,tmpvr1
+          read(*,*) xfin
+          hrfin=xfin
+          iplane=1
+          nsl=3
+          st=0.
+          dg=0.1
+          solthk(:,1)=(/0.1,0.2,0.3/)
+          tillay=0.3
+    """ + code + """      write(*,*) sum(st),xfin
+          end
+    """, str(infiltration)+'\n')
+>       assert result[0] == pytest.approx(infiltration, rel=3.e-7)
+E       assert 3.66666677e-06 == 1.1e-05 ± 3.3e-12
+E         
+E         comparison failed
+E         Obtained: 3.66666677e-06
+E         Expected: 1.1e-05 ± 3.3e-12
+
+tests/test_physical_water.py:83: AssertionError
+____________ test_flat_source_delivers_requested_volume[900-900-0] _____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 0
+volume = 900, duration = 900
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 600.0 == 900 ± 0.0018
+E         
+E         comparison failed
+E         Obtained: 600.0
+E         Expected: 900 ± 0.0018
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_flat_source_delivers_requested_volume[900-900-1] _____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 1
+volume = 900, duration = 900
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 600.0 == 900 ± 0.0018
+E         
+E         comparison failed
+E         Obtained: 600.0
+E         Expected: 900 ± 0.0018
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_flat_source_delivers_requested_volume[1000-600-0] ____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 0
+volume = 1000, duration = 600
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 600.0 == 1000 ± 0.002
+E         
+E         comparison failed
+E         Obtained: 600.0
+E         Expected: 1000 ± 0.002
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_flat_source_delivers_requested_volume[1000-600-1] ____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 1
+volume = 1000, duration = 600
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 600.0 == 1000 ± 0.002
+E         
+E         comparison failed
+E         Obtained: 600.0
+E         Expected: 1000 ± 0.002
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_flat_source_delivers_requested_volume[1000-300-0] ____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 0
+volume = 1000, duration = 300
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 0.0 == 1000 ± 0.002
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 1000 ± 0.002
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_flat_source_delivers_requested_volume[1000-300-1] ____________
+
+reconstruct = <function reconstruct.<locals>.run at 0x7bb28b49db20>, nt0 = 1
+volume = 1000, duration = 300
+
+    @pytest.mark.parametrize('nt0', [0, 1])
+    @pytest.mark.parametrize('volume,duration', [(1200,1200),(900,900),(1000,600),(1000,300)])
+    def test_flat_source_delivers_requested_volume(reconstruct, nt0, volume, duration):
+        q = reconstruct(vr=volume, pr=1, vs=0, duration=duration,
+                        active=0, nt0=nt0)
+>       assert sum(q[1:])*600 == pytest.approx(volume, rel=2.e-6)
+E       assert 0.0 == 1000 ± 0.002
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 1000 ± 0.002
+
+tests/test_physical_water.py:92: AssertionError
+____________ test_channel_local_water_reaches_rate_arrays[100-0-0] _____________
+
+channel_sources = PosixPath('/tmp/pytest-of-roger/pytest-121/channel-sources0/probe')
+side = 0, local = 100, loss = 0
+
+    @pytest.mark.parametrize('side', [0,1])
+    @pytest.mark.parametrize('local,loss', [(0,0),(100,0),(100,-20)])
+    def test_channel_local_water_reaches_rate_arrays(channel_sources, side, local, loss):
+        result = subprocess.run([str(channel_sources)],
+            input=f'{side} {local} {loss}\n', text=True, capture_output=True, check=True)
+        top,lateral,declared = map(float,result.stdout.split())
+        assert declared == pytest.approx(local-loss)
+>       assert top+lateral == pytest.approx(declared, rel=2.e-6)
+E       assert 0.0 == 100.0 ± 2.0e-04
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 100.0 ± 2.0e-04
+
+tests/test_physical_water.py:145: AssertionError
+____________ test_channel_local_water_reaches_rate_arrays[100-0-1] _____________
+
+channel_sources = PosixPath('/tmp/pytest-of-roger/pytest-121/channel-sources0/probe')
+side = 1, local = 100, loss = 0
+
+    @pytest.mark.parametrize('side', [0,1])
+    @pytest.mark.parametrize('local,loss', [(0,0),(100,0),(100,-20)])
+    def test_channel_local_water_reaches_rate_arrays(channel_sources, side, local, loss):
+        result = subprocess.run([str(channel_sources)],
+            input=f'{side} {local} {loss}\n', text=True, capture_output=True, check=True)
+        top,lateral,declared = map(float,result.stdout.split())
+        assert declared == pytest.approx(local-loss)
+>       assert top+lateral == pytest.approx(declared, rel=2.e-6)
+E       assert 0.0 == 100.0 ± 2.0e-04
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 100.0 ± 2.0e-04
+
+tests/test_physical_water.py:145: AssertionError
+___________ test_channel_local_water_reaches_rate_arrays[100--20-0] ____________
+
+channel_sources = PosixPath('/tmp/pytest-of-roger/pytest-121/channel-sources0/probe')
+side = 0, local = 100, loss = -20
+
+    @pytest.mark.parametrize('side', [0,1])
+    @pytest.mark.parametrize('local,loss', [(0,0),(100,0),(100,-20)])
+    def test_channel_local_water_reaches_rate_arrays(channel_sources, side, local, loss):
+        result = subprocess.run([str(channel_sources)],
+            input=f'{side} {local} {loss}\n', text=True, capture_output=True, check=True)
+        top,lateral,declared = map(float,result.stdout.split())
+        assert declared == pytest.approx(local-loss)
+>       assert top+lateral == pytest.approx(declared, rel=2.e-6)
+E       assert 0.0 == 120.0 ± 2.4e-04
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 120.0 ± 2.4e-04
+
+tests/test_physical_water.py:145: AssertionError
+___________ test_channel_local_water_reaches_rate_arrays[100--20-1] ____________
+
+channel_sources = PosixPath('/tmp/pytest-of-roger/pytest-121/channel-sources0/probe')
+side = 1, local = 100, loss = -20
+
+    @pytest.mark.parametrize('side', [0,1])
+    @pytest.mark.parametrize('local,loss', [(0,0),(100,0),(100,-20)])
+    def test_channel_local_water_reaches_rate_arrays(channel_sources, side, local, loss):
+        result = subprocess.run([str(channel_sources)],
+            input=f'{side} {local} {loss}\n', text=True, capture_output=True, check=True)
+        top,lateral,declared = map(float,result.stdout.split())
+        assert declared == pytest.approx(local-loss)
+>       assert top+lateral == pytest.approx(declared, rel=2.e-6)
+E       assert 0.0 == 120.0 ± 2.4e-04
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 120.0 ± 2.4e-04
+
+tests/test_physical_water.py:145: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_physical_water.py::test_initial_groundwater_uses_entire_hillslope[lengths1]
+FAILED tests/test_physical_water.py::test_initial_groundwater_uses_entire_hillslope[lengths2]
+FAILED tests/test_physical_water.py::test_hourly_infiltration_has_no_unallocated_remainder[1e-06]
+FAILED tests/test_physical_water.py::test_hourly_infiltration_has_no_unallocated_remainder[1e-05]
+FAILED tests/test_physical_water.py::test_hourly_infiltration_has_no_unallocated_remainder[1.1e-05]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[900-900-0]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[900-900-1]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[1000-600-0]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[1000-600-1]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[1000-300-0]
+FAILED tests/test_physical_water.py::test_flat_source_delivers_requested_volume[1000-300-1]
+FAILED tests/test_physical_water.py::test_channel_local_water_reaches_rate_arrays[100-0-0]
+FAILED tests/test_physical_water.py::test_channel_local_water_reaches_rate_arrays[100-0-1]
+FAILED tests/test_physical_water.py::test_channel_local_water_reaches_rate_arrays[100--20-0]
+FAILED tests/test_physical_water.py::test_channel_local_water_reaches_rate_arrays[100--20-1]
+15 failed, 6 passed in 2.03s

@@ -1,0 +1,37 @@
+{
+  "tool_sha256": "7f56ff16d69d7b140f86988fc43bc57fa0800ae03f991b8e7dc51cf2e8d2afd4",
+  "mutations": [
+    {
+      "mutation": "missing_middle_segment_step",
+      "rejected": true,
+      "error": "Incomplete or reordered recurrence records 2"
+    },
+    {
+      "mutation": "duplicate_middle_segment_step",
+      "rejected": true,
+      "error": "Incomplete or reordered recurrence records 2"
+    },
+    {
+      "mutation": "swapped_boundary_times",
+      "rejected": true,
+      "error": "Incomplete or reordered boundaries 2"
+    },
+    {
+      "mutation": "nonfinite_outlet",
+      "rejected": true,
+      "error": "Nonfinite native observation 2"
+    },
+    {
+      "mutation": "duplicate_conflicting_publication",
+      "rejected": true,
+      "error": "Duplicate publication day 2"
+    },
+    {
+      "mutation": "reversed_day_blocks",
+      "rejected": false,
+      "canonicalized_exactly_to_baseline": true
+    }
+  ],
+  "v3_stdout_identical_to_v1": true,
+  "v3_receipts_reproduced": 16
+}

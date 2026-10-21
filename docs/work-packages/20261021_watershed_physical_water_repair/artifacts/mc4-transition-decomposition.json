@@ -1,0 +1,242 @@
+[
+  {
+    "method": 4,
+    "mode": 1,
+    "fixed_grid": 0,
+    "placement": 1,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 35,
+        "new_segments": 20,
+        "grid_interpolation_at_prior_K_per_length_m3": 11.608198152483965,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": -1.0034195838670712e-06,
+        "coefficient_revaluation_m3": -476.01474685559003,
+        "combined_jump_m3": -464.40654970652565,
+        "max_remap_rate_error_m3s": 3.725290298461914e-09
+      },
+      {
+        "day": 3,
+        "old_segments": 20,
+        "new_segments": 20,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 1,
+    "fixed_grid": 0,
+    "placement": 2,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 35,
+        "new_segments": 16,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": -1171.1066214547545,
+        "combined_jump_m3": -1171.1066214547545,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 16,
+        "new_segments": 16,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 1,
+    "fixed_grid": 8,
+    "placement": 1,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 1,
+    "fixed_grid": 8,
+    "placement": 2,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 2,
+    "fixed_grid": 0,
+    "placement": 1,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 35,
+        "new_segments": 20,
+        "grid_interpolation_at_prior_K_per_length_m3": 11.608198152483965,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": -1.0034195838670712e-06,
+        "coefficient_revaluation_m3": -476.01474685559003,
+        "combined_jump_m3": -464.40654970652565,
+        "max_remap_rate_error_m3s": 3.725290298461914e-09
+      },
+      {
+        "day": 3,
+        "old_segments": 20,
+        "new_segments": 20,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 2,
+    "fixed_grid": 0,
+    "placement": 2,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 35,
+        "new_segments": 16,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": -1171.1066214547545,
+        "combined_jump_m3": -1171.1066214547545,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 16,
+        "new_segments": 16,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 2,
+    "fixed_grid": 8,
+    "placement": 1,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  },
+  {
+    "method": 4,
+    "mode": 2,
+    "fixed_grid": 8,
+    "placement": 2,
+    "transitions": [
+      {
+        "day": 2,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      },
+      {
+        "day": 3,
+        "old_segments": 8,
+        "new_segments": 8,
+        "grid_interpolation_at_prior_K_per_length_m3": 0.0,
+        "upstream_boundary_replacement_m3": 0.0,
+        "native_remap_rounding_m3": 0.0,
+        "coefficient_revaluation_m3": 0.0,
+        "combined_jump_m3": 0.0,
+        "max_remap_rate_error_m3s": 0.0
+      }
+    ]
+  }
+]

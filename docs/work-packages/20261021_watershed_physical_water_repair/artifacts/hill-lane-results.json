@@ -1,0 +1,102 @@
+[
+  {
+    "lane": "wpa04",
+    "case": "daily-single",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.0679114770609885,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     1  365 2023    7.90    7.90   0.6695651E+01    0.44    0.21    0.00   0.3647915E-01   0.0000000E+00    0.00    0.63  344.83    0.00    0.00    0.6695651E+01    0.00    0.00   10000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa04",
+    "case": "daily-single-gw100",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.0684666901361197,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     1  365 2023    7.90    7.90   0.6695651E+01    0.44    0.21    0.00   0.3647915E-01   0.0000000E+00    0.00    0.63  344.83    0.00    0.00    0.6695651E+01    0.00    0.00   10000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa04",
+    "case": "daily-upper60",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.6701207240112126,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     2  365 2023    7.90    7.90   0.6695650E+01    0.44    0.21    0.00   0.3647915E-01   0.9412067E+01    1.58    1.58  344.83    0.00    0.00    0.1673912E+02    0.00    0.00    4000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa04",
+    "case": "daily-upper60-gw100",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.6697491339873523,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     2  365 2023    7.90    7.90   0.6695650E+01    0.44    0.21    0.00   0.3647915E-01   0.9412067E+01    1.58    1.58  344.83    0.00    0.00    0.1673912E+02    0.00    0.00    4000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa04",
+    "case": "daily-three",
+    "returncode": 0,
+    "success": true,
+    "seconds": 2.2361945731099695,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     3  365 2023    7.90    7.90   0.6695652E+01    0.44    0.21    0.00   0.3647915E-01   0.6064238E+01    1.26    1.26  344.83    0.00    0.00    0.1339130E+02    0.00    0.00    5000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa04",
+    "case": "daily-three-gw100",
+    "returncode": 0,
+    "success": true,
+    "seconds": 2.2273457378614694,
+    "binary_sha256": "274bd6ccec73bf555b67c4cc86a590d69d34b2c9a4c279c22ab2c28ba3290cb9",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     3  365 2023    7.90    7.90   0.6695652E+01    0.44    0.21    0.00   0.3647915E-01   0.6064238E+01    1.26    1.26  344.83    0.00    0.00    0.1339130E+02    0.00    0.00    5000.00     344.83     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa03",
+    "case": "hourly-single",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.083078402793035,
+    "binary_sha256": "0d92d16f437c04fae629760f448ce903c69e7fe62a93105b4ec34e26b69f3e2c",
+    "wat_baseline_identical": false,
+    "final_wat_row": "     1  365 2023    7.90    7.90   0.0000000E+00    0.44    0.21    0.00   0.1860479E-01   0.0000000E+00    0.00    4.90  317.19    0.00    0.00    0.0000000E+00    0.00    0.00   10000.00     317.19     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa03",
+    "case": "hourly-upper60",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.6735387921798974,
+    "binary_sha256": "0d92d16f437c04fae629760f448ce903c69e7fe62a93105b4ec34e26b69f3e2c",
+    "wat_baseline_identical": false,
+    "final_wat_row": "     2  365 2023    7.90    7.90   0.0000000E+00    0.44    0.21    0.00   0.1859813E-01   0.0000000E+00    8.30   13.90  330.54    0.00    0.00    0.0000000E+00    0.00    0.00    4000.00     330.54     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa03",
+    "case": "hourly-three",
+    "returncode": 0,
+    "success": true,
+    "seconds": 2.1927045218180865,
+    "binary_sha256": "0d92d16f437c04fae629760f448ce903c69e7fe62a93105b4ec34e26b69f3e2c",
+    "wat_baseline_identical": false,
+    "final_wat_row": "     3  365 2023    7.90    7.90   0.0000000E+00    0.44    0.21    0.00   0.1860479E-01   0.0000000E+00    5.62   11.31  332.49    0.00    0.00    0.0000000E+00    0.00    0.00    5000.00     332.49     800.00     345.26     179.69      88.99"
+  },
+  {
+    "lane": "wpa03",
+    "case": "daily-upper60",
+    "returncode": 0,
+    "success": true,
+    "seconds": 1.5384455530438572,
+    "binary_sha256": "0d92d16f437c04fae629760f448ce903c69e7fe62a93105b4ec34e26b69f3e2c",
+    "wat_baseline_identical": true,
+    "final_wat_row": "     2  365 2023    7.90    7.90   0.6695650E+01    0.44    0.21    0.00   0.3647915E-01   0.9412067E+01    1.58    1.58  344.83    0.00    0.00    0.1673912E+02    0.00    0.00    4000.00     344.83     800.00     345.26     179.69      88.99"
+  }
+]

@@ -1,6 +1,6 @@
 # Repair acceptance matrix
 
-Status: planned; no row has passed a repair gate yet. Evidence baseline:
+Status: narrow source/allocation/groundwater controls validated; full routing acceptance remains open. Evidence baseline:
 [committed audit](../../20261021_watershed_physical_water_audit/artifacts/findings.md).
 
 | ID | Required cases | Acceptance |
@@ -41,3 +41,11 @@ those gates when available and cannot be substituted with a truncated successful
 window. If residual channel state/transport inconsistency survives the four fixes,
 record the first remaining failing boundary and block closure pending a bounded
 repair or explicit operator re-scope; do not silently declare success.
+
+## MC authority clarification
+
+Per the operator decision recorded in ADR-0101, assess MC using its implemented
+continuity increment, coefficient/grid transitions and accepted transfers.
+Geometric storage is diagnostic; equality to it is not a routing acceptance gate.
+The added interior-state control must route a nonzero internal profile despite
+dry inlet/outlet boundaries while preserving the all-zero fast path and equations.
