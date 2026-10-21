@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-20
+**Last Updated**: 2026-10-21
 **Active Packages**: 46
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -372,6 +372,13 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Watershed channel routing closure investigation
+
+**Status**: Scaffolded 2026-10-21; execution pending.
+**Link**: [Work package](docs/work-packages/20261021_watershed_channel_routing_closure/package.md).
+**Scope**: Trace OFE/PASS/channel/outlet volume closure with gated observations and output parity. Simulation changes, release, and deployment are prohibited; findings feed separately authorized remediation.
+**Next**: Inventory source paths, executable provenance, control volumes, and controlled/real-project replay cases.
 
 ### Features Export standalone GeoJSON compatibility
 
