@@ -1,0 +1,412 @@
+[
+  {
+    "case": "daily-single",
+    "mode": "daily",
+    "fractions": [
+      1.0
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.0774482630658895
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.902439959114417
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "9803d91b736dfbe064e9775151995bb9569372b75aabbefc64b5fd41af9c312f",
+      "H1.element.dat": "55c93fc56a3621530b2fed3534a4230b2a156b6e9e6dff1df38beff8f11e18f4",
+      "H1.loss.dat": "40957928f497f5bc75666491ffc41b8bea4f75a5aa7abf2affab660f1c86bfb4",
+      "H1.pass.dat": "446a085a72c7c0d8bd0e272a9c8db1f3d62512eb56bd96b75a0b80fb2c8eebaf",
+      "H1.plot.dat": "a773361343de2db661b4456c12ec264df7ce21f44b1ff2e4beccf3ef717ab1cb",
+      "H1.soil.dat": "fbae1e2e6c83ea7d4b33f0ed0e682917dd7bac12ad328d03a3760aa188a82b58",
+      "H1.wat.dat": "1edff97a0c5cb71db43584fce367b666400d002e37fbbff1c9a6189e788754e6",
+      "chnwb.txt": "8500b6a875dc760a832175222d4d2005253554867ed54f3cb84e16b6235d7d9e",
+      "ebe_pw0.txt": "ac258485b6eb7e40fb223ba2701bfb9fb241b14532ea48fb416873d9c49fe0bf",
+      "loss_pw0.txt": "a88400579ea677d4082fd4aa20396393fafcc87656b0abe8e44c983041e10716",
+      "pass_pw0.txt": "0f9d2d4c7daec6439a1aa02b50c72e5955f3c2f9b1061fb1bcbb03a36e730270",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "94f13156243614ab1f57a2d50412fcce5fa4396fd2355fdc8b69dcfd62731178"
+    }
+  },
+  {
+    "case": "daily-equal",
+    "mode": "daily",
+    "fractions": [
+      0.5,
+      0.5
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.6293745168950409
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.679721311898902
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "20f8c3aa5bd61e15c9f0fea13e3192e80019608c2213e577574573edb45cbe30",
+      "H1.element.dat": "4404e1d54d48c918039a76b43c36b33d05c30601f5437777acb4747d30c11a22",
+      "H1.loss.dat": "956591f8a1d8484233fc9f14c48d676535f15ceb36b242035d4a57a5b3fe9e62",
+      "H1.pass.dat": "f9bf125f4e448ee706fb59068e77c515d6b62889ea600432f66899593e653d2e",
+      "H1.plot.dat": "5b876e298daac9713e7730d1f163886671cdc8868bf66055964e8ad24237f230",
+      "H1.soil.dat": "0fcb8c89962ee98f954bafd46be76ca048d2f9ecc45d039665c18fc8916b0f31",
+      "H1.wat.dat": "6e991b8388905ae5789c6281f61b6983727ef9a2acc1a471359880ab2fa234d5",
+      "chnwb.txt": "4985fe9408afe13bbdc61203c3e8fb9ca32333c6df4bbb89f7aede368f93278a",
+      "ebe_pw0.txt": "cee2a4d37baf590d7dff2f01d3476eb24cb01966f0981f00a1c869eeecee19ad",
+      "loss_pw0.txt": "45820042ee0232e423c113ed023e37d0890de569f623f5cdfe4b2bc18811c942",
+      "pass_pw0.txt": "14aa2206683023ede2e1c5c39de1f14fd7715ae273762ea5c3de225ef6dc34e1",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "3f20ee5f50830265c3da7912d0960ef27db31e2226a7aaca158bcd0b025d3e58"
+    }
+  },
+  {
+    "case": "daily-upper60",
+    "mode": "daily",
+    "fractions": [
+      0.6,
+      0.4
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.6782512608915567
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.734357791952789
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H1.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H1.loss.dat": "639e371cd0094190fa954130cb4da602e1b7b43a6fb5c0509ddd36fe8ad1867b",
+      "H1.pass.dat": "ff223145928be726a0786f101e501fda461a0843bfa5f06878471e9edd62a21d",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H1.wat.dat": "fda2b136cf04954791ef28e749dba8d2b328e55557310b4abe992c09557c9e89",
+      "chnwb.txt": "c55eca718827322066653a46c13d2979008e08f756ff2bb23a4c29e4dbdd8d45",
+      "ebe_pw0.txt": "478d458560343902961bb2444c259a515f91c9c136a925571e061834699917f4",
+      "loss_pw0.txt": "94609e473f46760657e02d20cf52875b2845cdc739ba9cd5a8fc53d80770d07f",
+      "pass_pw0.txt": "d07a2e95430d1f89471e97e1533e3bca41ef8b14ac815eb6c0b9d19c169e3dcb",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "746a06cc01f68316d991ebf3e274de9f390753a0c98c8956719c987df030ffa1"
+    }
+  },
+  {
+    "case": "daily-lower60",
+    "mode": "daily",
+    "fractions": [
+      0.4,
+      0.6
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.627770452061668
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.978201930876821
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "1451b148b4513a4fcaeee7fc9f5237d9e3fd8711560b826f44c4fc24cc594b31",
+      "H1.element.dat": "399d9914afddfbf1a457d9bc1fcd27bbd0fd255f3674e36a9325ed5021f71869",
+      "H1.loss.dat": "5be1126b5c8e8f3eb50860486d74cdc2c4965e10ed365d951656549a690a753a",
+      "H1.pass.dat": "02502d0a3afb275106785163556acf890248b626f8a74647609265e7560e40dc",
+      "H1.plot.dat": "636dbe0fb5c2ec8f10041922edea711a843419e67d830d1701f7be001f14cc58",
+      "H1.soil.dat": "d7187c0430743766b9337240c67825a7f3405acddc66db351cd2eacc626a11be",
+      "H1.wat.dat": "791953055fb5b986605b83603855c81761f7870f5a63ed35132626211dbf4427",
+      "chnwb.txt": "557c08c883703a2b39b5f76fa701e036e2ef0a753203d634086e86ee51d12940",
+      "ebe_pw0.txt": "6b4b9be86a2eeeec1911c60a476b0f317947f3612d4eef1519ab1e42d3e31d11",
+      "loss_pw0.txt": "2fda80e3b76eb6a1570ff650d09b5cc2d5cd0ec9d80b4776b2293eb25a67dec9",
+      "pass_pw0.txt": "4b0a5ed895491d63b9bceadb6922c2ac507d996505967b87d6ecb4d68dc63c92",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "11c9de9292059630e07dbd05fa2d7b446e6ee6727e01196dcf0d657d07fded7b"
+    }
+  },
+  {
+    "case": "daily-three",
+    "mode": "daily",
+    "fractions": [
+      0.2,
+      0.3,
+      0.5
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 2.1785903591662645
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.505215659039095
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "6b91233bfb69e403571be70d9c1e631438f9ed2000e8f861efeedb963df26ef0",
+      "H1.element.dat": "0ef570468d600806cad72e8af857c38ace2b9abe8063d0fb15cd89a44770170a",
+      "H1.loss.dat": "1cbb8ef531177ac035dd1e9aa5c00c1ff37be313f96408475cbe967640e961c5",
+      "H1.pass.dat": "902b75f9abdb1824cf23a6ff77053000653b38f299b0900b0c3d9f495f23d2f4",
+      "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+      "H1.soil.dat": "d67c4015f8a255b6fc2bcf025be340f1b147dc3c4c557c048e5d75b1c0ba25e0",
+      "H1.wat.dat": "555f73de7c1cb28824e139614acfe441894ca3a2cdc490acf1c3c07e45869f3c",
+      "chnwb.txt": "2dc3561ece65a1def4b6a060b8ef38d86d4b87042185a3dfee594f12d17433f2",
+      "ebe_pw0.txt": "ce9846936ae0dec6bb866a3cf1a9e1d120c5ad787a6e9f8f5ceb16605016ed5d",
+      "loss_pw0.txt": "925b64dfc6453c0e304161f8a5d6a8a77946724e8d0dcd385e6ef010fd502c67",
+      "pass_pw0.txt": "5e34748dbf80498c1eedbcaf1cd3cec9c33f8613e2a3c1cf86d236b10bf56c30",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "16aef13d0b903a2aed88111d2cba8013e44f3648e54ef81788ba7e1d14536035"
+    }
+  },
+  {
+    "case": "hourly-single",
+    "mode": "hourly",
+    "fractions": [
+      1.0
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.0765344761312008
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 17.9050833939109
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "e4fd1fe1c53a769afd990af151230fcfe110b0ceea0575d3e5baa6d3f09a235c",
+      "H1.element.dat": "1d5543a11fd1869f2a955f33d0a8d8ef4ae44c77228b35fdaeaae21a2f25d263",
+      "H1.loss.dat": "730c4c15701ed4574bdc4c3262e59c08f9f16394187d4d56a6f13c7be56fdb79",
+      "H1.pass.dat": "92b7787428935ccb22a44feed4852fdfdf1de7a20927d47d7c18fc9cb64b9dc4",
+      "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+      "H1.soil.dat": "8676e205bbcb7fe3daea3c10cf647112d6c1d632a1bb73542d8aa18f9b81c7ef",
+      "H1.wat.dat": "793f7feca2c7d94fd9c2820178ae4b8aa8c1628325aa80deb9b23bf5cff6ed3f",
+      "chnwb.txt": "c43113e16244a287b347ee91a9a69139838396a7033d04b95877fef708be90fd",
+      "ebe_pw0.txt": "fb9e60c5e27915236d277cab2f53992a31f29f4f444c5cc593a370f72c8b3c8e",
+      "loss_pw0.txt": "191325cc2ddcfbdcbbd17e1c4bdeb572dddadbd20c523c685980835f91b56fab",
+      "pass_pw0.txt": "822afbb0d8a29cabc27f019c9789ce8511336c03d8ad7de228a27df447711d5a",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "73e45717eb1ceb2877ae39eb8aefe5e278f6b9077f06bb58a6361ffb1b7bfcd4"
+    }
+  },
+  {
+    "case": "hourly-equal",
+    "mode": "hourly",
+    "fractions": [
+      0.5,
+      0.5
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.6769793520215899
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 16.455601111985743
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "e04c5f13f41d1e287f4410f399c3aba389da96f257df55f3450cc58a2720a063",
+      "H1.element.dat": "9692593a537479e4f4d517fea58d000d4b524f56132f7e34271b06bbe40a9209",
+      "H1.loss.dat": "809d12a37e4e6c38825815a5a2b0790c2e68d0f799db03f07ef85c4406731fec",
+      "H1.pass.dat": "4f933dae57ae876fb20afd245e0ebd8d483347d24e8dc08424b1c32c270b5b21",
+      "H1.plot.dat": "5b876e298daac9713e7730d1f163886671cdc8868bf66055964e8ad24237f230",
+      "H1.soil.dat": "bcf225e765f075abafbc51eac9e27b529b554f656fa22d3a14db2c61d2c25822",
+      "H1.wat.dat": "5950eda863b08d13734e64cc586a557b59b94606574927024b3d8f5b68dba237",
+      "chnwb.txt": "56f2db6bd3fdd6186d686e89552c2fa3434d77501bde703d0a0080bb328c4a0c",
+      "ebe_pw0.txt": "c047a0ca87d9af8eecba00289027652e7718deed89f962a74ae19636d6f10fbf",
+      "loss_pw0.txt": "9d3b916080e19603ee17e1315424abc16d822da20ff3a5c09a8c53e59d12943a",
+      "pass_pw0.txt": "40e617e99c8d8ee9bd08f03aea934a3937f8e0c35f178680aa6fce31f8b47538",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "2e73530682e0e0bd0c6e1ee69ac63cb860eadb3bb3a1640d913f4f80fcf7a99c"
+    }
+  },
+  {
+    "case": "hourly-upper60",
+    "mode": "hourly",
+    "fractions": [
+      0.6,
+      0.4
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.6771551121491939
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 16.55265875486657
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H1.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H1.loss.dat": "8b75728729c916c0893bfa15fa3e90ae5b42b838e704f5af572e8843902c6841",
+      "H1.pass.dat": "0c4daa376f50df3f8804be26d1dbaf419a77cbfb68db891587daf30b03bf5b20",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H1.wat.dat": "23529bd5aea10b2963986c1eb5806163ca559b35444bf4948c1ce362c993a691",
+      "chnwb.txt": "2b36f7cd382fa89b593fd1a4d8545b2464fbb7e6a54c12ba31e1eaed9b598748",
+      "ebe_pw0.txt": "20083b3395022225480d45e74c35ebb8b52d10446dd5015d64f5c50008b74201",
+      "loss_pw0.txt": "35af1235899d2e922841457a1d9ff3f600becb5bef9492a6bce1a28aaeae7966",
+      "pass_pw0.txt": "414f62032bd4121d5a7ed095f174ddcd95141f4c554786762ac4622e20f709fc",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "b9c9f16f9f5efbf93d457d62d95e6e1f3b6c2577a6096d405357c530df276896"
+    }
+  },
+  {
+    "case": "hourly-lower60",
+    "mode": "hourly",
+    "fractions": [
+      0.4,
+      0.6
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 1.5767599099781364
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 16.456410174956545
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "ce7af0b69abb08a484ef89d0bd0bc123cfdec8c729eb8ecd8c93fc1717df0e1a",
+      "H1.element.dat": "33594a79037d550154dd146091ae8b2c2828b4f5d5190657ae4c6c28def1937c",
+      "H1.loss.dat": "069a3fdb1224f6a6831a438b632c9231bc2ee1f93c8d182c32ddab2a5be05947",
+      "H1.pass.dat": "a8d7ff2bde8d1a2717190996988668f46fa3694ec5680f4ab5275aace1f7ae31",
+      "H1.plot.dat": "636dbe0fb5c2ec8f10041922edea711a843419e67d830d1701f7be001f14cc58",
+      "H1.soil.dat": "67b8b3bef7515a26c346dc4b6970ba3fc54c9d124ba17de1c84d03acd3d77549",
+      "H1.wat.dat": "d7089be2d54c35685478c26c01e9be926a45a144b98c9d5b8eb7983ba1ba1232",
+      "chnwb.txt": "524e7ac8e3fdb16f2adb7870f087e72b05af7220f72cc6e1cfca0c3abc4cd38b",
+      "ebe_pw0.txt": "d485435eb10bc80e2b9220753f71247608f68571e03505b968e74f653dd7233f",
+      "loss_pw0.txt": "53ea738a150608fbd7ed8214d62cb160c131430b0ac46e68c68e6cf05cc7407a",
+      "pass_pw0.txt": "f4fe2bf086e58ada36ca021f6e04837ee046dcce3573770252ed2984c21e7409",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "a4468fe4e2369757310e2292e433f78c23153117cc4cf15400e55cc23eb387a8"
+    }
+  },
+  {
+    "case": "hourly-three",
+    "mode": "hourly",
+    "fractions": [
+      0.2,
+      0.3,
+      0.5
+    ],
+    "results": [
+      {
+        "card": "p1.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill",
+        "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+        "returncode": 0,
+        "success": true,
+        "seconds": 2.1777832580264658
+      },
+      {
+        "card": "pw0.run",
+        "binary": "/workdir/wepppy/wepp_runner/bin/wepp_261021",
+        "sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+        "returncode": 0,
+        "success": true,
+        "seconds": 16.468551284167916
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "9a2e62c8846fa952366eb160e5634add13d2fcae5ff3091cc518ec49b243e600",
+      "H1.element.dat": "4f9ca8d4d3edcbfab93682d12abc312ab46fefe4034f6b27a594ec3916d3cf7a",
+      "H1.loss.dat": "64646edcc0bc797aab0e08f4f7d5499ec2d3eddfdd718dbc8505cb08f7a14106",
+      "H1.pass.dat": "94a8ca71809e2b2dbd828a39f2eb06631134b2bd8f85bba0cfd5d92a0f6c9668",
+      "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+      "H1.soil.dat": "3d88a8402eb9ed65cde9a7bb171642fb3f1460779e6c0c0af39757524e3df166",
+      "H1.wat.dat": "97423dbee630e2e499bbce37f5a1e16f76623fa104655b294d32b59e7c55fb2d",
+      "chnwb.txt": "7a669c77372f8ca918cf371567962d3155e07572f242aae4328c26c727533e3f",
+      "ebe_pw0.txt": "edc236b19c7ee018c5fa6457ecdf582353eb36d9385d9138b3fa29ae8e78dd63",
+      "loss_pw0.txt": "b3da1a914684183a6f2cc55d708de6e9ea6aa9ecb357aca4914db95e255d7cf2",
+      "pass_pw0.txt": "4d011fc819e753e712fa9eae2766ad139212020b6e77b8f0058870f9c21cdb0b",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "025b5df66f395cf29ce1ba953d1e78bb021c3d43ca971c8c40afe24ce5789542"
+    }
+  }
+]

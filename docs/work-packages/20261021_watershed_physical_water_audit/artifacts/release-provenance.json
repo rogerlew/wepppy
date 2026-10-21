@@ -1,0 +1,10 @@
+{
+  "source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa",
+  "artifact_commit": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "binaries": {
+    "/workdir/wepppy/wepp_runner/bin/wepp_261021": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+    "/workdir/wepppy/wepp_runner/bin/wepp_261021_hill": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+  },
+  "source_inputs": "/wc1/runs/wb/wb34-impoundment-cohort/wepp/runs",
+  "private_inputs": "Supplementary scientific investigation inputs; not a new mandatory release gate. Original Ayush input decks unavailable."
+}

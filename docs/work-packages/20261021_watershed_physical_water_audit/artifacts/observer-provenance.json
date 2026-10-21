@@ -1,0 +1,6 @@
+{
+  "source": "/workdir/wepp-forest-release-20261009",
+  "commit": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "root": "/workdir/watershed-physical-water-audit-20261021/observer-source-v2",
+  "purpose": "Read-only channel state and rate observations; parity required"
+}

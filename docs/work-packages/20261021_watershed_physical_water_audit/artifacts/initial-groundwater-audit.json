@@ -1,0 +1,38 @@
+[
+  {
+    "case": "single",
+    "days": 16071,
+    "initial_depth_mm": 100.0,
+    "hillslope_area_m2": 10000.0,
+    "expected_initial_volume_m3": 1000.0,
+    "expected_first_baseflow_m3": 40.0,
+    "actual_first_baseflow_m3": 40.0,
+    "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "input_change": "gwcoeff.txt initial storage only; WAT must be unchanged",
+    "wat_identical": true
+  },
+  {
+    "case": "upper60",
+    "days": 16071,
+    "initial_depth_mm": 100.0,
+    "hillslope_area_m2": 10000.0,
+    "expected_initial_volume_m3": 1000.0,
+    "expected_first_baseflow_m3": 40.0,
+    "actual_first_baseflow_m3": 16.0,
+    "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "input_change": "gwcoeff.txt initial storage only; WAT must be unchanged",
+    "wat_identical": true
+  },
+  {
+    "case": "three",
+    "days": 16071,
+    "initial_depth_mm": 100.0,
+    "hillslope_area_m2": 10000.0,
+    "expected_initial_volume_m3": 1000.0,
+    "expected_first_baseflow_m3": 40.0,
+    "actual_first_baseflow_m3": 20.0,
+    "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "input_change": "gwcoeff.txt initial storage only; WAT must be unchanged",
+    "wat_identical": true
+  }
+]

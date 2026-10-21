@@ -1,0 +1,44 @@
+--- a/src/watbal_hourly.for
++++ b/src/watbal_hourly.for
+@@ -237,6 +237,10 @@
+ c     fcdfz - frozen portion in the saturated layers. 
+ c
+ c     + + + SAVES + + +
++      integer auditunit
++      logical auditinit,auditon
++      save auditunit,auditinit,auditon
++      data auditinit /.false./
+       save watcon, fcdep, totlqc
+ c
+ c     + + + SUBROUTINES CALLED + + +
+@@ -314,6 +318,12 @@
+       end if
+ c
+       ui_LFtstpF = ui_LFtstp
++      if (.not.auditinit) then
++        inquire(file='water_audit.on',exist=auditon)
++        if (auditon) open(newunit=auditunit,
++     1    file='water_audit_hourly.txt',status='new',action='write')
++        auditinit=.true.
++      endif
+       sep(iplane) = 0.0
+       deepSeep = 0.0
+       tileDrainage = 0.0
+@@ -528,6 +538,9 @@
+ c       *** L1 ENDIF ***
+ cd        end if
+ 
++      if (auditon) write(auditunit,9901)
++     1  year,sdate,iplane,ii,hrfin,xfin
++c
+ c       ------ combined standing & fallen residue (used in EVAP to compute % bare soil)
+ c       only do this on the first hour, so that it is done once per day
+         if (ii.eq.1) then
+@@ -1178,6 +1191,7 @@
+ c     *** L0 ENDIF ***
+       end if
+ c
++ 9901 format(4(i8,1x),2(es24.16,1x))
+       return
+  1000 format (i2,1x,i3,1x,i5,1x,f4.2,1x,f5.3,1x,f4.2,2(1x,f5.3),1x,i1,
+      1    1x,f6.3,

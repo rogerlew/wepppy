@@ -1,5 +1,7 @@
 # PROJECT_TRACKER.md
 
+Completed (diagnostic audit): [Watershed physical water audit](docs/work-packages/20261021_watershed_physical_water_audit/package.md) — eighteen 44-year watershed cases, OFE/PASS accounting and native observations identify four unresolved defects in channel rate construction, flat hydrographs, hourly infiltration allocation and initial groundwater area. Ash excluded. Watershed correctness not certified; no model repair or deployment.
+
 Completed (local release): [WEPP 261021](docs/work-packages/20261021_wepp_261021_release/package.md) — paired Gregorian ASCII PASS v3 binaries built from the default branch and vendored; changelog includes 261010 and 261021. Native 232 tests, 12 watchlist cases, host/container smokes and 400-year alignment pass. WEPPpy segmented coverage 11,052 passed/122 skipped; test-order/browser-path limits retained. No default switch or deployment.
 
 Completed (source/local validation): [Gregorian calendar repair](docs/work-packages/20261021_gregorian_calendar_repair/package.md) — Gregorian/EOF and HBP padding fixes; both full 200-year paths, 400-year simulations and downstream audits pass. Regression parity and independent native reviews pass; broad fixture/cache limitations retained. No deployment.

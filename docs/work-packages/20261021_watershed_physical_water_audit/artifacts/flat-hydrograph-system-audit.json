@@ -1,0 +1,97 @@
+{
+  "compiler": "/usr/bin/gfortran",
+  "source_harness": "/workdir/wepp-forest-release-20261009/tests/test_component_reconstruction.py",
+  "source_commit": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "results": [
+    {
+      "case": "aligned_control",
+      "nt0": 0,
+      "requested_volume_m3": 1200.0,
+      "peak_m3s": 1.0,
+      "duration_s": 1200.0,
+      "integrated_volume_m3": 1200.0,
+      "deficit_m3": 0.0
+    },
+    {
+      "case": "aligned_control",
+      "nt0": 1,
+      "requested_volume_m3": 1200.0,
+      "peak_m3s": 1.0,
+      "duration_s": 1200.0,
+      "integrated_volume_m3": 1200.0,
+      "deficit_m3": 0.0
+    },
+    {
+      "case": "fractional_last_interval",
+      "nt0": 0,
+      "requested_volume_m3": 900.0,
+      "peak_m3s": 1.0,
+      "duration_s": 900.0,
+      "integrated_volume_m3": 600.0,
+      "deficit_m3": 300.0
+    },
+    {
+      "case": "fractional_last_interval",
+      "nt0": 1,
+      "requested_volume_m3": 900.0,
+      "peak_m3s": 1.0,
+      "duration_s": 900.0,
+      "integrated_volume_m3": 600.0,
+      "deficit_m3": 300.0
+    },
+    {
+      "case": "peak_duration_below_volume",
+      "nt0": 0,
+      "requested_volume_m3": 1000.0,
+      "peak_m3s": 1.0,
+      "duration_s": 600.0,
+      "integrated_volume_m3": 600.0,
+      "deficit_m3": 400.0
+    },
+    {
+      "case": "peak_duration_below_volume",
+      "nt0": 1,
+      "requested_volume_m3": 1000.0,
+      "peak_m3s": 1.0,
+      "duration_s": 600.0,
+      "integrated_volume_m3": 600.0,
+      "deficit_m3": 400.0
+    },
+    {
+      "case": "observed_daily_1983_182",
+      "nt0": 0,
+      "requested_volume_m3": 313.9,
+      "peak_m3s": 0.067072,
+      "duration_s": 4680.0,
+      "integrated_volume_m3": 281.70238572,
+      "deficit_m3": 32.19761427999998
+    },
+    {
+      "case": "observed_daily_1983_182",
+      "nt0": 1,
+      "requested_volume_m3": 313.9,
+      "peak_m3s": 0.067072,
+      "duration_s": 4680.0,
+      "integrated_volume_m3": 281.70238572,
+      "deficit_m3": 32.19761427999998
+    },
+    {
+      "case": "observed_hourly_2017_37",
+      "nt0": 0,
+      "requested_volume_m3": 177.17,
+      "peak_m3s": 0.0035153,
+      "duration_s": 46800.0,
+      "integrated_volume_m3": 164.516045148,
+      "deficit_m3": 12.653954851999998
+    },
+    {
+      "case": "observed_hourly_2017_37",
+      "nt0": 1,
+      "requested_volume_m3": 177.17,
+      "peak_m3s": 0.0035153,
+      "duration_s": 46800.0,
+      "integrated_volume_m3": 164.516045148,
+      "deficit_m3": 12.653954851999998
+    }
+  ]
+}

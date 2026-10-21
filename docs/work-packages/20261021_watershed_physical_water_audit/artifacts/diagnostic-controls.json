@@ -1,0 +1,194 @@
+{
+  "controls": {
+    "duplicate_transfer": [
+      0.0,
+      6.0
+    ],
+    "drop_outflow": [
+      0.0,
+      4.0
+    ],
+    "wrong_area_factor": [
+      0.0,
+      3.0
+    ],
+    "reverse_storage_sign": [
+      0.0,
+      10.0
+    ],
+    "one_day_shift_absolute_m3": 14.0
+  },
+  "release_matrix": [
+    {
+      "case": "daily-equal",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "daily-lower60",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "daily-single",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "daily-three",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        },
+        {
+          "ofe": 3,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "daily-upper60",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "hourly-equal",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "hourly-lower60",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "hourly-single",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "hourly-three",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        },
+        {
+          "ofe": 3,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    },
+    {
+      "case": "hourly-upper60",
+      "ofes": [
+        {
+          "ofe": 1,
+          "q_qofe_failures": 0
+        },
+        {
+          "ofe": 2,
+          "q_qofe_failures": 0,
+          "surface_transfer_failures": 0,
+          "lateral_transfer_failures": 0
+        }
+      ],
+      "event_surface_failures": 0,
+      "delivered_lateral_failures": 0
+    }
+  ],
+  "tolerance_rationale": "Local rounded lateral fields: 0.005 mm per field; WAT scientific fields 7 significant digits; PASS 5 significant digits; 4 binary32 eps allowance for producer scaling. Not a whole-domain conservation tolerance."
+}

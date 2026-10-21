@@ -1,0 +1,810 @@
+{
+  "root": "/workdir/watershed-physical-water-audit-20261021",
+  "files": [
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/diagnostic-controls.json",
+      "bytes": 4232,
+      "sha256": "a56160753e5d563b34d3a8ae1b655444ea3eba0c08e450ea679a67452feec200"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer/parity.json",
+      "bytes": 7097,
+      "sha256": "fe84ae407b6382375cec1d436ade5bc608cae9254bd276a1ed4ee12d078d9f4d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/audit.json",
+      "bytes": 6894,
+      "sha256": "13f8cc4958dd70a899209d1a10e2af4ae4397834058a6f91485a15c7c5bfc76e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/parity.json",
+      "bytes": 14543,
+      "sha256": "5cfc3cc61098faa422bef1f26d65735df659dc8924868be32be28389058720e9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/audit.json",
+      "bytes": 20669,
+      "sha256": "3429ba9de99585ef76b54815226f8393d177ecfba67ebc4fa7f876c173f3d601"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/parity.json",
+      "bytes": 61515,
+      "sha256": "b8ffdf9d433ed37e596cb94860065161a603f497a00d53d4ca11bdee2046b97d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/audit.json",
+      "bytes": 36153,
+      "sha256": "ff09c2fd5c997eaa6bb58107d8e4c000f6605c741398db4170b7218ea1453ca7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/execution.json",
+      "bytes": 18809,
+      "sha256": "c67b47daa7bbc4f6ab987881b9f8e1ba4dba3bcfc98dbc41629e6c54458ea667"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/initial-groundwater/audit.json",
+      "bytes": 1290,
+      "sha256": "7b640471ac8472b1f27da6b5662bc981de6178d9df4caa03ebf6481fd18bddde"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/audit.json",
+      "bytes": 6800,
+      "sha256": "22d5ec5e3574a0322b38dd79cf5eb6eeb190d25bcfb6977fc6725352e7bcd6e7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/parity.json",
+      "bytes": 14527,
+      "sha256": "2c94089630fec2b24b31b2c2d393b7f44acad15228df2f673f3b0f34595d8f06"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/audit.json",
+      "bytes": 4589,
+      "sha256": "75df9e9c425d53b4b7316fee2dace5c27e1e44c7dddc9b07ea6e01dd21f4fac3"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/parity.json",
+      "bytes": 1134,
+      "sha256": "d8014eef0d6ee6f77f7abd340f967947c8876f9a5efbf51ff88af14a228bb8ca"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/flat-hydrograph/audit.json",
+      "bytes": 2481,
+      "sha256": "e655c11ec639f0fb4665a4d8a86e273e2225cd4ab8e619bcce0d9f35e2d2e190"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/execution.json",
+      "bytes": 16941,
+      "sha256": "91d2160c50961b04f43ca2438dee2ff15b6d23c249c7c396268b7cfde7f59470"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/flat-hydrograph-system/audit.json",
+      "bytes": 2516,
+      "sha256": "f620201231c70626b61aacacd87412cb0a87262f9e65dda5921557f18a2a7f96"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-cascade/execution.json",
+      "bytes": 3263,
+      "sha256": "8eb36ab7c987265f03a1d3f0dd3c28c567badfb5556aa992f0f049254401de7c"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-cascade/input_manifest.json",
+      "bytes": 2600,
+      "sha256": "cfbb5f6486c10048781e250806fef13ff17c4db924dfa3d947488e54e9e25e66"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-side/execution.json",
+      "bytes": 1320,
+      "sha256": "23de3c519a1bba3d59bc59e9fb78908f109b781f1843d729689fee864dbc7797"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-side/input_manifest.json",
+      "bytes": 1800,
+      "sha256": "c6bb9790c6799a748e6a775a6307db35f0f34527702dd40fa6c813bdef9ef6ed"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-cascade/execution.json",
+      "bytes": 3262,
+      "sha256": "b3106b39c56100271fc7ba4d68a54adfcd48384a624d8f12cfdddd176f1cb02c"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-cascade/input_manifest.json",
+      "bytes": 2685,
+      "sha256": "c47c96781af4f7197936355b38a9b339f73282b4f51d62a97e140b25c340f8e9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-short/execution.json",
+      "bytes": 1621,
+      "sha256": "c445fd8728f2aeb429b8d82c0befaa03c2a2500c9525dba46a855b5a7abad915"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-short/input_manifest.json",
+      "bytes": 1800,
+      "sha256": "017dffee5370627d39741850ec8935e4e56f8ff91f1af7cd6e9c7b4e8bd4f3db"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-short/execution.json",
+      "bytes": 1621,
+      "sha256": "b2cf4acacffb81c91b71f81998a697b01a989cfea0ce1a5d5651c761389ed92f"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-short/input_manifest.json",
+      "bytes": 1885,
+      "sha256": "3791d02065c145c3447ecc840ce4ba1dd86a29a9afaf81d1f2b78753db3f2476"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-tributaries/execution.json",
+      "bytes": 3267,
+      "sha256": "d8639d5533b4f71eb1f3c895cac9eb416d726183f4b2c804c18d27dd7c05258e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-tributaries/input_manifest.json",
+      "bytes": 2685,
+      "sha256": "6f198cfaac9c0c55a676a1d46eceb474088d2d6140652ebaecd5f51ee4d5b4e7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-tributaries/execution.json",
+      "bytes": 3266,
+      "sha256": "4dfd3f6db2d6e814e44ba78d925bb2c23e9e2d981deba85f8d95c0106b56c258"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/daily-tributaries/input_manifest.json",
+      "bytes": 2600,
+      "sha256": "949f84e25fd2adcfcadd6a018222347b0948a99968ac46420e0e036e79c0d462"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-side/execution.json",
+      "bytes": 1322,
+      "sha256": "54d3c81da19c6069766523a829d5a28505d7820778d767c45c54075f3f2c8a99"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/networks/hourly-side/input_manifest.json",
+      "bytes": 1885,
+      "sha256": "74e6f442780d29b0b566000b51af52ea202489e39c2b4a9e9083b23fb056da72"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-three/hourly-water-ledger.csv",
+      "bytes": 8546180,
+      "sha256": "b74ebf3645de4cbbc2abae2596627e9a5ceee7fed515d9ef9562678166bc4229"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-three/parity.json",
+      "bytes": 172,
+      "sha256": "341b9e4050c0a77fb82a8c0c02e11e6d2a59989217451367bd8ad02d3581b3e3"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-single/hourly-water-ledger.csv",
+      "bytes": 2845522,
+      "sha256": "6118bad82d3addd89a9535626a5bcd5c5e9a60a6c48aee1e7092564aee8b918b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-single/parity.json",
+      "bytes": 173,
+      "sha256": "76bd9d421dbc6a2e7dd8746b1a9cc7d51e4a58dc8a35e261212bb8e97cf74b96"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-upper60/hourly-water-ledger.csv",
+      "bytes": 5707325,
+      "sha256": "c99e30c4539e2a9b7d246f40dc15d2e54f8f7708363c3cba856c729849cd82e2"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-upper60/parity.json",
+      "bytes": 174,
+      "sha256": "179756f3ab5fabf117e311f44fa44ed962438f69364d8bde3a7d107455f1c220"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-upper60/runs/water_audit_hourly.txt",
+      "bytes": 66341088,
+      "sha256": "62c416657a97ce81b50163a8b1459b385c089a54bd5860343b0e4615a35e53d1"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-single/runs/water_audit_hourly.txt",
+      "bytes": 33170544,
+      "sha256": "f1602111b8da45b93a1936f0b94b769ce04c740819387b0bca7a6c830ecd5179"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/on/hourly-three/runs/water_audit_hourly.txt",
+      "bytes": 99511632,
+      "sha256": "a964ff8877106695d970fde8858413397eed6bf2631f5732050cc5750dbf20a5"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/off/hourly-three/parity.json",
+      "bytes": 173,
+      "sha256": "020a7716346ccd4fccf1b0e3b6b37fbb5c9125d9c00806f75a5b6e6100c63499"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/off/hourly-single/parity.json",
+      "bytes": 174,
+      "sha256": "6d399f2beab2872c2192c97815f1e373e4ee9587779eab1bcc9e8cd24d9e98f3"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/hourly-observer/off/hourly-upper60/parity.json",
+      "bytes": 175,
+      "sha256": "a51f7c9bb24e6370e632a7cbed30160ef91372e6dbf00a46a2ac27856fbb5cbb"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/daily-side/audit.json",
+      "bytes": 3176,
+      "sha256": "d956ddcf085b96ac3ee1ee920fee1048962574eb8a199c2d53bf91aeff25766e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/daily-side/parity.json",
+      "bytes": 3491,
+      "sha256": "4372e8360ac0e6c3b15e914fc242981617a16351c9ebbb136325db453eb72780"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/daily-side/channel-ledger.csv",
+      "bytes": 7118108,
+      "sha256": "f4cd1990f76ed7be05074c2e9c2f657a6dc63a1547ec4d08d3d40bcaba87b35b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/hourly-side/audit.json",
+      "bytes": 3175,
+      "sha256": "9cbb624e46ab3966cb00a984e2c4648abf36f8c13e14d4be75bee0be3d2261c5"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/hourly-side/parity.json",
+      "bytes": 3583,
+      "sha256": "67bb08cbec0bf01604589e2f1744619f9b6349ec8bfe515355604adde5710249"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/hourly-side/channel-ledger.csv",
+      "bytes": 7713418,
+      "sha256": "7580810a8ab2ce6711a7976057f443bd7aed78cb2d6162fab414e84f59b51e40"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/hourly-side/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "2e337802e8bfe4f01382e78df1a9413042e435c3b2c41b9227e593a39e68a87f"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/hourly-side/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "009a4f146a6bf9e660b7c27f39e5caeb5f3330dc743a1f61edcd70ca1ed94a52"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/daily-side/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "6817acbe4ed1cccd654d5d6817de3836dacaa24b5507e2d0efc46bec28f3f998"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/on/daily-side/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "c9e42651444a35ce69b34c69c358d2a64fccd04adce6817711adc406271e8f21"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/off/daily-side/parity.json",
+      "bytes": 3490,
+      "sha256": "d3e30b9763348065743946bb1811a6ed604853239158d4079ca2fb583a65efd9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/side-observer/off/hourly-side/parity.json",
+      "bytes": 3584,
+      "sha256": "ae7db7c500bb405cd44a39ea7044402dbafc43f7a586fdc512535a7b8c0ead46"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/initial-groundwater/upper60/file-manifest.json",
+      "bytes": 2555,
+      "sha256": "0b2e5421560911681affe92bdfc2b9c101a8090f92438c50b0891e4839a09ffa"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/initial-groundwater/single/file-manifest.json",
+      "bytes": 2555,
+      "sha256": "3371b41b193ba37d52381c0788a3f12847a51fd040485b8ad8bd9c9b21fa92b1"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/initial-groundwater/three/file-manifest.json",
+      "bytes": 2555,
+      "sha256": "d244720d3eba20c191f63053dd1d5a03b615f88743c46c8630aa6428645d6016"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-equal/audit.json",
+      "bytes": 3307,
+      "sha256": "0aabd6f3971f449bb131d7e134d2ce7ff8ba8701725ea639a335d040668e33b6"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-equal/case.json",
+      "bytes": 149,
+      "sha256": "8fc7c4869e8adecc1ec264e455b4fa357e330fd1b5d357a2a7e56de4d27d18e7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-equal/water-ledger.csv",
+      "bytes": 2292865,
+      "sha256": "594fd18683b9ec1baab4fe8efa9d4b10b70367dfc4d982d30d70b36f4eb42190"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-equal/execution.json",
+      "bytes": 1798,
+      "sha256": "3108f50a32488aba2835069f89daa6899128241d8da862ed801c8164b0003408"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-equal/input_manifest.json",
+      "bytes": 1635,
+      "sha256": "7f2e893a4053ba28f9354ed944cd9e092eae86496c3052c78901772f1d98ed70"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-lower60/audit.json",
+      "bytes": 3375,
+      "sha256": "af4aae0a80a07b876ee6e95e754d54ff4b851ae9e171fdff758c0e843b0d592c"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-lower60/case.json",
+      "bytes": 149,
+      "sha256": "36c74feea4fbc770f63344c3c43eb5930546e61f24788bdf79289d0aaefebcb5"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-lower60/water-ledger.csv",
+      "bytes": 2464387,
+      "sha256": "d8648b26e34f4063eb362deb0a56fb5ca7355f2531dff1dfade1728aa6051274"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-lower60/execution.json",
+      "bytes": 1797,
+      "sha256": "68e28ae1f0791b3717d32b54e703f658dc3ef8dc6454f31f99202046af062452"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-lower60/input_manifest.json",
+      "bytes": 1550,
+      "sha256": "60db3671a203a881eba18610a941f714d60f74db7dc5f0512f656dade8f4d62b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-lower60/audit.json",
+      "bytes": 3409,
+      "sha256": "799bf64ff535c3433f5ee43d106463f4c53f410e063c36e8d054f512629d073a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-lower60/case.json",
+      "bytes": 149,
+      "sha256": "36c74feea4fbc770f63344c3c43eb5930546e61f24788bdf79289d0aaefebcb5"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-lower60/water-ledger.csv",
+      "bytes": 2342710,
+      "sha256": "5ff4043f9bc4420d134793734107d4262b47cb254cefc596c1d2f51cfd4f9210"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-lower60/execution.json",
+      "bytes": 1800,
+      "sha256": "ad8dc554b157f3ad48bb08dfff981d27531e6910e9f9fe8cfa3808342b16ac08"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-lower60/input_manifest.json",
+      "bytes": 1635,
+      "sha256": "9068d5cdca8a2cfcedb9840a8f3969eeb14b7b181e1610d1c849d5280feb0461"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-three/audit.json",
+      "bytes": 4287,
+      "sha256": "fab802565b33cd1a1b7d96a9a276dad9cd76869deb442f5aef0d51ff5ea47ad0"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-three/case.json",
+      "bytes": 158,
+      "sha256": "c169c018b45051d4e2542b03669dc1f7e7433b5866a95752d89389395691a768"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-three/water-ledger.csv",
+      "bytes": 2327181,
+      "sha256": "2eb0c8d7f6dbed4021dad6fecbe4c67ecdf395d1d3cfefdd71ef7b108e183fce"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-three/execution.json",
+      "bytes": 1807,
+      "sha256": "68801b2e42f01c8e32292d5fb71227ca2e1724a62412b4aa73c6d8bddc284fb8"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-three/input_manifest.json",
+      "bytes": 1635,
+      "sha256": "fdc4385d25adacb36e512a44850694bb8149abaf76afedc0494d11ee31156287"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-three/audit.json",
+      "bytes": 4288,
+      "sha256": "5257b3aae26fcb942a1f4d888af67f74d583c37b81ecd5bd0f4427c06682e31d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-three/case.json",
+      "bytes": 158,
+      "sha256": "c169c018b45051d4e2542b03669dc1f7e7433b5866a95752d89389395691a768"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-three/water-ledger.csv",
+      "bytes": 2435826,
+      "sha256": "0dd5626f9866f3074e1330ed84794c814fb898cf379b4f04fac6f86f5f1d3d97"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-three/execution.json",
+      "bytes": 1805,
+      "sha256": "b4d0f434f753494c1fbecd9ad27959fa87827e3c8f84f1e4ef882f86f87668ad"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-three/input_manifest.json",
+      "bytes": 1550,
+      "sha256": "51a8f1fff1f6e0ad5acb5df4bb5f8a9b2b3b8e6eaf1d1a1ebedacbef67c1a4c6"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-single/audit.json",
+      "bytes": 2506,
+      "sha256": "e0825d260f214e0b63d9bcb55c87f501e1fa0a604ee579c2fca4deab1cbf082a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-single/case.json",
+      "bytes": 140,
+      "sha256": "eb5bd080cbee8d666573dd2b708c6f03aafbcb2c81a8d54c567df35c8160dd7d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-single/water-ledger.csv",
+      "bytes": 2383609,
+      "sha256": "bf8f98de9e2b52ded23bc97efdb0aeadacbe5db769b6d33fd0e7b50f77421590"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-single/execution.json",
+      "bytes": 1788,
+      "sha256": "9f731d5a5daca74dc76f13c15a1a979f17605f12b919c1afe289d06d7a5c2b4e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-single/input_manifest.json",
+      "bytes": 1550,
+      "sha256": "28e85bebbb0a813c58607031825154aef8583b946db7b11208ecab08045f926a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-equal/audit.json",
+      "bytes": 3329,
+      "sha256": "66fb090c6e8dfb1789014e43fbfc9bdf27bab1e666d235994ac36e2f48979f2e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-equal/case.json",
+      "bytes": 149,
+      "sha256": "8fc7c4869e8adecc1ec264e455b4fa357e330fd1b5d357a2a7e56de4d27d18e7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-equal/water-ledger.csv",
+      "bytes": 2403855,
+      "sha256": "1d091b7c0b631df726d1fd33baf2e5d01417853060c19c4e35b6eef0fe817746"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-equal/execution.json",
+      "bytes": 1796,
+      "sha256": "020235eef419b72150f2c67935be12b778447a4f2aef1183ddca46861137a233"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-equal/input_manifest.json",
+      "bytes": 1550,
+      "sha256": "ea5a0d3c2b28abafbe10915648008e4301c2d2063aefe1fab40e8a9f3e0bb540"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-single/audit.json",
+      "bytes": 2473,
+      "sha256": "c331a610bb4b3c5054f54b1c0da13dbeb9da3f372f2e65fb38f3d1d0188f4aa9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-single/case.json",
+      "bytes": 140,
+      "sha256": "eb5bd080cbee8d666573dd2b708c6f03aafbcb2c81a8d54c567df35c8160dd7d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-single/water-ledger.csv",
+      "bytes": 2250845,
+      "sha256": "d3e9c7480288982cd84b2c09257430dc642728815f4a9163073381d2d817360b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-single/execution.json",
+      "bytes": 1788,
+      "sha256": "05bec60ad5828cc72e030941f99bc141fc78570ad6808e713b22a5591e1f91f7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-single/input_manifest.json",
+      "bytes": 1635,
+      "sha256": "fa1a87146b543aacf56a63c00e4514d1cfb8ae46ac8cf1fe30d180a883635e6e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-upper60/audit.json",
+      "bytes": 3368,
+      "sha256": "bf49e55115e05402ba3c7ef9ae1f506c1af5e4a8f62bea9e2a80552ce12d6219"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-upper60/case.json",
+      "bytes": 149,
+      "sha256": "a1a0b908a932a545cd83979347ed178e427da1ccbf4ebfc3b42f0f21b877de24"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-upper60/water-ledger.csv",
+      "bytes": 2470143,
+      "sha256": "fe4ee66d51dbebbc5e36aa84f33378f6e9a01f69ea930a8bba1be6f07d3fc656"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-upper60/execution.json",
+      "bytes": 1798,
+      "sha256": "1060a7018751b6b5e21828778d94d3acfb1b75f70f3b78504d9e568bfab6b037"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/daily-upper60/input_manifest.json",
+      "bytes": 1550,
+      "sha256": "2337009b0b6bd560cb092f32a5351fe4e22baac7cd276621afda4ad67fb567c7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-upper60/audit.json",
+      "bytes": 3398,
+      "sha256": "b968ae12e4be4b59ff67e7ace02dbc00ecc81200618c9911d8acfdde88c3831d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-upper60/case.json",
+      "bytes": 149,
+      "sha256": "a1a0b908a932a545cd83979347ed178e427da1ccbf4ebfc3b42f0f21b877de24"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-upper60/water-ledger.csv",
+      "bytes": 2311440,
+      "sha256": "4535b5cdac92bd69f150af05d009676e17698bbb1eeab33240dbb2d2bb3e7c8a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-upper60/execution.json",
+      "bytes": 1799,
+      "sha256": "e7abb802681c2f0dacc855ebc8d5fbf55289a37cdad02e168276bf265a9a05db"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/release-matrix/hourly-upper60/input_manifest.json",
+      "bytes": 1635,
+      "sha256": "84ab18387639aae30fe9f97e4391153336c32e4d0e4ed80c88ef126661d0dcc9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-cascade/audit.json",
+      "bytes": 3198,
+      "sha256": "ca163b95a8a6b883ee604894a9c2907f3e387bcc8fd3576f2b688f2b5ba94d4d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-cascade/parity.json",
+      "bytes": 5681,
+      "sha256": "9a3ff09e3b7a34595723c7c4703718073322af50da8c3c518ca2d305d27304b8"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-cascade/channel-ledger.csv",
+      "bytes": 18399662,
+      "sha256": "885bb3ba1ff4107bf8345229d8422abd1a4aec83ff4063dcf23ca1bfefc27645"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-cascade/audit.json",
+      "bytes": 3182,
+      "sha256": "49e57ae1edf3219ecbf9ccfa398b25c45957ec5350f836c85116e7eb37e55e32"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-cascade/parity.json",
+      "bytes": 5774,
+      "sha256": "049cceef941c1251378936cb5dd9b24c60f7fe2c013bf9e6b8d162bb4aa22132"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-cascade/channel-ledger.csv",
+      "bytes": 18175247,
+      "sha256": "d004467202a7d68f35939a133dfdd2b9a98d4a47a351d042e7a08bb1d6d6797c"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-short/audit.json",
+      "bytes": 3221,
+      "sha256": "0e963d99765419fd99832b2011e0e0549ff715f8a0374e3a8797daad159053d9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-short/parity.json",
+      "bytes": 3492,
+      "sha256": "0866a4ecbc64c7d6ae4fa73ce6ab2e9cfa6e08c9376a94aef4457f57bcbd69f9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-short/channel-ledger.csv",
+      "bytes": 8505920,
+      "sha256": "d605a986ee7f223db968e6e7a948f370875f12cbd58f737d125fa2d36af674c6"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-short/audit.json",
+      "bytes": 3210,
+      "sha256": "f1d1094afcca0f5c3d02b8e9c51b9bdfffa11d2e7f330e468bcc67c4a7472ed0"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-short/parity.json",
+      "bytes": 3585,
+      "sha256": "21bc1246f5846b1b63ab003f901cae404b4e066b38eaf1e8add91c4d95287d74"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-short/channel-ledger.csv",
+      "bytes": 8797695,
+      "sha256": "9c50a21ee9274e2be15125329a40f72a2f0a3dc15d1125c612ca11925a81d155"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-tributaries/audit.json",
+      "bytes": 3248,
+      "sha256": "0fc3ae7737d0251361c867eef979cf244d8892e2476cd65fedb9e43d53b49ce7"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-tributaries/parity.json",
+      "bytes": 5779,
+      "sha256": "10bec59e312ef798184f0dd8d08ec974ac1739e14791483fdbefa0b641e9808b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-tributaries/channel-ledger.csv",
+      "bytes": 9620507,
+      "sha256": "1b0be847f2e4c9f7a23d2b276bd2dd19af73d8ee7276e6bb7086e4a947df7512"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-tributaries/audit.json",
+      "bytes": 3269,
+      "sha256": "b0f7d0df6d18fa4c403c381cb09ece61ffaae8100100800d3390a05abf9cd39b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-tributaries/parity.json",
+      "bytes": 5686,
+      "sha256": "ee6e6a6c80ef435d0e65ff5dfab92e99f2f714aaf6a7053bdee06d90512da4b9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-tributaries/channel-ledger.csv",
+      "bytes": 9533653,
+      "sha256": "7932303a57fb22af87d03ca762f026d2e4045260fc93fc8648f3e13066f7f6b1"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-tributaries/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "c641820e271d10f140c48424d7b84070ffaa131ac4dcd79532c2b326ef208f12"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-tributaries/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "de696627c7a90d16d1b4cb742668020496ac658a71cdea89c394cfbf451c4d9c"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-tributaries/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "9da7f3b0a33d0c083856ca49808a63a80441937cd338e2f2b3604a459902fce0"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-tributaries/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "6b5e3e513a72fb13eb642814fee80e0a1bface92edcd73cc92ccab8bcb2152ad"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-short/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "c39d96963578bc2249de75e9608f998c4fce7c41474de570453b40a7e6d37ebc"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-short/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "52ce182e6f925a007fdb3993ce5f01bce332af3817f7b075956c7980688b8bb6"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-short/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "4784e487d7681599c764fcfb2b5c0c04c3baa531c7f6c18751213ccc2ea52f71"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-short/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "b5c1b8479464fb91e58dfd086fbc4c11cfb66aa0a926da5a11e9093e1ae6e78a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-cascade/runs/water_audit_hydrograph.txt",
+      "bytes": 633840240,
+      "sha256": "a54cc861f773b3fc09c1503f6d7e347b42612a000b1e789badd8443417981b5e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/hourly-cascade/runs/water_audit_channel.txt",
+      "bytes": 13210362,
+      "sha256": "fdb94b24e5680e166352ba91b2ccbecd1806bbd1a87444614c00fceec3c48e4b"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-cascade/runs/water_audit_hydrograph.txt",
+      "bytes": 633840240,
+      "sha256": "7d2ee763306f5c0d28115d339e964afce87126f712af7a21e6891065476c88af"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/on/daily-cascade/runs/water_audit_channel.txt",
+      "bytes": 13210362,
+      "sha256": "31692e13772301b2202af0ba2ac23a9e92bdec15226750da82e0eb22188693da"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/daily-cascade/parity.json",
+      "bytes": 5682,
+      "sha256": "2896351ab1b7b7852e886b702a038ae6304c43f5b9535639a4bf67e58b860d7d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/hourly-cascade/parity.json",
+      "bytes": 5776,
+      "sha256": "5e72c5d4cc395b261180ee6cc1e87258f4f3d555525dd626a4153c4ff0ff6c0a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/daily-short/parity.json",
+      "bytes": 3492,
+      "sha256": "f11fd142b9c715ee7064c0eec715e4ff6d1998fdb75a95fc87ce9d861b226f1f"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/hourly-short/parity.json",
+      "bytes": 3586,
+      "sha256": "c3f246cb4413495246fbb6c695e4b714b5b3a05779310cbbdc3292b270835317"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/hourly-tributaries/parity.json",
+      "bytes": 5780,
+      "sha256": "4f8d4dbeaf913d86f92a295915b99e66ac268d28c7e4d6b652e62b8bee4185a1"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/network-observer/off/daily-tributaries/parity.json",
+      "bytes": 5687,
+      "sha256": "df7b793b80ce9b05bbedb08df94e3cbf1d8819fdf7cea889c3b1268696fcbe85"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/daily-upper60/audit.json",
+      "bytes": 3222,
+      "sha256": "15e3b12b7bedbd3e21c1879b0950334b9fe9dcfd0f3cc30ba4046239960268ef"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/daily-upper60/parity.json",
+      "bytes": 3494,
+      "sha256": "448d6b54b42aca439d77189b3d8cbff9b64e718d7a7d165233fd1a2dbd68c6bb"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/daily-upper60/channel-ledger.csv",
+      "bytes": 8487309,
+      "sha256": "5d36833e8d006acd3698c96ee8c2807bae9b330de2d91087a9cec5576872316a"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/hourly-upper60/audit.json",
+      "bytes": 3227,
+      "sha256": "2e7bca316f824d5f5e80cfa7c1bccefdd2fc5b5fd34f0b0bec8fdefbb9dc7a1f"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/hourly-upper60/parity.json",
+      "bytes": 3587,
+      "sha256": "b7a981e62c3a5dcee6e551a80fcce81b023ef63ea438d0c908921a9e5a3cabe9"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/hourly-upper60/channel-ledger.csv",
+      "bytes": 8860629,
+      "sha256": "c361a15d153ded8e73f0cedc1085488557f09cc44e02716f343bf9087c22494d"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/hourly-upper60/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "427c9523797b644e2f1ba4ea19f999284e2ad8a9f2c430e1bc9db1471175a324"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/hourly-upper60/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "ed9dea1236b76a9530601a51eb85c1ac6c90160a7934203dba9a507b110a0df3"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/daily-upper60/runs/water_audit_hydrograph.txt",
+      "bytes": 316920120,
+      "sha256": "9735c76f6be843182efdb933e80042773e815f7181a43b664a227f828a3eee4f"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/on/daily-upper60/runs/water_audit_channel.txt",
+      "bytes": 6605181,
+      "sha256": "17fbc575bca033aa3229a29f69e186070574064fdb734829dd0116ee2a796585"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/off/daily-upper60/parity.json",
+      "bytes": 3495,
+      "sha256": "bf796a2b3d357ef0be9cea08e7d9ec893021e455d42b407a24a47588c46b36de"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer-v2/off/hourly-upper60/parity.json",
+      "bytes": 3588,
+      "sha256": "299e67e2f8f4edd57bc664578b5081f40a5f22c328608f78f941eeb710393f91"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer/on/daily-upper60/parity.json",
+      "bytes": 1719,
+      "sha256": "110b931dbd2bf968b49edd163bce44b7794504f747fe928c6dfdb1997d373237"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer/on/hourly-upper60/parity.json",
+      "bytes": 1721,
+      "sha256": "d4106290cd934aec3592864eba0e4435386f93123761daa44f9788befc17162e"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer/off/daily-upper60/parity.json",
+      "bytes": 1721,
+      "sha256": "374b7c646b2a11c2ec332c5613442a2bdaf876bb98f295b2f296b26adc4057ba"
+    },
+    {
+      "path": "/workdir/watershed-physical-water-audit-20261021/observer/off/hourly-upper60/parity.json",
+      "bytes": 1721,
+      "sha256": "665d0284f173c9a3905a2add6587c2ed5d3ce85361552b5655b8c70786305e34"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "case": "hourly-single",
+    "mode": "off",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  },
+  {
+    "case": "hourly-single",
+    "mode": "on",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  },
+  {
+    "case": "hourly-upper60",
+    "mode": "off",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  },
+  {
+    "case": "hourly-upper60",
+    "mode": "on",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  },
+  {
+    "case": "hourly-three",
+    "mode": "off",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  },
+  {
+    "case": "hourly-three",
+    "mode": "on",
+    "success": true,
+    "differences": [],
+    "binary_sha256": "adf14f82dbb07708ae5d22d051d9899114ad71b07911e03a25051e0a9b8a89f0"
+  }
+]

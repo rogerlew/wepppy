@@ -1,0 +1,152 @@
+[
+  {
+    "case": "hourly-single",
+    "ofes": [
+      {
+        "ofe": 1,
+        "raw_screen_mm": {
+          "sum": 19.186262649999883,
+          "absolute_sum": 91.12535334999626,
+          "max_abs": 0.2313952099999823,
+          "mean": 0.0011939180242688165
+        },
+        "remainder_mm": {
+          "sum": 14.531922952528475,
+          "absolute_sum": 14.531922952528475,
+          "max_abs": 0.2349874193896539,
+          "mean": 0.0009042889205058168
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": 4.654339697471407,
+          "absolute_sum": 77.3449374883778,
+          "max_abs": 0.021571210000040253,
+          "mean": 0.00028962910376299983
+        }
+      }
+    ],
+    "unallocated_m3": 145.31922952528475,
+    "unallocated_hillslope_mm_per_year": 0.330270976193829,
+    "max_hour_remainder_mm": 0.009791142474568913
+  },
+  {
+    "case": "hourly-upper60",
+    "ofes": [
+      {
+        "ofe": 1,
+        "raw_screen_mm": {
+          "sum": 16.234995089999618,
+          "absolute_sum": 88.45038726999718,
+          "max_abs": 0.24139520999999586,
+          "mean": 0.001010267273802092
+        },
+        "remainder_mm": {
+          "sum": 14.531922952528475,
+          "absolute_sum": 14.531922952528475,
+          "max_abs": 0.2349874193896539,
+          "mean": 0.0009042889205058168
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": 1.7030721374711422,
+          "absolute_sum": 74.75861799066328,
+          "max_abs": 0.021395210000063614,
+          "mean": 0.00010597835329627518
+        }
+      },
+      {
+        "ofe": 2,
+        "raw_screen_mm": {
+          "sum": 106.49017966999921,
+          "absolute_sum": 185.92667464999553,
+          "max_abs": 0.24139521000001363,
+          "mean": 0.006626644658991861
+        },
+        "remainder_mm": {
+          "sum": 109.58373051718485,
+          "absolute_sum": 109.58373051718485,
+          "max_abs": 0.23314394547924167,
+          "mean": 0.006819149378791838
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": -3.0935508471856368,
+          "absolute_sum": 84.23874832410709,
+          "max_abs": 0.02709478999998538,
+          "mean": -0.0001925047197999774
+        }
+      }
+    ],
+    "unallocated_m3": 525.5264597839102,
+    "unallocated_hillslope_mm_per_year": 1.194378317690705,
+    "max_hour_remainder_mm": 0.009999344001698772
+  },
+  {
+    "case": "hourly-three",
+    "ofes": [
+      {
+        "ofe": 1,
+        "raw_screen_mm": {
+          "sum": 15.190427549999576,
+          "absolute_sum": 86.05155411000095,
+          "max_abs": 0.24139520999998432,
+          "mean": 0.0009452661823272917
+        },
+        "remainder_mm": {
+          "sum": 14.531922952528475,
+          "absolute_sum": 14.531922952528475,
+          "max_abs": 0.2349874193896539,
+          "mean": 0.0009042889205058168
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": 0.6585045974711006,
+          "absolute_sum": 72.2582152013805,
+          "max_abs": 0.02139521000005118,
+          "mean": 4.097726182147483e-05
+        }
+      },
+      {
+        "ofe": 2,
+        "raw_screen_mm": {
+          "sum": 99.88854148699795,
+          "absolute_sum": 173.0841013929997,
+          "max_abs": 0.23139521000001567,
+          "mean": 0.006215839544928311
+        },
+        "remainder_mm": {
+          "sum": 101.06995967804772,
+          "absolute_sum": 101.06995967804772,
+          "max_abs": 0.2361020206080866,
+          "mean": 0.006289356544993636
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": -1.1814181910497563,
+          "absolute_sum": 79.69384735125504,
+          "max_abs": 0.027235210000007726,
+          "mean": -7.351700006532397e-05
+        }
+      },
+      {
+        "ofe": 3,
+        "raw_screen_mm": {
+          "sum": 78.96666081599875,
+          "absolute_sum": 156.02579333600275,
+          "max_abs": 0.23139521000001562,
+          "mean": 0.004913917910143046
+        },
+        "remainder_mm": {
+          "sum": 79.9081557319229,
+          "absolute_sum": 79.9081557319229,
+          "max_abs": 0.22157616331242025,
+          "mean": 0.004972505023766205
+        },
+        "screen_after_measured_remainder_mm": {
+          "sum": -0.9414949159241495,
+          "absolute_sum": 82.46199709778057,
+          "max_abs": 0.03139521000000123,
+          "mean": -5.858711362315803e-05
+        }
+      }
+    ],
+    "unallocated_m3": 731.8145035988147,
+    "unallocated_hillslope_mm_per_year": 1.663214780906397,
+    "max_hour_remainder_mm": 0.009999295798479581
+  }
+]

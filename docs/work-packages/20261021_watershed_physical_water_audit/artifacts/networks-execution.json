@@ -1,0 +1,318 @@
+[
+  {
+    "case": "daily-short",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6183210341259837,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 15.546585163101554,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H1.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H1.loss.dat": "639e371cd0094190fa954130cb4da602e1b7b43a6fb5c0509ddd36fe8ad1867b",
+      "H1.pass.dat": "ff223145928be726a0786f101e501fda461a0843bfa5f06878471e9edd62a21d",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H1.wat.dat": "fda2b136cf04954791ef28e749dba8d2b328e55557310b4abe992c09557c9e89",
+      "chnwb.txt": "6f9871e43a4511c86493550aea3ee33c2b84b7934515705202dcf6fd9a3824df",
+      "ebe_pw0.txt": "6dcdbf6301cca47e7e7d458ccd2e0d007fd96b1691e92b2268ffb108ae42bc0d",
+      "loss_pw0.txt": "ee9fce2638027e3aa13625941084e47e9460c0835b8cb8ea668dba38af78604a",
+      "pass_pw0.txt": "d07a2e95430d1f89471e97e1533e3bca41ef8b14ac815eb6c0b9d19c169e3dcb",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "b3ae4692bd7cbd64a6ca8bd2f48d7369cd1f77f403e14dd1386b1243299ef4d1"
+    }
+  },
+  {
+    "case": "daily-tributaries",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6677916620392352,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p2.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6672093181405216,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p3.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.717115731909871,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 18.152793026994914,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H1.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H1.loss.dat": "639e371cd0094190fa954130cb4da602e1b7b43a6fb5c0509ddd36fe8ad1867b",
+      "H1.pass.dat": "ff223145928be726a0786f101e501fda461a0843bfa5f06878471e9edd62a21d",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H1.wat.dat": "fda2b136cf04954791ef28e749dba8d2b328e55557310b4abe992c09557c9e89",
+      "H2.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H2.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H2.loss.dat": "e789836d8e5714b27906d3a8e1aad58676d83927977395af66c8348cacde4781",
+      "H2.pass.dat": "aa47ad04a2d6c40241ab41589fe0337c987fdba7016aea57086d0c9c451623ce",
+      "H2.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H2.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H2.wat.dat": "46cd20fffd4552edfcf42ba6891d74a8a02fa01f31f672bc47d7e2baa1ce537d",
+      "H3.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H3.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H3.loss.dat": "c6a3474b6eaf2e4b3408e2f103947cccf1bf1e4be04a399b3639f576d99458ba",
+      "H3.pass.dat": "e6431a7e3c3e0d55a6d8c1d906725b424022cef88cc080cc0553d7ff37aeeecd",
+      "H3.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H3.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H3.wat.dat": "8006fc4426304efc383cda41d00f2d44473879bbd1e5c6b406798e0e9a6ded90",
+      "chnwb.txt": "a5c337a3e815590ef14d5d0d9e4307ebb976b89ebd4dcf02649885dad241aeda",
+      "ebe_pw0.txt": "965b166dac72759452d14604299ccc87194ba93c0c9688a7e9e4e5f089823257",
+      "loss_pw0.txt": "06bea99e04b0c7262ed14a919bb230bcac0f1ac802ab252a21284b5a253e5947",
+      "pass_pw0.txt": "12dba3740e0f08ff38186b5091e98424c97775cdb24219c5f716b1213b5b52b7",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "2d0c1ab5b3a047c9fcf54b8cffd41cd913451d461c03c0e4ba94990a771ef6fc"
+    }
+  },
+  {
+    "case": "daily-cascade",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6676319150719792,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p2.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.7169703170657158,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p3.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.7169093580450863,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 25.067158361896873,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H1.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H1.loss.dat": "639e371cd0094190fa954130cb4da602e1b7b43a6fb5c0509ddd36fe8ad1867b",
+      "H1.pass.dat": "ff223145928be726a0786f101e501fda461a0843bfa5f06878471e9edd62a21d",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H1.wat.dat": "fda2b136cf04954791ef28e749dba8d2b328e55557310b4abe992c09557c9e89",
+      "H2.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H2.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H2.loss.dat": "e789836d8e5714b27906d3a8e1aad58676d83927977395af66c8348cacde4781",
+      "H2.pass.dat": "aa47ad04a2d6c40241ab41589fe0337c987fdba7016aea57086d0c9c451623ce",
+      "H2.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H2.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H2.wat.dat": "46cd20fffd4552edfcf42ba6891d74a8a02fa01f31f672bc47d7e2baa1ce537d",
+      "H3.ebe.dat": "c36b42b1340d4e2967a847b138860c92f195dd585baff4e3ad931a09d6385105",
+      "H3.element.dat": "7ffda8fca739f340c2cbd0147cca88604116a55e16bb4f181998e395b2e9bd10",
+      "H3.loss.dat": "c6a3474b6eaf2e4b3408e2f103947cccf1bf1e4be04a399b3639f576d99458ba",
+      "H3.pass.dat": "e6431a7e3c3e0d55a6d8c1d906725b424022cef88cc080cc0553d7ff37aeeecd",
+      "H3.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H3.soil.dat": "43b15a9f8aec7c792924da8133ceb8ebcc045ca761940d81b59a587ac64283e0",
+      "H3.wat.dat": "8006fc4426304efc383cda41d00f2d44473879bbd1e5c6b406798e0e9a6ded90",
+      "chnwb.txt": "fd7a962290c265a341cdb78c50214069dcd354b754952791ac466d48b859c6dc",
+      "ebe_pw0.txt": "52769fc31fdc4c0dd36efed46a4c05693f1995af20c389d8ba4540136f36cdf6",
+      "loss_pw0.txt": "e51c94e199b0ee284bbeee0d106ab2235316ebf801838634cfce23b2c4de8f84",
+      "pass_pw0.txt": "12dba3740e0f08ff38186b5091e98424c97775cdb24219c5f716b1213b5b52b7",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "778aba95399be0a78b46bef1b4cc97c4c0f0b5760ceaae04b2906bca01ea755c"
+    }
+  },
+  {
+    "case": "hourly-short",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.5679653079714626,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 16.45162608497776,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H1.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H1.loss.dat": "8b75728729c916c0893bfa15fa3e90ae5b42b838e704f5af572e8843902c6841",
+      "H1.pass.dat": "0c4daa376f50df3f8804be26d1dbaf419a77cbfb68db891587daf30b03bf5b20",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H1.wat.dat": "23529bd5aea10b2963986c1eb5806163ca559b35444bf4948c1ce362c993a691",
+      "chnwb.txt": "eecf5669bdccd0dc7a91538922456189c3762af8654a55db82bf84d9cd6f12cc",
+      "ebe_pw0.txt": "cddf4f39c10e981563eaf6307ed58df3599f82178877e221aa780616ee5f6a9a",
+      "loss_pw0.txt": "d17a83064b76a3d801b9e309565739ad571268c7a65d86d0bc5dd61b517fb2d0",
+      "pass_pw0.txt": "414f62032bd4121d5a7ed095f174ddcd95141f4c554786762ac4622e20f709fc",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "99bcff9c94d4e917a05877d4d18b36c9475f9cd5a68c17b71ca657d506253d71"
+    }
+  },
+  {
+    "case": "hourly-tributaries",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6191085630562156,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p2.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.617812782060355,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p3.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.5674326978623867,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 17.547989760991186,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H1.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H1.loss.dat": "8b75728729c916c0893bfa15fa3e90ae5b42b838e704f5af572e8843902c6841",
+      "H1.pass.dat": "0c4daa376f50df3f8804be26d1dbaf419a77cbfb68db891587daf30b03bf5b20",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H1.wat.dat": "23529bd5aea10b2963986c1eb5806163ca559b35444bf4948c1ce362c993a691",
+      "H2.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H2.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H2.loss.dat": "66f2cc50619481a7f9d8e17d2a39fcd7cfad373544f3a91fd6232f68dd9d3f4d",
+      "H2.pass.dat": "a58617c191de435d502b2bf23e18a5e739a7f75f18a9fda37637e9d3b88cbf52",
+      "H2.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H2.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H2.wat.dat": "886dd95ae9e56f98b5beb794dd478ef863a18b0f40977465381fe2366bd6aaa9",
+      "H3.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H3.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H3.loss.dat": "526683ab2fad407d8bc16464d4b1ca49f97c01ebdcb43b188193476c4337c05c",
+      "H3.pass.dat": "081aae52ff81a91cf4b3a77469041efb4316df43b054455f71217746d54cdcc4",
+      "H3.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H3.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H3.wat.dat": "b792f4f023eee12794d2ece7a161309702639feffddbdc1127d898dda136fd71",
+      "chnwb.txt": "1e3293d7768834629a4fc428ef3a2f15c4ae7ff885a1c233e48897eb19bed0cc",
+      "ebe_pw0.txt": "29a69d8fd29116d9811253372d42bccd436646f2d320b2734e977a57db9b50d1",
+      "loss_pw0.txt": "4d28f042e8657d15b3a9ad5537128f52d1301f6f00e20342b606d7bc64d02a25",
+      "pass_pw0.txt": "3833884e8a0ea4931af271433e889829ad028cf33174a523b97d76111b34dc86",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "4aa13ab60de0186b2f672ca06eb449effe7906aa4f74f831c705c33ba40e6d5f"
+    }
+  },
+  {
+    "case": "hourly-cascade",
+    "results": [
+      {
+        "card": "p1.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6182074779644608,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p2.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.6682130710687488,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "p3.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 1.618908760836348,
+        "binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+      },
+      {
+        "card": "pw0.run",
+        "success": true,
+        "returncode": 0,
+        "seconds": 23.82106068613939,
+        "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+      }
+    ],
+    "outputs": {
+      "H1.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H1.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H1.loss.dat": "8b75728729c916c0893bfa15fa3e90ae5b42b838e704f5af572e8843902c6841",
+      "H1.pass.dat": "0c4daa376f50df3f8804be26d1dbaf419a77cbfb68db891587daf30b03bf5b20",
+      "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H1.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H1.wat.dat": "23529bd5aea10b2963986c1eb5806163ca559b35444bf4948c1ce362c993a691",
+      "H2.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H2.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H2.loss.dat": "66f2cc50619481a7f9d8e17d2a39fcd7cfad373544f3a91fd6232f68dd9d3f4d",
+      "H2.pass.dat": "a58617c191de435d502b2bf23e18a5e739a7f75f18a9fda37637e9d3b88cbf52",
+      "H2.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H2.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H2.wat.dat": "886dd95ae9e56f98b5beb794dd478ef863a18b0f40977465381fe2366bd6aaa9",
+      "H3.ebe.dat": "c8b72da0023e9e6c337766eb3ecad68071c4f5d68b898b902638dc03f97b278c",
+      "H3.element.dat": "f2abd79f86d5ed96898e4f17df8b2ec2d8449370029bd9fcf932f3d73a7156a2",
+      "H3.loss.dat": "526683ab2fad407d8bc16464d4b1ca49f97c01ebdcb43b188193476c4337c05c",
+      "H3.pass.dat": "081aae52ff81a91cf4b3a77469041efb4316df43b054455f71217746d54cdcc4",
+      "H3.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+      "H3.soil.dat": "db96a70463cbabec1e0a3d4d5a064af5b1ae5258a716c0da2787d33b0883a109",
+      "H3.wat.dat": "b792f4f023eee12794d2ece7a161309702639feffddbdc1127d898dda136fd71",
+      "chnwb.txt": "8748d5dc49cd4d7331bbc934ed267cbd9fff56c87f11d3b43232e776ee12e7c8",
+      "ebe_pw0.txt": "b60a17194444eb42846b39e48d26b247caa84afc949ee7814abc416a0130163a",
+      "loss_pw0.txt": "dbe2bbb2017193478ff9dab4c01aff74789eb0762d71e3657e89258d472b452c",
+      "pass_pw0.txt": "3833884e8a0ea4931af271433e889829ad028cf33174a523b97d76111b34dc86",
+      "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+      "soil_pw0.txt": "764b1e055092c245374c59960ee60e7d096200b2e967bbd7f0f64338baa1e5f5"
+    }
+  }
+]

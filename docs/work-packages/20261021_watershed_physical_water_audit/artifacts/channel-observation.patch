@@ -1,0 +1,53 @@
+--- a/src/wshchr.for
++++ b/src/wshchr.for
+@@ -66,6 +66,10 @@
+      1 sslp,qavg,ti,qsb,qtotl,areat,areal,rseg
+ c
+       integer i, it, itt, itpk, ih, is, nseg, ic, ishp, nt0
++      integer auditunit,auditq,iaudit
++      logical auditon,auditinit
++      save auditunit,auditq,auditon,auditinit
++      data auditinit /.false./
+ c
+ c
+ c     + + + LOCAL DEFINITIONS + + +
+@@ -92,6 +96,16 @@
+ c     + + + END SPECIFICATIONS + + +
+ c
+ c
++      if (.not.auditinit) then
++        inquire(file='water_audit.on',exist=auditon)
++        if (auditon) then
++          open(newunit=auditunit,file='water_audit_channel.txt',
++     1         status='new',action='write')
++          open(newunit=auditq,file='water_audit_hydrograph.txt',
++     1         status='new',action='write')
++        endif
++        auditinit=.true.
++      endif
+       eps = 1.e-8
+ 	qs = 0.
+ 	qmax = 0.
+@@ -740,7 +754,22 @@
+ 	          tmppvol(ielmt) = pvolon(ielmt)*(chvol/ rvolon(ielmt))
+ 	      endif
+ CAS-P
++c     Read-only audit of existing states, before lastStor advances.
++      if (auditon) then
++        write(auditunit,9101) year,sdate,ielmt,ichan,
++     1    rvolon(ielmt),chnvol(ielmt),rtrans(ielmt),
++     1    volint(ichan),sinit(ichan),sfnl(ichan),lastStor(ichan),
++     1    chvol,runvol(ielmt),tmpvol(ielmt),chnl1,dtchr,
++     1    qBase(ichan),rvotop(ielmt),rvolat(ielmt)
++        do iaudit=0,ntchr
++          write(auditq,9102) year,sdate,ielmt,iaudit,
++     1      dtchr,qin(iaudit),qlat(iaudit),q1(iaudit,ichan)
++        enddo
++      endif
++
+       lastStor(ichan) = sfnl(ichan)
++ 9101 format(4(i8,1x),15(es24.16,1x))
++ 9102 format(4(i8,1x),4(es24.16,1x))
+  104  format(1x,4(i10,2x), 3x, f7.0, 4x, es10.2)
+  105  format(1x,4(i10,2x), 2x, es10.2, 2x, f16.2)
+  106  format(1x,4(i10,2x), 6(1x, f16.2))

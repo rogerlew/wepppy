@@ -1,0 +1,1202 @@
+[
+  {
+    "case": "daily-equal",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 68.3162311899932,
+          "absolute_sum": 437.12074834002124,
+          "max_abs": 0.1180042499997711,
+          "mean": 0.004251165599875121
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.004585130000784353,
+          "absolute_sum": 0.07765780999917794,
+          "max_abs": 0.0005,
+          "mean": -2.8530458594887394e-07
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 22.82673516999736,
+          "absolute_sum": 436.4501837100321,
+          "max_abs": 0.13239575000008585,
+          "mean": 0.001420456451151049
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -0.00010859999983040329,
+          "absolute_sum": 0.002536600000125418,
+          "max_abs": 5.0000000046566127e-05,
+          "mean": -6.7575135231412665e-09
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 504.85659090909087,
+      "Es": 160.57261363636363,
+      "Er": 0.0,
+      "Dp": 13.280343197045454,
+      "Q": 1348.8736602351592,
+      "lateral": 119.04465909090908,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 91.13848982998593,
+      "absolute_sum": 727.4611457700114,
+      "max_abs": 0.2212484999999056,
+      "mean": 0.005671343486620157
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.008273000001358,
+      "absolute_sum": 5.868553000000416,
+      "max_abs": 0.041999999999916326,
+      "mean": 1.949799670364836e-06
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -88.90030000000003,
+      "absolute_sum": 114.99710000000003,
+      "max_abs": 0.025000000000000355,
+      "mean": -0.01045025273304338
+    },
+    "omitted_surface_m3": 554.01433047,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 592950.3879,
+      "lateral": 52468.550299999995,
+      "tile": 0.0,
+      "baseflow": 5834.600719590002,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": -6.059200236926622,
+      "absolute_sum": 6.060206686524243,
+      "max_abs": 0.0007485644009085912,
+      "mean": -0.0003770269576831947
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 9.11410711002276,
+    "channel_totals_m3": {
+      "inflow": 732530.62,
+      "outflow": 730115.0900000001,
+      "loss": 2415.339999999999,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 0.53,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": -0.3400000000004801,
+      "absolute_sum": 37.260000000024405,
+      "max_abs": 0.020000000000007956,
+      "mean": -2.115611971877793e-05
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 81277.08108041,
+      "absolute_sum": 81339.42618041,
+      "max_abs": 192.83111,
+      "mean": 5.057375463904549
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -89986.81623014,
+      "absolute_sum": 90109.8297069,
+      "max_abs": 194.45448,
+      "mean": -5.599328991981831
+    },
+    "integrated_hydrograph_m3": 640128.27376986
+  },
+  {
+    "case": "daily-lower60",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 4000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": -25.659989592002432,
+          "absolute_sum": 343.18381338402185,
+          "max_abs": 0.09408340000021909,
+          "mean": -0.0015967635091476311
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 6000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.0015788799999716372,
+          "absolute_sum": 0.08115972400408752,
+          "max_abs": 0.0006000000000931323,
+          "mean": -9.824404206157907e-08
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 21.4005950099815,
+          "absolute_sum": 520.7334539340509,
+          "max_abs": 0.14112510000009237,
+          "mean": 0.0013317109527057561
+        },
+        "surface_transfer_difference_m3": {
+          "sum": 0.00134759800012144,
+          "absolute_sum": 0.03164928200331924,
+          "max_abs": 0.00019999999995343388,
+          "mean": 8.385277830386659e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": -89.0,
+          "absolute_sum": 145.44,
+          "max_abs": 0.04,
+          "mean": -0.005537925455789932
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 504.7798636363637,
+      "Es": 160.5333181818182,
+      "Er": 0.0,
+      "Dp": 13.28068390025,
+      "Q": 1349.1994577385228,
+      "lateral": 118.84909090909088,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 84.73767893998637,
+      "absolute_sum": 716.1992976600704,
+      "max_abs": 0.22123850000036427,
+      "mean": 0.005273035403857272
+    },
+    "event_surface_difference_m3": {
+      "sum": -0.025791999999010606,
+      "absolute_sum": 5.854181999999768,
+      "max_abs": 0.041999999999916326,
+      "mean": -6.074422986107067e-06
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -81.65780000000021,
+      "absolute_sum": 122.15619999999997,
+      "max_abs": 0.03000000000000025,
+      "mean": -0.009605669921185767
+    },
+    "omitted_surface_m3": 621.83519695,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 593025.952,
+      "lateral": 52375.25779999999,
+      "tile": 0.0,
+      "baseflow": 5834.750369590001,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": -6.050130386549818,
+      "absolute_sum": 6.051136836147439,
+      "max_abs": 0.0007482808009123265,
+      "mean": -0.00037646259638789235
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 9.114376520022855,
+    "channel_totals_m3": {
+      "inflow": 732511.97,
+      "outflow": 730108.5,
+      "loss": 2403.689999999999,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 0.53,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": -0.7500000000014416,
+      "absolute_sum": 37.79000000002421,
+      "max_abs": 0.020000000000007956,
+      "mean": -4.666791114438689e-05
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 81276.00983041001,
+      "absolute_sum": 81338.55617041,
+      "max_abs": 192.83111,
+      "mean": 5.057308806571465
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -89999.95928334,
+      "absolute_sum": 90121.00345814001,
+      "max_abs": 195.33508000000006,
+      "mean": -5.600146803767034
+    },
+    "integrated_hydrograph_m3": 640108.54071666
+  },
+  {
+    "case": "daily-single",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 10000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 77.66137884998687,
+          "absolute_sum": 856.7075897500903,
+          "max_abs": 0.2352085000005495,
+          "mean": 0.004832693145612126
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 505.3134090909091,
+      "Es": 160.99704545454546,
+      "Er": 0.0,
+      "Dp": 13.281064140113635,
+      "Q": 1351.2633418170456,
+      "lateral": 115.80363636363636,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 77.66137884998669,
+      "absolute_sum": 856.7075897500455,
+      "max_abs": 0.2352085000000912,
+      "mean": 0.004832693145612115
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.06801000000150914,
+      "absolute_sum": 5.8586300000000815,
+      "max_abs": 0.041999999999916326,
+      "mean": 1.7195954488371466e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -75.96550000000005,
+      "absolute_sum": 148.18889999999993,
+      "max_abs": 0.05000000000000071,
+      "mean": -0.009081350866706521
+    },
+    "omitted_surface_m3": 1015.8013895,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 593540.0009999999,
+      "lateral": 51029.5655,
+      "tile": 0.0,
+      "baseflow": 5834.916199590001,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": -6.152678536961519,
+      "absolute_sum": 6.15368498655914,
+      "max_abs": 0.0007657584009134744,
+      "mean": -0.0003828435403497927
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 9.115902060022899,
+    "channel_totals_m3": {
+      "inflow": 731623.6499999999,
+      "outflow": 729483.0900000001,
+      "loss": 2140.7699999999995,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 0.53,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": -0.7400000000004837,
+      "absolute_sum": 37.8200000000242,
+      "max_abs": 0.020000000000007956,
+      "mean": -4.6045672329069985e-05
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 81219.16730041,
+      "absolute_sum": 81284.20890041001,
+      "max_abs": 192.83111,
+      "mean": 5.0537718437191215
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -89703.35038068,
+      "absolute_sum": 89829.86202492,
+      "max_abs": 192.54908,
+      "mean": -5.5816906465484415
+    },
+    "integrated_hydrograph_m3": 639779.73961932
+  },
+  {
+    "case": "daily-three",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 2000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": -24.058780848002378,
+          "absolute_sum": 173.8829250080114,
+          "max_abs": 0.04850829999999995,
+          "mean": -0.0014971238859989035
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 3000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.0015984589997836396,
+          "absolute_sum": 0.0379999610022839,
+          "max_abs": 0.0002999999999301508,
+          "mean": -9.94623234262734e-08
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 30.091957808997456,
+          "absolute_sum": 264.7748484210118,
+          "max_abs": 0.07943745000004565,
+          "mean": 0.0018725549352207502
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -0.0001602330000315889,
+          "absolute_sum": 0.013066073001482215,
+          "max_abs": 5.999999996856786e-05,
+          "mean": -9.970319210477811e-09
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": -82.99000000000012,
+          "absolute_sum": 105.99,
+          "max_abs": 0.020000000000000226,
+          "mean": -0.005163959927820305
+        }
+      },
+      {
+        "ofe": 3,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.0033814500015228784,
+          "absolute_sum": 0.07668726000064449,
+          "max_abs": 0.0005,
+          "mean": -2.104069442799377e-07
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 4.647869564998166,
+          "absolute_sum": 431.38890176505623,
+          "max_abs": 0.11760424999999941,
+          "mean": 0.0002892264819538373
+        },
+        "surface_transfer_difference_m3": {
+          "sum": 0.0009249589997710876,
+          "absolute_sum": 0.03964076100143951,
+          "max_abs": 0.0002999999999301508,
+          "mean": 5.755453921791348e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": 0.8400000000002796,
+          "absolute_sum": 26.10000000000025,
+          "max_abs": 0.030000000000000908,
+          "mean": 5.2268060481630245e-05
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 504.545409090909,
+      "Es": 160.2937272727273,
+      "Er": 0.0,
+      "Dp": 13.280238957363638,
+      "Q": 1348.9591999054776,
+      "lateral": 119.54545454545452,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 92.82690034998646,
+      "absolute_sum": 702.0291788300665,
+      "max_abs": 0.2212484999999056,
+      "mean": 0.005776409480397415
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.02121174000046408,
+      "absolute_sum": 5.776551059999967,
+      "max_abs": 0.041999999999916326,
+      "mean": 4.812100726058094e-06
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -90.11120000000001,
+      "absolute_sum": 115.549,
+      "max_abs": 0.025000000000000355,
+      "mean": -0.010554134457718436
+    },
+    "omitted_surface_m3": 123.43227767,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 593418.594469,
+      "lateral": 52690.111199999985,
+      "tile": 0.0,
+      "baseflow": 5834.555019590001,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": -6.064055526541672,
+      "absolute_sum": 6.065061976139293,
+      "max_abs": 0.000751746000910436,
+      "mean": -0.0003773290726489747
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 9.113931650022803,
+    "channel_totals_m3": {
+      "inflow": 733232.78,
+      "outflow": 730757.83,
+      "loss": 2475.0899999999992,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 0.53,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": -0.6700000000010781,
+      "absolute_sum": 37.59000000002433,
+      "max_abs": 0.020000000000007956,
+      "mean": -4.16900006223059e-05
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 81289.51931141,
+      "absolute_sum": 81351.96362941,
+      "max_abs": 192.83111,
+      "mean": 5.058149418916682
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -89997.02090944,
+      "absolute_sum": 90122.19399756001,
+      "max_abs": 194.91508,
+      "mean": -5.599963966737602
+    },
+    "integrated_hydrograph_m3": 640760.8090905601
+  },
+  {
+    "case": "daily-upper60",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 6000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 65.04028016999195,
+          "absolute_sum": 523.5597438300006,
+          "max_abs": 0.14112509999996803,
+          "mean": 0.004047310527068571
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 4000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.001968831598025308,
+          "absolute_sum": 0.088081440405925,
+          "max_abs": 0.0004000000001396984,
+          "mean": 1.225083440996396e-07
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": -7.74657862961302,
+          "absolute_sum": 348.37396606963074,
+          "max_abs": 0.10591659999995073,
+          "mean": -0.0004820521860369023
+        },
+        "surface_transfer_difference_m3": {
+          "sum": 0.00102094000099364,
+          "absolute_sum": 0.046706780005026496,
+          "max_abs": 0.00040000000002328304,
+          "mean": 6.35268496667065e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": 92.6,
+          "absolute_sum": 151.44,
+          "max_abs": 0.04,
+          "mean": 0.005761931429282558
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 504.92604545454543,
+      "Es": 160.60104545454547,
+      "Er": 0.0,
+      "Dp": 13.28053619515909,
+      "Q": 1348.6418850561317,
+      "lateral": 119.46572727272725,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": -35.30535056800563,
+      "absolute_sum": 716.963336748142,
+      "max_abs": 0.21894149999999968,
+      "mean": -0.00219697265513414
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.07159600000224753,
+      "absolute_sum": 5.767678000000113,
+      "max_abs": 0.041999999999916326,
+      "mean": 1.685801742459325e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": 38.32050000000257,
+      "absolute_sum": 59.71030000000286,
+      "max_abs": 0.020000000000000462,
+      "mean": 0.004505114037150548
+    },
+    "omitted_surface_m3": 426.560628698,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 592975.7971999999,
+      "lateral": 52526.5995,
+      "tile": 0.0,
+      "baseflow": 5834.686029590001,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": -6.017105916145342,
+      "absolute_sum": 6.0181123657429625,
+      "max_abs": 0.0007440512009110334,
+      "mean": -0.00037440768565399424
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 9.113706280022827,
+    "channel_totals_m3": {
+      "inflow": 732619.8,
+      "outflow": 730172.52,
+      "loss": 2447.2999999999993,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 0.53,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": -0.550000000001024,
+      "absolute_sum": 37.67000000002446,
+      "max_abs": 0.020000000000007956,
+      "mean": -3.422313483921498e-05
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 81282.71727041001,
+      "absolute_sum": 81345.28663041,
+      "max_abs": 192.83111,
+      "mean": 5.057726169523366
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -89977.69605515999,
+      "absolute_sum": 90100.6282446,
+      "max_abs": 193.5338200000001,
+      "mean": -5.598761499294381
+    },
+    "integrated_hydrograph_m3": 640194.8239448401
+  },
+  {
+    "case": "hourly-equal",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 80.11615729999545,
+          "absolute_sum": 441.40766269998863,
+          "max_abs": 1.2069760499998168,
+          "mean": 0.00498544849408808
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0007899500001734482,
+          "absolute_sum": 0.031003850000147895,
+          "max_abs": 0.0005,
+          "mean": 4.9153755222042695e-08
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 514.8272679499823,
+          "absolute_sum": 905.5852023500192,
+          "max_abs": 1.206976050000005,
+          "mean": 0.03203654436527582
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -0.00012949999998045314,
+          "absolute_sum": 0.0003104999999691245,
+          "max_abs": 5.00000000174623e-05,
+          "mean": -8.057992656365698e-09
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 409.4696590909092,
+      "Es": 162.6856818181818,
+      "Er": 0.0,
+      "Dp": 6.7928579875,
+      "Q": 490.6498821381818,
+      "lateral": 1076.8555681818182,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 594.9443446999909,
+      "absolute_sum": 1204.4362180999915,
+      "max_abs": 2.2139521,
+      "mean": 0.03702205007467274
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.008870999997945717,
+      "absolute_sum": 2.0655110000006562,
+      "max_abs": 0.009000000000014552,
+      "mean": 4.433283357294211e-06
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": 9.88697200000948,
+      "absolute_sum": 159.2445340000111,
+      "max_abs": 0.025000000000005684,
+      "mean": 0.0007583196809333856
+    },
+    "omitted_surface_m3": 258.8027698,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 215627.1365,
+      "lateral": 473806.56302799995,
+      "tile": 0.0,
+      "baseflow": 2984.4002204,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": 8.479418854303267,
+      "absolute_sum": 8.47994253430344,
+      "max_abs": 0.001005955999843905,
+      "mean": 0.0005276223541972041
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 4.643304100005718,
+    "channel_totals_m3": {
+      "inflow": 775305.44,
+      "outflow": 764231.6399999999,
+      "loss": 11066.71,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 2.34,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": 4.749999999999907,
+      "absolute_sum": 51.03000000002458,
+      "max_abs": 0.02000000000002622,
+      "mean": 0.0002955634372472097
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 82887.34025159999,
+      "absolute_sum": 82902.5823756,
+      "max_abs": 192.82895000000005,
+      "mean": 5.157572039798394
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -92836.39484856,
+      "absolute_sum": 92991.77681608,
+      "max_abs": 196.53860000000003,
+      "mean": -5.776640834332649
+    },
+    "integrated_hydrograph_m3": 671395.24515144
+  },
+  {
+    "case": "hourly-lower60",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 4000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 57.237780919997334,
+          "absolute_sum": 348.9683405199876,
+          "max_abs": 0.925580839999931,
+          "mean": 0.0035617785264466296
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 6000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.00012503999962862626,
+          "absolute_sum": 0.03220516000223998,
+          "max_abs": 0.00040000000002328304,
+          "mean": -7.78047412286891e-09
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 658.1950918439923,
+          "absolute_sum": 1074.8775867240165,
+          "max_abs": 1.4483712599999876,
+          "mean": 0.0409580019815801
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -0.0003906960000385808,
+          "absolute_sum": 0.0036131040001269026,
+          "max_abs": 5.999999999767169e-05,
+          "mean": -2.431062161897709e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": -3.8800000000001784,
+          "absolute_sum": 200.48000000000167,
+          "max_abs": 0.04000000000000727,
+          "mean": -0.00024142866031984185
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 406.5560000000001,
+      "Es": 160.9492727272727,
+      "Er": 0.0,
+      "Dp": 6.792797186227273,
+      "Q": 499.07044568099997,
+      "lateral": 1072.7953636363636,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 719.3131384199918,
+      "absolute_sum": 1286.0376880600268,
+      "max_abs": 2.2139521,
+      "mean": 0.04476124072308599
+    },
+    "event_surface_difference_m3": {
+      "sum": -0.13161099999908266,
+      "absolute_sum": 2.1525669999995607,
+      "max_abs": 0.03899999999998727,
+      "mean": -6.952509244536855e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -28.34371400000114,
+      "absolute_sum": 205.16705400000149,
+      "max_abs": 0.030000000000008242,
+      "mean": -0.002118680968754757
+    },
+    "omitted_surface_m3": 373.86491063999995,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 219217.2628,
+      "lateral": 472058.30371400004,
+      "tile": 0.0,
+      "baseflow": 2984.3994204,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": 10.50211433842079,
+      "absolute_sum": 10.502638018420964,
+      "max_abs": 0.0013159383998310459,
+      "mean": 0.0006534823183635611
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 4.617351540004224,
+    "channel_totals_m3": {
+      "inflow": 777193.87,
+      "outflow": 765185.13,
+      "loss": 12001.560000000001,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 2.32,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": 4.860000000001023,
+      "absolute_sum": 51.76000000002547,
+      "max_abs": 0.020000000000006235,
+      "mean": 0.00030240806421510935
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 82933.9040656,
+      "absolute_sum": 82949.75298759999,
+      "max_abs": 192.83195000000003,
+      "mean": 5.160469421044117
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -92870.21703348,
+      "absolute_sum": 93024.84270884,
+      "max_abs": 196.7446,
+      "mean": -5.778745381960053
+    },
+    "integrated_hydrograph_m3": 672314.9129665201
+  },
+  {
+    "case": "hourly-single",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 10000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 191.8626264999956,
+          "absolute_sum": 911.253533500015,
+          "max_abs": 2.3139520999999945,
+          "mean": 0.011939180242687966
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 408.16045454545457,
+      "Es": 152.65045454545458,
+      "Er": 0.0,
+      "Dp": 6.793162039545454,
+      "Q": 519.6778319911364,
+      "lateral": 1059.745227272727,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 191.86262649999435,
+      "absolute_sum": 911.2535335000346,
+      "max_abs": 2.313952100000005,
+      "mean": 0.011939180242687888
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.014280000001276605,
+      "absolute_sum": 2.2700800000029506,
+      "max_abs": 0.0420000000001437,
+      "mean": 1.0303030303951374e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": -39.1074410000048,
+      "absolute_sum": 389.18999500000393,
+      "max_abs": 0.05000000000000426,
+      "mean": -0.0026445388828783335
+    },
+    "omitted_surface_m3": 368.04579609999996,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 228290.186,
+      "lateral": 466327.00744099997,
+      "tile": 0.0,
+      "baseflow": 2984.5593803999996,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": 10.55073936233911,
+      "absolute_sum": 10.551263042339283,
+      "max_abs": 0.0013313199997911918,
+      "mean": 0.0006565079560910404
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 4.61796700000522,
+    "channel_totals_m3": {
+      "inflow": 780708.81,
+      "outflow": 764235.35,
+      "loss": 16465.11,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 2.12,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": 6.22999999999872,
+      "absolute_sum": 55.590000000023345,
+      "max_abs": 0.020000000000011786,
+      "mean": 0.00038765478190521557
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 83107.0571786,
+      "absolute_sum": 83125.7593866,
+      "max_abs": 192.83595,
+      "mean": 5.17124367983324
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -92817.39241052,
+      "absolute_sum": 92980.43072424,
+      "max_abs": 196.6116,
+      "mean": -5.775458428879348
+    },
+    "integrated_hydrograph_m3": 671417.95758948
+  },
+  {
+    "case": "hourly-three",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 2000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 30.38085509999898,
+          "absolute_sum": 172.10310822000287,
+          "max_abs": 0.48279041999996863,
+          "mean": 0.0018905323646545725
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 3000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -0.00030148100009769777,
+          "absolute_sum": 0.0070794010006967655,
+          "max_abs": 0.00030000000004656613,
+          "mean": -1.8759318032337612e-08
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 299.66562446099397,
+          "absolute_sum": 519.2523041789964,
+          "max_abs": 0.6941856300000389,
+          "mean": 0.018647518634784938
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -3.480000011867903e-05,
+          "absolute_sum": 0.0007152000000568534,
+          "max_abs": 3.0000000006111804e-05,
+          "mean": -2.1653910844800594e-09
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": -0.8000000000000653,
+          "absolute_sum": 90.44000000000102,
+          "max_abs": 0.020000000000007276,
+          "mean": -4.977910522058773e-05
+        }
+      },
+      {
+        "ofe": 3,
+        "area_m2": 5000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0025342999996274644,
+          "absolute_sum": 0.03056469999988972,
+          "max_abs": 0.0005,
+          "mean": 1.5769398292747585e-07
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 394.8333040799923,
+          "absolute_sum": 780.1289666800416,
+          "max_abs": 1.1569760500000186,
+          "mean": 0.02456958955071514
+        },
+        "surface_transfer_difference_m3": {
+          "sum": 0.0006879810000100007,
+          "absolute_sum": 0.007053901000573336,
+          "max_abs": 0.00030000000004656613,
+          "mean": 4.2808848236575244e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": -2.7699999999964158,
+          "absolute_sum": 155.41000000000605,
+          "max_abs": 0.04,
+          "mean": -0.0001723601518260479
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 408.3176818181817,
+      "Es": 163.0895227272727,
+      "Er": 0.0,
+      "Dp": 6.792979622022727,
+      "Q": 500.8611302307955,
+      "lateral": 1067.2876136363636,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 728.451664759986,
+      "absolute_sum": 1282.8209585400177,
+      "max_abs": 2.133952100000254,
+      "mean": 0.045329910688238086
+    },
+    "event_surface_difference_m3": {
+      "sum": -0.09051669999984313,
+      "absolute_sum": 2.2383992999995135,
+      "max_abs": 0.015999999999849024,
+      "mean": -4.404705596099422e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": 11.500671000010191,
+      "absolute_sum": 158.71415300001144,
+      "max_abs": 0.025000000000005684,
+      "mean": 0.0008880827027034897
+    },
+    "omitted_surface_m3": 293.29011825000003,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 220085.6977,
+      "lateral": 469595.049329,
+      "tile": 0.0,
+      "baseflow": 2984.4793204,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": 10.512945755980299,
+      "absolute_sum": 10.513469435980472,
+      "max_abs": 0.0013202683998111975,
+      "mean": 0.0006541562912065397
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 4.61774329000472,
+    "channel_totals_m3": {
+      "inflow": 775517.23,
+      "outflow": 764780.9,
+      "loss": 10729.57,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 2.34,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": 4.419999999999728,
+      "absolute_sum": 50.40000000002564,
+      "max_abs": 0.0200000000000089,
+      "mean": 0.0002750295563437078
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 82852.0036506,
+      "absolute_sum": 82866.8570666,
+      "max_abs": 192.83595,
+      "mean": 5.155373259324249
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -92767.5894692,
+      "absolute_sum": 92917.81993263999,
+      "max_abs": 196.67859999999996,
+      "mean": -5.7723594965590195
+    },
+    "integrated_hydrograph_m3": 672013.3105308
+  },
+  {
+    "case": "hourly-upper60",
+    "days": 16071,
+    "ofes": [
+      {
+        "ofe": 1,
+        "area_m2": 6000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": 0.0,
+          "absolute_sum": 0.0,
+          "max_abs": 0.0,
+          "mean": 0.0
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 97.40997053999745,
+          "absolute_sum": 530.7023236199853,
+          "max_abs": 1.4483712600000338,
+          "mean": 0.0060616036428125354
+        }
+      },
+      {
+        "ofe": 2,
+        "area_m2": 4000.0,
+        "Q_QOFE_volume_difference_m3": {
+          "sum": -2.773999963559938e-05,
+          "absolute_sum": 0.031791160002187804,
+          "max_abs": 0.00040000000002328304,
+          "mean": -1.7260904508493175e-09
+        },
+        "soil_snow_screen_excluding_unknown_interception_m3": {
+          "sum": 425.96071867999683,
+          "absolute_sum": 743.7066985999832,
+          "max_abs": 0.9655808400000545,
+          "mean": 0.026506578635967445
+        },
+        "surface_transfer_difference_m3": {
+          "sum": -0.0003462199993251714,
+          "absolute_sum": 0.010650420001326098,
+          "max_abs": 0.00040000000002328304,
+          "mean": -2.1543152219847638e-08
+        },
+        "lateral_transfer_difference_m3": {
+          "sum": 13.839999999999947,
+          "absolute_sum": 215.60000000000264,
+          "max_abs": 0.04000000000000727,
+          "mean": 0.000861178520316094
+        }
+      }
+    ],
+    "annual_mm": {
+      "P": 2151.040909090909,
+      "Ep": 412.3601818181818,
+      "Es": 163.80868181818184,
+      "Er": 0.0,
+      "Dp": 6.792918791909091,
+      "Q": 484.87623800877276,
+      "lateral": 1078.7888181818182,
+      "tile": 0.0
+    },
+    "hill_soil_snow_screen_m3": {
+      "sum": 509.5310077000011,
+      "absolute_sum": 1128.9426108799753,
+      "max_abs": 2.153952100000236,
+      "mean": 0.03170696998755452
+    },
+    "event_surface_difference_m3": {
+      "sum": 0.02077200000023982,
+      "absolute_sum": 2.003246000000229,
+      "max_abs": 0.01999999999998181,
+      "mean": 1.0157457212831209e-05
+    },
+    "delivered_lateral_difference_m3": {
+      "sum": 25.093198999996858,
+      "absolute_sum": 139.84299299999844,
+      "max_abs": 0.020000000000003126,
+      "mean": 0.001972425640622297
+    },
+    "omitted_surface_m3": 259.83205186,
+    "omitted_lateral_m3": 0.0,
+    "pass_totals_m3": {
+      "surface": 213085.6919,
+      "lateral": 474641.98680099996,
+      "tile": 0.0,
+      "baseflow": 2984.4395104,
+      "deepseep": 0.0
+    },
+    "gw_recurrence_difference_m3": {
+      "sum": 9.455980376734802,
+      "absolute_sum": 9.456504056734975,
+      "max_abs": 0.0009985663998428596,
+      "mean": 0.0005883878026715701
+    },
+    "reconstructed_gw_end_before_current_withdrawals_m3": 4.6307780400052625,
+    "channel_totals_m3": {
+      "inflow": 773576.29,
+      "outflow": 763122.38,
+      "loss": 10447.04,
+      "balance": 0.0
+    },
+    "channel_end_storage_m3": 2.31,
+    "channel_recomputed_publication_residual_m3": {
+      "sum": 4.5599999999983565,
+      "absolute_sum": 50.04000000002458,
+      "max_abs": 0.020000000000017337,
+      "mean": 0.0002837408997572246
+    },
+    "channel_input_minus_pass_m3": {
+      "sum": 82864.17178860001,
+      "absolute_sum": 82878.48024860001,
+      "max_abs": 192.83295000000007,
+      "mean": 5.15613040810155
+    },
+    "hydrograph_rectangle_minus_published_m3": {
+      "sum": -92831.3671913,
+      "absolute_sum": 92987.81983938,
+      "max_abs": 196.5288,
+      "mean": -5.77632799398295
+    },
+    "integrated_hydrograph_m3": 670291.0128087
+  }
+]
