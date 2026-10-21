@@ -1,0 +1,22 @@
+{
+  "climate_days": 146097,
+  "first": [
+    1,
+    1
+  ],
+  "last": [
+    400,
+    366
+  ],
+  "water_files": {
+    "H1.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 146097
+    }
+  },
+  "pass_files": {
+    "H1.pass.dat": 146097,
+    "pass_pw0.txt": 146097
+  },
+  "watershed_events": 146097
+}

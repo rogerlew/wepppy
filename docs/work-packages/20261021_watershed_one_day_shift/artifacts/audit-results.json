@@ -1,0 +1,69 @@
+{
+  "corrected_400_year_trace": {
+    "days": 146097,
+    "nonzero_surface_runoff_days": 147,
+    "same_day_payload_mismatches": 0,
+    "matches_against_pass_day_offsets": {
+      "-1": 0,
+      "0": 147,
+      "1": 0
+    },
+    "routing_begin_end_keys_match": true,
+    "channel_routing_days": 103556
+  },
+  "released_ascii_hill": {
+    "matched_events": 309,
+    "event_date_minus_pass_date_days": {
+      "0": 137,
+      "1": 172
+    },
+    "missing_hill_ebe": [],
+    "examples": [
+      {
+        "pass_year": 102,
+        "pass_julian": 121,
+        "pass_gregorian_label": "0102-05-01",
+        "hill_ebe_date": "0102-05-02",
+        "runoff_mm": 39.7
+      },
+      {
+        "pass_year": 102,
+        "pass_julian": 123,
+        "pass_gregorian_label": "0102-05-03",
+        "hill_ebe_date": "0102-05-04",
+        "runoff_mm": 101.1
+      },
+      {
+        "pass_year": 104,
+        "pass_julian": 98,
+        "pass_gregorian_label": "0104-04-07",
+        "hill_ebe_date": "0104-04-08",
+        "runoff_mm": 4.4
+      },
+      {
+        "pass_year": 105,
+        "pass_julian": 87,
+        "pass_gregorian_label": "0105-03-28",
+        "hill_ebe_date": "0105-03-29",
+        "runoff_mm": 1.4
+      },
+      {
+        "pass_year": 106,
+        "pass_julian": 90,
+        "pass_gregorian_label": "0106-03-31",
+        "hill_ebe_date": "0106-04-01",
+        "runoff_mm": 1.1
+      }
+    ]
+  },
+  "original_run_example": {
+    "H1.ebe.dat": "2    5   102   0.0    39.7   0.000   0.00   0.00    0.0    0.00    0.00    0.0     0.0  1.00",
+    "ebe_pw0.txt": "2    5   102   0.0       147126.00         2.36994       913239.69           0.00            0.00            0.00    147",
+    "H1.pass.dat": {
+      "year": 102,
+      "julian": 121,
+      "gregorian_label": "0102-05-01",
+      "runoff_mm": 39.742
+    }
+  }
+}

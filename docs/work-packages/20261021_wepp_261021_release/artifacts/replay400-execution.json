@@ -1,0 +1,36 @@
+{
+  "binary": "/workdir/wepp-forest-release-20261009/release/wepp_261021",
+  "binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+  "hill_binary": "/workdir/wepp-forest-release-20261009/release/wepp_261021_hill",
+  "hill_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+  "hbp": false,
+  "results": [
+    {
+      "card": "p1.run",
+      "returncode": 0,
+      "success": true,
+      "seconds": 8.331989966100082
+    },
+    {
+      "card": "pw0.run",
+      "returncode": 0,
+      "success": true,
+      "seconds": 87.1134207949508
+    }
+  ],
+  "output_hashes": {
+    "H1.loss.dat": "d2ecd9910643d9a2d34f94d5eb2c6905ae3b986907b4cde4cdd47293accf49eb",
+    "H1.soil.dat": "e2a5215762069cf7b3d9cf243c971843b92545915312b211ed7764372eaaaa5c",
+    "H1.pass.dat": "694f8c84f2b219b49109139f4c8dee7efa02550b44247617802ca4e6e5edacc6",
+    "pass_pw0.txt": "02979450db8062a8d9e08faedae9e219345baa6cd4c34e75b4d44f95fded310c",
+    "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+    "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+    "loss_pw0.txt": "99ba9ad31cb456dab83d78b2f4efa37f24d2d6f4c45b02bf2f7a2d27eae5520c",
+    "chnwb.txt": "163c083178f3ab60882fa1c03fbf4207f5c694721102965225a05a1a80ff965a",
+    "H1.wat.dat": "1e026ab1c0052df9c9b613f47f7a66d11ef14c87472bc82dd4b556102ba6d892",
+    "H1.element.dat": "9f90f6e2b703a66def83a4446264e91f2648b6f531e4cc6acc9a5d3314f1bea1",
+    "H1.ebe.dat": "990af2d3dac89b80daf56b13844a5850b0b8795d374f0f5eb750026ed698ae28",
+    "soil_pw0.txt": "7778cf08e505926747590eb00016d1008e7325669605501ce9cd7604b69cc512",
+    "ebe_pw0.txt": "c65745c9997169e9f5a601063bab07e3b1bf4b93e32ce02af92dd37aad6c4174"
+  }
+}

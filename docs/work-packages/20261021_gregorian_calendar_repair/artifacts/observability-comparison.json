@@ -1,0 +1,15 @@
+{
+  "identical": [
+    "H1.loss.dat",
+    "H1.soil.dat",
+    "plot_pw0.txt",
+    "H1.plot.dat",
+    "H1.wat.dat",
+    "H1.element.dat",
+    "H1.hbp",
+    "H1.ebe.dat",
+    "soil_pw0.txt",
+    "ebe_pw0.txt"
+  ],
+  "different": []
+}

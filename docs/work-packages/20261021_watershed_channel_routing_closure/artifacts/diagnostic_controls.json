@@ -1,0 +1,103 @@
+{
+  "hand_computable": {
+    "zero": {
+      "expected_m3": 0,
+      "actual_m3": 0,
+      "detected": false
+    },
+    "duplicate_inflow": {
+      "expected_m3": 100,
+      "actual_m3": 100,
+      "detected": true
+    },
+    "drop_outflow": {
+      "expected_m3": 70,
+      "actual_m3": 70,
+      "detected": true
+    },
+    "wrong_area_0.4": {
+      "expected_m3": -60,
+      "actual_m3": -60,
+      "detected": true
+    },
+    "reverse_storage": {
+      "expected_m3": 40,
+      "actual_m3": 40,
+      "detected": true
+    }
+  },
+  "observed_mutations": {
+    "source_observed_record": {
+      "case": "single",
+      "year": 1980,
+      "day": 4,
+      "element": 2,
+      "inflow": 44.31232833862305,
+      "baseflow": 0.0,
+      "outflow": 50.29222869873047,
+      "loss": 0.0,
+      "storage_start": 6.601160526275635,
+      "storage_end": 0.6212615966796875,
+      "residual": -1.430511474609375e-06,
+      "tolerance": 0.000194219550484842,
+      "normalized": -2.8443986508903422e-08,
+      "within_arithmetic_bound": true,
+      "boundary": "channel publication",
+      "interval": "calendar day; integrated published volumes",
+      "phase": "post-routing publication with start/end storage",
+      "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/channel_balance.csv",
+      "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/input_manifest.json"
+    },
+    "copied_csv": "/workdir/watershed-channel-routing-closure-20261021/audit-complete/observed_control_ledgers.csv",
+    "results": {
+      "unchanged": {
+        "actual_residual_m3": -1.430511474609375e-06,
+        "expected_delta_m3": 0.0,
+        "measured_delta_m3": 0.0,
+        "detected": false
+      },
+      "duplicate_inflow": {
+        "actual_residual_m3": 44.31232690811157,
+        "expected_delta_m3": 44.31232833862305,
+        "measured_delta_m3": 44.31232833862305,
+        "detected": true
+      },
+      "drop_outflow": {
+        "actual_residual_m3": 50.292227268218994,
+        "expected_delta_m3": 50.29222869873047,
+        "measured_delta_m3": 50.29222869873047,
+        "detected": true
+      },
+      "wrong_area": {
+        "actual_residual_m3": -26.5873984336853,
+        "expected_delta_m3": -26.587397003173827,
+        "measured_delta_m3": -26.587397003173827,
+        "detected": true
+      },
+      "reverse_storage": {
+        "actual_residual_m3": -11.95979928970337,
+        "expected_delta_m3": -11.959797859191895,
+        "measured_delta_m3": -11.959797859191895,
+        "detected": true
+      }
+    }
+  },
+  "pipeline_rejections": {
+    "duplicate_balance": {
+      "rejected": true,
+      "reason": "Duplicate channel balance record",
+      "retained_path": "/workdir/watershed-channel-routing-closure-20261021/audit-complete/duplicate_balance"
+    },
+    "missing_day": {
+      "rejected": true,
+      "reason": "Incomplete channel calendar",
+      "retained_path": "/workdir/watershed-channel-routing-closure-20261021/audit-complete/missing_day"
+    },
+    "nonfinite_inflow": {
+      "rejected": true,
+      "reason": "Nonfinite channel ledger",
+      "retained_path": "/workdir/watershed-channel-routing-closure-20261021/audit-complete/nonfinite_inflow"
+    }
+  }
+}

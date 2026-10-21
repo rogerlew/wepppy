@@ -1,0 +1,15 @@
+--- a/src/mixpass.for
++++ b/src/mixpass.for
+@@ -153,7 +153,11 @@
+       if(ios.ne.0) call mixerror('invalid SOURCES3 day')
+       read(tok(4),*,iostat=ios) nactive
+       if(ios.ne.0) call mixerror('invalid source count')
+-      if(y.ne.yr.or.d.ne.day) call mixerror('SOURCES3 date mismatch')
++      if(y.ne.yr.or.d.ne.day) then
++        write(6,*) 'CENTURY_EXPECTED_Y_D ',yr,day
++        write(6,*) 'CENTURY_MASTER_Y_D ',y,d
++        call mixerror('SOURCES3 date mismatch')
++      endif
+       if(nactive.lt.0.or.nactive.gt.nh)
+      1  call mixerror('source count out of bounds')
+       last=0

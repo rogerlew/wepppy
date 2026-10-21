@@ -14,24 +14,48 @@ The outcome is an auditable diagnosis, including unresolved terms when necessary
 
 This is an investigation, not modernization or a simulation fix. The user asked
 to scaffold it and allows observability instrumentation during later execution.
-Do not execute the investigation merely because this plan has been created.
+Execution explicitly authorized by Roger on 2026-10-21.
 
 ## Progress
 
 - [x] (2026-10-21 16:42 UTC) Scaffold investigation and operator scope boundary.
-- [ ] M1: Establish provenance, source map, control volumes, and replay matrix.
-- [ ] M2: Implement bounded diagnostics and establish output parity.
-- [ ] M3: Run closure audit and independent diagnostic controls.
-- [ ] M4: Review evidence and deliver findings without simulation changes.
+- [x] (2026-10-21) M1: Retained provenance, source map, workbook audit,
+  control-volume definitions, generated input decks and supported project forks.
+- [x] (2026-10-21) M2: Added gated native probes; baseline/off/on runs complete.
+  Five controlled cases, daily path, unequal tributaries, cascade and one real
+  project completed full periods. Exact scientific parity passes in all nine successful cases.
+- [x] (2026-10-21) M3: Final readback, 160,345 channel-day ledger records,
+  diagnostic controls and malformed-record rejection complete.
+- [x] (2026-10-21) M4: Correctness review and source QA pass; findings
+  published and investigation closed with the model defect explicitly open.
 
 ## Surprises & Discoveries
 
-Preliminary source inspection found terminal lateral volume already calculated
-as `sbrunf(nplane) * slplen(nplane) * fwidth(nplane)` in `src/wshpas.f90`.
-The current writer requires `.hbp` files; older text PASS evidence does not prove
-current-path behavior. These are source observations, not generated-run validation.
+Terminal lateral area conversion matches observations in the tested constant-width
+cases. The schema-2 writer emits 366 slots every year; the reader consumes one
+slot per actual routing day without matching dates. Controlled cases first diverge
+on 1982-01-01. This is the first demonstrated failing boundary, independent of
+OFE splitting. Channel publication residuals are partly balance identities and
+cannot prove physical-domain conservation.
+
+The workbook's original decks were not supplied by Ayush (operator confirmation).
+The first real project rejects zero HMAX; the second completes after isolated
+run-card migration to the canonical HBP prompt contract. The impoundment case
+reports failure despite process return code zero. Full observation traces on NFS
+were slow, so complete observation runs use local storage; overhead measurements
+are not a controlled filesystem benchmark.
 
 ## Decision Log
+
+2026-10-21 — Close as a successful observation-only investigation with a confirmed
+calendar-selection defect, not a corrected model. Real-project full-period parity
+and independent final review pass. Stop at the first reproduced failing boundary;
+full soil/GW/domain ledgers and unsupported/failed cases remain unresolved rather
+than expanding into simulation repair. Original decks were not supplied by Ayush.
+
+2026-10-21 — Execute observation-only scope on explicit operator request. Retain
+failed default-link build; supply existing zlib explicitly with `-lz`. Use existing
+channel diagnostics before adding probes. Original workbook decks were not supplied; historical binary identity is unknown.
 
 2026-10-21 16:42 UTC — Operator Roger permits observation but prohibits changes
 to simulation code behavior. Add probes only; preserve equations, precision,
@@ -42,8 +66,14 @@ does not override this narrower scope.
 
 ## Outcomes & Retrospective
 
-Scaffold only. No instrumentation, rebuild, model execution, or diagnosis has
-been completed under this package.
+A reproducible PASS calendar-selection defect is identified without changing
+simulation behavior. Original workbook attribution, physical-domain closure and
+failed-case balances remain unresolved. All nine successful cases pass
+exact baseline/off/on file parity and reviewed readback, including 28 hillslopes
+over 43 years in a real project. The 160,345-record ledger supports publication
+arithmetic only; no physical-domain closure is inferred. Detailed evidence is in
+`artifacts/findings.md`; commands, failed attempts and external trace paths are
+retained. No simulation correction, release, vendoring or deployment occurred.
 
 ## Context and Orientation
 
@@ -242,3 +272,8 @@ and unknown-value representation. Offline analysis never writes model inputs bac
 
 2026-10-21 16:42 UTC — Initial scaffold records the operator's observability-only
 scope and prevents investigation from turning into an implicit simulation fix.
+
+2026-10-21 — Execution started; retained provenance and declared ledger design.
+
+2026-10-21 — Completed M1–M4; final independent gate passed. Retained successful
+and failed artifacts, explicit limitations, and separate remediation proposal.

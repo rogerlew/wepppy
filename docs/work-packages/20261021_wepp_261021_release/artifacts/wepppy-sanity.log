@@ -1,0 +1,314 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 11172 items / 1 skipped
+
+tests/all_your_base/geo/test_raster_stacker.py .                         [  0%]
+tests/all_your_base/geo/test_vrt.py .................                    [  0%]
+tests/all_your_base/test_file_digest.py .......                          [  0%]
+tests/all_your_base/test_geo_get_utm_zone.py .                           [  0%]
+tests/climate/test_cligen_binary_provenance.py .................         [  0%]
+tests/climate/test_cligen_binary_provenance_integration.py .....         [  0%]
+tests/climate/test_cligen_peak_intensity_contract.py ....                [  0%]
+tests/climate/test_cligen_replace_var_nan_guard.py ..                    [  0%]
+tests/climate/test_cligen_run_observed_retries.py ..............         [  0%]
+tests/climate/test_cligen_wc1_parity.py .s                               [  0%]
+tests/climate/test_climate_scaling.py sssssss                            [  0%]
+tests/climates/daymet/test_daymet_singlelocation_client.py ...           [  0%]
+tests/climates/gridmet/test_admission.py ............................... [  0%]
+................................                                         [  1%]
+tests/climates/gridmet/test_admission_clients.py ....................... [  1%]
+.....                                                                    [  1%]
+tests/climates/gridmet/test_admission_redis.py ssssssssssssss            [  1%]
+tests/climates/gridmet/test_download_clients.py ........................ [  1%]
+.                                                                        [  1%]
+tests/climates/noaa/test_atlas14_client.py ....                          [  1%]
+tests/climates/noaa/test_atlas14_download.py ssss                        [  1%]
+tests/climates/prism/test_bulk_client.py ............................... [  2%]
+........                                                                 [  2%]
+tests/climates/prism/test_wepp_adapter.py ..                             [  2%]
+tests/climates/test_cligen_geojson_export.py .                           [  2%]
+tests/climates/test_cligen_station_catalog_isolation.py .                [  2%]
+tests/climates/test_cligen_station_search.py .                           [  2%]
+tests/climates/test_cligen_tenerife_catalog.py ....                      [  2%]
+tests/climates/test_edde_client.py ..............                        [  2%]
+tests/climates/test_edde_cligen.py ...........                           [  2%]
+tests/climates/test_gridmet_propagation.py .....                         [  2%]
+tests/climates/test_maca_artifacts.py ..                                 [  2%]
+tests/climates/test_maca_client.py ..................................... [  2%]
+....                                                                     [  3%]
+tests/climates/test_prism_temperature_ordering.py .............          [  3%]
+tests/config/test_secrets.py .....                                       [  3%]
+tests/culverts/test_culvert_batch_rq.py .......                          [  3%]
+tests/culverts/test_culvert_orchestration.py .....                       [  3%]
+tests/culverts/test_culverts_runner.py .......                           [  3%]
+tests/culverts/test_download_skeletons_script.py ...                     [  3%]
+tests/culverts/test_watershed_feature_crs.py ..                          [  3%]
+tests/disturbed/test_disturbed_matrix.py ............................... [  3%]
+....................................................................     [  4%]
+tests/disturbed/test_matrix_contracts.py ..........                      [  4%]
+tests/disturbed/test_route_coefficients.py ......                        [  4%]
+tests/docker/test_canary_smoke_contract.py s.                            [  4%]
+tests/docker/unit/test_download_service_routing.py ......                [  4%]
+tests/docker/unit/test_feature_access_service_dependencies.py ...        [  4%]
+tests/docker/unit/test_project_config_rollout_contract.py .........      [  4%]
+tests/docker/unit/test_rq_worker_startup_contract.py .......             [  4%]
+tests/docker/unit/test_weppcloudr_shared_group_contract.py ...           [  4%]
+tests/docker/unit/test_wepppyo3_interchange_startup_contract.py ........ [  4%]
+..                                                                       [  4%]
+tests/eu/soils/test_esdac_build.py ..                                    [  4%]
+tests/eu/soils/test_esdac_disturbed_downstream.py ......                 [  4%]
+tests/eu/soils/test_esdac_quality_contract.py ..........                 [  4%]
+tests/eu/soils/test_esdac_quality_fixture.py ..........                  [  5%]
+tests/eu/soils/test_esdac_soil_build.py ........                         [  5%]
+tests/eu/soils/test_invalid_soil_search.py ......                        [  5%]
+tests/integration/test_cross_service_auth_lifecycle.py ....              [  5%]
+tests/integration/test_cross_service_auth_portability.py ......          [  5%]
+tests/investigations/test_peakflow_phase1_fixture.py ..                  [  5%]
+tests/investigations/test_peakflow_phase1_protocol.py .................. [  5%]
+                                                                         [  5%]
+tests/investigations/test_peakflow_phase1_replay.py .........            [  5%]
+tests/investigations/test_peakflow_phase2a_pilot.py .....                [  5%]
+tests/locales/earth/soils/test_isric_crs_workaround.py .........         [  5%]
+tests/locales/earth/test_copernicus_retrieve.py .......                  [  5%]
+tests/microservices/test_browse_auth_routes.py ......................... [  5%]
+.................................................................        [  6%]
+tests/microservices/test_browse_dtale.py ..........                      [  6%]
+tests/microservices/test_browse_report_routes.py ..........              [  6%]
+tests/microservices/test_browse_routes.py ..................             [  6%]
+tests/microservices/test_browse_security.py .............                [  6%]
+tests/microservices/test_creation_idempotency.py .....                   [  7%]
+tests/microservices/test_dedicated_download_service.py ...............   [  7%]
+tests/microservices/test_download.py ......                              [  7%]
+tests/microservices/test_dss_preview.py .                                [  7%]
+tests/microservices/test_dtale_freshness.py ................             [  7%]
+tests/microservices/test_elevationquery.py ....                          [  7%]
+tests/microservices/test_feature_access_data.py ............             [  7%]
+tests/microservices/test_files_routes.py ............................... [  7%]
+................................................................         [  8%]
+tests/microservices/test_parquet_filters.py .......                      [  8%]
+tests/microservices/test_rq_engine_admin_job_routes.py ....              [  8%]
+tests/microservices/test_rq_engine_ag_fields_routes.py ................. [  8%]
+.....................................                                    [  8%]
+tests/microservices/test_rq_engine_ash_routes.py ....................... [  9%]
+...                                                                      [  9%]
+tests/microservices/test_rq_engine_auth.py ............................. [  9%]
+...........                                                              [  9%]
+tests/microservices/test_rq_engine_auth_concurrency_routes.py .......... [  9%]
+.......                                                                  [  9%]
+tests/microservices/test_rq_engine_batch_routes.py ..................... [  9%]
+...                                                                      [  9%]
+tests/microservices/test_rq_engine_bootstrap_routes.py ................. [ 10%]
+................................                                         [ 10%]
+tests/microservices/test_rq_engine_builder_routes.py .......F
+
+=================================== FAILURES ===================================
+_ test_writer_enabled_creation_resolves_each_locale_graph[continental-us-profile_selections0-us] _
+
+client = (<starlette.testclient.TestClient object at 0x76856c0e6ff0>, {'roles': ['PowerUser'], 'sub': '42'}, PosixPath('/tmp/py...known/pytest-314/test_writer_enabled_creation_r0'), <test_rq_engine_builder_routes.FakeRedis object at 0x76856c0e7b30>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76850c73d9d0>
+profile_id = 'continental-us', profile_selections = {}, runtime_token = 'us'
+
+    @pytest.mark.parametrize(
+        ("profile_id", "profile_selections", "runtime_token"),
+        (
+            ("continental-us", {}, "us"),
+            ("europe", {
+                "dem": "europe-eudem-v1-1", "soil": "esdac-europe",
+                "landuse": "corine-2018",
+            }, "eu"),
+            ("canada", {
+                "dem": "copernicus-dem-30", "soil": "isric-global",
+                "landuse": "c3s-landcover-2020",
+            }, "canada"),
+            ("australia", {
+                "dem": "australia-srtm-1s", "soil": "asris-australia",
+                "landuse": "australia-landuse-2010-2011",
+            }, "au"),
+            ("global-earth", {
+                "dem": "copernicus-dem-30", "soil": "isric-global",
+                "landuse": "c3s-landcover-2020",
+            }, "earth"),
+        ),
+    )
+    def test_writer_enabled_creation_resolves_each_locale_graph(
+        client, monkeypatch, profile_id: str,
+        profile_selections: dict[str, str], runtime_token: str,
+    ) -> None:
+        http, _claims, path, _idempotency = client
+        monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", "1")
+>       revision = http.get("/api/project-config/builder").json()["registry_revision"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'registry_revision'
+
+tests/microservices/test_rq_engine_builder_routes.py:224: KeyError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.builder_routes:builder_routes.py:109 builder description failed
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepp_runner/wepp_binary_capabilities.py", line 36, in read_binary_capabilities
+    payload = json.loads(raw)
+              ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 384, in _provider_wepp_components
+    features = read_binary_capabilities(watershed_path, hillslope_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepp_runner/wepp_binary_capabilities.py", line 38, in read_binary_capabilities
+    raise ValueError(f'Invalid WEPP {role} release metadata: {sidecar}') from exc
+ValueError: Invalid WEPP watershed release metadata: /workdir/wepppy/wepp_runner/bin/wepp_261021.json
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/builder_routes.py", line 107, in builder_description
+    description = describe_builder()
+                  ^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/resolver.py", line 310, in describe_builder
+    resolved_registry = load_registry() if registry is None else registry
+                        ^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 694, in load_registry
+    provider_components = _provider_wepp_components()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 386, in _provider_wepp_components
+    raise RegistryError(str(exc)) from exc
+wepppy.nodb.config_builder.registry.RegistryError: Invalid WEPP watershed release metadata: /workdir/wepppy/wepp_runner/bin/wepp_261021.json
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:73 rq-engine error response emitted [error_id=9c3d5dd3836146979b3f384802bf9deb code=builder_registry_error status=500]: Builder registry is unavailable.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepp_runner/wepp_binary_capabilities.py", line 36, in read_binary_capabilities
+    payload = json.loads(raw)
+              ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 384, in _provider_wepp_components
+    features = read_binary_capabilities(watershed_path, hillslope_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepp_runner/wepp_binary_capabilities.py", line 38, in read_binary_capabilities
+    raise ValueError(f'Invalid WEPP {role} release metadata: {sidecar}') from exc
+ValueError: Invalid WEPP watershed release metadata: /workdir/wepppy/wepp_runner/bin/wepp_261021.json
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/builder_routes.py", line 107, in builder_description
+    description = describe_builder()
+                  ^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/resolver.py", line 310, in describe_builder
+    resolved_registry = load_registry() if registry is None else registry
+                        ^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 694, in load_registry
+    provider_components = _provider_wepp_components()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/config_builder/registry.py", line 386, in _provider_wepp_components
+    raise RegistryError(str(exc)) from exc
+wepppy.nodb.config_builder.registry.RegistryError: Invalid WEPP watershed release metadata: /workdir/wepppy/wepp_runner/bin/wepp_261021.json
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/climates/gridmet/test_download_clients.py::test_grid_content_decoding_failure_retries_and_closes_responses
+  /usr/local/lib/python3.12/contextlib.py:775: RuntimeWarning: Cannot close a netcdf_file opened with mmap=True, when netcdf_variables or arrays referring to its data still exist. All data arrays obtained from such files refer directly to data on disk, and must be copied before the file can be cleanly closed. (See netcdf_file docstring for more information on mmap.)
+    def __enter__(self):
+
+tests/climates/test_gridmet_propagation.py::test_daymet_download_pool_receives_pickle_safe_config
+  /workdir/wepppy/wepppy/climates/daymet/daymet_singlelocation_client.py:296: FutureWarning: This function is deprecated. See: https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
+    hill_easting, hill_northing = pyproj.transform(wgs84_proj, raster_proj, loc['longitude'], loc['latitude'])
+
+tests/climates/test_gridmet_propagation.py::test_daymet_download_pool_receives_pickle_safe_config
+  /workdir/wepppy/wepppy/climates/daymet/daymet_singlelocation_client.py:345: FutureWarning: This function is deprecated. See: https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
+    lng, lat = pyproj.transform(raster_proj, wgs84_proj, eastings[i], northings[j])
+
+tests/climates/test_maca_artifacts.py::test_selected_source_reaches_native_prepared_and_restored_artifacts
+tests/climates/test_maca_artifacts.py::test_replay_validation_failure_retains_working_input_and_real_exception_log
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:300: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/climates/test_maca_artifacts.py::test_replay_validation_failure_retains_working_input_and_real_exception_log
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/climates/test_prism_temperature_ordering.py::test_real_writers_repair_and_preserve_weather[public]
+tests/climates/test_prism_temperature_ordering.py::test_real_writers_repair_and_preserve_weather[public]
+tests/climates/test_prism_temperature_ordering.py::test_real_writers_repair_and_preserve_weather[public]
+tests/climates/test_prism_temperature_ordering.py::test_real_writers_repair_and_preserve_weather[public]
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/eu/soils/test_esdac_build.py: 32 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1983687) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/microservices/test_files_routes.py::test_files_pattern_literal_underscore_percent
+tests/microservices/test_files_routes.py::test_files_sort_stability_matches_manifest
+tests/microservices/test_files_routes.py::test_files_manifest_cached_flag
+tests/microservices/test_files_routes.py::test_files_meta_skips_cached_flag
+tests/microservices/test_files_routes.py::test_files_manifest_pattern_filtering
+tests/microservices/test_files_routes.py::test_files_manifest_stale_cache_is_ignored
+tests/microservices/test_files_routes.py::test_files_dotfiles_hidden_by_default
+  /workdir/wepppy/wepppy/microservices/browse/listing.py:252: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    generated_at = datetime.utcnow().isoformat()
+
+tests/microservices/test_rq_engine_bootstrap_routes.py::test_bootstrap_checkout_invalid_json_payload_falls_back_to_missing_sha
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/microservices/test_rq_engine_builder_routes.py::test_writer_enabled_creation_resolves_each_locale_graph[continental-us-profile_selections0-us]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+===== 1 failed, 1134 passed, 28 skipped, 60 warnings in 504.38s (0:08:24) ======

@@ -1,0 +1,89 @@
+{
+  "outputs": {
+    "chnwb.txt": {
+      "original_release_probe_sha256": [
+        "ec9d793468d669f343f33a77bb087a642f1712ea3dc2190520f6d2818ff76eaf",
+        "15844f0d7ed53b4cd16bc425dfdd1a5c4016e3f34bdb2ac509a1aef9764a5ca5",
+        "15844f0d7ed53b4cd16bc425dfdd1a5c4016e3f34bdb2ac509a1aef9764a5ca5"
+      ],
+      "equal": false,
+      "release_probe_equal": true
+    },
+    "ebe_pw0.txt": {
+      "original_release_probe_sha256": [
+        "9df6833a2180c38efd77765246bd7a34ce9616f2bdeb22d2b7f43a55e10f423d",
+        "80a6e7e6df72aff1449c33ac699306940583a109336d4c0b8fd735db387c1ada",
+        "80a6e7e6df72aff1449c33ac699306940583a109336d4c0b8fd735db387c1ada"
+      ],
+      "equal": false,
+      "release_probe_equal": true
+    },
+    "loss_pw0.txt": {
+      "original_release_probe_sha256": [
+        "13079b1c87365f70cac01f70e0399091349c44d54e8e3d292a8faf3228f8b00a",
+        "f5364b0948bacefe93f7ed4f024f0026f26da790c8207bfb658fc1195491ecff",
+        "f5364b0948bacefe93f7ed4f024f0026f26da790c8207bfb658fc1195491ecff"
+      ],
+      "equal": false,
+      "release_probe_equal": true
+    },
+    "pass_pw0.txt": {
+      "original_release_probe_sha256": [
+        "dd33c2d4a208403eb02a6125b33890b6b43311fcc4a2f35e4079cd1b24ea4c12",
+        "dd33c2d4a208403eb02a6125b33890b6b43311fcc4a2f35e4079cd1b24ea4c12",
+        "dd33c2d4a208403eb02a6125b33890b6b43311fcc4a2f35e4079cd1b24ea4c12"
+      ],
+      "equal": true,
+      "release_probe_equal": true
+    },
+    "plot_pw0.txt": {
+      "original_release_probe_sha256": [
+        "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7"
+      ],
+      "equal": true,
+      "release_probe_equal": true
+    },
+    "soil_pw0.txt": {
+      "original_release_probe_sha256": [
+        "fee86418eae0e0399c8692cc19d359131dff2c43c4b8a15aa28438fcd9cefe66",
+        "f9c6b5570153d15904af9599f1256d40d66f5d1f7f601d7563bbd5e7b0a8518a",
+        "f9c6b5570153d15904af9599f1256d40d66f5d1f7f601d7563bbd5e7b0a8518a"
+      ],
+      "equal": false,
+      "release_probe_equal": true
+    }
+  },
+  "hillslope_pass_unchanged": true,
+  "release": {
+    "error": "SOURCES3 date mismatch",
+    "stderr": "Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL\nSTOP 1\n",
+    "last_stdout_lines": [
+      " SIMULATION YEAR =          99",
+      "     ",
+      " SIMULATION YEAR =         100",
+      "     ",
+      " SIMULATION YEAR =         101",
+      "     ",
+      " SIMULATION YEAR =         102",
+      "PASS components error: SOURCES3 date mismatch"
+    ]
+  },
+  "probe": {
+    "error": "SOURCES3 date mismatch",
+    "stderr": "Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL\nSTOP 1\n",
+    "last_stdout_lines": [
+      " SIMULATION YEAR =         100",
+      "     ",
+      " SIMULATION YEAR =         101",
+      "     ",
+      " SIMULATION YEAR =         102",
+      " CENTURY_EXPECTED_Y_D          103         365",
+      " CENTURY_MASTER_Y_D          102         365",
+      "PASS components error: SOURCES3 date mismatch"
+    ]
+  },
+  "all_outputs_equal": false,
+  "all_release_probe_outputs_equal": true
+}

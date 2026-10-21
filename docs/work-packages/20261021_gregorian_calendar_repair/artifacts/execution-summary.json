@@ -1,0 +1,1385 @@
+{
+  "ascii-final": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/ascii-source/src/wepp",
+    "binary_sha256": "74d565a85b355dbc1504ec65448010c9c7db4798e2bdbdf9c07985c95d4ffa82",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/ascii-source/src/wepp_hill",
+    "hill_sha256": "31c7f3f0b2006424525ffccab12fddcaac7c37914eaa61e531c206bb72271741",
+    "hbp": false,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.823978821979836
+      },
+      {
+        "card": "p10.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.8734644879586995
+      },
+      {
+        "card": "p11.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.872163891093805
+      },
+      {
+        "card": "p103.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.07402508193627
+      },
+      {
+        "card": "p104.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.175582523923367
+      },
+      {
+        "card": "p102.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.174361236859113
+      },
+      {
+        "card": "p101.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173796348972246
+      },
+      {
+        "card": "p100.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.223533812910318
+      },
+      {
+        "card": "p15.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.82268306799233
+      },
+      {
+        "card": "p16.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.722424886189401
+      },
+      {
+        "card": "p14.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.072643390158191
+      },
+      {
+        "card": "p12.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.12411550199613
+      },
+      {
+        "card": "p19.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.822330866008997
+      },
+      {
+        "card": "p18.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.872459140839055
+      },
+      {
+        "card": "p13.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173648102907464
+      },
+      {
+        "card": "p17.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173377074999735
+      },
+      {
+        "card": "p23.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.72233738610521
+      },
+      {
+        "card": "p22.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.073172753909603
+      },
+      {
+        "card": "p20.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173481024103239
+      },
+      {
+        "card": "p21.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.123014334123582
+      },
+      {
+        "card": "p2.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.223774251993746
+      },
+      {
+        "card": "p24.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.1732332080136985
+      },
+      {
+        "card": "p25.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173280254006386
+      },
+      {
+        "card": "p26.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173376167891547
+      },
+      {
+        "card": "p27.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.823029596125707
+      },
+      {
+        "card": "p29.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.672723687021062
+      },
+      {
+        "card": "p28.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.822794032981619
+      },
+      {
+        "card": "p30.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.872457319870591
+      },
+      {
+        "card": "p32.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.822313246084377
+      },
+      {
+        "card": "p31.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.872641551075503
+      },
+      {
+        "card": "p33.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.722387686138973
+      },
+      {
+        "card": "p3.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.223413745174184
+      },
+      {
+        "card": "p34.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.273213614942506
+      },
+      {
+        "card": "p35.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.324711367953569
+      },
+      {
+        "card": "p36.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.223659829935059
+      },
+      {
+        "card": "p4.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.9729685068596154
+      },
+      {
+        "card": "p38.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.24354814295657
+      },
+      {
+        "card": "p37.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.3237520509865135
+      },
+      {
+        "card": "p39.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.423657747916877
+      },
+      {
+        "card": "p40.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.324061297113076
+      },
+      {
+        "card": "p45.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.6241155420430005
+      },
+      {
+        "card": "p42.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.872860100120306
+      },
+      {
+        "card": "p44.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.722217995906249
+      },
+      {
+        "card": "p41.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173123510088772
+      },
+      {
+        "card": "p46.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.822920369915664
+      },
+      {
+        "card": "p43.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.123237998923287
+      },
+      {
+        "card": "p47.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.722375905839726
+      },
+      {
+        "card": "p48.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.526512962998822
+      },
+      {
+        "card": "p51.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.77283354382962
+      },
+      {
+        "card": "p49.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.975195968989283
+      },
+      {
+        "card": "p50.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.973035946954042
+      },
+      {
+        "card": "p53.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.874029994942248
+      },
+      {
+        "card": "p52.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.923219673102722
+      },
+      {
+        "card": "p5.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.3245942229405046
+      },
+      {
+        "card": "p54.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.424169514095411
+      },
+      {
+        "card": "p55.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.3738626590929925
+      },
+      {
+        "card": "p6.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.822539550019428
+      },
+      {
+        "card": "p57.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173642429057509
+      },
+      {
+        "card": "p59.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.073838838143274
+      },
+      {
+        "card": "p58.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.223750747041777
+      },
+      {
+        "card": "p56.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.423949962016195
+      },
+      {
+        "card": "p60.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.0762495619710535
+      },
+      {
+        "card": "p61.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.977515749167651
+      },
+      {
+        "card": "p62.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.22601319802925
+      },
+      {
+        "card": "p65.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.723440084140748
+      },
+      {
+        "card": "p66.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.8233852030243725
+      },
+      {
+        "card": "p67.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.873486688127741
+      },
+      {
+        "card": "p63.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.224015791900456
+      },
+      {
+        "card": "p68.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.123581560095772
+      },
+      {
+        "card": "p64.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.628341939998791
+      },
+      {
+        "card": "p7.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.2740557480137795
+      },
+      {
+        "card": "p69.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 7.231039926176891
+      },
+      {
+        "card": "p71.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.528544331900775
+      },
+      {
+        "card": "p72.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.426557555096224
+      },
+      {
+        "card": "p70.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.726854443084449
+      },
+      {
+        "card": "p73.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.777006487129256
+      },
+      {
+        "card": "p74.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 7.129113532137126
+      },
+      {
+        "card": "p75.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.98150425311178
+      },
+      {
+        "card": "p76.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.879502482013777
+      },
+      {
+        "card": "p77.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.073651347775012
+      },
+      {
+        "card": "p8.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.973432566039264
+      },
+      {
+        "card": "p80.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.6234326381236315
+      },
+      {
+        "card": "p78.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173604277893901
+      },
+      {
+        "card": "p79.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 7.0273302448913455
+      },
+      {
+        "card": "p81.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.175911255879328
+      },
+      {
+        "card": "p82.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.276309981942177
+      },
+      {
+        "card": "p83.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.628119081957266
+      },
+      {
+        "card": "p85.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.974187568062916
+      },
+      {
+        "card": "p84.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 7.979991375934333
+      },
+      {
+        "card": "p88.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.3775721290148795
+      },
+      {
+        "card": "p89.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.324001668021083
+      },
+      {
+        "card": "p87.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.777525865007192
+      },
+      {
+        "card": "p86.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.828824267024174
+      },
+      {
+        "card": "p9.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.5760561029892415
+      },
+      {
+        "card": "p90.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.3753868960775435
+      },
+      {
+        "card": "p91.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.174918679986149
+      },
+      {
+        "card": "p92.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.873602737905458
+      },
+      {
+        "card": "p93.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.173347873846069
+      },
+      {
+        "card": "p95.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.274683461990207
+      },
+      {
+        "card": "p94.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.72767151100561
+      },
+      {
+        "card": "p96.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.576736389193684
+      },
+      {
+        "card": "p97.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.578174413880333
+      },
+      {
+        "card": "p98.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 5.474667491856962
+      },
+      {
+        "card": "p99.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.52786554209888
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 590.007095229812
+      }
+    ]
+  },
+  "ascii400": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/ascii-source/src/wepp",
+    "binary_sha256": "74d565a85b355dbc1504ec65448010c9c7db4798e2bdbdf9c07985c95d4ffa82",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/ascii-source/src/wepp_hill",
+    "hill_sha256": "31c7f3f0b2006424525ffccab12fddcaac7c37914eaa61e531c206bb72271741",
+    "hbp": false,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 8.58598156296648
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 90.10889208409935
+      }
+    ]
+  },
+  "hbp400-final": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp",
+    "binary_sha256": "9d3a2e503544de160e2b7d3b9466055862370cfae558e49cf0412f819e12368d",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp_hill",
+    "hill_sha256": "f96fcfebf73a5c5185553633f5f2e00c65845c0c250d120e0dd601f37c6fedb8",
+    "hbp": true,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 41.39880115003325
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 39.891230863984674
+      }
+    ]
+  },
+  "matched-baseline44": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/baseline-code/src/wepp",
+    "binary_sha256": "e2eb381a75784fb45b508c030f4aaf4bcef0517f88facb34de13b98bd609e1e9",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/baseline-code/src/wepp_hill",
+    "hill_sha256": "5e902cc6fc4b4d5063a2b8720451bfeb36f075ede3fe6ab8a9fb3e9af8bcaa43",
+    "hbp": true,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.275093495147303
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 7.281219284050167
+      }
+    ]
+  },
+  "final44": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp",
+    "binary_sha256": "9d3a2e503544de160e2b7d3b9466055862370cfae558e49cf0412f819e12368d",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp_hill",
+    "hill_sha256": "f96fcfebf73a5c5185553633f5f2e00c65845c0c250d120e0dd601f37c6fedb8",
+    "hbp": true,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 4.825794454896823
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 6.68119922792539
+      }
+    ]
+  },
+  "hbp400-observe": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp",
+    "binary_sha256": "9d3a2e503544de160e2b7d3b9466055862370cfae558e49cf0412f819e12368d",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp_hill",
+    "hill_sha256": "f96fcfebf73a5c5185553633f5f2e00c65845c0c250d120e0dd601f37c6fedb8",
+    "hbp": true,
+    "results": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 137.6142564979382
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 183.43719756999053
+      }
+    ]
+  },
+  "hbp-final": {
+    "binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp",
+    "binary_sha256": "9d3a2e503544de160e2b7d3b9466055862370cfae558e49cf0412f819e12368d",
+    "hill_binary": "/workdir/wepp-gregorian-repair-20261021/candidates/wepp_hill",
+    "hill_sha256": "f96fcfebf73a5c5185553633f5f2e00c65845c0c250d120e0dd601f37c6fedb8",
+    "hbp": true,
+    "results": [
+      {
+        "card": "p14.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 22.712350599002093
+      },
+      {
+        "card": "p104.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 23.9107270068489
+      },
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.06506381602958
+      },
+      {
+        "card": "p11.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.362635013181716
+      },
+      {
+        "card": "p101.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.37786817806773
+      },
+      {
+        "card": "p15.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.91667012916878
+      },
+      {
+        "card": "p10.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.067856353940442
+      },
+      {
+        "card": "p13.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.368654654128477
+      },
+      {
+        "card": "p102.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.96441688714549
+      },
+      {
+        "card": "p12.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.96793629298918
+      },
+      {
+        "card": "p100.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.121761141112074
+      },
+      {
+        "card": "p103.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.687327923020348
+      },
+      {
+        "card": "p16.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 24.87244070088491
+      },
+      {
+        "card": "p18.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.92023956985213
+      },
+      {
+        "card": "p17.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.172964164055884
+      },
+      {
+        "card": "p21.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 24.010100034996867
+      },
+      {
+        "card": "p19.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.922803269000724
+      },
+      {
+        "card": "p22.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.117154792882502
+      },
+      {
+        "card": "p20.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.267300836043432
+      },
+      {
+        "card": "p23.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.920352856861427
+      },
+      {
+        "card": "p2.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.575298069044948
+      },
+      {
+        "card": "p26.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.970882480032742
+      },
+      {
+        "card": "p24.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.519844378810376
+      },
+      {
+        "card": "p25.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.523633308010176
+      },
+      {
+        "card": "p3.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 21.858980000019073
+      },
+      {
+        "card": "p27.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.274913471890613
+      },
+      {
+        "card": "p34.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 23.574836065992713
+      },
+      {
+        "card": "p29.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.673911829013377
+      },
+      {
+        "card": "p28.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.873068589018658
+      },
+      {
+        "card": "p31.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.380923241144046
+      },
+      {
+        "card": "p30.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.084509969921783
+      },
+      {
+        "card": "p33.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.061704549007118
+      },
+      {
+        "card": "p32.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.981757598929107
+      },
+      {
+        "card": "p37.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.17448206502013
+      },
+      {
+        "card": "p35.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.89097354398109
+      },
+      {
+        "card": "p36.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.235433901892975
+      },
+      {
+        "card": "p38.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.36976599181071
+      },
+      {
+        "card": "p39.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.515959673095495
+      },
+      {
+        "card": "p4.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 24.4149335520342
+      },
+      {
+        "card": "p40.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.62030570488423
+      },
+      {
+        "card": "p42.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.563235531793907
+      },
+      {
+        "card": "p43.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.22028951300308
+      },
+      {
+        "card": "p41.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.422828926937655
+      },
+      {
+        "card": "p45.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.167779745999724
+      },
+      {
+        "card": "p44.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.42218663310632
+      },
+      {
+        "card": "p46.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.0208821229171
+      },
+      {
+        "card": "p48.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.211141965119168
+      },
+      {
+        "card": "p47.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.073947519995272
+      },
+      {
+        "card": "p5.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 23.414882973069325
+      },
+      {
+        "card": "p49.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.564645375823602
+      },
+      {
+        "card": "p50.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.72189343185164
+      },
+      {
+        "card": "p54.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 24.109163012122735
+      },
+      {
+        "card": "p51.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.714613914955407
+      },
+      {
+        "card": "p53.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.52861491101794
+      },
+      {
+        "card": "p52.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.76502557215281
+      },
+      {
+        "card": "p56.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.46815959108062
+      },
+      {
+        "card": "p55.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.76583424420096
+      },
+      {
+        "card": "p57.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.367468954995275
+      },
+      {
+        "card": "p58.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.813054703874514
+      },
+      {
+        "card": "p59.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.276543054031208
+      },
+      {
+        "card": "p6.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.168247248977423
+      },
+      {
+        "card": "p60.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 24.264841759111732
+      },
+      {
+        "card": "p61.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.523921102052554
+      },
+      {
+        "card": "p62.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.517659235047176
+      },
+      {
+        "card": "p65.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.42473431606777
+      },
+      {
+        "card": "p64.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.072579760104418
+      },
+      {
+        "card": "p63.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.824714296963066
+      },
+      {
+        "card": "p67.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.918890328146517
+      },
+      {
+        "card": "p66.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.320709638064727
+      },
+      {
+        "card": "p69.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.11110545694828
+      },
+      {
+        "card": "p7.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.77185268700123
+      },
+      {
+        "card": "p68.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 31.57342655491084
+      },
+      {
+        "card": "p71.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.620602146023884
+      },
+      {
+        "card": "p72.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.422570150811225
+      },
+      {
+        "card": "p70.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.678206185111776
+      },
+      {
+        "card": "p73.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.3805458759889
+      },
+      {
+        "card": "p74.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.970624253852293
+      },
+      {
+        "card": "p75.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.22600562684238
+      },
+      {
+        "card": "p76.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.87449274188839
+      },
+      {
+        "card": "p79.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.173872540937737
+      },
+      {
+        "card": "p77.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.07660607690923
+      },
+      {
+        "card": "p78.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.174907271983102
+      },
+      {
+        "card": "p8.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 25.97069269209169
+      },
+      {
+        "card": "p80.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 29.727752505103126
+      },
+      {
+        "card": "p81.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.722738495096564
+      },
+      {
+        "card": "p82.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.3798532478977
+      },
+      {
+        "card": "p84.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.621565554989502
+      },
+      {
+        "card": "p83.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 31.130161761073396
+      },
+      {
+        "card": "p87.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.5725396561902
+      },
+      {
+        "card": "p85.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.375136227114126
+      },
+      {
+        "card": "p86.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.688318161992356
+      },
+      {
+        "card": "p88.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 27.266744171036407
+      },
+      {
+        "card": "p9.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.223232632968575
+      },
+      {
+        "card": "p89.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.480293543078005
+      },
+      {
+        "card": "p90.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.18070595897734
+      },
+      {
+        "card": "p91.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.374686192022637
+      },
+      {
+        "card": "p92.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.730967953102663
+      },
+      {
+        "card": "p94.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.776671575848013
+      },
+      {
+        "card": "p93.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.88515867688693
+      },
+      {
+        "card": "p96.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.332636332837865
+      },
+      {
+        "card": "p97.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 26.983565932139754
+      },
+      {
+        "card": "p98.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 28.58310918393545
+      },
+      {
+        "card": "p95.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 31.292355217039585
+      },
+      {
+        "card": "p99.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 30.893489894922823
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 621.805414514849
+      }
+    ]
+  }
+}

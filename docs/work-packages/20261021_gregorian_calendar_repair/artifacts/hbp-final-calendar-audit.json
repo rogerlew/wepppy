@@ -1,0 +1,431 @@
+{
+  "climate_days": 73048,
+  "first": [
+    1,
+    1
+  ],
+  "last": [
+    200,
+    365
+  ],
+  "water_files": {
+    "H1.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H10.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H100.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H101.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H102.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H103.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H104.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H11.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H12.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H13.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H14.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H15.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H16.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H17.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H18.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H19.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H2.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H20.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H21.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H22.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H23.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H24.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H25.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H26.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H27.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H28.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H29.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H3.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H30.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H31.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H32.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H33.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H34.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H35.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H36.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H37.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H38.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H39.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H4.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H40.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H41.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H42.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H43.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H44.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H45.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H46.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H47.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H48.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H49.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H5.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H50.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H51.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H52.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H53.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H54.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H55.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H56.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H57.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H58.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H59.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H6.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H60.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H61.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H62.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H63.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H64.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H65.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H66.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H67.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H68.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H69.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H7.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H70.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H71.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H72.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H73.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H74.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H75.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H76.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H77.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H78.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H79.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H8.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H80.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H81.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H82.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H83.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H84.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H85.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H86.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H87.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H88.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H89.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H9.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H90.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H91.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H92.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H93.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H94.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H95.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H96.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H97.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H98.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    },
+    "H99.wat.dat": {
+      "ofes": 1,
+      "days_per_ofe": 73048
+    }
+  },
+  "pass_files": {},
+  "watershed_events": 73048
+}

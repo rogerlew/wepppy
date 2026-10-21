@@ -1,0 +1,101 @@
+diff --git a/docs/contracts/pass-and-output-contracts.md b/docs/contracts/pass-and-output-contracts.md
+index 0e1900461..bf8113505 100644
+--- a/docs/contracts/pass-and-output-contracts.md
++++ b/docs/contracts/pass-and-output-contracts.md
+@@ -60,3 +60,28 @@ Risk if broken:
+ - Prefer additive-safe formatting changes and keep legacy column ordering where possible.
+ - Treat parser-facing output layout as a contract, not a cosmetic detail.
+ - If a contract change is unavoidable, release notes must call out expected downstream updates.
++
++## Opt-in water transfer observations
++
++With `wepp_observe.on` present and `wepp_observe_frost.on` absent, `WCL_*`
++records in `wepp_observe.log` expose stored values without modifying simulation
++state. `WCL_RAW_Q` is terminal runoff depth (m) and volume (m3);
++`WCL_RAW_L` is lateral and tile depth (m); `WCL_AREA` is terminal length and
++width (m); `WCL_GW` is baseflow and deep seepage volume (m3).
++The record's element field identifies the standalone hillslope, channel field
++identifies its terminal OFE, and year/day identify the simulated day. Standalone
++hill IDs must be joined through the run card and PASS filename.
++
++`WCL_SELECTED` exposes lateral/tile arguments before serialization, with event
++enum in the segment field (0=no event, 1=subevent, 2=event). These arguments
++are not necessarily retained in the payload: event selection may omit them.
++`WCL_READ_Q/L/T/G` expose the actual reader arrays before routing; Q/L/T are
++depth (m) and volume (m3), G is baseflow/seepage volume (m3), and element is the
++reader hill index. L excludes the separately observed tile contribution.
++
++Only WCL records use expanded numeric precision; existing observation tags and
++scientific output schemas are unchanged. Retain the actual HBP identity and join
++its calendar/event metadata before interpreting these diagnostics. A small
++channel balance residual does not prove correct transfer dates or complete
++domain closure. Observation I/O can add substantial overhead, particularly on
++network filesystems; use isolated retained replay directories.
+diff --git a/src/wepp_observe.for b/src/wepp_observe.for
+index 6a693e3e5..45c929680 100644
+--- a/src/wepp_observe.for
++++ b/src/wepp_observe.for
+@@ -41,10 +41,16 @@ c     in hot paths when observability is disabled (the common production case).
+ 
+       open(unit=lun,file='wepp_observe.log',status='unknown',
+      1  position='append',form='formatted')
+-      write (lun,1000) tag, year, sdate, ielmt, ichan, iseg, v1, v2
++      if (index(tag,'WCL').eq.1) then
++        write (lun,1010) tag, year, sdate, ielmt, ichan, iseg, v1, v2
++      else
++        write (lun,1000) tag, year, sdate, ielmt, ichan, iseg, v1, v2
++      endif
+       close(lun)
+ 
+       return
+  1000 format (a,' y=',i6,' d=',i4,' e=',i4,' c=',i4,' s=',i4,
+      1  ' v1=',1pe12.4,' v2=',1pe12.4)
++ 1010 format (a,' y=',i6,' d=',i4,' e=',i6,' c=',i4,' s=',i4,
++     1  ' v1=',1pe24.16,' v2=',1pe24.16)
+       end
+diff --git a/src/wshpas.f90 b/src/wshpas.f90
+index 2097991eb..3e894562b 100755
+--- a/src/wshpas.f90
++++ b/src/wshpas.f90
+@@ -114,6 +114,11 @@ stop
+ endif
+ 
+ if (istat.eq.1) then
++! Observation-only: stored terminal quantities before event filtering.
++call wepp_observe('WCL_RAW_Q',year,day,ihill,nplane,0,runoff(nplane),runvol(nplane))
++call wepp_observe('WCL_RAW_L',year,day,ihill,nplane,0,sbrunf(nplane),drainq(nplane))
++call wepp_observe('WCL_AREA',year,day,ihill,nplane,0,slplen(nplane),fwidth(nplane))
++call wepp_observe('WCL_GW',year,day,ihill,nplane,0,gwbfv(ihill),gwdsv(ihill))
+ !         calculate a tile drainage volume
+ if (drainq(nplane).gt.0.0) then
+ drrunv = drainq(nplane) * slplen(nplane) &
+@@ -273,6 +278,7 @@ if (year.eq.(ibyear+nyear-1).and.day.eq.ndays) then
+ bpfinal = .true.
+ endif
+ endif
++call wepp_observe('WCL_SELECTED',year,day,ihill,nplane,bpevent,sbrunv(nplane),drrunv)
+ call hbp_legacy_capture(year,day,bpevent,tcs,oalpha,drrunv, &
+   &bpfinal)
+ !
+diff --git a/src/wshred.for b/src/wshred.for
+index f0637e273..f3b74283c 100755
+--- a/src/wshred.for
++++ b/src/wshred.for
+@@ -121,6 +121,17 @@ c
+           write (6,1400) hbp_message
+           stop
+         endif
++c       Observe the actual loaded arrays before routing transforms them.
++        do i = 1, nhill
++          call wepp_observe('WCL_READ_Q',year,sdate,i,0,0,
++     1      runoff(i),runvol(i))
++          call wepp_observe('WCL_READ_L',year,sdate,i,0,0,
++     1      sbrunf(i),sbrunv(i))
++          call wepp_observe('WCL_READ_T',year,sdate,i,0,0,
++     1      tmpdrf(i),tmpdrv(i))
++          call wepp_observe('WCL_READ_G',year,sdate,i,0,0,
++     1      gwbfv(i),gwdsv(i))
++        enddo
+       else
+         read (49,1100) event
+       endif

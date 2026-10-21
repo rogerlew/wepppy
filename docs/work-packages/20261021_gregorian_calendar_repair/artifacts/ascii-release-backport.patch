@@ -1,0 +1,388 @@
+--- a/src/contin.for
++++ b/src/contin.for
+@@ -1,4 +1,5 @@
+       subroutine contin(iwpass)
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -230,7 +231,6 @@
+      1    mondet,mondep,det,dep,dsunmp,runom,tirig,tiro,tmelt,totir,
+      1    train,yirrig,yirrro,yrmro,yrrro,fuzzr,powerz,hyradz,
+      1    qrainp,qsnowp,qnofirr
+-      logical gregorian_leap_year, legacy_centurial_day366
+ c
+       character text2(12)*3
+       character*8 inifil
+@@ -633,12 +633,8 @@
+ c
+ c         check to see if year is a leap year
+ c
+-          gregorian_leap_year = mod(lyear,4).eq.0 .and.
+-     1      (mod(lyear,100).ne.0 .or. mod(lyear,400).eq.0)
+-          legacy_centurial_day366 = mod(lyear,100).eq.0 .and.
+-     1      mod(lyear,400).ne.0
+           lp = 1
+-          if (gregorian_leap_year.or.legacy_centurial_day366) lp = 2
++          if (calendar_is_leap(lyear)) lp = 2
+         else
+           lyear = ibyear
+         end if
+--- a/src/stmget.for
++++ b/src/stmget.for
+@@ -1,4 +1,5 @@
+       subroutine stmget(mxint)
++      use wepp_calendar
+ c******************************************************************
+ c                                                                 *
+ c  This subroutine is called from SR CONTIN to read in storm data *
+@@ -68,6 +69,7 @@
+       include 'cupdate.inc'
+ c
+       include 'cstmgt.inc'
++      include 'ccliyr.inc'
+ c
+       include 'cstruc.inc'
+ c
+@@ -80,7 +82,9 @@
+ c
+ c     real mxint,totrn
+       real mxint
+-      logical is_gregorian_leap_year
++      logical climate_eof
++      integer valid_records, ios
++      character*2048 climate_line
+       integer xday(10), xmon(10), xyear(10), nbrkpt, i, jkjk, jkl, kjl
+       real xrain(10), xstmdr(10), xtimep(10), xip(10), xtmax(10),
+      1    xtmin(10), xradly(10), xvwind(10), xwind(10), xtdpt(10)
+@@ -115,21 +119,56 @@
+ c       1             tmax,tmin,radly,vwind,wind,tdpt
+ c
+ c       Try to speed up disk I/O by doing it in larger chunks.
++        if (jyear.le.1.and.sdate.le.1) then
++          valid_records = 0
++          climate_eof = .false.
++          nrec = 10
++        endif
+         nrec = nrec + 1
+         if (nrec.ge.11) then
+           nrec = 1
+-          read (13,*,end=20) (xday(i),xmon(i),xyear(i),xrain(i),
+-     1        xstmdr(i),xtimep(i),xip(i),xtmax(i),xtmin(i),xradly(i),
+-     1        xvwind(i),xwind(i),xtdpt(i),i = 1,10)
+-          do 15 i = 1,10
+-            if (isnan(xtdpt(i))) then
+-              call wepp_observe('EVA_U010_XTDPT',xyear(i),xday(i),0,0,i,
+-     1          xtdpt(i),xradly(i))
+-            endif
+-   15     continue
++          valid_records = 0
++          if (.not.climate_eof) then
++            do i = 1,10
++              read (13,'(a)',iostat=ios) climate_line
++              if (ios.lt.0) then
++                climate_eof = .true.
++                exit
++              endif
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'climate read failed')
++c             Permit trailing whitespace, but never count it as weather.
++              do while (len_trim(climate_line).eq.0)
++                read (13,'(a)',iostat=ios) climate_line
++                if (ios.ne.0) exit
++              enddo
++              if (ios.lt.0) then
++                climate_eof = .true.
++                exit
++              endif
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'climate read failed')
++              call calendar_require_numeric_record(13,climate_line)
++              read (climate_line,*,iostat=ios) xday(i),xmon(i),
++     1          xyear(i),xrain(i),xstmdr(i),xtimep(i),xip(i),
++     1          xtmax(i),xtmin(i),xradly(i),xvwind(i),xwind(i),xtdpt(i)
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'incomplete climate record')
++              valid_records = i
++              if (isnan(xtdpt(i))) then
++                call wepp_observe('EVA_U010_XTDPT',xyear(i),
++     1            xday(i),0,0,i,xtdpt(i),xradly(i))
++              endif
++            enddo
++          endif
+         end if
+-c
+-   20   continue
++        if (nrec.gt.valid_records) then
++          write(6,*) 'Climate expected year/day:',ibyear+jyear-1,
++     1      sdate
++          call calendar_input_error(13,'premature climate EOF')
++        endif
++        if (imodel.eq.1) call calendar_require_date(13,
++     1    ibyear+jyear-1,sdate,xyear(nrec),xmon(nrec),xday(nrec))
+ c
+ c       Most of the variables below are never used in STMGET (except RAIN).
+ c       They are just stuffed into common.
+@@ -140,14 +179,6 @@
+ c
+ c       If a leap year check to see if 29 days in Feb
+ c
+-        is_gregorian_leap_year = mod(year,4).eq.0 .and.
+-     1      (mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-        if (is_gregorian_leap_year) then
+-          if (mon.eq.3.and.day.eq.1.and.sdate.lt.61) then
+-            write (6,1000)
+-            write (6,1100) year
+-          end if
+-        end if
+ c
+         do 30 jkjk=1,nplane
+           rain(jkjk) = xrain(nrec)
+@@ -220,20 +251,20 @@
+ c
+       else
+ c       READ IN BREAKPOINT DATA
+-        read (13,*) day, mon, year, nbrkpt, tmax, tmin, radly, vwind,
+-     1              wind, tdpt
++        read (13,'(a)',iostat=ios) climate_line
++        if (ios.ne.0) call calendar_input_error(13,
++     1    'missing breakpoint climate header')
++        call calendar_require_numeric_record(13,climate_line)
++        read (climate_line,*,iostat=ios) day, mon, year, nbrkpt,
++     1    tmax, tmin, radly, vwind, wind, tdpt
++        if (ios.ne.0) call calendar_input_error(13,
++     1    'incomplete breakpoint climate header')
++        if (imodel.eq.1) call calendar_require_date(13,
++     1    ibyear+jyear-1,sdate,year,mon,day)
+         if (isnan(tdpt)) then
+           call wepp_observe('EVA_U030_BRKTDP',year,sdate,0,0,nbrkpt,
+      1      tdpt,radly)
+         endif
+-        is_gregorian_leap_year = mod(year,4).eq.0 .and.
+-     1      (mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-        if (is_gregorian_leap_year) then
+-          if (mon.eq.3.and.day.eq.1.and.sdate.lt.61) then
+-            write (6,1000)
+-            write (6,1200) year
+-          end if
+-        end if
+ c
+ c       NINT IS THE NUMBER OF BREAKPOINTS OCCURRING ON THE GIVEN DAY.
+ c       READ IN BREAKPOINT DATA IF RAINFALL OCCURS
+--- a/src/wshdrv.for
++++ b/src/wshdrv.for
+@@ -1,4 +1,5 @@
+       subroutine wshdrv
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -233,7 +234,6 @@
+ cd      real dslost(mxplan,100), xmxint(mxplan), mxint, effdrr(mxplan),
+       real dslost(mxplan,100),mxint, effdrr(mxplan),
+      1    rcalsl, avdatm, hday, sumrtm, sumsrm, warain, dsunmp, toplen
+-      logical gregorian_leap_year, legacy_centurial_day366
+ c
+       character*8 inifil
+       character*51 filen
+@@ -562,12 +562,8 @@
+ c
+ c         check to see if year is a leap year
+ c
+-          gregorian_leap_year = mod(lyear,4).eq.0 .and.
+-     1      (mod(lyear,100).ne.0 .or. mod(lyear,400).eq.0)
+-          legacy_centurial_day366 = mod(lyear,100).eq.0 .and.
+-     1      mod(lyear,400).ne.0
+           lp = 1
+-          if (gregorian_leap_year.or.legacy_centurial_day366) lp = 2
++          if (calendar_is_leap(lyear)) lp = 2
+         else
+           lyear = ibyear
+         end if
+--- a/src/wshpas.for
++++ b/src/wshpas.for
+@@ -1,4 +1,5 @@
+       subroutine wshpas(year,day,istat)
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -83,7 +84,6 @@
+ c End adding.     
+ c
+       integer i, iflag, ios, j, k, l, m, ndays, tmpbyr, tmpnyr
+-      logical gregorian_leap_year, legacy_centurial_day366
+       logical mixextended(mxhill)
+       integer mixidx
+ c
+@@ -368,14 +368,7 @@
+ c
+ c         check for leap year
+ c
+-          gregorian_leap_year = mod(year,4).eq.0 .and.
+-     1      (mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-          legacy_centurial_day366 = mod(year,100).eq.0 .and.
+-     1      mod(year,400).ne.0
+-          ndays = 365
+-          if (gregorian_leap_year.or.legacy_centurial_day366) then
+-            ndays = 366
+-          endif
++          ndays = calendar_year_days(year)
+ c
+ c         check for simulation mode (single storm or continuous)
+ c
+@@ -396,6 +389,9 @@
+ c
+ c             read remainder of information in hillslope pass files
+ c
++              call calendar_read_pass_header(m,event(k),
++     1          iwsbyr+i-1,j,imodel.eq.1)
++              backspace (m)
+               read (m,1000) event(k)
+               if (event(k).eq.'NO EVENT') then
+                 backspace (m)
+--- a/src/wshred.for
++++ b/src/wshred.for
+@@ -1,4 +1,5 @@
+       subroutine wshred
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -113,7 +114,8 @@
+ c
+ c     read daily information in hillslope to watershed pass file
+ c
+-      read (49,1100) event
++      call calendar_read_pass_header(49,event,year,sdate,
++     1  imodel.eq.1)
+ c
+       if (event.eq.'EVENT   ') then
+ c
+--- a/src/makefile
++++ b/src/makefile
+@@ -41,7 +41,7 @@
+ WATERSHED_INCLUDE_DIR = includes_watershed
+ HILL_INCLUDE_DIR = includes_hill
+ INCLUDE_FILES = pmxhil.inc pmxpln.inc pmxelm.inc pntype.inc
+-OBJS            = annchn.o annout.o appmth.o aspect.o bgnrnd.o \
++OBJS            = wepp_calendar.o annchn.o annout.o appmth.o aspect.o bgnrnd.o \
+                   bighdr.o bigout.o brkpt.o mixpeak.o mixpass.o \
+                   case12.o case34.o chncon.o chnero.o chnpar.o \
+                   chnrt.o chnvar.o close.o conrun.o \
+@@ -90,7 +90,7 @@
+                   frznw.o sheart.o wshchr.o chrstate.o mann.o chrqin.o wepp_observe.o \
+ 		    watbal_hourly.o watbalprint.o writeyearlylossbypoint.o getfreezecond.o
+ 
+-HILL_OBJS       = \
++HILL_OBJS       = wepp_calendar.o \
+                   annchn_hill.o annout_hill.o appmth_hill.o aspect_hill.o bgnrnd_hill.o bighdr_hill.o \
+                   mixpeak_hill.o mixpass_hill.o bigout_hill.o brkpt_hill.o case12_hill.o case34_hill.o chncon_hill.o chnero_hill.o \
+                   chnpar_hill.o chnrt_hill.o chnvar_hill.o close_hill.o conrun_hill.o const_hill.o \
+@@ -1093,3 +1093,8 @@
+ 
+ yldopt.o: ccrpgro.inc ccrpprm.inc ccrpvr3.inc ccrpvr3a.inc pmxcrp.inc \
+          pmxpln.inc pmxres.inc pmxtil.inc pmxtls.inc pntype.inc
++
++wepp_calendar.o: ../fpm-src/wepp_calendar.f90
++	$(FC) $(FFLAGS_F90) -c $< -o $@
++
++contin.o contin_hill.o stmget.o stmget_hill.o wshdrv.o wshdrv_hill.o wshpas.o wshpas_hill.o wshred.o wshred_hill.o: wepp_calendar.o
+--- /dev/null
++++ b/fpm-src/wepp_calendar.f90
+@@ -0,0 +1,95 @@
++! SPDX-License-Identifier: CC0-1.0
++! Contract-Spec: docs/contracts/execution-calendar-contract.md
++! Contributors: Roger Lew; Codex
++module wepp_calendar
++  implicit none (type, external)
++  private
++  public :: calendar_is_leap, calendar_year_days, calendar_month_days
++  public :: calendar_julian, calendar_require_date, calendar_require_key
++  public :: calendar_input_error, calendar_require_numeric_record
++  public :: calendar_read_pass_header
++contains
++  pure logical function calendar_is_leap(year) result(leap)
++    integer, intent(in) :: year
++    leap = mod(year, 4) == 0 .and. (mod(year, 100) /= 0 .or. mod(year, 400) == 0)
++  end function calendar_is_leap
++
++  pure integer function calendar_year_days(year) result(days)
++    integer, intent(in) :: year
++    days = 365
++    if (calendar_is_leap(year)) days = 366
++  end function calendar_year_days
++
++  pure integer function calendar_month_days(year, month) result(days)
++    integer, intent(in) :: year, month
++    integer, parameter :: lengths(12) = [31,28,31,30,31,30,31,31,30,31,30,31]
++    days = 0
++    if (month < 1 .or. month > 12) return
++    days = lengths(month)
++    if (month == 2 .and. calendar_is_leap(year)) days = 29
++  end function calendar_month_days
++
++  pure integer function calendar_julian(year, month, day) result(julian)
++    integer, intent(in) :: year, month, day
++    integer :: m
++    julian = 0
++    if (year < 1 .or. month < 1 .or. month > 12) return
++    if (day < 1 .or. day > calendar_month_days(year, month)) return
++    julian = day
++    do m = 1, month - 1
++      julian = julian + calendar_month_days(year, m)
++    end do
++  end function calendar_julian
++
++  subroutine calendar_require_date(unit, expected_year, expected_day, year, month, day)
++    integer, intent(in) :: unit, expected_year, expected_day, year, month, day
++    integer :: julian
++    julian = calendar_julian(year, month, day)
++    if (julian == 0) call calendar_input_error(unit, 'invalid calendar date')
++    call calendar_require_key(unit, expected_year, expected_day, year, julian)
++  end subroutine calendar_require_date
++
++  subroutine calendar_require_key(unit, expected_year, expected_day, year, day)
++    integer, intent(in) :: unit, expected_year, expected_day, year, day
++    if (expected_year == year .and. expected_day == day) return
++    write (*, '(A,2(1X,I0),A,2(1X,I0))') 'Calendar expected year/day:', &
++      expected_year, expected_day, '; received:', year, day
++    call calendar_input_error(unit, 'date mismatch; regenerate climate/PASS with matching Gregorian binaries')
++  end subroutine calendar_require_key
++
++  subroutine calendar_read_pass_header(unit, event, expected_year, expected_day, continuous)
++    integer, intent(in) :: unit, expected_year, expected_day
++    character(len=8), intent(out) :: event
++    logical, intent(in) :: continuous
++    integer :: year, day, ios
++    ! Shared ASCII hillslope/master header format; payload stays with its owner.
++    read(unit, '(a8,2x,2(i5,1x))', iostat=ios) event, year, day
++    if (ios /= 0) call calendar_input_error(unit, 'incomplete PASS daily header')
++    if (event /= 'EVENT   ' .and. event /= 'SUBEVENT' .and. event /= 'NO EVENT') then
++      call calendar_input_error(unit, 'unknown PASS event kind')
++    end if
++    if (continuous) call calendar_require_key(unit, expected_year, expected_day, year, day)
++  end subroutine calendar_read_pass_header
++
++  subroutine calendar_require_numeric_record(unit, line)
++    integer, intent(in) :: unit
++    character(len=*), intent(in) :: line
++    ! CLIGEN daily records are whitespace-separated numeric fields. List-directed
++    ! null/repeat/termination syntax can succeed without assigning every field.
++    if (scan(line, ',/*!') /= 0) then
++      call calendar_input_error(unit, 'expected complete whitespace-separated numeric climate record')
++    end if
++  end subroutine calendar_require_numeric_record
++
++  subroutine calendar_input_error(unit, message)
++    integer, intent(in) :: unit
++    character(len=*), intent(in) :: message
++    character(len=1024) :: path
++    integer :: ios
++    path = '<unknown>'
++    inquire(unit=unit, name=path, iostat=ios)
++    if (ios /= 0) path = '<unknown>'
++    write (*, '(A)') 'Calendar input error: '//trim(message)//' ['//trim(path)//']'
++    stop 1
++  end subroutine calendar_input_error
++end module wepp_calendar

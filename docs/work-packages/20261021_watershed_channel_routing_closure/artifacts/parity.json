@@ -1,0 +1,262 @@
+{
+  "single": {
+    "roots": [
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-baseline/single",
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/single",
+      "/workdir/watershed-channel-routing-closure-20261021/controlled-on/single"
+    ],
+    "files_compared": 35,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      14.07670823787339,
+      13.767271846998483,
+      43.43425667914562
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      133871318
+    ]
+  },
+  "equal": {
+    "roots": [
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-baseline/equal",
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/equal",
+      "/workdir/watershed-channel-routing-closure-20261021/controlled-on/equal"
+    ],
+    "files_compared": 35,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      16.483292018063366,
+      17.924630047986284,
+      54.40437520807609
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      166545476
+    ]
+  },
+  "upper60": {
+    "roots": [
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-baseline/upper60",
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/upper60",
+      "/workdir/watershed-channel-routing-closure-20261021/controlled-on/upper60"
+    ],
+    "files_compared": 35,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      16.478991765063256,
+      17.779135055141523,
+      54.20481931301765
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      166368892
+    ]
+  },
+  "lower60": {
+    "roots": [
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-baseline/lower60",
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/lower60",
+      "/workdir/watershed-channel-routing-closure-20261021/controlled-on/lower60"
+    ],
+    "files_compared": 35,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      16.23024671897292,
+      17.6246554129757,
+      55.21221410483122
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      166754751
+    ]
+  },
+  "three": {
+    "roots": [
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-baseline/three",
+      "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/three",
+      "/workdir/watershed-channel-routing-closure-20261021/controlled-on/three"
+    ],
+    "files_compared": 35,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      19.576610386138782,
+      19.92978003900498,
+      64.21499442798086
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      200384704
+    ]
+  },
+  "daily": {
+    "roots": [
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/baseline/daily",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/off/daily",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/on/daily"
+    ],
+    "files_compared": 34,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      15.01674048602581,
+      15.317219991935417,
+      42.41774014476687
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      121648987
+    ]
+  },
+  "tributaries": {
+    "roots": [
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/baseline/tributaries",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/off/tributaries",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/on/tributaries"
+    ],
+    "files_compared": 59,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      36.74385850923136,
+      37.193701503099874,
+      114.51656331075355
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      334660650
+    ]
+  },
+  "cascade": {
+    "roots": [
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/baseline/cascade",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/off/cascade",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/on/cascade"
+    ],
+    "files_compared": 59,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      39.1581134502776,
+      39.052453595912084,
+      138.75729171396233
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      433583326
+    ]
+  },
+  "impoundment": {
+    "roots": [
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/baseline/impoundment",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/off/impoundment",
+      "/workdir/watershed-channel-routing-closure-20261021/extensions/on/impoundment"
+    ],
+    "files_compared": 74,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": false,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      24.766571203013882,
+      25.372669871896505,
+      52.426259502302855
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      124685158
+    ]
+  },
+  "real-tight-orthodontist": {
+    "roots": [
+      "/workdir/watershed-channel-routing-closure-20261021/real-second-baseline",
+      "/workdir/watershed-channel-routing-closure-20261021/real-second-off",
+      "/workdir/watershed-channel-routing-closure-20261021/real-second-on"
+    ],
+    "files_compared": 388,
+    "differences": [],
+    "exact_file_parity": true,
+    "all_executions_successful": true,
+    "binaries": [
+      "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+      "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+    ],
+    "seconds": [
+      218.82443047035486,
+      222.99263502447866,
+      639.5807071113959
+    ],
+    "diagnostic_bytes": [
+      0,
+      0,
+      1968167529
+    ]
+  }
+}

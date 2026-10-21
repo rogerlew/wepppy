@@ -1,0 +1,20 @@
+{
+  "single": {
+    "routing_date": "1982-01-01",
+    "lateral_m3_before": 0.0,
+    "lateral_m3_after": 40.66572570800781,
+    "first_changed_ebe_line": 741,
+    "baseline_ebe_row": "    1    1     3  17.0            1.96         0.00050            0.00           0.00            0.00            0.00      2",
+    "corrected_ebe_row": "    1    1     3  17.0           40.22         0.00049            0.01           0.00            0.00            0.00      2",
+    "all_prior_ebe_lines_identical": true
+  },
+  "upper60": {
+    "routing_date": "1982-01-01",
+    "lateral_m3_before": 0.0,
+    "lateral_m3_after": 45.78518295288086,
+    "first_changed_ebe_line": 741,
+    "baseline_ebe_row": "    1    1     3  17.0            2.12         0.00072            0.00           0.00            0.00            0.00      2",
+    "corrected_ebe_row": "    1    1     3  17.0           45.34         0.00055            0.02           0.00            0.00            0.00      2",
+    "all_prior_ebe_lines_identical": true
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "initial_matrix": {
+    "module": "tests/disturbed/test_disturbed_matrix.py",
+    "passed": 99,
+    "log": "wepppy-sanity.log"
+  },
+  "soil_shards": {
+    "module": "tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py",
+    "collected": 230,
+    "assignments": "soil-shards.json",
+    "results": "soil-shards-results.json"
+  },
+  "remainder": {
+    "command": "wctl run-pytest tests --ignore=tests/disturbed/test_disturbed_matrix.py --ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py --maxfail=1",
+    "log": "wepppy-sanity-remainder.log"
+  },
+  "stable_interrupted_run": {
+    "passed": 2350,
+    "skipped": 48,
+    "purpose": "confirms Builder failure resolved; superseded by disjoint final partitions",
+    "log": "wepppy-sanity-stable.log"
+  },
+  "completed_prefix": {
+    "collected_tests": 4913,
+    "passed": 4863,
+    "skipped": 50,
+    "log": "wepppy-sanity-remainder.log",
+    "note": "Exclude nine successful tests in the partially run snapshot module, repeated in resumed segment."
+  },
+  "resumed": {
+    "collected_tests": 5931,
+    "modules": 404,
+    "log": "wepppy-sanity-resumed.log",
+    "coverage": "resumed-suite-coverage.json"
+  },
+  "total_collected_tests_after_new_release_regression": 11173,
+  "resumed_completed_prefix": {
+    "collected_tests": 5621,
+    "passed": 5550,
+    "skipped": 71,
+    "log": "wepppy-sanity-resumed.log"
+  },
+  "feature_access": {
+    "collected_tests": 52,
+    "passed": 52,
+    "log": "feature-access-isolated.log",
+    "limitation": "Combined suite encountered Redis authentication failure in the first test; complete module passes in isolation. No auth code changes."
+  },
+  "tail": {
+    "collected_tests": 258,
+    "modules": 29,
+    "log": "wepppy-sanity-tail-browser.log",
+    "passed": 258,
+    "browser_path_override": "/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers"
+  },
+  "result": {
+    "unique_passed": 11052,
+    "test_skipped": 121,
+    "collection_skipped": 1,
+    "reported_skipped": 122,
+    "single_process_full_green": false,
+    "limitations": [
+      "Combined suite Redis authentication/test-order failure; all 52 feature-access tests pass in isolation.",
+      "Browser tail needs existing cache path override; container default path is incorrect."
+    ]
+  }
+}

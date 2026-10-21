@@ -1,0 +1,36 @@
+{
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa",
+  "source_checkout": "/workdir/wepp-forest-release-20261009",
+  "build_command": "TARGET_TAG=261021 COMPILER=/usr/bin/gfortran tools/build_wepp_dated_release.sh",
+  "build_profiles": "sequential watershed then hillslope; unchanged capacities",
+  "fixture_source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa",
+  "fresh_400_year_root": "/workdir/wepp-261021-release-400",
+  "external_replay_policy": "supplementary only",
+  "native_gates": {
+    "host_smokes": "pass",
+    "watchlist": "12/12 pass",
+    "artifact_policy": "pass",
+    "pytest": "232 passed"
+  },
+  "pre_vendor_provenance": "pass",
+  "deployment": "not performed",
+  "post_vendor": {
+    "provenance": "pass",
+    "host_smokes": "both pass",
+    "container_smokes": "both pass",
+    "runner_tests": "8 passed"
+  },
+  "wepppy_soil_artifact_tests": "230 passed in four disjoint shards",
+  "wepppy_disturbed_matrix_tests": "99 passed in initial broad run",
+  "wepppy_segmented_suite": {
+    "passed": 11052,
+    "skipped": 122,
+    "coverage": "coverage-plan.json",
+    "limitations": "Redis test-order failure passes in isolation; browser cache path overridden for final segment"
+  },
+  "wepppy_selection_tests": "39 passed",
+  "native_release_artifact_commit": "6a6621e4db9aff1cdf6fa9cd0cb02b00e82182eb",
+  "native_worktree_status": "clean after local release commit",
+  "push": "not performed"
+}

@@ -1,0 +1,306 @@
+--- a/fpm-src/hillslope_binary_pass_reader.f90
++++ b/fpm-src/hillslope_binary_pass_reader.f90
+@@ -450,7 +450,7 @@
+ 
+   subroutine hbp_reader_load_next_day(day_event_kind_max, event_count_no_event, event_count_subevent, &
+       event_count_event, hildur, htcs, halpha, runoff, runvol, sbrunf, sbrunv, tile_depth, tile_volume, &
+-      peakro, tdet, tdep, sedcon, frcflw, gwbfv, gwdsv, status)
++      peakro, tdet, tdep, sedcon, frcflw, gwbfv, gwdsv, status, requested_year, requested_day)
+     integer, intent(out) :: day_event_kind_max
+     integer, intent(out) :: event_count_no_event
+     integer, intent(out) :: event_count_subevent
+@@ -472,6 +472,7 @@
+     real, intent(out) :: gwbfv(:)
+     real, intent(out) :: gwdsv(:)
+     type(hbp_reader_status), intent(out) :: status
++    integer, intent(in), optional :: requested_year, requested_day
+ 
+     integer :: hill
+     integer :: part
+@@ -483,10 +484,6 @@
+       call fail(status, 'reader is not open')
+       return
+     end if
+-    if (reader%cursor > reader%logical_day_count) then
+-      call fail(status, 'no additional logical day records')
+-      return
+-    end if
+     if (size(hildur) < reader%nhill .or. size(htcs) < reader%nhill .or. size(halpha) < reader%nhill .or. &
+         size(runoff) < reader%nhill .or. size(runvol) < reader%nhill .or. size(sbrunf) < reader%nhill .or. &
+         size(sbrunv) < reader%nhill .or. size(tile_depth) < reader%nhill .or. size(tile_volume) < reader%nhill .or. &
+@@ -501,8 +498,23 @@
+       return
+     end if
+ 
+-    day_index = reader%cursor
+-    reader%cursor = reader%cursor + 1
++    if (present(requested_year) .neqv. present(requested_day)) then
++      call fail(status, 'requested year and day must be supplied together')
++      return
++    end if
++    if (present(requested_year) .and. present(requested_day)) then
++      day_index = find_requested_day(requested_year, requested_day)
++      if (day_index == 0) then
++        call fail(status, 'requested routing date is absent from shard directory')
++        return
++      end if
++    else
++      day_index = reader%cursor
++      if (day_index > reader%logical_day_count) then
++        call fail(status, 'no additional logical day records')
++        return
++      end if
++    end if
+ 
+     day_event_kind_max = hbp_event_no_event
+     event_count_no_event = 0
+@@ -560,8 +572,37 @@
+         frcflw(part, hill) = real(reader%particle_flow_fraction(part, day_index, hill))
+       end do
+     end do
++    reader%cursor = day_index + 1
+   end subroutine hbp_reader_load_next_day
+ 
++  integer function find_requested_day(calendar_year, julian_day) result(day_index)
++    integer, intent(in) :: calendar_year, julian_day
++    integer :: low, high, middle, sim_year
++
++    day_index = 0
++    if (calendar_year < reader%iwsbyr .or. calendar_year > reader%iwsbyr + reader%maxyrs - 1) return
++    sim_year = calendar_year - reader%iwsbyr + 1
++    low = 1
++    high = reader%logical_day_count
++    ! Directory validation guarantees ordered (simulation year, Julian day) keys.
++    ! Lookup leaves schema-2 padding in storage without consuming it as a routing day.
++    do while (low <= high)
++      middle = low + (high - low) / 2
++      if (reader%day_sim_year_index(middle) < sim_year) then
++        low = middle + 1
++      else if (reader%day_sim_year_index(middle) > sim_year) then
++        high = middle - 1
++      else if (reader%day_julian_day(middle) < julian_day) then
++        low = middle + 1
++      else if (reader%day_julian_day(middle) > julian_day) then
++        high = middle - 1
++      else
++        if (reader%day_calendar_year(middle) == calendar_year) day_index = middle
++        return
++      end if
++    end do
++  end function find_requested_day
++
+   subroutine hbp_reader_close()
+     call clear_reader()
+   end subroutine hbp_reader_close
+--- a/src/hbp_mode2_bridge.f90
++++ b/src/hbp_mode2_bridge.f90
+@@ -70,7 +70,7 @@
+ end subroutine hbp_mode2_seed_metadata
+ 
+ ! allow(C092)
+-subroutine hbp_mode2_read_day(event, tmpdrf, tmpdrv, ok, message)
++subroutine hbp_mode2_read_day(event, tmpdrf, tmpdrv, ok, message, routing_year, routing_day)
+   use hillslope_binary_pass_reader, only : hbp_reader_load_next_day, hbp_reader_status
+   use, intrinsic :: iso_fortran_env, only : real64
+   use wb12_hbp_mode2_bridge_context, only : mxhill, hbp_mode2_profile_bridge, nhill, hildur, htcs, halpha, runoff, &
+@@ -78,6 +78,7 @@
+     hbp_mode2_bridge_cpu_total_s
+   implicit none (type, external)
+ 
++  integer, intent(in) :: routing_year, routing_day
+   character(len=8), intent(out) :: event
+   real, intent(out) :: tmpdrf(mxhill), tmpdrv(mxhill)
+   logical, intent(out) :: ok
+@@ -98,7 +99,7 @@
+                                 runoff(1:nhill), runvol(1:nhill), sbrunf(1:nhill), &
+                                 sbrunv(1:nhill), tmpdrf, tmpdrv, peakro(1:nhill), tdet(1:nhill), &
+                                 tdep(1:nhill), sedcon(1:npart, 1:nhill), frcflw(1:npart, 1:nhill), &
+-                                gwbfv(1:nhill), gwdsv(1:nhill), status)
++                                gwbfv(1:nhill), gwdsv(1:nhill), status, routing_year, routing_day)
+   ok = status%ok
+   message = status%message
+   if (.not. ok) return
+--- a/src/wshred.for
++++ b/src/wshred.for
+@@ -116,7 +116,8 @@
+ c     read daily information in hillslope to watershed pass file
+ c
+       if (hbp_mode2_active.eq.1) then
+-        call hbp_mode2_read_day(event,tmpdrf,tmpdrv,hbp_ok,hbp_message)
++        call hbp_mode2_read_day(event,tmpdrf,tmpdrv,hbp_ok,hbp_message,
++     1                         year,sdate)
+         if (.not.hbp_ok) then
+           write (6,1400) hbp_message
+           stop
+--- a/fpm-test/ps05_mode2_direct_reader_tests.f90
++++ b/fpm-test/ps05_mode2_direct_reader_tests.f90
+@@ -25,6 +25,9 @@
+   call check_pathmap_vector(failures)
+   ! PS14 dual-major/schema2 reader obligations
+   call check_schema2_vector(failures)
++  call check_calendar_selection(failures, 2, 2003)
++  call check_calendar_selection(failures, 1, 2003)
++  call check_calendar_selection(failures, 2, 1899)
+ 
+   if (failures /= 0) then
+     write(*, '(i0, a)') failures, ' PS-05 direct shard reader checks failed'
+@@ -604,6 +607,104 @@
+     status = hbp_reader_status()
+   end subroutine refresh_schema2_crc_fields
+ 
++  subroutine check_calendar_selection(failures, major, first_year)
++    integer, intent(inout) :: failures
++    integer, intent(in) :: major, first_year
++    type(hbp_shard) :: shard
++    type(hbp_writer_status) :: writer_status
++    type(hbp_reader_status) :: status
++    character(len=256) :: paths(1)
++    integer :: y, d, n, days, total, before
++    integer :: kind, no_event, subevent, event
++    real :: duration(1), tc(1), alpha(1), runoff(1), volume(1), lateral_depth(1), lateral(1)
++    real :: tile_depth(1), tile(1), peak(1), detachment(1), deposition(1), baseflow(1), seepage(1)
++    real :: sediment(5,1), fractions(5,1), expected
++
++    ! Generate serialized records with distinct day/year signatures in volume and sediment fields.
++    ! Middle year is 2004 (leap) or 1900 (existing legacy-centurial day 366).
++    shard = make_dense_shard(first_year, 1, major, 0)
++    shard%nyear = 3
++    deallocate(shard%years, shard%records)
++    allocate(shard%years(3))
++    total = 1096
++    if (major == 2) total = 1098
++    allocate(shard%records(total))
++    n = 0
++    do y = first_year, first_year+2
++      days = 365
++      if (y == first_year+1 .or. major == 2) days = 366
++      shard%years(y-first_year+1) = hbp_year_entry(y-first_year+1, y, days, 1, days, 0)
++      do d = 1, days
++        n = n + 1
++        shard%records(n) = make_dense_record(y, 120, 5, 2, 3)
++        if (d == 366 .and. y /= first_year+1) shard%records(n) = make_dense_record(y, 366, 5, 2, 3)
++        shard%records(n)%sim_year_index = y - first_year + 1
++        shard%records(n)%julian_day = d
++        expected = real((y-first_year+1)*1000+d)
++        shard%records(n)%baseflow_volume_m3 = real(expected+3, real64)
++        shard%records(n)%dissolved_storage_volume_m3 = real(expected+4, real64)
++        if (d == 366 .and. y /= first_year+1) cycle
++        shard%records(n)%runoff_volume_m3 = real(expected, real64)
++        shard%records(n)%subsurface_flow_volume_m3 = real(expected+1, real64)
++        shard%records(n)%tile_drainage_volume_m3 = real(expected+2, real64)
++        shard%records(n)%sediment_concentration_kg_m3 = real(expected+5, real64)
++      end do
++    end do
++    write(paths(1), '(a,i0,a,i0,a)') '/tmp/wepp_calendar_selection_v', major, '_', first_year, '.hbp'
++    call hbp_write_file(trim(paths(1)), shard, writer_status)
++    call assert_true(writer_status%ok, 'calendar fixture write: '//trim(writer_status%message), failures)
++    if (.not. writer_status%ok) return
++    call hbp_reader_open_paths(1, paths, status)
++    call assert_true(status%ok, 'calendar fixture open: '//trim(status%message), failures)
++    if (.not. status%ok) return
++
++    calendar_years: do y = first_year, first_year+2
++      days = 365
++      if (y == first_year+1) days = 366
++      do d = 1, days
++        before = failures
++        call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++          duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++          peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, y, d)
++        call assert_true(status%ok, 'requested calendar day loads: '//trim(status%message), failures)
++        if (.not. status%ok) exit calendar_years
++        expected = real((y-first_year+1)*1000+d)
++        call assert_true(kind == hbp_event .and. event == 1, 'dated event kind', failures)
++        call assert_true(volume(1) == expected, 'dated runoff including final day', failures)
++        call assert_true(lateral(1) == expected+1, 'dated lateral volume', failures)
++        call assert_true(tile(1) == expected+2, 'dated tile volume', failures)
++        call assert_true(baseflow(1) == expected+3, 'dated groundwater volume', failures)
++        call assert_true(seepage(1) == expected+4, 'dated seepage volume', failures)
++        call assert_true(all(sediment == expected+5), 'dated sediment payload', failures)
++        if (failures /= before) exit calendar_years
++      end do
++    end do calendar_years
++
++    ! Invalid requests cannot consume a record, and dated access works after EOF.
++    call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++      duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++      peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, first_year+1, 1)
++    call assert_true(status%ok, 'dated rewind after final day', failures)
++    call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++      duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++      peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, requested_year=first_year+1)
++    call assert_true(.not. status%ok, 'reject incomplete requested date', failures)
++    call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++      duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++      peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, first_year+1, 367)
++    call assert_true(.not. status%ok, 'reject absent requested date', failures)
++    call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++      duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++      peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, first_year+3, 1)
++    call assert_true(.not. status%ok, 'reject year outside shard', failures)
++    call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++      duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++      peak, detachment, deposition, sediment, fractions, baseflow, seepage, status)
++    call assert_true(status%ok, 'failed requests preserve sequential cursor', failures)
++    if (status%ok) call assert_true(volume(1) == 2002, 'sequential read follows selected date', failures)
++    call hbp_reader_close()
++  end subroutine check_calendar_selection
++
+   subroutine write_dense_hbp(path, hill_id, schema_major, schema_minor, status)
+     character(len=*), intent(in) :: path
+     integer, intent(in) :: hill_id
+--- a/docs/contracts/watershed-hillslope-pass-reader-contract.md
++++ b/docs/contracts/watershed-hillslope-pass-reader-contract.md
+@@ -166,6 +166,31 @@
+ - selected state-vector extraction;
+ - first-error reporting.
+ 
++## Routing Date Selection
++
++Production watershed reads must request the current calendar year and Julian day.
++The reader must select that exact directory key and verify the calendar year,
++rather than equating the number of read calls with the serialized slot index.
++Schema 2 retains 366 serialized slots per year; synthetic non-leap day 366 is
++padding and must not displace the following year's first routing day. The existing
++`wepp-gregorian-legacy-centurial-v1` calendar remains authoritative: this correction
++does not change which days the watershed requests, including centurial day 366.
++
++`hbp_reader_load_next_day` accepts paired optional `requested_year` and
++`requested_day` arguments. Production supplies both. With both absent, sequential
++serialized-slot iteration remains available for inspection and existing callers.
++Supplying only one argument or requesting an absent key fails explicitly without
++advancing the cursor. Production simulation years are consecutive from the shard
++`begin_year`; lookup derives the simulation-year index from that origin and
++verifies the stored calendar year before returning a payload. A successful dated read positions the sequential cursor
++immediately after the selected record. Exact selection applies to all payload
++fields, including event metadata, tile, groundwater and sediment, for both supported
++schema majors. No file-format, quantization or event-filter change is introduced.
++
++The rationale is to preserve the fixed-slot storage contract while restoring
++routing's date ownership. Dropping writer padding or changing leap rules would
++expand the correction into a format/calendar migration.
++
+ ## In-Memory Ownership
+ 
+ The reader/index may cache headers, directories, and selected day payloads in
+--- a/docs/specs/source/hbp_mode2_bridge_spec.md
++++ b/docs/specs/source/hbp_mode2_bridge_spec.md
+@@ -0,0 +1,18 @@
++# Mode-2 binary PASS bridge
++
++`src/hbp_mode2_bridge.f90` connects the validated binary PASS reader to existing
++watershed COMMON arrays through `wb12_hbp_mode2_bridge_context`. Open validates
++the complete shard set; metadata seeds hillslope areas and checks particle count.
++Close releases reader state and optionally prints profiling counters.
++
++`hbp_mode2_read_day` receives the current routing calendar year and Julian day
++from `wshred` (`cupdate.year` and `cupdate.sdate`). It requests that exact key from
++`hbp_reader_load_next_day`, fills runoff/lateral/tile/sediment/groundwater arrays,
++and maps the maximum event enum to EVENT, SUBEVENT or NO EVENT. Reader errors are
++returned through `ok` and `message`; `wshred` stops rather than substituting data.
++
++The bridge does not derive a calendar, integrate fluxes, alter precision, or
++change PASS payloads. Schema-2 padding remains serialized but is not consumed
++as a different requested date. Profiling counts successful routing reads, not
++serialized slots. The normative contract is
++[the watershed reader contract](../../contracts/watershed-hillslope-pass-reader-contract.md#routing-date-selection).

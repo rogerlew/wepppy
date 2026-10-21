@@ -1,4 +1,10 @@
 # PROJECT_TRACKER.md
+
+Completed (local release): [WEPP 261021](docs/work-packages/20261021_wepp_261021_release/package.md) — paired Gregorian ASCII PASS v3 binaries built from the default branch and vendored; changelog includes 261010 and 261021. Native 232 tests, 12 watchlist cases, host/container smokes and 400-year alignment pass. WEPPpy segmented coverage 11,052 passed/122 skipped; test-order/browser-path limits retained. No default switch or deployment.
+
+Completed (source/local validation): [Gregorian calendar repair](docs/work-packages/20261021_gregorian_calendar_repair/package.md) — Gregorian/EOF and HBP padding fixes; both full 200-year paths, 400-year simulations and downstream audits pass. Regression parity and independent native reviews pass; broad fixture/cache limitations retained. No deployment.
+
+Completed (investigation/design): [ASCII PASS century failure](docs/work-packages/20261021_ascii_pass_century_investigation/package.md) — reproduced year-102 stop in the 200-year project; confirmed legacy/Gregorian mismatch and stale climate buffer reuse. Robust repair identified; no implementation or deployment.
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-10-21
@@ -6,6 +12,10 @@
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Completed (development): [Schema-2 PASS calendar selection](docs/work-packages/20261021_hbp_schema2_calendar_selection/package.md) — exact requested-date routing fixes non-leap padding drift; two 44-year cases and a 28-hillslope, 43-year project pass readback, unchanged hillslope payloads and observation off/on parity. Independent review passes; broad native suite limitations retained. Not released or deployed; ASCII century issue remains separate.
+
+Completed (investigation): [Watershed channel routing closure](docs/work-packages/20261021_watershed_channel_routing_closure/package.md) — confirmed schema-2 PASS calendar-selection defect; nine full-period cases have exact baseline/off/on parity, including a 28-hillslope, 43-year real project. Independent review passes diagnosis; physical-domain closure remains unresolved. Model correction and deployment were not performed.
 
 Implemented locally: [MACA model/scenario selection](docs/work-packages/20261016_maca_projection_selection/package.md) — 40-pair selector, CCSM4 r6i1p1 correction, focused/native/live checks passed. Broad gate blocked by missing Playwright Chromium; not deployed.
 
@@ -372,13 +382,6 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
-
-### Watershed channel routing closure investigation
-
-**Status**: Scaffolded 2026-10-21; execution pending.
-**Link**: [Work package](docs/work-packages/20261021_watershed_channel_routing_closure/package.md).
-**Scope**: Trace OFE/PASS/channel/outlet volume closure with gated observations and output parity. Simulation changes, release, and deployment are prohibited; findings feed separately authorized remediation.
-**Next**: Inventory source paths, executable provenance, control volumes, and controlled/real-project replay cases.
 
 ### Features Export standalone GeoJSON compatibility
 

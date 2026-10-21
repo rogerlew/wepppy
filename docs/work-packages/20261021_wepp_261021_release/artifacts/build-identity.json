@@ -1,0 +1,10 @@
+{
+  "wepp": {
+    "source_binary_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+    "release_sha256": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385"
+  },
+  "wepp_hill": {
+    "source_binary_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "release_sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1"
+  }
+}

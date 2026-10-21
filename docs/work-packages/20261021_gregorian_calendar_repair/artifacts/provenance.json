@@ -1,0 +1,281 @@
+{
+  "evidence_root": "/workdir/wepp-gregorian-repair-20261021",
+  "source_roots": {
+    "wepp-forest": {
+      "head": "04f1c4d26bcef217009c124151f877dcbf3985cb"
+    },
+    "wepppyo3": {
+      "head": "3b630643ba06bd40262285f206112c9d3ee32b21"
+    },
+    "jimf-cligen532": {
+      "head": "8b9619b68c78f52d3bac778be19dc8436cac7d51"
+    }
+  },
+  "evidence": [
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ablation-policy.log",
+      "bytes": 203,
+      "sha256": "d2c4258235f66985203c181dfaef415d57402790e715f2a5ebc144e284cd0877"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/adr-lint.log",
+      "bytes": 44,
+      "sha256": "2a5c1d89a20be06d79ae0c83cf88d7307591b2c4df00a06e53ccea819d9836df"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-audit.log",
+      "bytes": 7832,
+      "sha256": "c87497922a2cad795e3f549fd679965840bbd12bc464abd29e541c8a00d4c5d9"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-build.log",
+      "bytes": 100790,
+      "sha256": "b55c73c2ec97d6a72ca20a31a4082e5c22098178038e4a671296f02a79a7aaa6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-final-build.log",
+      "bytes": 36437,
+      "sha256": "ece309a68768404a8f366b5d6bf19a895b6744a4e7cb24ff95e8013d65ae5707"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-final-replay.log",
+      "bytes": 8820,
+      "sha256": "07249af6ce9e7ebc937b46740f585010a095c58ff2e0671383c2064ec8643db7"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-interchange.log",
+      "bytes": 5804,
+      "sha256": "4692830e980f66ff1599d8216995a32d420b382db1f7cabc17c276c0ff521602"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-replay.log",
+      "bytes": 9387,
+      "sha256": "1c449765e15a23811d0cfecf302a0c3d6a1551adc496de0d379030241142b631"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii400-audit.log",
+      "bytes": 221,
+      "sha256": "dc250c377a11d4e76a2645a3847d4f0b7a83ef7fa637df2d285136f9a17aa08f"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii400-replay.log",
+      "bytes": 166,
+      "sha256": "7290648b3bd64887c188ed7524723f00614b122747e18a068995b30a1b2900c3"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/baseline-build.log",
+      "bytes": 114466,
+      "sha256": "560eb72d269f2a3a8ccd46a47b611fef97e0961b3c931ec839e3db961ffa5983"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/baseline44-replay.log",
+      "bytes": 167,
+      "sha256": "d2b9bec1fd9015b6677cee67e60d0b3e972e299775fe7bc4b8f3dae28a22b577"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/calendar-tests.log",
+      "bytes": 99,
+      "sha256": "a6e8be4ff5c11677322bfd829b309f135dfb512d33af32f6541ed32b5ad0dfcc"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/doc-move.log",
+      "bytes": 1210,
+      "sha256": "c1c0bd94594156b83827537786b5c7a0a232f6c7a11515a0fb398e695d469058"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/docs-lint.log",
+      "bytes": 44,
+      "sha256": "e603b899f715893d615d2fa48956c02b818078b9a3cf00f7b0a3b53a4e58c1b5"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/final44-replay.log",
+      "bytes": 166,
+      "sha256": "8af72c7297bf3593a178644d5af833a9e5728b9372b233082bfbde4344d57e19"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fork.log",
+      "bytes": 13257,
+      "sha256": "ddb9515670e3aec870ba2fd5254cadeabe2aa0b40fa6ae02c063770f17db89a4"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fortitude.log",
+      "bytes": 48,
+      "sha256": "74cf8dc3af157525f559dbe4aaf738b86936ceb932efed6bae460dc74ca711a5"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fpm-all.log",
+      "bytes": 7292,
+      "sha256": "5ae56f21aa78fb37e5594d10314b82a2b7061b40629f42f1c413fb042399480c"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fpm-bridge.log",
+      "bytes": 5886,
+      "sha256": "0de3ee7f5c995c574d2834fd63fd026fb37f97f7931e97b60b86185a85bcd400"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fpm-observability.log",
+      "bytes": 59,
+      "sha256": "44ee0384a2061b295e3533f2821b2223566889f6e07c970aff6a113c47f3051b"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/fpm-reader.log",
+      "bytes": 7258,
+      "sha256": "30bf52076cfdb93bac664e88ea14dcaf9e8c62ca1ee35c18234976a8e5ff8893"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-audit-preliminary.log",
+      "bytes": 5423,
+      "sha256": "f751fe43a1a62fabffc81704dffec5972a2868880348f8442ae05efc1f57aec5"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-audit.log",
+      "bytes": 5423,
+      "sha256": "68fb91f0a40acebef1f20e36dbaa17c2df2c2fe3cad2dfb3735f757e66c1b93f"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-final-build.log",
+      "bytes": 39572,
+      "sha256": "5602ecb902fe4177a65906c94f15708358b38f0915780cc114f5195750f79b2d"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-final-replay.log",
+      "bytes": 8878,
+      "sha256": "46b864bde9b2c8b77750edb8b2776c22562d00d1c39a4e607b2229c63f6ab1d4"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-interchange.log",
+      "bytes": 5230,
+      "sha256": "e322a32ac4e96f5bc60980cf217c933bffebc43d584e11d3697d80e907f3e2e4"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-payload-parity.log",
+      "bytes": 366,
+      "sha256": "b21bf40127ae07ce812ca816cafe8ef5bead3be5c0c7a48edd55119d43f451f2"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp-replay.log",
+      "bytes": 9446,
+      "sha256": "c6a1756f7f1bb893c4c16f6b8ee3cb4ef2ba6d57e0230c446f384dfc7bbbe33d"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-audit.log",
+      "bytes": 176,
+      "sha256": "f142a4a62b93012a3e12ac9fa8224983ce5d66ac2b0dcc99fd1951642dc0c6b6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-final-audit.log",
+      "bytes": 176,
+      "sha256": "f142a4a62b93012a3e12ac9fa8224983ce5d66ac2b0dcc99fd1951642dc0c6b6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-final-interchange.log",
+      "bytes": 5215,
+      "sha256": "1f160dff77ad21c1b2b860b04d92fcf71f02e19911f5044f1fb759d4f39ebeba"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-final-replay.log",
+      "bytes": 168,
+      "sha256": "c97fabd89b99597c6bf910b528c53a74ffdcce492b7e7084d99181a98fb81844"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-interchange.log",
+      "bytes": 1899,
+      "sha256": "6ad068bcb86e91b9ae7900455a09bc31ae80bbac2e1455d2ec365c9ad16bbee0"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-observe-replay.log",
+      "bytes": 168,
+      "sha256": "fce26ed2bf2fa975daa6f5575c632d7059e8c6118e143149056f74860ed3bfe0"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/hbp400-replay.log",
+      "bytes": 166,
+      "sha256": "ee05096795159e889a48b4949ba2f4f517f441ce1b2b3f233298b283e19856d3"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/matched-baseline44-replay.log",
+      "bytes": 167,
+      "sha256": "c1267ec4c5dfc9cf2a1104d2ef387300c99020ab2f4ff6fc5682df26b1bddd01"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/native-build.log",
+      "bytes": 199069,
+      "sha256": "ae1f436b9272d8cf653ad390ea87c47db0577a2ed52131a4603acdd9367d3394"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/pytest-all.log",
+      "bytes": 3237,
+      "sha256": "d582081a11601708ab435ac620fc2aa47011a85f61505a9d287a9df03d447f12"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/rust-all-tests.log",
+      "bytes": 9572,
+      "sha256": "ebf70845b2230f9e6928bed6c8d6efd0cd975a81b2ca4679e23d866f9d86a7e6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/rust-build.log",
+      "bytes": 147,
+      "sha256": "4b839eac819ce0acd140b6ebbc7450d4d8a0f770f5713564f02c6e45bc7e88f6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/rust-hbp-tests.log",
+      "bytes": 2002,
+      "sha256": "653879f4ea33b0a8f30f6bbcf8efd50f8af0272dfd7b956fabd39fb8c1e93e7d"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/rust-python-tests.log",
+      "bytes": 850,
+      "sha256": "b25a48bbaa2a2e5de1f7621f1ee3e934157a5a34b1363a5d086e74304d817b94"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/rustfmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/smoke-hill.log",
+      "bytes": 248,
+      "sha256": "f39232038fff5ca802db6e8f5dc71bee015e1c7007b60d152568ade982ea0bb6"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/smoke-wepp.log",
+      "bytes": 243,
+      "sha256": "0f70286e3760f1574e878a395bb65356504ac36e18e72069c4a9d3cf2ffce693"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/watchlist.log",
+      "bytes": 5525,
+      "sha256": "f808a163caeeeade0321561c8d7392a3475bdb366284d2022aa5003c2a9bc709"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-matched-predivergence.json",
+      "bytes": 189,
+      "sha256": "8b2f5c5d15a22093e6dfa25739774d5798bcacaf071ecaf849051fc0ba815bfb"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/ascii-predivergence.json",
+      "bytes": 185,
+      "sha256": "6e1478127a8d523ca37411406fad3f282c0f7c15926d4da6e469f76be6abe18f"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/input-manifest.json",
+      "bytes": 44918,
+      "sha256": "b97999ed2df5c8640de4083b36a77d2eee6d6daef32d4d1605179807d224a41f"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/matched-unaffected44-comparison.json",
+      "bytes": 232,
+      "sha256": "f98c6d335c9371d95118c2a277415b3eede2330dec6eb23b4532c15d5db49920"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/observability-comparison.json",
+      "bytes": 230,
+      "sha256": "085a9cee262f84d426e7324950cdd2c069bc34b6a8a14b7adb5168685b6af93b"
+    },
+    {
+      "path": "/workdir/wepp-gregorian-repair-20261021/unaffected44-comparison.json",
+      "bytes": 232,
+      "sha256": "36f871a543e222f6f0003e37b243c499255c33355185e1eb5fad0471743e6b2d"
+    }
+  ]
+}

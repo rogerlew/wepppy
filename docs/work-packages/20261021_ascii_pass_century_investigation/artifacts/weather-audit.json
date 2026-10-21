@@ -1,0 +1,92 @@
+{
+  "climate_rows": 73048,
+  "water_balance_rows": 73050,
+  "date_mismatch_count": 36524,
+  "first_date_mismatches": [
+    {
+      "ordinal": 36525,
+      "water_balance": {
+        "year": 101,
+        "julian": 366,
+        "precip": 0.0
+      },
+      "climate": {
+        "date": [
+          101,
+          1,
+          1
+        ],
+        "julian": 1,
+        "precip": 0.0
+      }
+    },
+    {
+      "ordinal": 36526,
+      "water_balance": {
+        "year": 101,
+        "julian": 1,
+        "precip": 5.4
+      },
+      "climate": {
+        "date": [
+          101,
+          1,
+          2
+        ],
+        "julian": 2,
+        "precip": 5.4
+      }
+    },
+    {
+      "ordinal": 36527,
+      "water_balance": {
+        "year": 101,
+        "julian": 2,
+        "precip": 0.0
+      },
+      "climate": {
+        "date": [
+          101,
+          1,
+          3
+        ],
+        "julian": 3,
+        "precip": 0.0
+      }
+    }
+  ],
+  "precip_mismatch_count_within_input": 0,
+  "first_precip_mismatches": [],
+  "beyond_climate": [
+    {
+      "year": 200,
+      "julian": 365,
+      "precip": 7.1
+    },
+    {
+      "year": 200,
+      "julian": 366,
+      "precip": 5.9
+    }
+  ],
+  "previous_block_tail": [
+    {
+      "date": [
+        200,
+        12,
+        22
+      ],
+      "julian": 356,
+      "precip": 7.1
+    },
+    {
+      "date": [
+        200,
+        12,
+        23
+      ],
+      "julian": 357,
+      "precip": 5.9
+    }
+  ]
+}

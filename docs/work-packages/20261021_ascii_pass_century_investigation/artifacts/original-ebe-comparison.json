@@ -1,0 +1,18 @@
+{
+  "original_rows": 37254,
+  "replay_rows": 37254,
+  "dates_precip_equal": true,
+  "max_absolute_difference_by_column": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    5.410000000000764,
+    5.9999999999990616e-05,
+    1.8799999998882413,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ]
+}

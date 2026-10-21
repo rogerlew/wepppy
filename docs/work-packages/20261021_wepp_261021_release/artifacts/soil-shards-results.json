@@ -1,0 +1,22 @@
+[
+  {
+    "shard": 0,
+    "collected": 58,
+    "returncode": 0
+  },
+  {
+    "shard": 1,
+    "collected": 58,
+    "returncode": 0
+  },
+  {
+    "shard": 2,
+    "collected": 57,
+    "returncode": 0
+  },
+  {
+    "shard": 3,
+    "collected": 57,
+    "returncode": 0
+  }
+]

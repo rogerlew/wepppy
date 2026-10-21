@@ -1,0 +1,28 @@
+
+== wepp_runner/bin/wepp_261021 ==
+fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385  wepp_runner/bin/wepp_261021
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007fff5f5d4000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007572eb800000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007572eb717000)
+	libmvec.so.1 => /lib/x86_64-linux-gnu/libmvec.so.1 (0x00007572eb61e000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007572eb400000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007572eb3d2000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007572ebb69000)
+
+== wepp_runner/bin/wepp_261021_hill ==
+6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1  wepp_runner/bin/wepp_261021_hill
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007ffe1753a000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x000076a5aba00000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x000076a5ab917000)
+	libmvec.so.1 => /lib/x86_64-linux-gnu/libmvec.so.1 (0x000076a5ab81e000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x000076a5ab600000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x000076a5abd27000)
+	/lib64/ld-linux-x86-64.so.2 (0x000076a5abd74000)

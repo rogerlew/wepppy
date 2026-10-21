@@ -1,0 +1,145 @@
+{
+  "case": "single",
+  "roots": [
+    "/wc1/holdouts/watershed-channel-routing-closure-20261021/controlled-off/single",
+    "/workdir/hbp-schema2-calendar-selection-20261021/off/single",
+    "/workdir/hbp-schema2-calendar-selection-20261021/on/single"
+  ],
+  "executions": [
+    {
+      "binary": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp",
+      "binary_sha256": "de9df340f45befc21deebeb45245251ce0c33b787efd23370be2e4e467359095",
+      "observe": false,
+      "results": [
+        {
+          "card": "p1.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 7.532079425873235
+        },
+        {
+          "card": "pw0.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.730604561045766
+        }
+      ],
+      "output_manifest": {
+        "H1.ebe.dat": "e0a4a958ff1609d4daa5cb0b100d6cf0ccc0303417617bf8fe526ad24c02f7b6",
+        "H1.element.dat": "cfc092ad5aab17d22d3faad24dccf8a5bec6ed6493e87963e447f5553fa43736",
+        "H1.hbp": "6e13a91de9985bca7d80b691e75dad4b4f2fe893c5e2784a31e4d1a09207b623",
+        "H1.loss.dat": "99e4e36fb237c9d3bb28c70f94b4ad648a8338317d281c348e0cdbd720962c24",
+        "H1.plot.dat": "923ffeb988278d5a74a137164e1ed17409331b1199ac333a64419db572db0e77",
+        "H1.soil.dat": "e250d4af9abd945ce0dd600435a469e49b76fd3af8a27635203c2648eeb38570",
+        "H1.wat.dat": "7ad436c48eee92d7bc7ec7f1573fe04f01a2482fc2a0a992f5268abb0659dc0e",
+        "ebe_pw0.txt": "b799e7748a877ffa5a55bb4175b51694f41be25ce18e84a9220a9850562f5b9b",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "55ba5eafd150400a947ecf43be174066f289f352e5ad9321ad690c4eace04c2e"
+      }
+    },
+    {
+      "binary": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp",
+      "binary_sha256": "de9df340f45befc21deebeb45245251ce0c33b787efd23370be2e4e467359095",
+      "observe": true,
+      "results": [
+        {
+          "card": "p1.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 17.69973093504086
+        },
+        {
+          "card": "pw0.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 28.270391762955114
+        }
+      ],
+      "output_manifest": {
+        "H1.ebe.dat": "e0a4a958ff1609d4daa5cb0b100d6cf0ccc0303417617bf8fe526ad24c02f7b6",
+        "H1.element.dat": "cfc092ad5aab17d22d3faad24dccf8a5bec6ed6493e87963e447f5553fa43736",
+        "H1.hbp": "6e13a91de9985bca7d80b691e75dad4b4f2fe893c5e2784a31e4d1a09207b623",
+        "H1.loss.dat": "99e4e36fb237c9d3bb28c70f94b4ad648a8338317d281c348e0cdbd720962c24",
+        "H1.plot.dat": "923ffeb988278d5a74a137164e1ed17409331b1199ac333a64419db572db0e77",
+        "H1.soil.dat": "e250d4af9abd945ce0dd600435a469e49b76fd3af8a27635203c2648eeb38570",
+        "H1.wat.dat": "7ad436c48eee92d7bc7ec7f1573fe04f01a2482fc2a0a992f5268abb0659dc0e",
+        "ebe_pw0.txt": "b799e7748a877ffa5a55bb4175b51694f41be25ce18e84a9220a9850562f5b9b",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "55ba5eafd150400a947ecf43be174066f289f352e5ad9321ad690c4eace04c2e"
+      }
+    }
+  ],
+  "off_on_exact": true,
+  "files_compared": 35,
+  "unchanged_hillslope_files": [
+    "output/H1.ebe.dat",
+    "output/H1.element.dat",
+    "output/H1.hbp",
+    "output/H1.loss.dat",
+    "output/H1.plot.dat",
+    "output/H1.soil.dat",
+    "output/H1.wat.dat"
+  ],
+  "date_readback": {
+    "1": {
+      "days": 16071,
+      "years": [
+        1980,
+        2023
+      ],
+      "hbp_sha256": "6e13a91de9985bca7d80b691e75dad4b4f2fe893c5e2784a31e4d1a09207b623",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.000515557185281e-10,
+        "payload_reader_m3": 5.000515557185281e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 1233,
+        "1": 13452,
+        "2": 1386
+      },
+      "last_requested_date": [
+        2023,
+        365
+      ],
+      "all_requested_days_checked": true
+    }
+  },
+  "changed_watershed_files": [
+    "output/ebe_pw0.txt",
+    "output/soil_pw0.txt",
+    "runs/Yes",
+    "runs/chan.out",
+    "runs/chanwb.out",
+    "runs/tc_out.txt"
+  ],
+  "channel_publication_arithmetic_only": {
+    "rows": 16071,
+    "signed_m3": -3.855518298223615e-05,
+    "absolute_m3": 0.00871960975928232,
+    "worst": {
+      "case": "single",
+      "year": 1982,
+      "day": 45,
+      "element": 2,
+      "inflow": 611.7432861328125,
+      "baseflow": 0.0,
+      "outflow": 606.6007080078125,
+      "loss": -4.26873779296875,
+      "storage_start": 1.2902603149414062,
+      "storage_end": 10.70166015625,
+      "residual": -8.392333984375e-05,
+      "tolerance": 0.0023548214968282188,
+      "normalized": -1.3718718577898675e-07,
+      "within_arithmetic_bound": true
+    },
+    "outside_arithmetic_bound": 0,
+    "negative_loss_rows": 3715
+  },
+  "ledger": {
+    "path": "/workdir/hbp-schema2-calendar-selection-20261021/single-channel-ledger.csv",
+    "bytes": 2440855,
+    "sha256": "f34271ca9d2ef07841f86ccbfd581c1d4d22e75e77ec67fc8eb62210a0509a47"
+  }
+}

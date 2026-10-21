@@ -1,0 +1,12 @@
+{
+  "watershed": {
+    "normalized_release_sha256": "e28c08e0958e56bdb7ad94ec3af6afcdcc73071d46f1459fa5e5ae215aab676b",
+    "normalized_validated_candidate_sha256": "e28c08e0958e56bdb7ad94ec3af6afcdcc73071d46f1459fa5e5ae215aab676b",
+    "equal": true
+  },
+  "hillslope": {
+    "normalized_release_sha256": "71daa36a4e705b578b5f86d98f5f52923e4ee65bad613670627ac23e8b2c5174",
+    "normalized_validated_candidate_sha256": "71daa36a4e705b578b5f86d98f5f52923e4ee65bad613670627ac23e8b2c5174",
+    "equal": true
+  }
+}

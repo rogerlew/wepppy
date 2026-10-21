@@ -1,0 +1,472 @@
+{
+  "retained_root": "/workdir/hbp-schema2-calendar-selection-20261021",
+  "captured_utc": "2026-10-21T18:14:08.841288+00:00",
+  "source_head": "04f1c4d26bcef217009c124151f877dcbf3985cb",
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "build_command": "make FC=/usr/bin/gfortran LDFLAGS='-mcmodel=medium -no-pie -lz' wepp wepp_hill",
+  "flags_source": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/makefile",
+  "source_manifest": {
+    "path": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source-manifest.json",
+    "bytes": 116765,
+    "sha256": "29d3a085fcab132419bca6681274f4168444121676b80c6918f8ad5ddc6327cd"
+  },
+  "baseline": "/wc1/holdouts/watershed-channel-routing-closure-20261021/instrumented-source",
+  "correction": {
+    "path": "/home/workdir/wepppy/docs/work-packages/20261021_hbp_schema2_calendar_selection/artifacts/reader-fix.patch",
+    "bytes": 15640,
+    "sha256": "2fd2abbf251e05d4dac730b84a3c79533859a6fac920598ec2920da787e9c9bd"
+  },
+  "binaries": [
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp",
+      "bytes": 4118216,
+      "sha256": "de9df340f45befc21deebeb45245251ce0c33b787efd23370be2e4e467359095"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp_hill",
+      "bytes": 4056776,
+      "sha256": "36f3778d8f7ae28cca5a3a5f3570338dbb9d2141bd9d80c320271fb119e7cdd9"
+    }
+  ],
+  "initial_repository_snapshots": [
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/native-baseline.txt",
+      "bytes": 9363,
+      "sha256": "80a4234ec5b65a67cad251231b91d9aac40f284a499ee5e8b7ef546ea56c6003"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/wepppy-baseline.txt",
+      "bytes": 130513,
+      "sha256": "ac2e60b76488470c1431a12a58795a2532ecb8b539e8663b279624542a4a7156"
+    }
+  ],
+  "validation_logs": [
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-isolated-wb_adapter_hourly_boundary_tests.log",
+      "bytes": 399,
+      "sha256": "bd943780af58f2b64cbba0982bfe37046d0711ba5d4e98d04177146f23437400"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-isolated-wb_kernel_wbk08_closure.log",
+      "bytes": 1010,
+      "sha256": "4363d9b1be8d25635eeeda674366127aa595d569f86e1d0a66cf6e49712c0076"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-wb_adapter_hourly_boundary.setup-failure.log",
+      "bytes": 3348,
+      "sha256": "897e771b663416b8d530758bd80152f5222d3dc4526e7ee31360a7cb386efcbe"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-wb_adapter_hourly_boundary_tests.log",
+      "bytes": 678,
+      "sha256": "f5814a5bb4a2ede2bc3b56215583d74c2ec6dc16b0894ceceb9f16b6df40b3d8"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-wb_kernel_wbk08_closure.log",
+      "bytes": 4247,
+      "sha256": "316120cdd779843cb3af308768927efadd9f854b502d42c39206ecac5aff95c5"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/baseline-wb_kernel_wbk08_closure.setup-failure.log",
+      "bytes": 425,
+      "sha256": "e8bc7c675c397db17e4b18add982b8fa67244d079c9305823dcd511c8b9bc487"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/build.log",
+      "bytes": 36723,
+      "sha256": "75b64428686c89070d1fd477d552259458e9fdd067171667d83c172cacbb4016"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-isolated-wb_adapter_hourly_boundary_tests.log",
+      "bytes": 51,
+      "sha256": "6b714d13bc92038ec91eb4c6fc09d8958c5dfc6d6bfdf981fe9d9ce5a46f965e"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-isolated-wb_kernel_wbk08_closure.log",
+      "bytes": 595,
+      "sha256": "010ae51f351791c63dc07c09b5513fa773f5a928c6aed6e3c3997caf4eb2c098"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/fortitude.log",
+      "bytes": 48,
+      "sha256": "50d9181fe48b1390e59425746e4743d297901b9649c646253f94adc77f5df57c"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/fpm-full.log",
+      "bytes": 5159,
+      "sha256": "02bce5f96a71de38544a2510b892c937ef6e8f779fbaf3ceb05b58f337d2b901"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/fresh-reader-test.log",
+      "bytes": 1301,
+      "sha256": "8cae4820a394bdcdbff85faf7d791ca89f59650f1a8f7838c2e44272531656a2"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/fresh-reader-test.setup-failure.log",
+      "bytes": 188,
+      "sha256": "efb382e07c36f6a9d05c5b6af8d529963566c7a9073585bceca028bf7d956cd6"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/pytest-collection.log",
+      "bytes": 18469,
+      "sha256": "327b83e1d89854de0dd0dba8e00ecd565cb6ea066d76883a9775c1f7d86e5563"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/pytest-full.log",
+      "bytes": 1988,
+      "sha256": "bb6a07e270fa1db3a8abfd8c71d9b88d03c9bbfd9a213d70f16a15945fa63f42"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/pytest-watchlist-failure.log",
+      "bytes": 1155,
+      "sha256": "1a3b8c5ced7dd009c318b84059dd97323aa4f265129ebf08450565b7c80de4aa"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/real-audit.log",
+      "bytes": 75,
+      "sha256": "16866dff2aab5c0815270a1b7c2f31ca3310e24ce7b8a3dac1cf8a1ef8424290"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/real-off.log",
+      "bytes": 2424,
+      "sha256": "42583c5a74a32bc58f2cb216862acbe22106ae8a5a514c1d68133a1429d959b7"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/real-on.log",
+      "bytes": 2447,
+      "sha256": "64f1c8b2918d84a6e27dc5685e764c423b969c54682b6d3aecab2ae104baaa83"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/regression-green.log",
+      "bytes": 886,
+      "sha256": "5fcbc9147370fbef613e429e634bc4313f52b8c8674cbb0cc06a91514e10eb32"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/regression-red.log",
+      "bytes": 7009,
+      "sha256": "f7ebeace09b82c829d48e2a6962ccca75feb66df654de863ba9fda316a27ae64"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/regression-test-fixture-error.log",
+      "bytes": 1327,
+      "sha256": "b3bbc2bdb624046054f2ea4a92c94f822817e7f95cc6efd1577a0a4ffe84cc97"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/single-audit.log",
+      "bytes": 76,
+      "sha256": "7345eeb491757bfe1a300fa3328a0f4319c0e352f19b0cb236855c5c97916428"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/single-off.log",
+      "bytes": 167,
+      "sha256": "60db835d5562022d8fffb435b7aeb469ee8234055621a65cd17991b1ace6b22d"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/single-on.log",
+      "bytes": 168,
+      "sha256": "7df301660d321a8cdbf81b82247c9657109856072c147732dda39aa06e237327"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/smoke-wepp.log",
+      "bytes": 380,
+      "sha256": "a4de8a2822e2e016938df710109e330ca6c6e3ebdf8f83f3562c79302ce8085f"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/smoke-wepp_hill.log",
+      "bytes": 385,
+      "sha256": "8bd520b5d344ebf1164afbc7a5cbda35578da96e30f4280fa0abfc8fd138f1c0"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/upper60-audit.log",
+      "bytes": 77,
+      "sha256": "86a80953ea862986f9ac398c5276b1ffaa75063cb5befb379156132a848cc4a3"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/upper60-off.log",
+      "bytes": 169,
+      "sha256": "3d819fcf08790ac6f71b847df094634ae8d5d7c3f938be864f3c35a25d64d30e"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/upper60-on.log",
+      "bytes": 168,
+      "sha256": "be16e7a1311ca020e6eab1d85ff81360452d55391ccc71801dc8856fa98fbd70"
+    }
+  ],
+  "replay_manifests": [
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/single/input_manifest.json",
+      "bytes": 2036,
+      "sha256": "2c3ac6ece35c4cbf4833c6afb1be385e31c763670f51f4d485e6fd8583435e2a"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/single/execution.json",
+      "bytes": 1350,
+      "sha256": "c6cbb5d30c5bfb93104c6241a8440cedf13b19abfce730a2ddea4b1ece4ad458"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/upper60/input_manifest.json",
+      "bytes": 2036,
+      "sha256": "865ae3b1c5f7ed71d639fcc2f1636381379d170174974e51ffec5969f112893f"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/upper60/execution.json",
+      "bytes": 1352,
+      "sha256": "a539f17d40a3ce575c7a7b035c2956d5905e053558e29f4c87ae5068cad32f1b"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/real/input_manifest.json",
+      "bytes": 14869,
+      "sha256": "1aa9a5d5252da1c7b1ba8a90ab5bb05b0d9d16ed93d313fe09c6c6fd26d0e114"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/off/real/execution.json",
+      "bytes": 21193,
+      "sha256": "d159d6da21ac7ec73244eaa72a287499bf8a3266ff3b306fd8cedbd060c91d4c"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/input_manifest.json",
+      "bytes": 2125,
+      "sha256": "e272099944e04a9bc05f83f1f3f2b031f785c673c226000add3849d192576c8c"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/execution.json",
+      "bytes": 1350,
+      "sha256": "1e4ae19602e3e13ce42e9a8376db6944d51c994e8f30737a045b26efa2d5226f"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/input_manifest.json",
+      "bytes": 2125,
+      "sha256": "37a65ac3d7a9f1a4b05cad2115b32e2f09ce1b466e06c77e6a5c61e3135a29a1"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/execution.json",
+      "bytes": 1350,
+      "sha256": "02bac49b1a792e14ff3d1e17759c4d0958508ecc2b3f4b8b0fbc7c53abdca9ac"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/input_manifest.json",
+      "bytes": 14958,
+      "sha256": "0399c63de52af741466691edae395fa7aab71d2275bedad861249b7ee3bd8a10"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/execution.json",
+      "bytes": 21215,
+      "sha256": "74837507961ee6e3fff238bd3df6d8eb895947dc7bfd30fb0c1f9e5f65f3f154"
+    }
+  ],
+  "diagnostics": [
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/channel_balance.csv",
+      "bytes": 4855159,
+      "sha256": "5b9ea8f333c1415eab5f01599f3b198978fce8e88d786ccabb1307d8f43bbd3c"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/channel_publish.csv",
+      "bytes": 4251486,
+      "sha256": "08eaddef3b24d2609d935323dcdc53887f800974054bc5188ac591b514ce1317"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p1.run.observe.log",
+      "bytes": 30182727,
+      "sha256": "07b4a7668a5a6d7914520173fbaf74cb6eb631f79402e9189e2659261c08daf8"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p10.run.observe.log",
+      "bytes": 32246177,
+      "sha256": "8f6f6c34de7e04916acc3d8017525c6fef37d4754b5acac77099327da919ef16"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p11.run.observe.log",
+      "bytes": 32228055,
+      "sha256": "36f2705a5f1913f48d2d698a284f61e7c595440553669f94497d7ba82fe53de7"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p12.run.observe.log",
+      "bytes": 30122786,
+      "sha256": "0b190967f3d626711466f6842829500fc19c939a2c2f20508aad75ec7096c8ae"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p13.run.observe.log",
+      "bytes": 61096090,
+      "sha256": "65eb215b1f0e1234b0362cedb42710543abe2e06ed40f460050392b2d9b09349"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p14.run.observe.log",
+      "bytes": 30183711,
+      "sha256": "5e5d34189e04305e657d50fe0eef3e0eecf4c524284fdd9e163213eba99a487d"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p15.run.observe.log",
+      "bytes": 61091662,
+      "sha256": "77673e27f83e2ee6c02ea5e805892628842f4a441c05444a8de21d793ba8b35a"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p16.run.observe.log",
+      "bytes": 30119834,
+      "sha256": "21f7fe52e353b7577e8640a015ef5a2d3d6c6eea4187e0dfea77d1d338e1bcbf"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p17.run.observe.log",
+      "bytes": 30116882,
+      "sha256": "3120d090093e6e30addafe05fb48f22675ee9c26cc6c506026988a529eded5de"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p18.run.observe.log",
+      "bytes": 30185679,
+      "sha256": "366635e8816e874134a760c19096167c6717e952321dc5d8422dadfb2e3aa55c"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p19.run.observe.log",
+      "bytes": 30116882,
+      "sha256": "1d22f297afacf7c5f2031dd61a5dfd4ae81e2802f8c958ae767f27e5c4a72ac4"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p2.run.observe.log",
+      "bytes": 30182481,
+      "sha256": "7a53e906bd988d8bf3eb8bebb1cf5d9f80eedc793e02dc98e6c6b126e82458e8"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p20.run.observe.log",
+      "bytes": 30182973,
+      "sha256": "ad14501234fc434450b378f7d35005013a451e74b3f3bc5f2099a42974eb7e44"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p21.run.observe.log",
+      "bytes": 30182481,
+      "sha256": "d85452ddb556df12a92eb937cde6b5a4047a50ceec16ca5e930101490629ecb7"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p22.run.observe.log",
+      "bytes": 30182727,
+      "sha256": "6965626a2b84060ac10dd63382f63b2835fff1464276e2bab82d93b56b30d111"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p23.run.observe.log",
+      "bytes": 30120982,
+      "sha256": "8c35f94eb9d1f40b695f3f6ba34b871a7d439d3f085a05612937b61a6711cc08"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p24.run.observe.log",
+      "bytes": 32229039,
+      "sha256": "49475f4873c5731debc19b94db5668102125a2c545d994b7c14e5102934281d2"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p25.run.observe.log",
+      "bytes": 30175347,
+      "sha256": "92834afe5d8e260defa56ef18cff21ed0a9152a086815109b430baefcdaa7960"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p26.run.observe.log",
+      "bytes": 30114668,
+      "sha256": "152db4be45c58788e863c763c0da7800950653dfe7ce14ec68e980fff3451f7d"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p27.run.observe.log",
+      "bytes": 32234041,
+      "sha256": "4599ad8a7f36f26c95f4e6f8e6f3f2ddf50c6ddb014567bd6f505039ff991306"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p28.run.observe.log",
+      "bytes": 30115406,
+      "sha256": "3304addf378beb78d12fbaafac72d4d41af65f6c77833639cb367250efd9ff68"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p3.run.observe.log",
+      "bytes": 61099534,
+      "sha256": "76100cba4ac107e01ad13d7f43b5fcbb2b221b0a7acfab4f0f31c315f125e58f"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p4.run.observe.log",
+      "bytes": 30128362,
+      "sha256": "be6148c30bb4287a45e64ac57e46f6bbbd3ed48b52ac84be455f6898380e8499"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p5.run.observe.log",
+      "bytes": 61094286,
+      "sha256": "cd85916d5fabcb1b72622ce60f0abdfdc030cf119b76dcdafc87050bf48a729e"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p6.run.observe.log",
+      "bytes": 30182645,
+      "sha256": "0b420f783edbca25a55a63b1d4b82446fff92a560049131c70fcf1edba629859"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p7.run.observe.log",
+      "bytes": 30185679,
+      "sha256": "bec89d7316b565c157b65c57d114c5d80c2146ee61b2c34869398491217aa16b"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p8.run.observe.log",
+      "bytes": 30183465,
+      "sha256": "07ec91d3b4670b64172788feefc5c98b6d1bb41004b330561c5fa91f06d9cef4"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/p9.run.observe.log",
+      "bytes": 30117620,
+      "sha256": "57c9d5f32ac5cf3014f113acb938de11055741ffb6a57945b826a92b31d22a28"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/real/pw0.run.observe.log",
+      "bytes": 979244038,
+      "sha256": "6aba3bb8e5257cc7d2d107f3e8c3ed8fc909151326ef3e1ba483f14bc799bbf1"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/channel_balance.csv",
+      "bytes": 3626664,
+      "sha256": "47a242cd0d5a88e539da1ed878fe26ed9f72c097de4635ee5670474c0f1e6d84"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/channel_publish.csv",
+      "bytes": 4330933,
+      "sha256": "f2501fe0f8a696906f96a4a865b9679015824ea707a861f80422c416b930f665"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/p1.run.observe.log",
+      "bytes": 42434063,
+      "sha256": "1c61a21aa7c52aea7d58a2fbb1c9f133b0427c62e36b61a4de37ed120ba76455"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/single/pw0.run.observe.log",
+      "bytes": 82557137,
+      "sha256": "9a33102cac9a6e6e3a5f310d99f8eff7c4ac37653dfb2c5a657899c7a6f3fd09"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/channel_balance.csv",
+      "bytes": 3659457,
+      "sha256": "217bd34bdf727fe238b495e1dd3b0c21c287a97461fda16e2855ad42a2abaf87"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/channel_publish.csv",
+      "bytes": 4330421,
+      "sha256": "db4addb77e394457ffbe6e5301abd7beabff9de275a16fe39a28b3e99f1548b2"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/p1.run.observe.log",
+      "bytes": 76448808,
+      "sha256": "c9b6e9a492a8f632edb2606e31ff1c729286dbb4706cb39aac4eaba3aa382ef3"
+    },
+    {
+      "path": "/workdir/hbp-schema2-calendar-selection-20261021/on/upper60/pw0.run.observe.log",
+      "bytes": 81237528,
+      "sha256": "8ed2789cbd2d3bf8959861f91ced6350ce1eeb3a8ee616fe13125dea0b5d5998"
+    }
+  ],
+  "validation_receipts": [
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261021_hbp_schema2_calendar_selection/artifacts/real-validation.json",
+      "bytes": 67992,
+      "sha256": "57f14a8518ba5dc9543104c6ffcefd2dfd944c978aff19ca6b9ea23a8a1ad901"
+    },
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261021_hbp_schema2_calendar_selection/artifacts/single-validation.json",
+      "bytes": 5167,
+      "sha256": "3bf823a8a78d522cb7271591a42bb96e6d9fdefa69be606512831c4ecb97cf70"
+    },
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261021_hbp_schema2_calendar_selection/artifacts/upper60-validation.json",
+      "bytes": 5168,
+      "sha256": "3945caf402069f96d49c04501091f402b0e5b3db2e6b11ffba36cdbd068ed0dd"
+    }
+  ],
+  "release": "local build only; no release, vendoring or deployment"
+}

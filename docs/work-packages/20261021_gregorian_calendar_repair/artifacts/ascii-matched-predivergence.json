@@ -1,0 +1,15 @@
+{
+  "identical_initial_daily_rows": 36524,
+  "first_difference": {
+    "old_key": [
+      "1",
+      "366",
+      "101"
+    ],
+    "new_key": [
+      "1",
+      "1",
+      "101"
+    ]
+  }
+}

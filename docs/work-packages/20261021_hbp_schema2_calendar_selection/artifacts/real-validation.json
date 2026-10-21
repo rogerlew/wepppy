@@ -1,0 +1,1685 @@
+{
+  "case": "real",
+  "roots": [
+    "/workdir/watershed-channel-routing-closure-20261021/real-second-off",
+    "/workdir/hbp-schema2-calendar-selection-20261021/off/real",
+    "/workdir/hbp-schema2-calendar-selection-20261021/on/real"
+  ],
+  "executions": [
+    {
+      "binary": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp",
+      "binary_sha256": "de9df340f45befc21deebeb45245251ce0c33b787efd23370be2e4e467359095",
+      "observe": false,
+      "results": [
+        {
+          "card": "p1.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.98106148885563
+        },
+        {
+          "card": "p10.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.872796623967588
+        },
+        {
+          "card": "p11.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.48090483690612
+        },
+        {
+          "card": "p12.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.780369215179235
+        },
+        {
+          "card": "p13.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.480260381940752
+        },
+        {
+          "card": "p14.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.781636427156627
+        },
+        {
+          "card": "p15.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.329315513139591
+        },
+        {
+          "card": "p16.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.929732639109716
+        },
+        {
+          "card": "p17.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.631209399085492
+        },
+        {
+          "card": "p18.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.4786387081258
+        },
+        {
+          "card": "p19.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.47844047495164
+        },
+        {
+          "card": "p2.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 7.280983787029982
+        },
+        {
+          "card": "p20.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.531202050857246
+        },
+        {
+          "card": "p21.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.632334887050092
+        },
+        {
+          "card": "p22.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.378906135912985
+        },
+        {
+          "card": "p23.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.428178733913228
+        },
+        {
+          "card": "p24.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.27901621395722
+        },
+        {
+          "card": "p25.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.429021584102884
+        },
+        {
+          "card": "p26.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.279577024048194
+        },
+        {
+          "card": "p27.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.1794271930120885
+        },
+        {
+          "card": "p28.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.3796481639146805
+        },
+        {
+          "card": "p3.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.5301530989818275
+        },
+        {
+          "card": "p4.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.529252874199301
+        },
+        {
+          "card": "p5.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.32846543402411
+        },
+        {
+          "card": "p6.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.530039179138839
+        },
+        {
+          "card": "p7.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.329219315201044
+        },
+        {
+          "card": "p8.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.231911184033379
+        },
+        {
+          "card": "p9.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 6.3293689580168575
+        },
+        {
+          "card": "pw0.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 35.73862211708911
+        }
+      ],
+      "output_manifest": {
+        "H1.ebe.dat": "396b62ccd9056fdb26d25cba863f1539d87795713a19942d1d01aef9775d2bb8",
+        "H1.element.dat": "a0aa1bb207cc032170116e939d362a1b510ef99a3a5212e82d461adee31d906a",
+        "H1.hbp": "80d4146e7272ce953f3c106cb90cb9a50a6e2b6961aa35c207ddf2b91098ca54",
+        "H1.loss.dat": "d808231e6a2e009585e9d89c98e9b955d6de2c505908140ef47a005f0ec80ea8",
+        "H1.plot.dat": "196030a05df6702a741b4056718fa992053503523411d72756a0cbece18e3c71",
+        "H1.soil.dat": "b7c934f3e0c2034dd176a284da6063f0758f03aabc29a172280c02a380c12de0",
+        "H1.wat.dat": "fd825c9c9f49c196899844a04344f2e41cd81f2af62383564686cb38efcea5a9",
+        "H10.ebe.dat": "6799078fe234657b1e950334321736e962d7d612598be669a8d08beb69149813",
+        "H10.element.dat": "d452209877dfae897b9613d5dba94bd069769dad7105e7c67ec33886d803c59c",
+        "H10.hbp": "997f25f803a2bb9949d1f1fc5368d14f99ab3c27a10503ee882866b22cfe9447",
+        "H10.loss.dat": "ec92087b6aa3ba82d75813af031a685cd110a22e72abdf8dc0a12c5e5bd12172",
+        "H10.plot.dat": "7e771f07ff955d9663efb5942889fb804c57f1fc8e9dcc23ae35b0b299ebc949",
+        "H10.soil.dat": "ca945a0bd638ec157cb00a56d000c4687936dcfb915fe52460ff3bdd7f129f67",
+        "H10.wat.dat": "5e0e5c0baf773704eb95cdbd8c2c259101076f80c9c482a55709619e73eff137",
+        "H11.ebe.dat": "b218b6ef99e0b188b10b292a732fb8e6988e4af6f0bf2ca6a74a74d55c9d6c37",
+        "H11.element.dat": "f9b157b6fe3e50a33a66a18d50f1cc0fd801797aa30dbec39ba53a815a752461",
+        "H11.hbp": "13358bcb78ab3b57bd1a7a55e96e0f13cb0caa94bf8db063f1fdbcc23a58e735",
+        "H11.loss.dat": "5755c36d9906385afdb65bc010e177e58e7c896d30eff2c5c819aad8fcb2c8bb",
+        "H11.plot.dat": "5acf2fbf725e694903fc9d87253a602f367cc262cf8531d346c0f5df92cc6714",
+        "H11.soil.dat": "145e9feb1d7ba8bc486560bededd0c143ad9d1f8dea0aa9b697c951da6ee447d",
+        "H11.wat.dat": "5577c6d68f11bf7987163e9287cb3848276b0689980949b42dc64d948a504be9",
+        "H12.ebe.dat": "6469aec5a6b987884415479d4abea5a6748be72863b83dbdf2ab631398c6862c",
+        "H12.element.dat": "48c2d32491aaeb774d391153909d5d8197baf3a9d4b29beb06202d25759495f4",
+        "H12.hbp": "e6db753f159de80b7fecf2cc79368c877a5debb9f8ecfffc0bd7daeb456d4e6f",
+        "H12.loss.dat": "550d29f950d0116e0fde508f6464c4a35c0ae281fe76fb467b0c20d9aa5d0cb4",
+        "H12.plot.dat": "c84d3964373519f6205275f0ce95f434baa6530a243b81ce68dd9a6dea175a3c",
+        "H12.soil.dat": "3a846528dabdf4a540a90a9562119ad64b36aedcad112f8f220b0e43682ab5a0",
+        "H12.wat.dat": "d17800ad3d8c503e234558221c714c7de6b09d0812bfa8d02b281fb63fcb1e9a",
+        "H13.ebe.dat": "115236b183dfa22c1817900b66af7bd4dae8c1c3ca3422af042d29d9210b84ac",
+        "H13.element.dat": "3bd193c07ca83abdb7df93fb6f26628441c7f9730afb6f8167be662195bde15a",
+        "H13.hbp": "ea1569d93d1dc96d905d4dd6f93cbf3421009d94459a75de049bbf588e5a50fe",
+        "H13.loss.dat": "3147059856a69a4e3a231da7831c95a9bf79b690793290697da41a8181facd1a",
+        "H13.plot.dat": "87ad85b8dd967a62a32db2800594885e3d2766eaf7d13710f6482bdbf7a01bdb",
+        "H13.soil.dat": "ab226f3fefc72b9ec5dfcf4a2c6ef4eedd658c865c36d9336efb0cbe177d9a94",
+        "H13.wat.dat": "460efd11419dcca9b897cbba48b5a1033089c7579faa2f3f199a56dba48912ae",
+        "H14.ebe.dat": "687fd78206ecddb2cececa1e69a405410bea69cd343c549189119ca74f5add0d",
+        "H14.element.dat": "c095237bbd8511fea77bd6a47c689f6aea4c273e6239b9887243c03ab8a89cab",
+        "H14.hbp": "a9891dbb2e374b2e6c615f905935115543d13a998e85e87c7296e1a2893b054e",
+        "H14.loss.dat": "74a300283d7c04e9ed10c7a86bca069adf2b2bf3a430a361f9cd44362cb7e711",
+        "H14.plot.dat": "71d5b7d1651bfae9be8128a05cd114ca75d0ea9b2699bd5337bce56689a3ef2d",
+        "H14.soil.dat": "2f44e5c4c40885fe979e221f51906b6edbc32899bffcb63fa032db8636e2990f",
+        "H14.wat.dat": "da259dd04d98f719144a6ad354eed917d75d4115323c33c3c58ad92a040801d9",
+        "H15.ebe.dat": "dcfbaa00827cf342dd1735bfad5baa4e5d97be960195b51575253307b3d7bc9d",
+        "H15.element.dat": "73dcb0d458c79494af50525ed20a9364d2a495bd10970c994081940792a4bcb7",
+        "H15.hbp": "9f87d93f8efd8970054db4fc50a8531517df28f570e326f11ad834b1b81502de",
+        "H15.loss.dat": "b82aa3ecc1a76d4056df72a0d31a6cd4fcfbf383b5c2eb16e25fc9286b5b8a27",
+        "H15.plot.dat": "1419ec8cb635d496879813b0a50e96771bbef0e210a68f75afefbc712c871fe5",
+        "H15.soil.dat": "a61776014ed1467db37828590ede9aed39c2effa848ed93172407cae3674fa5f",
+        "H15.wat.dat": "04c3d9c1ce82ac504cc40e823bad555f934b3657b5b84addd5a972329c0dde5d",
+        "H16.ebe.dat": "ceedaaf0ef5765cc7e451db562ef206b0cad6a697aed776c193c6616a105ee25",
+        "H16.element.dat": "bfd8736f5f340160974f188653c65c8fc4b9279659b7f3d6915d0dae7b8ea3d0",
+        "H16.hbp": "3c4530dbb5c85df61f305396b244f8863996a8b0a13c3b0edd7b222d4bb06bbe",
+        "H16.loss.dat": "a4bdbdd1c43e16e11af249c1ef2943086d802c8bf0fb48cdd4acb60d9c799f61",
+        "H16.plot.dat": "998e764bde7c9974bbca03c588ea52db189cf1a16603a0fce968ef435ba8e85b",
+        "H16.soil.dat": "67750d8da7030dbc2e6c48a0bb2aa67c7d104cfeb7c8dc306dcc5ff384f5ab50",
+        "H16.wat.dat": "ee70b3b476ae19de79793af1769bbc68d4f162ef872de5e79e684e80b1945726",
+        "H17.ebe.dat": "76aaebd649f656cd8b443ff0bca0c43c99d82778dcabdf6e61f7a9bd4a9f0a4f",
+        "H17.element.dat": "567662ddd711c7e4f4c2551f0465fc8844459a555d405822ae1f8f322dc36593",
+        "H17.hbp": "8a81f088ecc010d3e43224c4b504ebb3674df869ed7b9bb0d33d0eb5f33d5ef7",
+        "H17.loss.dat": "64fab1ad3a8dea6759b1d50d38c47f7deaa7347965e52180140246fbdd637516",
+        "H17.plot.dat": "66f34d6a80fcd365b0f6fd9bb1dc9ba72b5e85a66cdcd551864d96abd5249cd5",
+        "H17.soil.dat": "e7dd483052158460b6786740210d497e2ac6f21e05618d66aa6a7d3d4e31eacb",
+        "H17.wat.dat": "29bea9f0077863ac860b56b87389cee8a0d1474ccd524939bab9b8d91507ec0d",
+        "H18.ebe.dat": "5661c93efd30286b477aab5ddf5dc829eda471b82cc665d3794ad4e6a71d459c",
+        "H18.element.dat": "de690139814cf19fb7b52f1983c28496e65b6395f2a941c0dd6d0238bd129fc4",
+        "H18.hbp": "1cf8e2d7e45f5aabea3025ef184156276e86b905e180e5b9fda0346d508e9ab9",
+        "H18.loss.dat": "0b64d93106a6ee3749e8a04d947f7907b7f7d8e153ffa5f2e405cf66ac4e4cff",
+        "H18.plot.dat": "8d38027bc98694a17dcc3b65f7aded36070e72e2783060c20b45e5353fedfec3",
+        "H18.soil.dat": "d546f335a2e694b38a79a637ec17c569f0e3ace7573422e470eeb852bd123c2c",
+        "H18.wat.dat": "9419844a0bc6cd71ed6a2d029124e92ce90e9cf318cc4b9bf12e748dfe990373",
+        "H19.ebe.dat": "f425207b67068880df7f8c5a90f37aeff3e96dd3e0ce5ea45b4b03ec5b71ced0",
+        "H19.element.dat": "5dda208f2e2f69755c5ed66609319ddf052cc4b785276cd0a2008666be323df8",
+        "H19.hbp": "8b6bf1a0f664f4176721fcc350ae51641ceb5952b5504b6d465929b39f744228",
+        "H19.loss.dat": "c3a5a1bd82d700fa49113027f25b36f5ffcd39b88a05e3980fab3af0438b5db0",
+        "H19.plot.dat": "e42f5faed892b8d27813e0155c0a15200f0a3d4eecee814405d4c26d8c150651",
+        "H19.soil.dat": "668cd807d03af549d5a47663432778ddfccfee414d72c3eb4d6f19d83aa9cdfe",
+        "H19.wat.dat": "81d13cd0d03e9411d0e5d1f67930512dd887fe50a4a27e6f53e794fa38ad20f1",
+        "H2.ebe.dat": "6df3b70b1f1b9e8223ff777113518de58b665fe01318b20a467f4ee24e986a44",
+        "H2.element.dat": "0466c95c55478737f5cd394c5266e339c8f8ab03d4ef61cc96c7ba9982c3e535",
+        "H2.hbp": "3de08a844ab3e0550f58b49b1434a933cce370db22b21ad2076fcb8268710567",
+        "H2.loss.dat": "3131f811b13a7da76128514fade6a8acaf54e01a10e486a748a20195e942d378",
+        "H2.plot.dat": "35f64c0c5ec110fac8f3ce3563b566f2c71b78ceed5d0f045caec06e002bfab1",
+        "H2.soil.dat": "5fb7771286ece4fcb80fbd63b1566379430df9351bac98b273bb54156232b969",
+        "H2.wat.dat": "aa9c1b91dd75838e3f6ba6116bd621277dcb7f5d084f72950eaf8f913a6277fe",
+        "H20.ebe.dat": "613c91e698fa09ccd34bcc76fede58154946d73c471bef6571b1da84d33d8733",
+        "H20.element.dat": "254762225f49ec70279798a2f69ae5e774a38f240a1b67d7015ba24f5998dced",
+        "H20.hbp": "d7c4fe5625c2e4ba3f7a143c2bd8c261b21634a559530a7f1e20d4d29775b011",
+        "H20.loss.dat": "933099dcbec5724b7e7046ae6132eac688315cc872b30322139a463b2f2b7d3d",
+        "H20.plot.dat": "f2275b6f2f16511b3d9228f64dc4ac9e29c2eeed0b5f338b89348248683b6c22",
+        "H20.soil.dat": "2a07c5ae9c3adfb93681194de2f10b37b8b0b3d2eb7a8055a8bd3b053dd4985f",
+        "H20.wat.dat": "a6df8bd50931b1b6e969ab5626fe3b6ca01d9eb384135d42cea7793d2bae8e4a",
+        "H21.ebe.dat": "3db180b79b7a58925bc72e8a75e5f8330bf9348298d1e38f8bb0ae75da1d5dad",
+        "H21.element.dat": "6f1fe1e1e821d327928401e6b20d11c7bc4701bbc009bbdf2a96eb9a3d324938",
+        "H21.hbp": "c271295803d523ea2bff1aa714178698463584397d2ae25f6d5128f1bb75bfa2",
+        "H21.loss.dat": "9696ea3276bb069992018f7442f4c641b7a875ec5a91447a9e24012dc3d1cdbe",
+        "H21.plot.dat": "c081ad2dc6af5119980319389b0fe46f498c0fbb7c5f54d1c76f9c5643f4893c",
+        "H21.soil.dat": "82dfcc9484507a6997955ed039dd50b0a63e35ebd804069bf264ea5310c33cff",
+        "H21.wat.dat": "a901a5b5aa29ca153bf2f4313c752fe23c79a79274a3a99741a81caee6dfa322",
+        "H22.ebe.dat": "546b40e4831acca445bc27c6aa31d5be9741cae7224ff27f587b50d949e1493e",
+        "H22.element.dat": "9212861d56d8f0c8fd66c6d68e7cededae561437a11c97f32ab19014ac528bcd",
+        "H22.hbp": "f6f3ebd47c7548eb85313d993f282f19b50f78811a7465cadaffa105aca53e73",
+        "H22.loss.dat": "f3eaea1e16025aec4242b452c8334e7cbaca78e3167e5ee42be9e591496e6867",
+        "H22.plot.dat": "d69d2a720d04ae39d3373a456e1d86c93b6d706d4afa76d4848e922558ea7f70",
+        "H22.soil.dat": "1df7c6e47e8b81325f3831f929d6610a60fbca49ec44b7fc3afa2a99a47c6651",
+        "H22.wat.dat": "d4b41fd86f9f87189fad14fe09bdfad9415a274a535b3dc04f6fbb870b21116f",
+        "H23.ebe.dat": "483e7c37bdd94ef098c9f8dd65b1827c01c77f33d36b493cc5b2161472023fd3",
+        "H23.element.dat": "33a4100b401abaaf95235254ddddfee44c065fba8328ecf30e0ccac11ca16a9e",
+        "H23.hbp": "f2caecff57bed5615730130cdf8829148c2d89163a30804d60ada316ba4fdb60",
+        "H23.loss.dat": "ab071c9d177fec1eef031726d66590784279402f556e07cdcbf859e57f8b56dd",
+        "H23.plot.dat": "6ff60b504c1d5904b024fe25cf407bef696ae306e7be54d8d41087a988d055b7",
+        "H23.soil.dat": "d15d73bb08ec2bdc9259cd795479ce15bfec3b26ee893ca2db6dece072c9893a",
+        "H23.wat.dat": "929714075402f43e6a19cfea6fde3fb56a32b4b044f1f7def1789017a314f34c",
+        "H24.ebe.dat": "b41e8da70cc4b0f61f3273cd2223a5c21207f4430b00d47533d4f6223688825c",
+        "H24.element.dat": "2d0c9b6186b519968c863a5904f6f7b0151561121b829422a15ae11c04512050",
+        "H24.hbp": "c1fd25ea25d54752b8ad6cb3d57fa64958963e7e15f9bfce1bb3a8c4b4de23dc",
+        "H24.loss.dat": "da18cb1e7dc96a88b7379fdba2b773402b52d1951a1541a72a604feb5b8160e4",
+        "H24.plot.dat": "5397e94eaa8fc3e85a5cab79667f0674bd765333a635dbd387d042dc2d755338",
+        "H24.soil.dat": "223c93eecabfe562f709a69a24576d06cb4dc97b3ac45c344ee1bcde6a135f6e",
+        "H24.wat.dat": "4b5fc3103e624aefebc8f8219ce16596d92ac605992c9f7607e780d07a90bdfa",
+        "H25.ebe.dat": "c1a1f2db28b6e02f62ea949dadec45d08bbd8b2460499e3876b7ba9087e6af07",
+        "H25.element.dat": "272eb558f49579513fe35f8d06a86d48d58199d37d6d3a4234dd2482ac565e39",
+        "H25.hbp": "06b251c6ecf6aab2f585309bed878528a2f721e667b9b60b6c71dc872f02957f",
+        "H25.loss.dat": "fff5b5488104215d8692c94c28b1ef785293eea9f9564a93e75b71f5e3579947",
+        "H25.plot.dat": "105339638c2ab9d3c773325cf3efef1851c76a6176e7483f80fa19d317d3a1eb",
+        "H25.soil.dat": "a137720a31fcd63c8d5cf93987b2b3195590986a0a8d474cea28acddf2aa1690",
+        "H25.wat.dat": "b2cff971e752e331dc9d8d23d23e210da5a0774db0fcd015f30155218abe45f5",
+        "H26.ebe.dat": "ad45df6881e56b306e7ca1a7b6bc4f877014f8156982d705c6fa638ab5a7a90d",
+        "H26.element.dat": "1d58723557279993ff961d0c0c4339ea6c3e05796dca6db047d2c07f65272444",
+        "H26.hbp": "f5a9bad13738e4dca740ff8356812508fd598aa0cbb8c7b8bd3c1b325f6a39eb",
+        "H26.loss.dat": "a57fec67879b115010302ffc4e88ad8b0f3a03c191c63562ce63bde509e3725f",
+        "H26.plot.dat": "8d5790af756d580b30d8bbcc2ef0e029e713abf9045097f8966f2064d520ee3b",
+        "H26.soil.dat": "16a39cd6a425d70794809d9d3002b8a1fd3fceda0878c778b73d6754b295a1f8",
+        "H26.wat.dat": "c61bbac41740fdf95b31b988528bcd274ebfcc270c15a5b1008f19bad90b77d0",
+        "H27.ebe.dat": "488493a2e642f87c09bc921ca0154d55ce1dec5bdaf2b7ebe40ed39d0f055c28",
+        "H27.element.dat": "fb9e214889c8b72a71abf620caa94443883afc3e5bd65ccdfe15f010a5a31787",
+        "H27.hbp": "4cbf341f793061d9ad8e1c9f2b4958ec861f42426996aa63b8216ca917145d49",
+        "H27.loss.dat": "b59c0e55d8cca1ba55f0a4cef35a968187c9a3b46f880133e4d7b92273b1ffb1",
+        "H27.plot.dat": "5ffd8079adbe5e6edea7db081bff45fd93b843c121e5cd16ce8cd3834195d096",
+        "H27.soil.dat": "c102d6096633fe996f6b8a444be075452e9b6956b97fb52cd7607a4d86b7b03f",
+        "H27.wat.dat": "0d5d38a55f8a119bb0d6df54b4aa80a815dbb61f0d85babec20bf4767ce171eb",
+        "H28.ebe.dat": "e257d4de80df3a29565b09211cfeb08b2523d5b57be86d64c9629319c36b6027",
+        "H28.element.dat": "80ed5924b864c9c88a6926a152de2edc08dd2ac844626443b013e173df265e4f",
+        "H28.hbp": "2724655d33c09b418fcf3d65d5d0c0154c06965d84d987546e9e45518b621cde",
+        "H28.loss.dat": "e638c71b5719d4e13d5612a585e20e27b18d33a2180f0bdad41af74637b1af01",
+        "H28.plot.dat": "e86da91e990259498a68eb4359634b92f93c10e1e549b6c1f0da3199ccd5e2fb",
+        "H28.soil.dat": "67b47b9ffc84f52caf51f4c3bd9eb0977b7f74ac13e6b0c6ce79d1ca2c69b80d",
+        "H28.wat.dat": "8b200d92540be16655231df4748b3611b400984cb8aaf2de85723b5cabf45cfc",
+        "H3.ebe.dat": "1502e8b0cd70f53c4b84e2ff94df001c47b55f17340e3b8e2aca9a9ea31fb44e",
+        "H3.element.dat": "44bf7e339eda6a704ba0ada4fdc07c742730dc865c087fbc0cc0d0bb5a08a675",
+        "H3.hbp": "b406e0eb4759027312914236a1cea06afde0e9a50ac868841e5452722f9f84a3",
+        "H3.loss.dat": "ae67adeaf467475dee5c8c6878b717350a5ccc40b6180ca8f19569ea589a7dd8",
+        "H3.plot.dat": "b57019c69926ed6cbf9aa5b0614ade85a1650253fe51c860c9023e3e11a62b83",
+        "H3.soil.dat": "7ebebf1085b49100fc076c198908fb417724aceba1536f9790f3298e8a70d7d1",
+        "H3.wat.dat": "478cffb277e39478ecc4296cd1b928e96210f10573b52afd4ab5f946b0091281",
+        "H4.ebe.dat": "4fc5461bb6bfdfeecad9569db432d1b9e89f39e3ef639de970489d1714bae114",
+        "H4.element.dat": "e12eb1c9925f22c2e9fefa9a3eff70dd8a81e1d06152c6a65b74932fc8b01247",
+        "H4.hbp": "aa001d210a3035c03804163593de31375e71c42b54ba8150752213166dc59e04",
+        "H4.loss.dat": "706effdee965c59c740c742fec446716ca14f1ed64034a9583fded31b5736173",
+        "H4.plot.dat": "a3183fdf02ea3515c02d656ae8eff4b2e7c3be7fa9e291c6d054f4215f776439",
+        "H4.soil.dat": "d768bfa7a4d06c13f909640ae8952319dee37c9fa265e5cdce7c13cd77bf409f",
+        "H4.wat.dat": "a70962ff950715ab3382b2a79efb4b694b12ff0405221bd1b32ef76e184cdf59",
+        "H5.ebe.dat": "60daec9363d5afd63089425bf5076286f8560b1c52a482ca60302ccac7b4c31f",
+        "H5.element.dat": "cb2805b3002c7409e41a5a6370278d0a07658445f43cb3c216067acff1fe8a2a",
+        "H5.hbp": "4e80c7bdd04dddc5319ece6aa0e28678afcead03eb41749bd5446a9eeb1a9cf4",
+        "H5.loss.dat": "ed0d27955baaaf4350011c208a384c0c5cbe92a4dbeb4ee88ba2c1c343b9b520",
+        "H5.plot.dat": "a2d2e2facc5d3c6da4412fce81fb63ca6250f334b0918bc82a0ef477fc2ee671",
+        "H5.soil.dat": "1435cf1a7106ccd2a297d57ca7144310847ae3f19d21b4796464b687ed09e3e8",
+        "H5.wat.dat": "c2ebab2ec2be433f536f4e07da9839b0867ccd31ef18a310a0dd53d50867d099",
+        "H6.ebe.dat": "33a19edabead955f0f4d960dac651181f5d3ceec5ce722881bb8961edc7677b4",
+        "H6.element.dat": "5c106ef4dc13fd329ae646d963516993033aaa7ab1db45eef2a086afdbc316ce",
+        "H6.hbp": "721f02895496bae839b450863b900f479a68f56c28d5cf02ecbcc81d8a6023c4",
+        "H6.loss.dat": "b91eb7d9313372e56e2ce0e9b81b955bbb3849a7a613d83b1c1e86f07a85cc63",
+        "H6.plot.dat": "abd4ac6703df25df67e1862b46541f0f45be60b4f8b42374c47e4b049ce67b7b",
+        "H6.soil.dat": "24a6fde21108c36da1160e9479d7ac5d5847a3f9e5cb085e0e3ce29457ef7e5f",
+        "H6.wat.dat": "d55edf464cb8d3647bbea3f1d89965678aa646aa5ce2539db03f2799789745e3",
+        "H7.ebe.dat": "52363a32ceaf7c30ca0a827b50426af3ef34e2428c5a6f59dcd3e3c5fa8f4e49",
+        "H7.element.dat": "b0a23069c722eb4925d1bd23b6d7ff9cc319af55f6a5103ace21cb2ad4d33db3",
+        "H7.hbp": "98d245ba174c6c4374c3098197d9775571f3e5780873e65466e74ef0e89dd541",
+        "H7.loss.dat": "d16786dbcd7c439aabf775eb6adb8f8daddf6a9ad99649d8f795949cb02a1101",
+        "H7.plot.dat": "0531c4294f8f47606557479508cc55b2f04bdaeae4cffca2d59ba334e1244308",
+        "H7.soil.dat": "76de58978028f7fae8a4243bae31a1af9119251adcf46c06ad8abca04b25d5f8",
+        "H7.wat.dat": "fac69862b34ec56b65166b6c9797679784fbb01076687e9296da301f55b67078",
+        "H8.ebe.dat": "ca70275ddb9fd94eedc67ca35b73f54e57347cf5ee81f0d77c37ed27c7c1d028",
+        "H8.element.dat": "e73e5a4ba297c2f0366c13c0b5769f87425bb1d54a66044b5f4efa2d072c8c3c",
+        "H8.hbp": "550f9c7cb0bc1c37b23b487f34b3a787198d13d3408ca6dc4c7b3ee9e34df6f0",
+        "H8.loss.dat": "a6d99b7734cb15397d9184348368bb4dd6e3eb8f3271ee2f039652d9743423c7",
+        "H8.plot.dat": "87b13946b85d2a2a13ea604688b2ced6ee6971e2688a1de2bcbb384899e415ef",
+        "H8.soil.dat": "21438669dbecc2c49da9ad1ac041d4d02d9ece13bae3f5d4bf5c098a49a9e665",
+        "H8.wat.dat": "de15d3639cecce84172931e2ea3d37f357a288a0b81e87e09c007ecf297157ac",
+        "H9.ebe.dat": "c4e5ed2c1045f34a195f4cc9ad8549b3dd8ef6410c26dc15b5335b232543f94c",
+        "H9.element.dat": "9b7505d664e1069b59cbd49d9a9f82567e5adf223f9500f88dde91af2f7dcef5",
+        "H9.hbp": "5a7ada0ba95a1bfc37979afae205b5a328d40aaabf2d31ed23b14ace1651c204",
+        "H9.loss.dat": "bfd166ee891c23292e57bad1aee24fe0c650b055367149d08ec76f3c6ce93499",
+        "H9.plot.dat": "e207479b8a415e055235da256a767416b97a0cfed80cf325115426a1f27fa092",
+        "H9.soil.dat": "04529ad56bdf3fa61735011837dd66ef013507c0f25e94566d0376a87a5e1632",
+        "H9.wat.dat": "7f3da4cdacf682beb28e5403a7c4b80d493590df963755fc94d982d6bd00acc3",
+        "chnwb.txt": "7b009f371d575c17c40044eb23333ba5d8574e295c8be03ea17f185c9d6b3b41",
+        "ebe_pw0.txt": "a72870acf8b791af70ce8b52a8c90c649889d12527300254965a3baf8a876ed7",
+        "loss_pw0.txt": "c1579ea80064c95b7f0faa087a520c1c7151bb209a0173d6faa2c4ab254c203a",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "6bdaa1916559a0b3609bc6a79c50cca060e092e8c6f4dd1e77e18225bb870c1d"
+      }
+    },
+    {
+      "binary": "/workdir/hbp-schema2-calendar-selection-20261021/candidate-source/src/wepp",
+      "binary_sha256": "de9df340f45befc21deebeb45245251ce0c33b787efd23370be2e4e467359095",
+      "observe": true,
+      "results": [
+        {
+          "card": "p1.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 14.554653201019391
+        },
+        {
+          "card": "p10.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 14.05168807390146
+        },
+        {
+          "card": "p11.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.948948821984231
+        },
+        {
+          "card": "p12.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.848671202082187
+        },
+        {
+          "card": "p13.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 20.86550008994527
+        },
+        {
+          "card": "p14.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.4006412550807
+        },
+        {
+          "card": "p15.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 20.21407719491981
+        },
+        {
+          "card": "p16.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.247282715979964
+        },
+        {
+          "card": "p17.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.394893603865057
+        },
+        {
+          "card": "p18.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.345252292929217
+        },
+        {
+          "card": "p19.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.29534374200739
+        },
+        {
+          "card": "p2.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.198015404865146
+        },
+        {
+          "card": "p20.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.994102516910061
+        },
+        {
+          "card": "p21.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.092648697085679
+        },
+        {
+          "card": "p22.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.19235477806069
+        },
+        {
+          "card": "p23.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.542755075031891
+        },
+        {
+          "card": "p24.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.743231587810442
+        },
+        {
+          "card": "p25.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 13.04410174395889
+        },
+        {
+          "card": "p26.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.942378551932052
+        },
+        {
+          "card": "p27.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.942738321144134
+        },
+        {
+          "card": "p28.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.742296903161332
+        },
+        {
+          "card": "p3.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 20.658987603150308
+        },
+        {
+          "card": "p4.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.939042954938486
+        },
+        {
+          "card": "p5.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 20.262284555006772
+        },
+        {
+          "card": "p6.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.842279455857351
+        },
+        {
+          "card": "p7.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.642662617145106
+        },
+        {
+          "card": "p8.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.993700437946245
+        },
+        {
+          "card": "p9.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 12.94449813500978
+        },
+        {
+          "card": "pw0.run",
+          "returncode": 0,
+          "success": true,
+          "seconds": 237.29524154379033
+        }
+      ],
+      "output_manifest": {
+        "H1.ebe.dat": "396b62ccd9056fdb26d25cba863f1539d87795713a19942d1d01aef9775d2bb8",
+        "H1.element.dat": "a0aa1bb207cc032170116e939d362a1b510ef99a3a5212e82d461adee31d906a",
+        "H1.hbp": "80d4146e7272ce953f3c106cb90cb9a50a6e2b6961aa35c207ddf2b91098ca54",
+        "H1.loss.dat": "d808231e6a2e009585e9d89c98e9b955d6de2c505908140ef47a005f0ec80ea8",
+        "H1.plot.dat": "196030a05df6702a741b4056718fa992053503523411d72756a0cbece18e3c71",
+        "H1.soil.dat": "b7c934f3e0c2034dd176a284da6063f0758f03aabc29a172280c02a380c12de0",
+        "H1.wat.dat": "fd825c9c9f49c196899844a04344f2e41cd81f2af62383564686cb38efcea5a9",
+        "H10.ebe.dat": "6799078fe234657b1e950334321736e962d7d612598be669a8d08beb69149813",
+        "H10.element.dat": "d452209877dfae897b9613d5dba94bd069769dad7105e7c67ec33886d803c59c",
+        "H10.hbp": "997f25f803a2bb9949d1f1fc5368d14f99ab3c27a10503ee882866b22cfe9447",
+        "H10.loss.dat": "ec92087b6aa3ba82d75813af031a685cd110a22e72abdf8dc0a12c5e5bd12172",
+        "H10.plot.dat": "7e771f07ff955d9663efb5942889fb804c57f1fc8e9dcc23ae35b0b299ebc949",
+        "H10.soil.dat": "ca945a0bd638ec157cb00a56d000c4687936dcfb915fe52460ff3bdd7f129f67",
+        "H10.wat.dat": "5e0e5c0baf773704eb95cdbd8c2c259101076f80c9c482a55709619e73eff137",
+        "H11.ebe.dat": "b218b6ef99e0b188b10b292a732fb8e6988e4af6f0bf2ca6a74a74d55c9d6c37",
+        "H11.element.dat": "f9b157b6fe3e50a33a66a18d50f1cc0fd801797aa30dbec39ba53a815a752461",
+        "H11.hbp": "13358bcb78ab3b57bd1a7a55e96e0f13cb0caa94bf8db063f1fdbcc23a58e735",
+        "H11.loss.dat": "5755c36d9906385afdb65bc010e177e58e7c896d30eff2c5c819aad8fcb2c8bb",
+        "H11.plot.dat": "5acf2fbf725e694903fc9d87253a602f367cc262cf8531d346c0f5df92cc6714",
+        "H11.soil.dat": "145e9feb1d7ba8bc486560bededd0c143ad9d1f8dea0aa9b697c951da6ee447d",
+        "H11.wat.dat": "5577c6d68f11bf7987163e9287cb3848276b0689980949b42dc64d948a504be9",
+        "H12.ebe.dat": "6469aec5a6b987884415479d4abea5a6748be72863b83dbdf2ab631398c6862c",
+        "H12.element.dat": "48c2d32491aaeb774d391153909d5d8197baf3a9d4b29beb06202d25759495f4",
+        "H12.hbp": "e6db753f159de80b7fecf2cc79368c877a5debb9f8ecfffc0bd7daeb456d4e6f",
+        "H12.loss.dat": "550d29f950d0116e0fde508f6464c4a35c0ae281fe76fb467b0c20d9aa5d0cb4",
+        "H12.plot.dat": "c84d3964373519f6205275f0ce95f434baa6530a243b81ce68dd9a6dea175a3c",
+        "H12.soil.dat": "3a846528dabdf4a540a90a9562119ad64b36aedcad112f8f220b0e43682ab5a0",
+        "H12.wat.dat": "d17800ad3d8c503e234558221c714c7de6b09d0812bfa8d02b281fb63fcb1e9a",
+        "H13.ebe.dat": "115236b183dfa22c1817900b66af7bd4dae8c1c3ca3422af042d29d9210b84ac",
+        "H13.element.dat": "3bd193c07ca83abdb7df93fb6f26628441c7f9730afb6f8167be662195bde15a",
+        "H13.hbp": "ea1569d93d1dc96d905d4dd6f93cbf3421009d94459a75de049bbf588e5a50fe",
+        "H13.loss.dat": "3147059856a69a4e3a231da7831c95a9bf79b690793290697da41a8181facd1a",
+        "H13.plot.dat": "87ad85b8dd967a62a32db2800594885e3d2766eaf7d13710f6482bdbf7a01bdb",
+        "H13.soil.dat": "ab226f3fefc72b9ec5dfcf4a2c6ef4eedd658c865c36d9336efb0cbe177d9a94",
+        "H13.wat.dat": "460efd11419dcca9b897cbba48b5a1033089c7579faa2f3f199a56dba48912ae",
+        "H14.ebe.dat": "687fd78206ecddb2cececa1e69a405410bea69cd343c549189119ca74f5add0d",
+        "H14.element.dat": "c095237bbd8511fea77bd6a47c689f6aea4c273e6239b9887243c03ab8a89cab",
+        "H14.hbp": "a9891dbb2e374b2e6c615f905935115543d13a998e85e87c7296e1a2893b054e",
+        "H14.loss.dat": "74a300283d7c04e9ed10c7a86bca069adf2b2bf3a430a361f9cd44362cb7e711",
+        "H14.plot.dat": "71d5b7d1651bfae9be8128a05cd114ca75d0ea9b2699bd5337bce56689a3ef2d",
+        "H14.soil.dat": "2f44e5c4c40885fe979e221f51906b6edbc32899bffcb63fa032db8636e2990f",
+        "H14.wat.dat": "da259dd04d98f719144a6ad354eed917d75d4115323c33c3c58ad92a040801d9",
+        "H15.ebe.dat": "dcfbaa00827cf342dd1735bfad5baa4e5d97be960195b51575253307b3d7bc9d",
+        "H15.element.dat": "73dcb0d458c79494af50525ed20a9364d2a495bd10970c994081940792a4bcb7",
+        "H15.hbp": "9f87d93f8efd8970054db4fc50a8531517df28f570e326f11ad834b1b81502de",
+        "H15.loss.dat": "b82aa3ecc1a76d4056df72a0d31a6cd4fcfbf383b5c2eb16e25fc9286b5b8a27",
+        "H15.plot.dat": "1419ec8cb635d496879813b0a50e96771bbef0e210a68f75afefbc712c871fe5",
+        "H15.soil.dat": "a61776014ed1467db37828590ede9aed39c2effa848ed93172407cae3674fa5f",
+        "H15.wat.dat": "04c3d9c1ce82ac504cc40e823bad555f934b3657b5b84addd5a972329c0dde5d",
+        "H16.ebe.dat": "ceedaaf0ef5765cc7e451db562ef206b0cad6a697aed776c193c6616a105ee25",
+        "H16.element.dat": "bfd8736f5f340160974f188653c65c8fc4b9279659b7f3d6915d0dae7b8ea3d0",
+        "H16.hbp": "3c4530dbb5c85df61f305396b244f8863996a8b0a13c3b0edd7b222d4bb06bbe",
+        "H16.loss.dat": "a4bdbdd1c43e16e11af249c1ef2943086d802c8bf0fb48cdd4acb60d9c799f61",
+        "H16.plot.dat": "998e764bde7c9974bbca03c588ea52db189cf1a16603a0fce968ef435ba8e85b",
+        "H16.soil.dat": "67750d8da7030dbc2e6c48a0bb2aa67c7d104cfeb7c8dc306dcc5ff384f5ab50",
+        "H16.wat.dat": "ee70b3b476ae19de79793af1769bbc68d4f162ef872de5e79e684e80b1945726",
+        "H17.ebe.dat": "76aaebd649f656cd8b443ff0bca0c43c99d82778dcabdf6e61f7a9bd4a9f0a4f",
+        "H17.element.dat": "567662ddd711c7e4f4c2551f0465fc8844459a555d405822ae1f8f322dc36593",
+        "H17.hbp": "8a81f088ecc010d3e43224c4b504ebb3674df869ed7b9bb0d33d0eb5f33d5ef7",
+        "H17.loss.dat": "64fab1ad3a8dea6759b1d50d38c47f7deaa7347965e52180140246fbdd637516",
+        "H17.plot.dat": "66f34d6a80fcd365b0f6fd9bb1dc9ba72b5e85a66cdcd551864d96abd5249cd5",
+        "H17.soil.dat": "e7dd483052158460b6786740210d497e2ac6f21e05618d66aa6a7d3d4e31eacb",
+        "H17.wat.dat": "29bea9f0077863ac860b56b87389cee8a0d1474ccd524939bab9b8d91507ec0d",
+        "H18.ebe.dat": "5661c93efd30286b477aab5ddf5dc829eda471b82cc665d3794ad4e6a71d459c",
+        "H18.element.dat": "de690139814cf19fb7b52f1983c28496e65b6395f2a941c0dd6d0238bd129fc4",
+        "H18.hbp": "1cf8e2d7e45f5aabea3025ef184156276e86b905e180e5b9fda0346d508e9ab9",
+        "H18.loss.dat": "0b64d93106a6ee3749e8a04d947f7907b7f7d8e153ffa5f2e405cf66ac4e4cff",
+        "H18.plot.dat": "8d38027bc98694a17dcc3b65f7aded36070e72e2783060c20b45e5353fedfec3",
+        "H18.soil.dat": "d546f335a2e694b38a79a637ec17c569f0e3ace7573422e470eeb852bd123c2c",
+        "H18.wat.dat": "9419844a0bc6cd71ed6a2d029124e92ce90e9cf318cc4b9bf12e748dfe990373",
+        "H19.ebe.dat": "f425207b67068880df7f8c5a90f37aeff3e96dd3e0ce5ea45b4b03ec5b71ced0",
+        "H19.element.dat": "5dda208f2e2f69755c5ed66609319ddf052cc4b785276cd0a2008666be323df8",
+        "H19.hbp": "8b6bf1a0f664f4176721fcc350ae51641ceb5952b5504b6d465929b39f744228",
+        "H19.loss.dat": "c3a5a1bd82d700fa49113027f25b36f5ffcd39b88a05e3980fab3af0438b5db0",
+        "H19.plot.dat": "e42f5faed892b8d27813e0155c0a15200f0a3d4eecee814405d4c26d8c150651",
+        "H19.soil.dat": "668cd807d03af549d5a47663432778ddfccfee414d72c3eb4d6f19d83aa9cdfe",
+        "H19.wat.dat": "81d13cd0d03e9411d0e5d1f67930512dd887fe50a4a27e6f53e794fa38ad20f1",
+        "H2.ebe.dat": "6df3b70b1f1b9e8223ff777113518de58b665fe01318b20a467f4ee24e986a44",
+        "H2.element.dat": "0466c95c55478737f5cd394c5266e339c8f8ab03d4ef61cc96c7ba9982c3e535",
+        "H2.hbp": "3de08a844ab3e0550f58b49b1434a933cce370db22b21ad2076fcb8268710567",
+        "H2.loss.dat": "3131f811b13a7da76128514fade6a8acaf54e01a10e486a748a20195e942d378",
+        "H2.plot.dat": "35f64c0c5ec110fac8f3ce3563b566f2c71b78ceed5d0f045caec06e002bfab1",
+        "H2.soil.dat": "5fb7771286ece4fcb80fbd63b1566379430df9351bac98b273bb54156232b969",
+        "H2.wat.dat": "aa9c1b91dd75838e3f6ba6116bd621277dcb7f5d084f72950eaf8f913a6277fe",
+        "H20.ebe.dat": "613c91e698fa09ccd34bcc76fede58154946d73c471bef6571b1da84d33d8733",
+        "H20.element.dat": "254762225f49ec70279798a2f69ae5e774a38f240a1b67d7015ba24f5998dced",
+        "H20.hbp": "d7c4fe5625c2e4ba3f7a143c2bd8c261b21634a559530a7f1e20d4d29775b011",
+        "H20.loss.dat": "933099dcbec5724b7e7046ae6132eac688315cc872b30322139a463b2f2b7d3d",
+        "H20.plot.dat": "f2275b6f2f16511b3d9228f64dc4ac9e29c2eeed0b5f338b89348248683b6c22",
+        "H20.soil.dat": "2a07c5ae9c3adfb93681194de2f10b37b8b0b3d2eb7a8055a8bd3b053dd4985f",
+        "H20.wat.dat": "a6df8bd50931b1b6e969ab5626fe3b6ca01d9eb384135d42cea7793d2bae8e4a",
+        "H21.ebe.dat": "3db180b79b7a58925bc72e8a75e5f8330bf9348298d1e38f8bb0ae75da1d5dad",
+        "H21.element.dat": "6f1fe1e1e821d327928401e6b20d11c7bc4701bbc009bbdf2a96eb9a3d324938",
+        "H21.hbp": "c271295803d523ea2bff1aa714178698463584397d2ae25f6d5128f1bb75bfa2",
+        "H21.loss.dat": "9696ea3276bb069992018f7442f4c641b7a875ec5a91447a9e24012dc3d1cdbe",
+        "H21.plot.dat": "c081ad2dc6af5119980319389b0fe46f498c0fbb7c5f54d1c76f9c5643f4893c",
+        "H21.soil.dat": "82dfcc9484507a6997955ed039dd50b0a63e35ebd804069bf264ea5310c33cff",
+        "H21.wat.dat": "a901a5b5aa29ca153bf2f4313c752fe23c79a79274a3a99741a81caee6dfa322",
+        "H22.ebe.dat": "546b40e4831acca445bc27c6aa31d5be9741cae7224ff27f587b50d949e1493e",
+        "H22.element.dat": "9212861d56d8f0c8fd66c6d68e7cededae561437a11c97f32ab19014ac528bcd",
+        "H22.hbp": "f6f3ebd47c7548eb85313d993f282f19b50f78811a7465cadaffa105aca53e73",
+        "H22.loss.dat": "f3eaea1e16025aec4242b452c8334e7cbaca78e3167e5ee42be9e591496e6867",
+        "H22.plot.dat": "d69d2a720d04ae39d3373a456e1d86c93b6d706d4afa76d4848e922558ea7f70",
+        "H22.soil.dat": "1df7c6e47e8b81325f3831f929d6610a60fbca49ec44b7fc3afa2a99a47c6651",
+        "H22.wat.dat": "d4b41fd86f9f87189fad14fe09bdfad9415a274a535b3dc04f6fbb870b21116f",
+        "H23.ebe.dat": "483e7c37bdd94ef098c9f8dd65b1827c01c77f33d36b493cc5b2161472023fd3",
+        "H23.element.dat": "33a4100b401abaaf95235254ddddfee44c065fba8328ecf30e0ccac11ca16a9e",
+        "H23.hbp": "f2caecff57bed5615730130cdf8829148c2d89163a30804d60ada316ba4fdb60",
+        "H23.loss.dat": "ab071c9d177fec1eef031726d66590784279402f556e07cdcbf859e57f8b56dd",
+        "H23.plot.dat": "6ff60b504c1d5904b024fe25cf407bef696ae306e7be54d8d41087a988d055b7",
+        "H23.soil.dat": "d15d73bb08ec2bdc9259cd795479ce15bfec3b26ee893ca2db6dece072c9893a",
+        "H23.wat.dat": "929714075402f43e6a19cfea6fde3fb56a32b4b044f1f7def1789017a314f34c",
+        "H24.ebe.dat": "b41e8da70cc4b0f61f3273cd2223a5c21207f4430b00d47533d4f6223688825c",
+        "H24.element.dat": "2d0c9b6186b519968c863a5904f6f7b0151561121b829422a15ae11c04512050",
+        "H24.hbp": "c1fd25ea25d54752b8ad6cb3d57fa64958963e7e15f9bfce1bb3a8c4b4de23dc",
+        "H24.loss.dat": "da18cb1e7dc96a88b7379fdba2b773402b52d1951a1541a72a604feb5b8160e4",
+        "H24.plot.dat": "5397e94eaa8fc3e85a5cab79667f0674bd765333a635dbd387d042dc2d755338",
+        "H24.soil.dat": "223c93eecabfe562f709a69a24576d06cb4dc97b3ac45c344ee1bcde6a135f6e",
+        "H24.wat.dat": "4b5fc3103e624aefebc8f8219ce16596d92ac605992c9f7607e780d07a90bdfa",
+        "H25.ebe.dat": "c1a1f2db28b6e02f62ea949dadec45d08bbd8b2460499e3876b7ba9087e6af07",
+        "H25.element.dat": "272eb558f49579513fe35f8d06a86d48d58199d37d6d3a4234dd2482ac565e39",
+        "H25.hbp": "06b251c6ecf6aab2f585309bed878528a2f721e667b9b60b6c71dc872f02957f",
+        "H25.loss.dat": "fff5b5488104215d8692c94c28b1ef785293eea9f9564a93e75b71f5e3579947",
+        "H25.plot.dat": "105339638c2ab9d3c773325cf3efef1851c76a6176e7483f80fa19d317d3a1eb",
+        "H25.soil.dat": "a137720a31fcd63c8d5cf93987b2b3195590986a0a8d474cea28acddf2aa1690",
+        "H25.wat.dat": "b2cff971e752e331dc9d8d23d23e210da5a0774db0fcd015f30155218abe45f5",
+        "H26.ebe.dat": "ad45df6881e56b306e7ca1a7b6bc4f877014f8156982d705c6fa638ab5a7a90d",
+        "H26.element.dat": "1d58723557279993ff961d0c0c4339ea6c3e05796dca6db047d2c07f65272444",
+        "H26.hbp": "f5a9bad13738e4dca740ff8356812508fd598aa0cbb8c7b8bd3c1b325f6a39eb",
+        "H26.loss.dat": "a57fec67879b115010302ffc4e88ad8b0f3a03c191c63562ce63bde509e3725f",
+        "H26.plot.dat": "8d5790af756d580b30d8bbcc2ef0e029e713abf9045097f8966f2064d520ee3b",
+        "H26.soil.dat": "16a39cd6a425d70794809d9d3002b8a1fd3fceda0878c778b73d6754b295a1f8",
+        "H26.wat.dat": "c61bbac41740fdf95b31b988528bcd274ebfcc270c15a5b1008f19bad90b77d0",
+        "H27.ebe.dat": "488493a2e642f87c09bc921ca0154d55ce1dec5bdaf2b7ebe40ed39d0f055c28",
+        "H27.element.dat": "fb9e214889c8b72a71abf620caa94443883afc3e5bd65ccdfe15f010a5a31787",
+        "H27.hbp": "4cbf341f793061d9ad8e1c9f2b4958ec861f42426996aa63b8216ca917145d49",
+        "H27.loss.dat": "b59c0e55d8cca1ba55f0a4cef35a968187c9a3b46f880133e4d7b92273b1ffb1",
+        "H27.plot.dat": "5ffd8079adbe5e6edea7db081bff45fd93b843c121e5cd16ce8cd3834195d096",
+        "H27.soil.dat": "c102d6096633fe996f6b8a444be075452e9b6956b97fb52cd7607a4d86b7b03f",
+        "H27.wat.dat": "0d5d38a55f8a119bb0d6df54b4aa80a815dbb61f0d85babec20bf4767ce171eb",
+        "H28.ebe.dat": "e257d4de80df3a29565b09211cfeb08b2523d5b57be86d64c9629319c36b6027",
+        "H28.element.dat": "80ed5924b864c9c88a6926a152de2edc08dd2ac844626443b013e173df265e4f",
+        "H28.hbp": "2724655d33c09b418fcf3d65d5d0c0154c06965d84d987546e9e45518b621cde",
+        "H28.loss.dat": "e638c71b5719d4e13d5612a585e20e27b18d33a2180f0bdad41af74637b1af01",
+        "H28.plot.dat": "e86da91e990259498a68eb4359634b92f93c10e1e549b6c1f0da3199ccd5e2fb",
+        "H28.soil.dat": "67b47b9ffc84f52caf51f4c3bd9eb0977b7f74ac13e6b0c6ce79d1ca2c69b80d",
+        "H28.wat.dat": "8b200d92540be16655231df4748b3611b400984cb8aaf2de85723b5cabf45cfc",
+        "H3.ebe.dat": "1502e8b0cd70f53c4b84e2ff94df001c47b55f17340e3b8e2aca9a9ea31fb44e",
+        "H3.element.dat": "44bf7e339eda6a704ba0ada4fdc07c742730dc865c087fbc0cc0d0bb5a08a675",
+        "H3.hbp": "b406e0eb4759027312914236a1cea06afde0e9a50ac868841e5452722f9f84a3",
+        "H3.loss.dat": "ae67adeaf467475dee5c8c6878b717350a5ccc40b6180ca8f19569ea589a7dd8",
+        "H3.plot.dat": "b57019c69926ed6cbf9aa5b0614ade85a1650253fe51c860c9023e3e11a62b83",
+        "H3.soil.dat": "7ebebf1085b49100fc076c198908fb417724aceba1536f9790f3298e8a70d7d1",
+        "H3.wat.dat": "478cffb277e39478ecc4296cd1b928e96210f10573b52afd4ab5f946b0091281",
+        "H4.ebe.dat": "4fc5461bb6bfdfeecad9569db432d1b9e89f39e3ef639de970489d1714bae114",
+        "H4.element.dat": "e12eb1c9925f22c2e9fefa9a3eff70dd8a81e1d06152c6a65b74932fc8b01247",
+        "H4.hbp": "aa001d210a3035c03804163593de31375e71c42b54ba8150752213166dc59e04",
+        "H4.loss.dat": "706effdee965c59c740c742fec446716ca14f1ed64034a9583fded31b5736173",
+        "H4.plot.dat": "a3183fdf02ea3515c02d656ae8eff4b2e7c3be7fa9e291c6d054f4215f776439",
+        "H4.soil.dat": "d768bfa7a4d06c13f909640ae8952319dee37c9fa265e5cdce7c13cd77bf409f",
+        "H4.wat.dat": "a70962ff950715ab3382b2a79efb4b694b12ff0405221bd1b32ef76e184cdf59",
+        "H5.ebe.dat": "60daec9363d5afd63089425bf5076286f8560b1c52a482ca60302ccac7b4c31f",
+        "H5.element.dat": "cb2805b3002c7409e41a5a6370278d0a07658445f43cb3c216067acff1fe8a2a",
+        "H5.hbp": "4e80c7bdd04dddc5319ece6aa0e28678afcead03eb41749bd5446a9eeb1a9cf4",
+        "H5.loss.dat": "ed0d27955baaaf4350011c208a384c0c5cbe92a4dbeb4ee88ba2c1c343b9b520",
+        "H5.plot.dat": "a2d2e2facc5d3c6da4412fce81fb63ca6250f334b0918bc82a0ef477fc2ee671",
+        "H5.soil.dat": "1435cf1a7106ccd2a297d57ca7144310847ae3f19d21b4796464b687ed09e3e8",
+        "H5.wat.dat": "c2ebab2ec2be433f536f4e07da9839b0867ccd31ef18a310a0dd53d50867d099",
+        "H6.ebe.dat": "33a19edabead955f0f4d960dac651181f5d3ceec5ce722881bb8961edc7677b4",
+        "H6.element.dat": "5c106ef4dc13fd329ae646d963516993033aaa7ab1db45eef2a086afdbc316ce",
+        "H6.hbp": "721f02895496bae839b450863b900f479a68f56c28d5cf02ecbcc81d8a6023c4",
+        "H6.loss.dat": "b91eb7d9313372e56e2ce0e9b81b955bbb3849a7a613d83b1c1e86f07a85cc63",
+        "H6.plot.dat": "abd4ac6703df25df67e1862b46541f0f45be60b4f8b42374c47e4b049ce67b7b",
+        "H6.soil.dat": "24a6fde21108c36da1160e9479d7ac5d5847a3f9e5cb085e0e3ce29457ef7e5f",
+        "H6.wat.dat": "d55edf464cb8d3647bbea3f1d89965678aa646aa5ce2539db03f2799789745e3",
+        "H7.ebe.dat": "52363a32ceaf7c30ca0a827b50426af3ef34e2428c5a6f59dcd3e3c5fa8f4e49",
+        "H7.element.dat": "b0a23069c722eb4925d1bd23b6d7ff9cc319af55f6a5103ace21cb2ad4d33db3",
+        "H7.hbp": "98d245ba174c6c4374c3098197d9775571f3e5780873e65466e74ef0e89dd541",
+        "H7.loss.dat": "d16786dbcd7c439aabf775eb6adb8f8daddf6a9ad99649d8f795949cb02a1101",
+        "H7.plot.dat": "0531c4294f8f47606557479508cc55b2f04bdaeae4cffca2d59ba334e1244308",
+        "H7.soil.dat": "76de58978028f7fae8a4243bae31a1af9119251adcf46c06ad8abca04b25d5f8",
+        "H7.wat.dat": "fac69862b34ec56b65166b6c9797679784fbb01076687e9296da301f55b67078",
+        "H8.ebe.dat": "ca70275ddb9fd94eedc67ca35b73f54e57347cf5ee81f0d77c37ed27c7c1d028",
+        "H8.element.dat": "e73e5a4ba297c2f0366c13c0b5769f87425bb1d54a66044b5f4efa2d072c8c3c",
+        "H8.hbp": "550f9c7cb0bc1c37b23b487f34b3a787198d13d3408ca6dc4c7b3ee9e34df6f0",
+        "H8.loss.dat": "a6d99b7734cb15397d9184348368bb4dd6e3eb8f3271ee2f039652d9743423c7",
+        "H8.plot.dat": "87b13946b85d2a2a13ea604688b2ced6ee6971e2688a1de2bcbb384899e415ef",
+        "H8.soil.dat": "21438669dbecc2c49da9ad1ac041d4d02d9ece13bae3f5d4bf5c098a49a9e665",
+        "H8.wat.dat": "de15d3639cecce84172931e2ea3d37f357a288a0b81e87e09c007ecf297157ac",
+        "H9.ebe.dat": "c4e5ed2c1045f34a195f4cc9ad8549b3dd8ef6410c26dc15b5335b232543f94c",
+        "H9.element.dat": "9b7505d664e1069b59cbd49d9a9f82567e5adf223f9500f88dde91af2f7dcef5",
+        "H9.hbp": "5a7ada0ba95a1bfc37979afae205b5a328d40aaabf2d31ed23b14ace1651c204",
+        "H9.loss.dat": "bfd166ee891c23292e57bad1aee24fe0c650b055367149d08ec76f3c6ce93499",
+        "H9.plot.dat": "e207479b8a415e055235da256a767416b97a0cfed80cf325115426a1f27fa092",
+        "H9.soil.dat": "04529ad56bdf3fa61735011837dd66ef013507c0f25e94566d0376a87a5e1632",
+        "H9.wat.dat": "7f3da4cdacf682beb28e5403a7c4b80d493590df963755fc94d982d6bd00acc3",
+        "chnwb.txt": "7b009f371d575c17c40044eb23333ba5d8574e295c8be03ea17f185c9d6b3b41",
+        "ebe_pw0.txt": "a72870acf8b791af70ce8b52a8c90c649889d12527300254965a3baf8a876ed7",
+        "loss_pw0.txt": "c1579ea80064c95b7f0faa087a520c1c7151bb209a0173d6faa2c4ab254c203a",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "6bdaa1916559a0b3609bc6a79c50cca060e092e8c6f4dd1e77e18225bb870c1d"
+      }
+    }
+  ],
+  "off_on_exact": true,
+  "files_compared": 388,
+  "unchanged_hillslope_files": [
+    "output/H1.ebe.dat",
+    "output/H1.element.dat",
+    "output/H1.hbp",
+    "output/H1.loss.dat",
+    "output/H1.plot.dat",
+    "output/H1.soil.dat",
+    "output/H1.wat.dat",
+    "output/H10.ebe.dat",
+    "output/H10.element.dat",
+    "output/H10.hbp",
+    "output/H10.loss.dat",
+    "output/H10.plot.dat",
+    "output/H10.soil.dat",
+    "output/H10.wat.dat",
+    "output/H11.ebe.dat",
+    "output/H11.element.dat",
+    "output/H11.hbp",
+    "output/H11.loss.dat",
+    "output/H11.plot.dat",
+    "output/H11.soil.dat",
+    "output/H11.wat.dat",
+    "output/H12.ebe.dat",
+    "output/H12.element.dat",
+    "output/H12.hbp",
+    "output/H12.loss.dat",
+    "output/H12.plot.dat",
+    "output/H12.soil.dat",
+    "output/H12.wat.dat",
+    "output/H13.ebe.dat",
+    "output/H13.element.dat",
+    "output/H13.hbp",
+    "output/H13.loss.dat",
+    "output/H13.plot.dat",
+    "output/H13.soil.dat",
+    "output/H13.wat.dat",
+    "output/H14.ebe.dat",
+    "output/H14.element.dat",
+    "output/H14.hbp",
+    "output/H14.loss.dat",
+    "output/H14.plot.dat",
+    "output/H14.soil.dat",
+    "output/H14.wat.dat",
+    "output/H15.ebe.dat",
+    "output/H15.element.dat",
+    "output/H15.hbp",
+    "output/H15.loss.dat",
+    "output/H15.plot.dat",
+    "output/H15.soil.dat",
+    "output/H15.wat.dat",
+    "output/H16.ebe.dat",
+    "output/H16.element.dat",
+    "output/H16.hbp",
+    "output/H16.loss.dat",
+    "output/H16.plot.dat",
+    "output/H16.soil.dat",
+    "output/H16.wat.dat",
+    "output/H17.ebe.dat",
+    "output/H17.element.dat",
+    "output/H17.hbp",
+    "output/H17.loss.dat",
+    "output/H17.plot.dat",
+    "output/H17.soil.dat",
+    "output/H17.wat.dat",
+    "output/H18.ebe.dat",
+    "output/H18.element.dat",
+    "output/H18.hbp",
+    "output/H18.loss.dat",
+    "output/H18.plot.dat",
+    "output/H18.soil.dat",
+    "output/H18.wat.dat",
+    "output/H19.ebe.dat",
+    "output/H19.element.dat",
+    "output/H19.hbp",
+    "output/H19.loss.dat",
+    "output/H19.plot.dat",
+    "output/H19.soil.dat",
+    "output/H19.wat.dat",
+    "output/H2.ebe.dat",
+    "output/H2.element.dat",
+    "output/H2.hbp",
+    "output/H2.loss.dat",
+    "output/H2.plot.dat",
+    "output/H2.soil.dat",
+    "output/H2.wat.dat",
+    "output/H20.ebe.dat",
+    "output/H20.element.dat",
+    "output/H20.hbp",
+    "output/H20.loss.dat",
+    "output/H20.plot.dat",
+    "output/H20.soil.dat",
+    "output/H20.wat.dat",
+    "output/H21.ebe.dat",
+    "output/H21.element.dat",
+    "output/H21.hbp",
+    "output/H21.loss.dat",
+    "output/H21.plot.dat",
+    "output/H21.soil.dat",
+    "output/H21.wat.dat",
+    "output/H22.ebe.dat",
+    "output/H22.element.dat",
+    "output/H22.hbp",
+    "output/H22.loss.dat",
+    "output/H22.plot.dat",
+    "output/H22.soil.dat",
+    "output/H22.wat.dat",
+    "output/H23.ebe.dat",
+    "output/H23.element.dat",
+    "output/H23.hbp",
+    "output/H23.loss.dat",
+    "output/H23.plot.dat",
+    "output/H23.soil.dat",
+    "output/H23.wat.dat",
+    "output/H24.ebe.dat",
+    "output/H24.element.dat",
+    "output/H24.hbp",
+    "output/H24.loss.dat",
+    "output/H24.plot.dat",
+    "output/H24.soil.dat",
+    "output/H24.wat.dat",
+    "output/H25.ebe.dat",
+    "output/H25.element.dat",
+    "output/H25.hbp",
+    "output/H25.loss.dat",
+    "output/H25.plot.dat",
+    "output/H25.soil.dat",
+    "output/H25.wat.dat",
+    "output/H26.ebe.dat",
+    "output/H26.element.dat",
+    "output/H26.hbp",
+    "output/H26.loss.dat",
+    "output/H26.plot.dat",
+    "output/H26.soil.dat",
+    "output/H26.wat.dat",
+    "output/H27.ebe.dat",
+    "output/H27.element.dat",
+    "output/H27.hbp",
+    "output/H27.loss.dat",
+    "output/H27.plot.dat",
+    "output/H27.soil.dat",
+    "output/H27.wat.dat",
+    "output/H28.ebe.dat",
+    "output/H28.element.dat",
+    "output/H28.hbp",
+    "output/H28.loss.dat",
+    "output/H28.plot.dat",
+    "output/H28.soil.dat",
+    "output/H28.wat.dat",
+    "output/H3.ebe.dat",
+    "output/H3.element.dat",
+    "output/H3.hbp",
+    "output/H3.loss.dat",
+    "output/H3.plot.dat",
+    "output/H3.soil.dat",
+    "output/H3.wat.dat",
+    "output/H4.ebe.dat",
+    "output/H4.element.dat",
+    "output/H4.hbp",
+    "output/H4.loss.dat",
+    "output/H4.plot.dat",
+    "output/H4.soil.dat",
+    "output/H4.wat.dat",
+    "output/H5.ebe.dat",
+    "output/H5.element.dat",
+    "output/H5.hbp",
+    "output/H5.loss.dat",
+    "output/H5.plot.dat",
+    "output/H5.soil.dat",
+    "output/H5.wat.dat",
+    "output/H6.ebe.dat",
+    "output/H6.element.dat",
+    "output/H6.hbp",
+    "output/H6.loss.dat",
+    "output/H6.plot.dat",
+    "output/H6.soil.dat",
+    "output/H6.wat.dat",
+    "output/H7.ebe.dat",
+    "output/H7.element.dat",
+    "output/H7.hbp",
+    "output/H7.loss.dat",
+    "output/H7.plot.dat",
+    "output/H7.soil.dat",
+    "output/H7.wat.dat",
+    "output/H8.ebe.dat",
+    "output/H8.element.dat",
+    "output/H8.hbp",
+    "output/H8.loss.dat",
+    "output/H8.plot.dat",
+    "output/H8.soil.dat",
+    "output/H8.wat.dat",
+    "output/H9.ebe.dat",
+    "output/H9.element.dat",
+    "output/H9.hbp",
+    "output/H9.loss.dat",
+    "output/H9.plot.dat",
+    "output/H9.soil.dat",
+    "output/H9.wat.dat"
+  ],
+  "date_readback": {
+    "1": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "80d4146e7272ce953f3c106cb90cb9a50a6e2b6961aa35c207ddf2b91098ca54",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12930,
+        "2": 2774
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "2": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "3de08a844ab3e0550f58b49b1434a933cce370db22b21ad2076fcb8268710567",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12932,
+        "2": 2772
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "3": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "b406e0eb4759027312914236a1cea06afde0e9a50ac868841e5452722f9f84a3",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "1": 13483,
+        "2": 2223
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "4": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "aa001d210a3035c03804163593de31375e71c42b54ba8150752213166dc59e04",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.001083991373889e-10,
+        "payload_reader_m3": 5.001083991373889e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12858,
+        "2": 2846
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "5": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "4e80c7bdd04dddc5319ece6aa0e28678afcead03eb41749bd5446a9eeb1a9cf4",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "1": 13897,
+        "2": 1809
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "6": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "721f02895496bae839b450863b900f479a68f56c28d5cf02ecbcc81d8a6023c4",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12925,
+        "2": 2779
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "7": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "98d245ba174c6c4374c3098197d9775571f3e5780873e65466e74ef0e89dd541",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12960,
+        "2": 2744
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "8": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "550f9c7cb0bc1c37b23b487f34b3a787198d13d3408ca6dc4c7b3ee9e34df6f0",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12922,
+        "2": 2782
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "9": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "5a7ada0ba95a1bfc37979afae205b5a328d40aaabf2d31ed23b14ace1651c204",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12815,
+        "2": 2889
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "10": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "997f25f803a2bb9949d1f1fc5368d14f99ab3c27a10503ee882866b22cfe9447",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12469,
+        "2": 3235
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "11": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "13358bcb78ab3b57bd1a7a55e96e0f13cb0caa94bf8db063f1fdbcc23a58e735",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12468,
+        "2": 3236
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "12": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "e6db753f159de80b7fecf2cc79368c877a5debb9f8ecfffc0bd7daeb456d4e6f",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12813,
+        "2": 2891
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "13": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "ea1569d93d1dc96d905d4dd6f93cbf3421009d94459a75de049bbf588e5a50fe",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "1": 13456,
+        "2": 2250
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "14": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "a9891dbb2e374b2e6c615f905935115543d13a998e85e87c7296e1a2893b054e",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12981,
+        "2": 2723
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "15": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "9f87d93f8efd8970054db4fc50a8531517df28f570e326f11ad834b1b81502de",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "1": 13773,
+        "2": 1933
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "16": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "3c4530dbb5c85df61f305396b244f8863996a8b0a13c3b0edd7b222d4bb06bbe",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12815,
+        "2": 2889
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "17": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "8a81f088ecc010d3e43224c4b504ebb3674df869ed7b9bb0d33d0eb5f33d5ef7",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12819,
+        "2": 2885
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "18": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "1cf8e2d7e45f5aabea3025ef184156276e86b905e180e5b9fda0346d508e9ab9",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12911,
+        "2": 2793
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "19": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "8b6bf1a0f664f4176721fcc350ae51641ceb5952b5504b6d465929b39f744228",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.000515557185281e-10,
+        "payload_reader_m3": 5.000515557185281e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12850,
+        "2": 2854
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "20": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "d7c4fe5625c2e4ba3f7a143c2bd8c261b21634a559530a7f1e20d4d29775b011",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12908,
+        "2": 2796
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "21": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "c271295803d523ea2bff1aa714178698463584397d2ae25f6d5128f1bb75bfa2",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12904,
+        "2": 2800
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "22": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "f6f3ebd47c7548eb85313d993f282f19b50f78811a7465cadaffa105aca53e73",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12910,
+        "2": 2794
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "23": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "f2caecff57bed5615730130cdf8829148c2d89163a30804d60ada316ba4fdb60",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12814,
+        "2": 2890
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "24": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "c1fd25ea25d54752b8ad6cb3d57fa64958963e7e15f9bfce1bb3a8c4b4de23dc",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12493,
+        "2": 3211
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "25": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "06b251c6ecf6aab2f585309bed878528a2f721e667b9b60b6c71dc872f02957f",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12970,
+        "2": 2734
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "26": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "f5a9bad13738e4dca740ff8356812508fd598aa0cbb8c7b8bd3c1b325f6a39eb",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12814,
+        "2": 2890
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "27": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "4cbf341f793061d9ad8e1c9f2b4958ec861f42426996aa63b8216ca917145d49",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12513,
+        "2": 3191
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    },
+    "28": {
+      "days": 15706,
+      "years": [
+        1983,
+        2025
+      ],
+      "hbp_sha256": "2724655d33c09b418fcf3d65d5d0c0154c06965d84d987546e9e45518b621cde",
+      "maximum_deltas": {
+        "writer_payload_m3": 5.002220859751105e-10,
+        "payload_reader_m3": 5.002220859751105e-10,
+        "lateral_area_m3": 0.0
+      },
+      "violation_count": 0,
+      "event_counts": {
+        "0": 2,
+        "1": 12823,
+        "2": 2881
+      },
+      "last_requested_date": [
+        2025,
+        365
+      ],
+      "all_requested_days_checked": true
+    }
+  },
+  "changed_watershed_files": [
+    "output/chnwb.txt",
+    "output/ebe_pw0.txt",
+    "output/loss_pw0.txt",
+    "output/soil_pw0.txt",
+    "runs/chan.out",
+    "runs/chanwb.out",
+    "runs/tc_out.txt"
+  ],
+  "channel_publication_arithmetic_only": {
+    "rows": 15706,
+    "signed_m3": 0.29880150667304406,
+    "absolute_m3": 4.245004909673298,
+    "worst": {
+      "case": "real",
+      "year": 1991,
+      "day": 94,
+      "element": 39,
+      "inflow": 279084.25,
+      "baseflow": 0.0,
+      "outflow": 279048.46875,
+      "loss": -3.875,
+      "storage_start": 987.46875,
+      "storage_end": 1027.09375,
+      "residual": 0.03125,
+      "tolerance": 1.0684035420427787,
+      "normalized": 1.1197335571606065e-07,
+      "within_arithmetic_bound": true
+    },
+    "outside_arithmetic_bound": 0,
+    "negative_loss_rows": 2298
+  },
+  "ledger": {
+    "path": "/workdir/hbp-schema2-calendar-selection-20261021/real-channel-ledger.csv",
+    "bytes": 2284245,
+    "sha256": "c71781f79770910b1c8e8ea9c21d6a9d19788a4b280c2ebbdd61efbac276f8e9"
+  }
+}

@@ -1,41 +1,46 @@
 # Watershed channel routing closure tracker
 
-**Started / updated**: 2026-10-21 16:42 UTC
-**Phase**: Scaffold complete; execution pending
+**Started / closed**: 2026-10-21
+**Phase**: Closed; investigation complete, model defect open
 **Security impact**: none; dedicated security review not required
 
 ## Progress
 
-- [x] Record investigation-only authority and simulation-change prohibition.
-- [x] Scaffold package, active ExecPlan, and discovery links.
-- [ ] M1: Inventory exact execution paths, provenance, boundaries, and hypotheses.
-- [ ] M2: Add only necessary observations and prove three-way output parity.
-- [ ] M3: Execute controlled and real-project closure ledgers and diagnostic controls.
-- [ ] M4: Review findings, publish reproducible conclusions, and close investigation.
+- [x] M1: Source/provenance, workbook, boundaries and controlled/project inputs.
+- [x] M2: Gated native observations and exact three-way scientific parity.
+- [x] M3: Native PASS readback, publication ledger and diagnostic controls.
+- [x] M4: Independent correctness and source QA; findings and retained evidence.
 
-## Decisions
+## Decisions and outcome
 
-- 2026-10-21 16:42 UTC — Roger authorized observability but no simulation changes.
-  Diagnosis is independent of remediation; no correction is required or permitted
-  to make this investigation successful.
-- 2026-10-21 16:42 UTC — Retain physical WAT, filtered PASS delivery, and routed
-  outlet balances separately so threshold omissions cannot masquerade as area errors.
+Roger authorized observation only. The confirmed first failing boundary is
+schema-2 PASS calendar selection: a synthetic day 366 is consumed as the following
+year's first day. See [findings](artifacts/findings.md#confirmed-defect-schema-2-calendar-selection).
+Nine full-period cases pass exact parity, including the 28-hillslope real project.
+The 160,345-record channel ledger validates publication arithmetic, not physical
+domain conservation. COR-01 remains open for separate authorization; no simulation
+correction, release, vendoring, deployment or live-run mutation occurred.
 
-## Risks and blockers
+Ayush did not supply the original decks. Workbook accounting is a screen only.
+The fixture, first real project and impoundment failures remain unresolved;
+positive tile, variable width, schema 1, centurial calendars and full-domain
+storage are outside demonstrated coverage. Failed attempts remain retained.
 
-No scaffold blockers. Original workbook inputs and matching historical executable
-are not yet inventoried. No runtime closure or instrumentation parity claim exists.
-Shared repository changes must be recorded and preserved during builds/replays.
+## Validation and evidence
 
-## Validation
+- [Case matrix](artifacts/case_matrix.csv), [parity](artifacts/parity.json),
+  [provenance](artifacts/provenance.json), [commands](artifacts/commands.md).
+- [Residual summary](artifacts/residual_summary.csv),
+  [controls](artifacts/diagnostic_controls.json),
+  [large-ledger receipts](artifacts/retained_ledgers.json).
+- [Independent correctness review](artifacts/correctness_review.md): pass for
+  investigation closure; source QA and Fortitude pass.
+- Native targeted pytest: 13 passed; FPM router contract passed.
+- Package documentation lint, spelling preview, root size and scoped diff checks.
 
-Scaffold validation passed: package doc-lint (3 files, zero errors/warnings),
-root onboarding size check (160 lines), and `git diff --check`. Spelling
-normalization was previewed and the single prose correction applied. Execution
-must record build/test commands, artifact hashes, parity comparisons, diagnostic
-controls, numerical tolerance rationale, and full-period coverage in artifacts.
+## Handoff
 
-## Next action
-
-On execution authorization, begin M1 of the
-[ExecPlan](prompts/active/watershed_channel_routing_closure_execplan.md).
+The [completed ExecPlan](prompts/completed/watershed_channel_routing_closure_execplan.md)
+records decisions and limitations. The separately proposed next task is calendar-key
+reader selection plus non-leap/final-day/schema compatibility validation; this
+package does not authorize or implement that correction.

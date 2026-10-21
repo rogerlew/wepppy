@@ -1,0 +1,13 @@
+case,configured_years,completed,exact_parity,observe_root
+single,44,True,True,/workdir/watershed-channel-routing-closure-20261021/controlled-on/single
+equal,44,True,True,/workdir/watershed-channel-routing-closure-20261021/controlled-on/equal
+upper60,44,True,True,/workdir/watershed-channel-routing-closure-20261021/controlled-on/upper60
+lower60,44,True,True,/workdir/watershed-channel-routing-closure-20261021/controlled-on/lower60
+three,44,True,True,/workdir/watershed-channel-routing-closure-20261021/controlled-on/three
+daily,44,True,True,/workdir/watershed-channel-routing-closure-20261021/extensions/on/daily
+tributaries,44,True,True,/workdir/watershed-channel-routing-closure-20261021/extensions/on/tributaries
+cascade,44,True,True,/workdir/watershed-channel-routing-closure-20261021/extensions/on/cascade
+impoundment,44,False,True,/workdir/watershed-channel-routing-closure-20261021/extensions/on/impoundment
+real-tight-orthodontist,43,True,True,/workdir/watershed-channel-routing-closure-20261021/real-second-on
+up-pedantry-evappm-failure,6,False,not assessed,/wc1/holdouts/watershed-channel-routing-closure-20261021/up-pedantry-baseline
+near-burton-creek-zero-HMAX,30,False,not assessed,/wc1/holdouts/watershed-channel-routing-closure-20261021/real-baseline

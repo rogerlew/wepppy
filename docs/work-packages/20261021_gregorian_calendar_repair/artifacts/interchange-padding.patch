@@ -1,0 +1,167 @@
+diff --git a/wepp_interchange/src/calendar.rs b/wepp_interchange/src/calendar.rs
+index 14dc08b..2d1d96f 100644
+--- a/wepp_interchange/src/calendar.rs
++++ b/wepp_interchange/src/calendar.rs
+@@ -246,7 +246,7 @@ fn downcast_uint64(array: &dyn Array) -> Vec<Option<u64>> {
+         .unwrap_or_default()
+ }
+ 
+-fn is_leap_year(year: i32) -> bool {
++pub(crate) fn is_leap_year(year: i32) -> bool {
+     (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+ }
+ 
+diff --git a/wepp_interchange/src/hill_hbp.rs b/wepp_interchange/src/hill_hbp.rs
+index 37b2625..c64ebdb 100644
+--- a/wepp_interchange/src/hill_hbp.rs
++++ b/wepp_interchange/src/hill_hbp.rs
+@@ -6,8 +6,8 @@ use std::path::Path;
+ use flate2::read::ZlibDecoder;
+ 
+ use crate::calendar::{
+-    compute_sim_day_index, determine_wateryear, julian_to_calendar, load_cli_calendar,
+-    CalendarLookup,
++    compute_sim_day_index, determine_wateryear, is_leap_year, julian_to_calendar,
++    load_cli_calendar, CalendarLookup,
+ };
+ use crate::errors::InterchangeError;
+ use crate::hill_pass::{extract_wepp_id, PassColumns};
+@@ -77,6 +77,7 @@ struct PayloadBlockEntry {
+ }
+ 
+ struct Layout {
++    gregorian_calendar: bool,
+     schema_major: u16,
+     schema_minor: u16,
+     begin_year: i32,
+@@ -427,7 +428,8 @@ fn parse_layout(data: &[u8], path: &Path) -> Result<Layout, InterchangeError> {
+     let npart = cursor.u16().map_err(|msg| parse_error(path, msg))? as usize;
+     let nofe = cursor.u16().map_err(|msg| parse_error(path, msg))? as u32;
+     let max_layers = cursor.u16().map_err(|msg| parse_error(path, msg))? as u32;
+-    let _calendar_policy_id = cursor.string().map_err(|msg| parse_error(path, msg))?;
++    let calendar_policy_id = cursor.string().map_err(|msg| parse_error(path, msg))?;
++    let gregorian_calendar = calendar_policy_id == "wepp-gregorian-v1";
+     let _event_enum_version = cursor.u16().map_err(|msg| parse_error(path, msg))?;
+     let simulation_mode = cursor.u8().map_err(|msg| parse_error(path, msg))?;
+ 
+@@ -647,6 +649,7 @@ fn parse_layout(data: &[u8], path: &Path) -> Result<Layout, InterchangeError> {
+             }
+ 
+             Ok(Layout {
++                gregorian_calendar,
+                 schema_major,
+                 schema_minor,
+                 begin_year,
+@@ -897,6 +900,7 @@ fn parse_layout(data: &[u8], path: &Path) -> Result<Layout, InterchangeError> {
+             }
+ 
+             Ok(Layout {
++                gregorian_calendar,
+                 schema_major,
+                 schema_minor,
+                 begin_year,
+@@ -1272,6 +1276,14 @@ fn parse_payload_into(
+         ));
+     }
+ 
++    // Schema-2 non-leap day 366 is storage padding under the explicit new policy.
++    // Validate the entire payload above before omitting it from dated output.
++    if layout.gregorian_calendar && julian_day == 366 && !is_leap_year(calendar_year) {
++        if layout.schema_major != SUPPORTED_MAJOR_V2 || event_kind != 0 {
++            return Err(parse_error(path, "invalid Gregorian non-leap day 366"));
++        }
++        return Ok(());
++    }
+     row.push_into(out, wepp_id);
+     Ok(())
+ }
+@@ -1496,6 +1508,7 @@ mod tests {
+         nyear: u32,
+         begin_year: i32,
+         simulation_mode: u8,
++        calendar_policy: &str,
+     ) -> Vec<u8> {
+         let mut file = Vec::new();
+ 
+@@ -1530,7 +1543,7 @@ mod tests {
+         put_u16(&mut file, npart);
+         put_u16(&mut file, nofe);
+         put_u16(&mut file, max_layers);
+-        put_string(&mut file, "gregorian");
++        put_string(&mut file, calendar_policy);
+         put_u16(&mut file, 1); // event_enum_version
+         put_u8(&mut file, simulation_mode);
+ 
+@@ -1577,7 +1590,7 @@ mod tests {
+     }
+ 
+     fn build_schema1_fixture() -> Vec<u8> {
+-        let mut file = append_common_prefix(SUPPORTED_MAJOR_V1, 0, 1, 2004, 1);
++        let mut file = append_common_prefix(SUPPORTED_MAJOR_V1, 0, 1, 2004, 1, "gregorian");
+         let payload = build_no_event_payload(1, 2004, 1, 1, 1, 0);
+         let payload_crc = crc32c(&payload);
+ 
+@@ -1609,9 +1622,12 @@ mod tests {
+     }
+ 
+     fn build_schema2_fixture() -> Schema2Fixture {
++        build_schema2_calendar_fixture(2004, "gregorian")
++    }
++
++    fn build_schema2_calendar_fixture(begin_year: i32, policy: &str) -> Schema2Fixture {
+         let nyear = 1u32;
+-        let begin_year = 2004i32;
+-        let mut file = append_common_prefix(SUPPORTED_MAJOR_V2, 0, nyear, begin_year, 1);
++        let mut file = append_common_prefix(SUPPORTED_MAJOR_V2, 0, nyear, begin_year, 1, policy);
+ 
+         let mut raw_offsets = Vec::with_capacity(366);
+         let mut raw_lengths = Vec::with_capacity(366);
+@@ -1778,6 +1794,48 @@ mod tests {
+         assert_eq!(out.year[0], 2004);
+     }
+ 
++    #[test]
++    fn gregorian_policy_omits_only_nonleap_padding() {
++        for (year, days) in [
++            (1, 365),
++            (100, 365),
++            (200, 365),
++            (300, 365),
++            (400, 366),
++            (1900, 365),
++            (2000, 366),
++            (2001, 365),
++        ] {
++            let fixture = build_schema2_calendar_fixture(year, "wepp-gregorian-v1");
++            let path = write_temp_hbp(&fixture.bytes);
++            let out = hillslope_hbp_to_columns(&path, None, &VersionInfo::new(7, 0)).unwrap();
++            assert_eq!(out.year.len(), days);
++            assert_eq!(out.julian[days - 1] as usize, days);
++            assert!(out.year.iter().all(|y| *y == year as i16));
++        }
++        for year in [100, 2001] {
++            let fixture =
++                build_schema2_calendar_fixture(year, "wepp-gregorian-legacy-centurial-v1");
++            let path = write_temp_hbp(&fixture.bytes);
++            let out = hillslope_hbp_to_columns(&path, None, &VersionInfo::new(7, 0)).unwrap();
++            assert_eq!(out.year.len(), 366, "legacy conversion remains unchanged");
++        }
++    }
++
++    #[test]
++    fn gregorian_padding_is_validated_before_omission() {
++        let mut fixture = build_schema2_calendar_fixture(100, "wepp-gregorian-v1");
++        let crc_pos = schema2_row_start(&fixture, 365) + 25;
++        put_u32_at(&mut fixture.bytes, crc_pos, 0);
++        refresh_schema2_crc_fields(&mut fixture);
++        let path = write_temp_hbp(&fixture.bytes);
++        let result = hillslope_hbp_to_columns(&path, None, &VersionInfo::new(7, 0));
++        match result {
++            Ok(_) => panic!("corrupted padding must fail"),
++            Err(error) => assert_parse_message(error, "raw payload crc mismatch"),
++        }
++    }
++
+     #[test]
+     fn hillslope_hbp_to_columns_reads_schema2_fixture() {
+         let fixture = build_schema2_fixture();

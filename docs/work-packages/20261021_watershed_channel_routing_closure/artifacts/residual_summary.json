@@ -1,0 +1,4893 @@
+{
+  "single": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "6e13a91de9985bca7d80b691e75dad4b4f2fe893c5e2784a31e4d1a09207b623",
+        "event_counts": {
+          "0": 1233,
+          "1": 13452,
+          "2": 1386
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1212.013427734,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 368.04579254984856,
+        "omitted_lateral_m3": 0.20353404787601903,
+        "violation_count": 16232,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            40.665725708000004
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            1.9235610960078091
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            1.8955688478164063
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            1.8161697391601521
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            1.6981811523906245
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            1.622484207046874
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            0.7601203918935511
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.2571468350478483
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            1.0401535037207026
+          ],
+          [
+            1982,
+            11,
+            "sbrunv_payload_reader",
+            1.2636013033027318
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2403.134212494,
+          "sbrunv": 1733.701515202,
+          "drrunv": 0.0,
+          "gwbfv": 6.139578126
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 228287.60583210702,
+          "sbrunv": 479047.84577990905,
+          "drrunv": 0.0,
+          "gwbfv": 2984.52495855
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953530304
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": -0.0001813325216062367,
+      "absolute_m3": 0.009003258950542659,
+      "worst": {
+        "case": "single",
+        "year": 1999,
+        "day": 343,
+        "element": 2,
+        "inflow": 1275.340576171875,
+        "baseflow": 0.0,
+        "outflow": 1271.8116455078125,
+        "loss": 3.578857898712158,
+        "storage_start": 2.52459716796875,
+        "storage_end": 2.4747314453125,
+        "residual": -6.151199340820312e-05,
+        "tolerance": 0.0048746689009017356,
+        "normalized": -4.822992898559828e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/single/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3602
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "equal": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "bfe59d6615e50efcdbf4f7548a88b31076c5232b7862c506f03bb06d0cd0d4cb",
+        "event_counts": {
+          "0": 2953,
+          "1": 11116,
+          "2": 2002
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1189.3950195310001,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 258.1259974874556,
+        "omitted_lateral_m3": 0.20490076409896574,
+        "violation_count": 15555,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            46.866886139
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            2.18762206991601
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.1631088256035156
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.1567153929199208
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.1293220518535136
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            2.0771560668515576
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            2.005939483957029
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            1.9227027893144495
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            1.2746791840078089
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.21750259404785055
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2201.889493464,
+          "sbrunv": 1926.055500034,
+          "drrunv": 0.0,
+          "gwbfv": 6.138491403000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 215626.23886341802,
+          "sbrunv": 483676.048149141,
+          "drrunv": 0.0,
+          "gwbfv": 2984.393421274
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953266856
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": -0.00020892760949209332,
+      "absolute_m3": 0.008516238711308688,
+      "worst": {
+        "case": "equal",
+        "year": 1999,
+        "day": 343,
+        "element": 2,
+        "inflow": 1252.72216796875,
+        "baseflow": 0.0,
+        "outflow": 1249.1932373046875,
+        "loss": 3.578857898712158,
+        "storage_start": 2.52459716796875,
+        "storage_end": 2.4747314453125,
+        "residual": -6.151199340820312e-05,
+        "tolerance": 0.0047883865209764846,
+        "normalized": -4.910070526292818e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/equal/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/equal/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/equal/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3613
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "upper60": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "bbe544e1d17d02a7ce89395f2b0cff11a086f91dc24d31b2d3011198ba040776",
+        "event_counts": {
+          "0": 3269,
+          "1": 10757,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1212.0130615234375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 319.7548879534006,
+        "omitted_lateral_m3": 0.19996819630432583,
+        "violation_count": 15290,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            45.785182953
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            2.0771636958808557
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.0388946535917967
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.0712852482714794
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.066730499468747
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            1.9630546572011696
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            1.9512290952187499
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            1.8681964877597643
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.8334789273330045
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.912210464720701
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2224.182955741,
+          "sbrunv": 1919.952960972,
+          "drrunv": 0.0,
+          "gwbfv": 6.138711678
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 213024.04982855602,
+          "sbrunv": 484353.95534181705,
+          "drrunv": 0.0,
+          "gwbfv": 2984.420075871
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953320256
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": -0.00031471654074266553,
+      "absolute_m3": 0.00848263845546171,
+      "worst": {
+        "case": "upper60",
+        "year": 1981,
+        "day": 339,
+        "element": 2,
+        "inflow": 1193.35009765625,
+        "baseflow": 0.0,
+        "outflow": 1208.2659912109375,
+        "loss": -8.88037109375,
+        "storage_start": 8.55999755859375,
+        "storage_end": 2.5245361328125,
+        "residual": -6.103515625e-05,
+        "tolerance": 0.0046187991984875335,
+        "normalized": -5.014611072281306e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/upper60/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/upper60/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/upper60/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3578
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "lower60": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "e98089d9145606e6a75b0e94c038de4d3447dda8abee06f849a7ce6de7cf2e4d",
+        "event_counts": {
+          "0": 2623,
+          "1": 11554,
+          "2": 1894
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1152.012695313,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 373.08329151570797,
+        "omitted_lateral_m3": 0.24985775053937687,
+        "violation_count": 15757,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            46.524421692000004
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            1.7954864498945255
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.118103027699213
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.1945724483554656
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.1211814876249946
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            2.010627746587886
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            1.937858582005859
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            1.9224624634628853
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            1.4744930270839838
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.05914878835058346
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2197.356484412,
+          "sbrunv": 1921.166271215,
+          "drrunv": 0.0,
+          "gwbfv": 6.138271095
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 219216.50162632202,
+          "sbrunv": 482346.31172765204,
+          "drrunv": 0.0,
+          "gwbfv": 2984.366764935
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953213448
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": -3.920338349416852e-05,
+      "absolute_m3": 0.008504988334607333,
+      "worst": {
+        "case": "lower60",
+        "year": 1999,
+        "day": 343,
+        "element": 2,
+        "inflow": 1215.33984375,
+        "baseflow": 0.0,
+        "outflow": 1211.8109130859375,
+        "loss": 3.578857898712158,
+        "storage_start": 2.52459716796875,
+        "storage_end": 2.4747314453125,
+        "residual": -6.151199340820312e-05,
+        "tolerance": 0.004645784270996512,
+        "normalized": -5.06109191279182e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/lower60/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/lower60/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/lower60/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3595
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "three": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "516941ddc67bba31f50087a3167d133275e1327f9f1f7eff3cfb640d9cca4864",
+        "event_counts": {
+          "0": 3048,
+          "1": 10967,
+          "2": 2056
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1162.083496094,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 290.7072930186987,
+        "omitted_lateral_m3": 0.230864235010813,
+        "violation_count": 15528,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            48.136810303000004
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            2.3858985897343743
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.312255859646484
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.34291076627148
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.324371337669916
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            2.2342109677792976
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            2.112857818761718
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            2.0460891721582044
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            1.4285755157949183
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.30777549704784946
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2191.087647438,
+          "sbrunv": 1938.936107641,
+          "drrunv": 0.0,
+          "gwbfv": 6.138931986
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 220086.96846412902,
+          "sbrunv": 479219.121304842,
+          "drrunv": 0.0,
+          "gwbfv": 2984.446747865
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953373664
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": 2.0784209482371807e-06,
+      "absolute_m3": 0.008762642450165004,
+      "worst": {
+        "case": "three",
+        "year": 1999,
+        "day": 343,
+        "element": 2,
+        "inflow": 1225.41064453125,
+        "baseflow": 0.0,
+        "outflow": 1221.8817138671875,
+        "loss": 3.578857898712158,
+        "storage_start": 2.52459716796875,
+        "storage_end": 2.4747314453125,
+        "residual": -6.151199340820312e-05,
+        "tolerance": 0.0046842013271994,
+        "normalized": -5.019500000686582e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/three/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/controlled-on/three/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/controlled-on/three/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3605
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "daily": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "80721ca70124a227df42848ab5f4597f10de54e60ee0db40a130719f6bb64302",
+        "event_counts": {
+          "0": 7038,
+          "1": 4766,
+          "2": 4267
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000231340090977e-10,
+          "payload_reader_m3": 1268.662475586,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 484.3178835809231,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 14126,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            6.314107895
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            0.23944330189746044
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            0.07782936074291946
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            0.08259820978100585
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.2293477053999018
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.6292185784411624
+          ],
+          [
+            1982,
+            13,
+            "sbrunv_payload_reader",
+            0.20638656589746063
+          ],
+          [
+            1982,
+            14,
+            "sbrunv_payload_reader",
+            0.3100562097353512
+          ],
+          [
+            1982,
+            15,
+            "sbrunv_payload_reader",
+            0.10944986317114225
+          ],
+          [
+            1982,
+            16,
+            "sbrunv_payload_reader",
+            0.07667207673730392
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 4145.354750156001,
+          "sbrunv": 202.05145264,
+          "drrunv": 0.0,
+          "gwbfv": 11.973685799000002
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 594128.96992356,
+          "sbrunv": 54593.267096217,
+          "drrunv": 0.0,
+          "gwbfv": 5835.7198283650005
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 11.644626909000001
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": 0.00019630760652944446,
+      "absolute_m3": 0.012301280803512782,
+      "worst": {
+        "case": "daily",
+        "year": 1981,
+        "day": 339,
+        "element": 2,
+        "inflow": 1193.1536865234375,
+        "baseflow": 0.0,
+        "outflow": 1210.899169921875,
+        "loss": -9.6484375,
+        "storage_start": 8.61810302734375,
+        "storage_end": 0.52099609375,
+        "residual": 6.103515625e-05,
+        "tolerance": 0.0046212013122381105,
+        "normalized": 5.0006370811641406e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/daily/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/extensions/on/daily/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/daily/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3197
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "tributaries": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "bbe544e1d17d02a7ce89395f2b0cff11a086f91dc24d31b2d3011198ba040776",
+        "event_counts": {
+          "0": 3269,
+          "1": 10757,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1212.0130615234375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 319.7548879534006,
+        "omitted_lateral_m3": 0.19996819630432583,
+        "violation_count": 15290,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            45.785182953
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            2.0771636958808557
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.0388946535917967
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.0712852482714794
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.066730499468747
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            1.9630546572011696
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            1.9512290952187499
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            1.8681964877597643
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.8334789273330045
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.912210464720701
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2224.182955741,
+          "sbrunv": 1919.952960972,
+          "drrunv": 0.0,
+          "gwbfv": 6.138711678
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 213024.04982855602,
+          "sbrunv": 484353.95534181705,
+          "drrunv": 0.0,
+          "gwbfv": 2984.420075871
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953320256
+        }
+      },
+      "2": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "305944053b43fdbd709d5e1daa7bf2f7289cc3c38977fc38b6b29bb4e0d72869",
+        "event_counts": {
+          "0": 3309,
+          "1": 10717,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000018177270249e-10,
+          "payload_reader_m3": 606.006530762,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 159.8774439767003,
+        "omitted_lateral_m3": 0.3817868155629185,
+        "violation_count": 15236,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            22.892591476
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            1.0385818484404297
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            1.0194473262958965
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            1.0356426236357414
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            1.0333652497343735
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            0.9815273281005865
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            0.9756145476093749
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            0.9340982438798822
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.4167394641665023
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.4561052323603505
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 1112.091477871,
+          "sbrunv": 959.976480486,
+          "drrunv": 0.0,
+          "gwbfv": 3.0695761470000003
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 106512.024914276,
+          "sbrunv": 242176.695806634,
+          "drrunv": 0.0,
+          "gwbfv": 1492.236701168
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 2.976713536
+        }
+      },
+      "3": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "52b67cb92ba29b2881c8f9e104a34546f11e01b88c609eb46ca96af475d3a467",
+        "event_counts": {
+          "0": 3250,
+          "1": 10776,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 2424.026123047,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 639.5097759068012,
+        "omitted_lateral_m3": 0.11802911694030627,
+        "violation_count": 15325,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            91.570365906
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            4.154327392761715
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            4.07778930618359
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            4.142570495542969
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            4.133460998937494
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            3.926109314402339
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            3.9024581904374998
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            3.736392974519525
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            1.6669578556660127
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            1.824420929441402
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 4448.365911485001,
+          "sbrunv": 3839.905921934,
+          "drrunv": 0.0,
+          "gwbfv": 12.275723922000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 426048.09965713,
+          "sbrunv": 968708.1932190091,
+          "drrunv": 0.0,
+          "gwbfv": 5968.634481014
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 11.906228528
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 16071,
+      "signed_m3": -0.0007166138966567814,
+      "absolute_m3": 0.05104245588881895,
+      "worst": {
+        "case": "tributaries",
+        "year": 1983,
+        "day": 50,
+        "element": 4,
+        "inflow": 3074.96337890625,
+        "baseflow": 0.0,
+        "outflow": 3065.118896484375,
+        "loss": -0.363037109375,
+        "storage_start": 16.1673583984375,
+        "storage_end": 26.375244140625,
+        "residual": -0.0003662109375,
+        "tolerance": 0.011793113547445966,
+        "normalized": -1.190944061357438e-07,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/tributaries/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/extensions/on/tributaries/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/tributaries/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 3894
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "cascade": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "bbe544e1d17d02a7ce89395f2b0cff11a086f91dc24d31b2d3011198ba040776",
+        "event_counts": {
+          "0": 3269,
+          "1": 10757,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 1212.0130615234375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 319.7548879534006,
+        "omitted_lateral_m3": 0.19996819630432583,
+        "violation_count": 15290,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            45.785182953
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            2.0771636958808557
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            2.0388946535917967
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            2.0712852482714794
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            2.066730499468747
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            1.9630546572011696
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            1.9512290952187499
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            1.8681964877597643
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.8334789273330045
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.912210464720701
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 2224.182955741,
+          "sbrunv": 1919.952960972,
+          "drrunv": 0.0,
+          "gwbfv": 6.138711678
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 213024.04982855602,
+          "sbrunv": 484353.95534181705,
+          "drrunv": 0.0,
+          "gwbfv": 2984.420075871
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 5.953320256
+        }
+      },
+      "2": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "305944053b43fdbd709d5e1daa7bf2f7289cc3c38977fc38b6b29bb4e0d72869",
+        "event_counts": {
+          "0": 3309,
+          "1": 10717,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000018177270249e-10,
+          "payload_reader_m3": 606.006530762,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 159.8774439767003,
+        "omitted_lateral_m3": 0.3817868155629185,
+        "violation_count": 15236,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            22.892591476
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            1.0385818484404297
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            1.0194473262958965
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            1.0356426236357414
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            1.0333652497343735
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            0.9815273281005865
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            0.9756145476093749
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            0.9340982438798822
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            0.4167394641665023
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            0.4561052323603505
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 1112.091477871,
+          "sbrunv": 959.976480486,
+          "drrunv": 0.0,
+          "gwbfv": 3.0695761470000003
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 106512.024914276,
+          "sbrunv": 242176.695806634,
+          "drrunv": 0.0,
+          "gwbfv": 1492.236701168
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 2.976713536
+        }
+      },
+      "3": {
+        "days": 16071,
+        "serialized_slots": 16104,
+        "synthetic_slots": 33,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1982,
+            1
+          ],
+          "sequential_payload_date": [
+            1981,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1980,
+          2023
+        ],
+        "hbp_sha256": "52b67cb92ba29b2881c8f9e104a34546f11e01b88c609eb46ca96af475d3a467",
+        "event_counts": {
+          "0": 3250,
+          "1": 10776,
+          "2": 2045
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 2424.026123047,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 639.5097759068012,
+        "omitted_lateral_m3": 0.11802911694030627,
+        "violation_count": 15325,
+        "first_violations": [
+          [
+            1982,
+            1,
+            "sbrunv_payload_reader",
+            91.570365906
+          ],
+          [
+            1982,
+            2,
+            "sbrunv_payload_reader",
+            4.154327392761715
+          ],
+          [
+            1982,
+            3,
+            "sbrunv_payload_reader",
+            4.07778930618359
+          ],
+          [
+            1982,
+            4,
+            "sbrunv_payload_reader",
+            4.142570495542969
+          ],
+          [
+            1982,
+            5,
+            "sbrunv_payload_reader",
+            4.133460998937494
+          ],
+          [
+            1982,
+            6,
+            "sbrunv_payload_reader",
+            3.926109314402339
+          ],
+          [
+            1982,
+            7,
+            "sbrunv_payload_reader",
+            3.9024581904374998
+          ],
+          [
+            1982,
+            8,
+            "sbrunv_payload_reader",
+            3.736392974519525
+          ],
+          [
+            1982,
+            9,
+            "sbrunv_payload_reader",
+            1.6669578556660127
+          ],
+          [
+            1982,
+            10,
+            "sbrunv_payload_reader",
+            1.824420929441402
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 4448.365911485001,
+          "sbrunv": 3839.905921934,
+          "drrunv": 0.0,
+          "gwbfv": 12.275723922000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 426048.09965713,
+          "sbrunv": 968708.1932190091,
+          "drrunv": 0.0,
+          "gwbfv": 5968.634481014
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 11.906228528
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 32142,
+      "signed_m3": -0.0028433429542928934,
+      "absolute_m3": 0.060686340322718024,
+      "worst": {
+        "case": "cascade",
+        "year": 1999,
+        "day": 343,
+        "element": 4,
+        "inflow": 4463.69091796875,
+        "baseflow": 0.0,
+        "outflow": 4458.12451171875,
+        "loss": 5.566206455230713,
+        "storage_start": 0.6514892578125,
+        "storage_end": 0.6513671875,
+        "residual": 0.0003218650817871094,
+        "tolerance": 0.017030114160751973,
+        "normalized": 7.210738550275284e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/cascade/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/extensions/on/cascade/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/extensions/on/cascade/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 7510
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  },
+  "impoundment": {
+    "disposition": "incomplete; no closure claim",
+    "executions": [
+      {
+        "card": "p1.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 17.404729657107964
+      },
+      {
+        "card": "p2.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 15.748213842045516
+      },
+      {
+        "card": "p3.run",
+        "returncode": 0,
+        "success": true,
+        "seconds": 16.149170105112717
+      },
+      {
+        "card": "pw0.run",
+        "returncode": 0,
+        "success": false,
+        "seconds": 3.1241458980366588
+      }
+    ]
+  },
+  "real-tight-orthodontist": {
+    "pass_readback_by_hill": {
+      "1": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "80d4146e7272ce953f3c106cb90cb9a50a6e2b6961aa35c207ddf2b91098ca54",
+        "event_counts": {
+          "0": 2,
+          "1": 12930,
+          "2": 2774
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 19535.07421875,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 55723.85467547178,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17961,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            610.0858764650001
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            5.306476116000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            4791.701721191156
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            2044.2248535152498
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            2304.1259765626246
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            1053.436767578125
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.01243925118041922
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.006854057234374267
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.014637947077637214
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.06743145000488227
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 48113.929840089004,
+          "sbrunv": 163.06575536300002,
+          "drrunv": 0.0,
+          "gwbfv": 65.482490528
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 5473455.377945011,
+          "sbrunv": 61439.744772474005,
+          "drrunv": 0.0,
+          "gwbfv": 32084.9328693
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 63.436162699
+        }
+      },
+      "2": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "3de08a844ab3e0550f58b49b1434a933cce370db22b21ad2076fcb8268710567",
+        "event_counts": {
+          "0": 2,
+          "1": 12932,
+          "2": 2772
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 22182.984375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 63385.05152583122,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17958,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            692.203796387
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            6.319557667000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            5441.565246582281
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            2321.34423828075
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            2616.4770507815
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            1195.94775390625
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.01481485377856373
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.008297920110351242
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.01730203611669978
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.08043718316870052
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 54628.46511840801,
+          "sbrunv": 194.194939618,
+          "drrunv": 0.0,
+          "gwbfv": 74.35944368
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 6212557.29815681,
+          "sbrunv": 73137.980487629,
+          "drrunv": 0.0,
+          "gwbfv": 36434.438225617996
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 72.035711065
+        }
+      },
+      "3": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "b406e0eb4759027312914236a1cea06afde0e9a50ac868841e5452722f9f84a3",
+        "event_counts": {
+          "1": 13483,
+          "2": 2223
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 13321.946289063,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 30813.788066074252,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17638,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            392.727081299
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            18.793361664000003
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3253.5378112791723
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1397.523925781125
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1572.1137695308748
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            676.627197265625
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.009132384818357764
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.025569915564453538
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.020452499792966705
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.0431385044033199
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 19226.220092775002,
+          "sbrunv": 547.276005747,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 2819799.1109466953,
+          "sbrunv": 181398.681262783,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        }
+      },
+      "4": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "aa001d210a3035c03804163593de31375e71c42b54ba8150752213166dc59e04",
+        "event_counts": {
+          "0": 2,
+          "1": 12858,
+          "2": 2846
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.001083991373889e-10,
+          "payload_reader_m3": 2683.005371094,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 7993.8466606885195,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17924,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            83.197677612
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            1.222589731
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            647.9311065676953
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            276.90795898468747
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            311.4727478023125
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            142.74807739257812
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.002486229216430491
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0032526252735594063
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0023595091918335864
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.01783514027624511
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 6495.023284911001,
+          "sbrunv": 37.500410790000004,
+          "drrunv": 0.0,
+          "gwbfv": 8.884971616000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 762083.7281150981,
+          "sbrunv": 13352.290322171,
+          "drrunv": 0.0,
+          "gwbfv": 4353.647744817001
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 8.607316253
+        }
+      },
+      "5": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "4e80c7bdd04dddc5319ece6aa0e28678afcead03eb41749bd5446a9eeb1a9cf4",
+        "event_counts": {
+          "1": 13897,
+          "2": 1809
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 8467.0078125,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 16007.622057825327,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17270,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            176.84422302200002
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            48.765090942
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            2113.922866821539
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            892.12353515575
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1003.5164489745
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            395.1271057128906
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.024425506382812046
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.1860542297910115
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.17183303805468597
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.2319412227246076
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 10160.331733704,
+          "sbrunv": 1389.9729557,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1528076.398429895,
+          "sbrunv": 454416.907736308,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        }
+      },
+      "6": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "721f02895496bae839b450863b900f479a68f56c28d5cf02ecbcc81d8a6023c4",
+        "event_counts": {
+          "0": 2,
+          "1": 12925,
+          "2": 2779
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 11055.97265625,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 31482.71461749077,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17969,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            346.17282104500003
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            2.5470402240000003
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            2711.3222961430783
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1156.8918457035
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1303.9777221683748
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            596.6255493164062
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.005970955075317086
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0031223301802976167
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.007193803531616361
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.03219866725561493
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 27241.348052979003,
+          "sbrunv": 78.27243685500001,
+          "drrunv": 0.0,
+          "gwbfv": 37.058628096
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3102085.7245788914,
+          "sbrunv": 29529.940324989002,
+          "drrunv": 0.0,
+          "gwbfv": 18157.88588922
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 35.900545968
+        }
+      },
+      "7": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "98d245ba174c6c4374c3098197d9775571f3e5780873e65466e74ef0e89dd541",
+        "event_counts": {
+          "0": 2,
+          "1": 12960,
+          "2": 2744
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 12488.940429688,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 36972.87010926008,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17932,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            385.74411010700004
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            5.5852198600000005
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3066.0776672365782
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1307.1188964847497
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1473.3036499023751
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            671.3992309570312
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.013093471076904173
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.008778572549804409
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.013846874532715603
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.07252883870434523
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 30706.395614623,
+          "sbrunv": 171.603641032,
+          "drrunv": 0.0,
+          "gwbfv": 41.870788576
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3477424.062362717,
+          "sbrunv": 64288.572771058,
+          "drrunv": 0.0,
+          "gwbfv": 20515.735657389003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 40.562326433
+        }
+      },
+      "8": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "550f9c7cb0bc1c37b23b487f34b3a787198d13d3408ca6dc4c7b3ee9e34df6f0",
+        "event_counts": {
+          "0": 2,
+          "1": 12922,
+          "2": 2782
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 16126.386718750002,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 45986.73789969087,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17975,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            505.999694824
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            3.1669111250000004
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3954.0999145507812
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1687.400390625
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1901.934509277
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            870.7647094726562
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.007424116183105234
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0037117000484618856
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.009116888390991562
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.03986382465527338
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 39747.913848877004,
+          "sbrunv": 97.32458781700001,
+          "drrunv": 0.0,
+          "gwbfv": 54.05231856
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 4529777.380386407,
+          "sbrunv": 36756.566634956005,
+          "drrunv": 0.0,
+          "gwbfv": 26484.408933837003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 52.363183605
+        }
+      },
+      "9": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "5a7ada0ba95a1bfc37979afae205b5a328d40aaabf2d31ed23b14ace1651c204",
+        "event_counts": {
+          "0": 2,
+          "1": 12815,
+          "2": 2889
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 37892.2109375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 112980.14418685436,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17968,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            1203.049926758
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            2.742586374
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            9129.707885742188
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            3907.936523437
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            4395.7429199215
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            2029.078369140625
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.005577087282836679
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.005027770880492888
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.007556677115600596
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.03775286674902345
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 92036.448181154,
+          "sbrunv": 84.163367979,
+          "drrunv": 0.0,
+          "gwbfv": 125.391479488
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 10880667.157531861,
+          "sbrunv": 30249.925803517002,
+          "drrunv": 0.0,
+          "gwbfv": 61441.989516234
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 121.472995754
+        }
+      },
+      "10": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "997f25f803a2bb9949d1f1fc5368d14f99ab3c27a10503ee882866b22cfe9447",
+        "event_counts": {
+          "0": 2,
+          "1": 12469,
+          "2": 3235
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 13230.288085938,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 43909.644218713045,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 18152,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            390.642364502
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.45571985800000003
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3085.578338623047
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1326.2204589839998
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1491.880432128625
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            658.1198120117188
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.002011478407974221
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0025261934607391234
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0014068186035461339
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.006368666975234971
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 30838.954330446002,
+          "sbrunv": 13.968669883,
+          "drrunv": 0.0,
+          "gwbfv": 42.633972160000006
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 4130150.6717377394,
+          "sbrunv": 6137.258644045,
+          "drrunv": 0.0,
+          "gwbfv": 20891.479516197003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 41.30166053000001
+        }
+      },
+      "11": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "13358bcb78ab3b57bd1a7a55e96e0f13cb0caa94bf8db063f1fdbcc23a58e735",
+        "event_counts": {
+          "0": 2,
+          "1": 12468,
+          "2": 3236
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 57181.6875,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 190710.38460814953,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 18152,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            1690.323608398
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.9650499220000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            13334.726196289563
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            5731.8593749995
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            6447.8354492185
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            2845.35498046875
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.004259586466277998
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.005293608132049488
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0029230114202575264
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.013430476640472366
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 133310.147827149,
+          "sbrunv": 29.581595411000002,
+          "drrunv": 0.0,
+          "gwbfv": 184.26199340800002
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 17857466.411071982,
+          "sbrunv": 13001.172763563001,
+          "drrunv": 0.0,
+          "gwbfv": 90291.97769814401
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 178.503806114
+        }
+      },
+      "12": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "e6db753f159de80b7fecf2cc79368c877a5debb9f8ecfffc0bd7daeb456d4e6f",
+        "event_counts": {
+          "0": 2,
+          "1": 12813,
+          "2": 2891
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 23001.625,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 69031.15677905083,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17973,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            731.754394531
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.9650411010000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            5541.93310546875
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            2372.497314453
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            2668.642578124875
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            1232.547607421875
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0019624829788512654
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0017063620496214904
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.002722620721008373
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.013220429243041898
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 55893.104614259006,
+          "sbrunv": 29.615906657000004,
+          "drrunv": 0.0,
+          "gwbfv": 76.124824512
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 6611279.922760106,
+          "sbrunv": 10652.386061423,
+          "drrunv": 0.0,
+          "gwbfv": 37301.263758508
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 73.745923746
+        }
+      },
+      "13": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "ea1569d93d1dc96d905d4dd6f93cbf3421009d94459a75de049bbf588e5a50fe",
+        "event_counts": {
+          "1": 13456,
+          "2": 2250
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 12498.65234375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 30854.9604947567,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17664,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            376.82916259800004
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            13.416561127000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3047.174011230344
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1310.748535156125
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1474.453735351875
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            638.8009033203125
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.006501197708983497
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.015682220894042587
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.012044906435058067
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.028198241818847336
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 18250.562469482,
+          "sbrunv": 391.544373515,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 2675767.918533349,
+          "sbrunv": 129834.986044535,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        }
+      },
+      "14": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "a9891dbb2e374b2e6c615f905935115543d13a998e85e87c7296e1a2893b054e",
+        "event_counts": {
+          "0": 2,
+          "1": 12981,
+          "2": 2723
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 3785.702636719,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 11054.061593964696,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17924,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            115.57806396500001
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            2.3842017650000003
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            930.2540893551563
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            396.2926635743124
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            446.67626953109374
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            202.86322021484375
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.005589247060424629
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.004441023310546743
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.005219459562378237
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.031651257971313296
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 9291.075843811,
+          "sbrunv": 73.241324902,
+          "drrunv": 0.0,
+          "gwbfv": 12.694414144000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1047868.4089851441,
+          "sbrunv": 27280.126907041,
+          "drrunv": 0.0,
+          "gwbfv": 6219.974591463
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 12.297713702000001
+        }
+      },
+      "15": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "9f87d93f8efd8970054db4fc50a8531517df28f570e326f11ad834b1b81502de",
+        "event_counts": {
+          "1": 13773,
+          "2": 1933
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 6229.07421875,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 12694.297094196081,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17385,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            147.06219482400002
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            27.347291946000002
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            1544.4052124027814
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            655.4182128905625
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            737.2703857419375
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            298.77880859375
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.013580322411129941
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.08329963714550459
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.07551574730468502
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.1090736392343743
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 7942.971122741001,
+          "sbrunv": 784.221591943,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1183536.753868136,
+          "sbrunv": 257754.95723266902,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 0.0
+        }
+      },
+      "16": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "3c4530dbb5c85df61f305396b244f8863996a8b0a13c3b0edd7b222d4bb06bbe",
+        "event_counts": {
+          "0": 2,
+          "1": 12815,
+          "2": 2889
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 35278.23828125,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 104937.29370933771,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17969,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            1119.7537841800001
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            2.73933053
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            8500.584106445312
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            3638.563476562
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            4092.7451171875
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            1889.029296875
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.005570650166625946
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.005052566065917752
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.007516384462402659
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.03773951566235345
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 85687.651062012,
+          "sbrunv": 84.06290721500001,
+          "drrunv": 0.0,
+          "gwbfv": 116.748413088
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 10129269.725036744,
+          "sbrunv": 30210.04033359,
+          "drrunv": 0.0,
+          "gwbfv": 57206.875612657
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 113.100025179
+        }
+      },
+      "17": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "8a81f088ecc010d3e43224c4b504ebb3674df869ed7b9bb0d33d0eb5f33d5ef7",
+        "event_counts": {
+          "0": 2,
+          "1": 12819,
+          "2": 2885
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 44492.65625,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 133661.20452547073,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17965,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            1411.1252441410002
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            3.970580339
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            10720.824951172375
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            4588.6894531245
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            5161.469238281499
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            2381.79150390625
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.008074283431762641
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.007423400831908733
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.010795355046997468
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.05480122579614255
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 108049.692382815,
+          "sbrunv": 121.84497760800001,
+          "drrunv": 0.0,
+          "gwbfv": 147.23451232000002
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 12768516.514221346,
+          "sbrunv": 43775.11176266,
+          "drrunv": 0.0,
+          "gwbfv": 72145.10399377401
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 142.63343381
+        }
+      },
+      "18": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "1cf8e2d7e45f5aabea3025ef184156276e86b905e180e5b9fda0346d508e9ab9",
+        "event_counts": {
+          "0": 2,
+          "1": 12911,
+          "2": 2793
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 5605.18798828125,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 15966.460135400295,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17980,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            177.02546691900002
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.512858808
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            1373.636276245055
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            586.4425659180624
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            661.0028381350937
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            303.2163391113281
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0012022850406188113
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0005152227508544716
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.001561939798583989
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.006370245917755146
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 13829.834571837,
+          "sbrunv": 15.762553453000002,
+          "drrunv": 0.0,
+          "gwbfv": 18.785478592
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1580063.487266568,
+          "sbrunv": 5973.174394501,
+          "drrunv": 0.0,
+          "gwbfv": 9204.457750249001
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 18.198432386
+        }
+      },
+      "19": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "8b6bf1a0f664f4176721fcc350ae51641ceb5952b5504b6d465929b39f744228",
+        "event_counts": {
+          "0": 2,
+          "1": 12850,
+          "2": 2854
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.000515557185281e-10,
+          "payload_reader_m3": 460.862548828125,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 1388.7315925359726,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17932,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            14.372245789
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.16578637100000002
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            111.2015457154258
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            47.54319763190624
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            53.477722168070315
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            24.552871704101562
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0003371236350326323
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.00040683176418304656
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0003541107387314002
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.002384468455879196
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 1116.284796715,
+          "sbrunv": 5.085760823,
+          "drrunv": 0.0,
+          "gwbfv": 1.525487904
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 131207.273409363,
+          "sbrunv": 1815.091315435,
+          "drrunv": 0.0,
+          "gwbfv": 747.491079945
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 1.477816407
+        }
+      },
+      "20": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "d7c4fe5625c2e4ba3f7a143c2bd8c261b21634a559530a7f1e20d4d29775b011",
+        "event_counts": {
+          "0": 2,
+          "1": 12908,
+          "2": 2796
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 13934.060546875,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 39729.276202112436,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17983,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            440.88671875
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.858421564
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3414.238525391
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1457.807617187625
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1643.153137207125
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            754.1644897460938
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0020123721021727548
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0008213520852660139
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0026553269197387985
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.010621368400360098
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 34389.993179321005,
+          "sbrunv": 26.384044406,
+          "drrunv": 0.0,
+          "gwbfv": 46.697822560000006
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3931867.798690868,
+          "sbrunv": 10007.755351175001,
+          "drrunv": 0.0,
+          "gwbfv": 22880.872441188003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 45.238515605
+        }
+      },
+      "21": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "c271295803d523ea2bff1aa714178698463584397d2ae25f6d5128f1bb75bfa2",
+        "event_counts": {
+          "0": 2,
+          "1": 12904,
+          "2": 2800
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 30067.716796875004,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 85146.13719117641,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17989,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            953.014343262
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            1.013258457
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            7366.415344238281
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            3145.655273437
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            3545.5935058594996
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            1628.180908203125
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0023753641838377693
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0009244678802489137
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.003179550160217426
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.012492299010681052
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 74229.278442383,
+          "sbrunv": 31.143843109000002,
+          "drrunv": 0.0,
+          "gwbfv": 100.764526368
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 8492900.736847043,
+          "sbrunv": 11823.494332357,
+          "drrunv": 0.0,
+          "gwbfv": 49372.3291962
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 97.615634919
+        }
+      },
+      "22": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "f6f3ebd47c7548eb85313d993f282f19b50f78811a7465cadaffa105aca53e73",
+        "event_counts": {
+          "0": 2,
+          "1": 12910,
+          "2": 2794
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 9009.444335938,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 25708.74456909299,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17982,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            284.746246338
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.719673216
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            2207.7710876461097
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            942.6018066403749
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1062.44406127975
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            487.4714660644531
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0016871693429260093
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0007094142679138216
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.002205312214202948
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.008925557037841703
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 22231.806663512,
+          "sbrunv": 22.119167261,
+          "drrunv": 0.0,
+          "gwbfv": 30.194305408
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 2540661.906959596,
+          "sbrunv": 8385.099585333,
+          "drrunv": 0.0,
+          "gwbfv": 14794.523791964
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 29.250733364000002
+        }
+      },
+      "23": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "f2caecff57bed5615730130cdf8829148c2d89163a30804d60ada316ba4fdb60",
+        "event_counts": {
+          "0": 2,
+          "1": 12814,
+          "2": 2890
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 13040.452148438,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 39218.39088714123,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17970,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            414.64941406300005
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.6108589170000001
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3141.3461914065
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1344.7810058597497
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1512.642456054375
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            698.5721435546875
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0012422202363281398
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0010863538345641244
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0017164944211121025
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.008375347139129574
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 31679.771423341,
+          "sbrunv": 18.746385449,
+          "drrunv": 0.0,
+          "gwbfv": 43.149108896
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3746790.779480032,
+          "sbrunv": 6741.931162973,
+          "drrunv": 0.0,
+          "gwbfv": 21143.120201943002
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 41.800699243000004
+        }
+      },
+      "24": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "c1fd25ea25d54752b8ad6cb3d57fa64958963e7e15f9bfce1bb3a8c4b4de23dc",
+        "event_counts": {
+          "0": 2,
+          "1": 12493,
+          "2": 3211
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 4094.7363281250005,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 13601.34938390553,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 18136,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            119.48306274400001
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.861317396
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            955.8644714358595
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            410.5334472656874
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            461.8138580320625
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            203.00022888183594
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0038017631639404303
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.00528138910623166
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0031619663466185832
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.012537062545928901
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 9527.652542113,
+          "sbrunv": 26.392037508,
+          "drrunv": 0.0,
+          "gwbfv": 13.197404864000001
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1271541.691761004,
+          "sbrunv": 11558.06413344,
+          "drrunv": 0.0,
+          "gwbfv": 6466.986288381
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 12.784985962
+        }
+      },
+      "25": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "06b251c6ecf6aab2f585309bed878528a2f721e667b9b60b6c71dc872f02957f",
+        "event_counts": {
+          "0": 2,
+          "1": 12970,
+          "2": 2734
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 4465.430664063,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 13216.332015171647,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17930,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            137.25303649900002
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            2.339963913
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            1096.7000885009766
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            467.3976440429999
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            526.8213958740312
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            239.7340850830078
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.005485534963867167
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.003963947295898329
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.005515814000244479
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.030671596827270164
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 10970.754867552001,
+          "sbrunv": 71.889366628,
+          "drrunv": 0.0,
+          "gwbfv": 14.972124096000002
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 1240171.189312007,
+          "sbrunv": 26866.188491364002,
+          "drrunv": 0.0,
+          "gwbfv": 7336.0006940660005
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 14.504245218000001
+        }
+      },
+      "26": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "f5a9bad13738e4dca740ff8356812508fd598aa0cbb8c7b8bd3c1b325f6a39eb",
+        "event_counts": {
+          "0": 2,
+          "1": 12814,
+          "2": 2890
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 12888.034179688,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 39037.89172887802,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17967,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            410.17285156300005
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.415813804
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            3104.4045410155004
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1329.048828125125
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1494.946044922125
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            690.58251953125
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0008455516727904899
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.000726282182006821
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.0011816914145812984
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.005687832470413157
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 31313.926086425003,
+          "sbrunv": 12.760963239,
+          "drrunv": 0.0,
+          "gwbfv": 42.644355776000005
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3704308.425079416,
+          "sbrunv": 4590.987932578,
+          "drrunv": 0.0,
+          "gwbfv": 20895.790425565003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 41.311719658
+        }
+      },
+      "27": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "4cbf341f793061d9ad8e1c9f2b4958ec861f42426996aa63b8216ca917145d49",
+        "event_counts": {
+          "0": 2,
+          "1": 12513,
+          "2": 3191
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 2757.666992188,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 9158.828830711544,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 18126,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            79.741790771
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            0.949132144
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            644.1961364745157
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            276.51742553709374
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            311.05760192898435
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            136.36289978027344
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.004189252451141323
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.006243944597747797
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.003905952429656967
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.014233112452880836
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 6407.898406984,
+          "sbrunv": 29.075315406,
+          "drrunv": 0.0,
+          "gwbfv": 8.889199264
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 852988.025932325,
+          "sbrunv": 12700.120749153,
+          "drrunv": 0.0,
+          "gwbfv": 4355.881330994
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 8.611411787
+        }
+      },
+      "28": {
+        "days": 15706,
+        "serialized_slots": 15738,
+        "synthetic_slots": 32,
+        "first_sequential_date_mismatch": {
+          "routing_date": [
+            1984,
+            1
+          ],
+          "sequential_payload_date": [
+            1983,
+            366
+          ]
+        },
+        "sequential_payload_reader_max_delta_m3": 0.0,
+        "years": [
+          1983,
+          2025
+        ],
+        "hbp_sha256": "2724655d33c09b418fcf3d65d5d0c0154c06965d84d987546e9e45518b621cde",
+        "event_counts": {
+          "0": 2,
+          "1": 12823,
+          "2": 2881
+        },
+        "maximum_deltas": {
+          "writer_payload_m3": 5.002220859751105e-10,
+          "payload_reader_m3": 10970.927734375,
+          "lateral_area_m3": 0.0
+        },
+        "omitted_surface_m3": 33018.02902045846,
+        "omitted_lateral_m3": 0.0,
+        "violation_count": 17959,
+        "first_violations": [
+          [
+            1984,
+            1,
+            "runvol_payload_reader",
+            347.352386475
+          ],
+          [
+            1984,
+            1,
+            "sbrunv_payload_reader",
+            1.26560235
+          ],
+          [
+            1984,
+            2,
+            "runvol_payload_reader",
+            2643.6100158693907
+          ],
+          [
+            1984,
+            3,
+            "runvol_payload_reader",
+            1131.3856201167498
+          ],
+          [
+            1984,
+            4,
+            "runvol_payload_reader",
+            1272.6104125975626
+          ],
+          [
+            1984,
+            5,
+            "runvol_payload_reader",
+            586.9663696289062
+          ],
+          [
+            1984,
+            5,
+            "sbrunv_payload_reader",
+            0.0025736092349852857
+          ],
+          [
+            1984,
+            6,
+            "sbrunv_payload_reader",
+            0.0024381878828734216
+          ],
+          [
+            1984,
+            7,
+            "sbrunv_payload_reader",
+            0.003369211716308662
+          ],
+          [
+            1984,
+            8,
+            "sbrunv_payload_reader",
+            0.017538428434265008
+          ]
+        ],
+        "unconsumed_tail_volume_m3": {
+          "runvol": 26633.298324585,
+          "sbrunv": 38.836201068,
+          "drrunv": 0.0,
+          "gwbfv": 36.302093504000005
+        },
+        "physical_payload_volumes_m3": {
+          "runvol": 3145627.699279846,
+          "sbrunv": 13943.637942183,
+          "drrunv": 0.0,
+          "gwbfv": 17788.073385597003
+        },
+        "consumed_synthetic_volumes_m3": {
+          "runvol": 0.0,
+          "sbrunv": 0.0,
+          "drrunv": 0.0,
+          "gwbfv": 35.16765308200001
+        }
+      }
+    },
+    "channel_publication_arithmetic": {
+      "rows": 15706,
+      "signed_m3": 0.042486356982408324,
+      "absolute_m3": 3.2201020344546123,
+      "worst": {
+        "case": "real-tight-orthodontist",
+        "year": 2001,
+        "day": 331,
+        "element": 39,
+        "inflow": 329576.125,
+        "baseflow": 0.0,
+        "outflow": 328768.9375,
+        "loss": 19.14948272705078,
+        "storage_start": 365.28125,
+        "storage_end": 1153.34375,
+        "residual": -0.02448272705078125,
+        "tolerance": 1.2586266269364383,
+        "normalized": -7.42854994450258e-08,
+        "within_arithmetic_bound": true,
+        "boundary": "channel publication",
+        "interval": "calendar day; integrated published volumes",
+        "phase": "post-routing publication with start/end storage",
+        "source_artifacts": "/workdir/watershed-channel-routing-closure-20261021/real-second-on/channel_publish.csv;/workdir/watershed-channel-routing-closure-20261021/real-second-on/channel_balance.csv",
+        "binary_sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f",
+        "input_manifest": "/workdir/watershed-channel-routing-closure-20261021/real-second-on/input_manifest.json"
+      },
+      "outside_arithmetic_bound": 0,
+      "negative_loss_rows": 2317
+    },
+    "disposition": "calendar selection defect; domain conservation unresolved"
+  }
+}

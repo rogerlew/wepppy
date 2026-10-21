@@ -1,6 +1,6 @@
 # Watershed channel routing closure investigation
 
-**Status**: Scaffolded; investigation not started
+**Status**: Closed 2026-10-21; investigation complete, calendar-selection defect open
 **Created**: 2026-10-21 16:42 UTC
 **Owner**: Roger Lew; scientific context from Ayush Poudel
 
@@ -16,7 +16,7 @@ The deliverable is a reproducible diagnosis, not a corrected simulation.
 
 The operator requested scaffolding on 2026-10-21 and explicitly allowed
 wepp-forest observability instrumentation while prohibiting simulation changes.
-This turn creates the plan only. Execution may add gated diagnostic observations,
+Execution was authorized on 2026-10-21. Execution may add gated diagnostic observations,
 offline accounting tools, fixtures, and evidence. It must not change equations,
 thresholds, routing branches, numerical precision of simulation variables,
 state updates, solver ordering, defaults, guards, or production output schemas.
@@ -30,9 +30,17 @@ the control volume (the physical domain whose inflows, outflows, and storage are
 balanced). Neither binary release/vendoring nor deployment, live-run mutation,
 historical regeneration, or consumer behavior changes are included.
 
+## Results
+
+[Findings](artifacts/findings.md) confirm a schema-2 PASS date-selection defect.
+Nine full-period cases have exact baseline/off/on parity, including a 28-hillslope,
+43-year real project. [Correctness review](artifacts/correctness_review.md) passes
+investigation closure. Physical-domain conservation, failed cases and historical
+workbook attribution remain unresolved. No simulation correction or deployment.
+
 ## Execution and deliverables
 
-Follow the [active ExecPlan](prompts/active/watershed_channel_routing_closure_execplan.md)
+Follow the [completed ExecPlan](prompts/completed/watershed_channel_routing_closure_execplan.md)
 and maintain the [tracker](tracker.md). Retain source/provenance mapping,
 instrumentation design and parity results, case matrix, volume ledgers,
 signed/absolute residual summaries, diagnostic controls, and a findings report
@@ -70,7 +78,7 @@ privileges, public routes, or new deployment mechanisms are permitted.
 
 Use supported project clone/archive workflows for real-project isolation and
 retain shared runtime context. Generated artifact validation applies during
-execution; this documentation-only scaffold generates no simulation evidence.
+execution; this investigation retains native replay and semantic readback evidence.
 Large payloads remain in visible, retained replay directories with manifests
 and hashes in the package. No new WEPPcloud artifact workflow is introduced.
 

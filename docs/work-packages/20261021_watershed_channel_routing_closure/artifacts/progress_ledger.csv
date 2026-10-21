@@ -1,0 +1,9 @@
+hypothesis,experiment,observation,disposition
+Unequal terminal area conversion loses lateral water,Matched single and unequal OFE full-period cases,Raw terminal depth times terminal area agrees with selected writer volume,Not supported in tested constant-width cases
+Event filtering alone explains delivery gap,Raw versus selected versus serialized flux audit,Measured filtered omissions coexist with independent calendar mismatch,Filtering measured separately
+Payload serialization corrupts delivered volumes,Native independent HBP parser versus writer observations,Quantization within declared bound,Not supported for tested schema 2
+Reader selects requested calendar day,Date-keyed and sequential-slot comparisons,Sequential slots match exactly but calendar selection diverges after non-leap year,Confirmed defect remains open
+Small channel residual establishes domain closure,Source ownership and channel publication audit,Some loss/storage/outflow terms constructed from balance identities,Invalid inference; physical domain closure unresolved
+Diagnostics can detect known accounting errors,Hand-computable and observed copied-ledger mutations,Four expected signed errors detected; malformed diagnostic records rejected,Validated arithmetic diagnostic only
+Instrumentation changes scientific outputs,Baseline versus candidate off versus candidate on,Exact file comparison receipts in parity.json,See per-case full-period gate
+Workbook establishes original model lineage,Workbook hash and operator clarification,Original decks not supplied and executable unknown,Historical attribution unresolved

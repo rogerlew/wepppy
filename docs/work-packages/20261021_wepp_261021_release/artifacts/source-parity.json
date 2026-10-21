@@ -1,0 +1,30 @@
+{
+  "src/contin.for": {
+    "sha256": "4f25f5a576b23ffd178342804f5df093f5a06ea18e4ba7a82e7deb3a19643dca",
+    "matches_validated_backport": true
+  },
+  "src/stmget.for": {
+    "sha256": "c38ee02f260fcb42e5be432311b8abbc3b6eb42c1c295a81675aec922c287e33",
+    "matches_validated_backport": true
+  },
+  "src/wshdrv.for": {
+    "sha256": "f50f1005ee44135e3e326424e19510aebaa97eb9942dd263c9a1499c85e02b57",
+    "matches_validated_backport": true
+  },
+  "src/wshpas.for": {
+    "sha256": "e0587595832cbd8b18f7e1ceccb45a0793a5b84d8d87134742094eb0e0c21f7a",
+    "matches_validated_backport": true
+  },
+  "src/wshred.for": {
+    "sha256": "6f66e04f38d2e11538c0dca29b7522ebf75e4b86f5f16037b2f2e9f9d9b883f9",
+    "matches_validated_backport": true
+  },
+  "src/makefile": {
+    "sha256": "fa9ec841d6523c132eb6c4b7aa52d7016a0e4d2762ca1826cc7e9d17604a60b8",
+    "matches_validated_backport": true
+  },
+  "fpm-src/wepp_calendar.f90": {
+    "sha256": "4f62406c7feb204ea865dffa0b5cfe94f574183babad8d5bc1b868562f8052af",
+    "matches_validated_backport": true
+  }
+}

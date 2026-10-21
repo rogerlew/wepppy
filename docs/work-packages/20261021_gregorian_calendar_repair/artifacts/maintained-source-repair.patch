@@ -1,0 +1,1077 @@
+--- a/src/contin.for
++++ b/src/contin.for
+@@ -1,4 +1,5 @@
+       subroutine contin(iwpass)
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -229,7 +230,6 @@
+      1    mondet,mondep,det,dep,dsunmp,runom,tirig,tiro,tmelt,totir,
+      1    train,yirrig,yirrro,yrmro,yrrro,fuzzr,powerz,hyradz,
+      1    qrainp,qsnowp,qnofirr
+-      logical gregorian_leap_year, legacy_centurial_day366
+ c
+       character text2(12)*3
+       character*8 inifil
+@@ -633,12 +633,8 @@
+ c
+ c         check to see if year is a leap year
+ c
+-          gregorian_leap_year = mod(lyear,4).eq.0 .and.
+-     1      (mod(lyear,100).ne.0 .or. mod(lyear,400).eq.0)
+-          legacy_centurial_day366 = mod(lyear,100).eq.0 .and.
+-     1      mod(lyear,400).ne.0
+           lp = 1
+-          if (gregorian_leap_year.or.legacy_centurial_day366) lp = 2
++          if (calendar_is_leap(lyear)) lp = 2
+         else
+           lyear = ibyear
+         end if
+--- a/src/stmget.for
++++ b/src/stmget.for
+@@ -1,4 +1,5 @@
+       subroutine stmget(mxint)
++      use wepp_calendar
+ c******************************************************************
+ c                                                                 *
+ c  This subroutine is called from SR CONTIN to read in storm data *
+@@ -68,6 +69,7 @@
+       include 'cupdate.inc'
+ c
+       include 'cstmgt.inc'
++      include 'ccliyr.inc'
+ c
+       include 'cstruc.inc'
+ c
+@@ -80,7 +82,9 @@
+ c
+ c     real mxint,totrn
+       real mxint
+-      logical is_gregorian_leap_year
++      logical climate_eof
++      integer valid_records, ios
++      character*2048 climate_line
+       integer xday(10), xmon(10), xyear(10), nbrkpt, i, jkjk, jkl, kjl
+       real xrain(10), xstmdr(10), xtimep(10), xip(10), xtmax(10),
+      1    xtmin(10), xradly(10), xvwind(10), xwind(10), xtdpt(10)
+@@ -115,21 +119,56 @@
+ c       1             tmax,tmin,radly,vwind,wind,tdpt
+ c
+ c       Try to speed up disk I/O by doing it in larger chunks.
++        if (jyear.le.1.and.sdate.le.1) then
++          valid_records = 0
++          climate_eof = .false.
++          nrec = 10
++        endif
+         nrec = nrec + 1
+         if (nrec.ge.11) then
+           nrec = 1
+-          read (13,*,end=20) (xday(i),xmon(i),xyear(i),xrain(i),
+-     1        xstmdr(i),xtimep(i),xip(i),xtmax(i),xtmin(i),xradly(i),
+-     1        xvwind(i),xwind(i),xtdpt(i),i = 1,10)
+-          do 15 i = 1,10
+-            if (isnan(xtdpt(i))) then
+-              call wepp_observe('EVA_U010_XTDPT',xyear(i),xday(i),0,0,i,
+-     1          xtdpt(i),xradly(i))
+-            endif
+-   15     continue
++          valid_records = 0
++          if (.not.climate_eof) then
++            do i = 1,10
++              read (13,'(a)',iostat=ios) climate_line
++              if (ios.lt.0) then
++                climate_eof = .true.
++                exit
++              endif
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'climate read failed')
++c             Permit trailing whitespace, but never count it as weather.
++              do while (len_trim(climate_line).eq.0)
++                read (13,'(a)',iostat=ios) climate_line
++                if (ios.ne.0) exit
++              enddo
++              if (ios.lt.0) then
++                climate_eof = .true.
++                exit
++              endif
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'climate read failed')
++              call calendar_require_numeric_record(13,climate_line)
++              read (climate_line,*,iostat=ios) xday(i),xmon(i),
++     1          xyear(i),xrain(i),xstmdr(i),xtimep(i),xip(i),
++     1          xtmax(i),xtmin(i),xradly(i),xvwind(i),xwind(i),xtdpt(i)
++              if (ios.ne.0) call calendar_input_error(13,
++     1          'incomplete climate record')
++              valid_records = i
++              if (isnan(xtdpt(i))) then
++                call wepp_observe('EVA_U010_XTDPT',xyear(i),
++     1            xday(i),0,0,i,xtdpt(i),xradly(i))
++              endif
++            enddo
++          endif
+         end if
+-c
+-   20   continue
++        if (nrec.gt.valid_records) then
++          write(6,*) 'Climate expected year/day:',ibyear+jyear-1,
++     1      sdate
++          call calendar_input_error(13,'premature climate EOF')
++        endif
++        if (imodel.eq.1) call calendar_require_date(13,
++     1    ibyear+jyear-1,sdate,xyear(nrec),xmon(nrec),xday(nrec))
+ c
+ c       Most of the variables below are never used in STMGET (except RAIN).
+ c       They are just stuffed into common.
+@@ -140,14 +179,6 @@
+ c
+ c       If a leap year check to see if 29 days in Feb
+ c
+-        is_gregorian_leap_year = mod(year,4).eq.0 .and.
+-     1      (mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-        if (is_gregorian_leap_year) then
+-          if (mon.eq.3.and.day.eq.1.and.sdate.lt.61) then
+-            write (6,1000)
+-            write (6,1100) year
+-          end if
+-        end if
+ c
+         do 30 jkjk=1,nplane
+           rain(jkjk) = xrain(nrec)
+@@ -220,20 +251,20 @@
+ c
+       else
+ c       READ IN BREAKPOINT DATA
+-        read (13,*) day, mon, year, nbrkpt, tmax, tmin, radly, vwind,
+-     1              wind, tdpt
++        read (13,'(a)',iostat=ios) climate_line
++        if (ios.ne.0) call calendar_input_error(13,
++     1    'missing breakpoint climate header')
++        call calendar_require_numeric_record(13,climate_line)
++        read (climate_line,*,iostat=ios) day, mon, year, nbrkpt,
++     1    tmax, tmin, radly, vwind, wind, tdpt
++        if (ios.ne.0) call calendar_input_error(13,
++     1    'incomplete breakpoint climate header')
++        if (imodel.eq.1) call calendar_require_date(13,
++     1    ibyear+jyear-1,sdate,year,mon,day)
+         if (isnan(tdpt)) then
+           call wepp_observe('EVA_U030_BRKTDP',year,sdate,0,0,nbrkpt,
+      1      tdpt,radly)
+         endif
+-        is_gregorian_leap_year = mod(year,4).eq.0 .and.
+-     1      (mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-        if (is_gregorian_leap_year) then
+-          if (mon.eq.3.and.day.eq.1.and.sdate.lt.61) then
+-            write (6,1000)
+-            write (6,1200) year
+-          end if
+-        end if
+ c
+ c       NINT IS THE NUMBER OF BREAKPOINTS OCCURRING ON THE GIVEN DAY.
+ c       READ IN BREAKPOINT DATA IF RAINFALL OCCURS
+--- a/src/wshdrv.f90
++++ b/src/wshdrv.f90
+@@ -10,6 +10,7 @@
+ ! allow(C001,C092,C121,MOD021,OB061,S071)
+ 
+ subroutine wshdrv
++use wepp_calendar
+ use wb12_wshdrv_context
+ use, intrinsic :: iso_fortran_env, only : real64
+ use watbal_route_kernels, only : wbk_imp_05_orchestrator_integration_execute, wbk_imp_06_summary_accumulator_execute, &
+@@ -156,7 +157,6 @@
+ !d      real dslost(mxplan,100), xmxint(mxplan), mxint, effdrr(mxplan),
+    real dslost(mxplan,100),mxint, effdrr(mxplan),&
+    &rcalsl, avdatm, hday, sumrtm, sumsrm, warain, dsunmp, toplen, rtrans_writeback_native
+-   logical gregorian_leap_year, legacy_centurial_day366
+    logical route08_should_route_hydrology
+    logical imp05_should_dispatch
+    logical imp06_summary_ok
+@@ -508,12 +508,8 @@
+ !
+ !         check to see if year is a leap year
+ !
+-         gregorian_leap_year = mod(lyear,4).eq.0 .and.&
+-         &(mod(lyear,100).ne.0 .or. mod(lyear,400).eq.0)
+-         legacy_centurial_day366 = mod(lyear,100).eq.0 .and.&
+-         &mod(lyear,400).ne.0
+          lp = 1
+-         if (gregorian_leap_year.or.legacy_centurial_day366) lp = 2
++         if (calendar_is_leap(lyear)) lp = 2
+       else
+          lyear = ibyear
+       end if
+--- a/src/wshpas.f90
++++ b/src/wshpas.f90
+@@ -8,6 +8,7 @@
+ ! allow(C001,C061,C092,C121,MOD021,OB061,S071)
+ 
+ subroutine wshpas(year,day,istat)
++use wepp_calendar
+ use wb12_wshpas_context
+ !
+ !     + + + PURPOSE + + +
+@@ -51,7 +52,7 @@
+ !
+ integer i, iflag, ios, j, k, l, m, ndays, tmpbyr, tmpnyr, &
+   &bpevent, pass_path_len
+-logical gregorian_leap_year, legacy_centurial_day366, bpfinal, &
++logical bpfinal, &
+   &hbp_binary_pass
+ !
+ character*8 event(mxhill)
+@@ -266,14 +267,7 @@
+ if (imodel.eq.2) then
+ bpfinal = .true.
+ else
+-gregorian_leap_year = mod(year,4).eq.0 .and. &
+-  &(mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-legacy_centurial_day366 = mod(year,100).eq.0 .and. &
+-  &mod(year,400).ne.0
+-ndays = 365
+-if (gregorian_leap_year.or.legacy_centurial_day366) then
+-ndays = 366
+-endif
++ndays = calendar_year_days(year)
+ if (year.eq.(ibyear+nyear-1).and.day.eq.ndays) then
+ bpfinal = .true.
+ endif
+@@ -369,14 +363,7 @@
+ !
+ !         check for leap year
+ !
+-gregorian_leap_year = mod(year,4).eq.0 .and. &
+-  &(mod(year,100).ne.0 .or. mod(year,400).eq.0)
+-legacy_centurial_day366 = mod(year,100).eq.0 .and. &
+-  &mod(year,400).ne.0
+-ndays = 365
+-if (gregorian_leap_year.or.legacy_centurial_day366) then
+-ndays = 366
+-endif
++ndays = calendar_year_days(year)
+ !
+ !         check for simulation mode (single storm or continuous)
+ !
+@@ -396,6 +383,9 @@
+ !
+ !             read remainder of information in hillslope pass files
+ !
++call calendar_read_pass_header(m,event(k),iwsbyr+i-1,j, &
++  & imodel.eq.1)
++backspace (m)
+ read (m,1000) event(k)
+ if (event(k).eq.'NO EVENT') then
+ backspace (m)
+--- a/src/wshred.for
++++ b/src/wshred.for
+@@ -1,4 +1,5 @@
+       subroutine wshred
++      use wepp_calendar
+ c
+ c     + + + PURPOSE + + +
+ c
+@@ -134,7 +135,8 @@
+      1      gwbfv(i),gwdsv(i))
+         enddo
+       else
+-        read (49,1100) event
++      call calendar_read_pass_header(49,event,year,sdate,
++     1  imodel.eq.1)
+       endif
+ c
+       if (event.eq.'EVENT   ') then
+--- a/src/makefile
++++ b/src/makefile
+@@ -85,12 +85,12 @@
+                     watbal_route_types_hill.o watbal_route_kernels_hill.o \
+                     watbal_daily_adapter_hill.o watbal_hourly_adapter_hill.o \
+                     watbal_closure_guard_hill.o watbal_process_probe_hill.o
+-PASS_BINARY_OBJS = hillslope_binary_pass_writer.o \
++PASS_BINARY_OBJS = wepp_calendar.o hillslope_binary_pass_writer.o \
+                    hillslope_binary_pass_legacy_adapter.o \
+                    hillslope_binary_pass_reader.o \
+                    hbp_legacy_bridge.o \
+                    hbp_mode2_bridge.o
+-PASS_BINARY_HILL_OBJS = hillslope_binary_pass_writer_hill.o \
++PASS_BINARY_HILL_OBJS = wepp_calendar.o hillslope_binary_pass_writer_hill.o \
+                         hillslope_binary_pass_legacy_adapter_hill.o \
+                         hillslope_binary_pass_reader_hill.o \
+                         hbp_legacy_bridge_hill.o \
+@@ -1456,3 +1456,12 @@
+ 
+ yldopt.o: ccrpgro.inc ccrpprm.inc ccrpvr3.inc ccrpvr3a.inc pmxcrp.inc \
+          pmxpln.inc pmxres.inc pmxtil.inc pmxtls.inc pntype.inc
++
++wepp_calendar.o: ../fpm-src/wepp_calendar.f90
++	$(FC) $(FFLAGS_F90) -c $< -o $@
++
++contin.o contin_hill.o stmget.o stmget_hill.o wshdrv.o wshdrv_hill.o wshpas.o wshpas_hill.o wshred.o wshred_hill.o: wepp_calendar.o
++
++hillslope_binary_pass_legacy_adapter.o hillslope_binary_pass_legacy_adapter_hill.o: wepp_calendar.o
++
++hillslope_binary_pass_reader.o hillslope_binary_pass_reader_hill.o: wepp_calendar.o
+--- /dev/null
++++ b/fpm-src/wepp_calendar.f90
+@@ -0,0 +1,95 @@
++! SPDX-License-Identifier: CC0-1.0
++! Contract-Spec: docs/contracts/execution-calendar-contract.md
++! Contributors: Roger Lew; Codex
++module wepp_calendar
++  implicit none (type, external)
++  private
++  public :: calendar_is_leap, calendar_year_days, calendar_month_days
++  public :: calendar_julian, calendar_require_date, calendar_require_key
++  public :: calendar_input_error, calendar_require_numeric_record
++  public :: calendar_read_pass_header
++contains
++  pure logical function calendar_is_leap(year) result(leap)
++    integer, intent(in) :: year
++    leap = mod(year, 4) == 0 .and. (mod(year, 100) /= 0 .or. mod(year, 400) == 0)
++  end function calendar_is_leap
++
++  pure integer function calendar_year_days(year) result(days)
++    integer, intent(in) :: year
++    days = 365
++    if (calendar_is_leap(year)) days = 366
++  end function calendar_year_days
++
++  pure integer function calendar_month_days(year, month) result(days)
++    integer, intent(in) :: year, month
++    integer, parameter :: lengths(12) = [31,28,31,30,31,30,31,31,30,31,30,31]
++    days = 0
++    if (month < 1 .or. month > 12) return
++    days = lengths(month)
++    if (month == 2 .and. calendar_is_leap(year)) days = 29
++  end function calendar_month_days
++
++  pure integer function calendar_julian(year, month, day) result(julian)
++    integer, intent(in) :: year, month, day
++    integer :: m
++    julian = 0
++    if (year < 1 .or. month < 1 .or. month > 12) return
++    if (day < 1 .or. day > calendar_month_days(year, month)) return
++    julian = day
++    do m = 1, month - 1
++      julian = julian + calendar_month_days(year, m)
++    end do
++  end function calendar_julian
++
++  subroutine calendar_require_date(unit, expected_year, expected_day, year, month, day)
++    integer, intent(in) :: unit, expected_year, expected_day, year, month, day
++    integer :: julian
++    julian = calendar_julian(year, month, day)
++    if (julian == 0) call calendar_input_error(unit, 'invalid calendar date')
++    call calendar_require_key(unit, expected_year, expected_day, year, julian)
++  end subroutine calendar_require_date
++
++  subroutine calendar_require_key(unit, expected_year, expected_day, year, day)
++    integer, intent(in) :: unit, expected_year, expected_day, year, day
++    if (expected_year == year .and. expected_day == day) return
++    write (*, '(A,2(1X,I0),A,2(1X,I0))') 'Calendar expected year/day:', &
++      expected_year, expected_day, '; received:', year, day
++    call calendar_input_error(unit, 'date mismatch; regenerate climate/PASS with matching Gregorian binaries')
++  end subroutine calendar_require_key
++
++  subroutine calendar_read_pass_header(unit, event, expected_year, expected_day, continuous)
++    integer, intent(in) :: unit, expected_year, expected_day
++    character(len=8), intent(out) :: event
++    logical, intent(in) :: continuous
++    integer :: year, day, ios
++    ! Shared ASCII hillslope/master header format; payload stays with its owner.
++    read(unit, '(a8,2x,2(i5,1x))', iostat=ios) event, year, day
++    if (ios /= 0) call calendar_input_error(unit, 'incomplete PASS daily header')
++    if (event /= 'EVENT   ' .and. event /= 'SUBEVENT' .and. event /= 'NO EVENT') then
++      call calendar_input_error(unit, 'unknown PASS event kind')
++    end if
++    if (continuous) call calendar_require_key(unit, expected_year, expected_day, year, day)
++  end subroutine calendar_read_pass_header
++
++  subroutine calendar_require_numeric_record(unit, line)
++    integer, intent(in) :: unit
++    character(len=*), intent(in) :: line
++    ! CLIGEN daily records are whitespace-separated numeric fields. List-directed
++    ! null/repeat/termination syntax can succeed without assigning every field.
++    if (scan(line, ',/*!') /= 0) then
++      call calendar_input_error(unit, 'expected complete whitespace-separated numeric climate record')
++    end if
++  end subroutine calendar_require_numeric_record
++
++  subroutine calendar_input_error(unit, message)
++    integer, intent(in) :: unit
++    character(len=*), intent(in) :: message
++    character(len=1024) :: path
++    integer :: ios
++    path = '<unknown>'
++    inquire(unit=unit, name=path, iostat=ios)
++    if (ios /= 0) path = '<unknown>'
++    write (*, '(A)') 'Calendar input error: '//trim(message)//' ['//trim(path)//']'
++    stop 1
++  end subroutine calendar_input_error
++end module wepp_calendar
+--- a/fpm-src/hillslope_binary_pass_reader.f90
++++ b/fpm-src/hillslope_binary_pass_reader.f90
+@@ -3,6 +3,8 @@
+ ! Contract-Spec: docs/contracts/watershed-hillslope-pass-reader-contract.md
+ 
+ module hillslope_binary_pass_reader
++  use wepp_calendar, only : calendar_year_days
++  use hillslope_binary_pass_writer, only : hbp_compatibility_hex, hbp_legacy_compatibility_hex
+   use, intrinsic :: iso_c_binding, only : c_int, c_loc, c_long, c_ptr
+   use, intrinsic :: iso_fortran_env, only : int8, int16, int32, int64, real64, output_unit
+   implicit none (type, external)
+@@ -51,9 +53,7 @@
+   character(len=*), parameter :: hbp_footer_magic = 'ENDHBP01'
+   character(len=*), parameter :: expected_unit_policy_id = 'ps02-si-scaled-i64-v1'
+   character(len=*), parameter :: expected_calendar_policy_id = &
+-    'wepp-gregorian-legacy-centurial-v1'
+-  character(len=*), parameter :: expected_compatibility_hex = &
+-    'a946b58f3c065647e271aa8eaefec0bd9773784ee2046503307d88d45311c4a3'
++    'wepp-gregorian-v1'
+   character(len=*), parameter :: expected_state_registry_hex = &
+     '4ffee8e680e75f88ad0324fc12bd492f3e1823bc7f65fd455c2fa359e52f892c'
+ 
+@@ -117,6 +117,7 @@
+ 
+   type :: hbp_reader_context
+     logical :: is_open = .false.
++    logical :: gregorian_calendar = .true.
+     integer :: nhill = 0
+     integer :: npart = 0
+     integer :: maxyrs = 0
+@@ -216,10 +217,14 @@
+     end if
+   end function hbp_path_from_pass_file
+ 
+-  subroutine hbp_reader_open_paths(nhill, paths, status)
++  subroutine hbp_reader_open_paths(nhill, paths, status, calendar_policy_id)
+     integer, intent(in) :: nhill
+     character(len=*), intent(in) :: paths(nhill)
+     type(hbp_reader_status), intent(out) :: status
++
++    ! Offline callers may explicitly request the legacy calendar. Runtime uses the default.
++    character(len=*), intent(in), optional :: calendar_policy_id
++    character(len=:), allocatable :: requested_calendar
+ 
+     type(hbp_parsed_shard) :: shard
+     integer :: i
+@@ -235,12 +240,23 @@
+ 
+     status = hbp_reader_status()
+     call clear_reader()
++    requested_calendar = expected_calendar_policy_id
++    if (present(calendar_policy_id)) requested_calendar = calendar_policy_id
++    if (requested_calendar /= expected_calendar_policy_id .and. &
++        requested_calendar /= 'wepp-gregorian-legacy-centurial-v1') then
++      call fail(status, 'unsupported requested calendar policy')
++      return
++    end if
+     call ensure_little_endian_host(status)
+     if (.not. status%ok) return
+     allocate(seen_hillslope(nhill))
+     seen_hillslope = .false.
+ 
+-    call hex_to_bytes(expected_compatibility_hex, expected_compatibility_id, status)
++    if (requested_calendar == expected_calendar_policy_id) then
++      call hex_to_bytes(hbp_compatibility_hex, expected_compatibility_id, status)
++    else
++      call hex_to_bytes(hbp_legacy_compatibility_hex, expected_compatibility_id, status)
++    end if
+     if (.not. status%ok) return
+     call hex_to_bytes(expected_state_registry_hex, expected_state_registry_id, status)
+     if (.not. status%ok) return
+@@ -255,6 +271,10 @@
+         return
+       end if
+ 
++      if (trim(shard%calendar_policy_id) /= requested_calendar) then
++        call fail(status, 'calendar policy mismatch; regenerate hillslopes for the runtime calendar')
++        return
++      end if
+       if (any(shard%compatibility_id /= expected_compatibility_id)) then
+         call fail(status, 'compatibility id mismatch')
+         return
+@@ -265,10 +285,6 @@
+       end if
+       if (trim(shard%unit_policy_id) /= expected_unit_policy_id) then
+         call fail(status, 'unit policy mismatch')
+-        return
+-      end if
+-      if (trim(shard%calendar_policy_id) /= expected_calendar_policy_id) then
+-        call fail(status, 'calendar policy mismatch')
+         return
+       end if
+       if (shard%event_enum_version /= 1) then
+@@ -294,6 +310,7 @@
+           return
+         end if
+ 
++        reader%gregorian_calendar = requested_calendar == expected_calendar_policy_id
+         reader%nhill = nhill
+         reader%npart = npart
+         reader%maxyrs = shard%nyear
+@@ -581,6 +598,7 @@
+ 
+     day_index = 0
+     if (calendar_year < reader%iwsbyr .or. calendar_year > reader%iwsbyr + reader%maxyrs - 1) return
++    if (reader%gregorian_calendar .and. julian_day > calendar_year_days(calendar_year)) return
+     sim_year = calendar_year - reader%iwsbyr + 1
+     low = 1
+     high = reader%logical_day_count
+--- a/fpm-src/hillslope_binary_pass_writer.f90
++++ b/fpm-src/hillslope_binary_pass_writer.f90
+@@ -10,6 +10,7 @@
+   private
+ 
+   public :: hbp_artifact_role_hillslope
++  public :: hbp_compatibility_hex, hbp_legacy_compatibility_hex
+   public :: hbp_calendar_policy_id
+   public :: hbp_day_record
+   public :: hbp_event
+@@ -88,7 +89,12 @@
+   character(len=*), parameter :: hbp_magic = 'WFPHBP01'
+   character(len=*), parameter :: hbp_footer_magic = 'ENDHBP01'
+   character(len=*), parameter :: hbp_numeric_policy_id = 'ps02-si-scaled-i64-v1'
+-  character(len=*), parameter :: hbp_calendar_policy_id = 'wepp-gregorian-legacy-centurial-v1'
++  ! SHA-256 of docs/contracts/hbp-gregorian-compatibility.txt (UTF-8, LF).
++  character(len=*), parameter :: hbp_compatibility_hex = &
++    'f09eb5f380f007a03f7f04017b31ddfe2c3801866f85da7165f913ebb86a602a'
++  character(len=*), parameter :: hbp_legacy_compatibility_hex = &
++    'a946b58f3c065647e271aa8eaefec0bd9773784ee2046503307d88d45311c4a3'
++  character(len=*), parameter :: hbp_calendar_policy_id = 'wepp-gregorian-v1'
+ 
+   real(real64), parameter :: scale_depth_m = 1.0e-9_real64
+   real(real64), parameter :: scale_volume_m3 = 1.0e-9_real64
+--- a/fpm-src/hillslope_binary_pass_legacy_adapter.f90
++++ b/fpm-src/hillslope_binary_pass_legacy_adapter.f90
+@@ -3,10 +3,11 @@
+ ! Contract-Spec: docs/contracts/hillslope-binary-pass-format.md
+ 
+ module hillslope_binary_pass_legacy_adapter
++  use wepp_calendar, only : calendar_year_days
+   use, intrinsic :: ieee_arithmetic, only : ieee_is_finite
+   use, intrinsic :: iso_fortran_env, only : int64, real64
+-  use hillslope_binary_pass_writer, only : hbp_calendar_policy_id, hbp_day_record, hbp_event, hbp_event_no_event, &
+-    hbp_event_subevent, &
++  use hillslope_binary_pass_writer, only : hbp_calendar_policy_id, hbp_compatibility_hex, hbp_day_record, &
++    hbp_event, hbp_event_no_event, hbp_event_subevent, &
+     hbp_hex_to_bytes, hbp_numeric_policy_id, hbp_required_state_count, hbp_required_state_ids, hbp_repr_f64, &
+     hbp_repr_scaled_i64, hbp_schema_major, hbp_schema_major_v1, hbp_schema_major_v2, hbp_schema_minor, &
+     hbp_schema_minor_v1, hbp_shard, hbp_state_value, hbp_status, hbp_unit_count, hbp_unit_density_kg_m3, &
+@@ -16,8 +17,6 @@
+ 
+   public :: hbp_capture_legacy_day
+ 
+-  character(len=*), parameter :: compatibility_hex = &
+-    'a946b58f3c065647e271aa8eaefec0bd9773784ee2046503307d88d45311c4a3'
+   character(len=*), parameter :: state_registry_hex = &
+     '4ffee8e680e75f88ad0324fc12bd492f3e1823bc7f65fd455c2fa359e52f892c'
+ 
+@@ -148,7 +147,7 @@
+     shard%unit_policy_id = hbp_numeric_policy_id
+     shard%calendar_policy_id = hbp_calendar_policy_id
+     shard%climate_file_name = trim(climate_file)
+-    call hbp_hex_to_bytes(compatibility_hex, shard%compatibility_id, status)
++    call hbp_hex_to_bytes(hbp_compatibility_hex, shard%compatibility_id, status)
+     if (.not. status%ok) goto 900
+     call hbp_hex_to_bytes(state_registry_hex, shard%state_registry_id, status)
+     if (.not. status%ok) goto 900
+@@ -764,14 +763,7 @@
+   integer function represented_days(calendar_year)
+     integer, intent(in) :: calendar_year
+ 
+-    logical :: gregorian_leap_year
+-    logical :: legacy_centurial_day366
+-
+-    gregorian_leap_year = mod(calendar_year, 4) == 0 .and. &
+-      (mod(calendar_year, 100) /= 0 .or. mod(calendar_year, 400) == 0)
+-    legacy_centurial_day366 = mod(calendar_year, 100) == 0 .and. mod(calendar_year, 400) /= 0
+-    represented_days = 365
+-    if (gregorian_leap_year .or. legacy_centurial_day366) represented_days = 366
++    represented_days = calendar_year_days(calendar_year)
+   end function represented_days
+ 
+   subroutine append_record(record)
+--- a/fpm-test/ps05_mode2_direct_reader_tests.f90
++++ b/fpm-test/ps05_mode2_direct_reader_tests.f90
+@@ -8,9 +8,10 @@
+     hbp_unit_count, hbp_unit_density_kg_m3, hbp_unit_depth_m, hbp_unit_dimensionless, hbp_unit_volume_m3, hbp_write_file, &
+     hbp_year_entry
+   use wb_test_support, only : assert_true
++  use wepp_calendar, only : calendar_year_days
+   implicit none (type, external)
+ 
+-  integer :: failures
++  integer :: failures, boundary
+ 
+   failures = 0
+ 
+@@ -27,7 +28,13 @@
+   call check_schema2_vector(failures)
+   call check_calendar_selection(failures, 2, 2003)
+   call check_calendar_selection(failures, 1, 2003)
++  call check_calendar_selection(failures, 2, 1899, .true.)
++  do boundary = 99, 399, 100
++    call check_calendar_selection(failures, 1, boundary)
++    call check_calendar_selection(failures, 2, boundary)
++  end do
+   call check_calendar_selection(failures, 2, 1899)
++  call check_calendar_selection(failures, 2, 1999)
+ 
+   if (failures /= 0) then
+     write(*, '(i0, a)') failures, ' PS-05 direct shard reader checks failed'
+@@ -174,7 +181,7 @@
+     paths(2) = valid_root // 'PS04-FIX-MIXED-DAY-001-H2.hbp'
+     paths(3) = valid_root // 'PS04-FIX-MIXED-DAY-001-H3.hbp'
+ 
+-    call hbp_reader_open_paths(3, paths, status)
++    call hbp_reader_open_paths(3, paths, status, 'wepp-gregorian-legacy-centurial-v1')
+     call assert_true(status%ok, 'mixed-day shard set opens [' // trim(status%message) // ']', failures)
+     if (.not. status%ok) then
+       call hbp_reader_close()
+@@ -211,19 +218,23 @@
+   subroutine check_mode2_path_family_derivation(failures)
+     integer, intent(inout) :: failures
+ 
+-    character(len=*), parameter :: valid_root = &
+-      'docs/work-packages/20260505-ps04-hillslope-binary-shard-writer/artifacts/fixtures/valid/'
+     character(len=*), parameter :: tmp_root = '/tmp/wepp_ps05_hbp_path_test/'
+     character(len=256) :: paths(3)
+     type(hbp_reader_status) :: status
+-    integer :: cmd_status
+-
+-    call execute_command_line('rm -rf ' // tmp_root // ' && mkdir -p ' // tmp_root // &
+-      ' && cp ' // valid_root // 'PS04-FIX-MIXED-DAY-001-H1.hbp ' // tmp_root // 'H1.hbp' // &
+-      ' && cp ' // valid_root // 'PS04-FIX-MIXED-DAY-001-H2.hbp ' // tmp_root // 'H2.hbp' // &
+-      ' && cp ' // valid_root // 'PS04-FIX-MIXED-DAY-001-H3.hbp ' // tmp_root // 'H3.hbp', exitstat=cmd_status)
++    integer :: cmd_status, hill
++    type(hbp_shard) :: shard
++    type(hbp_writer_status) :: writer_status
++
++    call execute_command_line('mkdir -p '//tmp_root, exitstat=cmd_status)
+     call assert_true(cmd_status == 0, 'mode-2 path-family fixture setup', failures)
+     if (cmd_status /= 0) return
++    do hill = 1, 3
++      shard = make_dense_shard(2003, hill, 2, 0)
++      write(paths(hill), '(a,a,i0,a)') tmp_root, 'H', hill, '.hbp'
++      call hbp_write_file(trim(paths(hill)), shard, writer_status)
++      call assert_true(writer_status%ok, 'Gregorian path fixture write', failures)
++      if (.not. writer_status%ok) return
++    end do
+ 
+     paths(1) = tmp_root // 'H1.hbp'
+     paths(2) = tmp_root // 'H2.hbp'
+@@ -607,43 +618,54 @@
+     status = hbp_reader_status()
+   end subroutine refresh_schema2_crc_fields
+ 
+-  subroutine check_calendar_selection(failures, major, first_year)
++  subroutine check_calendar_selection(failures, major, first_year, legacy_calendar)
+     integer, intent(inout) :: failures
+     integer, intent(in) :: major, first_year
++    logical, intent(in), optional :: legacy_calendar
++    logical :: legacy
+     type(hbp_shard) :: shard
+     type(hbp_writer_status) :: writer_status
+     type(hbp_reader_status) :: status
+     character(len=256) :: paths(1)
+-    integer :: y, d, n, days, total, before
++    integer :: y, d, n, days, actual_days, total, before
+     integer :: kind, no_event, subevent, event
+     real :: duration(1), tc(1), alpha(1), runoff(1), volume(1), lateral_depth(1), lateral(1)
+     real :: tile_depth(1), tile(1), peak(1), detachment(1), deposition(1), baseflow(1), seepage(1)
+     real :: sediment(5,1), fractions(5,1), expected
+ 
+     ! Generate serialized records with distinct day/year signatures in volume and sediment fields.
+-    ! Middle year is 2004 (leap) or 1900 (existing legacy-centurial day 366).
++    legacy = .false.
++    if (present(legacy_calendar)) legacy = legacy_calendar
+     shard = make_dense_shard(first_year, 1, major, 0)
+     shard%nyear = 3
++    if (legacy) then
++      shard%calendar_policy_id = 'wepp-gregorian-legacy-centurial-v1'
++      call hbp_hex_to_bytes('a946b58f3c065647e271aa8eaefec0bd9773784ee2046503307d88d45311c4a3', &
++        shard%compatibility_id, writer_status)
++    end if
+     deallocate(shard%years, shard%records)
+     allocate(shard%years(3))
+-    total = 1096
++    total = sum([(calendar_year_days(y), y=first_year,first_year+2)])
++    if (legacy) total = 1096
+     if (major == 2) total = 1098
+     allocate(shard%records(total))
+     n = 0
+     do y = first_year, first_year+2
+-      days = 365
+-      if (y == first_year+1 .or. major == 2) days = 366
++      actual_days = calendar_year_days(y)
++      if (legacy .and. mod(y,4) == 0) actual_days = 366
++      days = actual_days
++      if (major == 2) days = 366
+       shard%years(y-first_year+1) = hbp_year_entry(y-first_year+1, y, days, 1, days, 0)
+       do d = 1, days
+         n = n + 1
+         shard%records(n) = make_dense_record(y, 120, 5, 2, 3)
+-        if (d == 366 .and. y /= first_year+1) shard%records(n) = make_dense_record(y, 366, 5, 2, 3)
++        if (d > actual_days) shard%records(n) = make_dense_record(y, 366, 5, 2, 3)
+         shard%records(n)%sim_year_index = y - first_year + 1
+         shard%records(n)%julian_day = d
+         expected = real((y-first_year+1)*1000+d)
+         shard%records(n)%baseflow_volume_m3 = real(expected+3, real64)
+         shard%records(n)%dissolved_storage_volume_m3 = real(expected+4, real64)
+-        if (d == 366 .and. y /= first_year+1) cycle
++        if (d > actual_days) cycle
+         shard%records(n)%runoff_volume_m3 = real(expected, real64)
+         shard%records(n)%subsurface_flow_volume_m3 = real(expected+1, real64)
+         shard%records(n)%tile_drainage_volume_m3 = real(expected+2, real64)
+@@ -655,12 +677,16 @@
+     call assert_true(writer_status%ok, 'calendar fixture write: '//trim(writer_status%message), failures)
+     if (.not. writer_status%ok) return
+     call hbp_reader_open_paths(1, paths, status)
++    if (legacy) then
++      call assert_true(.not. status%ok, 'runtime rejects legacy century policy', failures)
++      call hbp_reader_open_paths(1, paths, status, 'wepp-gregorian-legacy-centurial-v1')
++    end if
+     call assert_true(status%ok, 'calendar fixture open: '//trim(status%message), failures)
+     if (.not. status%ok) return
+ 
+     calendar_years: do y = first_year, first_year+2
+-      days = 365
+-      if (y == first_year+1) days = 366
++      days = calendar_year_days(y)
++      if (legacy .and. mod(y,4) == 0) days = 366
+       do d = 1, days
+         before = failures
+         call hbp_reader_load_next_day(kind, no_event, subevent, event, &
+@@ -685,6 +711,12 @@
+       duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
+       peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, first_year+1, 1)
+     call assert_true(status%ok, 'dated rewind after final day', failures)
++    if (.not. legacy .and. calendar_year_days(first_year+1) == 365) then
++      call hbp_reader_load_next_day(kind, no_event, subevent, event, &
++        duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
++        peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, first_year+1, 366)
++      call assert_true(.not. status%ok, 'reject nonleap day 366 without consuming cursor', failures)
++    end if
+     call hbp_reader_load_next_day(kind, no_event, subevent, event, &
+       duration, tc, alpha, runoff, volume, lateral_depth, lateral, tile_depth, tile, &
+       peak, detachment, deposition, sediment, fractions, baseflow, seepage, status, requested_year=first_year+1)
+@@ -731,7 +763,7 @@
+     integer, intent(in) :: schema_minor
+ 
+     character(len=*), parameter :: compatibility_hex = &
+-      'a946b58f3c065647e271aa8eaefec0bd9773784ee2046503307d88d45311c4a3'
++      'f09eb5f380f007a03f7f04017b31ddfe2c3801866f85da7165f913ebb86a602a'
+     character(len=*), parameter :: state_registry_hex = &
+       '4ffee8e680e75f88ad0324fc12bd492f3e1823bc7f65fd455c2fa359e52f892c'
+     type(hbp_writer_status) :: writer_status
+@@ -750,7 +782,7 @@
+     shard%run_id = 'ps14-schema2-reader-test'
+     shard%created_utc = '2026-05-14T00:00:00Z'
+     shard%unit_policy_id = 'ps02-si-scaled-i64-v1'
+-    shard%calendar_policy_id = 'wepp-gregorian-legacy-centurial-v1'
++    shard%calendar_policy_id = 'wepp-gregorian-v1'
+     shard%climate_file_name = 'ps14.cli'
+     call hbp_hex_to_bytes(compatibility_hex, shard%compatibility_id, writer_status)
+     if (.not. writer_status%ok) error stop trim(writer_status%message)
+--- a/fpm-test/ps_mode2_state_bridge_contract_tests.f90
++++ b/fpm-test/ps_mode2_state_bridge_contract_tests.f90
+@@ -1,6 +1,6 @@
+ program ps_mode2_state_bridge_contract_tests
+   use hillslope_binary_pass_reader, only : hbp_reader_close, hbp_reader_get_metadata, hbp_reader_load_next_day, &
+-    hbp_reader_open_mode2, hbp_reader_status
++    hbp_reader_open_mode2, hbp_reader_open_paths, hbp_reader_status
+   use wb_test_support, only : assert_true
+   implicit none (type, external)
+ 
+@@ -62,6 +62,8 @@
+     paths(3) = root // 'PS04-FIX-MIXED-DAY-001-H3.hbp'
+ 
+     call hbp_reader_open_mode2(3, paths, status)
++    call assert_true(.not. status%ok, 'historical calendar rejected by runtime', failures)
++    call hbp_reader_open_paths(3, paths, status, 'wepp-gregorian-legacy-centurial-v1')
+     call assert_true(status%ok, 'GV-P04-HYDRATE-BASE-001: open mode-2 set [' // trim(status%message) // ']', failures)
+     if (.not. status%ok) then
+       call hbp_reader_close()
+@@ -119,6 +121,8 @@
+     paths(3) = root // 'PS04-FIX-MIXED-DAY-001-H3.hbp'
+ 
+     call hbp_reader_open_mode2(3, paths, status)
++    call assert_true(.not. status%ok, 'historical calendar rejected by runtime', failures)
++    call hbp_reader_open_paths(3, paths, status, 'wepp-gregorian-legacy-centurial-v1')
+     call assert_true(status%ok, 'GV-P04-HYDRATE-INACTIVE-001: open mode-2 set', failures)
+     if (.not. status%ok) then
+       call hbp_reader_close()
+--- /dev/null
++++ b/tests/test_execution_calendar.py
+@@ -0,0 +1,220 @@
++"""Exercise the real climate reader with native Gregorian/EOF boundaries."""
++from datetime import date, timedelta
++from pathlib import Path
++import subprocess
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++
++DRIVER = """      program climate_reader_test
++      use wepp_calendar
++      include 'pmxelm.inc'
++      include 'pmxhil.inc'
++      include 'pmxpln.inc'
++      include 'pmxtls.inc'
++      include 'pmxtil.inc'
++      include 'cclig.inc'
++      include 'cclim.inc'
++      include 'cdiss1.inc'
++      include 'cdiss3.inc'
++      include 'chydrol.inc'
++      include 'cstmflg.inc'
++      include 'cupdate.inc'
++      include 'cstmgt.inc'
++      include 'ccliyr.inc'
++      include 'cstruc.inc'
++      integer count, requested, yr
++      real intensity
++      double precision total
++      character*64 arg
++      call get_command_argument(1,arg)
++      read(arg,*) ibyear
++      call get_command_argument(2,arg)
++      read(arg,*) requested
++      call get_command_argument(3,arg)
++      read(arg,*) ibrkpt
++      call get_command_argument(4,arg)
++      read(arg,*) imodel
++      nplane=1
++      iclig=4
++      jyear=1
++      sdate=0
++      yr=ibyear
++      total=0.0d0
++      open(13,file='weather.dat',status='old')
++      do count=1,requested
++        sdate=sdate+1
++        if(sdate.gt.calendar_year_days(yr)) then
++          sdate=1
++          jyear=jyear+1
++          yr=yr+1
++        endif
++        call stmget(intensity)
++        total=total+dble(prcp)
++      enddo
++      write(*,*) 'COMPLETE',requested,year,mon,day,total
++      end
++"""
++# Only post-reader physics/telemetry is stubbed; stmget and calendar are unmodified.
++STUBS = """subroutine sumrnf
++end subroutine
++subroutine brkpt(n, intensity)
++  integer :: n
++  real :: intensity
++  stop 91
++end subroutine
++subroutine wepp_observe(tag,y,d,e,c,s,a,b)
++  character(len=*) :: tag
++  integer :: y,d,e,c,s
++  real :: a,b
++end subroutine
++"""
++
++@pytest.fixture(scope="module")
++def reader(tmp_path_factory):
++    build = tmp_path_factory.mktemp("climate_reader")
++    (build / "driver.for").write_text(DRIVER)
++    (build / "stubs.f90").write_text(STUBS)
++    result = subprocess.run(
++        ["/usr/bin/gfortran", "-O0", "-fcheck=all", "-fno-align-commons", "-finit-local-zero",
++         "-I", str(ROOT / "src"), str(ROOT / "fpm-src/wepp_calendar.f90"),
++         str(ROOT / "src/stmget.for"), str(build / "driver.for"),
++         str(build / "stubs.f90"), "-o", str(build / "reader")],
++        cwd=build, capture_output=True, text=True,
++    )
++    assert result.returncode == 0, result.stderr
++    return build / "reader"
++
++
++def daily_lines(first_year, count, breakpoint=False):
++    start = date(first_year, 1, 1)
++    out = []
++    for i in range(count):
++        day = start + timedelta(days=i)
++        weather = "0 10 1 100 1 1 0" if breakpoint else "1 1 0.5 1 10 1 100 1 1 0"
++        out.append(f"{day.day} {day.month} {day.year} {weather}\n")
++    return out
++
++
++def run_reader(reader, tmp_path, lines, count, year=1, breakpoint=False, continuous=True):
++    (tmp_path / "weather.dat").write_text("".join(lines))
++    return subprocess.run([str(reader), str(year), str(count), str(int(breakpoint)),
++                           "1" if continuous else "2"], cwd=tmp_path,
++                          capture_output=True, text=True, timeout=30)
++
++
++@pytest.mark.parametrize("year,years", [(1,400),(99,3),(199,3),(299,3),(399,3),(1899,3),(1999,3)])
++def test_century_climate_is_consumed_exactly(reader, tmp_path, year, years):
++    count = (date(year+years,1,1)-date(year,1,1)).days
++    result = run_reader(reader,tmp_path,daily_lines(year,count),count,year)
++    assert result.returncode == 0, result.stdout + result.stderr
++    assert "COMPLETE" in result.stdout
++    fields = result.stdout.split()
++    assert list(map(int, fields[1:5])) == [count,year+years-1,12,31]
++    assert float(fields[5]) == pytest.approx(count * .001, rel=1e-6)
++
++
++@pytest.mark.parametrize("count", range(1,21))
++def test_partial_final_buffer_has_only_complete_records(reader, tmp_path, count):
++    lines = daily_lines(1,count)
++    complete = run_reader(reader,tmp_path,lines,count)
++    assert complete.returncode == 0, complete.stdout + complete.stderr
++    short = run_reader(reader,tmp_path,lines,count+1)
++    assert short.returncode != 0
++    assert "premature climate EOF" in short.stdout
++    assert "weather.dat" in short.stdout
++
++
++@pytest.mark.parametrize("kind", ["duplicate","missing","invalid_month","invalid_day","invalid_leap","incomplete","malformed","slash","null","repeat_null","comment"])
++def test_bad_daily_records_fail_before_consumption(reader, tmp_path, kind):
++    lines = daily_lines(100,70)
++    if kind == "duplicate": lines[1] = lines[0]
++    elif kind == "missing": del lines[1]
++    elif kind == "invalid_month": lines[1] = lines[1].replace("2 1 100", "2 13 100")
++    elif kind == "invalid_day": lines[1] = lines[1].replace("2 1 100", "32 1 100")
++    elif kind == "invalid_leap": lines[59] = lines[59].replace("1 3 100", "29 2 100")
++    elif kind == "incomplete": lines[1] = "2 1 100 1\n"
++    elif kind == "slash": lines[10] = "11 1 100 /\n"
++    elif kind == "null": lines[10] = "11 1 100 ,, 0.5 1 10 1 100 1 1 0\n"
++    elif kind == "repeat_null": lines[10] = "11 1 100 10*\n"
++    elif kind == "comment": lines[10] = "11 1 100 ! weather missing\n"
++    else: lines[1] = "not weather\n"
++    result = run_reader(reader,tmp_path,lines,70,100)
++    assert result.returncode != 0
++    assert "Calendar input error:" in result.stdout
++    assert "COMPLETE" not in result.stdout
++
++
++@pytest.mark.parametrize("bad", [False,True])
++def test_breakpoint_calendar_and_eof(reader,tmp_path,bad):
++    lines=daily_lines(100,60,breakpoint=True)
++    if bad: lines[-1] = lines[-1].replace("1 3 100", "29 2 100")
++    result=run_reader(reader,tmp_path,lines,60,100,breakpoint=True)
++    assert (result.returncode != 0) == bad
++    if not bad:
++        result=run_reader(reader,tmp_path,lines,61,100,breakpoint=True)
++        assert "missing breakpoint climate header" in result.stdout
++
++
++def test_single_storm_does_not_require_january_first(reader,tmp_path):
++    lines=["15 7 2000 1 1 0.5 1 10 1 100 1 1 0\n"]
++    result=run_reader(reader,tmp_path,lines,1,continuous=False)
++    assert result.returncode == 0, result.stdout + result.stderr
++
++
++def test_breakpoint_slash_cannot_reuse_weather(reader,tmp_path):
++    lines=daily_lines(100,2,breakpoint=True)
++    lines[1]="2 1 100 /\n"
++    result=run_reader(reader,tmp_path,lines,2,100,breakpoint=True)
++    assert result.returncode != 0
++    assert "complete whitespace-separated numeric" in result.stdout
++
++
++@pytest.fixture(scope="module")
++def pass_reader(tmp_path_factory):
++    build = tmp_path_factory.mktemp("pass_reader")
++    (build / "driver.f90").write_text('''program pass_reader
++use wepp_calendar
++implicit none
++integer :: year, day
++character(len=32) :: arg
++character(len=8) :: event
++call get_command_argument(1,arg)
++read(arg,*) year
++call get_command_argument(2,arg)
++read(arg,*) day
++open(49,file='header.dat',status='old')
++call calendar_read_pass_header(49,event,year,day,.true.)
++print *, 'COMPLETE ',event
++end program
++''')
++    subprocess.run(["/usr/bin/gfortran", "-fcheck=all", str(ROOT / "fpm-src/wepp_calendar.f90"),
++                    "driver.f90", "-o", "reader"], cwd=build, check=True, capture_output=True)
++    return build / "reader"
++
++
++@pytest.mark.parametrize("kind", ["EVENT   ", "SUBEVENT", "NO EVENT"])
++@pytest.mark.parametrize("year,day", [(1,1), (100,365), (200,365), (1900,365), (2000,366)])
++def test_ascii_daily_header(pass_reader, tmp_path, kind, year, day):
++    (tmp_path / "header.dat").write_text(f"{kind}  {year:5d} {day:5d} \n")
++    good = subprocess.run([str(pass_reader), str(year), str(day)], cwd=tmp_path, capture_output=True, text=True)
++    assert good.returncode == 0, good.stdout + good.stderr
++    bad = subprocess.run([str(pass_reader), str(year+1), str(day)], cwd=tmp_path, capture_output=True, text=True)
++    assert bad.returncode != 0
++    assert "date mismatch" in bad.stdout
++
++
++@pytest.mark.parametrize("line", ["", "EVENT     abcde     1\n", "UNKNOWN       1     1\n"])
++def test_invalid_ascii_header(pass_reader, tmp_path, line):
++    (tmp_path / "header.dat").write_text(line)
++    result = subprocess.run([str(pass_reader), "1", "1"], cwd=tmp_path, capture_output=True, text=True)
++    assert result.returncode != 0
++    assert "Calendar input error" in result.stdout
++
++
++def test_calendar_compatibility_preimage():
++    import hashlib
++    canonical = (ROOT / "docs/contracts/hbp-gregorian-compatibility.txt").read_bytes()
++    digest = hashlib.sha256(canonical).hexdigest()
++    assert digest in (ROOT / "fpm-src/hillslope_binary_pass_writer.f90").read_text()
+--- a/tests/test_wshpas_leap_day_guard.py
++++ b/tests/test_wshpas_leap_day_guard.py
+@@ -1,27 +1,26 @@
+-import re
+ from pathlib import Path
++import subprocess
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ 
+ 
+-def test_wshpas_leap_day_assignment_survives_fixed_form_truncation() -> None:
+-    lines = (ROOT / "src/wshpas.f90").read_text(
+-        encoding="utf-8", errors="replace"
+-    ).splitlines()
+-
+-    leap_if_lines = [
+-        idx
+-        for idx, line in enumerate(lines, start=1)
+-        if "if (gregorian_leap_year.or.legacy_centurial_day366) then" in line
+-    ]
+-    assert leap_if_lines, "wshpas leap-day branch guard was not found"
+-
+-    fixed72 = [line[:72] for line in lines]
+-    assert any("ndays = 366" in line for line in fixed72), (
+-        "wshpas leap-day assignment must remain visible within fixed-form "
+-        "column 72 to avoid ndays=36 truncation regressions"
+-    )
+-    assert not any(re.search(r"\bndays\s*=\s*36\b", line) for line in fixed72), (
+-        "wshpas fixed-form source appears to contain a truncated leap-day "
+-        "assignment (ndays = 36)"
+-    )
++def test_wshpas_leap_day_assignment_survives_fixed_form_truncation(tmp_path) -> None:
++    """Retain the historical vector entrypoint while exercising its replacement."""
++    source = (ROOT / "src/wshpas.f90").read_text()
++    assert "ndays = calendar_year_days(year)" in source
++    assert "legacy_centurial_day366" not in source
++    driver = tmp_path / "calendar.f90"
++    driver.write_text("""program test_calendar
++use wepp_calendar
++implicit none
++if (calendar_year_days(100) /= 365) stop 1
++if (calendar_year_days(200) /= 365) stop 2
++if (calendar_year_days(300) /= 365) stop 3
++if (calendar_year_days(400) /= 366) stop 4
++if (calendar_year_days(1900) /= 365) stop 5
++if (calendar_year_days(2000) /= 366) stop 6
++end program
++""")
++    subprocess.run(["/usr/bin/gfortran", str(ROOT / "fpm-src/wepp_calendar.f90"),
++                    str(driver), "-o", str(tmp_path / "calendar")], cwd=tmp_path, check=True)
++    subprocess.run([str(tmp_path / "calendar")], check=True)

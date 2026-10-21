@@ -1,0 +1,139 @@
+{
+  "captured_utc": "2026-10-21T16:47:12.000741+00:00",
+  "retained_root": "/wc1/holdouts/watershed-channel-routing-closure-20261021",
+  "repositories": {
+    "wepppy": {
+      "path": "/home/workdir/wepppy",
+      "head": "115a8436b2d2263ad0438cd6d81320c6193b81ea",
+      "patch_path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/wepppy.patch",
+      "patch_sha256": "fd4786c6a8bb08bccd1fb7764c8141337fa3c048bc5ebdb3b3b8302657ac3fb8",
+      "status_path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/wepppy-status.txt"
+    },
+    "wepp-forest": {
+      "path": "/workdir/wepp-forest",
+      "head": "04f1c4d26bcef217009c124151f877dcbf3985cb",
+      "patch_path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/wepp-forest.patch",
+      "patch_sha256": "7c448775855cd93c4bd0af6ac92a1389ccee96809d783c462543d59229f5b3dd",
+      "status_path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/wepp-forest-status.txt"
+    }
+  },
+  "workbook": {
+    "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/Water_Balance_S_Shape_0.6_0.4_Corrected.xlsx",
+    "sha256": "63c6ef58813a690e15ca8244a9c998db32f87bdb2efab53c4cae6cb3e8fc6279",
+    "original_input_decks": "Not supplied by Ayush; confirmed by Roger during execution."
+  },
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "local_retained_root": "/workdir/watershed-channel-routing-closure-20261021",
+  "build": {
+    "FC": "/usr/bin/gfortran",
+    "FFLAGS": "-c -fno-align-commons -mcmodel=medium -g -fbacktrace -O2 -ffpe-trap=invalid,zero,overflow -finit-local-zero",
+    "fixed_form_flags": "-ffixed-form -ffixed-line-length-72",
+    "LDFLAGS": "-mcmodel=medium -no-pie -lz",
+    "replay_executable": "src/wepp for both hillslope and watershed cards",
+    "baseline_and_candidate": [
+      {
+        "root": "/wc1/holdouts/watershed-channel-routing-closure-20261021/baseline-source",
+        "source_manifest": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/baseline-source-source-manifest.json",
+          "bytes": 120384,
+          "sha256": "74b429d939157d04042056a7e60f74f7c3034e5bff9a611aca8b78f153843936"
+        },
+        "binary": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/baseline-source/src/wepp",
+          "bytes": 4112128,
+          "sha256": "dd5fe795b1630f3ece1be01c024b9a18fee9e05fc69621fd6e33f492087031ba"
+        },
+        "unused_hill_build": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/baseline-source/src/wepp_hill",
+          "bytes": 4054848,
+          "sha256": "2b2343e2be9985007040ac1d60176891fd664a209be6923559dfd73300600ff5",
+          "disposition": "build succeeds; not used for scientific replay"
+        }
+      },
+      {
+        "root": "/wc1/holdouts/watershed-channel-routing-closure-20261021/instrumented-source",
+        "source_manifest": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/instrumented-source-source-manifest.json",
+          "bytes": 122452,
+          "sha256": "535bd4b59df0d4ad707285a215b2f8ea5d4ae902a8c8469db53132d2768d9b3a"
+        },
+        "binary": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/instrumented-source/src/wepp",
+          "bytes": 4117320,
+          "sha256": "702ee2c38fa432501695d4b8980f1a809269dad9377cd0a04b59c0c45d6e264f"
+        },
+        "unused_hill_build": {
+          "path": "/wc1/holdouts/watershed-channel-routing-closure-20261021/instrumented-source/src/wepp_hill",
+          "bytes": 4055896,
+          "sha256": "385fd9bcb24a06b3e2afbc3a2a8efec0bc3602867f8cc239ddad6bc81f90a5fa",
+          "disposition": "build succeeds; not used for scientific replay"
+        }
+      }
+    ]
+  },
+  "independent_pass_reader": {
+    "module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/__init__.py",
+    "extensions": [
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/watershed_abstraction/watershed_abstraction_rust.so",
+        "bytes": 752728,
+        "sha256": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so",
+        "bytes": 1568296,
+        "sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_viz/wepp_viz_rust.so",
+        "bytes": 818752,
+        "sha256": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/swat_interchange/swat_interchange_rust.so",
+        "bytes": 13469448,
+        "sha256": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+        "bytes": 1145184,
+        "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "bytes": 15475696,
+        "sha256": "1cb2cec6ecba762362d117982d448b397c900b9c3a1be742a0c3bbea16e3e62b"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/swat_utils/swat_utils_rust.so",
+        "bytes": 12085208,
+        "sha256": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/sbs_map/sbs_map_rust.so",
+        "bytes": 933016,
+        "sha256": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45"
+      },
+      {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so",
+        "bytes": 1559240,
+        "sha256": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45"
+      }
+    ]
+  },
+  "observation_patch": {
+    "path": "/home/workdir/wepppy/docs/work-packages/20261021_watershed_channel_routing_closure/artifacts/native_observation.patch",
+    "bytes": 4714,
+    "sha256": "e56572eb759fbfa22df91cd5752e45f8864110e018e7fc2ef810b5f9303a796e"
+  },
+  "runtime": {
+    "observer_sentinel": "wepp_observe.on",
+    "frost_filter": "absent",
+    "environment": {
+      "WB33_M1A_BAL_DIAG": "1 for observation-on only",
+      "WB33_M7_PUBLISH_TRACE": "1 for observation-on only"
+    },
+    "inputs": "Per-attempt input_manifest.json; run cards select calendar and physical configuration",
+    "geometry": "Controlled case.json and manifested .slp/.str inputs; real project uses retained fork geometry"
+  }
+}
