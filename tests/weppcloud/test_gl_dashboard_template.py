@@ -16,6 +16,12 @@ def _make_template_app() -> Flask:
     def _index() -> str:
         return ""
 
+    from wepppy.weppcloud._jinja_filters import usersum_doc_link
+    from wepppy.weppcloud.routes.usersum import usersum_bp
+
+    app.register_blueprint(usersum_bp)
+    app.jinja_env.globals["usersum_doc_link"] = usersum_doc_link
+
     # Keep the template render self-contained.
     app.jinja_env.globals["static_url"] = lambda path: f"/static/{path}"
     return app
@@ -46,5 +52,6 @@ def test_gl_dashboard_renders_with_omni_scenarios_without_contrasts() -> None:
             batch_mode_enabled=False,
         )
 
+    assert '/usersum/view/weppcloud/water-balance-and-runoff.md' in rendered
     assert '<option value="_pups/omni/scenarios/treated">treated</option>' in rendered
 

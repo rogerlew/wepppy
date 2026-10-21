@@ -1,0 +1,16 @@
+{
+  "affected_doc_ids": [
+    "usersum.weppcloud.water_balance_and_runoff",
+    "usersum.weppcloud.water_pass_variables",
+    "usersum.weppcloud.wepp_interchange",
+    "usersum.weppcloud.wepp_run_results"
+  ],
+  "preserved_other_documents": 74,
+  "before_sha256": "92c4b7d2b703bbc24f3edf9be9f133e4cf68ba23777918cbc64bc2471a44a247",
+  "after_sha256": "a10657253fd36a41509571472040b25d1fb6c827694f5096284214d19ce2eeff",
+  "backup": "/tmp/usersum-index-before-water-publication.json",
+  "vendor_sync": false,
+  "authorization": "Operator explicitly requested: update usersum and commit please",
+  "browser": "Fresh process used unmodified loader and published repository index; both user-role guides and seven searches passed",
+  "scheduler_note": "Current docker/scheduled-tasks.yml sets write_index:false; origin of pre-existing index changes is unverified."
+}

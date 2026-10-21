@@ -417,7 +417,7 @@ Recommended validation commands:
 
 ## Water output interpretation publication
 
-Implementation conformance: pending (2026-10-20 documentation package).
+Implementation conformance: validated 2026-10-21 UTC (2026-10-20 documentation package), including published repository catalog and fresh-process user-role browser/search checks. Production deployment remains separate.
 
 Publish **Understanding water balance and runoff** and **Water and PASS variables** as active user-role documents under Technical Reference. They explain local OFE versus whole-hillslope normalization, physical WAT runoff versus threshold-filtered PASS delivery, routed watershed outputs, date support, storage and producer/version limitations using the hillslope-water-aggregation contract and ADR-0099. Scientific formulas and output scope remain unchanged.
 

@@ -29,15 +29,17 @@ changes. No production deployment or existing run regeneration.
 | Native generated Parquet metadata readback | Both 6,576-row files exactly match Python schema metadata; independently verified |
 | Isolated Chromium Usersum guide/reference and seven searches | HTTP 200, normal user role, prefix-safe guide links, no page-width overflow at 1440 px |
 
-The browser uses an isolated Flask process and a fresh temporary catalog, leaving
-the dirty active index untouched. Screenshots are retained alongside
-[browser_checks.json](browser_checks.json). This is not deployed catalog evidence.
+The final browser check uses a fresh Flask process with the unmodified runtime
+loader reading the published repository index. Both guides and all seven searches
+returned HTTP 200 as a normal user under `/weppcloud`. Screenshots and
+[browser_checks.json](browser_checks.json) record that boundary; this is repository
+catalog publication evidence, not production deployment.
 
 The full repository pytest sweep initially passed 506 tests with 28 skips before
 a stale literal expected binary hash failed. The expected hash now matches the
 paired release. The sweep resumed after the 45 fully completed files, rerunning
-the entire startup-contract file. It remains ongoing; do not count it as passed
-until the final outcome is recorded. No Python execution errors remain in the
+the entire startup-contract file. Subsequent chunks and final completion are
+recorded below. No Python execution errors remain in the
 focused checks. Two initial new-test harness errors (boolean instead of string
 configuration, HTML role-label matching) were corrected and rerun successfully.
 
@@ -54,13 +56,17 @@ sources remain unchanged.
 
 ## Publication and operational gate
 
-The active `generated/docs_index.json` was already dirty and root AGENTS explicitly
-forbids editing it without a request. Permission to merge only affected entries
-while preserving unrelated changes has been requested. Until approved and applied,
-normal catalog navigation/search cannot be claimed complete. After publication,
-reload catalog-caching processes through the normal deployment workflow and verify
-normal-user routes/search against the published catalog. No service restart or
-production write is included here.
+The operator explicitly authorized updating Usersum and committing. Four affected
+document entries and two navigation leaves were published while preserving all
+74 other document entries exactly. The original bytes were backed up before the
+write; a concurrent-change check guarded publication. See
+[catalog_publication.json](catalog_publication.json). No vendor sync occurred.
+The pre-existing generated-index updates are retained in the commit. Their origin
+is unverified; the current scheduled task sets `write_index: false`.
+
+Fresh-process catalog, normal-user routes/search and browser validation pass.
+Existing production workers receive the catalog through the normal deployment
+and process reload workflow; no production restart or deployment was performed.
 
 Old Parquet metadata and report caches are not rewritten. Known machine-unit
 labels for PASS sediment fractions remain flagged; groundwater volume units are
@@ -77,3 +83,33 @@ existing in-memory search also matches ET inside unrelated words. A descriptive
 reference subtitle now includes ET/Dp/runoff; all seven first-page discovery
 checks pass without changing ranking code. Browser screenshots/results were
 refreshed after this authoring correction.
+
+## Final publication checks
+
+The resumed broad sweep passed 10,299 tests with 99 skips before exposing the
+dashboard test fixture's missing Usersum helper. The fixture now registers the
+real helper and Usersum blueprint, matching production wiring; no production
+fallback was added. The focused dashboard/Usersum/template suite passed 66 tests.
+The remaining broad files were checked separately without repeating the
+683 completed files. Final successful outcome is recorded below.
+
+## Final broad outcome and publication approval (2026-10-21 UTC)
+
+Broad coverage completed in resumed chunks: 499 passes in fully completed initial
+files (the first run's 506 included seven startup-file cases subsequently rerun),
+10,299 passes/99 skips in the next chunk, and final 186 + 60 passes. Initial
+skips were 28; the repeated collection skip is counted once, yielding 126 unique
+skips across broad coverage. Three additional guide-query cases added after
+broad collection pass in the 66-test publication suite. No unresolved test
+failure remains in the selected coverage.
+
+The all-tree resumption with 683 ignore flags was stopped during collection to
+avoid unnecessary traversal; the remaining 186 top-level WEPPcloud cases and 60
+utility cases were run directly. One unrelated run-catalog browser check initially
+failed because its environment pointed at an absent Chromium directory. Rerunning
+with PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers
+passed. No application/browser installation changes were made.
+
+Independent publication reviewer B approved the actual index, unchanged 74
+unrelated entries, affected source hashes, and two intended nav additions.
+Repository publication is complete; production deployment is not claimed.

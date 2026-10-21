@@ -1,36 +1,42 @@
 # Water output documentation tracker
 
-Status: Active — implementation and validation; index publication awaits operator exception.
+Status: Closed 2026-10-21 UTC. No production deployment or push.
 
-- Starting WEPPpy revision: `1ecf04735`; native revision: `54d0867`.
-- Audit: `docs/dev-notes/20261020_water_output_documentation_audit.md`.
-- Active plan: [water_output_documentation_execplan.md](prompts/active/water_output_documentation_execplan.md).
-- Contract checkpoint: `14c7eebb1`, two independent reviews approved after disposition.
-- Implementation written; focused 281 checks passed, native Python 163 passed, interchange/reports 105 passed (1 skipped), fresh temporary-catalog discovery 7 passed; isolated Chromium checks passed. Native paired release `3b63064`; final review and broad validation underway.
+## Revisions and deliverables
 
-## Decisions
+Starting WEPPpy `1ecf04735`; contract checkpoint `14c7eebb1` with two independent
+reviews; source implementation `b47b768d7`; paired native release `3b63064`.
+Two user guides, native/Python descriptions, Results/Roads/report/dashboard/export
+help, current-doc corrections, and Usersum catalog publication are complete.
+Plan: [water_output_documentation_execplan.md](prompts/completed/water_output_documentation_execplan.md).
 
-Preserve all numerical behavior. Add guides under Technical Reference without changing protected navigation sections. Preserve the pre-existing dirty generated Usersum index; validate a fresh temporary index and publish only task-specific changes if safely separable, otherwise document the required rebuild without altering unrelated entries.
+## Publication decision and evidence
 
-## Handoff state (2026-10-20 UTC)
+The operator explicitly authorized the dirty-index update and commit. Four
+package-owned entries were added/refreshed; all 74 other entries and their order
+were preserved. Existing index changes are included in the commit, with a
+byte-for-byte prepublication backup. No vendor sync occurred. The current
+scheduled task sets write_index:false; the origin of earlier index dirt remains
+unverified. A fresh process using the unmodified runtime loader rendered both
+guides and all seven searches successfully from the published repository index.
 
-Source implementation committed as `b47b768d7`; paired native `3b63064`.
-Independent source/scientific and UX reviews pass with all medium/high findings
-closed. Browser evidence uses an isolated fresh catalog, not the active index.
-The operator's requested dirty-index exception is unanswered; package closure and
-normal-catalog publication remain pending. No production deployment or push.
+## Validation and review
 
-Broad pytest continues in development through the resumed run, with log
-`/tmp/water-docs-broad-resumed.log` on the host and exec session `41660`.
-The initial run completed 45 files before a stale expected native hash failed;
-the entire startup-contract file was rerun after correcting that test. The
-resumed sweep has passed startup/service tests and is running treatment-soil
-artifact cases. Do not count the broad sweep as passed until it completes.
-All focused, native, frontend, and isolated discovery checks have passed.
+Independent scientific and UX reviews closed all medium/high findings; the
+publication reviewer separately confirmed preservation, source hashes and nav.
+Focused publication suite: 66 passed. Native: 163 Python, 107 Rust unit and 17
+integration passed. Frontend: 987 passed. Broad validation completed in resumed
+chunks: 499 completed-file passes before the initial hash-test failure, 10,299
+passes in the next chunk, and final 186 + 60 passes. The corrected startup test
+and dashboard fixture passed on resumption. The final browser test required the
+installed Chromium path in its environment; no application change was needed.
+Three extra discovery cases added after broad collection also pass in the focused
+suite. See [validation](artifacts/20261020_validation.md) and
+[review](artifacts/20261020_correctness_review.md) for boundaries and caveats.
 
-After index permission, preserve an exact backup, merge only package-owned new
-entries and changed guide text/nav entries, validate the actual freshly loaded
-catalog and normal-user routes/search/browser, and retain publication evidence.
-Then record broad outcome, remove the active-plan root pointer, and close the
-package using the normal completed-plan move. Machine-unit compatibility work
-remains separate and documented in the user variable reference.
+## Remaining operational boundaries
+
+Production publication uses the normal deployment/reload workflow. Old output
+files and report caches are not rewritten. Machine-unit metadata compatibility
+work remains separate: the variable reference documents correct physical units
+and inherited label defects. No scientific formulas or numerical behavior changed.

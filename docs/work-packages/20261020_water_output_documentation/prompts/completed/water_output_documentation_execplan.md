@@ -12,9 +12,9 @@ Users comparing multiple overland flow elements (OFEs, sequential sections of a 
 - [x] (2026-10-20 UTC) Canonical amendment and two reviews committed as `14c7eebb1`.
 - [x] (2026-10-20 UTC) Interpretation/reference guides, description metadata, and interface corrections implemented; native release `3b63064`.
 - [x] (2026-10-20 UTC) Generated artifact, isolated discovery/browser, focused/native/frontend and independent source correctness evidence.
-- [ ] Authorized active-catalog publication and actual-runtime discovery evidence.
-- [ ] Record the outcome of the ongoing broad regression sweep.
-- [ ] Close package and update project tracker.
+- [x] (2026-10-21 UTC) Authorized catalog publication and actual-loader browser/search evidence.
+- [x] (2026-10-21 UTC) Broad sweep completed in resumed chunks; startup/dashboard fixture expectations corrected and final browser environment supplied.
+- [x] (2026-10-21 UTC) Package closed and project tracker updated.
 
 ## Surprises & Discoveries
 
@@ -26,7 +26,7 @@ On 2026-10-20 the operator authorized executing the audited documentation correc
 
 ## Outcomes & Retrospective
 
-Implementation and generated Parquet metadata parity are established. Runtime index publication awaits an explicit operator exception. Completion requires evidence from rendered documents and generated files, not merely source edits.
+Implementation and generated Parquet metadata parity are established. The operator granted the index exception and publication is validated. Completion requires evidence from rendered documents and generated files, not merely source edits.
 
 ## Context and Orientation
 
@@ -75,3 +75,14 @@ inside unrelated words such as parameters and getting. The reference title now
 adds the descriptive subtitle “ET, Dp and runoff” so it appears on the first
 results page for ET without altering the search engine. This is document-authoring
 within the approved publication scope; no ranking or authorization logic changes.
+
+## Final outcome (2026-10-21 UTC)
+
+Source implementation, paired native metadata release, and authorized catalog
+publication are complete. All 74 unrelated index entries were preserved. Fresh
+actual-catalog browser/search checks and independent publication review pass.
+The broad suite completed in resumed chunks; see validation for exact counts,
+fixture fixes and browser-path environment. No production deployment or old-run
+repair is claimed. The machine-unit compatibility limitation is explicitly
+published in the user reference. Earlier pending-gate notes above are historical
+checkpoint/handoff observations superseded by this closure.

@@ -1,5 +1,5 @@
 {
-  "scope": "isolated Flask process with fresh temporary catalog; NOT active catalog publication",
+  "scope": "Fresh Flask process loading the published repository catalog through the unmodified runtime loader; no production deployment",
   "results": [
     {
       "slug": "water_balance_and_runoff",

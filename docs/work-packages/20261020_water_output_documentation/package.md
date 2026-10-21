@@ -1,6 +1,6 @@
 # Water output interpretation and discovery
 
-Status: Active — source implementation complete (`b47b768d7`); catalog publication permission and broad regression outcome pending. Started 2026-10-20 UTC.
+Status: Closed 2026-10-21 UTC (2026-10-20 Pacific). Repository catalog publication and validation complete; no production deployment.
 
 ## Purpose and scope
 

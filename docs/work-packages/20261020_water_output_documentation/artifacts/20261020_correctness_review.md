@@ -14,8 +14,8 @@ unchanged, no new endpoints or path inputs.
 
 Users can read the guide/reference and distinguish local area weighting,
 terminal physical runoff and filtered PASS delivery. Source and isolated-runtime
-validation pass; actual catalog publication remains held pending the operator's
-explicit dirty-index exception.
+validation pass; the operator authorized the index update and actual catalog publication now
+passes normal-user browser/search checks.
 
 | State | Required outcome | Evidence |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ explicit dirty-index exception.
 | Populated Parquet | Actual metadata and at most three rows | 6,576-row WAT/PASS native output readback |
 | Legacy metadata / missing manifest | Preserve data, identify version as unknown and explain limitations | README regression and historical cache wording |
 | Roads resources pending/ready | Guide remains available; scoped report links retain readiness gate | Added Roads render matrix |
-| Dirty/stale generated catalog | Do not overwrite unrelated edits; publication incomplete until authorized | Explicit pending operator question and tracker |
+| Dirty/stale generated catalog | Do not overwrite unrelated edits; publication incomplete until authorized | Explicit operator authorization, preservation receipt and final publication review |
 | Malformed/hostile paths | Existing Usersum and browse guards unchanged | Existing route regression suite; no new path-taking API |
 
 No new user-reachable exceptions are introduced. Missing optional run outputs do
@@ -46,8 +46,8 @@ descriptions confirms unchanged names/types/units. See
 
 Fresh catalogs are built from the real manifest and Markdown. Actual Usersum
 routes/search run against those isolated catalogs, including browser navigation
-under `/weppcloud`. These do not establish publication to the pre-existing active
-catalog. See [browser evidence](browser_checks.json).
+under `/weppcloud`. Final browser checks use the published repository catalog through the unmodified
+runtime loader; no production deployment is claimed. See [browser evidence](browser_checks.json).
 
 No project persisted-state mutation or new executable model input is involved.
 No production deployment, historical report repair, or original run-file rewrite
@@ -71,8 +71,18 @@ all new guide relative links. No unresolved high/medium source findings.
 
 ## Verdict
 
-Source correctness: pass. Release/publication recommendation: **hold** pending
-authorized index publication and actual-catalog validation. The inherited PASS
+Source correctness: pass. Authorized catalog publication and actual-catalog
+normal-user browser/search validation pass. The inherited PASS
 machine-unit labels remain explicitly deferred compatibility work, not repaired
 labels. Normal-user isolated browser checks passed after review; live deployed
 browser behavior is not asserted.
+
+## Publication sign-off (2026-10-21 UTC)
+
+Reviewer B independently approved actual index publication: all 74 unrelated
+entries and ordering preserved, two existing entries updated, two new guides and
+only their nav leaves added, affected hashes matching source files, and receipt
+hashes matching backup/current artifacts. The operator explicitly authorized this
+publication. Real-loader browser checks passed. Broad validation completed with
+fixture/environment corrections recorded in validation. No unresolved medium/high
+findings remain. Repository publication gate: pass; no production deployment.
