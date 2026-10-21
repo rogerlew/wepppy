@@ -1,5 +1,7 @@
 # PROJECT_TRACKER.md
 
+Scaffolded: [Watershed physical water repair](docs/work-packages/20261021_watershed_physical_water_repair/package.md) — four native repair lanes for channel-local rate assembly, flat hydrograph volume, hourly infiltration allocation and groundwater initialization. Portable regressions, ADR/scientific review and independent combined accounting required. Execution pending; Ash excluded.
+
 Completed (diagnostic audit): [Watershed physical water audit](docs/work-packages/20261021_watershed_physical_water_audit/package.md) — eighteen 44-year watershed cases, OFE/PASS accounting and native observations identify four unresolved defects in channel rate construction, flat hydrographs, hourly infiltration allocation and initial groundwater area. Ash excluded. Watershed correctness not certified; no model repair or deployment.
 
 Completed (local release): [WEPP 261021](docs/work-packages/20261021_wepp_261021_release/package.md) — paired Gregorian ASCII PASS v3 binaries built from the default branch and vendored; changelog includes 261010 and 261021. Native 232 tests, 12 watchlist cases, host/container smokes and 400-year alignment pass. WEPPpy segmented coverage 11,052 passed/122 skipped; test-order/browser-path limits retained. No default switch or deployment.
