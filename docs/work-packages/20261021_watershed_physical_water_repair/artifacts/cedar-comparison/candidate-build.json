@@ -1,0 +1,10 @@
+{
+  "wepp": {
+    "source": "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp",
+    "sha256": "444e742740728918f4e68ba1e539a9df538d1b73a1546a2fa164aec0cd0ecca2"
+  },
+  "wepp_hill": {
+    "source": "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp_hill",
+    "sha256": "ea541cde82e4f927cab1c8af3d3a7d03cdbbe4f5db9ecbf9ef7d73edb8edc7ee"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "wepp": {
+    "source": "/home/workdir/wepppy/wepp_runner/bin/wepp_261010",
+    "sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e"
+  },
+  "wepp_hill": {
+    "source": "/home/workdir/wepppy/wepp_runner/bin/wepp_261010_hill",
+    "sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698"
+  }
+}

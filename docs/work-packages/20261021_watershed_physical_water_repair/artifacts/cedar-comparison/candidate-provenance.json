@@ -1,0 +1,67 @@
+{
+  "source_commit": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
+  "source_files_match": [
+    "wshdrv.for",
+    "wshchr.for",
+    "chrstate.for",
+    "watbal_hourly.for",
+    "wshcqi.for",
+    "wshpas.for"
+  ],
+  "binaries_match_prior_validated_receipt": true,
+  "receipt": {
+    "source_parent": "e6dc19008ce83378508299b0e1efe4cf3844b198",
+    "scope": "Two receiving-plane working-flux initializations; MC storage authority unchanged",
+    "full_suite": {
+      "passed": 520,
+      "warnings": 2,
+      "seconds": 618.33,
+      "final_trace": "year100/day365/channel31",
+      "timeout_seconds": 900
+    },
+    "paired_replays": 29,
+    "longest_years": 400,
+    "watchlist": 12,
+    "host_smokes": 2,
+    "elf_interpreters": [
+      "/lib64/ld-linux-x86-64.so.2",
+      "/lib64/ld-linux-x86-64.so.2"
+    ],
+    "causal_runs": 96,
+    "exact_observer_file_pairs": 1800,
+    "portable_tests": {
+      "passed": 7,
+      "seconds": 115.93,
+      "final_collection": 527,
+      "note": "Added after full-suite collection; covered separately"
+    },
+    "release_status": "unreleased, no vendoring or deployment",
+    "remaining": "Signed routing withdrawal/soil credit and negative-discharge clipping remain open",
+    "sha256": {
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp": "444e742740728918f4e68ba1e539a9df538d1b73a1546a2fa164aec0cd0ecca2",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp_hill": "ea541cde82e4f927cab1c8af3d3a7d03cdbbe4f5db9ecbf9ef7d73edb8edc7ee",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wshdrv.for": "179fa57c1aa64dd07281e92dbea58556daf8c2dfad838bda956f2a995bab492e",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wshchr.for": "52ab00eda3f5bd44ae652ed2e199b04c97e48f56a1de41a5b1d18dcbca096369",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/chrstate.for": "649943add6c9b9eb8809f536d640ee3fb7fe963eb5052e8066d690eb1247d863",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/watbal_hourly.for": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wshcqi.for": "1b23a28a52c702af859442321eb52d3ee7f6539a1571b62c6838e94ef7959727",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wshpas.for": "e0587595832cbd8b18f7e1ceccb45a0793a5b84d8d87134742094eb0e0c21f7a",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-v1-pytest.log": "b69a87508133bebf74f6f05a1871f1563a0adaeb36fb1e5dff96088384582577",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-v1-watchlist.log": "03ce3f386cb8f34027b0cb16ec3efc3a35afdc1fcbe1f92840f450a7c6f067e1",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-v1-smoke.log": "26becebbb1ac0d3d74bc6db172e1e434ce7e05e60646f32cdc59365b61357040",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-v1-validation.json": "1801786d56b6e7a6e1e8f64326b1702820e1e4d34d9c42c0e5a87250cf08f0bc",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-v1-replay-results.json": "71655f5ade2e2cab2af9e822b1b27bfd2212aa6bd15bb8826dd123f20ca6335d",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-review-v1/receipt.json": "62f66c62439b4fcf5f8a5666d5936b68677c4888af8349b7075d6eb121c0f9b3",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-review-v1/parity.json": "f11cbcad1ac177162339b13de42bf6618bfb3eb339be0894f8630f7d053d6772",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-review-v1/manifest.json": "33c0fb2a5d28c5023de2151e681871a3b6eff70222cabd67a6d5ce5b45a7c34c",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/wepp-build.log": "879fcfc1eaed729ae0095b0e5482fb17fb59442f1f3fd248cde288c931b81567",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/hill-build.log": "e31a40e7d01aaaf703e5ec92dcd40811de038e2033d3c4c08b099de96ad8c7e0",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-initialization-qa-v1/pytest.log": "9c2fcffacf47a3a00885365b4d4f9196b652312113eb626247015f7464f6a51b",
+      "/workdir/wepp-forest-release-20261009/tests/test_channel_plane_initialization.py": "10644f6ee1105e14db3a6524fe90962ac2d2434105b15a2b3604113d4a5181d9",
+      "/workdir/wepp-forest-release-20261009/tests/native/channel_plane_trace.for": "f96e2607c6e85945c1124cc186753a6d8364b71f6c684732a703bc50a87881c8",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-initialization-qa-v1/receipt.json": "5e6bef3729f37b9a8b6858fbcb26e027ca3720b15ee3505b53027631341c9aee",
+      "/workdir/watershed-physical-water-repair-20261021/channel-plane-initialization-qa-v1/manifest.json": "299999ed67f62a08217774297bc4cfacd4d49370401a76c93e6a38988514c1fe"
+    },
+    "source_commit": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b"
+  }
+}

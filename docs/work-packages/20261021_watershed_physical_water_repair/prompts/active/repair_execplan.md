@@ -48,7 +48,15 @@ publication, production deployment and original-project repair are excluded.
 - [ ] M3: combined paired runs and independently closed transfer/storage ledgers.
 - [ ] M4: native gates, independent correctness/QA reviews and release-readiness documentation.
 
+- [x] Cedar Creek paired comparison: 1,728 fresh hills and both 24-year watersheds complete; every outlet date/sample and all 356 event windows independently checked. See `artifacts/cedar-comparison.md`.
+
 ## Surprises & Discoveries
+
+Cedar annual maxima increase 0.223–2.461%, while a low-flow window peak
+increases 19.07%. Aggregated hillslope yield also increases 0.0370%, so the
+0.5165% sampled outlet-volume increase is not a routing-only ablation. Repaired
+published discharge agrees with reconstructed printed integrals within rounding
+on all 8,765 checkable days, without establishing physical storage closure.
 
 Actual soil tracing confirms a different alias defect: WSHDRV's completed-channel
 runoff element slot can also be the next channel's soil-plane slot. On dry days
@@ -85,6 +93,12 @@ additional storage/routing residuals may remain after their correction.
 
 ## Decision Log
 
+2026-10-21 — Complete the requested Cedar comparison against available
+wepp_261010 using fresh same-build PASS files and unchanged frozen physical
+inputs. Retain both reported and sampled volume definitions, symmetric event
+screens and low-flow extremes; do not infer causal attribution or transit-time
+shifts from this end-to-end comparison. No release action is implied.
+
 2026-10-21 — Continue the independently confirmed working-flux alias repair as a
 separate checkpoint after native e6dc19008 and WEPPpy 87f9c8dd6. Test only two
 per-channel initializations after WSHCQI; retain norun and all soil/MC stores.
@@ -119,6 +133,12 @@ are necessary but not assumed sufficient. Do not compensate through ET/Dp,
 report-only balancing terms, wider tolerances or post-hoc outlet normalization.
 
 ## Outcomes & Retrospective
+
+Cedar comparison is complete with independent raw-output verification: sampled
+volume +0.5165%, largest reported peak +0.2455%, all annual maxima higher, and
+material relative changes in some low-flow windows. Full results and plots are
+in `artifacts/cedar-comparison.md`. The model-repair package remains open for
+signed soil/routing exchange; this comparison does not close that boundary.
 
 
 Four narrow source corrections are committed locally at native `22133f0c9`.
@@ -510,3 +530,14 @@ acceptance and complete closure remain open. See
 `d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b`. Native worktree clean. No push,
 release, vendoring or deployment. Signed withdrawal/soil credit remains open;
 retain the package as active.
+
+
+2026-10-21 — User requests full Cedar Creek discharge/peak comparison against
+`wepp_2601010`, interpreted as the available `wepp_261010` release. Run the
+frozen warming-championship 10 cm inputs (1980–2003, 864 hills, 371 channels)
+with fresh same-build PASS files in both lanes, using native d354e3c99 candidate.
+Preserve inputs/parameters; change only chan.inp output selector 1 to 3 to retain
+complete 600-second outlet samples, as in the prior Cedar comparisons. Validate
+all dates, output completion and finite discharge; report hydrograph integrals
+separately from published volume, annual maxima and event/timing departures.
+Supplementary comparison does not resolve signed exchange authority.

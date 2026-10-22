@@ -1,0 +1,130 @@
+{
+  "disposition": "No blocking finding for this descriptive end-to-end comparison; physical routing closure and per-fix attribution are not established.",
+  "raw_outlet_audit": {
+    "method": "Independent streaming parse with math.fsum; complete date/time/channel checks; native published outputs, daily/annual/event metrics compared to analysis CSV/JSON; no simulation mutation.",
+    "lane_results": {
+      "release": {
+        "rows": 1262304,
+        "days": 8766,
+        "sampled_volume_m3": 1266461659.9199998,
+        "published_volume_m3": 1272337711.84,
+        "maximum_sampled_peak_m3s": 46.2,
+        "maximum_reported_peak_m3s": 46.19911,
+        "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+        "rounding_bound_m3": 2878153.83,
+        "nonzero_samples": 1262304,
+        "trapezoid_published_days2on_outside_print_bound": 3455,
+        "max_trapezoid_published_gap_m3": 25083.87999999989
+      },
+      "candidate": {
+        "rows": 1262304,
+        "days": 8766,
+        "sampled_volume_m3": 1273003350.42,
+        "published_volume_m3": 1273001265.95,
+        "maximum_sampled_peak_m3s": 46.3,
+        "maximum_reported_peak_m3s": 46.31255,
+        "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+        "rounding_bound_m3": 2887210.98,
+        "nonzero_samples": 1262304,
+        "trapezoid_published_days2on_outside_print_bound": 0,
+        "max_trapezoid_published_gap_m3": 1559.5
+      }
+    },
+    "percent_changes": {
+      "sampled_volume_m3": 0.5165328495150501,
+      "published_volume_m3": 0.05215235733604384,
+      "maximum_sampled_peak_m3s": 0.21645021645020357,
+      "maximum_reported_peak_m3s": 0.24554585575351506
+    },
+    "event_windows_verified": 356,
+    "source_sha256": {
+      "/workdir/cedar-physical-water-comparison-20261021/release/off/output/chanwb.out": "e1eb1d34dedd2992a9cac528d94b2e0467a716ce4f91017e7c12b16d2d6e11f7",
+      "/workdir/cedar-physical-water-comparison-20261021/release/off/output/ebe_pw0.txt": "0283f8783e4993a2714867ed6eb78a71c7db3d78cc95e3a93b28c4647b1b6cb1",
+      "/workdir/cedar-physical-water-comparison-20261021/release/off/output/chan.out": "28986996f0619d4d23e1f14778a9dbaae5d32c124d01898e2de3e8be4483bba7",
+      "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/chanwb.out": "d5dbeb5160eb050f7c7c2a3e0f5ac1fd761f68243ef78e81f1fb626bb674d9c7",
+      "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/ebe_pw0.txt": "1251be26091c2f7ccdef7d1ebd132b1de9cc23ecded807763a9d9725455f5c94",
+      "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/chan.out": "507e148553c6b1f1ee943868e31266eff15a2d20ef741035fe53a608189aeb16"
+    },
+    "analyzer_summary_sha256": "01bdff58ffa912d4db570823667459353fd2f029119bb82e348d939c6d8910dd",
+    "review_script_sha256": "7d6a7c10566a959b24b10e602187da74d71fceac2f78f0ac585e2ed0d6f6e6a4"
+  },
+  "aggregate_yield_audit": {
+    "release": {
+      "hill_stream_m3": 1267735665.681543,
+      "hill_surface_m3": 192438982.72777,
+      "hill_lateral_m3": 404349515.6909671,
+      "hill_baseflow_m3": 670947167.2628059,
+      "max_daily_component_sum_discrepancy_m3": 0.0,
+      "area_range_m2": [
+        19258143.089999996,
+        19258143.089999996
+      ],
+      "input_sha256": "45132cbc56f4ef2853620c63c131263b85531cd428f96c40da3bb9220bf6bb49"
+    },
+    "candidate": {
+      "hill_stream_m3": 1268205085.2956302,
+      "hill_surface_m3": 192503131.596093,
+      "hill_lateral_m3": 404503344.8113858,
+      "hill_baseflow_m3": 671198608.8881513,
+      "max_daily_component_sum_discrepancy_m3": 0.0,
+      "area_range_m2": [
+        19258143.089999996,
+        19258143.089999996
+      ],
+      "input_sha256": "bbba281ca3f383bc7236dc038ed6a3409122e9affb26b677b2a821c091af66d1"
+    },
+    "streamflow_percent_change": 0.03702819339981289
+  },
+  "source_and_mode_audit": {
+    "source_commit": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
+    "matching_compilation_unit_count": 242,
+    "mode_evidence": {
+      "release": {
+        "wepp_ui_exists": true,
+        "wepp_ui_bytes": 0,
+        "H1_wat_header": [
+          " DAILY WATER BALANCE - HOURLY SEEPAGE UPDATE FROM UI",
+          "",
+          " J=julian day, Y=simulation year",
+          " P= precipitation       ",
+          " RM=rainfall+irrigation+snowmelt"
+        ]
+      },
+      "candidate": {
+        "wepp_ui_exists": true,
+        "wepp_ui_bytes": 0,
+        "H1_wat_header": [
+          " DAILY WATER BALANCE - HOURLY SEEPAGE UPDATE FROM UI",
+          "",
+          " J=julian day, Y=simulation year",
+          " P= precipitation       ",
+          " RM=rainfall+irrigation+snowmelt"
+        ]
+      }
+    },
+    "source_marker_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "event_first_peak_shift_minutes": {
+    "minimum": -2680.0,
+    "maximum": 4680.0,
+    "nonzero_windows": 238,
+    "interpretation": "First rounded maximum of a multi-peak window; not isolated transit time."
+  },
+  "v2_metric_files_byte_identical_to_v1": [
+    "summary.json",
+    "release-daily.csv",
+    "candidate-daily.csv",
+    "annual.csv",
+    "daily-differences.csv",
+    "annual-percent-changes.csv",
+    "events.csv"
+  ],
+  "reviewed_analyzer_sha256": "74ae8d206bce061af055f12d15cde1f0e360a26ecf4c3f8737ceaf502cf39ce5",
+  "reviewed_runner_sha256": "04c2c8506fcd7a2d71342b731f94ebfb6991c5b86b5428f9bc6f8bb96325f044",
+  "supporting_file_sha256": {
+    "/workdir/cedar-physical-water-comparison-20261021/independent-scientific-audit.json": "65e59a8e7138fda8f7d40f804c797423ff594907257494addbf37bc5ecd96f20",
+    "/workdir/cedar-physical-water-comparison-20261021/independent-yield-arithmetic-audit.json": "85571eda3b98b49f438307ffd12c1680d54912eb0fc88fe8bc817a951c49fb41",
+    "/workdir/cedar-physical-water-comparison-20261021/independent-source-and-mode-audit.json": "1ac7b575c09fb5291a72e6a8e107253e2c69ce7dbecc8594e0130c94d0d9d784",
+    "/workdir/cedar-physical-water-comparison-20261021/review_raw_outputs.py": "7d6a7c10566a959b24b10e602187da74d71fceac2f78f0ac585e2ed0d6f6e6a4"
+  }
+}

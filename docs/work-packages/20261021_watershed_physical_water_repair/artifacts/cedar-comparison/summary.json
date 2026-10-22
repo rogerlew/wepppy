@@ -1,0 +1,639 @@
+{
+  "release": {
+    "sampled_volume_m3": 1266461659.92,
+    "published_volume_m3": 1272337711.84,
+    "hill_stream_m3": 1267735665.6815429,
+    "hill_surface_m3": 192438982.72777,
+    "hill_lateral_m3": 404349515.6909671,
+    "hill_baseflow_m3": 670947167.2628059,
+    "sampled_minus_published_m3": -5876051.919999999,
+    "printed_volume_rounding_bound_m3": 2878153.829999999,
+    "trapezoid_publication_check_days2on": {
+      "signed_gap_m3": -5876422.879999999,
+      "absolute_daily_gaps_m3": 6495618.44,
+      "days_outside_conservative_printing_bound": 3446,
+      "maximum_daily_gap_m3": 25083.879999999655,
+      "note": "Only discharge-publication consistency; not a physical water budget."
+    },
+    "q0_peak_diagnostic": {
+      "maximum_reported_minus_positive_time_peak_m3s": 0.04882999999999882,
+      "days_q0_exceeds_positive_time_max": 346,
+      "max_reported_minus_reconstructed_peak_abs_m3s_days2on": 1.39656,
+      "note": "Printed positive-time max can omit q0; both printed quantities have rounding. First q0 unknown."
+    },
+    "discharge_exceedance_m3s": {
+      "1": 9.1,
+      "5": 3.57,
+      "10": 2.82,
+      "50": 1.49,
+      "90": 0.285,
+      "95": 0.195,
+      "99": 0.0974
+    },
+    "mean_sampled_discharge_m3s": 1.6721561788602428,
+    "maximum_sampled_peak_m3s": 46.2,
+    "maximum_reported_peak_m3s": 46.19911,
+    "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+    "sum_absolute_daily_sampled_published_gap_m3": 6380525.059999999
+  },
+  "candidate": {
+    "sampled_volume_m3": 1273003350.42,
+    "published_volume_m3": 1273001265.95,
+    "hill_stream_m3": 1268205085.29563,
+    "hill_surface_m3": 192503131.596093,
+    "hill_lateral_m3": 404503344.8113858,
+    "hill_baseflow_m3": 671198608.8881513,
+    "sampled_minus_published_m3": 2084.470000000163,
+    "printed_volume_rounding_bound_m3": 2887210.9799999995,
+    "trapezoid_publication_check_days2on": {
+      "signed_gap_m3": 1506.490000000404,
+      "absolute_daily_gaps_m3": 531539.6900000018,
+      "days_outside_conservative_printing_bound": 0,
+      "maximum_daily_gap_m3": 1559.5,
+      "note": "Only discharge-publication consistency; not a physical water budget."
+    },
+    "q0_peak_diagnostic": {
+      "maximum_reported_minus_positive_time_peak_m3s": 0.8325299999999993,
+      "days_q0_exceeds_positive_time_max": 408,
+      "max_reported_minus_reconstructed_peak_abs_m3s_days2on": 0.048960000000001,
+      "note": "Printed positive-time max can omit q0; both printed quantities have rounding. First q0 unknown."
+    },
+    "discharge_exceedance_m3s": {
+      "1": 9.18,
+      "5": 3.6,
+      "10": 2.83,
+      "50": 1.5,
+      "90": 0.289,
+      "95": 0.199,
+      "99": 0.0998
+    },
+    "mean_sampled_discharge_m3s": 1.6807934148192505,
+    "maximum_sampled_peak_m3s": 46.3,
+    "maximum_reported_peak_m3s": 46.31255,
+    "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+    "sum_absolute_daily_sampled_published_gap_m3": 815842.4899999995
+  },
+  "changes": {
+    "sampled_volume_m3": {
+      "absolute": 6541690.5,
+      "percent": 0.5165328495150279
+    },
+    "published_volume_m3": {
+      "absolute": 663554.1100001335,
+      "percent": 0.05215235733604384
+    },
+    "hill_stream_m3": {
+      "absolute": 469419.6140871048,
+      "percent": 0.03702819339981289
+    },
+    "hill_surface_m3": {
+      "absolute": 64148.868322998285,
+      "percent": 0.03333465362043153
+    },
+    "hill_lateral_m3": {
+      "absolute": 153829.1204187274,
+      "percent": 0.03804360199513024
+    },
+    "hill_baseflow_m3": {
+      "absolute": 251441.6253453493,
+      "percent": 0.03747562216727118
+    },
+    "sampled_minus_published_m3": {
+      "absolute": 5878136.389999999,
+      "percent": -100.03547398880028
+    },
+    "printed_volume_rounding_bound_m3": {
+      "absolute": 9057.150000000373,
+      "percent": 0.31468609862317365
+    },
+    "mean_sampled_discharge_m3s": {
+      "absolute": 0.008637235959007672,
+      "percent": 0.5165328495149835
+    },
+    "maximum_sampled_peak_m3s": {
+      "absolute": 0.09999999999999432,
+      "percent": 0.21645021645020357
+    },
+    "maximum_reported_peak_m3s": {
+      "absolute": 0.1134400000000042,
+      "percent": 0.24554585575351506
+    },
+    "sum_absolute_daily_sampled_published_gap_m3": {
+      "absolute": -5564682.569999999,
+      "percent": -87.21355245331488
+    },
+    "increased_daily_peaks": 4826,
+    "decreased_daily_peaks": 0,
+    "max_daily_hillslope_yield_change_m3": 795.7698511029594
+  },
+  "largest_reference_events": [
+    {
+      "start": "1994-10-24",
+      "end": "1994-10-30",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 2539839.72,
+      "release_peak_m3s": 46.2,
+      "release_first_peak": "1994-10-27 04:40:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 269540.13449163636,
+      "candidate_volume_m3": 2559694.08,
+      "candidate_peak_m3s": 46.3,
+      "candidate_first_peak": "1994-10-27 04:40:00",
+      "candidate_tied_peak_samples": 3,
+      "candidate_centroid_seconds": 269685.5872526767,
+      "peak_change_percent": 0.21645021645020357,
+      "volume_change_percent": 0.7817170447275368,
+      "centroid_shift_minutes": 2.424212684006003
+    },
+    {
+      "start": "1990-04-24",
+      "end": "1990-04-30",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3941423.9999999995,
+      "release_peak_m3s": 43.3,
+      "release_first_peak": "1990-04-27 06:00:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 297084.2945087867,
+      "candidate_volume_m3": 3961031.9999999995,
+      "candidate_peak_m3s": 43.4,
+      "candidate_first_peak": "1990-04-27 06:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 296880.2303036179,
+      "peak_change_percent": 0.23094688221709792,
+      "volume_change_percent": 0.4974851728715368,
+      "centroid_shift_minutes": -3.4010700861467438
+    },
+    {
+      "start": "2003-03-04",
+      "end": "2003-03-10",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3999510.0,
+      "release_peak_m3s": 37.7,
+      "release_first_peak": "2003-03-07 09:00:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 314820.6350277909,
+      "candidate_volume_m3": 4022124.0,
+      "candidate_peak_m3s": 37.8,
+      "candidate_first_peak": "2003-03-07 09:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 314752.4785411887,
+      "peak_change_percent": 0.2652519893899141,
+      "volume_change_percent": 0.5654192638598232,
+      "centroid_shift_minutes": -1.1359414433701507
+    },
+    {
+      "start": "1999-11-22",
+      "end": "1999-11-28",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3280113.6000000006,
+      "release_peak_m3s": 37.5,
+      "release_first_peak": "1999-11-25 07:10:00",
+      "release_tied_peak_samples": 7,
+      "release_centroid_seconds": 303016.85729421076,
+      "candidate_volume_m3": 3299278.1999999997,
+      "candidate_peak_m3s": 37.6,
+      "candidate_first_peak": "1999-11-25 07:50:00",
+      "candidate_tied_peak_samples": 4,
+      "candidate_centroid_seconds": 302848.78056054807,
+      "peak_change_percent": 0.2666666666666595,
+      "volume_change_percent": 0.5842663497995559,
+      "centroid_shift_minutes": -2.801278894378144
+    },
+    {
+      "start": "1995-11-08",
+      "end": "1995-11-14",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3840179.9999999995,
+      "release_peak_m3s": 36.6,
+      "release_first_peak": "1995-11-11 05:20:00",
+      "release_tied_peak_samples": 6,
+      "release_centroid_seconds": 259719.29815789888,
+      "candidate_volume_m3": 3864540.0,
+      "candidate_peak_m3s": 36.7,
+      "candidate_first_peak": "1995-11-11 05:40:00",
+      "candidate_tied_peak_samples": 4,
+      "candidate_centroid_seconds": 259689.84086074927,
+      "peak_change_percent": 0.2732240437158584,
+      "volume_change_percent": 0.6343452650657166,
+      "centroid_shift_minutes": -0.4909549524934846
+    },
+    {
+      "start": "1980-11-29",
+      "end": "1980-12-05",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": true,
+      "release_volume_m3": 2670372.0,
+      "release_peak_m3s": 35.3,
+      "release_first_peak": "1980-12-02 05:40:00",
+      "release_tied_peak_samples": 22,
+      "release_centroid_seconds": 296233.8635965326,
+      "candidate_volume_m3": 2713181.9999999995,
+      "candidate_peak_m3s": 35.7,
+      "candidate_first_peak": "1980-12-02 05:20:00",
+      "candidate_tied_peak_samples": 26,
+      "candidate_centroid_seconds": 296008.06285755994,
+      "peak_change_percent": 1.1331444759207,
+      "volume_change_percent": 1.6031474266506418,
+      "centroid_shift_minutes": -3.763345649544499
+    },
+    {
+      "start": "1996-11-16",
+      "end": "1996-11-22",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3310530.0,
+      "release_peak_m3s": 32.8,
+      "release_first_peak": "1996-11-19 06:50:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 279722.06069722975,
+      "candidate_volume_m3": 3330126.0,
+      "candidate_peak_m3s": 32.9,
+      "candidate_first_peak": "1996-11-19 06:50:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 279372.0702459907,
+      "peak_change_percent": 0.3048780487804992,
+      "volume_change_percent": 0.5919293889498078,
+      "centroid_shift_minutes": -5.833174187317491
+    },
+    {
+      "start": "1996-12-29",
+      "end": "1997-01-04",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 6744408.0,
+      "release_peak_m3s": 29.9,
+      "release_first_peak": "1997-01-01 04:20:00",
+      "release_tied_peak_samples": 1,
+      "release_centroid_seconds": 257290.32353914532,
+      "candidate_volume_m3": 6777216.0,
+      "candidate_peak_m3s": 30.0,
+      "candidate_first_peak": "1997-01-01 04:20:00",
+      "candidate_tied_peak_samples": 1,
+      "candidate_centroid_seconds": 256884.44511728708,
+      "peak_change_percent": 0.33444816053511683,
+      "volume_change_percent": 0.48644743912289456,
+      "centroid_shift_minutes": -6.764640364304069
+    },
+    {
+      "start": "1997-01-28",
+      "end": "1997-02-03",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3739230.0,
+      "release_peak_m3s": 26.9,
+      "release_first_peak": "1997-01-31 04:30:00",
+      "release_tied_peak_samples": 1,
+      "release_centroid_seconds": 298184.63330685726,
+      "candidate_volume_m3": 3765983.9999999995,
+      "candidate_peak_m3s": 27.1,
+      "candidate_first_peak": "1997-01-31 04:30:00",
+      "candidate_tied_peak_samples": 1,
+      "candidate_centroid_seconds": 297980.64187208447,
+      "peak_change_percent": 0.743494423791824,
+      "volume_change_percent": 0.7154949013566947,
+      "centroid_shift_minutes": -3.3998572462131658
+    },
+    {
+      "start": "1997-03-06",
+      "end": "1997-03-12",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 4423092.0,
+      "release_peak_m3s": 26.3,
+      "release_first_peak": "1997-03-09 05:00:00",
+      "release_tied_peak_samples": 3,
+      "release_centroid_seconds": 325389.387966608,
+      "candidate_volume_m3": 4448376.0,
+      "candidate_peak_m3s": 26.5,
+      "candidate_first_peak": "1997-03-09 05:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 325265.10609714646,
+      "peak_change_percent": 0.7604562737642651,
+      "volume_change_percent": 0.5716363123353441,
+      "centroid_shift_minutes": -2.0713644910254514
+    }
+  ],
+  "largest_candidate_events": [
+    {
+      "start": "1994-10-24",
+      "end": "1994-10-30",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 2539839.72,
+      "release_peak_m3s": 46.2,
+      "release_first_peak": "1994-10-27 04:40:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 269540.13449163636,
+      "candidate_volume_m3": 2559694.08,
+      "candidate_peak_m3s": 46.3,
+      "candidate_first_peak": "1994-10-27 04:40:00",
+      "candidate_tied_peak_samples": 3,
+      "candidate_centroid_seconds": 269685.5872526767,
+      "peak_change_percent": 0.21645021645020357,
+      "volume_change_percent": 0.7817170447275368,
+      "centroid_shift_minutes": 2.424212684006003
+    },
+    {
+      "start": "1990-04-24",
+      "end": "1990-04-30",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3941423.9999999995,
+      "release_peak_m3s": 43.3,
+      "release_first_peak": "1990-04-27 06:00:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 297084.2945087867,
+      "candidate_volume_m3": 3961031.9999999995,
+      "candidate_peak_m3s": 43.4,
+      "candidate_first_peak": "1990-04-27 06:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 296880.2303036179,
+      "peak_change_percent": 0.23094688221709792,
+      "volume_change_percent": 0.4974851728715368,
+      "centroid_shift_minutes": -3.4010700861467438
+    },
+    {
+      "start": "2003-03-04",
+      "end": "2003-03-10",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3999510.0,
+      "release_peak_m3s": 37.7,
+      "release_first_peak": "2003-03-07 09:00:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 314820.6350277909,
+      "candidate_volume_m3": 4022124.0,
+      "candidate_peak_m3s": 37.8,
+      "candidate_first_peak": "2003-03-07 09:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 314752.4785411887,
+      "peak_change_percent": 0.2652519893899141,
+      "volume_change_percent": 0.5654192638598232,
+      "centroid_shift_minutes": -1.1359414433701507
+    },
+    {
+      "start": "1999-11-22",
+      "end": "1999-11-28",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3280113.6000000006,
+      "release_peak_m3s": 37.5,
+      "release_first_peak": "1999-11-25 07:10:00",
+      "release_tied_peak_samples": 7,
+      "release_centroid_seconds": 303016.85729421076,
+      "candidate_volume_m3": 3299278.1999999997,
+      "candidate_peak_m3s": 37.6,
+      "candidate_first_peak": "1999-11-25 07:50:00",
+      "candidate_tied_peak_samples": 4,
+      "candidate_centroid_seconds": 302848.78056054807,
+      "peak_change_percent": 0.2666666666666595,
+      "volume_change_percent": 0.5842663497995559,
+      "centroid_shift_minutes": -2.801278894378144
+    },
+    {
+      "start": "1995-11-08",
+      "end": "1995-11-14",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3840179.9999999995,
+      "release_peak_m3s": 36.6,
+      "release_first_peak": "1995-11-11 05:20:00",
+      "release_tied_peak_samples": 6,
+      "release_centroid_seconds": 259719.29815789888,
+      "candidate_volume_m3": 3864540.0,
+      "candidate_peak_m3s": 36.7,
+      "candidate_first_peak": "1995-11-11 05:40:00",
+      "candidate_tied_peak_samples": 4,
+      "candidate_centroid_seconds": 259689.84086074927,
+      "peak_change_percent": 0.2732240437158584,
+      "volume_change_percent": 0.6343452650657166,
+      "centroid_shift_minutes": -0.4909549524934846
+    },
+    {
+      "start": "1980-11-29",
+      "end": "1980-12-05",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": true,
+      "release_volume_m3": 2670372.0,
+      "release_peak_m3s": 35.3,
+      "release_first_peak": "1980-12-02 05:40:00",
+      "release_tied_peak_samples": 22,
+      "release_centroid_seconds": 296233.8635965326,
+      "candidate_volume_m3": 2713181.9999999995,
+      "candidate_peak_m3s": 35.7,
+      "candidate_first_peak": "1980-12-02 05:20:00",
+      "candidate_tied_peak_samples": 26,
+      "candidate_centroid_seconds": 296008.06285755994,
+      "peak_change_percent": 1.1331444759207,
+      "volume_change_percent": 1.6031474266506418,
+      "centroid_shift_minutes": -3.763345649544499
+    },
+    {
+      "start": "1996-11-16",
+      "end": "1996-11-22",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3310530.0,
+      "release_peak_m3s": 32.8,
+      "release_first_peak": "1996-11-19 06:50:00",
+      "release_tied_peak_samples": 2,
+      "release_centroid_seconds": 279722.06069722975,
+      "candidate_volume_m3": 3330126.0,
+      "candidate_peak_m3s": 32.9,
+      "candidate_first_peak": "1996-11-19 06:50:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 279372.0702459907,
+      "peak_change_percent": 0.3048780487804992,
+      "volume_change_percent": 0.5919293889498078,
+      "centroid_shift_minutes": -5.833174187317491
+    },
+    {
+      "start": "1996-12-29",
+      "end": "1997-01-04",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 6744408.0,
+      "release_peak_m3s": 29.9,
+      "release_first_peak": "1997-01-01 04:20:00",
+      "release_tied_peak_samples": 1,
+      "release_centroid_seconds": 257290.32353914532,
+      "candidate_volume_m3": 6777216.0,
+      "candidate_peak_m3s": 30.0,
+      "candidate_first_peak": "1997-01-01 04:20:00",
+      "candidate_tied_peak_samples": 1,
+      "candidate_centroid_seconds": 256884.44511728708,
+      "peak_change_percent": 0.33444816053511683,
+      "volume_change_percent": 0.48644743912289456,
+      "centroid_shift_minutes": -6.764640364304069
+    },
+    {
+      "start": "1997-01-28",
+      "end": "1997-02-03",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 3739230.0,
+      "release_peak_m3s": 26.9,
+      "release_first_peak": "1997-01-31 04:30:00",
+      "release_tied_peak_samples": 1,
+      "release_centroid_seconds": 298184.63330685726,
+      "candidate_volume_m3": 3765983.9999999995,
+      "candidate_peak_m3s": 27.1,
+      "candidate_first_peak": "1997-01-31 04:30:00",
+      "candidate_tied_peak_samples": 1,
+      "candidate_centroid_seconds": 297980.64187208447,
+      "peak_change_percent": 0.743494423791824,
+      "volume_change_percent": 0.7154949013566947,
+      "centroid_shift_minutes": -3.3998572462131658
+    },
+    {
+      "start": "1997-03-06",
+      "end": "1997-03-12",
+      "reference_selected": true,
+      "candidate_selected": true,
+      "top_peak_change_selected": false,
+      "release_volume_m3": 4423092.0,
+      "release_peak_m3s": 26.3,
+      "release_first_peak": "1997-03-09 05:00:00",
+      "release_tied_peak_samples": 3,
+      "release_centroid_seconds": 325389.387966608,
+      "candidate_volume_m3": 4448376.0,
+      "candidate_peak_m3s": 26.5,
+      "candidate_first_peak": "1997-03-09 05:00:00",
+      "candidate_tied_peak_samples": 2,
+      "candidate_centroid_seconds": 325265.10609714646,
+      "peak_change_percent": 0.7604562737642651,
+      "volume_change_percent": 0.5716363123353441,
+      "centroid_shift_minutes": -2.0713644910254514
+    }
+  ],
+  "annual_change_ranges_percent": {
+    "sampled_volume_m3": {
+      "minimum": 0.4586289807376076,
+      "maximum": 0.6535371671548162,
+      "minimum_year": 2000,
+      "maximum_year": 2001
+    },
+    "sampled_peak_m3s": {
+      "minimum": 0.21645021645020357,
+      "maximum": 2.1428571428571574,
+      "minimum_year": 1994,
+      "maximum_year": 1993
+    },
+    "reported_peak_m3s": {
+      "minimum": 0.22285689144287968,
+      "maximum": 2.4612079408744103,
+      "minimum_year": 1995,
+      "maximum_year": 1993
+    }
+  },
+  "event_screen_ranges": {
+    "volume_change_percent": {
+      "minimum": 0.07835346263294074,
+      "maximum": 13.552478008821357
+    },
+    "peak_change_percent": {
+      "minimum": 0.0,
+      "maximum": 19.06614785992218
+    },
+    "centroid_shift_minutes": {
+      "minimum": -73.33360953423059,
+      "maximum": 11.895648886010168
+    }
+  },
+  "event_screen_count": 356,
+  "largest_daily_volume_changes": [
+    {
+      "date": "1980-12-02",
+      "release": 1797264.0000000002,
+      "candidate": 1826267.9999999995,
+      "delta": 29003.9999999993
+    },
+    {
+      "date": "1996-12-07",
+      "release": 951078.0000000001,
+      "candidate": 967344.0,
+      "delta": 16265.999999999884
+    },
+    {
+      "date": "1997-01-17",
+      "release": 498690.00000000006,
+      "candidate": 513756.0,
+      "delta": 15065.999999999942
+    },
+    {
+      "date": "1983-01-05",
+      "release": 1587888.0000000002,
+      "candidate": 1602509.9999999998,
+      "delta": 14621.999999999534
+    },
+    {
+      "date": "1982-01-23",
+      "release": 495348.0000000001,
+      "candidate": 509406.0,
+      "delta": 14057.999999999884
+    },
+    {
+      "date": "1993-04-02",
+      "release": 650010.0,
+      "candidate": 663690.0,
+      "delta": 13680.0
+    },
+    {
+      "date": "1982-12-03",
+      "release": 597570.0,
+      "candidate": 611106.0000000001,
+      "delta": 13536.000000000116
+    },
+    {
+      "date": "1981-12-05",
+      "release": 827526.0,
+      "candidate": 841062.0,
+      "delta": 13536.0
+    },
+    {
+      "date": "1985-11-07",
+      "release": 735707.9999999999,
+      "candidate": 748907.9999999999,
+      "delta": 13200.0
+    },
+    {
+      "date": "1997-02-19",
+      "release": 560526.0,
+      "candidate": 573690.0,
+      "delta": 13164.0
+    }
+  ],
+  "definitions": {
+    "sampled_volume": "600 times sum of printed positive-time discharge samples; right-endpoint quadrature, matching prior Cedar comparison",
+    "reported_volume": "chanwb Outflow, checked against EBE; release balance publication differs from candidate accepted-flux publication",
+    "trapezoid": "Daily q0 reconstructed from previous endpoint; first day unknown; printed precision prevents exact solver closure",
+    "event_selection": "Union of reference and candidate daily peaks (prominence0.1m3/s, spacing7days) and ten largest daily peak changes; plus/minus3day overlapping descriptive windows, not independent storms",
+    "source": "Frozen Cedar 10cm RRINIT, 1980\u20132003,864 hills,371 channels; MC4 at600seconds",
+    "candidate": "Unreleased native d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
+    "reference": "wepp_261010 (user typed wepp_2601010)"
+  }
+}

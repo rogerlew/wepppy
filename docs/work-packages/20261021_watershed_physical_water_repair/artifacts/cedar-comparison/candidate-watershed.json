@@ -1,0 +1,10 @@
+{
+  "run": "pw0.run",
+  "started_utc": "2026-10-22T04:08:11.792324+00:00",
+  "seconds": 533.3849785130005,
+  "returncode": 0,
+  "success": true,
+  "pid": 2025745,
+  "binary_sha256": "444e742740728918f4e68ba1e539a9df538d1b73a1546a2fa164aec0cd0ecca2",
+  "observer_trace": false
+}

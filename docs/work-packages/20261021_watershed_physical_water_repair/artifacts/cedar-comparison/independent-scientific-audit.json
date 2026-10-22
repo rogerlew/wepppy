@@ -1,0 +1,48 @@
+{
+  "method": "Independent streaming parse with math.fsum; complete date/time/channel checks; native published outputs, daily/annual/event metrics compared to analysis CSV/JSON; no simulation mutation.",
+  "lane_results": {
+    "release": {
+      "rows": 1262304,
+      "days": 8766,
+      "sampled_volume_m3": 1266461659.9199998,
+      "published_volume_m3": 1272337711.84,
+      "maximum_sampled_peak_m3s": 46.2,
+      "maximum_reported_peak_m3s": 46.19911,
+      "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+      "rounding_bound_m3": 2878153.83,
+      "nonzero_samples": 1262304,
+      "trapezoid_published_days2on_outside_print_bound": 3455,
+      "max_trapezoid_published_gap_m3": 25083.87999999989
+    },
+    "candidate": {
+      "rows": 1262304,
+      "days": 8766,
+      "sampled_volume_m3": 1273003350.42,
+      "published_volume_m3": 1273001265.95,
+      "maximum_sampled_peak_m3s": 46.3,
+      "maximum_reported_peak_m3s": 46.31255,
+      "maximum_sampled_peak_time": "1994-10-27 04:40:00",
+      "rounding_bound_m3": 2887210.98,
+      "nonzero_samples": 1262304,
+      "trapezoid_published_days2on_outside_print_bound": 0,
+      "max_trapezoid_published_gap_m3": 1559.5
+    }
+  },
+  "percent_changes": {
+    "sampled_volume_m3": 0.5165328495150501,
+    "published_volume_m3": 0.05215235733604384,
+    "maximum_sampled_peak_m3s": 0.21645021645020357,
+    "maximum_reported_peak_m3s": 0.24554585575351506
+  },
+  "event_windows_verified": 356,
+  "source_sha256": {
+    "/workdir/cedar-physical-water-comparison-20261021/release/off/output/chanwb.out": "e1eb1d34dedd2992a9cac528d94b2e0467a716ce4f91017e7c12b16d2d6e11f7",
+    "/workdir/cedar-physical-water-comparison-20261021/release/off/output/ebe_pw0.txt": "0283f8783e4993a2714867ed6eb78a71c7db3d78cc95e3a93b28c4647b1b6cb1",
+    "/workdir/cedar-physical-water-comparison-20261021/release/off/output/chan.out": "28986996f0619d4d23e1f14778a9dbaae5d32c124d01898e2de3e8be4483bba7",
+    "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/chanwb.out": "d5dbeb5160eb050f7c7c2a3e0f5ac1fd761f68243ef78e81f1fb626bb674d9c7",
+    "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/ebe_pw0.txt": "1251be26091c2f7ccdef7d1ebd132b1de9cc23ecded807763a9d9725455f5c94",
+    "/workdir/cedar-physical-water-comparison-20261021/candidate/off/output/chan.out": "507e148553c6b1f1ee943868e31266eff15a2d20ef741035fe53a608189aeb16"
+  },
+  "analyzer_summary_sha256": "01bdff58ffa912d4db570823667459353fd2f029119bb82e348d939c6d8910dd",
+  "review_script_sha256": "7d6a7c10566a959b24b10e602187da74d71fceac2f78f0ac585e2ed0d6f6e6a4"
+}

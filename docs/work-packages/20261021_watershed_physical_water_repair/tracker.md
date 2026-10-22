@@ -146,3 +146,17 @@ is ready; signed withdrawal/soil-credit acceptance remains unresolved. See
 `d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b`. Native worktree clean. No push,
 release, vendoring or deployment. Signed withdrawal/soil credit remains open;
 retain the package as active.
+
+
+Cedar Creek comparison started: fresh paired 1980–2003 simulations for unreleased
+d354e3c99 and wepp_261010. Runner: `run_cedar_comparison.py`; retained evidence
+root `/workdir/cedar-physical-water-comparison-20261021`. No live project changes.
+
+
+Cedar comparison completed: all 1,728 fresh hillslope runs and both 24-year
+watersheds succeed; 1,262,304 finite outlet samples per build and all 356 event
+windows independently verified. Sampled volume +0.5165%, maximum reported peak
++0.2455%, annual maxima +0.223–2.461%; low-flow window peaks reach +19.07%.
+Hillslope yield +0.0370%; this is not a routing-only attribution. Repaired
+discharge publication passes the printed-integral check on all 8,765 checkable
+days. See `artifacts/cedar-comparison.md`. Signed exchange remains open.

@@ -1,0 +1,10 @@
+{
+  "hillslope_runs": 1728,
+  "watershed_runs": 2,
+  "hillslope_files_per_build": 6048,
+  "changed_hillslope_files": 5083,
+  "same_output_names": true,
+  "raw_root": "/workdir/cedar-physical-water-comparison-20261021",
+  "source_manifest_sha256": "05743264f32d0f1277c0c21d210d60ed270f8d4ac1e1573fb91096c29b444e82",
+  "hillslope_parity_sha256": "06e095bbc45bd42bd070ec0c06da014251bbc7e0aa49ce6a15a1808f5a1b8986"
+}
