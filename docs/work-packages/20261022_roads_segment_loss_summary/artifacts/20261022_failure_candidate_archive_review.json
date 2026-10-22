@@ -1,0 +1,11 @@
+{
+  "reviewer": "integration_contract_review",
+  "uid": 1000,
+  "gid": 993,
+  "real_failed_candidate_retained": true,
+  "canonical_archive_member_present": true,
+  "canonical_restore_bytes_and_mode_preserved": true,
+  "candidate_mode": "0o640",
+  "candidate_sha256": "653da075a80b15ca4b266b0963075235834d4530fb85098ccf96ccd3657bb83a",
+  "runtime_callbacks": "isolated job/status/locks/cache; real filesystem archive implementation"
+}

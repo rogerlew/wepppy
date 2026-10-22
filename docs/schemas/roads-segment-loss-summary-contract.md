@@ -1,6 +1,6 @@
 # Roads segment loss summary
 
-Status: approved operator correction; implementation pending independent checkpoint.
+Status: implemented after independent contract checkpoint `bac3042b1` (2026-10-22).
 
 ## Scope and attribution
 

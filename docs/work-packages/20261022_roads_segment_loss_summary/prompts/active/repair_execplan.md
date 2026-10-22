@@ -13,15 +13,17 @@ this without changing model inputs, water accounting, downloads or baseline.
 
 - [x] (2026-10-22) Diagnose table and raw segment PASS differences.
 - [x] (2026-10-22) Scaffold package, compatibility plan, contract and ADR.
-- [ ] Independent contract checkpoint and standalone commit.
-- [ ] Implement and test producer; update affected documentation.
-- [ ] Isolated UM1/controller/CSV/browser/archive validation.
+- [x] (2026-10-22) Two independent contract approvals; checkpoint `bac3042b1`.
+- [x] (2026-10-22) Source-qualified producer, README and 76 passing focused tests.
+- [x] (2026-10-22) All 34 UM1 rows, live Chromium/downloads and canonical archive/restore pass.
 - [ ] Broad gates, final independent reviews, commits and package closure.
 
 ## Surprises & Discoveries
 
 The bad target-first join is explicitly specified and covered by old tests.
 This requires a reviewed normative correction, not merely swapping join order.
+Independent review caught eager facade climate access for empty manifests;
+a lazy calendar provider and real empty-facade regressions resolve it.
 H.loss.parquet contains particle classes, not profile mass totals. Native H.pass
 already contains all source segment IDs in addition to canonical routing targets.
 
@@ -35,7 +37,9 @@ Use native interchange and existing DuckDB aggregation, no model rerun.
 
 ## Outcomes & Retrospective
 
-Contract drafted; implementation and generated-artifact proof remain pending.
+Implementation and independent correctness review pass. All 34 isolated UM1
+rows match original PASS/WAT; aggregate and original artifacts are unchanged.
+Live consumer and archive/restore evidence pass. Broad regression is running.
 
 ## Context and Orientation
 

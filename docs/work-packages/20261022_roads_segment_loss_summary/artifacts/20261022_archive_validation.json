@@ -1,0 +1,16 @@
+{
+  "archive_helper": "wepppy.rq.project_rq_archive",
+  "source": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1-restored",
+  "restored": "/wc1/runs/ro/roads-segment-summary-validation",
+  "archive_sha256": "7ae3735c32906b2552e1b7e0771a95683745a8dcfa79266e88937870f4637bcc",
+  "verified_sources": {
+    "wepp/roads/output/interchange/roads_segment_loss_summary.parquet": "68fa7acb7c2786efa83d0e24eaeeca1fa070d955a4ca41603be9cce66b910dc2",
+    "wepp/roads/output/interchange/H.pass.parquet": "3dc40953fb0e20de22cc8ae06e565a37b5b077996a196b15cbfefb019a07e4c6",
+    "wepp/roads/output/interchange/H.wat.parquet": "8fe27eda3f48e3ad57c0e29126eddc215c5662713e1b400f0b2ab11fb6f27974",
+    "wepp/roads/segments/roads.segment.pass.manifest.json": "8b76b817ac209d4343ccfead048b6a0124556268c07be888ffce10973f73bddf"
+  },
+  "uid": 1000,
+  "gid": 993,
+  "summary_mode": "0o644",
+  "runtime_callbacks": "isolated job/status/locks/cache; real filesystem implementation"
+}

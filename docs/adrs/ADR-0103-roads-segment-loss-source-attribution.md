@@ -2,7 +2,8 @@
 
 ## Status
 
-Proposed checkpoint, 2026-10-22; implementation pending.
+Accepted and implemented, 2026-10-22; independently reviewed contract checkpoint
+`bac3042b1`.
 
 ## Decision and rationale
 

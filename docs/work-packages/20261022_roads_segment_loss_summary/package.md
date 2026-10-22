@@ -1,6 +1,6 @@
 # Roads segment loss summary correction
 
-Status: Active, contract checkpoint. Date: 2026-10-22.
+Status: Active, validation. Date: 2026-10-22.
 
 Correct the target-hillslope attribution defect in the existing segment summary.
 Roger authorized scaffolding/execution after the UM1 diagnosis; prior session

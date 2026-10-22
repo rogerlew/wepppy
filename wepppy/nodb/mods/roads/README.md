@@ -221,6 +221,23 @@ for area authority, optional inputs, cache provenance, and compatibility.
 | `wepp/roads/output/interchange/README.md` | Roads-scoped regenerated resource manifest |
 | `wepp/roads/output/interchange/roads_segment_loss_summary.parquet` | Segment-level Roads loss summary |
 
+The Road Segment Loss Summary contains mean annual exports from each completed
+source profile, selected by `segment_run_id`. Receiving-hillslope IDs provide
+routing context only. Volumes and sediment masses are averaged over the complete
+simulation, including zero-export years; densities use the full modeled OFE area.
+`profile_scope` distinguishes road, mixed-profile and replacement-remainder rows.
+`sediment_leaving_buffer_kg` is unavailable (NULL); `road_prism_erosion_kg` is only
+populated for proven single-OFE inslope road profiles. Use `sediment_yield_kg` for
+full-profile export, not watershed-outlet yield or incremental road impact.
+
+The `roads_segment_pass_v1` policy and source hashes identify corrected artifacts.
+Existing historical summaries require regeneration; reading them does not upgrade
+their values. Missing or invalid completed-source data fails regeneration and
+preserves the prior summary. A failed publication may retain a visible
+`roads_segment_loss_summary.pending-*.parquet` candidate for inspection; retry
+rebuilds from original sources. See the [accounting contract](../../../../docs/schemas/roads-segment-loss-summary-contract.md)
+for equations, units and validation rules.
+
 ### Report links
 
 When regeneration succeeds, Roads results can include links such as:

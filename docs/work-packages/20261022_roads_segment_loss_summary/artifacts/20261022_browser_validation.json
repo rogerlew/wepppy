@@ -1,0 +1,15 @@
+{
+  "runid": "roads-segment-summary-validation",
+  "browser": "Chromium via Playwright, live browse service",
+  "authorization": "existing active dev-agent account; 300-second scoped admin-run-token; live auth/feature DB checks",
+  "uid": 1000,
+  "gid": 993,
+  "rows": 34,
+  "browse_status": 200,
+  "parquet_status": 200,
+  "csv_status": 200,
+  "csv_headers_unchanged": true,
+  "csv_all_row_sediment_verified": true,
+  "summary_sha256": "68fa7acb7c2786efa83d0e24eaeeca1fa070d955a4ca41603be9cce66b910dc2",
+  "csv_sha256": "70d898556d4e0bde8b2ac573c581b4fa402f97fdb65d66cd37b2b494b65b411d"
+}

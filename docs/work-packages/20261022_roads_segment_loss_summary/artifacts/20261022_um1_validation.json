@@ -1,0 +1,15 @@
+{
+  "root": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1-restored",
+  "summary_sha256": "68fa7acb7c2786efa83d0e24eaeeca1fa070d955a4ca41603be9cce66b910dc2",
+  "rows": 34,
+  "sediment_kg_per_year": 4810.818379721261,
+  "runoff_m3_per_year": 1008.0648908316255,
+  "source_900001_sediment_kg_per_year": 4071.013295042149,
+  "modeled_area_m2": 4127.15,
+  "all_source_rows_verified": true,
+  "protected_scratch_artifacts": 216,
+  "original_parquets_unchanged": 46,
+  "policy": "roads_segment_pass_v1",
+  "uid": 1000,
+  "gid": 993
+}
