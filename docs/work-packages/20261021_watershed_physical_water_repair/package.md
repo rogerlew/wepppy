@@ -7,6 +7,12 @@ and local validation are authorized; release publication remains separate.
 [Active ExecPlan](prompts/active/repair_execplan.md) · [Tracker](tracker.md) ·
 [Acceptance matrix](artifacts/acceptance-matrix.md)
 
+The [validated MC checkpoint](artifacts/mc-reference-checkpoint.md), native
+`e6dc19008`, repairs source/publication interfaces and retained-state propagation
+while preserving MC dynamics and numerical storage authority. Full native gates
+and paired replays pass. Signed soil/channel exchange and clipping remain open;
+this package is not complete or release-ready.
+
 ## Purpose and evidence
 
 Repair four native defects found while tracing Ayush’s concerns about Dp,

@@ -1,0 +1,39 @@
+--- /workdir/watershed-physical-water-repair-20261021/mc-publication-candidate/src/wshchr.for	2026-10-21 16:22:28.418741006 -0700
++++ /workdir/watershed-physical-water-repair-20261021/mc-interface-candidate-v2/src/wshchr.for	2026-10-21 16:33:50.304918652 -0700
+@@ -154,7 +154,12 @@
+       vsb = tmpsbv(nhleft(ielmt))+tmpsbv(nhrght(ielmt))
+ c Sum of subsurface flow and base flow
+       vsbbs = vsb + vbasel
+-	if(volin <= vsbbs) then
++c     Without side surface runoff, no hill hydrograph can carry local
++c     water. Use the existing uniform daily non-surface representation.
++      if(volin.le.vsbbs.or.
++     1  ((tmpvol(nhleft(ielmt))+tmpvol(nhrght(ielmt))).le.0.
++     2  .and.tmpvol(nileft(ielmt)).le.0.
++     3  .and.tmpvol(nirght(ielmt)).le.0.)) then
+ c There is lateral outflow when volin < 0, or
+ c channel lateral inflow comes from base flow and subsurface flow only.
+ 	   do it = nt0, ntchr
+@@ -251,15 +256,19 @@
+ 	        qin(it) = qin(it) + q1(it, ic)
+ 	    enddo
+ 	endif
++c     WSHCQI admits deferred upstream baseflow at this channel.
++      if(lr_bf.eq.1) then
++        do it=nt0,ntchr
++          qin(it)=qin(it)+bflwpere(ielmt)/86400.
++        enddo
++      endif
+ 	qlich(ichan) = qlat(ntchr)
+ 	qinich(ichan) = qin(ntchr)
+ c -----------------------------------------------------------------
+       if(q1(ntchr,ichan) < -1.e5) then
+ c Calculate the initial condition (IC) of outflow. The IC is assumed to be at steady state.
+ 	    q1(0,ichan) = qin(0) + qlat(0)
+-CAS Added by A. Srivastava
+-     1                +  bflwpere(ielmt)/86400.                  
+-CAS End Adding
++c     Admitted baseflow is already included in qin(0).
+ c
+ 	    if(qin(0) > 0.) then
+ 	      call Mann(qin(0),ichan,chns0,chnn0,ishp,bw,chnz0,y)

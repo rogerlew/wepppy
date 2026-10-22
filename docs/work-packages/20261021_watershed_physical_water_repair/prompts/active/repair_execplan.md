@@ -29,15 +29,39 @@ publication, production deployment and original-project repair are excluded.
 - [x] M1 baseline: 88 existing tests pass; portable probes reproduce four defects (15 failures, six controls).
 - [x] M1 portable inputs: complete retained parameter decks and deterministic wet/dry/snow generator; two-year paired baseline succeeds.
 - [x] M1 narrow contract review: independent science/QA reviews retained; ADR-0101 drafted. Groundwater, hourly allocation and flat cells approved for isolated experiments.
-- [ ] M1 routing contract: source-cell/solver quadrature, channel sink timing and storage remain unratified; this blocks routing promotion, not the three reviewed narrow lanes.
+- [ ] M1 signed-coupling contract: accepted channel withdrawal and soil credit remain unratified. Operator-authorized MC numerical storage, source/publication and bounded reference contracts are recorded separately.
 - [x] M2a: groundwater correction, six full 44-year replays with unchanged WAT and narrow review/gates pass.
 - [x] M2b: signed allocation, 44-year replays, native zero-remainder/observation parity and narrow review/gates pass.
 - [ ] M2c: source-cell correction and 29 paired replay checks pass; solver-consumption boundary remains open.
-- [ ] M2d: repair WPA-01 channel-local rate assembly in an isolated lane.
+- [x] M2d ordinary sources: reviewed local-water and one-time deferred-groundwater fixes pass source/cascade controls.
+- [ ] M2d signed coupling: reconcile accepted routing withdrawal with soil credit.
+- [x] MC publication experiment: 24 controlled cases and 29 full-period paired date/transfer validations pass; not promoted.
+- [x] Source experiment v2: first-day MC4/5 groundwater steady routing and 24 source-assembly/parity controls pass.
+- [x] Source v2: 29 full paired replay validations and independent 108-execution threshold/cascade review pass.
+- [x] Portable mutation review and 55 final interface cases pass; watchlist and smokes pass.
+- [x] Exact execution retest: v5 completes all 100 years in 580.64 s within the unchanged 900 s timeout; v2 failure retained.
+- [x] V5 paired matrix, 12 watchlist cases, both smokes, 16 continuity/eight cascade controls and 92 portable reference tests pass.
+- [x] V5 full native gate: 490 passed, two existing warnings, 592.55 s; expanded targeted suite covers 30 added mode cases (final collection 520).
+- [x] Eight actual wet/dry, early/late, daily/hourly soil controls complete two years with independent full-calendar, target-isolation and observation-parity checks.
+- [ ] Repair confirmed channel plane/element runoff alias; review a bounded per-channel initialization candidate.
+- [ ] Signed-coupling acceptance remains open.
 - [ ] M3: combined paired runs and independently closed transfer/storage ledgers.
 - [ ] M4: native gates, independent correctness/QA reviews and release-readiness documentation.
 
 ## Surprises & Discoveries
+
+MC4 zero-reference handling with retained interior yields a period-two sign
+alternation, not drainage. Carrying the last valid reference restores recession.
+At the failing fixture's 60-second grid, subnormals can reach an exact fixed
+point. A bitwise shortcut preserves all represented state while avoiding repeated
+arithmetic. Numeric equality was rejected after a signed-zero counterexample.
+Independent v5 reviews verify 26 complete raw-array pairs and 26 lifecycle checks.
+
+Review caught duplicate first-day admitted groundwater in the initial candidate.
+Adding it to qin requires removing the old special outlet-initialization addition.
+The corrected full native test exports 100 m³ for 100 m³ in MC4 and MC5.
+The no-side-hill predicate also affected side impoundments; v2 explicitly excludes
+positive side-impoundment transfers, retaining their unresolved timing contract.
 
 
 The predecessor audit passes OFE transfer conversions and selected PASS delivery
@@ -54,6 +78,17 @@ separate. The prior audit identified, rather than repaired, four mechanisms;
 additional storage/routing residuals may remain after their correction.
 
 ## Decision Log
+
+2026-10-21 — Test the bounded MC4 previous-reference correction and bitwise
+fixed-point optimization under ADR-0101. Do not change MC storage authority,
+introduce a cutoff or increase the failed gate timeout. Readonly state access
+precedes grid selection. Exhaustive diagnostic builds explicitly disable the
+shortcut, with raw-array parity evidence and strict record completeness.
+
+2026-10-21 — Keep MC publication/source changes isolated pending review. Retain
+rejected candidate evidence. Correct admitted groundwater once in qin and exclude
+positive side-impoundment release from the new local-source eligibility. Do not
+reduce rtrans downstream without reconciling WATBAL soil allocation.
 
 
 2026-10-21 — Scaffold only on explicit operator request. Preserve the audit as
@@ -73,8 +108,19 @@ report-only balancing terms, wider tolerances or post-hoc outlet normalization.
 ## Outcomes & Retrospective
 
 
-Three narrow corrections are implemented as candidates and under validation.
-Complete routing repair and release readiness remain pending. Three native source routines have changed; no vendored binaries changed. The next milestone is the operator-authorized MC continuity and coupling audit.
+Four narrow source corrections are committed locally at native `22133f0c9`.
+The reviewed source/publication v2 passed narrow controls but failed its required
+100-year runtime gate. Combined v5 adds bounded MC4 reference carry and bitwise
+fixed-point copying; the exact failed gate now completes all 100 years within
+its original timeout. All 29 paired replays, 12 watchlist cases, both profile
+smokes, complete continuity/cascade probes and 92 portable reference tests pass.
+The full native gate passes 490 tests with two existing warnings; the expanded
+targeted suite passes all 92 reference tests. Signed-loss availability and soil-side
+reconciliation remain open; actual early/late soil controls reproduce material transmission and clipping, and
+identify a separate plane/element runoff alias requiring a bounded repair.
+Complete routing repair and release readiness remain pending; no vendored
+binaries changed. Retaining failed candidates and raw-state mutation controls
+prevented narrow passing results from masking the execution defect.
 
 ## Context and Orientation
 
@@ -383,3 +429,53 @@ All 29 fresh paired replays pass date/transfer validation, including 400 years.
 Guard-only effects are small in retained runs but visible in keyed routing output;
 retain `repair-handoff.md` and parity receipts. Full source/exchange/publication
 closure remains open; the package stays active.
+
+2026-10-21 — Native validated checkpoint `22133f0c9`, WEPPpy evidence checkpoint
+`8fa7a8d9b`; neither pushed. Continue with the independently reviewed interface
+experiment: integrate MC accepted outlet rates for publication/downstream volume,
+retain independent geometric diagnostics, and include the q0 endpoint in daily
+peak metadata. No MC recurrence or midnight boundary change. The candidate is
+isolated under `mc-publication-candidate`; source carry is accounted explicitly
+rather than normalized away. Full matrix/review must precede promotion.
+
+2026-10-21 — Independent science/QA supports the corrected interface source
+checkpoint. Actual 44-year raw/export observations preserve scientific output
+hashes and quantify clipping; fixed positive-coefficient signed controls isolate
+a separate soil/routing coupling mismatch. See `artifacts/mc-interface-checkpoint.md`
+and `signed-coupling-review.md`. The default native working source contains the
+reviewed changes; full native gates are running. Do not infer package completion.
+
+2026-10-21 — Required v2 full native gate fails: 409 passed, one 900-second
+execution timeout at year16/day81, two existing warnings. Source promotion is
+blocked; changes remain uncommitted candidates. The zero-reference MC4 update
+with retained interior and no forcing is qs_new=-qs_old, so an even-step day
+repeats the interior profile. Investigate bounded state-aware reference handling
+in isolation; do not increase the timeout or mark the run successful.
+
+2026-10-21 — Combined v5 candidate includes reviewed interface fixes, MC4 reference
+carry for degenerate boundary estimates with live interior, and bitwise exact
+fixed-point copying. Both profiles built; 29 paired replays completed and passed
+validation. The previously failed execution gate now passes; the final full native gate also passes. Portable review controls are being retained in the native test suite.
+
+2026-10-21 — V5 native source checkpoint passes full gates: 490-test full suite,
+92-test final reference suite (30 extra mode cases after full collection), all 29
+paired replays, 12 watchlist cases, both profile smokes and strict continuity/
+cascade probes. All 520 tests in the final collection are covered. This clears
+the narrow source/reference/publication checkpoint, not signed soil/routing
+acceptance. A bounded actual-soil early/late control is running separately.
+
+2026-10-21 — Native source/interface/reference checkpoint committed locally as
+`e6dc19008ce83378508299b0e1efe4cf3844b198`; native worktree clean. No push,
+release or vendoring. The package remains active for signed soil/routing coupling.
+
+2026-10-21 — Actual-soil controls complete: eight two-year runs, 300 scientific
+observation-off/on file pairs equal, and independent complete calendar/target
+isolation checks pass. Dry-day transmission requests are 37.8908 m³ daily and
+38.8419 m³ hourly; raw/export clipping remains material and is not fully assigned
+to losses because zero-loss controls also clip. The requested soil/routing
+acceptance contract remains unresolved. A separate confirmed implementation
+alias occurs when WSHDRV's element-indexed runoff write occupies the next
+channel's soil-plane slot and optional WSHIRS is skipped. Review a minimal reset
+of runoff/chnrun working plane fields after WSHCQI, before optional WSHIRS; retain
+norun handling and MC behavior. Portable causal controls and full gates precede
+promotion. See actual-soil-coupling-control-review.md and mc-coupled-soil-qa-review.md.

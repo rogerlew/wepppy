@@ -62,3 +62,38 @@ the verified remote-default branch. Source/doc whitespace checks pass; retained
 raw fixture decks and native log/diff evidence preserve their original whitespace
 and are excluded from that formatting gate. All 44 native incident checksums
 were verified against staged git blobs after canonical LF normalization of CSVs.
+
+
+## MC interface/reference checkpoint e6dc19008
+
+Native checkout: `/workdir/wepp-forest-release-20261009`; isolated paired build:
+`/workdir/watershed-physical-water-repair-20261021/mc-reference-candidate-v5`.
+Build watershed then hillslope sequentially with `make -B wepp` and
+`make -B wepp_hill`, both using `FC=/usr/bin/gfortran LINKER=/usr/bin/gfortran`.
+Retained build logs pin flags; source manifest and binary hashes are in
+`mc-reference-v5-manifest.json` and `mc-reference-v5-validation-receipt.json`.
+
+From the native checkout:
+
+    PATH=/usr/bin:$PATH WEPP_GUARDED_BINARY=/workdir/watershed-physical-water-repair-20261021/mc-reference-candidate-v5/src/wepp /workdir/wepppy/.venv/bin/python -m pytest -q
+    PATH=/usr/bin:$PATH /workdir/wepppy/.venv/bin/python -m pytest -q tests/test_mc_fixed_point.py tests/test_mc_reference_lifecycle.py
+    python tools/run_hillslope_watchlist.py --binary /workdir/watershed-physical-water-repair-20261021/mc-reference-candidate-v5/src/wepp_hill
+    tools/smoke_wepp_binary_host.sh /workdir/watershed-physical-water-repair-20261021/mc-reference-candidate-v5/src/wepp
+    tools/smoke_wepp_binary_host.sh /workdir/watershed-physical-water-repair-20261021/mc-reference-candidate-v5/src/wepp_hill
+    python tools/mc_continuity_probe.py NEW_UNUSED_DESTINATION
+    python tools/mc_cascade_probe.py ANOTHER_UNUSED_DESTINATION
+    python tools/check_ablation_artifact_policy.py
+
+Full suite: 490 passed, two existing tarfile warnings. Expanded final reference
+suite: 92 passed, covering 30 added mode cases after the full-suite collection.
+Final collection is 520 tests; all covered. The exact formerly failed 100-year
+gate also passes independently in 580.64 seconds within its unchanged 900-second
+timeout. Both ELF interpreters are `/lib64/ld-linux-x86-64.so.2`.
+
+Full 29-pair replay/validation commands and large raw outputs are retained in
+`replay_mc_reference_v5.py`, `validate_mc_reference_v5.py` and
+`mc-reference-v5-replays/` under the external experiment root. Repository
+receipts retain complete date/count validation including 400 years. Native
+required tests and fixtures do not depend on those supplementary directories.
+
+Diagnostic destination paths must not already exist.

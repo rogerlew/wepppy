@@ -62,3 +62,59 @@ then make accepted outlet flux and daily publication/downstream transfer agree.
 Do not normalize the outlet or invent geometric storage from a residual. Retain
 explicit coefficient/grid/clipping terms and full-period dates. No full routing
 acceptance is asserted while these boundaries remain unresolved.
+
+## Active follow-on experiment
+
+Checkpoint commits: native `22133f0c9`, WEPPpy `8fa7a8d9b`, not pushed.
+The isolated MC publication candidate uses the accepted outlet integral and
+independent geometric diagnostics, including q0 in peak metadata. Test source
+carry, MC recurrence parity, actual cascade transfer and downstream effects
+before any promotion. See `mc-interface-repair-design-review.md`.
+
+Publication-only experiment: all 24 controlled cases agree with accepted outlet
+flux within final binary32 rounding; all 29 fresh paired replays pass dates and
+transfer checks. Combined `mc-interface-candidate-v2` is built and replaying.
+Its full first-day MC4/5 baseflow tests route 100 m³ once and preserve next-day
+boundary carry. Twenty-four source controls preserve side impoundment, positive
+side-hill, zero/negative net and below-threshold comparators. The earlier candidate
+is rejected for duplicate first-day baseflow; see scientific review. Signed-loss
+availability and threshold-cascade review remain open.
+
+Both reviews now support scoped source promotion, conditional on final gates.
+All 29 combined replay validations pass. Signed-coupling controls demonstrate
+a mismatch even with positive MC coefficients; that boundary remains open.
+See `artifacts/mc-interface-checkpoint.md` for the current source/acceptance
+distinction, observational clipping totals and required coupling contract.
+
+**Promotion blocked:** explicit v2 binary times out in the required 100-year
+upstream-scheme test after 900 s at year 16/day 81. Full suite: 409 passed, one failed; final
+interface: 55 passed, watchlist: 12 passed and both smokes passed do not override this failure.
+Current native changes remain uncommitted candidates. State-aware MC reference
+handling is under isolated investigation; see the current validation receipt.
+
+
+## MC4 reference continuation
+
+The v2 timeout is retained as a failed gate. Reviewed v5 carries the previous
+valid MC4 reference only for degenerate boundary estimates with live interior,
+and preserves exact repeated states through bitwise fixed-point copying.
+Independent 26-pair raw-array and 26-check lifecycle reviews pass. Both profiles
+build and all 29 paired replay validations pass. Exact failed gate passes all 100 years in 580.64 s within the unchanged 900 s timeout; full
+native suite passes 490 tests and the expanded reference suite passes 92 tests; signed soil/routing coupling remains open.
+See `artifacts/mc-reference-state-review.md` and `mc-reference-qa-review.md`.
+
+2026-10-21 — Native source/interface/reference checkpoint committed locally as
+`e6dc19008ce83378508299b0e1efe4cf3844b198`; native worktree clean. No push,
+release or vendoring. The package remains active for signed soil/routing coupling.
+
+
+## Actual-soil coupling controls
+
+Eight full two-year wet/dry × early/late × daily/hourly runs pass full calendar,
+receiving-channel isolation and observer parity checks. Actual dry-day demand
+is 37.8908/38.8419 m³, with material raw-to-export clipping; signed-coupling
+closure remains open. Read-only tracing also confirms upstream runoff depth
+contaminates the next channel's soil-plane slot when WSHIRS is skipped. A
+bounded initialization repair is under review; no alias repair is promoted yet.
+See `artifacts/actual-soil-coupling-control-review.md` and
+`artifacts/mc-coupled-soil-qa-review.md`.

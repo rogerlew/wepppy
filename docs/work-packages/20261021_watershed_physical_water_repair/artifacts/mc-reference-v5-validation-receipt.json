@@ -1,0 +1,63 @@
+{
+  "status": "validated_narrow_source_checkpoint_full_signed_coupling_open",
+  "candidate": "mc-reference-candidate-v5",
+  "source_base": "22133f0c9",
+  "compiler": "/usr/bin/gfortran",
+  "build": "make -B wepp then make -B wepp_hill FC=/usr/bin/gfortran LINKER=/usr/bin/gfortran",
+  "binary_sha256": {
+    "wepp": "8eb693278748e1f5238d290221fd95309b7cb45e308caf06bbdeeff824a96130",
+    "wepp_hill": "51ee01f2f7885547a373eb22860c9c888bd524900a7255abb85fc8276cfcfd74"
+  },
+  "canonical_source_matches_built": {
+    "contin.for": true,
+    "watbal_hourly.for": true,
+    "chrqin.for": true,
+    "wshchr.for": true,
+    "chrstate.for": true
+  },
+  "source_sha256": {
+    "contin.for": "bf5b21b8e50800aad1d91c8caee550776e7b5e5b36a42260347874f73a02414f",
+    "watbal_hourly.for": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+    "chrqin.for": "1a987474cca1e1e9f0a2973fe6eeeb9cb75036aa11abb27baba672abbf0739d5",
+    "wshchr.for": "52ab00eda3f5bd44ae652ed2e199b04c97e48f56a1de41a5b1d18dcbca096369",
+    "chrstate.for": "649943add6c9b9eb8809f536d640ee3fb7fe963eb5052e8066d690eb1247d863"
+  },
+  "checks": {
+    "paired_replays": 29,
+    "calendar_years": 400,
+    "calendar_days": 146097,
+    "watchlist_pass": 12,
+    "host_smokes_pass": 2,
+    "host_smoke_scope": "p1 hillslope, both profiles",
+    "continuity_controls": 16,
+    "cascade_controls": 8,
+    "max_rate_and_volume_transfer_error_m3": 0.0,
+    "diagnostic_shortcut": "explicitly disabled for exhaustive recurrence; raw-array parity tested separately",
+    "exact_failed_gate": {
+      "passed": 2,
+      "warnings": 2,
+      "seconds": 580.64,
+      "timeout_seconds": 900,
+      "last_observed_year": 100,
+      "last_observed_day": 365,
+      "last_observed_channel": 31
+    },
+    "portable_reference_fixed_point_tests_passed": 92,
+    "full_native_suite": {
+      "passed": 490,
+      "warnings": 2,
+      "seconds": 592.55,
+      "explicit_binary": "mc-reference-candidate-v5/src/wepp",
+      "note": "Full collection preceded expansion of30 extra mode cases; final92test targeted run covers that expansion. Final collection520; all covered."
+    },
+    "artifact_policy": "pass",
+    "elf_interpreter_both": "/lib64/ld-linux-x86-64.so.2"
+  },
+  "limits": [
+    "signed soil/routing coupling unresolved",
+    "raw discharge clipping unresolved",
+    "no-history degenerate-reference behavior unchanged",
+    "not released, vendored, pushed or deployed"
+  ],
+  "validated_native_commit": "e6dc19008ce83378508299b0e1efe4cf3844b198"
+}

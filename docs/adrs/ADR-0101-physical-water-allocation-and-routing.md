@@ -112,3 +112,73 @@ recurrence whenever any previous interior node is nonzero. This preserves all
 MC equations, coefficient selection, storage definitions and the all-zero fast
 path. Independent scientific review supports this control-flow correction.
 A seeded admissible state proves the defect; natural-run frequency is not claimed.
+
+## MC interface experiment after checkpoint 22133f0c9
+
+Independent `mc-interface-repair-design-review.md` supports testing MC accepted
+outlet integration as the single published/downstream transfer amount, retaining
+the independently computed geometric storage diagnostic and exposing its residual.
+Do not replace that diagnostic with `prior storage + input - export`. Include q0
+in the daily peak assessment so a q0-only trapezoidal export is not erased by a
+zero positive-index peak. KW3 is unchanged in this MC-specific experiment.
+This is an isolated candidate, not yet promoted or release-ready.
+
+For conservative source cells, actual trapezoidal consumption is V plus
+`dt*q0/2 - dt*qN/2`. Observe these numerical boundary terms independently;
+they are not new physical water stores. Fixed positive q0 and a zero-volume dry
+day cannot yield a nonnegative exact-zero trapezoid without changing the boundary
+contract. Do not apply blanket daily normalization or reset midnight boundaries.
+Keep source omission, numerical carry, MC coefficient/grid terms, clipping and
+geometric diagnostic differences separate in the acceptance ledger.
+
+## Reviewed interface promotion and remaining loss contract
+
+The corrected v2 source/publication changes are approved by independent science
+and QA for a narrow source checkpoint, conditional on native regression gates.
+Admitted deferred groundwater enters qin once; the redundant initial outlet term
+is removed. Positive local net water with no side surface source uses the existing
+uniform representation only without positive side-impoundment transfers. These
+shared source corrections also apply to KW3; MC-specific publication leaves KW3
+publication unchanged. See native `physical-water-routing-contract.md` for the
+compatibility/regeneration contract.
+
+Signed-loss availability remains unresolved independently of negative MC
+coefficients. WSHDRV computes transmission after WATBAL has credited soil.
+Preserve requested, executed, skipped and clipped amounts separately; do not
+reduce the requested loss afterward or assign the mismatch to a geometric store.
+A full repair needs a reviewed source/sink acceptance and soil-commit contract,
+while retaining MC recurrence and numerical-storage authority. No such new
+contract or completed watershed-closure claim is implied by this checkpoint.
+
+## MC4 retained-state reference and exact fixed points
+
+The v2 full native gate timed out at 900 seconds, year16/day81 of100.
+With live interior but a boundary-derived reference at or below the existing
+`eps`, MC4 selects zero K. On dry forcing the recurrence alternates the sign
+of retained interior discharge; even-step days repeat the same profile.
+Preserve the last valid per-channel MC4 reference only when retained interior
+is nonzero and the newly selected reference is degenerate. Reset reference
+history on a new simulation, retain it over ordinary days/years, and preserve
+ordinary reference selection, MC5 and KW3. No-history cases remain unchanged.
+A readonly CHRSTATE query establishes eligibility before selecting the grid.
+
+Rationale: carrying the prior reference preserves the last valid coefficient
+coordinate during recession. The controlled 100 m³ late pulse exports about
+99.9999 m³; selecting a new positive-interior reference instead changes that
+coordinate and exports about 100.3233 m³. This is a bounded reference correction,
+not a new storage definition or an assertion of general physical closure.
+
+At 60-second timesteps, finite-precision subnormal states can reach an exact
+fixed point. For MC4 only, when all future inlet/lateral forcing is bitwise
+unchanged and the entire consecutive raw spatial profiles and clipped outlets
+are bitwise identical, copy that exact state to the remaining timesteps.
+Retain all represented values, including subnormals and signed zero; do not
+introduce a cutoff. Numeric equality alone was rejected after a signed-zero
+counterexample. MC5 coefficients vary by cell/time and are excluded.
+
+Independent actual-source controls compare all raw state arrays and publication
+with the shortcut disabled (26 pairs); separate lifecycle controls check reset,
+readonly state access and channel isolation (26 checks). Exhaustive continuity
+probes explicitly disable the shortcut and retain strict record completeness.
+Native execution gates remain required before this candidate is accepted.
+Rollback these two corrections together if propagation or bitwise parity fails.

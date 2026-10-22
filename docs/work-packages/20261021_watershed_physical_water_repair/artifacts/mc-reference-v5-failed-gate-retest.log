@@ -1,0 +1,9 @@
+..                                                                       [100%]
+=============================== warnings summary ===============================
+tests/test_upstream_scheme_pw0_wshpas_execution_regression.py::test_upstream_scheme_pw0_wshpas_pre_guard_fails_guarded_passes
+tests/test_upstream_scheme_pw0_wshpas_execution_regression.py::test_upstream_scheme_pw0_wshpas_pre_guard_fails_guarded_passes
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2 passed, 2 warnings in 580.64s (0:09:40)

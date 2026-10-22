@@ -1,0 +1,28 @@
+[
+  {
+    "lane": "checkpoint",
+    "exported_integral_m3": 3.3000000065896984e-06,
+    "positive_index_max": 0.0,
+    "publication_peak_duration_runvol_tmpvol_peakindex": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "lane": "publication",
+    "exported_integral_m3": 3.3000000065896984e-06,
+    "positive_index_max": 0.0,
+    "publication_peak_duration_runvol_tmpvol_peakindex": [
+      3.3000001167238224e-06,
+      1.1000000021965661e-08,
+      300.0,
+      3.3000001167238224e-06,
+      3.3000001167238224e-06,
+      0.0
+    ]
+  }
+]

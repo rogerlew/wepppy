@@ -1,0 +1,34 @@
+{
+  "candidate": "mc-interface-candidate-v2",
+  "source_parent": "22133f0c9",
+  "promotion": "blocked_by_required_execution_gate",
+  "full_pytest": {
+    "passed": 409,
+    "failed": 1,
+    "warnings": 2,
+    "seconds": 938.7,
+    "failure": "test_upstream_scheme_pw0_wshpas_pre_guard_fails_guarded_passes",
+    "cause": "TimeoutExpired after 900 seconds on explicit candidate; observed year16/day81 of configured100 years"
+  },
+  "final_interface_tests": 55,
+  "paired_replays_validated": 29,
+  "independent_cascade_executions": 108,
+  "watchlist_passed": 12,
+  "both_profile_host_smokes": "pass (hillslope p1 per profile)",
+  "elf_interpreter": "/lib64/ld-linux-x86-64.so.2",
+  "limits": [
+    "No full package closure",
+    "No release/vendor/deploy",
+    "Zero-reference propagation and signed soil/routing exchange remain unresolved"
+  ],
+  "hashes": {
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-candidate-v2/src/wepp": "014548de33205622514118b1f6101f01c6d90a10593699ecd97a671764b7907f",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-candidate-v2/src/wepp_hill": "f8ab85cdc731dd13b7adcaf3149dd7a782a9338c2f12f954e149bb4d7afc2d0d",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-candidate-v2/src/wshchr.for": "a1256946fba32df368db16bb2dc051bfaf78667d9d2c56d4c010e68717265dff",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-v2-pytest.log": "c465855d10b650df32275cade98158231bd9d130c244a2ab3a279a162274d87d",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-v2-final-interface-tests.log": "e5244388954d546d34df597e08c86aaf42d007300efd123c031f0671583c3656",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-v2-watchlist.log": "09846ad91e0e968826544c6cc63a88d531438637bf2c1ffdbc3ceb69eeb155d2",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-v2-smoke-hill.log": "84d04234132b863beb6c4510eb3d9cbf581ff67a49784f3434c4af644ed0fe59",
+    "/workdir/watershed-physical-water-repair-20261021/mc-interface-v2-smoke-watershed.log": "fef9cddb4becd9449be75e3441a7866d6a4e5255f285eaef6e6fc3ce1883d713"
+  }
+}

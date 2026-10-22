@@ -1,0 +1,1138 @@
+{
+  "receipt_sha256": {
+    "reviewer-reference-v1/receipt.json": "8642e2e9b4e449d01569ee629e8b86b50f454801d0eff22f3cf9ecd817579075",
+    "reviewer-reference-v2/receipt.json": "3a1a9622505d5a6bea8e5589a2c2afbb9d3c4eacab75424211b72d382455b203",
+    "reviewer-reference-v3/receipt.json": "af4cf906b5330a1dae727ec15f6eb46b6e8379ac74e38054851fef8455be58a5",
+    "reviewer-reference-v4/receipt.json": "0d291f460432c2c1eb7f57e67faa4fa93be57efaf9e96de1ca5dd134723884ed",
+    "reviewer-reference-v6/receipt.json": "8998f4a794563b9172a30d49a1494335f97fb801fda88520e5e54f772c7d8900",
+    "reviewer-reference-v7/receipt.json": "11091359a51092314fb0f5bf4c460787ab47a83373d674ab0ceb94440f8ca1f2"
+  },
+  "reference_comparison": [
+    {
+      "lane": "baseline",
+      "method": 4,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.006691289134323597,
+          5.839350839656255e-35,
+          5.839350839656255e-35,
+          0.006691289134323597,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 99.9998847226653,
+      "final_nseg": 77
+    },
+    {
+      "lane": "baseline",
+      "method": 4,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.0,
+          0.027545060962438583,
+          0.027545060962438583,
+          0.0,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 0.0,
+      "final_nseg": 101
+    },
+    {
+      "lane": "baseline",
+      "method": 5,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.003945156931877136,
+          0.001606629230082035,
+          0.001606629230082035,
+          0.003945156931877136,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 228.11169663000328,
+      "final_nseg": 94
+    },
+    {
+      "lane": "baseline",
+      "method": 5,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          9.4213719421532e-05,
+          0.027326984331011772,
+          0.027326984331011772,
+          9.4213719421532e-05,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 119.5905622709688,
+      "final_nseg": 101
+    },
+    {
+      "lane": "carry_previous",
+      "method": 4,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.006691289134323597,
+          5.839350839656255e-35,
+          5.839350839656255e-35,
+          0.006691289134323597,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 99.9998847226653,
+      "final_nseg": 77
+    },
+    {
+      "lane": "carry_previous",
+      "method": 4,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.0,
+          0.027545060962438583,
+          0.027545060962438583,
+          0.013888888992369175,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 99.9998847226653,
+      "final_nseg": 58
+    },
+    {
+      "lane": "carry_previous",
+      "method": 5,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.003945156931877136,
+          0.001606629230082035,
+          0.001606629230082035,
+          0.003945156931877136,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 228.11169663000328,
+      "final_nseg": 94
+    },
+    {
+      "lane": "carry_previous",
+      "method": 5,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          9.4213719421532e-05,
+          0.027326984331011772,
+          0.027326984331011772,
+          9.4213719421532e-05,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 119.5905622709688,
+      "final_nseg": 101
+    },
+    {
+      "lane": "positive_state",
+      "method": 4,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.006691289134323597,
+          5.839350839656255e-35,
+          5.839350839656255e-35,
+          0.006691289134323597,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 99.9998847226653,
+      "final_nseg": 77
+    },
+    {
+      "lane": "positive_state",
+      "method": 4,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.0,
+          0.027545060962438583,
+          0.027545060962438583,
+          0.013772530481219292,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 100.32332383057465,
+      "final_nseg": 58
+    },
+    {
+      "lane": "positive_state",
+      "method": 5,
+      "placement": 1,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          0.003945156931877136,
+          0.001606629230082035,
+          0.001606629230082035,
+          0.003945156931877136,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 228.11169663000328,
+      "final_nseg": 94
+    },
+    {
+      "lane": "positive_state",
+      "method": 5,
+      "placement": 2,
+      "reference": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.013888888992369175,
+          0.0,
+          0.0,
+          0.013888888992369175,
+          0.0
+        ],
+        [
+          3.0,
+          9.4213719421532e-05,
+          0.027326984331011772,
+          0.027326984331011772,
+          9.4213719421532e-05,
+          0.013888888992369175
+        ]
+      ],
+      "export_m3": 119.5905622709688,
+      "final_nseg": 101
+    }
+  ],
+  "final_actual_v5_parity": [
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 0,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "a27ac04b65682ef5ac60d30164f2e3796554088ff75a34ec2c852d63041096e3",
+      "plain_cells": 9759.0,
+      "fast_cells": 9759.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 2,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "e684b8820bac13414bd744bd5ac37aa77a151fa9d9fae475f731de2cd86ab4d1",
+      "plain_cells": 6264.0,
+      "fast_cells": 6264.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 3,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "62c02c421c9c747dbcc3f46ba460fbb384b12f5879bf80600a9759a602dde83a",
+      "plain_cells": 2146.0,
+      "fast_cells": 2146.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 4,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "87f054449f958ed5571b1cfb21a137d92109bc8f4aa31a04a6b5bf769c3e0cf9",
+      "plain_cells": 2146.0,
+      "fast_cells": 2146.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 5,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "ced9bbe2e4545809a9ce158f5cce71f8e99881d071a69611ad60a2739457e569",
+      "plain_cells": 0.0,
+      "fast_cells": 0.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 6,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "c2525844c065d0c693cb047924296bfb461993e93ad91a455209bf329e8b76b5",
+      "plain_cells": 6786.0,
+      "fast_cells": 6786.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 7,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "92a59375ff619245f17ce03551486a678c775853f784f1122671ce561930a473",
+      "plain_cells": 707.0,
+      "fast_cells": 707.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 8,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "3572cd22d1ecd22808b8aae0ee7ac78d07b3e63f4dc1fc06dbd510b054d5f264",
+      "plain_cells": 136224.0,
+      "fast_cells": 33282.0,
+      "plain_final": [
+        12.0,
+        86.0,
+        12384.0,
+        86.0,
+        0.0,
+        0.010000000707805157,
+        0.010000000707805157
+      ],
+      "fast_final": [
+        12.0,
+        86.0,
+        86.0,
+        86.0,
+        0.0,
+        0.010000000707805157,
+        0.010000000707805157
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 9,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "945ff5e74df56fac2c17e3cb1b6f0a568f79bf92b4282963bba414aff1894f6a",
+      "plain_cells": 25755.0,
+      "fast_cells": 25755.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 144,
+      "test": 10,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "5461975590f469113938b6312a8aeeebf90f8395f538efd6e6760a7ae9a39395",
+      "plain_cells": 0.0,
+      "fast_cells": 0.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 0,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "482b03ef2c00e9e5316d5cba998fbb03499e2411377a756f8aae4d9c279a429a",
+      "plain_cells": 1460561.0,
+      "fast_cells": 203010.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        101.0,
+        2.802596928649634e-45,
+        2.802596928649634e-45
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        101.0,
+        101.0,
+        2.802596928649634e-45,
+        2.802596928649634e-45
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 2,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "77a53e84b0cb8ff177d176831c2ebd4f736db0fd7ac998ddc703ca9d274e1bb3",
+      "plain_cells": 1460561.0,
+      "fast_cells": 107666.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        52.0,
+        52.0,
+        0.0,
+        9.80908925027372e-45
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        52.0,
+        52.0,
+        0.0,
+        9.80908925027372e-45
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 3,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "0055146cd6175e496a3769a9ad049e222f6f63fdeeba4a3f256978f399fc63b5",
+      "plain_cells": 1460561.0,
+      "fast_cells": 7171.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        1.0,
+        1.0,
+        0.0,
+        1.401298464324817e-45
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        1.0,
+        1.0,
+        0.0,
+        1.401298464324817e-45
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 4,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "fa56fbd8eb721987047adc49bf1784cacfc4e2739f4edd41d31b5a46965285a1",
+      "plain_cells": 1460561.0,
+      "fast_cells": 7171.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        1.0,
+        1.0,
+        -1.401298464324817e-45,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        1.0,
+        1.0,
+        -1.401298464324817e-45,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 5,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "42b6d845e6671c2ca5d9d0f8325ed0788a9d15d5d166e65f0228402ba843d6e2",
+      "plain_cells": 0.0,
+      "fast_cells": 0.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 6,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "a724578e1f6ba8ce66599fe7077c9dd18223886c0c4e0f6890a6736edd18d7df",
+      "plain_cells": 1460561.0,
+      "fast_cells": 115746.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        52.0,
+        52.0,
+        -9.80908925027372e-45,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        52.0,
+        52.0,
+        -9.80908925027372e-45,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 7,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "56e4056fec0c337647d4cacee97e8ebb37992bfca162241a1dd4b18ba053092f",
+      "plain_cells": 6161.0,
+      "fast_cells": 6161.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 8,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "f19fa97dc18ce243b709a49d8ffef9b3d80f91530bc851300ec48ee6eef3909c",
+      "plain_cells": 1599840.0,
+      "fast_cells": 116352.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        101.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 9,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "88fc247cbfeee60c9e668b39459dee2f29a6f3b1b7d384c1c8a51e4b0031fe5f",
+      "plain_cells": 1460561.0,
+      "fast_cells": 709121.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        101.0,
+        4.203895392974451e-45,
+        2.2420775429197073e-44
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        101.0,
+        101.0,
+        101.0,
+        4.203895392974451e-45,
+        2.2420775429197073e-44
+      ]
+    },
+    {
+      "method": 4,
+      "nstep": 1440,
+      "test": 10,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "e399788aa69f1dc9f08ecd12707de84c88fbe997140888107cb8cf0a33776d87",
+      "plain_cells": 0.0,
+      "fast_cells": 0.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 144,
+      "test": 0,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "2f70470d5821f3c5c02b5a3beabc3d0a034116e2804fa35a14ed08ed6ad860fa",
+      "plain_cells": 145846.0,
+      "fast_cells": 145846.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        14544.0,
+        101.0,
+        0.0,
+        5.510160656609564e-15,
+        1.335702108917758e-07
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        14544.0,
+        101.0,
+        0.0,
+        5.510160656609564e-15,
+        1.335702108917758e-07
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 144,
+      "test": 8,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "c42b859659151e6838b9e611bba72b8f816e013875ea2b757af9254870917c3b",
+      "plain_cells": 136224.0,
+      "fast_cells": 136224.0,
+      "plain_final": [
+        12.0,
+        86.0,
+        12384.0,
+        86.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ],
+      "fast_final": [
+        12.0,
+        86.0,
+        12384.0,
+        86.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 144,
+      "test": 9,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "5e2695eb5ce2e8656a9e3b892e60e398de2172cf8ba1daac65adeaa632081167",
+      "plain_cells": 143686.0,
+      "fast_cells": 143686.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        14544.0,
+        101.0,
+        0.0,
+        7.433268952618255e-13,
+        9.359151590615511e-06
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        14544.0,
+        101.0,
+        0.0,
+        7.433268952618255e-13,
+        9.359151590615511e-06
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 1440,
+      "test": 0,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "fb62370149b510b2b7cb07bf4e38dfbe2561d58120fbac80a666713299d0da32",
+      "plain_cells": 1460561.0,
+      "fast_cells": 1460561.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        5.767646390597136e-15,
+        1.5002380848727626e-07
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        5.767646390597136e-15,
+        1.5002380848727626e-07
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 1440,
+      "test": 8,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "d525b13d61021aaa2acfe218b3d0415cec2a3b864a140e92b4a625e08ef400b2",
+      "plain_cells": 1599840.0,
+      "fast_cells": 1599840.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    {
+      "method": 5,
+      "nstep": 1440,
+      "test": 9,
+      "full_array_bit_parity": true,
+      "publication_parity": true,
+      "state_sha256": "6128509d69d585ca6c4397caebf00c4847e37c97ccd8afff038d69b87c18594e",
+      "plain_cells": 1460561.0,
+      "fast_cells": 1460561.0,
+      "plain_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        2.332167391063539e-13,
+        8.628007890365552e-06
+      ],
+      "fast_final": [
+        12.0,
+        101.0,
+        145440.0,
+        101.0,
+        0.0,
+        2.332167391063539e-13,
+        8.628007890365552e-06
+      ]
+    }
+  ]
+}

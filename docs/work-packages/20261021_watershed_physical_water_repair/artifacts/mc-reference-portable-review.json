@@ -1,0 +1,59 @@
+{
+  "lifecycle_command": "PATH=/usr/bin:/bin /workdir/wepppy/.venv/bin/python -m pytest -q tests/test_mc_reference_lifecycle.py",
+  "lifecycle_result": "26 passed in 1.09s",
+  "lifecycle_review": "Independent scientific reviewer: no blocker",
+  "fixed_point_review": "Independent secondary QA: no blocker; author full run reports66passed8.65s; reviewer bounded mutants below",
+  "sha256": {
+    "tests/test_mc_reference_lifecycle.py": "5cde09f46966db3f3a0dc57ac749a77fbe652da7421db0a125d205bd5168bcc0",
+    "tests/native/mc_reference_lifecycle_driver.for": "b49db415b317370fb9af5f6f2a3920d414e4deaaec6391e21a8c96e9d679e332",
+    "tests/native/mc_reference_cache_driver.for": "7d7bf47e4235e49b8f8db5a7fe4127944e289a1264ca7fe24b02c2b882ab7daa",
+    "tests/test_mc_fixed_point.py": "64dfd15dd3553f024d6e0fc107ecc6d792996251e9d69567a8ec965bbdbcbb32",
+    "tests/native/mc_reference_driver.for": "f0a90a397c342ccc364bc29cf75d2f97af73cd456234f61d488f9d58e1649a93"
+  },
+  "lifecycle_mutants": [
+    {
+      "mutant": "cache_reset",
+      "summary": "1 failed, 25 passed in 1.15s",
+      "returncode": 1
+    },
+    {
+      "mutant": "cache_isolation",
+      "summary": "2 failed, 24 passed in 1.18s",
+      "returncode": 1
+    },
+    {
+      "mutant": "query_mutates",
+      "summary": "2 failed, 24 passed in 1.17s",
+      "returncode": 1
+    },
+    {
+      "mutant": "query_subnormal",
+      "summary": "1 failed, 25 passed in 1.15s",
+      "returncode": 1
+    },
+    {
+      "mutant": "cache_zero_only",
+      "summary": "1 failed, 25 passed in 1.16s",
+      "returncode": 1
+    },
+    {
+      "mutant": "cache_no_live_guard",
+      "summary": "1 failed, 25 passed in 1.15s",
+      "returncode": 1
+    }
+  ],
+  "parity_mutants": [
+    {
+      "mutant": "numeric_equality",
+      "selection": "signed_zero",
+      "summary": "4 failed, 4 passed, 58 deselected in 4.39s",
+      "returncode": 1
+    },
+    {
+      "mutant": "future_forcing_ignored",
+      "selection": "future_pulse",
+      "summary": "4 failed, 4 passed, 58 deselected in 5.60s",
+      "returncode": 1
+    }
+  ]
+}

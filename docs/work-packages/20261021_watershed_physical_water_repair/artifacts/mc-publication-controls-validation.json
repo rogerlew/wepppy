@@ -1,0 +1,14 @@
+[
+  {
+    "family": "controls",
+    "cases": 16,
+    "all_publication_within_final_binary32_rounding": true,
+    "max_publication_gap_m3": 0.00047203898429870605
+  },
+  {
+    "family": "cascades",
+    "cases": 8,
+    "all_publication_within_final_binary32_rounding": true,
+    "max_publication_gap_m3": 0.00046828389167785645
+  }
+]

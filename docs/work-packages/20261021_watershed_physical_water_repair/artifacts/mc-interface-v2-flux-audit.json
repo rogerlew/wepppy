@@ -1,0 +1,80 @@
+[
+  {
+    "case": "daily-single",
+    "days": 16071,
+    "output_parity": true,
+    "clipped_volume_sum_m3": 965.5562440462946,
+    "clipped_volume_max_m3": 3.173244930803776,
+    "negative_raw_days": 3836,
+    "negative_lateral_days": 9834,
+    "raw_min_m3_s": -0.005288741551339626,
+    "largest_clipping_row": [
+      1992.0,
+      100.0,
+      1.0,
+      626.2718014331767,
+      629.4450463639805,
+      -0.005288741551339626,
+      0.0007166590075939894,
+      629.445068359375,
+      626.5482177734375,
+      1.1274611949920654,
+      1.6000999212265015
+    ],
+    "accepted_outlet_sum_m3": 730311.7011192375,
+    "clipping_fraction_of_accepted": 0.0013221152592331929,
+    "source_positive_clipped_days": 2348
+  },
+  {
+    "case": "hourly-single",
+    "days": 16071,
+    "output_parity": true,
+    "clipped_volume_sum_m3": 36.44895394280753,
+    "clipped_volume_max_m3": 1.7427066341042519,
+    "negative_raw_days": 2288,
+    "negative_lateral_days": 9579,
+    "raw_min_m3_s": -0.0029045110568404198,
+    "largest_clipping_row": [
+      1999.0,
+      329.0,
+      1.0,
+      1419.9733075336553,
+      1421.7160141677596,
+      -0.0029045110568404198,
+      0.001683158683590591,
+      1421.716064453125,
+      1420.751953125,
+      3.2682876586914062,
+      4.14546012878418
+    ],
+    "accepted_outlet_sum_m3": 764342.5614293474,
+    "clipping_fraction_of_accepted": 4.7686673204023476e-05,
+    "source_positive_clipped_days": 56
+  },
+  {
+    "case": "hourly-three",
+    "days": 16071,
+    "output_parity": true,
+    "clipped_volume_sum_m3": 58.88584109489202,
+    "clipped_volume_max_m3": 2.202369086444378,
+    "negative_raw_days": 3202,
+    "negative_lateral_days": 9593,
+    "raw_min_m3_s": -0.003670615144073963,
+    "largest_clipping_row": [
+      2022.0,
+      122.0,
+      1.0,
+      324.6547134302091,
+      326.85708251665346,
+      -0.003670615144073963,
+      0.0004354545380920172,
+      326.8570861816406,
+      324.8692932128906,
+      2.7227275371551514,
+      3.0056326389312744
+    ],
+    "accepted_outlet_sum_m3": 765117.770130309,
+    "clipping_fraction_of_accepted": 7.696310737216708e-05,
+    "source_positive_clipped_days": 61
+  }
+]
