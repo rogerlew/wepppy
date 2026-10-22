@@ -222,7 +222,7 @@ required. The operator confirmed this scope on 2026-09-08 because the establishe
 pattern is sufficient; bounded scheduling and streaming aggregation address the
 memory problem without redesigning storage consistency.
 
-## Roads modeled-area accounting amendment (implementation pending)
+## Roads modeled-area accounting amendment
 
 Roads PASS construction and aggregate water reporting follow the
 [modeled-area accounting contract](roads-water-accounting-contract.md). Complete MOFE contributor

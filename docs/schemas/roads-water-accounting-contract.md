@@ -1,6 +1,6 @@
 # Roads modeled-area water accounting
 
-**Status**: Operator selected modeled MOFE accounting on 2026-10-22; final checkpoint review and implementation pending.
+**Status**: Accepted and implemented locally on 2026-10-22 after independent contract and implementation reviews. No production deployment.
 
 ## Authority and scope
 

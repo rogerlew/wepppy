@@ -1,6 +1,6 @@
 # Roads modeled-area accounting repair
 
-**Status**: Active — final contract checkpoint review (2026-10-22)  
+**Status**: Closed 2026-10-22 — local implementation and validation
 **Timezone**: UTC
 
 ## Purpose and approved scope
@@ -67,11 +67,17 @@ credential, subprocess mechanism or queue wiring is planned.
 Run native and focused WEPPpy tests, required API/stub checks, full WEPPpy sanity,
 and independent correctness/security reviews. Retain source/native binary hashes,
 build provenance, artifact lineage, complete UM1 daily/yearly comparisons and
-fresh watershed inputs/outputs. No implementation or deployment claim yet.
+fresh watershed inputs/outputs. Native `c941cb6` and WEPPpy `cf3043781` implement
+the contract; isolated UM1, archive/restore and both independent reviews pass.
+See [execution evidence](artifacts/20261022_execution_validation.md). Broad
+validation completed in segments after correcting an unrelated browser-path
+environment setting; the preexisting OutputScope stubtest limitation is retained.
+Production rollout and a clean native rebuild without the disclosed unrelated
+candidate edits remain follow-up work. No production deployment or original-run repair.
 
 ## References
 
-- [ExecPlan](prompts/active/repair_execplan.md)
+- [ExecPlan](prompts/completed/repair_execplan.md)
 - [Tracker](tracker.md)
 - [Investigation](../20261022_roads_lateral_flow_investigation/diagnosis.md)
 - [Contract decision](artifacts/20261022_contract_decision.md)

@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed for independently reviewed contract checkpoint, 2026-10-22.
-Operator scientific direction and task-scoped commit authority are granted;
-implementation conformance and deployment remain pending.
+Accepted at independently reviewed contract checkpoint `83f7410e8`, 2026-10-22.
+Implemented in native `c941cb6` and WEPPpy `cf3043781`; independent conformance
+reviews and isolated UM1 routing/report validation pass. No production deployment.
 
 ## Decision
 

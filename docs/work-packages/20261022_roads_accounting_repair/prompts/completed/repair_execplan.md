@@ -3,7 +3,7 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes &
-Retrospective alongside the package tracker. This is the active plan for the
+Retrospective alongside the package tracker. This is the completed plan for the
 operator's native/WEPPpy Roads repair; unrelated active packages are independent.
 
 ## Purpose / Big Picture
@@ -30,7 +30,8 @@ Geographic overlap is explicitly unnecessary under the latest operator direction
 - [x] (2026-10-22 UTC) Build native release and integrate WEPPpy composition/report/cache paths.
 - [x] (2026-10-22 UTC) Validate fresh scratch watershed execution and complete report evidence.
 - [x] (2026-10-22 UTC) Complete independent correctness/security reviews and 105 focused tests.
-- [ ] Finish broad-suite rerun, record disposition, commit integration and close package.
+- [x] (2026-10-22 UTC) Finish broad-suite run and corrected-browser-path remainder; record limitations and commit integration as `cf3043781`.
+- [x] (2026-10-22 UTC) Close local implementation package; no deployment or in-place repair.
 
 ## Surprises & Discoveries
 
@@ -81,8 +82,12 @@ Contract checkpoint `83f7410e8` and native implementation `c941cb6` are committe
 WEPPpy integration and full-record isolated UM1 routing/report validation pass.
 Native Rust 127 tests, independent native Python 61 tests and focused WEPPpy
 105 tests pass. Both independent final reviews pass. Archive/restore preserves
-176 lineage files. Original UM1 remains unchanged; broad-suite disposition and
-integration commit remain before closure. See the execution-validation artifact.
+176 lineage files. Original UM1 remains unchanged. Integration is committed as
+`cf3043781`. Broad run: 10,883 passed/126 skipped, then an unrelated browser-path
+failure; all 183 remainder tests pass with the installed browser path. Existing
+OutputScope stubtest alias limitation remains. Package closed for local
+implementation and segmented validation; see the execution-validation artifact
+for production/rebuild follow-ups and exact limits.
 
 ## Context and Orientation
 
@@ -205,3 +210,6 @@ forward the already-approved implementation/commit/routing scope.
 
 Revision note: 2026-10-22 — implemented and validated native/controller/report paths;
 recorded independent approvals, isolated routing and archive evidence.
+
+Closeout note: 2026-10-22 — completed all milestones; retained browser environment,
+stubtest and native dirty-source provenance limits without claiming deployment.

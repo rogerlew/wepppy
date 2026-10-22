@@ -164,7 +164,7 @@ artifacts. Test historical model/new post rejection and visible stale outputs.
 Retain source/binary hashes, cold/warm/stale/failing/restored cache evidence and
 runtime contour/width coverage limits. See ADR-0098 for preserved ET/Dp rationale.
 
-## Roads modeled-area accounting amendment (implementation pending)
+## Roads modeled-area accounting amendment
 
 Roads PASS construction and aggregate water reporting follow the
 [modeled-area accounting contract](roads-water-accounting-contract.md). Complete MOFE contributor

@@ -1,0 +1,53 @@
+{
+  "contract_commit": "83f7410e8",
+  "native_commit": "c941cb6",
+  "integration_commit": "cf3043781",
+  "native_rust": {
+    "unit_passed": 110,
+    "integration_passed": 17
+  },
+  "independent_native_python_passed": 61,
+  "focused_wepppy_passed": 105,
+  "routes_passed": 100,
+  "full_suite": {
+    "command": "wctl run-pytest tests --maxfail=1",
+    "passed": 10883,
+    "skipped": 126,
+    "failed": 1,
+    "seconds": 2769.14,
+    "failure": "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain",
+    "reason": "preexisting PLAYWRIGHT_BROWSERS_PATH points to a nonexistent directory"
+  },
+  "tail": {
+    "command_prefix": "wctl exec weppcloud env PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers PYTHONPATH=/workdir/wepppy /opt/venv/bin/pytest",
+    "paths": [
+      "tests/weppcloud/test_run_catalog_reader.py",
+      "tests/weppcloud/test_security_email_templates.py",
+      "tests/weppcloud/test_session_cookie_migration.py",
+      "tests/weppcloud/test_stale_controllers_gl_template_wiring.py",
+      "tests/weppcloud/test_ui_foundation_css.py",
+      "tests/weppcloud/test_user_preferences.py",
+      "tests/weppcloud/test_user_preferences_migration.py",
+      "tests/weppcloud/test_user_preferences_postgres.py",
+      "tests/weppcloud/test_usersum_template_wiring.py",
+      "tests/weppcloud/test_watershed_sub_intersection.py",
+      "tests/weppcloud/test_watershed_terrain_processor_api.py",
+      "tests/weppcloud/utils/test_assets_controllers_gl_build_id.py",
+      "tests/weppcloud/utils/test_helpers_authorize.py",
+      "tests/weppcloud/utils/test_helpers_error_responses.py",
+      "tests/weppcloud/utils/test_helpers_paths.py",
+      "tests/weppcloud/utils/test_helpers_url_for_run.py",
+      "tests/weppcloud/utils/test_run_ttl.py",
+      "tests/weppcloud/utils/test_runid.py",
+      "tests/weppcloud/utils/test_uploads.py"
+    ],
+    "flags": [
+      "--maxfail=1"
+    ],
+    "passed": 183,
+    "seconds": 33.1,
+    "repeated_prior_passes": 7
+  },
+  "completion_claim": "segmented suite completion; default full invocation retains unrelated browser environment failure",
+  "stubtest_limitation": "preexisting OutputScope Literal alias is not a Union; new Roads accounting API passes"
+}

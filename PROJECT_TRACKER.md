@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Active: [Roads modeled-area accounting repair](docs/work-packages/20261022_roads_accounting_repair/package.md) — full MOFE footprint response mixing and expansion; geographic overlap requirement removed by operator. Shared PASS/WAT ledger, fresh routing and aggregate report validation follow the reviewed contract checkpoint.
+Completed (local implementation): [Roads modeled-area accounting repair](docs/work-packages/20261022_roads_accounting_repair/package.md) — full MOFE areas without geographic overlap; shared PASS/WAT ledger and fresh isolated UM1 routing/report validation. Native `c941cb6`, WEPPpy `cf3043781`; independent reviews pass. Broad suite completed in segments after an unrelated browser-path failure; typing/provenance limits retained. No deployment or original-run repair.
 
 Completed (diagnosis): [Roads lateral flow — UM1](docs/work-packages/20261022_roads_lateral_flow_investigation/package.md) — isolated native replay confirms omitted baseline WAT, runoff area mismatch, and duplicate segment PASS contributions. Baseflow uses road-only percolation. All original hashes unchanged; repair contract and implementation remain follow-up.
 

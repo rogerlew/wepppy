@@ -3,7 +3,8 @@
 ## Scope and revisions
 
 Confirmed local implementation of full modeled MOFE accounting, without geographic
-overlap inputs. Contract checkpoint: `83f7410e8`; native implementation: `c941cb6`.
+overlap inputs. Contract checkpoint: `83f7410e8`; native implementation: `c941cb6`;
+WEPPpy integration: `cf3043781`.
 The exact native artifact and source hashes are in
 [the release receipt](20261022_native_release.json). The local binary includes
 preexisting calendar/HBP source edits, explicitly disclosed there and excluded
@@ -59,15 +60,40 @@ an existing mode 0640. No production host identity or deployment claim is made.
   partial source weighting and independent UM1 terminal lateral recomputation passed.
 - Final focused WEPPpy suite: 105 passed, covering accounting, Roads controller,
   water reports, output scope, return periods and native startup preflight.
+  Additional Roads/WEPP route suite: 100 passed. Final direct startup preflight
+  accepted the exact pinned artifact and all required APIs.
 - `wctl check-test-stubs`: passed. New `roads_accounting` stubtest: passed.
   `output_scope` stubtest retains one preexisting `OutputScope is not a Union`
   Literal-alias diagnostic; the new function/export surface passes.
 - Broad-exception changed-file gate: passed, zero net added broad handlers.
 - Full WEPPpy sanity first stopped at the startup test's old literal native hash
   after 506 passes and 28 skips. Updated its existing expected release hash to
-  match the paired artifact; the full-suite rerun is pending.
+  match the paired artifact. The rerun reached 10,883 passed and 126 skipped
+  before an unrelated browser-path failure in
+  `tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain`.
+  The container environment points at `/workdir/wepppy/weppcloud/static-src/`,
+  while the installed Chromium is under `/workdir/wepppy/wepppy/weppcloud/static-src/`.
+  Running that module and the remaining collected file tail with
+  `PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers`
+  passed all 183 tests (including seven earlier passing tests repeated in that
+  module). This is segmented completion, not a single green full-suite invocation.
+  No repository/browser dependency change was needed. Exact commands and counts
+  are retained in [the gate receipt](20261022_validation_gates.json).
 
 The [native correctness review](20261022_correctness_review_native.md) and
 [security review](20261022_security_review.md) pass with no unresolved high or
 medium findings. Scope-specific evidence does not claim exhaustive scenario
 coverage or performance benchmarking.
+
+## Completion and follow-ups
+
+Completed local implementation and validation on 2026-10-22. The reviewed
+contract remains authoritative outside this closed package. Production rollout,
+a clean native rebuild without the disclosed unrelated candidate sources, and
+live authorized project-browser acceptance are not claimed. Before production
+rollout, exercise the existing user workflow under that host's identities,
+mounts and configuration. The original incident run remains untouched.
+
+Small tooling follow-ups: correct the container's Playwright browser-root setting
+and resolve the preexisting `OutputScope` Literal-alias stubtest diagnostic.
+Neither required changing the Roads accounting contract or implementation.

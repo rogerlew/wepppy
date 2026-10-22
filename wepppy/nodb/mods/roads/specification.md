@@ -1033,7 +1033,7 @@ v1 integration constraints:
 1. [Completed 2026-04-07] Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
 2. Implement `outslope_unrutted` as MOFE hillslope replacement (`hill -> road -> fill -> hill`) with replacement semantics (no double counting).
 
-## Roads modeled-area accounting amendment (implementation pending)
+## Roads modeled-area accounting amendment
 
 Roads PASS construction and aggregate water reporting follow the
 [modeled-area accounting contract](../../../../docs/schemas/roads-water-accounting-contract.md). Complete MOFE contributor
