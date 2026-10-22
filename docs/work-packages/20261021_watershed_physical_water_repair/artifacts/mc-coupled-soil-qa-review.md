@@ -100,8 +100,8 @@ receipt and hashes: `mc-coupled-soil-qa-v3/receipt.json` and
 there. The manifest pins the final reviewed binary, relevant sources/scripts,
 inputs and observed/output artifacts for all eight cases.
 
-The original study `manifest.json` predates the dry-day extension and is stale;
-it must not identify the final binary or source. The study owner is retaining a
-refreshed final manifest. The independent review manifest already pins the
-artifacts assessed here. This diagnostic acceptance does not establish source
-repair correctness or full package closure.
+The initial study manifest predated the dry-day extension. The owner replaced
+it with a final `manifest.json` containing 1857 hashes; this reviewer verified
+every entry against the retained file with no mismatch. The independent review
+manifest also pins the artifacts assessed here. This diagnostic acceptance does
+not establish source repair correctness or full package closure.

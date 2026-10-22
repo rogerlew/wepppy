@@ -182,3 +182,24 @@ readonly state access and channel isolation (26 checks). Exhaustive continuity
 probes explicitly disable the shortcut and retain strict record completeness.
 Native execution gates remain required before this candidate is accepted.
 Rollback these two corrections together if propagation or bitwise parity fails.
+
+## Channel plane working-flux initialization
+
+Actual two-channel controls identify a separate implementation alias: WSHDRV
+writes completed channel runoff and local runoff depths into watershed element
+slots that can be reused as a later channel's soil-plane slots. When optional
+WSHIRS is skipped, WATBAL_HOURLY reads the inherited runoff as its own surface
+runoff and subtracts it from infiltration. Read-only tracing measures 1.54834 m³
+in the controlled receiving channel; observer output is unchanged by tracing.
+WSHIRS resets runoff when called but assigns chnrun only when local rainfall
+excess exists, so both working fields require a clear per-channel lifetime.
+
+Initialize runoff(iplane) and chnrun(iplane) immediately after WSHCQI,
+before optional WSHIRS. WSHCQI consumes retained element transfers in tmpvol
+and related arrays, not these working depths. Actual WSHIRS/WATBAL producers
+then fill the current channel's fields. Preserve norun decisions, soil stores,
+MC state/recurrence, and final element-output restoration from tmprof. Do not
+export an inherited positive value by relaxing the norun gate. Require causal
+ablations, wet no-local-excess and genuine-local-runoff controls, both soil modes,
+a three-channel cascade, and full native/replay gates before promotion.
+This is initialization of working fluxes, not a new soil or channel storage rule.

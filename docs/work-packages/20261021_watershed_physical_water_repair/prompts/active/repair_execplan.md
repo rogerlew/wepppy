@@ -43,12 +43,18 @@ publication, production deployment and original-project repair are excluded.
 - [x] V5 paired matrix, 12 watchlist cases, both smokes, 16 continuity/eight cascade controls and 92 portable reference tests pass.
 - [x] V5 full native gate: 490 passed, two existing warnings, 592.55 s; expanded targeted suite covers 30 added mode cases (final collection 520).
 - [x] Eight actual wet/dry, early/late, daily/hourly soil controls complete two years with independent full-calendar, target-isolation and observation-parity checks.
-- [ ] Repair confirmed channel plane/element runoff alias; review a bounded per-channel initialization candidate.
+- [x] Repair channel plane/element working-flux alias: 520 full-suite and seven new causal tests pass; all 29 paired replays, 12 watchlist cases and both smokes pass.
 - [ ] Signed-coupling acceptance remains open.
 - [ ] M3: combined paired runs and independently closed transfer/storage ledgers.
 - [ ] M4: native gates, independent correctness/QA reviews and release-readiness documentation.
 
 ## Surprises & Discoveries
+
+Actual soil tracing confirms a different alias defect: WSHDRV's completed-channel
+runoff element slot can also be the next channel's soil-plane slot. On dry days
+without WSHIRS, hourly infiltration consumes the inherited depth. chnrun has the
+same lifetime problem when WSHIRS produces no local rainfall excess. The validated
+repair initializes both current-plane working fluxes after inflow assembly.
 
 MC4 zero-reference handling with retained interior yields a period-two sign
 alternation, not drainage. Carrying the last valid reference restores recession.
@@ -78,6 +84,13 @@ separate. The prior audit identified, rather than repaired, four mechanisms;
 additional storage/routing residuals may remain after their correction.
 
 ## Decision Log
+
+2026-10-21 — Continue the independently confirmed working-flux alias repair as a
+separate checkpoint after native e6dc19008 and WEPPpy 87f9c8dd6. Test only two
+per-channel initializations after WSHCQI; retain norun and all soil/MC stores.
+Source review supports this lifecycle boundary. Both isolated profiles build;
+96 causal runs / 1,800 observer pairs, full suite, seven portable tests and paired
+replay gates pass. Accept the two assignments only; signed exchange stays open.
 
 2026-10-21 — Test the bounded MC4 previous-reference correction and bitwise
 fixed-point optimization under ADR-0101. Do not change MC storage authority,
@@ -117,7 +130,9 @@ smokes, complete continuity/cascade probes and 92 portable reference tests pass.
 The full native gate passes 490 tests with two existing warnings; the expanded
 targeted suite passes all 92 reference tests. Signed-loss availability and soil-side
 reconciliation remain open; actual early/late soil controls reproduce material transmission and clipping, and
-identify a separate plane/element runoff alias requiring a bounded repair.
+identify a separate plane/element runoff alias now corrected by two per-channel
+working-flux initializations. That checkpoint passes all 527 collected tests
+(520 full-suite plus seven added causal cases) and independent science/QA review.
 Complete routing repair and release readiness remain pending; no vendored
 binaries changed. Retaining failed candidates and raw-state mutation controls
 prevented narrow passing results from masking the execution defect.
@@ -479,3 +494,19 @@ channel's soil-plane slot and optional WSHIRS is skipped. Review a minimal reset
 of runoff/chnrun working plane fields after WSHCQI, before optional WSHIRS; retain
 norun handling and MC behavior. Portable causal controls and full gates precede
 promotion. See actual-soil-coupling-control-review.md and mc-coupled-soil-qa-review.md.
+
+
+2026-10-21 — Channel-plane initialization validated: both profiles built, full
+native suite 520 passed (two existing warnings, 618.33 s), seven final portable
+causal tests passed (115.93 s), 29 paired replays including 400 years, 12 watchlist
+cases and both smokes passed. Independent review covers 96 causal executions
+and 1,800 exact observer pairs. Preserve MC storage authority. The corrected
+hourly dry witness still clips 11.423601 m³; signed withdrawal/soil-credit
+acceptance and complete closure remain open. See
+`artifacts/channel-plane-initialization-checkpoint.md`.
+
+
+2026-10-21 — Validated channel working-flux repair committed locally at native
+`d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b`. Native worktree clean. No push,
+release, vendoring or deployment. Signed withdrawal/soil credit remains open;
+retain the package as active.

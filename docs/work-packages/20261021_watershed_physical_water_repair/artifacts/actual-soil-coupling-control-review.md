@@ -119,14 +119,21 @@ positive post-soil values are not forwarded. On wet day 159 WSHIRS recomputes
 the receiving depth. `runoff-alias/receipt.json` retains two full runs and exact
 parity against every original native and observer file.
 
-The smallest candidate to test is to initialize the current channel's plane
-runoff before the optional WSHIRS calculation, with an accompanying audit of
-`chnrun` and other shared plane/element scratch values. First prove that no
-legitimate producer is erased and that upstream reports remain intact. Required
-causal controls are dry/wet, small/material runon, multiple channel counts and
-both soil modes, followed by these eight controls and native gates. Do not fix
-this by merely changing the `norun` predicate, and do not reduce `rtrans` after
-WATBAL has already credited soil. No candidate behavioral edit was made here.
+Source review supports the bounded candidate of setting `runoff(iplane)=0` and
+`chnrun(iplane)=0` immediately after WSHCQI, before optional WSHIRS. WSHCQI
+consumes `tmpvol`/`tmpsbv` and writes separate runon fields; neither scratch
+value is a valid receiving-channel producer at that boundary. WSHIRS resets
+runoff itself but assigns `chnrun` only in its positive local rainfall-excess
+branch (`src/wshirs.for:266`). Thus the second reset also matters on wet days
+with no local excess. The existing `norun` decision should remain unchanged.
+
+Before promotion, require isolated ablations of each reset, dry inherited
+runoff, wet zero-local-excess inherited `chnrun`, genuine local runoff retained,
+small/material runon, at least three channels and both soil modes. Verify
+upstream reports remain intact, then repeat these controls and native gates.
+Do not fix this by merely changing the `norun` predicate, and do not reduce
+`rtrans` after WATBAL has already credited soil. No candidate behavioral edit
+was made by this reviewer.
 
 After the producer boundary is corrected and remeasured, complete signed
 coupling still requires an explicit requested-versus-accepted exchange design

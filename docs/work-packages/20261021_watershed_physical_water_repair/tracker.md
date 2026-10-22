@@ -118,3 +118,31 @@ contaminates the next channel's soil-plane slot when WSHIRS is skipped. A
 bounded initialization repair is under review; no alias repair is promoted yet.
 See `artifacts/actual-soil-coupling-control-review.md` and
 `artifacts/mc-coupled-soil-qa-review.md`.
+
+
+The alias candidate is isolated under `channel-plane-init-candidate-v1` and in
+uncommitted native WSHDRV working source. Both profiles build; full native suite,
+29 paired replays and independent causal controls are running. ADR-0101 records
+the working-flux lifetime and rejects forwarding inherited runoff as a repair.
+
+
+Channel-plane candidate: full native suite **520 passed**, two existing warnings,
+618.33 s; final trace reaches year100/day365/channel31 within the existing
+900-second gate. All 29 paired validations (including 400 years), 12 watchlist
+cases, both profile smokes and system ELF loaders pass. Independent causal
+review covers 96 runs and 1,800 exact observer file pairs. Final portable
+regressions and source checkpoint are pending. Signed soil/routing acceptance
+remains open.
+
+
+Final channel-plane portable target: **7 passed in 115.93 s**. All 527 collected
+native tests are covered (520 full suite plus seven added afterward). Independent
+science and QA reviews approve this bounded initialization. The source checkpoint
+is ready; signed withdrawal/soil-credit acceptance remains unresolved. See
+`artifacts/channel-plane-initialization-checkpoint.md`.
+
+
+2026-10-21 — Validated channel working-flux repair committed locally at native
+`d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b`. Native worktree clean. No push,
+release, vendoring or deployment. Signed withdrawal/soil credit remains open;
+retain the package as active.
