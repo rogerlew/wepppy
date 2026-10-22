@@ -1,5 +1,9 @@
 # PROJECT_TRACKER.md
 
+Active: [Roads modeled-area accounting repair](docs/work-packages/20261022_roads_accounting_repair/package.md) — full MOFE footprint response mixing and expansion; geographic overlap requirement removed by operator. Shared PASS/WAT ledger, fresh routing and aggregate report validation follow the reviewed contract checkpoint.
+
+Completed (diagnosis): [Roads lateral flow — UM1](docs/work-packages/20261022_roads_lateral_flow_investigation/package.md) — isolated native replay confirms omitted baseline WAT, runoff area mismatch, and duplicate segment PASS contributions. Baseflow uses road-only percolation. All original hashes unchanged; repair contract and implementation remain follow-up.
+
 Active: [Watershed physical water repair](docs/work-packages/20261021_watershed_physical_water_repair/package.md) — four native repair lanes for channel-local rate assembly, flat hydrograph volume, hourly infiltration allocation and groundwater initialization. Portable regressions, ADR/scientific review and independent combined accounting required. Narrow allocation, source/publication and MC4 retained-state corrections validated at native `e6dc19008`; 490-test full suite, expanded 92-test reference suite and 29 paired replays pass. Actual-soil controls expose remaining signed exchange/clipping discrepancies. Full routing closure remains open. Ash excluded.
 
 Completed (diagnostic audit): [Watershed physical water audit](docs/work-packages/20261021_watershed_physical_water_audit/package.md) — eighteen 44-year watershed cases, OFE/PASS accounting and native observations identify four unresolved defects in channel rate construction, flat hydrographs, hourly infiltration allocation and initial groundwater area. Ash excluded. Watershed correctness not certified; no model repair or deployment.

@@ -1,0 +1,855 @@
+{
+  "crs": "EPSG:32610",
+  "method": "flat-cap mitre-join road-width buffers; channel-associated single-OFE only",
+  "geometry_area_m2": 441843.99999964656,
+  "baseline_wat_area_m2": 441820.29,
+  "sum_clipped_area_m2": 2129.2810241134407,
+  "union_clipped_area_m2": 2129.281023841742,
+  "boundary_area_m2": 449259.9999999037,
+  "sum_external_watershed_area_m2": 1855.2409341433267,
+  "sum_inside_boundary_unassigned_area_m2": 141.03872818639107,
+  "segments": [
+    {
+      "segment_id": "roads-seg-000002",
+      "native_id": 900001,
+      "routing_target": 27,
+      "modeled_area_m2": 2332.7604415051883,
+      "polygon_area_m2": 2331.865482418178,
+      "inside_area_m2": 473.3963571288994,
+      "outside_hillslope_area_m2": 1858.4691252892787,
+      "external_watershed_area_m2": 1855.2409341433267,
+      "inside_boundary_unassigned_area_m2": 3.228191144973439,
+      "ownership_m2": {
+        "28": 463.9863069303293,
+        "18": 9.410050193736943
+      }
+    },
+    {
+      "segment_id": "roads-seg-000003",
+      "native_id": 900002,
+      "routing_target": 27,
+      "modeled_area_m2": 15.195942783893491,
+      "polygon_area_m2": 15.190111526028423,
+      "inside_area_m2": 6.959678504195098,
+      "outside_hillslope_area_m2": 8.230433021833324,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 8.23043302153309,
+      "ownership_m2": {
+        "27": 3.228191138639518,
+        "28": 3.7314873655555796
+      }
+    },
+    {
+      "segment_id": "roads-seg-000004",
+      "native_id": 900003,
+      "routing_target": 27,
+      "modeled_area_m2": 1.7614058071637457,
+      "polygon_area_m2": 1.7607298848106132,
+      "inside_area_m2": 1.6310810609935529,
+      "outside_hillslope_area_m2": 0.12964882381706033,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.12964882369944014,
+      "ownership_m2": {
+        "27": 0.9237382743009809,
+        "28": 0.7073427866925719
+      }
+    },
+    {
+      "segment_id": "roads-seg-000005",
+      "native_id": 900004,
+      "routing_target": 27,
+      "modeled_area_m2": 9.414524853746887,
+      "polygon_area_m2": 9.410912114997469,
+      "inside_area_m2": 5.514276388091732,
+      "outside_hillslope_area_m2": 3.8966357269057372,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.896635726900946,
+      "ownership_m2": {
+        "27": 2.4949078490004144,
+        "28": 3.019368539091317
+      }
+    },
+    {
+      "segment_id": "roads-seg-000006",
+      "native_id": 900005,
+      "routing_target": 27,
+      "modeled_area_m2": 4.020012184414411,
+      "polygon_area_m2": 4.018469538616798,
+      "inside_area_m2": 3.3431575369755597,
+      "outside_hillslope_area_m2": 0.6753120016412382,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.6753120019015568,
+      "ownership_m2": {
+        "27": 1.1080006884185714,
+        "28": 2.235156848556988
+      }
+    },
+    {
+      "segment_id": "roads-seg-000007",
+      "native_id": 900006,
+      "routing_target": 27,
+      "modeled_area_m2": 14.809037533232463,
+      "polygon_area_m2": 14.80335466098812,
+      "inside_area_m2": 7.417855833398435,
+      "outside_hillslope_area_m2": 7.385498827589685,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 7.385498827666434,
+      "ownership_m2": {
+        "27": 4.189664697528686,
+        "28": 3.2281911365247895
+      }
+    },
+    {
+      "segment_id": "roads-seg-000008",
+      "native_id": 900007,
+      "routing_target": 27,
+      "modeled_area_m2": 0.3869053425770765,
+      "polygon_area_m2": 0.38675686221334793,
+      "inside_area_m2": 0.3805014032791335,
+      "outside_hillslope_area_m2": 0.0062554589342144196,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.006255458617025106,
+      "ownership_m2": {
+        "27": 0.3805014032791334
+      }
+    },
+    {
+      "segment_id": "roads-seg-000009",
+      "native_id": 900008,
+      "routing_target": 27,
+      "modeled_area_m2": 9.027619575211094,
+      "polygon_area_m2": 9.024155258207475,
+      "inside_area_m2": 5.233771710770223,
+      "outside_hillslope_area_m2": 3.7903835474372523,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.790383547613244,
+      "ownership_m2": {
+        "27": 3.550712954348569,
+        "28": 1.6830587573866251
+      }
+    },
+    {
+      "segment_id": "roads-seg-000010",
+      "native_id": 900009,
+      "routing_target": 27,
+      "modeled_area_m2": 8.499807714140735,
+      "polygon_area_m2": 8.49654592764616,
+      "inside_area_m2": 5.051613251047112,
+      "outside_hillslope_area_m2": 3.4449326765990484,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.444932676265381,
+      "ownership_m2": {
+        "27": 3.5589700828272415,
+        "28": 1.4926431682099748
+      }
+    },
+    {
+      "segment_id": "roads-seg-000011",
+      "native_id": 900010,
+      "routing_target": 27,
+      "modeled_area_m2": 7.309653798110542,
+      "polygon_area_m2": 7.306848723273338,
+      "inside_area_m2": 3.3877521943358815,
+      "outside_hillslope_area_m2": 3.919096528937456,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.9190965292145576,
+      "ownership_m2": {
+        "27": 3.1789858555975443,
+        "28": 0.2087663387383379
+      }
+    },
+    {
+      "segment_id": "roads-seg-000012",
+      "native_id": 900011,
+      "routing_target": 27,
+      "modeled_area_m2": 0.762166690653401,
+      "polygon_area_m2": 0.7618742083364551,
+      "inside_area_m2": 0.6260851819511271,
+      "outside_hillslope_area_m2": 0.13578902638532808,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.135789026339767,
+      "ownership_m2": {
+        "27": 0.38327938239332804,
+        "28": 0.24280579955779907
+      }
+    },
+    {
+      "segment_id": "roads-seg-000013",
+      "native_id": 900012,
+      "routing_target": 28,
+      "modeled_area_m2": 16.14364102519545,
+      "polygon_area_m2": 16.137445867032,
+      "inside_area_m2": 7.528086482361867,
+      "outside_hillslope_area_m2": 8.609359384670132,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 8.609359383929432,
+      "ownership_m2": {
+        "27": 0.609399802969065,
+        "28": 6.918686679392802
+      }
+    },
+    {
+      "segment_id": "roads-seg-000014",
+      "native_id": 900013,
+      "routing_target": 28,
+      "modeled_area_m2": 16.143641087129314,
+      "polygon_area_m2": 16.137445870586916,
+      "inside_area_m2": 15.612019906597936,
+      "outside_hillslope_area_m2": 0.5254259639889796,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.5254259633315859,
+      "ownership_m2": {
+        "28": 15.612019906588074
+      }
+    },
+    {
+      "segment_id": "roads-seg-000015",
+      "native_id": 900014,
+      "routing_target": 27,
+      "modeled_area_m2": 8.071820570411397,
+      "polygon_area_m2": 8.068722936494588,
+      "inside_area_m2": 0.5254259584567511,
+      "outside_hillslope_area_m2": 7.543296978037837,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 7.543296977943858,
+      "ownership_m2": {
+        "27": 0.26271298023206524,
+        "28": 0.2627129782323263
+      }
+    },
+    {
+      "segment_id": "roads-seg-000016",
+      "native_id": 900015,
+      "routing_target": 31,
+      "modeled_area_m2": 48.909715890821076,
+      "polygon_area_m2": 48.89094606295865,
+      "inside_area_m2": 45.680637967998166,
+      "outside_hillslope_area_m2": 3.2103080949604816,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.2103080931502213,
+      "ownership_m2": {
+        "27": 31.341126055774648,
+        "31": 14.339511912200553
+      }
+    },
+    {
+      "segment_id": "roads-seg-000017",
+      "native_id": 900016,
+      "routing_target": 30,
+      "modeled_area_m2": 6.476659940517742,
+      "polygon_area_m2": 6.474174380903903,
+      "inside_area_m2": 2.5172427483164763,
+      "outside_hillslope_area_m2": 3.9569316325874264,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.9569316327123865,
+      "ownership_m2": {
+        "31": 0.014483086266328282,
+        "30": 2.502759662050148
+      }
+    },
+    {
+      "segment_id": "roads-seg-000018",
+      "native_id": 900017,
+      "routing_target": 33,
+      "modeled_area_m2": 144.87127103471957,
+      "polygon_area_m2": 144.81567138906073,
+      "inside_area_m2": 137.95881371729155,
+      "outside_hillslope_area_m2": 6.856857671769177,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 6.856857671052129,
+      "ownership_m2": {
+        "30": 9.539166163353316,
+        "33": 4.4995675776232655,
+        "34": 123.92007997542122
+      }
+    },
+    {
+      "segment_id": "roads-seg-000019",
+      "native_id": 900018,
+      "routing_target": 33,
+      "modeled_area_m2": 3.9559580038533078,
+      "polygon_area_m2": 3.9544397051013025,
+      "inside_area_m2": 0.7005182347835339,
+      "outside_hillslope_area_m2": 3.253921470317769,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.253921470011189,
+      "ownership_m2": {
+        "33": 0.7005182348719942
+      }
+    },
+    {
+      "segment_id": "roads-seg-000020",
+      "native_id": 900019,
+      "routing_target": 53,
+      "modeled_area_m2": 307.075171464307,
+      "polygon_area_m2": 306.95730827506554,
+      "inside_area_m2": 302.6792177427128,
+      "outside_hillslope_area_m2": 4.278090532352735,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 4.278090530973714,
+      "ownership_m2": {
+        "33": 203.44099218340565,
+        "53": 38.32463479146099,
+        "36": 60.781666655218814,
+        "52": 0.13192411315108196
+      }
+    },
+    {
+      "segment_id": "roads-seg-000021",
+      "native_id": 900020,
+      "routing_target": 52,
+      "modeled_area_m2": 1.6968366906316723,
+      "polygon_area_m2": 1.696185362790279,
+      "inside_area_m2": 0.8161242354500255,
+      "outside_hillslope_area_m2": 0.8800611273402534,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.8800611274912693,
+      "ownership_m2": {
+        "53": 0.8160261229437009,
+        "52": 9.811250632446375e-05
+      }
+    },
+    {
+      "segment_id": "roads-seg-000022",
+      "native_id": 900021,
+      "routing_target": 53,
+      "modeled_area_m2": 15.6599952972952,
+      "polygon_area_m2": 15.653984168244826,
+      "inside_area_m2": 9.179864328941058,
+      "outside_hillslope_area_m2": 6.474119839303768,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 6.474119838127739,
+      "ownership_m2": {
+        "53": 8.821473218492454,
+        "52": 0.35839111046785854
+      }
+    },
+    {
+      "segment_id": "roads-seg-000023",
+      "native_id": 900022,
+      "routing_target": 52,
+      "modeled_area_m2": 5.032710042237766,
+      "polygon_area_m2": 5.030778216089734,
+      "inside_area_m2": 1.5975268809805094,
+      "outside_hillslope_area_m2": 3.433251335109225,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.433251335032172,
+      "ownership_m2": {
+        "53": 0.049616080793169835,
+        "52": 1.5479108001873394
+      }
+    },
+    {
+      "segment_id": "roads-seg-000024",
+      "native_id": 900023,
+      "routing_target": 55,
+      "modeled_area_m2": 311.83490331227813,
+      "polygon_area_m2": 311.7151936344795,
+      "inside_area_m2": 309.72799180485265,
+      "outside_hillslope_area_m2": 1.9872018296268266,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 1.98720182859749,
+      "ownership_m2": {
+        "55": 260.93204139795125,
+        "52": 48.79595040832118
+      }
+    },
+    {
+      "segment_id": "roads-seg-000025",
+      "native_id": 900024,
+      "routing_target": 54,
+      "modeled_area_m2": 3.9005096910225325,
+      "polygon_area_m2": 3.899012207767457,
+      "inside_area_m2": 0.7163680655937985,
+      "outside_hillslope_area_m2": 3.1826441421736584,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.1826441421278764,
+      "ownership_m2": {
+        "55": 0.5886545641825423,
+        "54": 0.12771350131782974
+      }
+    },
+    {
+      "segment_id": "roads-seg-000026",
+      "native_id": 900025,
+      "routing_target": 43,
+      "modeled_area_m2": 89.18950336064997,
+      "polygon_area_m2": 89.15526116875137,
+      "inside_area_m2": 82.20865198637821,
+      "outside_hillslope_area_m2": 6.946609182373152,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 6.946609181824409,
+      "ownership_m2": {
+        "44": 13.458408645703457,
+        "54": 68.75024334070278
+      }
+    },
+    {
+      "segment_id": "roads-seg-000027",
+      "native_id": 900026,
+      "routing_target": 43,
+      "modeled_area_m2": 6.989177501772135,
+      "polygon_area_m2": 6.986494143368658,
+      "inside_area_m2": 3.3809769422927114,
+      "outside_hillslope_area_m2": 3.6055172010759464,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 3.6055172008720984,
+      "ownership_m2": {
+        "44": 0.6350752654878788,
+        "54": 2.418181092912542,
+        "43": 0.3277205829371109
+      }
+    },
+    {
+      "segment_id": "roads-seg-000028",
+      "native_id": 900027,
+      "routing_target": 44,
+      "modeled_area_m2": 19.45449147815666,
+      "polygon_area_m2": 19.447022270809367,
+      "inside_area_m2": 13.423885594592106,
+      "outside_hillslope_area_m2": 6.023136676217261,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 6.023136676869256,
+      "ownership_m2": {
+        "44": 13.13254357521963,
+        "43": 0.2913420193724775
+      }
+    },
+    {
+      "segment_id": "roads-seg-000029",
+      "native_id": 900028,
+      "routing_target": 43,
+      "modeled_area_m2": 14.132948840330949,
+      "polygon_area_m2": 14.127522736763988,
+      "inside_area_m2": 6.459174564851755,
+      "outside_hillslope_area_m2": 7.668348171912233,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 7.668348171896637,
+      "ownership_m2": {
+        "44": 4.629579320572255,
+        "43": 1.829595244232544
+      }
+    },
+    {
+      "segment_id": "roads-seg-000030",
+      "native_id": 900029,
+      "routing_target": 38,
+      "modeled_area_m2": 110.17289686611326,
+      "polygon_area_m2": 110.13059744730711,
+      "inside_area_m2": 104.68260376348655,
+      "outside_hillslope_area_m2": 5.447993683820556,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 5.447993682115468,
+      "ownership_m2": {
+        "39": 64.15316103214779,
+        "43": 40.5294427310445
+      }
+    },
+    {
+      "segment_id": "roads-seg-000031",
+      "native_id": 900030,
+      "routing_target": 38,
+      "modeled_area_m2": 13.932924590009545,
+      "polygon_area_m2": 13.947787190787563,
+      "inside_area_m2": 6.455712994071239,
+      "outside_hillslope_area_m2": 7.492074196716325,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 7.492074196144548,
+      "ownership_m2": {
+        "39": 4.983765822233186,
+        "38": 1.4719471720192683
+      }
+    },
+    {
+      "segment_id": "roads-seg-000032",
+      "native_id": 900031,
+      "routing_target": 40,
+      "modeled_area_m2": 417.03889442218735,
+      "polygon_area_m2": 416.87876812072255,
+      "inside_area_m2": 410.86812361453906,
+      "outside_hillslope_area_m2": 6.010644506183496,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 6.010644507071523,
+      "ownership_m2": {
+        "38": 84.65936581828304,
+        "41": 326.20875779657877
+      }
+    },
+    {
+      "segment_id": "roads-seg-000033",
+      "native_id": 900032,
+      "routing_target": 40,
+      "modeled_area_m2": 0.03444218925127735,
+      "polygon_area_m2": 0.034428962467013415,
+      "inside_area_m2": 0.00014373768563239822,
+      "outside_hillslope_area_m2": 0.03428522478138102,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 0.03428522452041814,
+      "ownership_m2": {
+        "40": 0.00014322933463882515,
+        "41": 5.083509935730759e-07
+      }
+    },
+    {
+      "segment_id": "roads-seg-000036",
+      "native_id": 900033,
+      "routing_target": 1,
+      "modeled_area_m2": 10.481851471737773,
+      "polygon_area_m2": 10.47783203999645,
+      "inside_area_m2": 3.383229385131342,
+      "outside_hillslope_area_m2": 7.094602654865108,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 7.094602654071072,
+      "ownership_m2": {
+        "2": 1.6916146891196389,
+        "1": 1.6916146960117033
+      }
+    },
+    {
+      "segment_id": "roads-seg-000037",
+      "native_id": 900034,
+      "routing_target": 1,
+      "modeled_area_m2": 151.97670155448543,
+      "polygon_area_m2": 151.91842317348448,
+      "inside_area_m2": 150.2365532621376,
+      "outside_hillslope_area_m2": 1.6818699113468938,
+      "external_watershed_area_m2": 0.0,
+      "inside_boundary_unassigned_area_m2": 1.6818699117997096,
+      "ownership_m2": {
+        "1": 150.23655326180855
+      }
+    }
+  ],
+  "hill_area_comparison": [
+    {
+      "wepp_id": 57,
+      "geometry_m2": 32128.000000030326,
+      "wat_m2": 32129.760000000002
+    },
+    {
+      "wepp_id": 61,
+      "geometry_m2": 7124.000000004889,
+      "wat_m2": 7122.84
+    },
+    {
+      "wepp_id": 63,
+      "geometry_m2": 15531.99999995029,
+      "wat_m2": 15521.22
+    },
+    {
+      "wepp_id": 62,
+      "geometry_m2": 5092.0000000068685,
+      "wat_m2": 5091.93
+    },
+    {
+      "wepp_id": 56,
+      "geometry_m2": 25684.00000000006,
+      "wat_m2": 25691.04
+    },
+    {
+      "wepp_id": 66,
+      "geometry_m2": 15504.000000030966,
+      "wat_m2": 15500.49
+    },
+    {
+      "wepp_id": 64,
+      "geometry_m2": 5232.000000054482,
+      "wat_m2": 5229.84
+    },
+    {
+      "wepp_id": 65,
+      "geometry_m2": 9263.999999955122,
+      "wat_m2": 9257.880000000001
+    },
+    {
+      "wepp_id": 29,
+      "geometry_m2": 4999.999999964377,
+      "wat_m2": 4996.2300000000005
+    },
+    {
+      "wepp_id": 59,
+      "geometry_m2": 148.00000000186265,
+      "wat_m2": 145.8
+    },
+    {
+      "wepp_id": 26,
+      "geometry_m2": 5000.0000000695,
+      "wat_m2": 5002.41
+    },
+    {
+      "wepp_id": 60,
+      "geometry_m2": 9115.999999987427,
+      "wat_m2": 9112.5
+    },
+    {
+      "wepp_id": 44,
+      "geometry_m2": 3151.9999999732827,
+      "wat_m2": 3139.9500000000003
+    },
+    {
+      "wepp_id": 32,
+      "geometry_m2": 5187.9999999961,
+      "wat_m2": 5186.79
+    },
+    {
+      "wepp_id": 27,
+      "geometry_m2": 8623.999999877065,
+      "wat_m2": 8627.64
+    },
+    {
+      "wepp_id": 58,
+      "geometry_m2": 6331.9999999965075,
+      "wat_m2": 6341.25
+    },
+    {
+      "wepp_id": 31,
+      "geometry_m2": 7204.00000007794,
+      "wat_m2": 7217.16
+    },
+    {
+      "wepp_id": 37,
+      "geometry_m2": 5084.000000006228,
+      "wat_m2": 5082.09
+    },
+    {
+      "wepp_id": 39,
+      "geometry_m2": 8475.999999994296,
+      "wat_m2": 8488.2
+    },
+    {
+      "wepp_id": 30,
+      "geometry_m2": 9579.999999959604,
+      "wat_m2": 9582.27
+    },
+    {
+      "wepp_id": 42,
+      "geometry_m2": 5108.000000061118,
+      "wat_m2": 5107.200000000001
+    },
+    {
+      "wepp_id": 28,
+      "geometry_m2": 6580.000000002328,
+      "wat_m2": 6586.92
+    },
+    {
+      "wepp_id": 33,
+      "geometry_m2": 11683.999999959255,
+      "wat_m2": 11699.34
+    },
+    {
+      "wepp_id": 51,
+      "geometry_m2": 5152.000000038883,
+      "wat_m2": 5146.65
+    },
+    {
+      "wepp_id": 38,
+      "geometry_m2": 4372.000000017113,
+      "wat_m2": 4361.49
+    },
+    {
+      "wepp_id": 53,
+      "geometry_m2": 824.0000000016298,
+      "wat_m2": 816.6600000000001
+    },
+    {
+      "wepp_id": 34,
+      "geometry_m2": 5379.999999989814,
+      "wat_m2": 5384.16
+    },
+    {
+      "wepp_id": 55,
+      "geometry_m2": 17479.999999968684,
+      "wat_m2": 17470.260000000002
+    },
+    {
+      "wepp_id": 48,
+      "geometry_m2": 6368.000000033353,
+      "wat_m2": 6368.700000000001
+    },
+    {
+      "wepp_id": 36,
+      "geometry_m2": 4387.9999999659485,
+      "wat_m2": 4392.39
+    },
+    {
+      "wepp_id": 52,
+      "geometry_m2": 2771.9999999961,
+      "wat_m2": 2775.87
+    },
+    {
+      "wepp_id": 54,
+      "geometry_m2": 28092.000000055996,
+      "wat_m2": 28087.739999999998
+    },
+    {
+      "wepp_id": 43,
+      "geometry_m2": 6763.999999946449,
+      "wat_m2": 6760.200000000001
+    },
+    {
+      "wepp_id": 35,
+      "geometry_m2": 4403.999999975611,
+      "wat_m2": 4405.68
+    },
+    {
+      "wepp_id": 45,
+      "geometry_m2": 5003.999999997497,
+      "wat_m2": 5006.82
+    },
+    {
+      "wepp_id": 46,
+      "geometry_m2": 388.00000000203727,
+      "wat_m2": 386.64
+    },
+    {
+      "wepp_id": 50,
+      "geometry_m2": 839.9999999963911,
+      "wat_m2": 841.08
+    },
+    {
+      "wepp_id": 47,
+      "geometry_m2": 135.99999999481952,
+      "wat_m2": 137.18
+    },
+    {
+      "wepp_id": 49,
+      "geometry_m2": 7087.999999942549,
+      "wat_m2": 7085.219999999999
+    },
+    {
+      "wepp_id": 18,
+      "geometry_m2": 11007.999999995634,
+      "wat_m2": 11012.400000000001
+    },
+    {
+      "wepp_id": 17,
+      "geometry_m2": 5511.9999999886495,
+      "wat_m2": 5519.88
+    },
+    {
+      "wepp_id": 20,
+      "geometry_m2": 799.9999999869615,
+      "wat_m2": 797.5500000000001
+    },
+    {
+      "wepp_id": 14,
+      "geometry_m2": 8080.000000017928,
+      "wat_m2": 8085.63
+    },
+    {
+      "wepp_id": 9,
+      "geometry_m2": 179.9999999825377,
+      "wat_m2": 180.0
+    },
+    {
+      "wepp_id": 7,
+      "geometry_m2": 5215.999999969092,
+      "wat_m2": 5218.29
+    },
+    {
+      "wepp_id": 19,
+      "geometry_m2": 2340.000000028871,
+      "wat_m2": 2339.2799999999997
+    },
+    {
+      "wepp_id": 10,
+      "geometry_m2": 6711.999999992258,
+      "wat_m2": 6708.27
+    },
+    {
+      "wepp_id": 8,
+      "geometry_m2": 59.9999999908614,
+      "wat_m2": 60.0
+    },
+    {
+      "wepp_id": 40,
+      "geometry_m2": 8496.000000037951,
+      "wat_m2": 8500.92
+    },
+    {
+      "wepp_id": 41,
+      "geometry_m2": 6995.999999974796,
+      "wat_m2": 6987.0599999999995
+    },
+    {
+      "wepp_id": 12,
+      "geometry_m2": 159.99999999179272,
+      "wat_m2": 158.86
+    },
+    {
+      "wepp_id": 11,
+      "geometry_m2": 363.999999977008,
+      "wat_m2": 365.04
+    },
+    {
+      "wepp_id": 3,
+      "geometry_m2": 4356.000000037893,
+      "wat_m2": 4348.08
+    },
+    {
+      "wepp_id": 25,
+      "geometry_m2": 3704.0000000057626,
+      "wat_m2": 3709.1400000000003
+    },
+    {
+      "wepp_id": 13,
+      "geometry_m2": 6924.0000000236905,
+      "wat_m2": 6922.23
+    },
+    {
+      "wepp_id": 21,
+      "geometry_m2": 5927.99999998213,
+      "wat_m2": 5926.799999999999
+    },
+    {
+      "wepp_id": 22,
+      "geometry_m2": 155.9999999902211,
+      "wat_m2": 156.32999999999998
+    },
+    {
+      "wepp_id": 23,
+      "geometry_m2": 660.0000000207801,
+      "wat_m2": 660.0600000000001
+    },
+    {
+      "wepp_id": 15,
+      "geometry_m2": 11799.999999987194,
+      "wat_m2": 11802.24
+    },
+    {
+      "wepp_id": 24,
+      "geometry_m2": 3928.000000013504,
+      "wat_m2": 3913.5
+    },
+    {
+      "wepp_id": 4,
+      "geometry_m2": 12076.000000034692,
+      "wat_m2": 12064.53
+    },
+    {
+      "wepp_id": 16,
+      "geometry_m2": 4383.9999999597785,
+      "wat_m2": 4382.82
+    },
+    {
+      "wepp_id": 6,
+      "geometry_m2": 3995.9999999563443,
+      "wat_m2": 3991.26
+    },
+    {
+      "wepp_id": 5,
+      "geometry_m2": 4567.999999948428,
+      "wat_m2": 4574.61
+    },
+    {
+      "wepp_id": 2,
+      "geometry_m2": 7704.000000069907,
+      "wat_m2": 7707.09
+    },
+    {
+      "wepp_id": 1,
+      "geometry_m2": 4447.999999955937,
+      "wat_m2": 4440.93
+    }
+  ]
+}

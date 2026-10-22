@@ -1,0 +1,572 @@
+{
+  "scratch": "/workdir/wepppy-scratch/roads-lateral-aol7fv82",
+  "native_binary": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+  "native_sha256": "1cb2cec6ecba762362d117982d448b397c900b9c3a1be742a0c3bbea16e3e62b",
+  "baseflow_opts": {
+    "py/object": "wepppy.nodb.core.wepp.BaseflowOpts",
+    "gwstorage": 200.0,
+    "bfcoeff": 0.04,
+    "dscoeff": 0.0,
+    "bfthreshold": 1.0
+  },
+  "cases": {
+    "baseline": {
+      "annual": [
+        {
+          "year": 2000,
+          "Lateral Flow": 813.2172900508937,
+          "Runoff": 17.818757938889583,
+          "Percolation": 59.47125087442227,
+          "Baseflow": 254.55704783036515,
+          "runvol": 7872.6888
+        },
+        {
+          "year": 2001,
+          "Lateral Flow": 1021.0975401138774,
+          "Runoff": 183.02294073004205,
+          "Percolation": 60.48430920680442,
+          "Baseflow": 60.107895663770734,
+          "runvol": 80863.24875
+        },
+        {
+          "year": 2002,
+          "Lateral Flow": 1149.04110664474,
+          "Runoff": 152.25426079911355,
+          "Percolation": 56.83802269696577,
+          "Baseflow": 56.99787015921484,
+          "runvol": 67269.02166
+        },
+        {
+          "year": 2003,
+          "Lateral Flow": 1439.1416745731617,
+          "Runoff": 190.7295506505597,
+          "Percolation": 61.03643849040975,
+          "Baseflow": 60.47784583396913,
+          "runvol": 84268.18538
+        },
+        {
+          "year": 2004,
+          "Lateral Flow": 1080.233829920079,
+          "Runoff": 90.01426380848193,
+          "Percolation": 72.35843702515336,
+          "Baseflow": 72.13057246173807,
+          "runvol": 39770.12814
+        },
+        {
+          "year": 2005,
+          "Lateral Flow": 1103.7027304866417,
+          "Runoff": 135.48556445879836,
+          "Percolation": 67.42934967178623,
+          "Baseflow": 67.74885582759649,
+          "runvol": 59860.27138
+        },
+        {
+          "year": 2006,
+          "Lateral Flow": 1623.1043517431033,
+          "Runoff": 432.6987950010172,
+          "Percolation": 57.831186965406225,
+          "Baseflow": 58.017526960046716,
+          "runvol": 191175.10709
+        },
+        {
+          "year": 2007,
+          "Lateral Flow": 1020.0361012200229,
+          "Runoff": 159.09882752102666,
+          "Percolation": 60.21469860132498,
+          "Baseflow": 59.94241967546209,
+          "runvol": 70293.090114
+        },
+        {
+          "year": 2008,
+          "Lateral Flow": 1037.5299686616925,
+          "Runoff": 88.12134827488342,
+          "Percolation": 60.94110363650343,
+          "Baseflow": 61.14474535200052,
+          "runvol": 38933.79965
+        },
+        {
+          "year": 2009,
+          "Lateral Flow": 991.2325137738693,
+          "Runoff": 126.25342258500618,
+          "Percolation": 59.3405510389756,
+          "Baseflow": 59.39716085731354,
+          "runvol": 55781.32377999999
+        },
+        {
+          "year": 2010,
+          "Lateral Flow": 1577.825567544668,
+          "Runoff": 169.721755693927,
+          "Percolation": 67.46662459390446,
+          "Baseflow": 67.26215238731183,
+          "runvol": 74986.51532
+        },
+        {
+          "year": 2011,
+          "Lateral Flow": 1319.29194587804,
+          "Runoff": 156.2754299695018,
+          "Percolation": 66.3539327858845,
+          "Baseflow": 66.39742366243233,
+          "runvol": 69045.655789
+        },
+        {
+          "year": 2012,
+          "Lateral Flow": 1843.063968742585,
+          "Runoff": 466.80377985809565,
+          "Percolation": 67.25223398635676,
+          "Baseflow": 67.17783939532396,
+          "runvol": 206243.38139000002
+        },
+        {
+          "year": 2013,
+          "Lateral Flow": 759.1735815270049,
+          "Runoff": 69.79192965538091,
+          "Percolation": 69.39452911952051,
+          "Baseflow": 69.18157766866003,
+          "runvol": 30835.4906
+        },
+        {
+          "year": 2014,
+          "Lateral Flow": 1450.4833532552339,
+          "Runoff": 207.26243642862119,
+          "Percolation": 64.04096389824016,
+          "Baseflow": 64.2385032468874,
+          "runvol": 91572.749769
+        },
+        {
+          "year": 2015,
+          "Lateral Flow": 1353.9969353211459,
+          "Runoff": 421.726099699948,
+          "Percolation": 55.62840711570761,
+          "Baseflow": 55.78074573540406,
+          "runvol": 186327.14767
+        }
+      ],
+      "area": 441820.2900000001,
+      "output_sha256": "3b1f3375fc183381fe6dd5fb5119ca46fa788ab0f13b8ef38ecff3dad1aba9a8",
+      "max_abs_difference_from_retained": {
+        "Area": 0.0,
+        "Lateral Flow": 1.4210854715202004e-14,
+        "Runoff": 2.1316282072803006e-14,
+        "Percolation": 1.3877787807814457e-16,
+        "Baseflow": 1.6653345369377348e-16,
+        "runvol": 7.275957614183426e-12
+      }
+    },
+    "original_roads": {
+      "annual": [
+        {
+          "year": 2000,
+          "Lateral Flow": 0.0,
+          "Runoff": 1989.4103813963627,
+          "Percolation": 1247.9931191015592,
+          "Baseflow": 1308.2860851660103,
+          "runvol": 8210.59505558
+        },
+        {
+          "year": 2001,
+          "Lateral Flow": 0.0,
+          "Runoff": 20082.365246002686,
+          "Percolation": 1401.1420004361362,
+          "Baseflow": 1273.2511635377116,
+          "runvol": 82882.93372504
+        },
+        {
+          "year": 2002,
+          "Lateral Flow": 0.0,
+          "Runoff": 16704.131020231634,
+          "Percolation": 1539.9528338684079,
+          "Baseflow": 1567.9634064072,
+          "runvol": 68940.454340149
+        },
+        {
+          "year": 2003,
+          "Lateral Flow": 0.0,
+          "Runoff": 20834.970294125724,
+          "Percolation": 1758.917790266891,
+          "Baseflow": 1775.360981001222,
+          "runvol": 85989.04764940099
+        },
+        {
+          "year": 2004,
+          "Lateral Flow": 0.0,
+          "Runoff": 9959.385814500078,
+          "Percolation": 1460.4846430587693,
+          "Baseflow": 1556.447149956298,
+          "runvol": 41103.879164314
+        },
+        {
+          "year": 2005,
+          "Lateral Flow": 0.0,
+          "Runoff": 15004.071791591046,
+          "Percolation": 1427.530897907757,
+          "Baseflow": 1291.706470428221,
+          "runvol": 61924.054894665
+        },
+        {
+          "year": 2006,
+          "Lateral Flow": 0.0,
+          "Runoff": 47183.961835516275,
+          "Percolation": 2021.5599240395914,
+          "Baseflow": 1995.963510931907,
+          "runvol": 194735.288089451
+        },
+        {
+          "year": 2007,
+          "Lateral Flow": 0.0,
+          "Runoff": 17297.620726356443,
+          "Percolation": 1404.5623145754332,
+          "Baseflow": 1403.5556019814005,
+          "runvol": 71389.875380782
+        },
+        {
+          "year": 2008,
+          "Lateral Flow": 0.0,
+          "Runoff": 9729.729339007303,
+          "Percolation": 1427.248565668803,
+          "Baseflow": 1531.1511150493898,
+          "runvol": 40156.052441484
+        },
+        {
+          "year": 2009,
+          "Lateral Flow": 0.0,
+          "Runoff": 13895.710931568998,
+          "Percolation": 1277.007452697382,
+          "Baseflow": 1336.9581544822,
+          "runvol": 57349.68337122499
+        },
+        {
+          "year": 2010,
+          "Lateral Flow": 0.0,
+          "Runoff": 18486.291572546426,
+          "Percolation": 2014.8447962395355,
+          "Baseflow": 1838.1142532218303,
+          "runvol": 76295.698263635
+        },
+        {
+          "year": 2011,
+          "Lateral Flow": 0.0,
+          "Runoff": 17197.312080662196,
+          "Percolation": 1586.3343677356045,
+          "Baseflow": 1744.6724610895417,
+          "runvol": 70975.886553705
+        },
+        {
+          "year": 2012,
+          "Lateral Flow": 0.0,
+          "Runoff": 50944.47390646499,
+          "Percolation": 2199.853384926644,
+          "Baseflow": 2033.1634235438733,
+          "runvol": 210255.485483067
+        },
+        {
+          "year": 2013,
+          "Lateral Flow": 0.0,
+          "Runoff": 7835.305139978435,
+          "Percolation": 1034.3733829640307,
+          "Baseflow": 1277.9840390017534,
+          "runvol": 32337.479608462003
+        },
+        {
+          "year": 2014,
+          "Lateral Flow": 0.0,
+          "Runoff": 22876.3704653102,
+          "Percolation": 1810.3314159407823,
+          "Baseflow": 1637.6163947765901,
+          "runvol": 94414.212365905
+        },
+        {
+          "year": 2015,
+          "Lateral Flow": 0.0,
+          "Runoff": 46132.37915022278,
+          "Percolation": 1671.9885584967833,
+          "Baseflow": 1546.6997974163712,
+          "runvol": 190395.248609842
+        }
+      ],
+      "area": 4127.150000000001,
+      "output_sha256": "4b1d4f5ba68829bb44d13167d9e62e241e6a48dd865911663c91a10a00558399",
+      "max_abs_difference_from_retained": {
+        "Area": 0.0,
+        "Lateral Flow": 0.0,
+        "Runoff": 0.0,
+        "Percolation": 0.0,
+        "Baseflow": 0.0,
+        "runvol": 0.0
+      }
+    },
+    "roads_pass_baseline_wat": {
+      "annual": [
+        {
+          "year": 2000,
+          "Lateral Flow": 813.2172900508937,
+          "Runoff": 18.583562686946763,
+          "Percolation": 59.47125087442227,
+          "Baseflow": 254.55704783036515,
+          "runvol": 8210.59505558
+        },
+        {
+          "year": 2001,
+          "Lateral Flow": 1021.0975401138774,
+          "Runoff": 187.5942223591406,
+          "Percolation": 60.48430920680442,
+          "Baseflow": 60.107895663770734,
+          "runvol": 82882.93372504
+        },
+        {
+          "year": 2002,
+          "Lateral Flow": 1149.04110664474,
+          "Runoff": 156.0373208304874,
+          "Percolation": 56.83802269696577,
+          "Baseflow": 56.99787015921484,
+          "runvol": 68940.454340149
+        },
+        {
+          "year": 2003,
+          "Lateral Flow": 1439.1416745731617,
+          "Runoff": 194.62448781924655,
+          "Percolation": 61.03643849040975,
+          "Baseflow": 60.47784583396913,
+          "runvol": 85989.04764940099
+        },
+        {
+          "year": 2004,
+          "Lateral Flow": 1080.233829920079,
+          "Runoff": 93.03302744270525,
+          "Percolation": 72.35843702515336,
+          "Baseflow": 72.13057246173807,
+          "runvol": 41103.879164314
+        },
+        {
+          "year": 2005,
+          "Lateral Flow": 1103.7027304866417,
+          "Runoff": 140.15665712107742,
+          "Percolation": 67.42934967178623,
+          "Baseflow": 67.74885582759649,
+          "runvol": 61924.054894665
+        },
+        {
+          "year": 2006,
+          "Lateral Flow": 1623.1043517431033,
+          "Runoff": 440.75677938976264,
+          "Percolation": 57.831186965406225,
+          "Baseflow": 58.017526960046716,
+          "runvol": 194735.288089451
+        },
+        {
+          "year": 2007,
+          "Lateral Flow": 1020.0361012200229,
+          "Runoff": 161.58125146489309,
+          "Percolation": 60.21469860132498,
+          "Baseflow": 59.94241967546209,
+          "runvol": 71389.875380782
+        },
+        {
+          "year": 2008,
+          "Lateral Flow": 1037.5299686616925,
+          "Runoff": 90.88775085789743,
+          "Percolation": 60.94110363650343,
+          "Baseflow": 61.14474535200052,
+          "runvol": 40156.052441484
+        },
+        {
+          "year": 2009,
+          "Lateral Flow": 991.2325137738693,
+          "Runoff": 129.80319072993453,
+          "Percolation": 59.3405510389756,
+          "Baseflow": 59.39716085731354,
+          "runvol": 57349.68337122499
+        },
+        {
+          "year": 2010,
+          "Lateral Flow": 1577.825567544668,
+          "Runoff": 172.68491282651365,
+          "Percolation": 67.46662459390446,
+          "Baseflow": 67.26215238731183,
+          "runvol": 76295.698263635
+        },
+        {
+          "year": 2011,
+          "Lateral Flow": 1319.29194587804,
+          "Runoff": 160.64424418739344,
+          "Percolation": 66.3539327858845,
+          "Baseflow": 66.39742366243233,
+          "runvol": 70975.886553705
+        },
+        {
+          "year": 2012,
+          "Lateral Flow": 1843.063968742585,
+          "Runoff": 475.8846305656695,
+          "Percolation": 67.25223398635676,
+          "Baseflow": 67.17783939532396,
+          "runvol": 210255.485483067
+        },
+        {
+          "year": 2013,
+          "Lateral Flow": 759.1735815270049,
+          "Runoff": 73.19147703348345,
+          "Percolation": 69.39452911952051,
+          "Baseflow": 69.18157766866003,
+          "runvol": 32337.479608462003
+        },
+        {
+          "year": 2014,
+          "Lateral Flow": 1450.4833532552339,
+          "Runoff": 213.69369968478583,
+          "Percolation": 64.04096389824016,
+          "Baseflow": 64.2385032468874,
+          "runvol": 94414.212365905
+        },
+        {
+          "year": 2015,
+          "Lateral Flow": 1353.9969353211459,
+          "Runoff": 430.93369163702727,
+          "Percolation": 55.62840711570761,
+          "Baseflow": 55.78074573540406,
+          "runvol": 190395.248609842
+        }
+      ],
+      "area": 441820.2900000001,
+      "output_sha256": "58cca844fd5b1dd527efb08608595d266f093e62a9a83698d212f17e5583c99d"
+    },
+    "combined_hills_only_baseline_wat": {
+      "annual": [
+        {
+          "year": 2000,
+          "Lateral Flow": 813.2172900508937,
+          "Runoff": 18.20116022109351,
+          "Percolation": 59.47125087442227,
+          "Baseflow": 254.55704783036515,
+          "runvol": 8041.64188722
+        },
+        {
+          "year": 2001,
+          "Lateral Flow": 1021.0975401138774,
+          "Runoff": 185.30858277727577,
+          "Percolation": 60.48430920680442,
+          "Baseflow": 60.107895663770734,
+          "runvol": 81873.091782145
+        },
+        {
+          "year": 2002,
+          "Lateral Flow": 1149.04110664474,
+          "Runoff": 154.14578772182008,
+          "Percolation": 56.83802269696577,
+          "Baseflow": 56.99787015921484,
+          "runvol": 68104.736633533
+        },
+        {
+          "year": 2003,
+          "Lateral Flow": 1439.1416745731617,
+          "Runoff": 192.67701824278143,
+          "Percolation": 61.03643849040975,
+          "Baseflow": 60.47784583396913,
+          "runvol": 85128.616076361
+        },
+        {
+          "year": 2004,
+          "Lateral Flow": 1080.233829920079,
+          "Runoff": 91.52364606936452,
+          "Percolation": 72.35843702515336,
+          "Baseflow": 72.13057246173807,
+          "runvol": 40437.003848224005
+        },
+        {
+          "year": 2005,
+          "Lateral Flow": 1103.7027304866417,
+          "Runoff": 137.82111031628943,
+          "Percolation": 67.42934967178623,
+          "Baseflow": 67.74885582759649,
+          "runvol": 60892.162928065
+        },
+        {
+          "year": 2006,
+          "Lateral Flow": 1623.1043517431033,
+          "Runoff": 436.7277884249498,
+          "Percolation": 57.831186965406225,
+          "Baseflow": 58.017526960046716,
+          "runvol": 192955.19813297
+        },
+        {
+          "year": 2007,
+          "Lateral Flow": 1020.0361012200229,
+          "Runoff": 160.34003771737144,
+          "Percolation": 60.21469860132498,
+          "Baseflow": 59.94241967546209,
+          "runvol": 70841.4819629
+        },
+        {
+          "year": 2008,
+          "Lateral Flow": 1037.5299686616925,
+          "Runoff": 89.50454873638553,
+          "Percolation": 60.94110363650343,
+          "Baseflow": 61.14474535200052,
+          "runvol": 39544.925679029
+        },
+        {
+          "year": 2009,
+          "Lateral Flow": 991.2325137738693,
+          "Runoff": 128.028308356685,
+          "Percolation": 59.3405510389756,
+          "Baseflow": 59.39716085731354,
+          "runvol": 56565.504326359995
+        },
+        {
+          "year": 2010,
+          "Lateral Flow": 1577.825567544668,
+          "Runoff": 171.20333578357386,
+          "Percolation": 67.46662459390446,
+          "Baseflow": 67.26215238731183,
+          "runvol": 75641.107464866
+        },
+        {
+          "year": 2011,
+          "Lateral Flow": 1319.29194587804,
+          "Runoff": 158.4598355308082,
+          "Percolation": 66.3539327858845,
+          "Baseflow": 66.39742366243233,
+          "runvol": 70010.770487574
+        },
+        {
+          "year": 2012,
+          "Lateral Flow": 1843.063968742585,
+          "Runoff": 471.3441964559391,
+          "Percolation": 67.25223398635676,
+          "Baseflow": 67.17783939532396,
+          "runvol": 208249.42956798003
+        },
+        {
+          "year": 2013,
+          "Lateral Flow": 759.1735815270049,
+          "Runoff": 71.4917076238169,
+          "Percolation": 69.39452911952051,
+          "Baseflow": 69.18157766866003,
+          "runvol": 31586.486994949995
+        },
+        {
+          "year": 2014,
+          "Lateral Flow": 1450.4833532552339,
+          "Runoff": 210.47806860303083,
+          "Percolation": 64.04096389824016,
+          "Baseflow": 64.2385032468874,
+          "runvol": 92993.481308831
+        },
+        {
+          "year": 2015,
+          "Lateral Flow": 1353.9969353211459,
+          "Runoff": 426.3298945876681,
+          "Percolation": 55.62840711570761,
+          "Baseflow": 55.78074573540406,
+          "runvol": 188361.197662393
+        }
+      ],
+      "area": 441820.2900000001,
+      "output_sha256": "642a57d0c6ace570082198473a6dc697fa6fe131a257f43ef6eeb3855009b7c5"
+    }
+  },
+  "double_count_check": {
+    "max_daily_abs_residual_m3": 0.004572600001779392,
+    "baseline_total_m3": 1355097.805282,
+    "combined_hills_total_m3": 1371226.836743401,
+    "standalone_segments_total_m3": 16129.038253306
+  }
+}

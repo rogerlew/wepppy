@@ -163,3 +163,21 @@ generated selected/base SQL, actual exports and corrected Ash input/output/post
 artifacts. Test historical model/new post rejection and visible stale outputs.
 Retain source/binary hashes, cold/warm/stale/failing/restored cache evidence and
 runtime contour/width coverage limits. See ADR-0098 for preserved ET/Dp rationale.
+
+## Roads modeled-area accounting amendment (implementation pending)
+
+Roads PASS construction and aggregate water reporting follow the
+[modeled-area accounting contract](roads-water-accounting-contract.md). Complete MOFE contributor
+areas replace the corresponding modeled baseline remainder, with explicit
+modeled-area expansion when contributors exceed baseline area. Geographic
+intersection is not required. Existing replacement precedence is preserved.
+Canonical PASS is reconstructed before routing, selected exactly once in reports,
+and paired with the same source-qualified water ledger.
+
+A dedicated derived `H.accounting.wat.parquet` supports Roads average hillslope
+water reports with canonical IDs and one equivalent reporting OFE after native
+terminal selection. Raw H.wat and raw dashboard/export views retain their existing
+semantics. TotalWatSed uses original weighted profiles directly, retaining its
+Q/QOFE diagnostics and optional support-area weighting. Baseline behavior and
+public report columns/units remain unchanged. Historical results without corrected
+accounting provenance are not certified by this amendment.
