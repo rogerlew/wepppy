@@ -25,6 +25,9 @@ def resolve_output_scope_paths(output_scope: str | None = ...) -> OutputScopePat
 def scoped_dataset_path(path: str | Path, output_scope: str | None = ...) -> str: ...
 
 
+def validate_roads_accounting(wd: str | Path, output_scope: str | None) -> None: ...
+
+
 __all__ = [
     "DEFAULT_OUTPUT_SCOPE",
     "OutputScope",
@@ -33,4 +36,5 @@ __all__ = [
     "normalize_output_scope",
     "resolve_output_scope_paths",
     "scoped_dataset_path",
+    "validate_roads_accounting",
 ]

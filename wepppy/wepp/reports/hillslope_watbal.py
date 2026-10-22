@@ -362,6 +362,11 @@ class HillslopeWatbalReport(ReportBase):
         return mapping
 
     def _resolve_source_path(self) -> Path:
+        if self._output_scope == "roads":
+            from wepppy.wepp.interchange.roads_accounting import accounting_source, has_accounting
+
+            if has_accounting(self.wd):
+                return accounting_source(self.wd)
         rel_path = scoped_dataset_path(self._SOURCE_REL_PATH, self._output_scope)
         return self.wd / rel_path
 

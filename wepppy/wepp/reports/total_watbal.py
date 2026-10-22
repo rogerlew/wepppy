@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
-from .output_scope import normalize_output_scope, scoped_dataset_path
+from .output_scope import normalize_output_scope, scoped_dataset_path, validate_roads_accounting
 from .report_base import ReportBase
 from .row_data import RowData
 
@@ -50,6 +50,7 @@ class TotalWatbalReport(ReportBase):
 
         dataset_path = base / scoped_dataset_path(self._DATASET_REL_PATH, self._output_scope)
         if dataframe is None:
+            validate_roads_accounting(base, self._output_scope)
             if not dataset_path.exists():
                 raise FileNotFoundError(dataset_path)
             schema_names = set(pq.read_schema(dataset_path).names)

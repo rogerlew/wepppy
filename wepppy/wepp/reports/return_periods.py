@@ -21,7 +21,7 @@ from wepppy.query_engine import activate_query_engine, resolve_run_context, upda
 from wepppy.query_engine.activate import READONLY_SENTINEL
 from wepppy.runtime_paths.errors import nodir_migration_required
 
-from .output_scope import normalize_output_scope, scoped_dataset_path
+from .output_scope import normalize_output_scope, scoped_dataset_path, validate_roads_accounting
 LOGGER = logging.getLogger(__name__)
 
 EVENTS_REL_PATH = Path("wepp/output/interchange/return_period_events.parquet")
@@ -472,6 +472,7 @@ def refresh_return_period_events(
     activate_query_engine(base, run_interchange=False)
     context = resolve_run_context(str(base), auto_activate=False)
     root_dir = context.base_dir
+    validate_roads_accounting(root_dir, normalized_scope)
 
     ebe_path = root_dir / scoped_dataset_path(EBE_DATASET, normalized_scope)
     alt_ebe = root_dir / scoped_dataset_path("wepp/output/ebe_pw0.parquet", normalized_scope)
@@ -691,6 +692,7 @@ class ReturnPeriodDataset:
         self._output_scope = normalize_output_scope(output_scope)
         context = resolve_run_context(str(base), auto_activate=False)
         self._root = context.base_dir
+        validate_roads_accounting(self._root, self._output_scope)
         events_rel_path = _events_rel_path(self._output_scope)
         ranks_rel_path = _ranks_rel_path(self._output_scope)
 

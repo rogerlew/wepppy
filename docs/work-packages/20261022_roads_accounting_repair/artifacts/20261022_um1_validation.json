@@ -1,0 +1,143 @@
+{
+  "scratch": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1",
+  "rows": 5844,
+  "years": 16,
+  "area_m2": 441820.2900000002,
+  "average_report_area_m2": 441820.29000000004,
+  "average_report_source": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1/wepp/roads/output/interchange/H.accounting.wat.parquet",
+  "average_report_cache_status": "built",
+  "ledger_area_m2": 441820.29,
+  "annual": [
+    {
+      "year": 2000,
+      "Runoff": 17.98055250353033,
+      "Lateral Flow": 805.1130948621663,
+      "Percolation": 70.59151907902039,
+      "Baseflow": 264.41629392827565,
+      "Streamflow": 1087.5099412939724
+    },
+    {
+      "year": 2001,
+      "Runoff": 183.26310493761832,
+      "Lateral Flow": 1011.5502449533644,
+      "Percolation": 73.02271352944577,
+      "Baseflow": 71.4562594052902,
+      "Streamflow": 1266.2696092962728
+    },
+    {
+      "year": 2002,
+      "Runoff": 152.61890405321577,
+      "Lateral Flow": 1138.2356857796183,
+      "Percolation": 70.70646401383388,
+      "Baseflow": 71.12702478613187,
+      "Streamflow": 1361.9816146189658
+    },
+    {
+      "year": 2003,
+      "Runoff": 190.70228938766925,
+      "Lateral Flow": 1425.5779825279935,
+      "Percolation": 76.90711334292347,
+      "Baseflow": 76.50741804618708,
+      "Streamflow": 1692.78768996185
+    },
+    {
+      "year": 2004,
+      "Runoff": 90.53236503670074,
+      "Lateral Flow": 1070.0100317408082,
+      "Percolation": 85.3333997938392,
+      "Baseflow": 86.00419676940966,
+      "Streamflow": 1246.5465935469188
+    },
+    {
+      "year": 2005,
+      "Runoff": 136.58002474302836,
+      "Lateral Flow": 1093.1980588379793,
+      "Percolation": 80.14873886650456,
+      "Baseflow": 79.19610921149913,
+      "Streamflow": 1308.974192792507
+    },
+    {
+      "year": 2006,
+      "Runoff": 432.04257874462917,
+      "Lateral Flow": 1608.2974616280442,
+      "Percolation": 76.18578042126582,
+      "Baseflow": 76.1316149136173,
+      "Streamflow": 2116.4716552862906
+    },
+    {
+      "year": 2007,
+      "Runoff": 158.65358915137185,
+      "Lateral Flow": 1010.5253351879784,
+      "Percolation": 72.78533207985231,
+      "Baseflow": 72.50618477822741,
+      "Streamflow": 1241.6851091175777
+    },
+    {
+      "year": 2008,
+      "Runoff": 88.42519050680534,
+      "Lateral Flow": 1027.7972140088145,
+      "Percolation": 73.72297341278733,
+      "Baseflow": 74.89485593018134,
+      "Streamflow": 1191.117260445801
+    },
+    {
+      "year": 2009,
+      "Runoff": 126.83509480608048,
+      "Lateral Flow": 981.8113451804876,
+      "Percolation": 70.72806561969645,
+      "Baseflow": 71.34421447374173,
+      "Streamflow": 1179.9906544603098
+    },
+    {
+      "year": 2010,
+      "Runoff": 169.38283010906304,
+      "Lateral Flow": 1563.1521875256863,
+      "Percolation": 85.66650423033609,
+      "Baseflow": 83.81343229232996,
+      "Streamflow": 1816.3484499270792
+    },
+    {
+      "year": 2011,
+      "Runoff": 156.8685325006395,
+      "Lateral Flow": 1306.8620606581915,
+      "Percolation": 80.57364732525069,
+      "Baseflow": 82.09511815676039,
+      "Streamflow": 1545.8257113155914
+    },
+    {
+      "year": 2012,
+      "Runoff": 466.6767296723922,
+      "Lateral Flow": 1825.88397228158,
+      "Percolation": 87.18405419429692,
+      "Baseflow": 85.5538975039398,
+      "Streamflow": 2378.114599457912
+    },
+    {
+      "year": 2013,
+      "Runoff": 70.88757415124594,
+      "Lateral Flow": 751.8158293892143,
+      "Percolation": 78.41928440844877,
+      "Baseflow": 80.4840685380894,
+      "Streamflow": 903.1874720785496
+    },
+    {
+      "year": 2014,
+      "Runoff": 208.497046697389,
+      "Lateral Flow": 1436.7022530634943,
+      "Percolation": 80.36354382879665,
+      "Baseflow": 78.94579316845834,
+      "Streamflow": 1724.1450929293414
+    },
+    {
+      "year": 2015,
+      "Runoff": 422.10982107909507,
+      "Lateral Flow": 1341.3526253883294,
+      "Percolation": 70.73714548336682,
+      "Baseflow": 69.71770713731497,
+      "Streamflow": 1833.1801536047394
+    }
+  ],
+  "original_parquet_files_unchanged": 44,
+  "pw0_run_sha256": "aaa73c7c8241800e7dad79cae356d6a80ad4958d3941950983cc8679f8f8bacf",
+  "pw0_error_sha256": "61d5caf0bcf1094f2ca09bc2cfe608513f2f33b2c17263c31f0c4524e1ce79c2"
+}

@@ -25,11 +25,12 @@ Geographic overlap is explicitly unnecessary under the latest operator direction
 - [x] (2026-10-22 UTC) Record modeled-MOFE direction, superseding geographic partition.
 - [x] (2026-10-22 UTC) Draft contract, ADR and cross-contract amendments.
 - [x] (2026-10-22 UTC) Obtain both independent approvals; no open high/medium findings.
-- [ ] Commit standalone ancestor checkpoint.
-- [ ] Implement/test native Roads weighted PASS and source-aware water products.
-- [ ] Build native release and integrate WEPPpy composition/report/cache paths.
-- [ ] Validate fresh scratch watershed execution and complete report evidence.
-- [ ] Complete broad gates and final correctness/security reviews.
+- [x] (2026-10-22 UTC) Commit approved checkpoint as `83f7410e8`.
+- [x] (2026-10-22 UTC) Implement/test native Roads weighted PASS and source-aware water products.
+- [x] (2026-10-22 UTC) Build native release and integrate WEPPpy composition/report/cache paths.
+- [x] (2026-10-22 UTC) Validate fresh scratch watershed execution and complete report evidence.
+- [x] (2026-10-22 UTC) Complete independent correctness/security reviews and 105 focused tests.
+- [ ] Finish broad-suite rerun, record disposition, commit integration and close package.
 
 ## Surprises & Discoveries
 
@@ -49,6 +50,11 @@ derived WAT for average hillslope reporting.
 The geographic audit found outside roads and unlocated rutted buffers. Roger
 explicitly removed geographic allocation as a requirement, resolving that design
 blocker without inventing positions. Retain the audit as historical evidence only.
+
+The actual report regeneration path must preserve already-hashed source WAT,
+SOIL and ELEMENT products; reconverting them changes provenance even when numeric
+values match. Corrected regeneration converts canonical PASS only. Source/output
+alias and allocation tampering checks were strengthened through independent review.
 
 ## Decision Log
 
@@ -71,9 +77,12 @@ or new spatial fallback. Final policy is in the canonical contract and ADR-0102.
 ## Outcomes & Retrospective
 
 
-Scientific direction and executable contract draft are established. Final
-checkpoint approval, native implementation, integration and routing validation
-remain outstanding. No runtime code or original project artifacts changed yet.
+Contract checkpoint `83f7410e8` and native implementation `c941cb6` are committed.
+WEPPpy integration and full-record isolated UM1 routing/report validation pass.
+Native Rust 127 tests, independent native Python 61 tests and focused WEPPpy
+105 tests pass. Both independent final reviews pass. Archive/restore preserves
+176 lineage files. Original UM1 remains unchanged; broad-suite disposition and
+integration commit remain before closure. See the execution-validation artifact.
 
 ## Context and Orientation
 
@@ -193,3 +202,6 @@ dependency, service, endpoint or queue edge.
 Revision note: 2026-10-22 — rewritten for Roger's explicit full-MOFE modeled-area
 policy. This supersedes geographic and fixed-baseline-area drafts and carries
 forward the already-approved implementation/commit/routing scope.
+
+Revision note: 2026-10-22 — implemented and validated native/controller/report paths;
+recorded independent approvals, isolated routing and archive evidence.

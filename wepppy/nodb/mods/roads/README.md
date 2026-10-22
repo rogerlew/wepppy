@@ -189,6 +189,25 @@ After a successful Roads run, the WEPPcloud Roads UI and Roads results page expo
 
 The Roads results summary page is rendered from [summary.htm](../../../weppcloud/templates/reports/roads/summary.htm).
 
+Corrected aggregate water reports use full modeled road, fill, and buffer OFE
+areas. At each receiving hillslope, road area replaces an equal amount of
+baseline response. If roads exceed baseline area, modeled area expands to retain
+the entire road footprint. This is response mixing; it does not estimate
+geographic overlap or rerun a smaller residual hillslope.
+
+The same area ledger weights canonical PASS before watershed routing and the
+water products afterward. TotalWatSed counts each canonical PASS once and uses
+weighted baseline plus road water profiles. The average hillslope water report
+reads derived `H.accounting.wat.parquet`. Raw `H.wat.parquet`, dashboard OFE views,
+and raw exports retain their diagnostic meaning. TotalWatSed diagnostic `Q` and
+physical average-report runoff remain distinct quantities.
+
+The ledger is `wepp/roads/segments/roads.accounting.json`. Missing or changed
+corrected lineage requires a fresh Roads execution; copying files or rebuilding
+reports alone does not certify old unweighted PASS. Historical unmarked results
+remain historical. See the [accounting contract](../../../../docs/schemas/roads-water-accounting-contract.md)
+for area authority, optional inputs, cache provenance, and compatibility.
+
 ### Important output locations
 
 | Path | Purpose |

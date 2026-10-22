@@ -1,0 +1,20 @@
+{
+  "source_base_revision": "3b630643ba06bd40262285f206112c9d3ee32b21",
+  "contract_checkpoint": "83f7410e8",
+  "binary_sha256": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e",
+  "source_sha256": {
+    "wepp_interchange/src/hill_pass_combine.rs": "52a0d14a16e66982d28882236b0fa27ea1392a95d03538b81cf57f87cdeefe20",
+    "wepp_interchange/src/lib.rs": "8b0eeb3754ece05b5660447cf2bc3bf9af3e4ccd9fe515258067934d61ef3a0f",
+    "wepp_interchange/src/totalwatsed.rs": "dff0d3ef9f3e5fa84252574ab6b24dccad313e2b566f1870d1c090d2055b4a9c",
+    "wepp_interchange/src/totalwatsed/roads.rs": "756c3e72764df8196b895ca8b524fc145ad9aa6ae59757f9d3b53b8e11b8ddc2",
+    "wepp_interchange/src/calendar.rs": "8e811b51f51cdbf9189986732dd7fcf789ae6b548d01afcc9b7fa9c8f6bb4a0b",
+    "wepp_interchange/src/hill_hbp.rs": "2b5ec9cb7a8498d6c3386378d845d6cd343845e489030f3b3f58720c675d1b73"
+  },
+  "unrelated_source_edits_included": [
+    "wepp_interchange/src/calendar.rs",
+    "wepp_interchange/src/hill_hbp.rs"
+  ],
+  "build_command": "PYO3_PYTHON=/workdir/wepppy/.venv/bin/python RUSTFLAGS='-C link-arg=-lpython3.12' cargo build --release --offline -p wepp_interchange_rust -j4",
+  "publication": "same-directory staging and atomic rename",
+  "production_deployment": false
+}

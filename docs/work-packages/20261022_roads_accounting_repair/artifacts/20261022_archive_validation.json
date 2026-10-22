@@ -1,0 +1,14 @@
+{
+  "archive_helper": "wepppy.rq.project_rq_archive",
+  "source": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1",
+  "restored": "/workdir/wepppy/tests/wepp/interchange/fixtures/roads-accounting-scratch/um1-restored",
+  "archive_sha256": "5068ef9be58e1993b6a1f51ded4dd11ee405b25b1cab5f6b5b9c62f85b270535",
+  "verified_lineage_files": 176,
+  "uid": 1000,
+  "gid": 993,
+  "restored_ledger_mode": "0o600",
+  "source_ledger_mode": "0o600",
+  "report_area_m2": 441820.29000000004,
+  "report_cache_status": "built",
+  "runtime_callbacks": "isolated job/status/locks/cache; real filesystem implementation"
+}

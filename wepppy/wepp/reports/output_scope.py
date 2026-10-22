@@ -74,6 +74,16 @@ def scoped_dataset_path(path: str | Path, output_scope: str | None = None) -> st
     return path_text
 
 
+def validate_roads_accounting(wd: str | Path, output_scope: str | None) -> None:
+    """Validate corrected aggregate lineage while retaining historical reads."""
+    if normalize_output_scope(output_scope) == "roads":
+        from wepppy.wepp.interchange.roads_accounting import accounting_source, has_accounting
+
+        root = Path(wd)
+        if has_accounting(root):
+            accounting_source(root)
+
+
 __all__ = [
     "DEFAULT_OUTPUT_SCOPE",
     "OutputScope",
@@ -82,4 +92,5 @@ __all__ = [
     "normalize_output_scope",
     "resolve_output_scope_paths",
     "scoped_dataset_path",
+    "validate_roads_accounting",
 ]

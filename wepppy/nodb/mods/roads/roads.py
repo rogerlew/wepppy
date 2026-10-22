@@ -3943,6 +3943,12 @@ class Roads(NoDbBase):
             run_wepp_watershed_interchange,
         )
 
+        from wepppy.wepp.interchange.roads_accounting import LEDGER, has_accounting, load, regenerate, validate_destinations
+
+        validate_destinations(Path(self.wd))
+        corrected = has_accounting(Path(self.wd))
+        if corrected:
+            load(Path(self.wd))
         climate = self.wepp_instance.climate_instance
         is_single_storm = bool(getattr(climate, "is_single_storm", False))
         start_year_raw = getattr(climate, "calendar_start_year", None)
@@ -3972,15 +3978,22 @@ class Roads(NoDbBase):
             },
         )
 
-        run_wepp_hillslope_interchange(
-            output_dir,
-            pass_family=self.wepp_instance.pass_family,
-            start_year=start_year,
-            run_loss_interchange=not is_single_storm,
-            run_soil_interchange=run_hillslope_soil_interchange,
-            run_wat_interchange=not is_single_storm,
-            delete_after_interchange=False,
-        )
+        if corrected and not is_single_storm:
+            # Source WAT/SOIL/ELEMENT were converted before allocation. Rewriting
+            # them here would invalidate the ledger even for equal numeric rows.
+            from wepppy.wepp.interchange import run_wepp_hillslope_pass_interchange
+
+            run_wepp_hillslope_pass_interchange(output_dir, pass_family=self.wepp_instance.pass_family)
+        else:
+            run_wepp_hillslope_interchange(
+                output_dir,
+                pass_family=self.wepp_instance.pass_family,
+                start_year=start_year,
+                run_loss_interchange=not is_single_storm,
+                run_soil_interchange=run_hillslope_soil_interchange and not corrected,
+                run_wat_interchange=not is_single_storm and not corrected,
+                delete_after_interchange=False,
+            )
         self._append_roads_log(
             "run",
             "roads_hillslope_interchange_completed",
@@ -3993,7 +4006,10 @@ class Roads(NoDbBase):
                 from wepppy.nodb.core.wepp import BaseflowOpts
 
                 baseflow_opts = BaseflowOpts()
-            run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
+            if corrected:
+                regenerate(Path(self.wd), baseflow_opts)
+            else:
+                run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
             self._append_roads_log(
                 "run",
                 "roads_totalwatsed3_completed",
@@ -4041,6 +4057,12 @@ class Roads(NoDbBase):
             include_chnwb=run_chnwb_interchange,
             include_segment_loss_summary=not is_single_storm,
         )
+        if corrected and not is_single_storm:
+            from wepppy.wepp.interchange.roads_accounting import accounting_source
+
+            accounting_source(Path(self.wd))
+            required_relpaths.append("wepp/roads/output/interchange/H.accounting.wat.parquet")
+            required_relpaths.append(str(LEDGER))
         missing_relpaths = [relpath for relpath in required_relpaths if not Path(self.wd, relpath).exists()]
         if missing_relpaths:
             self._append_roads_log(
@@ -4056,6 +4078,7 @@ class Roads(NoDbBase):
         resources = {
             "status": "ready",
             "output_scope": "roads",
+            "accounting_policy": "roads_modeled_area_v1" if corrected else "historical_unverified",
             "roads_output_relpath": os.path.relpath(output_dir, self.wd),
             "interchange_relpath": os.path.relpath(interchange_dir, self.wd),
             "required_relpaths": required_relpaths,
@@ -4072,6 +4095,26 @@ class Roads(NoDbBase):
             },
         )
         return resources
+
+    def _prepare_modeled_area_accounting(self, canonical_ids, records):
+        from wepppy.wepp.interchange import run_wepp_hillslope_interchange
+        from wepppy.wepp.interchange.roads_accounting import compose, validate_destinations
+
+        validate_destinations(Path(self.wd))
+        climate = self.wepp_instance.climate_instance
+        is_single_storm = bool(getattr(climate, "is_single_storm", False))
+        if not is_single_storm:
+            start_year_raw = getattr(climate, "calendar_start_year", None)
+            run_wepp_hillslope_interchange(
+                Path(self.roads_output_dir),
+                pass_family=self.wepp_instance.pass_family,
+                start_year=int(start_year_raw) if start_year_raw not in (None, "") else None,
+                run_loss_interchange=True,
+                run_soil_interchange=any(Path(self.roads_output_dir).glob("H*.soil.dat")),
+                run_wat_interchange=True,
+                delete_after_interchange=False,
+            )
+        return compose(Path(self.wd), canonical_ids, records, single_storm=is_single_storm)
 
     def run_roads_wepp(self) -> Dict[str, Any]:
         failed_run_summary: Optional[Dict[str, Any]] = None
@@ -5975,116 +6018,10 @@ class Roads(NoDbBase):
             all_hillslope_wepp_ids = sorted(int(value) for value in translator.iter_wepp_sub_ids())
 
             current_stage = "pass_combination"
-            for wepp_id in all_hillslope_wepp_ids:
-                base_pass_path = baseline_output_dir / f"H{wepp_id}.pass.dat"
-                if not base_pass_path.exists():
-                    raise FileNotFoundError(f"Missing baseline hillslope pass file: {base_pass_path}")
-
-                output_pass_path = Path(self.roads_output_dir) / f"H{wepp_id}.pass.dat"
-                staged_strategy[str(wepp_id)] = self._safe_link_or_copy(str(base_pass_path), str(output_pass_path))
-                self._append_roads_log(
-                    "run",
-                    "baseline_hillslope_staged",
-                    {
-                        "wepp_id": wepp_id,
-                        "base_pass_relpath": os.path.relpath(base_pass_path, self.wd),
-                        "staged_pass_relpath": os.path.relpath(output_pass_path, self.wd),
-                        "strategy": staged_strategy[str(wepp_id)],
-                    },
-                )
-
-            for wepp_id in additive_targeted_without_replacement_ids:
-                base_pass_path = baseline_output_dir / f"H{wepp_id}.pass.dat"
-                output_pass_path = Path(self.roads_output_dir) / f"H{wepp_id}.pass.dat"
-                output_was_symlink = output_pass_path.is_symlink()
-                if output_pass_path.exists() or output_was_symlink:
-                    output_pass_path.unlink()
-                self._append_roads_log(
-                    "run",
-                    "combine_target_hillslope_start",
-                    {
-                        "wepp_id": wepp_id,
-                        "base_pass_relpath": os.path.relpath(base_pass_path, self.wd),
-                        "road_pass_count": len(segment_pass_paths_by_wepp.get(wepp_id, [])),
-                        "output_pass_relpath": os.path.relpath(output_pass_path, self.wd),
-                        "output_was_symlink": output_was_symlink,
-                    },
-                )
-                self._combine_target_hillslope_pass(
-                    base_pass_path=str(base_pass_path),
-                    road_pass_paths=segment_pass_paths_by_wepp.get(wepp_id, []),
-                    output_pass_path=str(output_pass_path),
-                )
-                staged_strategy[str(wepp_id)] = "combined"
-                self._append_roads_log(
-                    "run",
-                    "combined_hillslope_pass",
-                    {
-                        "wepp_id": wepp_id,
-                        "base_pass_relpath": os.path.relpath(base_pass_path, self.wd),
-                        "road_pass_count": len(segment_pass_paths_by_wepp.get(wepp_id, [])),
-                        "combined_pass_relpath": os.path.relpath(output_pass_path, self.wd),
-                    },
-                )
-
-            for wepp_id in replacement_targeted_ids:
-                replacement_paths = list(replacement_pass_paths_by_wepp.get(wepp_id, []))
-                if not replacement_paths:
-                    continue
-                output_pass_path = Path(self.roads_output_dir) / f"H{wepp_id}.pass.dat"
-                output_was_symlink = output_pass_path.is_symlink()
-                if output_pass_path.exists() or output_was_symlink:
-                    output_pass_path.unlink()
-
-                additive_count = len(segment_pass_paths_by_wepp.get(wepp_id, []))
-                if additive_count:
-                    self._append_roads_log(
-                        "run",
-                        "replacement_supersedes_additive",
-                        {
-                            "wepp_id": int(wepp_id),
-                            "additive_pass_count": int(additive_count),
-                            "replacement_pass_count": len(replacement_paths),
-                        },
-                    )
-
-                self._append_roads_log(
-                    "run",
-                    "replacement_target_hillslope_start",
-                    {
-                        "wepp_id": int(wepp_id),
-                        "replacement_pass_count": len(replacement_paths),
-                        "replacement_pass_relpaths": [
-                            os.path.relpath(path, self.wd) for path in replacement_paths
-                        ],
-                        "output_pass_relpath": os.path.relpath(output_pass_path, self.wd),
-                        "output_was_symlink": output_was_symlink,
-                    },
-                )
-
-                if len(replacement_paths) == 1:
-                    staged_strategy[str(wepp_id)] = (
-                        f"replacement_{self._safe_link_or_copy(replacement_paths[0], str(output_pass_path))}"
-                    )
-                else:
-                    self._combine_target_hillslope_pass(
-                        base_pass_path=str(replacement_paths[0]),
-                        road_pass_paths=replacement_paths[1:],
-                        output_pass_path=str(output_pass_path),
-                        strategy="phase4",
-                    )
-                    staged_strategy[str(wepp_id)] = "replacement_combined"
-
-                self._append_roads_log(
-                    "run",
-                    "replacement_hillslope_pass_staged",
-                    {
-                        "wepp_id": int(wepp_id),
-                        "replacement_pass_count": len(replacement_paths),
-                        "staged_strategy": staged_strategy[str(wepp_id)],
-                        "staged_pass_relpath": os.path.relpath(output_pass_path, self.wd),
-                    },
-                )
+            accounting_ledger = self._prepare_modeled_area_accounting(
+                all_hillslope_wepp_ids, segment_execution_records
+            )
+            staged_strategy = {str(t["id"]): t["mode"] for t in accounting_ledger["targets"]}
 
             run_summary_base = {
                 "eligible_segment_count": eligible_segment_count,
@@ -6145,6 +6082,9 @@ class Roads(NoDbBase):
                     wepp_bin=self.wepp_instance.wepp_bin,
                 )
                 run_watershed(self.roads_runs_dir)
+                from wepppy.wepp.interchange.roads_accounting import mark_routed
+
+                mark_routed(Path(self.wd))
             except Exception as exc:
                 failed_run_summary = {
                     **run_summary_base,

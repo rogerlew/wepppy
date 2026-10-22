@@ -1,6 +1,6 @@
 # Roads modeled-area repair tracker
 
-**Status**: Active — approved contract checkpoint  
+**Status**: Active — final broad-suite validation
 **Date / timezone**: 2026-10-22 UTC
 
 ## Progress
@@ -10,10 +10,10 @@
 - [x] Record latest modeled-MOFE policy; remove geographic allocation requirement.
 - [x] Draft canonical contract, ADR-0102 and related contract amendments.
 - [x] Obtain final two independent approvals and disposition findings.
-- [ ] Commit standalone contract ancestor.
-- [ ] Implement native Roads weighted PASS, source-aware water accounting and release.
-- [ ] Integrate WEPPpy before routing, aggregate reports and cache provenance.
-- [ ] Validate scratch UM1 fresh routing and full-record reports.
+- [x] Commit standalone contract ancestor `83f7410e8`.
+- [x] Implement native Roads weighted PASS, source-aware water accounting and release.
+- [x] Integrate WEPPpy before routing, aggregate reports and cache provenance.
+- [x] Validate scratch UM1 fresh routing and full-record reports.
 - [ ] Complete broad gates and independent correctness/security reviews.
 
 ## Decisions
@@ -39,10 +39,11 @@ WEPPpy `38df23fbf5696b9cc5b5cdbbd6f15fa297a5286e`;
 wepppyo3 `3b630643ba06bd40262285f206112c9d3ee32b21`.
 Native unrelated calendar/HBP edits and other preexisting changes are excluded
 from task commits and explicitly disclosed if present in local build provenance.
-No runtime implementation files changed yet. No deployment or in-place UM1 repair.
+Native implementation committed as `c941cb6`; WEPPpy integration and isolated UM1
+validation pass. No deployment or in-place UM1 repair.
 
 ## Next action
 
-Finalize independent contract reviews and commit the checkpoint under granted
-authority, then execute native and integration milestones without seeking repeat
-scope permission. Update this tracker and active plan at each milestone.
+Finish broad-suite rerun after updating the expected native hash; record results,
+commit integration and close the plan. Both independent final reviews pass.
+See [execution evidence](artifacts/20261022_execution_validation.md).

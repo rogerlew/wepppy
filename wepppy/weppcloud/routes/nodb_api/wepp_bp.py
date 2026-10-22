@@ -1276,6 +1276,9 @@ def plot_wepp_streamflow(runid, config):
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
+    from wepppy.wepp.reports.output_scope import validate_roads_accounting
+
+    validate_roads_accounting(wd, output_scope)
     stream_rel_path = scoped_dataset_path('wepp/output/interchange/totalwatsed3.parquet', output_scope)
     stream_parquet = _join(wd, stream_rel_path)
     if not _exists(stream_parquet):

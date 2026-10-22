@@ -391,6 +391,40 @@ def test_resolve_outslope_unrutted_required_profiles_validates_bounds(tmp_path: 
     assert set(errors) == {"fill_length_m", "fill_slope_pct", "buffer_slope_pct"}
 
 
+
+@pytest.fixture
+def modeled_accounting_stub(monkeypatch):
+    """Isolate accounting in routing tests whose PASS files are text sentinels."""
+    from wepppy.wepp.interchange import roads_accounting
+
+    def prepare(self, canonical_ids, records):
+        targets = []
+        for target in canonical_ids:
+            rows = [r for r in records if r.get("status") == "completed"
+                    and r["target_hillslope_wepp_id"] == target]
+            replacement = [r for r in rows if r.get("routing_mode") == "outslope_unrutted_replacement"]
+            active = replacement or rows
+            output = Path(self.roads_output_dir) / f"H{target}.pass.dat"
+            baseline = Path(self.wepp_instance.output_dir) / f"H{target}.pass.dat"
+            paths = [str(Path(self.wd) / r["segment_pass_relpath"]) for r in active]
+            if replacement and len(paths) == 1:
+                self._safe_link_or_copy(paths[0], str(output))
+            elif active:
+                self._combine_target_hillslope_pass(
+                    base_pass_path=paths[0] if replacement else str(baseline),
+                    road_pass_paths=paths[1:] if replacement else paths,
+                    output_pass_path=str(output),
+                    **({"strategy": "phase4"} if replacement else {}),
+                )
+            else:
+                self._safe_link_or_copy(str(baseline), str(output))
+            targets.append({"id": target, "mode": "replacement" if replacement else "additive" if rows else "unchanged"})
+        return {"targets": targets}
+
+    monkeypatch.setattr(Roads, "_prepare_modeled_area_accounting", prepare)
+    monkeypatch.setattr(roads_accounting, "mark_routed", lambda root: None)
+
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_rejects_stale_prepare_summary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     monkeypatch.setattr(
@@ -1005,6 +1039,7 @@ def test_prepare_segments_infers_wgs_for_degree_coordinates_without_crs(
     assert state["roads_params"]["input_crs"] == "EPSG:4326"
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1190,8 +1225,8 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     assert summary["mapped_segment_count"] == 1
     assert summary["executed_segment_count"] == 1
     assert summary["targeted_hillslope_wepp_ids"] == [1]
-    assert summary["pass_staging_strategy"]["1"] == "combined"
-    assert summary["pass_staging_strategy"]["2"] in {"copy", "symlink"}
+    assert summary["pass_staging_strategy"]["1"] == "additive"
+    assert summary["pass_staging_strategy"]["2"] == "unchanged"
     assert summary["skipped_segment_reason_counts"] == {"design_not_eligible": 1}
     assert summary["segment_pass_count"] == 1
     assert len(summary["segment_execution_records"]) == 1
@@ -1205,6 +1240,7 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     assert captured_make["runs_dir"] == controller.roads_runs_dir
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1435,6 +1471,7 @@ def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract
     assert routed_build_calls == {"management": 1, "soil": 1, "slope": 1}
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_runs_outslope_rutted_channel_associated_with_fill_defaults(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1580,6 +1617,7 @@ def test_run_roads_wepp_runs_outslope_rutted_channel_associated_with_fill_defaul
     assert calls == {"management": 1, "soil": 1, "slope": 1}
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_routes_outslope_rutted_non_channel_with_three_ofe_contract(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1794,6 +1832,7 @@ def test_run_roads_wepp_routes_outslope_rutted_non_channel_with_three_ofe_contra
     assert calls == {"management": 1, "soil": 1, "slope": 1}
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_skips_non_channel_routable_segment_when_trace_does_not_reach_channel(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1980,6 +2019,7 @@ def test_run_roads_wepp_skips_non_channel_routable_segment_when_trace_does_not_r
     assert summary["skipped_segment_reason_counts"] == {"trace_did_not_reach_channel": 1}
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -2133,6 +2173,7 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
     assert last_run["segment_pass_count"] == 1
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_fails_when_segment_execution_fails(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -2985,6 +3026,7 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_c
     assert record["segment_ids_capped"] == ["seg-d::h21"]
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -3205,7 +3247,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     assert summary["segment_design_counts"]["outslope_unrutted"] == 1
     assert summary["replacement_targeted_hillslope_wepp_ids"] == [1]
     assert summary["additive_targeted_hillslope_wepp_ids"] == []
-    assert summary["pass_staging_strategy"]["1"] in {"replacement_copy", "replacement_symlink"}
+    assert summary["pass_staging_strategy"]["1"] == "replacement"
     assert summary["outslope_unrutted_targeted_hillslope_count"] == 1
     assert summary["outslope_unrutted_included_segment_count"] == 1
     assert summary["outslope_unrutted_excluded_segment_count"] == 0
@@ -3213,6 +3255,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "replacement pass"
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -3459,7 +3502,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
 
     assert summary["executed_outslope_unrutted_segment_count"] == 2
     assert summary["segment_design_counts"]["outslope_unrutted"] == 2
-    assert summary["pass_staging_strategy"]["1"] == "replacement_combined"
+    assert summary["pass_staging_strategy"]["1"] == "replacement"
     assert len(combine_calls) == 1
     assert combine_calls[0]["strategy"] == "phase4"
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "combined replacement pass"
@@ -3471,6 +3514,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
     assert executed_outslope_segments[:2] == expected_segment_order
 
 
+@pytest.mark.usefixtures("modeled_accounting_stub")
 def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candidates(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
