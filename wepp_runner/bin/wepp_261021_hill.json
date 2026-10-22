@@ -1,7 +1,8 @@
 {
+  "artifact_revision": 2,
   "binary_name": "wepp_261021_hill",
   "binary_role": "hillslope",
-  "built_utc": "2026-10-21T20:28:34Z",
+  "built_utc": "2026-10-22T04:32:16Z",
   "execution_calendar": {
     "ascii_pass_daily_key_validation": true,
     "climate_date_validation": true,
@@ -23,6 +24,10 @@
     "process_mode_pass_pw0_required": true,
     "single_user_defined_inputs_supported": true
   },
+  "known_limitations": [
+    "Signed soil/routing withdrawal acceptance and raw negative-discharge clipping remain open",
+    "Muskingum-Cunge storage authority unchanged; no universal physical closure claim"
+  ],
   "paired_interchange": {
     "pass_components_version": 3,
     "release_commit": "bd63094",
@@ -31,25 +36,32 @@
   },
   "release_tag": "261021",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+  "sha256": "81591bf0301604aa25002d641e3c8e5d22e15c747b179f1613e7c329233f4965",
   "source_branch": "wepp_260430_negmeltfix_comparator",
-  "source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa",
+  "source_commit": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
   "source_repo": "wepp-in-the-woods/wepp-forest",
+  "supersedes": {
+    "artifact_revision": 1,
+    "reason": "Owner-authorized replacement of undeployed calendar-only 261021",
+    "sha256": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa"
+  },
   "validation": {
     "ablation_artifact_policy": "pass",
-    "calendar_tests": "61 passed",
-    "candidate_executable_equivalence": "identical after removing debug sections and GNU build ID",
+    "candidate_executable_equivalence": "Independent match of 26 allocated ELF sections excluding GNU build ID; full normalized files also identical",
+    "cedar_creek_comparison": "24-year paired candidate study against 261010; transferred by exact executable equivalence (supplementary)",
     "gate_resource_policy": "committed inputs or reproducible generated outputs only",
     "hillslope_watchlist": "12 passed",
     "host_smoke": "pass",
     "post_vendor_container_smoke": "pass",
     "post_vendor_host_smoke": "pass",
     "post_vendor_provenance": "pass",
-    "post_vendor_tests": "8 passed, 2 existing deprecation warnings",
+    "post_vendor_tests": "21 passed, 2 existing deprecation warnings",
     "production_deployment": "not performed",
-    "pytest": "232 passed, 2 existing deprecation warnings",
+    "pytest": "527 passed, 2 warnings in 718.13s (0:11:58)",
     "runtime_provenance": "pass",
-    "same_build_watershed_replay": "pass; 400 years, 146097 climate-aligned days (supplementary)"
+    "same_build_watershed_replay": "29 paired candidate replays including 400 years / 146097 days; transferred by exact executable equivalence (supplementary)",
+    "wepppy_broad_suite": "11052 unique passed, 122 skipped in fully accounted segments; combined feature-access Redis authentication failure retained, isolated 52 pass; final 258 pass using installed browser cache"
   },
   "wepp_banner_version": "2020.500"
 }

@@ -1,0 +1,65 @@
+{
+  "collected_nodes": 11173,
+  "collection_import_skips": 1,
+  "unique_passes": 11052,
+  "unique_skips_including_collection": 122,
+  "completed_prefix_nodes": 2451,
+  "covered_unique_nodes": 11173,
+  "missing_nodes": [],
+  "failure_nodes_observed": [
+    "tests/weppcloud/test_feature_access.py::test_openet_signed_token_live_membership_admission"
+  ],
+  "failures_with_later_pass": [
+    "tests/weppcloud/test_feature_access.py::test_openet_signed_token_live_membership_admission"
+  ],
+  "reports": {
+    "feature-isolated.report.jsonl": {
+      "passed": 52,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "b9136b706572ab21cc8524ff8a4c12537319727acde3a2db058525422e1db462"
+    },
+    "remainder.report.jsonl": {
+      "passed": 8108,
+      "skipped": 74,
+      "failures": [
+        "tests/weppcloud/test_feature_access.py::test_openet_signed_token_live_membership_admission"
+      ],
+      "sha256": "949ce9dd2e231a784cc3d84095c44607985b80da4be3b7ba0972357bcefd72ff"
+    },
+    "soil-0.report.jsonl": {
+      "passed": 58,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "4b2ee087ec05c6a3b39dbf0f01781c3040e3c4dabb4ede7e899f9f70f608224c"
+    },
+    "soil-1.report.jsonl": {
+      "passed": 58,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "c7bdb468941285512fb1a574287e06969c4f081bddbf49ca1bc4fd43950fdf92"
+    },
+    "soil-2.report.jsonl": {
+      "passed": 57,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "32edfa8c2e7e316b7e4f2429aeb39913ff3d6362213131c56470517f8d0f2614"
+    },
+    "soil-3.report.jsonl": {
+      "passed": 57,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "36ecdf78e57c3d0f8f59d16006cf17e48570baef892703cf6f0f6c014304596e"
+    },
+    "tail.report.jsonl": {
+      "passed": 258,
+      "skipped": 0,
+      "failures": [],
+      "sha256": "f22e584fe6f608bc1106cc2ee10d9daea4030672c721f08cd5d9855e18b76420"
+    }
+  },
+  "all_collected_nodes_covered": true,
+  "full_collection_sha256": "bdae0f6dad485676e7381fd3e32d493f0365811af70e2196c6ccb25333b3f517",
+  "covered_node_set_sha256": "7d62b4af71a2f4adc74d38c6103c6d1b1524a776caa124c1fe4f8b6fb5e415ce",
+  "scope": "Segmented execution; original full command intentionally interrupted in slow soil module. Failure history retained even where isolated rerun passes."
+}

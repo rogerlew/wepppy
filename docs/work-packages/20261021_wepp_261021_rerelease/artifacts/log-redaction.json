@@ -1,0 +1,5 @@
+{
+  "source_log_sha256": "e523472be1d3d6f95233519a313ae453ef4801116c15da662f14818942426fdc",
+  "retained_log_sha256": "1ecd3f9bdf293e2223adacb08b2e3db8d9e1a592464ad5de9cfc323d3f533bc7",
+  "redaction": "Synthetic test JWT strings removed; trailing line whitespace normalized. Original log retained in local evidence root."
+}

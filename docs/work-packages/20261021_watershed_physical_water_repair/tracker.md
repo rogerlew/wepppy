@@ -160,3 +160,11 @@ windows independently verified. Sampled volume +0.5165%, maximum reported peak
 Hillslope yield +0.0370%; this is not a routing-only attribution. Repaired
 discharge publication passes the printed-integral check on all 8,765 checkable
 days. See `artifacts/cedar-comparison.md`. Signed exchange remains open.
+
+### 2026-10-21 — Separate binary reissue authorized
+
+The owner requests same-name replacement of undeployed261021 with d354e3c99
+and detailed illustrated release notes. Execution is tracked in
+`20261021_wepp_261021_rerelease`; this supersedes the original no-overwrite
+restriction for that pair only. Signed exchange remains open; MC storage
+authority, defaults and deployment scope remain unchanged.

@@ -1,0 +1,13 @@
+{
+  "source_commit": "a87925df9ffe6ebb928e126395dd159d484285fa",
+  "deployment_status": "not deployed, per operator",
+  "retained_archive": "/workdir/wepp-261021-rerelease-20261021/superseded",
+  "sha256": {
+    "wepp_261021": "fe7a8d7b93deb2329536b9cc937b9f51a5c747b19fd3b95584347639046fa385",
+    "wepp_261021.json": "959a0333f7c6920883d5953666e6b4e3f2faf529e30219953989d38bfed38612",
+    "wepp_261021_hill": "6e4ec397551175ffd71337eeea04f5b3150a544f247382c863956fb50d7e59d1",
+    "wepp_261021_hill.json": "3a8ec35cc4e222dffd2fbb113bf8329c7544cca7f328017cb945256a1defc18b",
+    "wepp_261021_release_notes.md": "2b73e43300cc941f9c3bb45f43ecacb714afe753119cfe1f4dcba928304f70fe",
+    "wepp_261021_validation.md": "af0d7ad6a99273860b73e512e573f4b9d7caf9e939c773803210b17d09be6589"
+  }
+}

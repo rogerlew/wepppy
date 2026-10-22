@@ -1,0 +1,28 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261021",
+  "artifact_revision": 2,
+  "document_revision": "1",
+  "document_date": "2026-10-21",
+  "publication_status": "approved",
+  "approved_on": "2026-10-21",
+  "approval_record": "Roger Lew: Publish the reviewed report",
+  "pdf_filename": "wepp_261021_release-notes-r1.pdf",
+  "pdf_sha256": "b4e894d013e4858e410ff8e2d265095ebebcde04fe68e3c25a665e3a9027f82c",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261021/wepp_261021_release-notes-r1.pdf",
+  "pages": 24,
+  "model_source_identity": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
+  "binary_sha256": {
+    "wepp_261021": "e2c83b1a691fad3ffe29acf1588dadbecfeec9b027391df8b7fddcf4908d2971",
+    "wepp_261021_hill": "81591bf0301604aa25002d641e3c8e5d22e15c747b179f1613e7c329233f4965"
+  },
+  "previous_document_revision": "1.0-review (unpublished owner-reviewed draft)",
+  "reviewed_pdf_sha256": "c2ed499701ee7bfa03dc7939d9a2b53a48329c546ee1ea16e6c0e9eda70230df",
+  "public_evidence_references": [
+    "USDA NSERL Report 10, chapters 4, 5 and 11",
+    "Wang et al. (2010), WEPP channel-routing implementation",
+    "Retained single/multiple-OFE daily/hourly accounting and controlled repair evidence",
+    "Cedar Creek 24-year paired comparison with 261010, including adverse low-flow events"
+  ],
+  "scope_note": "Owner-approved report publication. Signed soil/routing acceptance and raw negative-discharge clipping remain open; no universal physical closure, field validation, institutional endorsement, source-license grant or production deployment authorization."
+}

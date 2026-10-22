@@ -84,7 +84,8 @@ users; unchanged paths require parity. Historical outputs remain intact. A
 future release must regenerate all contributing hillslope PASS files and
 watershed outputs with one paired build, then refresh affected interchange/report
 artifacts through supported workflows. Never mix repaired hillslope PASS with
-an old watershed executable or overwrite `wepp_261021` artifacts.
+an old watershed executable. The original no-overwrite restriction is superseded
+only by the explicit reissue authorization below.
 
 This package targets source repair and locally validated, release-ready candidate
 builds. Dated release naming/vendoring, production deployment, default changes,
@@ -110,7 +111,11 @@ monitoring window in this local-repair phase.
 
 ## Highest claim and deliverables
 
-Current highest claim: three validated narrow corrections and an MC-preserving continuity audit with a separately tested interior-state execution correction. Complete watershed closure remains open.
+Current highest claim: validated bounded soil/source/state/publication and
+channel-plane repairs through source d354e3c99, with an MC-preserving continuity
+audit and a complete 24-year paired Cedar comparison. The separate reissue
+package records release gates and publication. Signed soil/routing acceptance
+and complete watershed physical closure remain open.
 Planned deliverables: ADR/contracts, portable regressions, four attributable
 repairs, combined generated-output ledgers, independent reviews, and an operator
 handoff recording supported geometries, remaining scientific limits and release
@@ -123,3 +128,11 @@ rejected a change to geometric-volume authority and authorized the consistency
 audit. Geometric mismatch alone is not an MC water-creation/loss finding.
 See [current findings](artifacts/mc-continuity-findings.md) for the derivation,
 actual cascade-transfer discrepancy and narrow interior-state correction.
+
+## Authorized release handoff (2026-10-21)
+
+The owner authorized replacing the undeployed `wepp_261021` pair with reviewed
+source d354e3c99. The separate [reissue package](../20261021_wepp_261021_rerelease/package.md)
+retains old identities, fresh release gates and the illustrated technical report.
+This authorization does not close signed soil/routing acceptance, change MC
+storage authority, switch defaults or authorize production deployment.

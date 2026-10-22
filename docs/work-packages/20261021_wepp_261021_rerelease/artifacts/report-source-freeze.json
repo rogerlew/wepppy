@@ -1,0 +1,33 @@
+{
+  "pdf_sha256": "b4e894d013e4858e410ff8e2d265095ebebcde04fe68e3c25a665e3a9027f82c",
+  "publication_approval": "Roger Lew,2026-10-21: Publish the reviewed report",
+  "source_files": {
+    "change-register.csv": "e2b8ddb2d6445a52e1975ba690d143b9aac69634b48cf3aa6de07dd369f9fabb",
+    "evidence/cedar-annual-percent-changes.csv": "6639149cdd517f2915c4da61307a59ec20e496ed5663d65f3dc265517b7d087f",
+    "evidence/cedar-annual.csv": "4e641f0528d40fece5542fd77fa1a90c501e4acf98daae2b437948d7f28d9e83",
+    "evidence/cedar-events.csv": "26252151a1ae2f1eef6e3876eb02e6d5443c1080cb6f79a0917d9a96316575a9",
+    "evidence/cedar-hydrograph-windows.csv": "2331d6e759be3eef51ceb78b396496f6fead0a1081a50417abbbfa381bf7f38f",
+    "evidence/figure-data.json": "63b6946cf1cdda20000d3ec113d50df2ed95cfa810905c4868c2f3d2bcc2225c",
+    "evidence/figure-manifest.json": "f7d165cff1ac5e79fadd16f7f7db2175531885bb814d04fd838ebef09af4b3c1",
+    "evidence/primary-reference-checks.md": "a0105563eb6da511a4941d10bc92ea504f48525a77c1ebc0d5fd86b7ef9e8b68",
+    "figures/accounting-control-volumes.pdf": "429e8d22d211a3078458686797ed507be7e6c64eb3d3bbbb0d892eb3a60da337",
+    "figures/calendar-century-defect.pdf": "c5cefa834c5917488e467506ce53e917a3cd10d191978b5366b9831d58ae529d",
+    "figures/cedar-annual-comparison.pdf": "4a5c3e94a5d7f3828035e487660d4b816da628af40d2dab1ebd4b217ffd8776f",
+    "figures/cedar-major-events.pdf": "35d7d41217d4e89a03864683c02c521c2a435eb27a0d0386a1f98cfa191ed42f",
+    "figures/cedar-small-events.pdf": "9f63052c04755dc6f86092ebde23ed4b7eef0584613db868d51b9b28b41add1b",
+    "figures/channel-plane-alias-defect.pdf": "0285eaa3b38ab7a8458b916ccb3614d0af026e8817e1cb57da282fa1aaaaece7",
+    "figures/flat-source-cells.pdf": "3ee3d3e8e820667d141525db9c316e723bc0cf6a91857495b46697e1ecfb15e5",
+    "figures/groundwater-area-defect.pdf": "801874a6b0e646677dc503db96b29796cf779178ef6e3101167b8f00d29d9cb0",
+    "figures/mc-retained-state-defects.pdf": "7133073d29a898f8c7370d6162f3463cbf4b5cd0af18b716b4ab791a75ae398d",
+    "implementation-review.md": "fbecf7dd2636829889924bbe9db3fd43a00fcfb2dfd3f45767bbb0830e66caee",
+    "investigation.tex": "1af029c8115d0d3e370fc1ea9f0c1a8bc97313214d94698da74110621399529b",
+    "main.tex": "5b1d274a86975552776c1d39ab25aece5c745da048581515a50872273a52c0f8",
+    "metadata.tex": "9db7d3fb2e1c5450ac99ac298499938e0ce97ed9fd5a297862389ad51ec99c7c",
+    "methods.tex": "e073c269387d38e82f1caf2bcccf3d58ca16b86dd644bc917bee877055f32418",
+    "operations.tex": "24bb9d1bcfe6f03ce41c989910f0b0eb42c3ab055d49e71b76bce0f7835740a2",
+    "overview.tex": "a0655ca857e1487770f74187fb8d5a41b34ee404944b58d2a3864bf45991d4d9",
+    "prepare_figures.py": "0f48550cf511167095376e204a12c555fcc1b4b6aaa819db91bd17ba6c5da81b",
+    "publication-review.md": "8eaab5a65112e4b2c7e042870c4e9d3e04d3f4694485a05c0d512121ad1e62a6",
+    "references.tex": "82f5f6612908c030f5653cc37e6db72b31c3aab8e871f64c8f523a926deb1e46"
+  }
+}

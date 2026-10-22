@@ -1,0 +1,12 @@
+{
+  "caddy_static_status": 200,
+  "content_type": "application/pdf",
+  "download_sha256": "b4e894d013e4858e410ff8e2d265095ebebcde04fe68e3c25a665e3a9027f82c",
+  "usersum_existing_changelog_status": 200,
+  "new_pdf_link_present": true,
+  "previous_261010_pdf_link_preserved": true,
+  "environment": "local running development stack via existing Caddy forwarded-HTTPS contract",
+  "production_deployment": false,
+  "public_manifest_status": 200,
+  "public_manifest_bytes_match": true
+}

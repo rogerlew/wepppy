@@ -1,0 +1,222 @@
+{
+  "method": "Independent streaming raw chan.out parse with exact full-period year/day/channel/time keys, finite rates, math.fsum annual volumes, sampled annual maxima, and every six-window CSV sample. Report annual/event CSV bytes match retained final metrics; report Cedar JSON matches retained summary.",
+  "copied_csv_sha256": {
+    "cedar-annual.csv": "4e641f0528d40fece5542fd77fa1a90c501e4acf98daae2b437948d7f28d9e83",
+    "cedar-annual-percent-changes.csv": "6639149cdd517f2915c4da61307a59ec20e496ed5663d65f3dc265517b7d087f",
+    "cedar-events.csv": "26252151a1ae2f1eef6e3876eb02e6d5443c1080cb6f79a0917d9a96316575a9"
+  },
+  "window_csv_sha256": "2331d6e759be3eef51ceb78b396496f6fead0a1081a50417abbbfa381bf7f38f",
+  "results": {
+    "release": {
+      "source_sha256": "28986996f0619d4d23e1f14778a9dbaae5d32c124d01898e2de3e8be4483bba7",
+      "verified_raw_rows": 1262304,
+      "verified_dates": 8766,
+      "verified_window_samples": 6048,
+      "verified_unique_window_samples": 6048,
+      "annual": {
+        "1980": {
+          "sampled_volume_m3": 41548802.339999996,
+          "sampled_peak_m3s": 35.3
+        },
+        "1981": {
+          "sampled_volume_m3": 45022701.00000001,
+          "sampled_peak_m3s": 24.3
+        },
+        "1982": {
+          "sampled_volume_m3": 61426826.4,
+          "sampled_peak_m3s": 20.6
+        },
+        "1983": {
+          "sampled_volume_m3": 59071834.2,
+          "sampled_peak_m3s": 23.5
+        },
+        "1984": {
+          "sampled_volume_m3": 63015651.00000001,
+          "sampled_peak_m3s": 25.9
+        },
+        "1985": {
+          "sampled_volume_m3": 46433636.4,
+          "sampled_peak_m3s": 19.5
+        },
+        "1986": {
+          "sampled_volume_m3": 47834044.2,
+          "sampled_peak_m3s": 16.5
+        },
+        "1987": {
+          "sampled_volume_m3": 39156767.94,
+          "sampled_peak_m3s": 19.5
+        },
+        "1988": {
+          "sampled_volume_m3": 45714875.4,
+          "sampled_peak_m3s": 9.86
+        },
+        "1989": {
+          "sampled_volume_m3": 51336788.4,
+          "sampled_peak_m3s": 9.39
+        },
+        "1990": {
+          "sampled_volume_m3": 59380384.800000004,
+          "sampled_peak_m3s": 43.3
+        },
+        "1991": {
+          "sampled_volume_m3": 53664801.3,
+          "sampled_peak_m3s": 19.1
+        },
+        "1992": {
+          "sampled_volume_m3": 38458069.800000004,
+          "sampled_peak_m3s": 20.1
+        },
+        "1993": {
+          "sampled_volume_m3": 49624423.800000004,
+          "sampled_peak_m3s": 14.0
+        },
+        "1994": {
+          "sampled_volume_m3": 47162669.82,
+          "sampled_peak_m3s": 46.2
+        },
+        "1995": {
+          "sampled_volume_m3": 67686954.6,
+          "sampled_peak_m3s": 36.6
+        },
+        "1996": {
+          "sampled_volume_m3": 80183239.80000001,
+          "sampled_peak_m3s": 32.8
+        },
+        "1997": {
+          "sampled_volume_m3": 68236206.6,
+          "sampled_peak_m3s": 29.9
+        },
+        "1998": {
+          "sampled_volume_m3": 53116540.199999996,
+          "sampled_peak_m3s": 25.2
+        },
+        "1999": {
+          "sampled_volume_m3": 62719734.6,
+          "sampled_peak_m3s": 37.5
+        },
+        "2000": {
+          "sampled_volume_m3": 48671237.400000006,
+          "sampled_peak_m3s": 8.64
+        },
+        "2001": {
+          "sampled_volume_m3": 37776459.0,
+          "sampled_peak_m3s": 17.7
+        },
+        "2002": {
+          "sampled_volume_m3": 49020451.92,
+          "sampled_peak_m3s": 18.1
+        },
+        "2003": {
+          "sampled_volume_m3": 50198559.0,
+          "sampled_peak_m3s": 37.7
+        }
+      }
+    },
+    "candidate": {
+      "source_sha256": "507e148553c6b1f1ee943868e31266eff15a2d20ef741035fe53a608189aeb16",
+      "verified_raw_rows": 1262304,
+      "verified_dates": 8766,
+      "verified_window_samples": 6048,
+      "verified_unique_window_samples": 6048,
+      "annual": {
+        "1980": {
+          "sampled_volume_m3": 41805940.08,
+          "sampled_peak_m3s": 35.7
+        },
+        "1981": {
+          "sampled_volume_m3": 45255804.0,
+          "sampled_peak_m3s": 24.4
+        },
+        "1982": {
+          "sampled_volume_m3": 61745972.4,
+          "sampled_peak_m3s": 20.9
+        },
+        "1983": {
+          "sampled_volume_m3": 59365787.400000006,
+          "sampled_peak_m3s": 23.7
+        },
+        "1984": {
+          "sampled_volume_m3": 63329368.2,
+          "sampled_peak_m3s": 26.0
+        },
+        "1985": {
+          "sampled_volume_m3": 46683044.4,
+          "sampled_peak_m3s": 19.6
+        },
+        "1986": {
+          "sampled_volume_m3": 48091918.2,
+          "sampled_peak_m3s": 16.6
+        },
+        "1987": {
+          "sampled_volume_m3": 39367638.0,
+          "sampled_peak_m3s": 19.7
+        },
+        "1988": {
+          "sampled_volume_m3": 45996154.199999996,
+          "sampled_peak_m3s": 9.96
+        },
+        "1989": {
+          "sampled_volume_m3": 51588057.0,
+          "sampled_peak_m3s": 9.46
+        },
+        "1990": {
+          "sampled_volume_m3": 59702074.8,
+          "sampled_peak_m3s": 43.4
+        },
+        "1991": {
+          "sampled_volume_m3": 53912522.94,
+          "sampled_peak_m3s": 19.2
+        },
+        "1992": {
+          "sampled_volume_m3": 38647341.120000005,
+          "sampled_peak_m3s": 20.2
+        },
+        "1993": {
+          "sampled_volume_m3": 49884979.199999996,
+          "sampled_peak_m3s": 14.3
+        },
+        "1994": {
+          "sampled_volume_m3": 47422200.54,
+          "sampled_peak_m3s": 46.3
+        },
+        "1995": {
+          "sampled_volume_m3": 68023541.4,
+          "sampled_peak_m3s": 36.7
+        },
+        "1996": {
+          "sampled_volume_m3": 80584444.8,
+          "sampled_peak_m3s": 32.9
+        },
+        "1997": {
+          "sampled_volume_m3": 68552753.39999999,
+          "sampled_peak_m3s": 30.0
+        },
+        "1998": {
+          "sampled_volume_m3": 53399298.6,
+          "sampled_peak_m3s": 25.3
+        },
+        "1999": {
+          "sampled_volume_m3": 63013024.8,
+          "sampled_peak_m3s": 37.6
+        },
+        "2000": {
+          "sampled_volume_m3": 48894457.800000004,
+          "sampled_peak_m3s": 8.75
+        },
+        "2001": {
+          "sampled_volume_m3": 38023342.2,
+          "sampled_peak_m3s": 17.8
+        },
+        "2002": {
+          "sampled_volume_m3": 49258408.14,
+          "sampled_peak_m3s": 18.2
+        },
+        "2003": {
+          "sampled_volume_m3": 50455276.8,
+          "sampled_peak_m3s": 37.8
+        }
+      }
+    }
+  },
+  "rounding_bound_note": "Selected report analyzer uses a conservative cell-sum bound plus both endpoint half-ULPs (3446 baseline days outside); prior independent audit uses exact trapezoid weights (3455). Both yield0 candidate days outside; initial q0 remains unknown."
+}

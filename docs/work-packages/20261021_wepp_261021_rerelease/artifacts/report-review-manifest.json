@@ -1,0 +1,42 @@
+{
+  "approval_status": "pending_owner_publication_approval",
+  "artifact_revision": 2,
+  "binary_sha256": {
+    "wepp_261021": "e2c83b1a691fad3ffe29acf1588dadbecfeec9b027391df8b7fddcf4908d2971",
+    "wepp_261021_hill": "81591bf0301604aa25002d641e3c8e5d22e15c747b179f1613e7c329233f4965"
+  },
+  "document_revision": "1.0-review",
+  "figure_count": 9,
+  "page_count": 24,
+  "pdf_file": "wepp_261021_release-notes-r1-review.pdf",
+  "pdf_sha256": "c2ed499701ee7bfa03dc7939d9a2b53a48329c546ee1ea16e6c0e9eda70230df",
+  "release_tag": "261021",
+  "schema": "wepp-release-report-review-v1",
+  "source_commit": "d354e3c998f81955f9d9e5ca7d01ca56e1a9f04b",
+  "source_files": {
+    "evidence/cedar-annual-percent-changes.csv": "6639149cdd517f2915c4da61307a59ec20e496ed5663d65f3dc265517b7d087f",
+    "evidence/cedar-annual.csv": "4e641f0528d40fece5542fd77fa1a90c501e4acf98daae2b437948d7f28d9e83",
+    "evidence/cedar-events.csv": "26252151a1ae2f1eef6e3876eb02e6d5443c1080cb6f79a0917d9a96316575a9",
+    "evidence/cedar-hydrograph-windows.csv": "2331d6e759be3eef51ceb78b396496f6fead0a1081a50417abbbfa381bf7f38f",
+    "evidence/figure-data.json": "63b6946cf1cdda20000d3ec113d50df2ed95cfa810905c4868c2f3d2bcc2225c",
+    "evidence/figure-manifest.json": "f7d165cff1ac5e79fadd16f7f7db2175531885bb814d04fd838ebef09af4b3c1",
+    "evidence/primary-reference-checks.md": "a0105563eb6da511a4941d10bc92ea504f48525a77c1ebc0d5fd86b7ef9e8b68",
+    "figures/accounting-control-volumes.pdf": "429e8d22d211a3078458686797ed507be7e6c64eb3d3bbbb0d892eb3a60da337",
+    "figures/calendar-century-defect.pdf": "c5cefa834c5917488e467506ce53e917a3cd10d191978b5366b9831d58ae529d",
+    "figures/cedar-annual-comparison.pdf": "4a5c3e94a5d7f3828035e487660d4b816da628af40d2dab1ebd4b217ffd8776f",
+    "figures/cedar-major-events.pdf": "35d7d41217d4e89a03864683c02c521c2a435eb27a0d0386a1f98cfa191ed42f",
+    "figures/cedar-small-events.pdf": "9f63052c04755dc6f86092ebde23ed4b7eef0584613db868d51b9b28b41add1b",
+    "figures/channel-plane-alias-defect.pdf": "0285eaa3b38ab7a8458b916ccb3614d0af026e8817e1cb57da282fa1aaaaece7",
+    "figures/flat-source-cells.pdf": "3ee3d3e8e820667d141525db9c316e723bc0cf6a91857495b46697e1ecfb15e5",
+    "figures/groundwater-area-defect.pdf": "801874a6b0e646677dc503db96b29796cf779178ef6e3101167b8f00d29d9cb0",
+    "figures/mc-retained-state-defects.pdf": "7133073d29a898f8c7370d6162f3463cbf4b5cd0af18b716b4ab791a75ae398d",
+    "investigation.tex": "1af029c8115d0d3e370fc1ea9f0c1a8bc97313214d94698da74110621399529b",
+    "main.tex": "64bd890a7a61df6ae36295d042dd1fc3d1a2c00c159081373a351d88a161b16c",
+    "metadata.tex": "537331e112c723c8f6ce2391ffe604235c506a7e994662eed412b2943bd2c2a2",
+    "methods.tex": "e073c269387d38e82f1caf2bcccf3d58ca16b86dd644bc917bee877055f32418",
+    "operations.tex": "78a94bd31212481148df5b23cf250627cbd2ab71d680f20d670693458dfed556",
+    "overview.tex": "a0655ca857e1487770f74187fb8d5a41b34ee404944b58d2a3864bf45991d4d9",
+    "prepare_figures.py": "0f48550cf511167095376e204a12c555fcc1b4b6aaa819db91bd17ba6c5da81b",
+    "references.tex": "82f5f6612908c030f5653cc37e6db72b31c3aab8e871f64c8f523a926deb1e46"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "role": "wepp",
+    "release_binary": "/home/workdir/wepp-forest-release-20261009/release/wepp_261021",
+    "release_sha256": "e2c83b1a691fad3ffe29acf1588dadbecfeec9b027391df8b7fddcf4908d2971",
+    "candidate_binary": "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp",
+    "candidate_sha256": "444e742740728918f4e68ba1e539a9df538d1b73a1546a2fa164aec0cd0ecca2",
+    "normalized_sha256": [
+      "dc3b648e58423f9dfd22ce082b8e163b200ce8daecfb497b6ba47344ffe9b87b",
+      "dc3b648e58423f9dfd22ce082b8e163b200ce8daecfb497b6ba47344ffe9b87b"
+    ],
+    "equivalent": true
+  },
+  {
+    "role": "wepp_hill",
+    "release_binary": "/home/workdir/wepp-forest-release-20261009/release/wepp_261021_hill",
+    "release_sha256": "81591bf0301604aa25002d641e3c8e5d22e15c747b179f1613e7c329233f4965",
+    "candidate_binary": "/workdir/watershed-physical-water-repair-20261021/channel-plane-init-candidate-v1/src/wepp_hill",
+    "candidate_sha256": "ea541cde82e4f927cab1c8af3d3a7d03cdbbe4f5db9ecbf9ef7d73edb8edc7ee",
+    "normalized_sha256": [
+      "a4ee1ed1108252479c03ed6a399035cbc2d97da4dcddd365d6350b3821ffe408",
+      "a4ee1ed1108252479c03ed6a399035cbc2d97da4dcddd365d6350b3821ffe408"
+    ],
+    "equivalent": true
+  }
+]
