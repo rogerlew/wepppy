@@ -1,0 +1,15 @@
+{
+  "source_run": "/wc1/runs/cl/clogging-starch",
+  "rows": 34,
+  "receiving_hillslopes": 14,
+  "original_summary_summed_sediment_kg": 1113.1,
+  "original_profile_sediment_kg_per_year": 4810.8183797212605,
+  "original_profile_runoff_m3_per_year": 1008.0648908316251,
+  "profile_900001_sediment_kg_per_year": 4071.0132950421503,
+  "source_sha256": {
+    "wepp/roads/output/interchange/H.pass.parquet": "5e37d7ccc85bd27e03bcad127629ddacb2bca0c68c4f9dcb2b22e7482d498352",
+    "wepp/roads/output/interchange/H.wat.parquet": "8fe27eda3f48e3ad57c0e29126eddc215c5662713e1b400f0b2ab11fb6f27974",
+    "wepp/roads/output/interchange/roads_segment_loss_summary.parquet": "64204a9300e442c85b524392a1a9cdd075b7a821ea3cfa0b46e7713ecbf864a3",
+    "wepp/roads/segments/roads.segment.pass.manifest.json": "8b76b817ac209d4343ccfead048b6a0124556268c07be888ffce10973f73bddf"
+  }
+}

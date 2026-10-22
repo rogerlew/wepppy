@@ -239,3 +239,11 @@ semantics. TotalWatSed uses original weighted profiles directly, retaining its
 Q/QOFE diagnostics and optional support-area weighting. Baseline behavior and
 public report columns/units remain unchanged. Historical results without corrected
 accounting provenance are not certified by this amendment.
+
+## Roads segment loss attribution
+
+The [segment summary contract](roads-segment-loss-summary-contract.md) governs
+Road Segment Loss Summary values and provenance. This diagnostic uses original
+segment/profile exports, not receiving-hillslope results or watershed outlet
+values. Existing Parquet path and on-demand CSV/download authorization remain.
+Implementation conformance pending the segment-summary repair checkpoint.

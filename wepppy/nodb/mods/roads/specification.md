@@ -227,14 +227,11 @@ Run Results link gating:
 Road segment loss summary artifact:
 
 - File: `wepp/roads/output/interchange/roads_segment_loss_summary.parquet`.
-- Built from `roads.segment.pass.manifest.json` + `loss_pw0.hill.parquet`.
-- Join precedence:
-  - first `target_hillslope_wepp_id`,
-  - fallback `segment_run_id`.
-- Includes diagnostics columns:
-  - `loss_match_key`
-  - `loss_row_missing`.
-- No on-disk CSV is written; CSV is served on demand via download conversion (`?as_csv=1`).
+- Follow the [segment loss summary contract](../../../../docs/schemas/roads-segment-loss-summary-contract.md).
+- Original segment PASS exports and full modeled WAT area govern mean annual values;
+  receiving-hillslope joins are prohibited. Implementation conformance pending.
+- Preserve existing columns with explicit unavailable aliases and additive provenance.
+- No on-disk CSV is written; CSV remains an on-demand download (`?as_csv=1`).
 
 ## Roads API Payload and Validation Contract
 
