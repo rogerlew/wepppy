@@ -1,0 +1,127 @@
+{
+  "generated_at_utc": "2026-10-22T23:57:40Z",
+  "mode": "observe-only",
+  "base_ref": "bac3042b1",
+  "changed_files": [
+    {
+      "path": "tests/nodb/mods/test_roads_controller.py",
+      "base_path": "tests/nodb/mods/test_roads_controller.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 3296.0,
+          "current": 3035.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 256.0,
+          "current": 256.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": 19.0,
+          "current": 19.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/nodb/mods/test_roads_segment_loss_summary.py",
+      "base_path": "tests/nodb/mods/test_roads_segment_loss_summary.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 165.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 27.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": 17.0,
+          "trend": "new",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_segment_loss_summary.py",
+      "base_path": "wepppy/nodb/mods/roads/_segment_loss_summary.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 208.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 51.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": 19.0,
+          "trend": "new",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "base_path": "wepppy/nodb/mods/roads/roads.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 5645.0,
+          "current": 5400.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 2023.0,
+          "current": 2023.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": 137.0,
+          "current": 137.0,
+          "trend": "unchanged",
+          "severity": "red"
+        }
+      ],
+      "highest_severity": "red"
+    }
+  ]
+}

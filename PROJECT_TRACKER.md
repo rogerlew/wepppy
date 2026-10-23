@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Active: [Roads segment loss summary correction](docs/work-packages/20261022_roads_segment_loss_summary/package.md) — replace receiving-hillslope attribution with original source-profile exports; preserve downloads and validate UM1.
+Completed (local implementation): [Roads segment loss summary correction](docs/work-packages/20261022_roads_segment_loss_summary/package.md) — original source-profile PASS/WAT attribution; all 34 UM1 rows, live downloads and archive/restore validated. Checkpoint `bac3042b1`, implementation `a8380cbbd`; full suite 11,085 passed/126 skipped; independent reviews pass. Original UM1 unchanged; no deployment.
 
 Completed (local implementation): [Roads modeled-area accounting repair](docs/work-packages/20261022_roads_accounting_repair/package.md) — full MOFE areas without geographic overlap; shared PASS/WAT ledger and fresh isolated UM1 routing/report validation. Native `c941cb6`, WEPPpy `cf3043781`; independent reviews pass. Broad suite completed in segments after an unrelated browser-path failure; typing/provenance limits retained. No deployment or original-run repair.
 

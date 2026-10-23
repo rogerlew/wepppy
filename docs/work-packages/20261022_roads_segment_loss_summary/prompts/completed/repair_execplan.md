@@ -1,6 +1,6 @@
 # Correct Roads segment loss attribution
 
-This active ExecPlan follows `docs/prompt_templates/codex_exec_plans.md` and is
+This completed ExecPlan follows `docs/prompt_templates/codex_exec_plans.md` and is
 executed with its tracker. It is independent of other active packages.
 
 ## Purpose / Big Picture
@@ -16,7 +16,7 @@ this without changing model inputs, water accounting, downloads or baseline.
 - [x] (2026-10-22) Two independent contract approvals; checkpoint `bac3042b1`.
 - [x] (2026-10-22) Source-qualified producer, README and 76 passing focused tests.
 - [x] (2026-10-22) All 34 UM1 rows, live Chromium/downloads and canonical archive/restore pass.
-- [ ] Broad gates, final independent reviews, commits and package closure.
+- [x] (2026-10-22) Full suite 11,085 passed/126 skipped; both final reviews pass; implementation `a8380cbbd`, package closed.
 
 ## Surprises & Discoveries
 
@@ -39,7 +39,15 @@ Use native interchange and existing DuckDB aggregation, no model rerun.
 
 Implementation and independent correctness review pass. All 34 isolated UM1
 rows match original PASS/WAT; aggregate and original artifacts are unchanged.
-Live consumer and archive/restore evidence pass. Broad regression is running.
+Live consumer and archive/restore evidence pass. Full regression: 11,085 passed,
+126 skipped. All local acceptance gates are complete. Contract checkpoint
+`bac3042b1` precedes implementation `a8380cbbd`. Original UM1 and native repo
+remain unchanged; no deployment claim.
+
+The real facade empty-state probe caught a dependency helper-only tests missed.
+Future artifact work should keep that boundary in acceptance tests. The long
+broad gate completed without exclusions; a per-process Chromium path correction
+avoided the previously documented unrelated environment failure.
 
 ## Context and Orientation
 

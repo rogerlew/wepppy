@@ -1,0 +1,11 @@
+{
+  "command": "wctl exec weppcloud env PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers PYTHONPATH=/workdir/wepppy /opt/venv/bin/pytest tests --maxfail=1",
+  "implementation_commit": "a8380cbbd",
+  "passed": 11085,
+  "skipped": 126,
+  "warnings": 8801,
+  "duration_seconds": 2786.59,
+  "exit_code": 0,
+  "log_path": "/tmp/roads-segment-broad.log",
+  "log_sha256": "6d826882704cee5bf588e0622b086a2c147077140b85385e218bbed34be463d7"
+}

@@ -37,9 +37,20 @@ the successful probe uses the already installed Node Playwright and Chromium.
   staged new helper: pass, zero added broad catches.
 - Independent [correctness review](20261022_correctness_review.md): pass;
   empty-facade climate dependency found and corrected with real regressions.
-- Independent [security review](20261022_security_review.md): local checks pass;
-  final receipt disposition pending.
-- Broad regression and final documentation gates: running.
+- Independent [security review](20261022_security_review.md): pass, EVID-01 closed;
+  reviewer also verified retained failed-candidate archive/restore bytes and mode.
+- Package, contract, ADR and README documentation lint: pass. Spelling preview
+  only proposed an unrelated existing README word; it was left unchanged.
+- Code-quality observability: four changed Python files analyzed, zero worsened
+  metric entries. Facade source lines decrease 245; helper is 208 source lines,
+  maximum function length 51 and complexity 19 (yellow). The bounded explicit
+  calendar/scope validations account for that complexity. See
+  [delta receipt](20261022_quality_delta.json).
+- Full regression: **11,085 passed, 126 skipped, 8,801 warnings**, 2786.59 s
+  (46:26), exit 0. Includes the real run-catalog browser integration. Warnings
+  are retained in the full log; no skipped test is represented as a pass.
+
+Implementation commit: `a8380cbbd`, descendant of contract checkpoint `bac3042b1`.
 
 The broad suite uses `wctl exec weppcloud env` to invoke the same container pytest
 with `PYTHONPATH=/workdir/wepppy` and installed Chromium path
