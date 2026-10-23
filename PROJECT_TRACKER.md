@@ -2,7 +2,7 @@
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
-Contract prepared and reviewed: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — async-preferred producer notification design, 79-call/41-file disposition, durable recovery and mandatory reader/lifecycle barriers. Independent correctness/security reviews approve; all ten findings/clarifications closed. Standalone checkpoint commit remains pending. No runtime changes or deployment.
+Execution scaffold ready: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — async-preferred producer notification design, 79-call/41-file disposition, durable recovery and mandatory reader/lifecycle barriers. Independent correctness/security reviews approve; all ten findings/clarifications closed. Contract ancestor `dc2b2ddbe`; active implementation ExecPlan and launch prompt ready. No runtime changes or deployment.
 
 Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-Contract phase complete; reviewed checkpoint prepared. Base revision: `fc3234efc6da58ff1da896dfab5b2dd5875988c2`. No implementation, commit or deployment performed.
+Execution scaffold ready; runtime work not started. Base revision: `fc3234efc6da58ff1da896dfab5b2dd5875988c2`. Reviewed standalone contract ancestor: `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`. No implementation or deployment performed.
 
 ## Progress
 
@@ -13,7 +13,7 @@ Contract phase complete; reviewed checkpoint prepared. Base revision: `fc3234efc
 ## Decisions
 
 - Preserve synchronous consumers until evidence supports an explicit migration.
-- Reuse existing infrastructure; retain dirty generations beyond queue admission.
+- Reuse existing infrastructure; retain durable receipt-set acknowledgment beyond queue admission.
 
 ## Review and validation
 
@@ -21,7 +21,7 @@ Correctness/security initial reviews, post-fix confirmations and all ten disposi
 
 ## Remaining gates
 
-Prepared checkpoint requires standalone ancestor commit before implementation. Commit authority has not been requested because this task ends at reviewed contract preparation. Runtime tests, queue graph/live tree, NFS/browser/archive validation and rollout remain future work.
+The operator authorized checkpoint commit and execution scaffolding after review. The ancestor gate is satisfied at `dc2b2ddbe`; verify ancestry again before runtime edits. Runtime tests, queue graph/live tree, NFS/browser/archive validation and rollout remain future work.
 
 ## Handoff evidence
 
@@ -32,4 +32,14 @@ Canonical decision: `docs/schemas/query-engine-catalog-refresh-contract.md`, esp
 - `wctl doc-lint` passed for all six changed/new canonical contracts, eight package documents and PROJECT_TRACKER.md: zero errors/warnings.
 - `git diff --check` passed.
 - Spelling previews found no changes in the new domain contract/package/matrix. Shared contracts had only preexisting wording suggestions (non-participating, warmup, Oversized); preserved to avoid unrelated edits.
-- No runtime tests run: this is a documentation-only contract phase. No commit, production write, deployment or repair performed. Unrelated dirty workspace files were preserved.
+- No runtime tests run: this is a documentation-only contract phase. At contract-phase validation no commit, production write, deployment or repair had been performed; subsequent authorized commits are recorded below. Unrelated dirty workspace files were preserved.
+
+## Execution scaffold handoff
+
+- 2026-10-23 UTC: Operator requested “commit and scaffold work-package for execution”. Committed accepted checkpoint as `dc2b2ddbe` before creating this execution scaffold.
+- Active plan: [implementation_execplan.md](prompts/active/implementation_execplan.md).
+- Launch prompt: [execute.md](prompts/active/execute.md).
+- Evidence ledger: [execution_evidence.md](artifacts/execution_evidence.md).
+- Contract plan moved to `prompts/completed/contract_execplan.md`; its historical status is superseded by this handoff.
+- Milestones M0–M7 are pending; M1–M3 are prerequisites for producer migration. Runtime, deployment and repair claims remain false.
+- Scaffold commit is the commit introducing this section, immediately following the standalone checkpoint. Resolve with `git log -1 --format=%H -- docs/work-packages/20261023_query_catalog_async_refresh/prompts/active/implementation_execplan.md`.
