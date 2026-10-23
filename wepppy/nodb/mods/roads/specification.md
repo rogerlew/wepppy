@@ -109,6 +109,14 @@ Suggested public controller surface (phase 1):
 - `query_status() -> dict`
 - `query_summary() -> dict`
 
+Upstream lifecycle amendment (operator-approved 2026-10-22; implementation pending):
+[Roads preparation and result lifecycle](../../../../docs/schemas/roads-preparation-lifecycle-contract.md)
+governs segment identity and current-result eligibility. Preparation replaces the
+segment set and invalidates all prior current Roads results before geometry is
+overwritten. A fresh successful Roads run is required. No stable-ID reconciliation
+or beta compatibility admission is required. This applies to producer artifacts,
+reports, downloads, query caches and dashboard consumers, not just NoDb summaries.
+
 State machine contract:
 
 - `idle` -> `prepared` -> `running` -> `completed`

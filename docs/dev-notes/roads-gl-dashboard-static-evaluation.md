@@ -57,19 +57,29 @@ is distinct from the earlier sediment-export totals and long-road mass dominance
 
 ## Implementation risks and limits
 
-1. Geometry IDs are preparation-local, not a content fingerprint. Bind geometry
-   at execution and preserve that binding through summary production and archive.
+1. Geometry IDs are preparation-local. The approved upstream replacement lifecycle
+   invalidates prior results before re-preparation and requires a fresh Roads run.
 2. A multi-profile aggregate can be a useful segment diagnostic, but cannot locate
    individual profile contributions along the line without further geometry.
 3. MOFE modeled area is intentionally independent of mapped line footprint. Label
    full-profile values; do not infer geographic fill/buffer polygons.
-4. Existing summary rows do not by themselves certify geometry lineage. Historical
-   admission/regeneration needs explicit evidence, not an automatic relabel.
+4. Existing beta summaries are not automatically admitted as current results.
+   Recovery is prepare/run again; no historical admission or migration mechanism.
 5. Availability in baseline and Roads views must not cause parent Roads values to
    leak into Omni scenario/comparison displays.
 
 No numerical/native-model change is needed for an individual-profile detachment
-rate. Geometry provenance requires an additive producer contract extension if
-adopted; no native release is established as necessary by this inspection.
+rate. Upstream invalidation and publication need runtime conformance work;
+no native release is established as necessary by this inspection.
 The GL module guide's `wepppy/docs/ui-docs/gl-dashboard.md` pointer is stale;
 the existing user specification is `docs/ui-docs/gl-dashboard.md`.
+
+## Reconciliation after operator feedback
+
+The initial fingerprint/legacy-admission proposal and subsequent stable-identity
+suggestion are superseded by the [preparation lifecycle contract](../schemas/roads-preparation-lifecycle-contract.md).
+Roger rejected that complexity and explicitly waived beta backward compatibility.
+The durable rule is replacement plus invalidation and a fresh run, enforced upstream
+for every consumer. This note records static findings; it does not certify that
+existing runtime invalidation already satisfies the new contract. Dashboard D1–D4
+remain separate open decisions.

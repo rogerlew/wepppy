@@ -2,6 +2,17 @@
 
 Status: implemented after independent contract checkpoint `bac3042b1` (2026-10-22).
 
+## Current-result lifecycle amendment
+
+Operator-approved direction (2026-10-22), implementation pending: follow the
+[upstream preparation lifecycle](roads-preparation-lifecycle-contract.md).
+Re-preparation invalidates this summary and all other current Roads results.
+Only a fresh successful Roads run against the replacement segment set can restore
+current-result eligibility. Preserved old summaries and failed candidates remain
+historical diagnostics, not current results. Legacy parsing rules below do not
+grant admission to a current report/map or require a beta migration path.
+The implemented numerical contract below remains unchanged.
+
 ## Scope and attribution
 
 `wepp/roads/output/interchange/roads_segment_loss_summary.parquet` is a continuous

@@ -61,19 +61,14 @@ when needed; do not assume all GeoJSON is WGS84. Reject unresolved CRS explicitl
 Display line width is a screen-space visibility aid, not modeled width or area.
 No buffer polygons are inferred from a one-dimensional simulation footprint.
 
-Readiness must bind geometry, manifest and summary to the same execution.
-Current summary source hashes bind manifest/PASS/WAT but do not bind the prepared
-line file. Generated segment IDs can be reused after re-preparation. A matching
-ID alone or last-run success alone is insufficient provenance.
-
-Proposed implementation requirement: record an additive geometry-content/CRS
-fingerprint when the run consumes prepared geometry, carry that binding into
-summary metadata, and verify it at map admission. Do not create a binding by
-hashing arbitrary current geometry alongside older results on page load or
-postprocessing. Existing unbound results must receive an explicit regeneration
-state unless execution lineage can independently establish the binding. Validate
-any historical admission path before promising regeneration without model rerun.
-This is a producer provenance extension, not a change to detachment equations.
+Current-result eligibility follows the upstream
+[Roads preparation lifecycle](roads-preparation-lifecycle-contract.md).
+Preparation replaces the segment set and invalidates previous Roads results
+across all consumers. Only a fresh successful Roads run can publish new current
+results. Join IDs are unique within that set; there is no stable-ID reconciliation,
+cross-preparation matching, geometry-fingerprint subsystem or legacy admission path.
+Display uploaded road names/IDs where available rather than implying generated
+keys are durable road identities. Existing source-integrity checks remain.
 
 ## Display and interaction
 
@@ -112,9 +107,9 @@ with no parent fallback. Baseline hillslope results retain their existing meanin
 | Roads never used or no prepared geometry | No Roads result layer; ordinary dashboard works. |
 | Prepared but no completed output, including single-storm without this summary | No detachment coloring; selected Roads context explains unavailable mean-annual results. |
 | Valid empty summary | Explicit no completed profiles; no invented zero values. |
-| Valid populated/bound summary | Enable layer; neutral geometry for unmatched noncompleted segments. |
-| Historic policy or geometry binding absent | Explain that results need compatible regeneration; link existing Roads results workflow. |
-| Re-prepared geometry or source fingerprint mismatch | Disable coloring as stale; never mix old values with new geometry. |
+| Valid populated current summary | Enable layer; neutral geometry for unmatched noncompleted segments. |
+| Historic beta outputs without established current eligibility | Offer Prepare and run Roads again; no compatibility admission path. |
+| Re-prepared segments, failed run, or stale results | No current detachment coloring until a fresh successful Roads run; retained historical files do not enable the layer. |
 | Malformed IDs, nonfinite metrics, nonpositive areas, inconsistent duration or CRS | Layer-specific actionable error; keep other dashboard layers usable. |
 | Unauthorized read or transient fetch failure | Respect existing auth/error behavior; do not report absence or fall back to baseline. |
 
@@ -125,7 +120,7 @@ browse/query-engine access. Queries name the Roads summary explicitly; do not
 substitute `loss_pw0.hill.parquet`. Honor browse sitePrefix and the separate
 root-scoped query-engine URL contract. Prefer existing transport to a new API.
 Only select necessary columns; do not load daily PASS/WAT into the browser.
-Cache by run and bound artifact identity, invalidate on scope/data changes and
+Cache within the current run/result lifecycle, invalidate on preparation/scope/data changes and
 ignore stale asynchronous responses. Keep geometry identity stable on color updates.
 Any generated transformed geometry must remain visible and archivable under the
 existing artifact standards. No new service, dependency or hidden CSV copy.
@@ -134,7 +129,7 @@ Before implementation: settle D1–D4, establish a work package/ExecPlan and obt
 the required independent contract checkpoint. Add an ADR for any newly selected
 aggregation/threshold/default policy under the parameterization standard.
 Validation must include one-to-one and multi-profile joins, mixed/unclassified
-scope, remainder exclusion, partial/empty/legacy/stale states, projected CRS,
+scope, remainder exclusion, partial/empty/historic-beta/stale states, projected CRS,
 zero/negative/outlier values, unit conversion and scenario transitions. Verify
 real producer-to-map identity after re-preparation, actual browser selection,
 legend/keyboard details, route authorization, downloads and archive/restore.
