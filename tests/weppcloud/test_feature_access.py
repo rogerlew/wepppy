@@ -85,7 +85,13 @@ def test_openet_signed_token_live_membership_admission(database, store, monkeypa
     from wepppy.weppcloud.utils import auth_tokens, feature_access_identity as identity
     from wepppy.weppcloud.utils.feature_access_identity import INTERNAL_STATEMENT_VERSION
     from wepppy.weppcloud.utils import helpers
+    from tests.factories.redis import make_redis_client
+    from wepppy.rq import submission_recovery
 
+    # Middleware captures its client at import time, before autouse Redis stubs
+    # in a full-suite collection. Keep this admission test independent of order.
+    monkeypatch.setattr(rq_engine, '_LIFECYCLE_REDIS_CLIENT', make_redis_client())
+    monkeypatch.setattr(submission_recovery, '_LIFECYCLE_LOCK_DIR', str(tmp_path / 'lifecycle'))
     monkeypatch.setenv('WEPP_AUTH_JWT_SECRET', 'isolated-feature-route-test')
     auth_tokens.get_jwt_config.cache_clear()
     monkeypatch.setattr(identity, 'account_engine', lambda: database)

@@ -1,0 +1,26 @@
+{
+  "runtime_commit": "e4d28c9ad",
+  "contract_checkpoint": "1270c209f",
+  "completed_utc": "2026-10-23T05:44:13.649666+00:00",
+  "mode": "segmented full-collection coverage; not a single green invocation",
+  "unique_passed": 11115,
+  "unique_skipped": 126,
+  "added_preboundary_cases": "Two D-Tale alias cases passed in final 20-case focused suite",
+  "runs": [
+    {
+      "log_name": "roads-lifecycle-broad.log",
+      "summary": "1 failed, 6029 passed, 56 skipped, 5263 warnings in 2350.77s (0:39:10)",
+      "sha256": "2aece5e67f53e8fd1ebef60c26bf5fee7e9aaa72e0898f7759c36c10361f7414"
+    },
+    {
+      "log_name": "roads-lifecycle-broad-resumed.log",
+      "summary": "1 failed, 4774 passed, 71 skipped, 6086 deselected, 3567 warnings in 464.29s (0:07:44)",
+      "sha256": "d1aba53ddbd5c05dbdbb8d5343c7c8ecbe0ef0adbc1b748294311b8c79ca612c"
+    },
+    {
+      "log_name": "roads-lifecycle-broad-final.log",
+      "summary": "310 passed, 1 skipped, 10930 deselected, 10 warnings in 68.86s (0:01:08)",
+      "sha256": "265bd722cb06ca362aab7f977908a731cd634e8262179eed63319f805936db73"
+    }
+  ]
+}

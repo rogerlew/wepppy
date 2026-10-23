@@ -3,7 +3,7 @@
 Date: 2026-10-22. Reviewer: integration_contract_review. Contract ancestor:
 `1270c209fe978f59a067c88af0df9574d3459114`. Runtime changes were reviewed read-only
 in the shared working tree. Final implementation review is bound to the source
-hashes below; package-wide validation is still progressing.
+hashes below; the final staged regression result was also inspected.
 
 ## Disposition
 
@@ -11,8 +11,9 @@ No unresolved high or medium implementation finding remains in this review.
 The reviewed implementation passes the security/integration review. Canonical
 archive, seven live HTTP reader transitions, separate-service D-Tale transitions,
 and authenticated report/discovery checks have retained acceptance evidence.
-EVID-01 is closed. Final package closure still requires the broad gate identified
-under remaining acceptance limits.
+EVID-01 is closed. The completed staged regression evidence is accepted with
+the explicit process and source limitations below; it is not one clean full-suite
+invocation. No remaining security/integration acceptance blocker is identified.
 
 ### Corrected finding SEC-09: existing D-Tale sessions
 
@@ -150,10 +151,33 @@ appropriate review refresh. Principal boundary hashes:
 
 ## Remaining acceptance limits
 
-The broad pytest gate is still running. The implementation agent reports 990
-frontend tests and 75 query tests, including conditional discovery-header cases;
-their final receipts belong in package closure. Final client sequencing regression
-disposition is owned by the independent correctness review.
+The first broad pytest invocation stopped after 6,029 passed and 56 skipped:
+`test_create_mcp_app` reloaded the edited router while its previously imported
+`feature_access` module lacked the newly added `discovery_headers`. The reviewed
+final clean-process logs show 75 query and 20 D-Tale tests passing. Runtime commit
+`e4d28c9ad` is frozen and all 28 review fingerprints still match.
+
+A second invocation performed ordinary full collection and resumed inclusively at
+the failed MCP node using the retained `roads_resume.py` selector. It completed
+4,774 passed and 71 skipped before an unrelated OpenET admission test reached a
+real Redis client captured before autouse stubbing and returned 503. The reviewed
+test-only correction binds the existing Redis client factory and a temporary
+lifecycle lock directory through scoped monkeypatches. JWT verification, real SQL
+membership changes, acknowledgment, scopes and revocation assertions remain
+unchanged. No runtime correction was needed.
+
+The final continuation includes that exact failed node and completed all 310
+selected tests: 310 passed, one collection skip, and 10,930 deselected in 68.86
+seconds. Collection counts reconcile across both
+boundaries, including the two added pre-boundary D-Tale cases covered by the
+final 20-test run. The completed staged evidence is acceptable; package closure
+must retain the selector, collection/result counts and final focused coverage
+of changes after the first collection. It must not be represented as one clean
+full-suite invocation. Prefix execution used earlier sources, and a new process
+does not test state accumulated across the split boundary. These are validation
+limits, not evidence of another implementation defect. The implementation agent
+also reports 990 frontend tests; final client sequencing regression disposition
+is owned by the independent correctness review.
 
 EVID-01 is closed by the retained live D-Tale workflow above. Its project is
 public; private dataset authorization remains covered by existing authorization

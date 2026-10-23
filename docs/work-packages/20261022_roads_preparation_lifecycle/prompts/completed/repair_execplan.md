@@ -16,7 +16,7 @@ not a scaffold. No new dashboard detachment layer is included.
 - [x] Ratify concrete publication boundary with two independent reviews; checkpoint `1270c209f`.
 - [x] Implement lifecycle, retention, shared admission and regression coverage.
 - [x] Validate real isolated project transitions, seven live HTTP readers, Chromium browse and canonical archive/restore.
-- [ ] Run final gates/reviews, commit and close.
+- [x] (2026-10-23 UTC) Complete segmented broad coverage, final reviews and commit `e4d28c9ad`; close package.
 
 ## Surprises & Discoveries
 
@@ -35,6 +35,7 @@ unconditional so first-time Roads creation cannot race a whole-project archive.
 ## Decision Log
 
 
+2026-10-23 UTC / Final validation used inclusive test-boundary restarts after a mixed-revision import and an import-order-dependent Redis fixture. Both reviewers approved gap-free segmented coverage with explicit process-state limits; production behavior stayed frozen.
 2026-10-22 / Roger approved replacement plus invalidation and fresh run, explicitly
 rejecting stable-ID reconciliation and beta compatibility. User then requested
 work-package execution. Prior permission for scoped commits persists.
@@ -44,7 +45,7 @@ layer D1–D4 remain open and are not silently decided here.
 ## Outcomes & Retrospective
 
 
-Runtime implementation is wired. Isolated UM1 runs and re-preparation passed: 34 profiles, 911 baseline files and 46 original Parquets unchanged. Canonical archive/restore preserved the current set, history and lock inode. Seven live HTTP readers passed current -> writer busy -> reprepared -> fresh run transitions; historical downloads and Chromium browse passed. Final broad gates and independent review closure remain in progress.
+Runtime implementation is wired. Isolated UM1 runs and re-preparation passed: 34 profiles, 911 baseline files and 46 original Parquets unchanged. Canonical archive/restore preserved the current set, history and lock inode. Seven live HTTP readers passed current -> writer busy -> reprepared -> fresh run transitions; historical downloads and Chromium browse passed. Final broad coverage completed in resumed runs: 11,115 unique passes/126 skips. Frontend 990 tests passed; both independent reviews pass. Runtime committed as `e4d28c9ad`. The validation artifact records the mixed-revision restart and unrelated Redis test-fixture correction; this is not a single uninterrupted green suite.
 
 ## Context and Orientation
 

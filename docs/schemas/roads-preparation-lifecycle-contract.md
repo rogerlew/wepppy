@@ -1,9 +1,9 @@
 # Roads preparation and result lifecycle
 
-Status: operator-approved direction, implementation pending (2026-10-22).
+Status: implemented and locally environment-validated (2026-10-23 UTC).
 This is the upstream authority for preparation identity and current-result
 eligibility across Roads producers, reports, downloads and GL Dashboard.
-It does not claim that current runtime code already enforces every requirement.
+Implementation and retained evidence: [Roads lifecycle package](../work-packages/20261022_roads_preparation_lifecycle/package.md), runtime commit `e4d28c9ad`. Production deployment is separate.
 
 ## Decision and rationale
 

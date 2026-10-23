@@ -2,20 +2,22 @@
 
 ## Disposition
 
-**No unresolved high or medium correctness finding remains.** The producer,
+**Approved: no unresolved high or medium correctness finding remains.** The producer,
 read admission, restore and client corrections below have targeted evidence.
 Real-project, authenticated HTTP and canonical archive evidence support the
 approved replacement lifecycle. Query discovery now prevents cached availability
-with a bounded no-store rule, and its 75-case gate passes. The full pytest gate
-remains with the implementation agent; this review does not claim it has completed.
+with a bounded no-store rule, and its 75-case gate passes. Broad Python coverage
+is complete through the explicitly documented segmented validation below;
+this is not a claim that one full-suite invocation passed.
 
 Reviewer: independent `accounting_contract_review`, 2026-10-22.
 Contract ancestor: `1270c209fe978f59a067c88af0df9574d3459114`.
+Reviewed runtime is frozen at `e4d28c9adc6c86948ba2383fdc172686c0d4d67c`.
 Runtime and tests were reviewed read only. This artifact is the reviewer's only
 implementation-review edit. Scope includes producer retention/publication,
 report/query/browse consumers, module mutations, archive/restore and client state.
 
-## Remaining acceptance limits
+## Coverage limits
 
 The inspected full frontend log records 119 suites/990 tests, including the new
 nonempty summary regressions. Source inspection confirms the generated
@@ -33,7 +35,7 @@ readers and a Chromium browse page, not every dashboard interaction or actual RQ
 enqueue/status sequence. Archive validation uses canonical filesystem functions
 with isolated RQ/status/cache callbacks. Single-storm publication and failure
 branches have targeted tests rather than a second full single-storm project run.
-The full pytest gate must be recorded before package closure; no production
+Broad coverage closes with the continuation evidence below. No production
 deployment or original-project repair is certified.
 
 ## Findings corrected during review
@@ -83,6 +85,62 @@ mutation hooks are the appropriate place to repair it; reads need not mutate.
 These probes establish failure behavior at the shared boundary; they do not
 replace actual controller, transport or archive workflows. Synthetic admission
 fixtures remain separate from evidence that the full model producer succeeded.
+
+## Broad-gate continuation assessment
+
+The original full-suite process collected 11229 tests before the final discovery
+and preview edits. It stopped after **6029 passed, 56 skipped and one failure** at
+`tests/query_engine/test_mcp_router.py::test_create_mcp_app`. The inspected traceback
+shows `reload(router)` importing the newly added `discovery_headers` symbol from
+an older, already-loaded `feature_access` module. This matches the documented
+mid-run edit sequence. A clean process passes all 75 query cases, and the restarted
+live query service passes the discovery checks. No runtime workaround is warranted
+for this mixed-source test process.
+
+The continuation uses the same full `tests` collection and an inspected temporary
+pytest hook at `/tmp/roads_resume.py`. It finds the exact failing node, reports all
+earlier nodes as deselected, and retains that node and every subsequent node. It
+does not filter by marker or by changed file. Final D-Tale validation separately
+passes 20 cases, covering the two alias regressions added before that boundary;
+new discovery cases are after the boundary and also pass in the focused query run.
+
+The fresh collection reports **11240 collected, 6086 deselected, 5154 selected and
+one collection skip**. The deselected prefix is the original 6084 executed nodes
+(6029 passed plus 55 runtime skips), plus the two new D-Tale cases covered by the
+focused rerun; the original total of 56 skips includes the collection skip.
+
+The first continuation stopped after **4774 passed, 71 skipped and one failure**
+at `tests/weppcloud/test_feature_access.py::test_openet_signed_token_live_membership_admission`.
+The inspected traceback shows the lifecycle middleware's import-captured real
+Redis constructor reaching an authentication-required Redis server, yielding 503
+before the test's first expected 403. This is a test isolation defect; the
+isolated feature-access file already passed without it.
+
+The reviewed six-line test-only correction binds that captured constructor to
+`tests.factories.redis.make_redis_client()` and places lifecycle filesystem locks
+under `tmp_path`. It does not change JWT verification, feature policy evaluation,
+SQL membership state or the response assertions. The test still checks Root and
+nonmember denial, acknowledgment and scope requirements, grant success and live
+revocation of the same token. Production runtime remains frozen.
+
+The final continuation accepts `ROADS_RESUME_NODE` and includes the exact failed
+feature-access node plus every later node. Its fresh collection is **11240
+collected, 10930 deselected, 310 selected and one collection skip**. The boundary
+reconciles: 6086 earlier deselections plus 4774 passes and 70 runtime skips equals
+10930; the first continuation's 71 skips include its collection skip.
+
+The inspected final log records **310 passed, one collection skip, 10930
+deselected in 68.86 seconds**. It includes the corrected feature-access test and
+every remaining node. Combined distinct coverage is **11115 passed**
+(6029 + 4774 + 310 + two added pre-boundary D-Tale cases), **125 runtime skips**
+(55 + 70), and **one collection skip**. This accounts for all 11240 collected
+nodes plus the collection-level skip without counting focused reruns twice.
+
+These bounded continuations close the broad coverage requirement with the
+runtime frozen. Report the original prefix, focused reruns, intermediate
+continuation and final suffix separately. Do not claim a single all-green
+full-suite invocation. Restarting processes does not prove absence of test-order
+interactions across either continuation boundary; that remains an evidence limit.
 
 ## Real-project evidence inspected
 
@@ -160,3 +218,4 @@ changes require a bounded follow-up review. Paths are repository-relative.
 | tests/wepp/interchange/test_roads_lifecycle.py | `96a9cf5d2010f586e0402b046a3d8c42e077e29fd31c8161d151c638faba5186` |
 | tests/microservices/test_dtale_freshness.py | `903ed9ab4d4244948458e4e22f7676150c14a451f3299f18b2300122894cec09` |
 | tests/query_engine/test_mcp_router.py | `8f3b75f94892946eb1732f1812baf48f82e2ce070203dcfbb926ad3bb41ac4b1` |
+| tests/weppcloud/test_feature_access.py (test isolation follow-up) | `d889f8ceec6db66e2531e0d683d2784ddc7074acd2c407e44ce3bf355ae65e45` |
