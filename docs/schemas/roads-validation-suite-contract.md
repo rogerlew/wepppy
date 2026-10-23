@@ -115,3 +115,13 @@ break source-relative evidence links.
 Old project outputs are neither migrated nor overwritten. Full-project tests use
 fresh scratch copies; generated suite outputs remain in the selected test/artifact
 root. Retain failed diagnostics and never publish a partial matrix as current.
+
+## Validation-discovered management repair
+
+The suite includes the bounded production management-reference repair specified
+in the Roads WEPP Run Assembly Contract: preserve all plant definitions and
+original plant references while selecting OFE assignments. The no-traffic
+single-OFE pilot otherwise fails native execution. Regenerated two-OFE no-traffic
+results may change; numerical changes require measurement, since the retained
+legacy fill/forest plant numerical rows are currently identical. Historical
+outputs are not rewritten or certified. No model defaults or formulas change.

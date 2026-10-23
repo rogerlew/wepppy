@@ -12,13 +12,19 @@ not satisfy it. Follow docs/prompt_templates/codex_exec_plans.md.
 
 
 - [x] (2026-10-23 UTC) Inspect baseline suite, production builders and site evidence.
-- [ ] Obtain independent contract reviews and commit checkpoint.
+- [x] Obtain independent contract reviews and commit checkpoint `c4774cf2a`.
 - [ ] Build portable fixtures, 504-case profile matrix and sensitivity controls.
 - [ ] Run matrix and four-design full-project validation; analyze artifacts.
 - [ ] Publish report through existing Usersum vendor/nav machinery.
 - [ ] Complete reviews, tests, evidence and closure.
 
 ## Surprises & Discoveries
+
+2026-10-23: pilot no-traffic single-OFE runs fail because pruning plant definitions
+leaves initial residue reference 2 outside the retained count1. Two-OFE pruning
+also changes that reference semantically. A separately reviewed checkpoint
+authorizes retaining all plants/references, without changing model defaults.
+
 
 
 The site climate header advertises 100 years but scientific rows cover 16 years.
@@ -63,6 +69,10 @@ roots for project executions. Do not vendor serialized account/controller state.
 Milestone 1 commits the canonical suite/publication contract and independent
 reviews before implementing publication changes. Capture precise matrix, state,
 compatibility and artifact acceptance in the checkpoint.
+
+Milestone 2 also repairs the pilot-discovered management reference defect after
+its independent canonical contract checkpoint, tests both legacy templates, and
+reruns fresh cases. Historical outputs remain unchanged.
 
 Milestone 2 creates tests/roads scientific fixtures with source hashes, a common
 finite climate, deterministic short/median/long selection, a named case matrix,

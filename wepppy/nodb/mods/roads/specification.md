@@ -525,6 +525,13 @@ For each selected segment, Roads must generate a standalone WEPP hillslope contr
 - slope file: generated from monotonic, downslope-oriented segment profile (see monotonicity requirement below).
 - soil file: selected and adjusted using the legacy-derived rules in this specification.
 - management file: selected from `3inslope.man` or `3inslopen.man`.
+  Retain all three plant definitions with their original indices, even for one-
+  and two-OFE profiles: initial-condition `iresd` references a plant/residue
+  definition, not an OFE. Preserve original `iresd` and yearly plant `itype`
+  values. Select/reindex initial-condition and yearly scenario assignments only.
+  This preserves no-traffic road residue referencing fill plant 2; deleting that
+  definition either makes the single-OFE input invalid or changes the two-OFE
+  residue to a different plant. Plant scenario count need not equal OFE count.
 - run metadata:
   - deterministic run key based on `segment_id`,
   - preserved provenance fields (`segment_id`, source feature ID if available, `topaz_id_chn_lowpoint`, `topaz_id_hill_lowpoint`).
@@ -535,7 +542,7 @@ Contributor variants:
 - non-channel routed segments: two-OFE routed contributor (`road OFE + buffer OFE`), where:
   - road OFE uses the existing inslope road parameterization,
   - buffer OFE uses trace-derived `path_length_m` and slope statistics,
-  - routed management transform strips fill scenario content and remaps yearly FOREST `itype` from `3` to `2` so WEPP management cardinality stays aligned with two-scenario output.
+  - routed management transform removes the fill initial-condition and yearly scenarios and remaps their assignment indices; the three plant definitions and their references remain unchanged.
 
 Required output for each successful segment run:
 
