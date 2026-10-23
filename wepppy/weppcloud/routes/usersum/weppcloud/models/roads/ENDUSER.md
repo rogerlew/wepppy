@@ -185,6 +185,13 @@ Then use the Roads results links to compare watershed-scale changes against base
 - Roads-scoped outputs are comparison outputs. They do not overwrite or "fix" the original baseline watershed run.
 - Results are decision support, not field verification. Segment priorities should still be checked against real road drainage features and local knowledge.
 
+## Roads Activation Error
+
+If Roads reports “Roads is unavailable because of a server configuration problem,”
+its saved activation settings disagree and the request was not processed. Contact
+support and include your project's URL. Editing your GeoJSON or repeating the
+upload will not resolve this server-side problem.
+
 ## Related Docs
 
 - [WEPP](../wepp/ENDUSER.md)

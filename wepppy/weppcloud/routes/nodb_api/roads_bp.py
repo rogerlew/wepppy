@@ -61,7 +61,11 @@ def _sync_roads_enabled_state(wd: str, cfg_fn: str) -> Roads:
         raise FileNotFoundError("Roads controller has not been initialized")
     should_enable = "roads" in (ron.mods or [])
     if controller.enabled != should_enable:
-        raise RuntimeError("Roads enabled state is inconsistent with project modules")
+        raise RuntimeError(
+            "Roads is unavailable because of a server configuration problem. "
+            "This request could not be processed. "
+            "Contact support and include this project's URL."
+        )
     return controller
 
 

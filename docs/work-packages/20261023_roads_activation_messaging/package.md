@@ -1,6 +1,6 @@
 # Roads activation error messaging
 
-Status: active. Owner: Roger. Scope: user-requested error wording revision only.
+Status: closed 2026-10-23. Owner: Roger. Scope: user-requested error wording revision only.
 
 Replace the internal module/controller disagreement text with an explanation of
 incomplete activation, server responsibility and an actionable support handoff.

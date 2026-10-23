@@ -294,7 +294,7 @@ Road segment loss summary artifact:
 - Missing custom mapped fields warn and fallback to configured defaults (no hard fail). Warning summaries are persisted in prepare/run summaries.
 - Discovery and mapping scope is top-level `feature.properties` only for this phase (nested paths out of scope).
 
-Activation mismatch message contract (implementation conformance pending): when
+Activation mismatch message contract: when
 project module membership and the Roads controller enabled flag disagree, retain
 the existing RuntimeError and response handling, but show:
 
@@ -304,6 +304,10 @@ This explains server responsibility and gives support the project reference;
 retrying an upload or editing GeoJSON cannot resolve the activation disagreement.
 The wording applies to every operation using the shared activation guard. It does
 not authorize state repair during reads or change normal disabled-module handling.
+Operators should inspect `ron.nodb` module membership and `roads.nodb` enabled
+state, and verify that the deployed canonical module-enable path calls
+`Roads.set_enabled(True)` before reconciling the project. The message change alone
+does not repair existing projects or authorize a production deployment.
 
 Common API error messages (current behavior):
 
