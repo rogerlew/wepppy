@@ -480,9 +480,10 @@ def test_build_single_ofe_soil_file_keeps_only_road_ofe(tmp_path: Path) -> None:
     assert "ubr" not in text
 
 
-def test_build_single_ofe_management_file_keeps_only_ofe_1(tmp_path: Path) -> None:
+@pytest.mark.parametrize("template_name", ["3inslope.man", "3inslopen.man"])
+def test_build_single_ofe_management_file_keeps_only_ofe_1(tmp_path: Path, template_name: str) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
-    template_path = Path(controller.roads_legacy_managements_dir) / "3inslope.man"
+    template_path = Path(controller.roads_legacy_managements_dir) / template_name
     output_path = tmp_path / "roads" / "single_ofe.man"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -492,8 +493,11 @@ def test_build_single_ofe_management_file_keeps_only_ofe_1(tmp_path: Path) -> No
     )
 
     text = output_path.read_text(encoding="utf-8")
+    if template_name == "3inslopen.man":
+        assert "2       # `iresd' - <FILL>" in text
+    assert "3       # looper; number of Plant scenarios" in text
     assert "# number of OFEs" in text
-    assert "Plant scenario 2" not in text
+    assert "Plant scenario 2" in text
     assert "Initial Conditions scenario 2" not in text
     assert "Yearly scenario 2" not in text
     assert "OFE : 2" not in text
@@ -577,9 +581,10 @@ def test_write_routed_three_ofe_slope_file_writes_three_ofes(tmp_path: Path) -> 
     assert lines[8].count(",") == 3
 
 
-def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Path) -> None:
+@pytest.mark.parametrize("template_name", ["3inslope.man", "3inslopen.man"])
+def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Path, template_name: str) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
-    template_path = Path(controller.roads_legacy_managements_dir) / "3inslope.man"
+    template_path = Path(controller.roads_legacy_managements_dir) / template_name
     output_path = tmp_path / "roads" / "routed_two_ofe.man"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -589,16 +594,19 @@ def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Pa
     )
 
     text = output_path.read_text(encoding="utf-8")
+    if template_name == "3inslopen.man":
+        assert "2       # `iresd' - <FILL>" in text
+    assert "3       # looper; number of Plant scenarios" in text
     assert "3\t# number of OFEs" not in text
     assert "2\t# number of OFEs" in text
-    assert "Plant scenario 2 of 3" not in text
+    assert "Plant scenario 2 of 3" in text
     assert "Initial Conditions scenario 2 of 3" not in text
     assert "Yearly scenario 2 of 3" not in text
     assert "OFE : 3" not in text
     assert "OFE : 2" in text
     assert "Initial Conditions indx' - <FILL>" not in text
-    assert "3       # `itype' - <FOREST>" not in text
-    assert "2       # `itype' - <FOREST>" in text
+    assert "3       # `itype' - <FOREST>" in text
+    assert "2       # `itype' - <FOREST>" not in text
 
 
 def test_prepare_segments_writes_summary_and_marks_prepared(

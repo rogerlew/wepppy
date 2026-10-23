@@ -1,0 +1,91 @@
+{
+  "source_run": "clogging-starch",
+  "source_artifact_sha256": {
+    "wepp/roads/segments/roads.segment.pass.manifest.json": "8b76b817ac209d4343ccfead048b6a0124556268c07be888ffce10973f73bddf",
+    "wepp/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+    "wepp/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "wepp/runs/snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp/runs/pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "wepp/runs/gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "wepp/runs/chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+    "wepp/runs/chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "wepp/runs/tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "selection": "completed positive-length segments; sort by length then segment_id; shortest/lower median/longest",
+  "completed_source_profiles": 34,
+  "geometry": {
+    "short": {
+      "segment_id": "roads-seg-000033",
+      "segment_length_m": 0.008610547312819338,
+      "slope_pct_clamped": 0.1,
+      "road_width_m": 4.0,
+      "target_hillslope_wepp_id": 40
+    },
+    "median": {
+      "segment_id": "roads-seg-000036",
+      "segment_length_m": 2.6204628679344433,
+      "slope_pct_clamped": 29.24324538598616,
+      "road_width_m": 4.0,
+      "target_hillslope_wepp_id": 1
+    },
+    "long": {
+      "segment_id": "roads-seg-000002",
+      "segment_length_m": 583.1901103762971,
+      "slope_pct_clamped": 4.966171188944492,
+      "road_width_m": 4.0,
+      "target_hillslope_wepp_id": 27
+    }
+  },
+  "source_lengths_m": [
+    0.008610547312819338,
+    0.09672633564426912,
+    0.19054167266335026,
+    0.4242091726579181,
+    0.44035145179093643,
+    0.9751274227556331,
+    0.9889895009633269,
+    1.0050030461036028,
+    1.2581775105594415,
+    1.6191649851294354,
+    1.7472943754430337,
+    1.8274134495276355,
+    2.0179551426028493,
+    2.1249519285351837,
+    2.2569048938027736,
+    2.3536312134367217,
+    2.6204628679344433,
+    3.4832311475023863,
+    3.533237210082737,
+    3.7022593833081157,
+    3.7989856959733728,
+    3.9149988243238,
+    4.0359102562988625,
+    4.0359102717823285,
+    4.863622869539165,
+    12.227428972705269,
+    22.29737584016249,
+    27.543224216528316,
+    36.21781775867989,
+    37.99417538862136,
+    76.76879286607675,
+    77.95872582806953,
+    104.25972360554684,
+    583.1901103762971
+  ],
+  "climate_first_day": "2000-01-01",
+  "climate_last_day": "2015-12-31",
+  "daily_records": 5844,
+  "simulation_years": 16,
+  "header_years_note": "Original header advertises 100; actual scientific record has 16 years.",
+  "binary": "wepp_260409",
+  "fixture_sha256": {
+    "site.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+    "shared/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shared/snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "shared/pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "shared/gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "shared/chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+    "shared/chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "shared/tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

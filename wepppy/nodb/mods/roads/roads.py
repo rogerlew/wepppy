@@ -3099,11 +3099,7 @@ class Roads(NoDbBase):
 
     def _build_routed_two_ofe_management_file(self, *, template_path: Path, output_path: Path) -> None:
         lines = template_path.read_text(encoding="utf-8").splitlines()
-        lines = self._strip_management_scenario_block(
-            lines,
-            start_marker="Plant scenario 2 of 3",
-            end_marker="Plant scenario 3 of 3",
-        )
+        # Keep all plant definitions and their iresd/itype references intact.
         lines = self._strip_management_scenario_block(
             lines,
             start_marker="Initial Conditions scenario 2 of 3",
@@ -3121,16 +3117,13 @@ class Roads(NoDbBase):
         remap_next_year_index = False
 
         for line in lines:
-            if "Plant scenario 3 of 3" in line:
-                line = line.replace("Plant scenario 3 of 3", "Plant scenario 2 of 2")
-            elif "Initial Conditions scenario 3 of 3" in line:
+            if "Initial Conditions scenario 3 of 3" in line:
                 line = line.replace("Initial Conditions scenario 3 of 3", "Initial Conditions scenario 2 of 2")
             elif "Yearly scenario 3 of 3" in line:
                 line = line.replace("Yearly scenario 3 of 3", "Yearly scenario 2 of 2")
 
             if (
                 "# number of OFEs" in line
-                or "# looper; number of Plant scenarios" in line
                 or "# looper; number of Initial Conditions scenarios" in line
                 or "# looper; number of Yearly scenarios" in line
                 or "# `nofe'" in line
@@ -3142,11 +3135,6 @@ class Roads(NoDbBase):
                 if initial_condition_index_counter == 2:
                     continue
                 if initial_condition_index_counter == 3:
-                    line = self._replace_leading_int(line, 2)
-
-            if "# `itype'" in line:
-                match = re.match(r"^\s*(\d+)", line)
-                if match and int(match.group(1)) == 3:
                     line = self._replace_leading_int(line, 2)
 
             if "# `nycrop'" in line and "OFE :" in line:
@@ -3282,24 +3270,8 @@ class Roads(NoDbBase):
             out.append(line)
             i += 1
 
-        while i < len(lines):
-            line = lines[i]
-            if "# looper; number of Plant scenarios" in line:
-                out.append(self._replace_leading_int(line, 1))
-                i += 1
-                break
-            out.append(line)
-            i += 1
-
-        while i < len(lines):
-            if "#       Plant scenario 2" in lines[i]:
-                break
-            out.append(lines[i])
-            i += 1
-
-        while i < len(lines) and "#####################" not in lines[i]:
-            i += 1
-
+        # Plant definitions are referenced by residue and yearly scenarios;
+        # their count is independent of the selected OFE count.
         while i < len(lines):
             line = lines[i]
             if "# looper; number of Initial Conditions scenarios" in line:

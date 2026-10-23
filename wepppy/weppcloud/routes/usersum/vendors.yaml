@@ -24,3 +24,12 @@ vendors:
       - "**/.git/**"
     target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest
     route_prefix: /usersum/vendor/wepp-forest
+  - vendor_id: wepppy-roads
+    source_repo_path: /workdir/wepppy
+    source_ref: master
+    include_globs:
+      - tests/roads/analysis_results_current.md
+    exclude_globs:
+      - "**/.git/**"
+    target_root: wepppy/weppcloud/routes/usersum/vendor/wepppy-roads
+    route_prefix: /usersum/vendor/wepppy-roads

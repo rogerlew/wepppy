@@ -54,7 +54,9 @@ The reference uses actual selected road length/grade, width 4 m, fill 30 m at
 rutted, loam, gravel, low traffic: width_2/width_8 (m), grade_half/grade_double
 (relative to the measured road grade), fill_length_10/fill_length_60 (m),
 fill_grade_2/fill_grade_30 (%), buffer_length_5/buffer_length_60 (m), and
-rock_0/rock_40 (%). Persist exact IDs and values in the case manifest before
+rock_0/rock_40 (%). Apply production grade limits to effective inputs: grade_double
+requests approximately 58.49% but emits 40%; retain both and flag clipping.
+Persist exact IDs and values in the case manifest before
 execution. These experiment choices do not change production defaults.
 Separately exercise full Roads controller preparation/execution for all four
 designs on isolated site copies, including persisted settings, prepared inputs,

@@ -86,3 +86,8 @@ OSM_ROADS_POSTGRES_INTEGRATION=1 wctl run-pytest tests/topo -k osm_roads_postgre
 - Playwright smoke harness lives under `wepppy/weppcloud/static-src/tests/smoke`. See [`README.smoke_tests.md`](README.smoke_tests.md) for setup, environment variables, and provisioning/cleanup instructions (`npm run smoke`).
 
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.
+
+## Roads parameter validation
+
+See [the Roads suite](roads/README.md) for the portable 516-profile matrix,
+four-texture comparisons, optional full-site checks and published report workflow.

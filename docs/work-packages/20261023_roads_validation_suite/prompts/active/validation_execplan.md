@@ -13,9 +13,9 @@ not satisfy it. Follow docs/prompt_templates/codex_exec_plans.md.
 
 - [x] (2026-10-23 UTC) Inspect baseline suite, production builders and site evidence.
 - [x] Obtain independent contract reviews and commit checkpoint `c4774cf2a`.
-- [ ] Build portable fixtures, 504-case profile matrix and sensitivity controls.
-- [ ] Run matrix and four-design full-project validation; analyze artifacts.
-- [ ] Publish report through existing Usersum vendor/nav machinery.
+- [x] Build portable fixtures, 504-case profile matrix and sensitivity controls.
+- [x] Run matrix and design validations; retain negative full-unrutted and qualified positive subset.
+- [x] Publish report through existing Usersum vendor/nav machinery; live HTTPS links verified.
 - [ ] Complete reviews, tests, evidence and closure.
 
 ## Surprises & Discoveries
@@ -34,6 +34,19 @@ short/median/long actual segment geometry makes that variation explicit.
 Usersum currently registers disturbed results as a local document; this task
 explicitly requests a vendored report, so use a scoped self-repository vendor.
 
+2026-10-23: the complete matrix found a stray trailing `k` in the paved sandy-
+loam rocked-ditch soil template. Routed two-OFE parsing correctly rejected the
+incomplete extra OFE pair. Remove only the non-data token; preserve every soil
+parameter. This restores template grammar without a new behavior contract.
+
+Initial full-site checks exposed two harness setup issues: unrutted requires
+explicit fill/buffer feature attributes (30 m at 10% experiment controls); and
+Roads deserialization initializes its log before NoDb relocates wd. The first
+copies appended to the original roads log, while source scientific artifacts and
+NoDb files remained unchanged. Rebase copied serialized absolute paths before
+loading any controller; retain before/after source hashes including that log in
+fresh final validations. Do not erase the initial diagnostic evidence.
+
 ## Decision Log
 
 
@@ -45,7 +58,8 @@ verification. No production default/formula change is authorized or necessary.
 ## Outcomes & Retrospective
 
 
-Pending execution. Record actual matrix coverage, anomalies, report identity,
+Implementation and focused validation complete; final source-bound matrix,
+publication and broad gates remain. Record actual matrix coverage, anomalies, report identity,
 publication evidence and limitations here before closure.
 
 ## Context and Orientation

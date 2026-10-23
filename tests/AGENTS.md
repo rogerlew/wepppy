@@ -16,6 +16,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | NoDb controllers | `tests/nodb/` | Singleton behavior, locking semantics, serialization |
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Disturbed matrix | `tests/disturbed/` | 96 canonical hourly hillslope cases including young forest; committed finite climate; legacy/v3 PASS and event-accounting contracts |
+| Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; separate opt-in full-project checks; reviewed Usersum report |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
 | Go microservices | `services/status2/internal/**/_test.go` (Go) | Go-based WebSocket and checklist services (`status2`, `preflight2`) |

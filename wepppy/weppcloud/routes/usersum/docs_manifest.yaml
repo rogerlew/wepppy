@@ -570,6 +570,16 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.source.disturbed_rankings
+  - doc_id: usersum.source.roads_validation
+    source: vendor
+    vendor_id: wepppy-roads
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepppy-roads/tests/roads/analysis_results_current.md
+    title: Roads Parameter Validation - Current Results
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.roads_validation
   - doc_id: usersum.source.observed
     source: local
     rel_path: wepppy/nodb/mods/observed/README.md

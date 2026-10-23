@@ -12,6 +12,19 @@ Roads is for questions such as:
 
 It is not a general road inventory tool and it does not replace the baseline WEPP watershed model.
 
+## Parameter validation
+
+The [Roads parameter validation report](../../../vendor/wepppy-roads/tests/roads/analysis_results_current.md)
+compares clay, loam, sand and silt across road surfaces, traffic settings, profile
+arrangements and site-derived geometries. It reports native profile detachment,
+water outputs, sensitivity controls and separate project integration checks.
+Mixed-profile detachment includes non-road OFEs; it is not road-prism-only erosion.
+
+The validation suite corrected management plant references for one/two-OFE
+profiles, including a no-traffic execution failure, and removed a stray character
+from the paved sandy-loam rocked-ditch soil template. Prepare and rerun Roads to
+use corrected inputs; existing results are not automatically replaced.
+
 ## When to Use It
 
 Use Roads when:

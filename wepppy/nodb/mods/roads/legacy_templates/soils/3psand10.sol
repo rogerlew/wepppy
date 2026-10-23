@@ -17,4 +17,3 @@ Plume for road (08/02/00)
 400     60      5       3       4       ufr
 'Forest' 'sandy loam'   1       0.05    0.40   1.3e+005    0.0004     2.0     30
 400     60      5       6       5       ubr
-k
