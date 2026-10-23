@@ -1,0 +1,60 @@
+{
+  "root": "/tmp/roads-matrix-verified-oct23/roads_matrix0",
+  "cases": 516,
+  "pass_daily_rows": 3015504,
+  "wat_daily_ofe_rows": 6942672,
+  "complete_pass_and_wat_calendars": true,
+  "annual_divisor": 16,
+  "maximum_absolute_summary_errors": {
+    "soil_loss_kg": 0.0,
+    "sediment_deposition_kg": 0.0,
+    "sediment_yield_kg": 0.0,
+    "runoff_volume_m3": 0.0,
+    "subrunoff_volume_m3": 0.0,
+    "baseflow_volume_m3": 0.0
+  },
+  "maximum_absolute_area_error_m2": 1.8189894035458565e-12,
+  "maximum_wat_vs_rounded_slope_area_error_m2": 0.004000000000019099,
+  "detachment_density_min": 1.221078745125813e-07,
+  "detachment_density_max": 92.53384430038624,
+  "max_case": "long-silt-paved-high-bare_direct-core",
+  "maximum_case_annual_detachment_kg": 215859.250630169,
+  "maximum_case_area_m2": 2332.76,
+  "negative_deposition_cases": 328,
+  "zero_deposition_cases": 188,
+  "ratios_above_one": 187,
+  "maximum_export_detachment_ratio": 1.0000376726921458,
+  "nonzero_pass_lateral_profiles": 0,
+  "grade_double": {
+    "requested": 58.48649077197232,
+    "effective": 40.0,
+    "slope_line": "0.00, 0.400000 1.00, 0.400000",
+    "flag": true
+  },
+  "preexecution_identity_matches": true,
+  "native_sha256": {
+    "wepp_interchange_rust.so": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e"
+  },
+  "pilot_pass_parity": {
+    "H6.pass.dat": true,
+    "H244.pass.dat": true,
+    "H1.pass.dat": true,
+    "H7.pass.dat": true,
+    "H3.pass.dat": true,
+    "H239.pass.dat": true,
+    "H4.pass.dat": true,
+    "H240.pass.dat": true,
+    "H242.pass.dat": true,
+    "H2.pass.dat": true,
+    "H245.pass.dat": true,
+    "H243.pass.dat": true,
+    "H5.pass.dat": true,
+    "H241.pass.dat": true
+  },
+  "artifact_sha256": {
+    "H.pass.parquet": "fc0d416df639bf32255ad6883c43353d6e70a821e661410d57c0b93dde617a41",
+    "H.wat.parquet": "e5bf570b8b1bbbeb570e75b0f2e03c2b5047a0d4e51fd9c90c166c2258c43f2a",
+    "roads_segment_loss_summary.parquet": "d3895e3115b88eb32c50bd4d70c9ea67fcf0880290e6f8c2246d8c1a00c5d7c1",
+    "execution-identity.json": "ae6ae6ed7a2a959e681e3c3c2632ed63d15818adabf4f1863fc5e0f76c34a385"
+  }
+}

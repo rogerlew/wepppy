@@ -1,0 +1,29 @@
+{
+  "report": {
+    "status": 200,
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/usersum/doc/usersum.source.roads_validation"
+  },
+  "navigation": {
+    "status": 200,
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/usersum/",
+    "report_links": [
+      "/weppcloud/usersum/doc/usersum.source.roads_validation",
+      "/weppcloud/usersum/doc/usersum.source.roads_validation"
+    ]
+  },
+  "guide": {
+    "status": 200,
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/usersum/doc/usersum.weppcloud.models.roads",
+    "report_links": [
+      "/weppcloud/usersum/doc/usersum.source.roads_validation",
+      "/weppcloud/usersum/doc/usersum.source.roads_validation"
+    ]
+  },
+  "vendor": {
+    "status": 200,
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/usersum/vendor/wepppy-roads/tests/roads/analysis_results_current.md"
+  },
+  "report_sha256": "69ac12140d779b92ed06c383adeb671a0ab4ab5f81b1dfd23541040d59bdc32b",
+  "vendor_byte_identical": true,
+  "access": "Live forest HTTPS through the normal reverse proxy; existing user-visible public documentation policy, no auth override"
+}

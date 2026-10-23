@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Active: [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — site-derived parameter matrix, fresh scientific assessment and vendored Usersum report.
+Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 
 Completed (local implementation): [Roads preparation lifecycle](docs/work-packages/20261022_roads_preparation_lifecycle/package.md) — replacement, retention and current-result admission across consumers; real reruns/live HTTP/archive validated. Checkpoint `1270c209f`, implementation `e4d28c9ad`; segmented Python coverage 11,115 passed/126 skipped, frontend 990 passed; independent reviews pass. Original UM1 unchanged; no deployment.
 

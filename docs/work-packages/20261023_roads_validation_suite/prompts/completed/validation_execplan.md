@@ -1,5 +1,8 @@
 # Build and publish the site-derived Roads validation suite
 
+Completed 2026-10-23: 516-case four-texture suite executed, independently reviewed,
+published in Usersum and validated by the passing full repository regression.
+
 ## Purpose / Big Picture
 
 
@@ -16,7 +19,8 @@ not satisfy it. Follow docs/prompt_templates/codex_exec_plans.md.
 - [x] Build portable fixtures, 504-case profile matrix and sensitivity controls.
 - [x] Run matrix and design validations; retain negative full-unrutted and qualified positive subset.
 - [x] Publish report through existing Usersum vendor/nav machinery; live HTTPS links verified.
-- [ ] Complete reviews, tests, evidence and closure.
+- [x] Independent correctness and publication/isolation reviews approve the final implementation.
+- [x] Broad regression: 11,647 passed, 131 skipped in 3,270.42 seconds; close package.
 
 ## Surprises & Discoveries
 
@@ -55,12 +59,34 @@ and Usersum vendoring/linking. Codex selects profile tests plus separate full-si
 checks to keep portable numerical comparisons distinct from routing/accounting
 verification. No production default/formula change is authorized or necessary.
 
+2026-10-23 UTC / Roger requested all four soil textures. Include clay, loam, sand
+and silt throughout the 504 core combinations, with 12 additional controls.
+
+2026-10-23 UTC / Reviewed checkpoint `fa5c40a76` retains full-upload unrutted as
+a negative control and adds a separately qualified positive subset. This preserves
+the observed production geometry rejection instead of silently dropping failed
+profiles or claiming whole-site success. Exactly one source feature is excluded
+by recorded identity; the report labels the resulting limited coverage.
+
 ## Outcomes & Retrospective
 
 
-Implementation and focused validation complete; final source-bound matrix,
-publication and broad gates remain. Record actual matrix coverage, anomalies, report identity,
-publication evidence and limitations here before closure.
+Implementation is committed at `a501c15cc`. The final source-bound matrix passes
+all 516 cases covering clay, loam, sand and silt; independent aggregation checks
+3,015,504 PASS days and 6,942,672 WAT OFE-days. Publication/Usersum tests pass
+68 cases, and live forest HTTPS report/navigation/guide/vendor checks return 200.
+The report is vendored byte-for-byte and both independent final reviews approve.
+Broad repository regression passes: 11,647 passed, 131 skipped in 3,270.42 seconds
+against the frozen implementation. Package closed 2026-10-23.
+
+Full-upload additive designs pass; full-upload unrutted remains a documented
+negative control because two generated upstream OFEs have nonpositive lengths.
+The reviewed positive unrutted fixture removes exactly one identified upload
+feature and validates one replacement plus its remainder. It does not establish
+whole-upload unrutted success. Every final project check preserves all 2,383
+recorded source files and 911 copied baseline files. Scientific limitations and
+reproduction commands are durable in tests/roads/README.md, analysis_context.md
+and docs/schemas/roads-validation-suite-contract.md.
 
 ## Context and Orientation
 
@@ -125,9 +151,10 @@ commands and results in artifacts. Commit only task files.
 504 complete canonical combinations and the declared sensitivity controls must
 produce fresh readable outputs with exact case identities and complete calendars.
 Prepared files must contain the requested factors; report formulas must match
-native source aggregates and actual modeled area. Four full-project design runs
-must validate current publication, profile summaries and accounting without
-changing baseline/source artifacts. Published Usersum content must match the
+native source aggregates and actual modeled area. Three additive full-upload design runs and the explicitly limited positive
+unrutted subset must validate current publication, profile summaries and accounting
+without changing baseline/source artifacts. Full-upload unrutted must retain its
+two expected rejected upstream OFEs and publish no current receipt. Published Usersum content must match the
 canonical report and be reachable through its intended link. No field-accuracy,
 production-deployment or original-project-repair claim is made.
 
@@ -153,3 +180,6 @@ suite contract, not only this work package.
 Reuse Roads production builders, wepp_runner, owned native PASS/WAT readers,
 DuckDB/PyArrow and existing Usersum vendor tooling. No new modeling code,
 queue topology, external dependency or identity subsystem is introduced.
+
+Revision note (2026-10-23): record final execution, publication and independent
+reviews; record the passing frozen broad regression and close the package.
