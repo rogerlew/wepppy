@@ -107,6 +107,20 @@ members and preserves its inode during restore. Project paths and lock/output/hi
 aliases are rejected before mutation. A disconnected or failed reader releases its
 lock. No process-wide runtime identity or permission changes are authorized.
 
+Exclusive Roads operations acquire the query-catalog owner guard before
+`roads.lifecycle.lock`, preserving nonblocking busy errors at both acquisitions.
+Archive and restore acquire catalog, project-configuration and Roads guards in
+that order. Ordinary report reads and inspections retain concurrent Roads shared
+locks without holding the exclusive catalog guard for their entire lifetime.
+They may acquire a short exclusive catalog freshness barrier while holding Roads
+shared admission. This narrow read exception cannot form a blocking cycle:
+archive takes compatible Roads shared admission; restore and writers attempt
+Roads exclusive admission nonblockingly and release catalog ownership on conflict.
+Blocking Roads exclusive acquisition and shared-to-exclusive upgrades are not
+permitted. Catalog publication itself remains exclusively guarded.
+Catalog metadata ownership does not extend the legacy shared-read contract to
+an atomic scientific snapshot across whole-project deletion.
+
 Before mutation, revoke current admission by moving prior output (including its
 receipt as historical evidence) into a fresh visible
 `wepp/roads/history/<unique-directory>/` snapshot. Retain corresponding prepared
