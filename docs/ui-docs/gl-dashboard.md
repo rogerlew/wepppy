@@ -22,6 +22,9 @@
 
 ## Overview
 
+Proposed extension (not implemented): [Roads soil-detachment layer](../schemas/roads-gl-dashboard-contract.md).
+Read-only feasibility and artifact findings are in the [static evaluation](../dev-notes/roads-gl-dashboard-static-evaluation.md).
+
 The GL Dashboard is a WebGL-powered visualization tool that provides real-time exploration of WEPPcloud modeling results. It replaces legacy Leaflet-based controls with a deck.gl renderer capable of handling large datasets efficiently. The dashboard supports multiple layer types (raster, vector, timeseries), scenario comparison, and interactive graph generation.
 
 **Primary Use Cases:**
