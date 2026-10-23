@@ -788,6 +788,11 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
             continue
         require_feature(feature, wd=get_wd(runid, prefer_active=False), operation=operation, protected_read=True)
 
+    if str(request.args.get('output_scope', '')).strip().lower() == 'roads':
+        from wepppy.weppcloud.routes._run_context import load_run_context
+        from wepppy.wepp.interchange._roads_lifecycle import protect_flask_response
+        protect_flask_response(load_run_context(runid, config).active_root)
+
 
 def _authorize_existing(runid: str, config: str, require_owner: bool = False) -> None:
     """Validate that the current user can access a run's resources.
@@ -931,6 +936,11 @@ def authorize_and_handle_with_exception_factory(
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
         except Exception as exc:  # broad-except: boundary contract
+            from wepppy.wepp.interchange._roads_lifecycle import RoadsOperationBusy, RoadsResultsUnavailable
+            if isinstance(exc, (RoadsOperationBusy, RoadsResultsUnavailable)):
+                response = error_factory(str(exc), status_code=409, code=exc.code)
+                response.headers["Cache-Control"] = "no-store"
+                return response
             from wepppy.weppcloud.user_preferences import (
                 PreferenceResolutionError,
                 preference_resolution_error_response,
@@ -986,6 +996,11 @@ def handle_with_exception_factory(
             # Preserve deliberate HTTP errors such as abort(404) / abort(403).
             raise
         except Exception as exc:  # broad-except: boundary contract
+            from wepppy.wepp.interchange._roads_lifecycle import RoadsOperationBusy, RoadsResultsUnavailable
+            if isinstance(exc, (RoadsOperationBusy, RoadsResultsUnavailable)):
+                response = error_factory(str(exc), status_code=409, code=exc.code)
+                response.headers["Cache-Control"] = "no-store"
+                return response
             from wepppy.weppcloud.user_preferences import (
                 PreferenceResolutionError,
                 preference_resolution_error_response,

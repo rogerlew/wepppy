@@ -12,6 +12,7 @@ import pyarrow as pa
 import pyarrow.dataset as pads
 
 from wepppy.query_engine.payload import QuerySource
+from wepppy.wepp.interchange._roads_lifecycle import read_paths
 
 
 _GEOMETRY_WKB_COLUMN = "__wepp_geometry_wkb"
@@ -86,7 +87,7 @@ class DuckDBExecutor:
             RuntimeError: If the spatial extension cannot be installed/loaded.
             duckdb.ParserException: If DuckDB rejects the SQL string.
         """
-        with duckdb.connect() as conn:
+        with read_paths(source.path for source in sources), duckdb.connect() as conn:
             if use_spatial:
                 try:
                     conn.execute("SET home_directory='/tmp';")

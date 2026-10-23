@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.microservices.browse._roads import guarded_response, visible
+
 import asyncio
 import logging
 import os
@@ -455,8 +457,6 @@ async def download_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
-    if not os.path.exists(dir_path):
-        raise HTTPException(status_code=404)
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
@@ -489,8 +489,6 @@ async def download_culvert_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
-    if not os.path.exists(dir_path):
-        raise HTTPException(status_code=404)
 
     return await download_response_file(dir_path, query_params=request.query_params)
 
@@ -527,13 +525,17 @@ async def download_batch_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
-    if not os.path.exists(dir_path):
-        raise HTTPException(status_code=404)
 
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
 async def download_response_file(path: str, query_params) -> Response:
+    return await guarded_response(path, lambda: _download_response_file(path, query_params))
+
+
+async def _download_response_file(path: str, query_params) -> Response:
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404)
     filename = os.path.basename(path)
     ext = os.path.splitext(filename)[1].lower()
     as_csv = query_params.get('as_csv') if query_params else False
@@ -759,6 +761,8 @@ def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[st
     for root, _dirs, files in os.walk(wd):
         for file in files:
             file_path = os.path.join(root, file)
+            if not visible(file_path):
+                continue
             relative_path = os.path.relpath(file_path, wd)
             if os.path.basename(relative_path) in _RETIRED_NODIR_ARCHIVE_FILES:
                 continue

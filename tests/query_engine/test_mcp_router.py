@@ -1089,3 +1089,26 @@ def test_execute_query_run_query_runtime_error_returns_500(monkeypatch, tmp_path
     payload = response.json()
     assert payload["errors"][0]["code"] == "execution_failed"
     assert "trace_id" in payload.get("meta", {})
+
+
+@pytest.mark.parametrize('roads', [False, True])
+@pytest.mark.parametrize('endpoint', ['schema', 'query', 'info', 'mcp'])
+def test_discovery_does_not_cache_roads_availability(monkeypatch, tmp_path, roads, endpoint):
+    _set_auth_env(monkeypatch)
+    runid = 'roads-discovery'
+    files = [{'path': 'wepp/roads/output/interchange/roads_segment_loss_summary.parquet'
+              if roads else 'a.parquet', 'extension': '.parquet',
+              'size_bytes': 1, 'modified': '2024-01-01T00:00:00Z'}]
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
+    from starlette.testclient import TestClient
+    from wepppy.query_engine.app.mcp import auth
+
+    path = (f'/mcp/runs/{runid}/catalog' if endpoint == 'mcp' else
+            f'/runs/{runid}' if endpoint == 'info' else f'/runs/{runid}/{endpoint}')
+    response = TestClient(app).get(path, headers={'Authorization': 'Bearer '+_issue_token(auth, runid)})
+    assert response.status_code == 200, response.text
+    assert (response.headers.get('Cache-Control') == 'no-store') is roads
+    if roads:
+        # Missing receipt suppresses stale catalog entries; the filtered response
+        # must not hide a later successful publication through browser caching.
+        assert files[0]['path'] not in response.text

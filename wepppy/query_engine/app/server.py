@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root
+from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root, discovery_headers
+
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import asyncio
 import os
@@ -635,6 +637,7 @@ async def run_info(request: StarletteRequest) -> Response:
             "catalog_entries": catalog_entries,
             "asset_version": ASSET_VERSION,
         },
+        headers=discovery_headers(context.base_dir, context.catalog.entries()),
     )
 
 
@@ -663,7 +666,7 @@ async def run_schema(request: StarletteRequest) -> Response:
         "runid": str(run_path),
         "entries": [asdict(entry) for entry in visible_entries(request, context.base_dir, context.catalog.entries())],
     }
-    return JSONResponse(data)
+    return JSONResponse(data, headers=discovery_headers(context.base_dir, context.catalog.entries()))
 
 
 async def make_query_endpoint(request: StarletteRequest) -> Response:
@@ -703,10 +706,12 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 
     catalog_entries = []
     catalog_ready = True
+    headers = discovery_headers(run_path)
     sample_dataset = "landuse/landuse.parquet"
 
     try:
         context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        headers = discovery_headers(context.base_dir, context.catalog.entries())
         catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
         if catalog_entries:
             # Use first parquet file, skip JSON/other metadata files
@@ -765,6 +770,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "post_url_display": post_display,
             "asset_version": ASSET_VERSION,
         },
+        headers=headers,
     )
 
 
@@ -844,6 +850,13 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         )
 
     require_datasets(request, context.base_dir, [spec.path for spec in payload.dataset_specs], entries=context.catalog.entries())
+    try:
+        if any(roads_lifecycle.current_path(spec.path) for spec in payload.dataset_specs):
+            with roads_lifecycle.current_read(context.base_dir):
+                pass
+    except roads_lifecycle.RoadsResultsUnavailable as exc:
+        return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
+                            headers={'Cache-Control': 'no-store'})
     missing = [spec.path for spec in payload.dataset_specs if not context.catalog.has(spec.path)]
     if missing:
         message = f"Dataset(s) not found: {', '.join(missing)}"
@@ -861,6 +874,9 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
 
     try:
         result = run_query(context, payload)
+    except roads_lifecycle.RoadsResultsUnavailable as exc:
+        return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
+                            headers={'Cache-Control': 'no-store'})
     except FileNotFoundError as exc:
         stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.warning("Query dataset missing for %s", run_path, exc_info=True)
@@ -905,7 +921,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     if result.sql is not None:
         response_payload["sql"] = result.sql
 
-    return JSONResponse(response_payload)
+    return JSONResponse(response_payload, headers={'Cache-Control': 'no-store'})
 
 
 async def activate_run(request: StarletteRequest) -> Response:

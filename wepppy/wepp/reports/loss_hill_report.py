@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Iterable, List
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import pandas as pd
 
 from wepppy.query_engine.payload import QueryRequest
@@ -25,6 +27,7 @@ class HillSummaryReport(ReportBase):
     _LANDUSE_DATASET = "landuse/landuse.parquet"
     _SOILS_DATASET = "soils/soils.parquet"
 
+    @report_read()
     def __init__(
         self,
         wd: str | Path | Any,

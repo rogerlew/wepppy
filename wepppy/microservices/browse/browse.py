@@ -46,6 +46,8 @@ For maintenance purposes, adjust template markup within the dedicated `templates
 module should remain focused on routing, filesystem queries, and response orchestration.
 """
 
+from wepppy.microservices.browse._roads import guarded_response
+
 import asyncio
 import os
 import re
@@ -783,7 +785,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     mimicking the style of the standard directory browser.
     """
     args = request.args
-    
+
     # Preserve the diff parameter if it exists
     diff_runid = args.get('diff', '')
     if '?' in diff_runid:
@@ -793,7 +795,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     # Build breadcrumbs up to the point of failure
     base_browse_url, home_href = _resolve_browse_paths(request.path, runid, config)
     breadcrumbs = [f'<a href="{base_browse_url}{diff_arg}"><b>{runid}</b></a>']
-    
+
     # Clean the subpath for display and split into components
     # This handles cases where a search pattern like "wepp/runs/p100.*" was used
     path_to_check = subpath.split('*')[0].strip('/')
@@ -820,7 +822,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
 
     breadcrumbs.append('<input type="text" id="pathInput" placeholder="../output/p1.*" size="50">')
     breadcrumbs_html = ' ❯ '.join(breadcrumbs)
-    
+
     # Create the main content tree with the error message
     escaped_subpath = html_escape(subpath)
     error_message = f"""
@@ -828,7 +830,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     <h3>404 - Directory Not Found</h3>
     <p>The path '<code>{escaped_subpath}</code>' could not be found on the server.</p>
 </div>"""
-    
+
     project_href = Markup(f'<a href="{home_href}">☁️</a> ')
 
     page_html = _render_browse_error_page(
@@ -1233,19 +1235,21 @@ async def _handle_schema_request(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
     )
-    if not os.path.isfile(target_path):
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Path not found.",
-        )
+    async def build():
+        if not os.path.isfile(target_path):
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail="Path not found.",
+            )
 
-    columns = await asyncio.to_thread(_read_parquet_schema, target_path)
-    return JSONResponse(
-        {
-            "path": subpath_value,
-            "columns": columns,
-        }
-    )
+        columns = await asyncio.to_thread(_read_parquet_schema, target_path)
+        return JSONResponse(
+            {
+                "path": subpath_value,
+                "columns": columns,
+            }
+        )
+    return await guarded_response(target_path, build)
 
 
 async def _handle_browse_request(
@@ -1292,16 +1296,18 @@ async def _handle_browse_request(
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
-    result = await _browse_tree_helper(
-        runid,
-        subpath_value,
-        wd,
-        flask_request,
-        config,
-        allow_recorder=allow_recorder,
-        is_admin=is_admin,
-    )
-    return ensure_response(result)
+    async def build():
+        result = await _browse_tree_helper(
+            runid,
+            subpath_value,
+            wd,
+            flask_request,
+            config,
+            allow_recorder=allow_recorder,
+            is_admin=is_admin,
+        )
+        return ensure_response(result)
+    return await guarded_response(Path(wd) / subpath_value, build)
 
 
 async def browse_culvert_root(request: StarletteRequest):

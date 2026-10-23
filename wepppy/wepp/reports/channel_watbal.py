@@ -6,6 +6,8 @@ from collections import OrderedDict
 from collections.abc import Iterator
 from pathlib import Path
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import pandas as pd
 import pyarrow.parquet as pq
 
@@ -41,6 +43,7 @@ class ChannelWatbalReport(ReportBase):
     }
     _TRANSPIRATION_COLUMNS = ["Ep (mm)", "Es (mm)", "Er (mm)"]
 
+    @report_read()
     def __init__(self, wd: str | Path, *, output_scope: str | None = None):
         """Load the channel water-balance parquet and compute summary tables."""
         self.wd = Path(wd).expanduser()

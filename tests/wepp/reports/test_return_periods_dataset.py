@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import json
 import shutil
 import sys
@@ -259,10 +261,12 @@ def test_return_period_dataset_uses_roads_output_scope(tmp_path):
     roads_ebe["precip"] = roads_ebe["precip"].astype(float) + 1000.0
     roads_ebe.to_parquet(roads_ebe_path, index=False)
 
+    write_current_roads_fixture(run_dir)
     events_path, ranks_path = refresh_return_period_events(run_dir, output_scope="roads")
     assert str(events_path).endswith("wepp/roads/output/interchange/return_period_events.parquet")
     assert str(ranks_path).endswith("wepp/roads/output/interchange/return_period_event_ranks.parquet")
 
+    write_current_roads_fixture(run_dir)
     dataset = ReturnPeriodDataset(run_dir, auto_refresh=False, output_scope="roads")
     report = dataset.create_report((2, 5), method="cta")
 

@@ -1,0 +1,49 @@
+{
+  "runid": "roads-lifecycle-archive-validation",
+  "uid": 1000,
+  "gid": 993,
+  "checks": {
+    "current": {
+      "download": 200,
+      "csv": 200,
+      "schema": 200,
+      "files_meta": 200,
+      "browse": 200,
+      "dashboard": 200,
+      "query": 200
+    },
+    "writer_busy": {
+      "download": 409,
+      "csv": 409,
+      "schema": 409,
+      "files_meta": 409,
+      "browse": 409,
+      "dashboard": 409,
+      "query": 409
+    },
+    "reprepared": {
+      "download": 409,
+      "csv": 409,
+      "schema": 409,
+      "files_meta": 409,
+      "browse": 409,
+      "dashboard": 409,
+      "query": 409
+    },
+    "fresh_run": {
+      "download": 200,
+      "csv": 200,
+      "schema": 200,
+      "files_meta": 200,
+      "browse": 200,
+      "dashboard": 200,
+      "query": 200
+    }
+  },
+  "historical_download": 200,
+  "prepared_geometry_available": true,
+  "browser": {
+    "browse_status": 200
+  },
+  "authentication": "existing scoped dev-agent token; live access checks"
+}

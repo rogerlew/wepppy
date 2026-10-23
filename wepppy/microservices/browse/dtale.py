@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.microservices.browse._roads import guarded_response
+
 import logging
 import os
 from http import HTTPStatus
@@ -198,114 +200,116 @@ def build_handlers(
                 detail=path_security_detail(resolved_violation),
             )
 
-        try:
-            nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
-        except NoDirError as err:
-            _raise_nodir_http_exception(err)
-
-        if nodir_target is None:
-            if not os.path.isfile(requested_target):
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
-            dtale_rel_path = logical_rel_path.replace('\\', '/')
-        else:
+        async def build():
             try:
-                nodir_entry = nodir_stat(nodir_target)
+                nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
             except NoDirError as err:
                 _raise_nodir_http_exception(err)
-            except (FileNotFoundError, NotADirectoryError):
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
 
-            if nodir_entry.is_dir:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
-
-            if nodir_target.form == 'archive':
-                try:
-                    materialized_path = Path(materialize_file(wd, logical_rel_path, purpose='dtale'))
-                except NoDirError as err:
-                    _raise_nodir_http_exception(err)
-                except (FileNotFoundError, IsADirectoryError):
-                    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
-
-                try:
-                    dtale_rel_path = materialized_path.relative_to(Path(wd)).as_posix()
-                except ValueError as exc:
-                    raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                        detail='Failed to prepare materialized file path.',
-                    ) from exc
-            else:
+            if nodir_target is None:
                 if not os.path.isfile(requested_target):
                     raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
                 dtale_rel_path = logical_rel_path.replace('\\', '/')
+            else:
+                try:
+                    nodir_entry = nodir_stat(nodir_target)
+                except NoDirError as err:
+                    _raise_nodir_http_exception(err)
+                except (FileNotFoundError, NotADirectoryError):
+                    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
 
-        rel_lower = dtale_rel_path.lower()
-        if not any(rel_lower.endswith(ext) for ext in DTALE_SUPPORTED_SUFFIXES):
-            raise HTTPException(
-                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
-                detail='D-Tale currently supports parquet, csv/tsv, feather, and pickle files.',
-            )
+                if nodir_entry.is_dir:
+                    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
 
-        payload = {
-            'runid': runid,
-            'config': config,
-            'path': dtale_rel_path,
-        }
-        if auth_mode == 'run':
-            payload['resource_public'] = NoDbBase.ispublic(wd)
-        elif group_public_runid:
-            payload['resource_public'] = run_is_public(group_public_runid)
-        else:
-            payload['resource_public'] = False
-        if not payload['resource_public']:
-            payload['access_claims'] = dict(auth_context.claims or {})
-            if auth_mode == 'group':
-                payload['feature_id'] = 'batch_runner' if group_public_runid else 'culvert_runner'
-        raw_pqf = (request.query_params.get('pqf') or '').strip()
-        if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.geoparquet', '.pq')):
-            payload['pqf'] = raw_pqf
-        headers = {}
-        if _DTALE_INTERNAL_TOKEN:
-            headers['X-DTALE-TOKEN'] = _DTALE_INTERNAL_TOKEN
+                if nodir_target.form == 'archive':
+                    try:
+                        materialized_path = Path(materialize_file(wd, logical_rel_path, purpose='dtale'))
+                    except NoDirError as err:
+                        _raise_nodir_http_exception(err)
+                    except (FileNotFoundError, IsADirectoryError):
+                        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
 
-        endpoint = f'{_DTALE_SERVICE_URL}/internal/load'
-        try:
-            async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
-                response = await client.post(endpoint, json=payload, headers=headers)
-        except httpx.HTTPError as exc:
-            logger.error('Unable to reach D-Tale loader at %s', endpoint, exc_info=True)
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_GATEWAY,
-                detail='Unable to contact the D-Tale service.',
-            ) from exc
+                    try:
+                        dtale_rel_path = materialized_path.relative_to(Path(wd)).as_posix()
+                    except ValueError as exc:
+                        raise HTTPException(
+                            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Failed to prepare materialized file path.',
+                        ) from exc
+                else:
+                    if not os.path.isfile(requested_target):
+                        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+                    dtale_rel_path = logical_rel_path.replace('\\', '/')
 
-        if response.status_code >= 400:
-            detail = None
+            rel_lower = dtale_rel_path.lower()
+            if not any(rel_lower.endswith(ext) for ext in DTALE_SUPPORTED_SUFFIXES):
+                raise HTTPException(
+                    status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                    detail='D-Tale currently supports parquet, csv/tsv, feather, and pickle files.',
+                )
+
+            payload = {
+                'runid': runid,
+                'config': config,
+                'path': dtale_rel_path,
+            }
+            if auth_mode == 'run':
+                payload['resource_public'] = NoDbBase.ispublic(wd)
+            elif group_public_runid:
+                payload['resource_public'] = run_is_public(group_public_runid)
+            else:
+                payload['resource_public'] = False
+            if not payload['resource_public']:
+                payload['access_claims'] = dict(auth_context.claims or {})
+                if auth_mode == 'group':
+                    payload['feature_id'] = 'batch_runner' if group_public_runid else 'culvert_runner'
+            raw_pqf = (request.query_params.get('pqf') or '').strip()
+            if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.geoparquet', '.pq')):
+                payload['pqf'] = raw_pqf
+            headers = {}
+            if _DTALE_INTERNAL_TOKEN:
+                headers['X-DTALE-TOKEN'] = _DTALE_INTERNAL_TOKEN
+
+            endpoint = f'{_DTALE_SERVICE_URL}/internal/load'
             try:
-                error_payload = response.json()
-                detail = error_payload.get('description') or error_payload.get('error')
-            except ValueError:
-                detail = response.text.strip()
-            detail = detail or 'D-Tale rejected the load request.'
-            raise HTTPException(status_code=response.status_code, detail=detail)
+                async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+                    response = await client.post(endpoint, json=payload, headers=headers)
+            except httpx.HTTPError as exc:
+                logger.error('Unable to reach D-Tale loader at %s', endpoint, exc_info=True)
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_GATEWAY,
+                    detail='Unable to contact the D-Tale service.',
+                ) from exc
 
-        try:
-            data = response.json()
-        except ValueError as exc:
-            logger.error('Invalid response from D-Tale: %s', response.text)
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_GATEWAY,
-                detail='Received malformed response from D-Tale.',
-            ) from exc
+            if response.status_code >= 400:
+                detail = None
+                try:
+                    error_payload = response.json()
+                    detail = error_payload.get('description') or error_payload.get('error')
+                except ValueError:
+                    detail = response.text.strip()
+                detail = detail or 'D-Tale rejected the load request.'
+                raise HTTPException(status_code=response.status_code, detail=detail)
 
-        target_url = data.get('url')
-        if not target_url:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_GATEWAY,
-                detail='D-Tale response missing redirect URL.',
-            )
+            try:
+                data = response.json()
+            except ValueError as exc:
+                logger.error('Invalid response from D-Tale: %s', response.text)
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_GATEWAY,
+                    detail='Received malformed response from D-Tale.',
+                ) from exc
 
-        logger.info('Forwarding %s to D-Tale at %s', logical_rel_path, target_url)
-        return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
+            target_url = data.get('url')
+            if not target_url:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_GATEWAY,
+                    detail='D-Tale response missing redirect URL.',
+                )
+
+            logger.info('Forwarding %s to D-Tale at %s', logical_rel_path, target_url)
+            return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
+        return await guarded_response(requested_target, build)
 
     async def dtale_open(request: StarletteRequest):
         runid = request.path_params['runid']

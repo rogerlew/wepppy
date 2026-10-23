@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.microservices.browse._roads import visible
+
 import asyncio
 import fnmatch
 import logging
@@ -192,6 +194,8 @@ def create_manifest(wd: str) -> str:
 
             batch = []
             for entry in dir_entries:
+                if not visible(entry.path):
+                    continue
                 name = entry.name
                 entry_path = entry.path
                 try:
@@ -457,6 +461,8 @@ def _scan_directory_snapshot(
     try:
         with os.scandir(directory) as it:
             for entry in it:
+                if not visible(entry.path):
+                    continue
                 name = entry.name
                 if name in (".", ".."):
                     continue
@@ -635,6 +641,8 @@ def _count_directory_items(
     try:
         with os.scandir(directory) as it:
             for entry in it:
+                if not visible(entry.path):
+                    continue
                 name = entry.name
                 if name in (".", ".."):
                     continue
@@ -710,7 +718,8 @@ async def get_page_entries(
     hide_mixed_nodir: bool = False,
 ):
     """List directory contents with pagination and optional filtering."""
-    skip_manifest = MANIFEST_CACHE_UNSTABLE
+    # Roads replacement changes visibility without rebuilding the browse manifest.
+    skip_manifest = MANIFEST_CACHE_UNSTABLE or os.path.isdir(os.path.join(wd, 'wepp', 'roads'))
     if hide_mixed_nodir:
         skip_manifest = skip_manifest or bool(_mixed_nodir_roots(str(wd)))
 

@@ -13,9 +13,9 @@ not a scaffold. No new dashboard detachment layer is included.
 
 
 - [x] (2026-10-22) Scaffold package and inspect current producers/consumers.
-- [ ] Ratify concrete publication boundary with two independent reviews; commit checkpoint.
-- [ ] Implement lifecycle, retention, shared admission and regression coverage.
-- [ ] Validate real isolated project transitions and consumer artifact behavior.
+- [x] Ratify concrete publication boundary with two independent reviews; checkpoint `1270c209f`.
+- [x] Implement lifecycle, retention, shared admission and regression coverage.
+- [x] Validate real isolated project transitions, seven live HTTP readers, Chromium browse and canonical archive/restore.
 - [ ] Run final gates/reviews, commit and close.
 
 ## Surprises & Discoveries
@@ -26,6 +26,11 @@ The run output workspace is deleted at fresh execution. Consumers also inspect
 files directly, so clearing NoDb alone cannot enforce invalidation. RQ already
 has a Roads runtime lock; direct parameter/upload mutations must participate in
 the lifecycle boundary too. Summary metadata does not itself establish currentness.
+
+Review exposed valid workspace symlinks, existing D-Tale sessions, module toggles,
+and read-only restore permissions as additional uses of the same admission boundary.
+History materializes owned file links before replacement. Archive coordination is
+unconditional so first-time Roads creation cannot race a whole-project archive.
 
 ## Decision Log
 
@@ -39,7 +44,7 @@ layer D1–D4 remain open and are not silently decided here.
 ## Outcomes & Retrospective
 
 
-Discovery in progress. No runtime changes yet.
+Runtime implementation is wired. Isolated UM1 runs and re-preparation passed: 34 profiles, 911 baseline files and 46 original Parquets unchanged. Canonical archive/restore preserved the current set, history and lock inode. Seven live HTTP readers passed current -> writer busy -> reprepared -> fresh run transitions; historical downloads and Chromium browse passed. Final broad gates and independent review closure remain in progress.
 
 ## Context and Orientation
 

@@ -427,3 +427,63 @@ def test_loader_config_fallback_rebinds_when_preferred_root_source_appears(tmp_p
     assert module.DATASETS[data_id].path == preferred
     _rewrite(preferred, pd.DataFrame({"a": [8, 9]}))
     assert _grid(module, data_id).json["code"] == "changed_source"
+
+
+@pytest.mark.parametrize('extension', ['parquet', 'csv'])
+def test_existing_roads_preview_rejects_invalidated_results(tmp_path, dtale_service, extension):
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
+    module = dtale_service
+    write_current_roads_fixture(tmp_path)
+    source = tmp_path/lifecycle.OUTPUT/f'preview.{extension}'
+    frame = pd.DataFrame({'a': [1, 2]})
+    if extension == 'parquet':
+        frame.to_parquet(source)
+    else:
+        frame.to_csv(source, index=False)
+    first = _load(module, tmp_path, str(source.relative_to(tmp_path)))
+    assert first.status_code == 200
+    data_id = first.json['data_id']
+    first.close()
+    with lifecycle.operation(tmp_path):
+        lifecycle.retain(tmp_path)
+    response = _grid(module, data_id)
+    assert response.status_code == 409
+    assert response.json['code'] == 'roads_results_unavailable'
+    assert response.headers['Cache-Control'] == 'no-store'
+    response.close()
+    module.DATASET_ROADS_SOURCES[data_id] = (module.DATASETS[data_id],)
+    module.global_state.cleanup(data_id)
+    assert data_id not in module.DATASET_ROADS_SOURCES
+
+
+@pytest.mark.parametrize('extension', ['parquet', 'csv'])
+def test_roads_preview_rejects_current_alias_to_history(tmp_path, dtale_service, extension):
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
+    module = dtale_service
+    write_current_roads_fixture(tmp_path)
+    source = tmp_path/lifecycle.OUTPUT/f'preview.{extension}'
+    frame = pd.DataFrame({'a': [1, 2]})
+    if extension == 'parquet':
+        frame.to_parquet(source)
+    else:
+        frame.to_csv(source, index=False)
+    relative = str(source.relative_to(tmp_path))
+    first = _load(module, tmp_path, relative)
+    assert first.status_code == 200
+    data_id = first.json['data_id']
+    first.close()
+    historical = tmp_path/lifecycle.HISTORY/'previous'/source.name
+    historical.parent.mkdir(parents=True)
+    source.rename(historical)
+    source.symlink_to(historical)
+    assert lifecycle.available(tmp_path)
+    for response in (_grid(module, data_id), _load(module, tmp_path, relative)):
+        assert response.status_code == 409
+        assert response.json['code'] == 'roads_results_unavailable'
+        assert response.headers['Cache-Control'] == 'no-store'
+        response.close()
+    historical_response = _load(module, tmp_path, str(historical.relative_to(tmp_path)))
+    assert historical_response.status_code == 200
+    historical_response.close()

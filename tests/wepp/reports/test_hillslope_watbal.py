@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import json
 import os
 import shutil
@@ -203,6 +205,7 @@ def test_hillslope_watbal_uses_roads_output_scope_with_isolated_cache(tmp_path, 
     roads_frame.to_parquet(roads_path, index=False)
 
     baseline = HillslopeWatbalReport(run_dir, output_scope="baseline")
+    write_current_roads_fixture(run_dir)
     roads = HillslopeWatbalReport(run_dir, output_scope="roads")
 
     baseline_rows = [row.row for row in baseline.avg_annual_iter()]
@@ -239,6 +242,7 @@ def test_hillslope_watbal_roads_maps_segment_run_ids_from_manifest(tmp_path, mon
         encoding="utf-8",
     )
 
+    write_current_roads_fixture(run_dir)
     report = HillslopeWatbalReport(run_dir, output_scope="roads")
     avg_rows = [row.row for row in report.avg_annual_iter()]
     topaz_ids = sorted(int(row["TopazID"]) for row in avg_rows)
@@ -256,6 +260,7 @@ def test_hillslope_watbal_roads_preserves_unknown_ids_without_crashing(tmp_path,
     roads_frame.loc[roads_frame["wepp_id"] == 1, "wepp_id"] = 900001
     roads_frame.to_parquet(roads_path, index=False)
 
+    write_current_roads_fixture(run_dir)
     report = HillslopeWatbalReport(run_dir, output_scope="roads")
     avg_rows = [row.row for row in report.avg_annual_iter()]
     topaz_ids = sorted(int(row["TopazID"]) for row in avg_rows)

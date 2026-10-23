@@ -1,0 +1,21 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "dtale_sha256": "0ab38970f234718cc48d2d85b1f6a04a8196a90e4fdc6c40a32725e63d36b391",
+  "lifecycle_sha256": "2a5821c4c2a8064aa1e58de137dabbf2afcb0a17ce84deff0824b1e26467e0c1",
+  "canonical_cleanup_removes_derived_sources": true,
+  "same_bytes_without_receipt": {
+    "original": {
+      "status": 409,
+      "code": "roads_results_unavailable",
+      "cache_control": "no-store"
+    },
+    "derived": {
+      "status": 409,
+      "code": "roads_results_unavailable",
+      "cache_control": "no-store"
+    }
+  },
+  "lock_held_until_response_close": true,
+  "derived_source_propagation": true
+}

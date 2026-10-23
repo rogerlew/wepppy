@@ -2,6 +2,9 @@
 
 from datetime import datetime
 from subprocess import PIPE, Popen
+from contextlib import nullcontext
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 import os
 import traceback
 import redis
@@ -32,7 +35,7 @@ from wepppy.weppcloud.utils.helpers import (
     success_factory, error_factory, exception_factory,
     get_run_owners_lazy, get_user_models, authorize,
     authorize_and_handle_with_exception_factory, run_lifecycle_mutation
-) 
+)
 from wepppy.weppcloud.feature_registry.runtime import (
     backend_matches_requirement,
     feature_registry_by_id,
@@ -172,7 +175,7 @@ def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
         cls = registry.get(mod_name)
         if cls is None:
             return False
-    
+
     existing = cls.tryGetInstance(wd)
     if existing is not None:
         return True
@@ -182,58 +185,66 @@ def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
 
 def _enable_mod_for_run(ron: Ron, wd: str, cfg_fn: str, mod_name: str) -> bool:
     """Add the mod (and dependencies) then materialize their controllers."""
-    spec = _feature_spec(mod_name)
-    if spec is None:
-        raise ValueError(f"Unknown module '{mod_name}'.")
+    with roads_lifecycle.operation(wd) if mod_name == "roads" else nullcontext():
+        spec = _feature_spec(mod_name)
+        if spec is None:
+            raise ValueError(f"Unknown module '{mod_name}'.")
 
-    # Validate the complete closure before module state or backups can change.
-    pending = [mod_name]
-    checked = set()
-    while pending:
-        candidate = pending.pop()
-        if candidate in checked:
-            continue
-        checked.add(candidate)
-        require_feature_allowed(ron, candidate)
-        candidate_spec = _feature_spec(candidate)
-        if candidate_spec is not None:
-            pending.extend(candidate_spec.enable_dependencies)
-            pending.extend(candidate_spec.requires_features)
-    changed = _append_mod(ron, mod_name)
+        # Validate the complete closure before module state or backups can change.
+        pending = [mod_name]
+        checked = set()
+        while pending:
+            candidate = pending.pop()
+            if candidate in checked:
+                continue
+            checked.add(candidate)
+            require_feature_allowed(ron, candidate)
+            candidate_spec = _feature_spec(candidate)
+            if candidate_spec is not None:
+                pending.extend(candidate_spec.enable_dependencies)
+                pending.extend(candidate_spec.requires_features)
+        changed = _append_mod(ron, mod_name)
 
-    for dependency in spec.enable_dependencies:
-        dependency_added = _append_mod(ron, dependency)
-        if dependency_added:
-            _restore_mod_backup(wd, dependency)
-            _instantiate_mod_if_available(wd, cfg_fn, dependency)
+        for dependency in spec.enable_dependencies:
+            dependency_added = _append_mod(ron, dependency)
+            if dependency_added:
+                _restore_mod_backup(wd, dependency)
+                _instantiate_mod_if_available(wd, cfg_fn, dependency)
 
-    _restore_mod_backup(wd, mod_name)
-    _instantiate_mod_if_available(wd, cfg_fn, mod_name)
-    return changed
+        _restore_mod_backup(wd, mod_name)
+        _instantiate_mod_if_available(wd, cfg_fn, mod_name)
+        if mod_name == "roads":
+            from wepppy.nodb.mods.roads import Roads
+            Roads.getInstance(wd).set_enabled(True)
+        return changed
 
 
 def _disable_mod_for_run(ron: Ron, wd: str, mod_name: str) -> bool:
     """Remove a mod when doing so will not violate dependency guards."""
-    spec = _feature_spec(mod_name)
-    if spec is None:
-        raise ValueError(f"Unknown module '{mod_name}'.")
+    with roads_lifecycle.operation(wd) if mod_name == "roads" else nullcontext():
+        spec = _feature_spec(mod_name)
+        if spec is None:
+            raise ValueError(f"Unknown module '{mod_name}'.")
 
-    active_mods = set(ron.mods or [])
-    blockers = [
-        blocker for blocker in spec.disable_blockers
-        if blocker in active_mods
-    ]
-    if blockers:
-        pretty = ", ".join(sorted(_feature_label(blocker) for blocker in blockers))
-        label = _feature_label(mod_name)
-        raise ValueError(f"Disable {pretty} before removing {label}.")
+        active_mods = set(ron.mods or [])
+        blockers = [
+            blocker for blocker in spec.disable_blockers
+            if blocker in active_mods
+        ]
+        if blockers:
+            pretty = ", ".join(sorted(_feature_label(blocker) for blocker in blockers))
+            label = _feature_label(mod_name)
+            raise ValueError(f"Disable {pretty} before removing {label}.")
 
-    if mod_name not in active_mods:
-        return False
+        if mod_name not in active_mods:
+            return False
 
-    _backup_mod_state(wd, mod_name)
-    ron.remove_mod(mod_name)
-    return True
+        if mod_name == "roads":
+            from wepppy.nodb.mods.roads import Roads
+            Roads.getInstance(wd).set_enabled(False)
+        _backup_mod_state(wd, mod_name)
+        ron.remove_mod(mod_name)
+        return True
 
 
 def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool) -> dict:
@@ -567,7 +578,7 @@ def resources_bounds_geojson(runid, config, simplify=False):
         fn2 = '.'.join(fn2)
         if _exists(fn2):
             return send_file(fn2)
-        
+
         cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
 
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
@@ -746,6 +757,8 @@ def task_set_mod(runid, config):
 
     try:
         state = set_project_mod_state(runid, config, mod_key, bool(enabled))
+    except (roads_lifecycle.RoadsOperationBusy, roads_lifecycle.RoadsResultsUnavailable):
+        raise
     except HTTPException:
         raise
     except ValueError as exc:

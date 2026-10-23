@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 from starlette.exceptions import HTTPException
 
 from wepppy.microservices.browse import auth as browse_auth
@@ -59,6 +61,16 @@ def require_datasets(request, base_dir, paths, *, entries=()):
         require_root(request, source)
 
 
+def discovery_headers(base_dir, entries=()):
+    """Roads availability in discovery must be refreshed after replacement."""
+    if (Path(base_dir) / 'wepp/roads').exists() or any(
+        roads_lifecycle.path_owner(source) is not None
+        for entry in entries for source in _entry_sources(base_dir, entry)
+    ):
+        return {'Cache-Control': 'no-store'}
+    return {}
+
+
 def visible_entries(request, base_dir, entries):
     require_root(request, base_dir)
     visible = []
@@ -70,6 +82,13 @@ def visible_entries(request, base_dir, entries):
         except HTTPException as exc:
             if exc.status_code not in (401, 403):
                 raise
+            continue
+        logical, physical = sources
+        owner = roads_lifecycle.path_owner(logical)
+        if owner is not None and owner.resolve() / logical.relative_to(owner) != physical:
+            continue
+        roots = {roads_lifecycle.path_owner(path) for path in sources} - {None}
+        if not all(roads_lifecycle.available(root) for root in roots):
             continue
         visible.append(entry)
     return visible

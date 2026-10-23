@@ -33,6 +33,8 @@ dataset paths; public tables retain ordinary anonymous downstream access.
 
 from __future__ import annotations
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 import hashlib
 import json
 import logging
@@ -152,6 +154,7 @@ class ViewerCapability:
 
 
 DATASETS: dict[str, DatasetMeta] = {}
+DATASET_ROADS_SOURCES: dict[str, tuple[DatasetMeta, ...]] = {}
 DATASET_ACCESS_SCOPES: dict[str, frozenset[str]] = {}
 VIEWER_CAPABILITIES: dict[str, ViewerCapability] = {}
 LAZY_PARQUET_DATASETS: dict[str, "LazyParquetDtaleInstance"] = {}
@@ -302,12 +305,41 @@ def _reauthorize_private_scope(scope: str, capability_id: str) -> bool:
     return True
 
 
+def _protect_roads_source(path, accepted_path=None):
+    lexical = Path(path).absolute()
+    resolved = Path(os.path.realpath(lexical))
+    owner = roads_lifecycle.path_owner(lexical)
+    if owner is not None and owner.resolve() / lexical.relative_to(owner) != resolved:
+        response = jsonify(error='Current Roads source cannot alias another resource.',
+                           code='roads_results_unavailable')
+        response.status_code = 409
+        response.headers['Cache-Control'] = 'no-store'
+        abort(response)
+    sources = (lexical, resolved, accepted_path or resolved)
+    roots = {roads_lifecycle.path_owner(source) for source in sources} - {None}
+    for root in roots:
+        roads_lifecycle.protect_flask_response(root)
+    return roots
+
+
 def _require_dataset_access(data_id: object) -> None:
     if not has_request_context() or request.path.startswith("/internal/"):
         return
     scopes = _effective_access_scopes(str(data_id))
     if scopes and not all(_has_scope_access(scope) for scope in scopes):
         abort(403, description="Private D-Tale dataset access required.")
+    meta = DATASETS.get(str(data_id))
+    sources = ([meta] if meta is not None else []) + list(DATASET_ROADS_SOURCES.get(str(data_id), ()))
+    for source in sources:
+        roots = _protect_roads_source(source.path, source.resolved_path)
+        if roots:
+            _verify_source(source.path, source.fingerprint, source.resolved_path or source.path.resolve())
+            inherited = getattr(g, 'dtale_roads_sources', None)
+            if inherited is None:
+                inherited = g.dtale_roads_sources = []
+            if source not in inherited:
+                inherited.append(source)
+
 
 
 def _request_private_scopes() -> frozenset[str]:
@@ -315,7 +347,7 @@ def _request_private_scopes() -> frozenset[str]:
     id_fields = {"dataid", "dataids", "leftdataid", "rightdataid", "sourceid"}
 
     def collect(value: object, *, reference: bool = False) -> None:
-        known_data_ids = DATASET_ACCESS_SCOPES.keys() | DATASETS.keys()
+        known_data_ids = DATASET_ACCESS_SCOPES.keys() | DATASETS.keys() | DATASET_ROADS_SOURCES.keys()
         if isinstance(value, str):
             if reference and value in known_data_ids:
                 referenced.add(value)
@@ -405,6 +437,7 @@ def _guarded_global_cleanup(data_id: object) -> None:
     _remove_dataset_geojson_provenance(normalized_id)
     LAZY_PARQUET_DATASETS.pop(normalized_id, None)
     DATASETS.pop(normalized_id, None)
+    DATASET_ROADS_SOURCES.pop(normalized_id, None)
     DATASET_ACCESS_SCOPES.pop(normalized_id, None)
     _prune_viewer_capabilities(scope=normalized_id)
 
@@ -446,6 +479,7 @@ def _resolve_target(runid: str, rel_path: str, *, config: str | None = None) -> 
             abort(403, description="Path traversal detected.")
         if common != str(wd):
             abort(403, description="Path traversal detected.")
+        _protect_roads_source(candidate)
         if candidate.exists() and candidate.is_file():
             return wd, candidate
 
@@ -1083,6 +1117,7 @@ def _initialize_dtale_dataset(data_id: str, display_name: str, df: pd.DataFrame)
 
 
 def _discard_dataset(data_id: str) -> None:
+    DATASET_ROADS_SOURCES.pop(data_id, None)
     global_state.cleanup(data_id)
     LAZY_PARQUET_DATASETS.pop(data_id, None)
     DATASETS.pop(data_id, None)
@@ -1464,6 +1499,10 @@ def _authorize_private_dataset_request():
 def _propagate_private_dataset_scope(response):
     existing = getattr(g, "dtale_existing_ids", None)
     scopes = getattr(g, "dtale_private_scopes", frozenset())
+    roads_sources = getattr(g, 'dtale_roads_sources', ())
+    if existing is not None and roads_sources:
+        for data_id in set(_ORIGINAL_GLOBAL_STATE_KEYS()) - existing:
+            DATASET_ROADS_SOURCES[str(data_id)] = tuple(roads_sources)
     if existing is not None and scopes:
         for data_id in set(_ORIGINAL_GLOBAL_STATE_KEYS()) - existing:
             DATASET_ACCESS_SCOPES[str(data_id)] = frozenset(scopes)

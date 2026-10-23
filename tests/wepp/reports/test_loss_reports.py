@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import pandas as pd
 
 
@@ -239,8 +241,11 @@ def test_loss_reports_use_roads_output_scope_paths(monkeypatch, tmp_path):
 
     payloads = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
+    write_current_roads_fixture(tmp_path)
     _ = HillSummaryReport(tmp_path, output_scope="roads")
+    write_current_roads_fixture(tmp_path)
     _ = ChannelSummaryReport(tmp_path, output_scope="roads")
+    write_current_roads_fixture(tmp_path)
     _ = OutletSummaryReport(tmp_path, output_scope="roads")
 
     queried_paths = [payload.datasets[0]["path"] for payload in payloads if not isinstance(payload, dict)]

@@ -1,6 +1,6 @@
 # Roads preparation lifecycle implementation
 
-Status: active, contract checkpoint. Owner: Roger. Starting revision: c3ac573e3.
+Status: implemented and locally validated; full regression gate running. Owner: Roger. Starting revision: c3ac573e3.
 
 Implement the operator-approved replacement lifecycle: preparation replaces the
 segment set, old Roads results cease to be current for every consumer, and only

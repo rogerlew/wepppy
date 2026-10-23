@@ -332,6 +332,11 @@ wctl run-pytest tests --maxfail=1
 
 - Roads persists to `roads.nodb` and follows standard NoDb locking semantics.
 - Parameter changes and new uploads clear stale prepare/run summaries and return the controller to `idle`.
+- Changing inputs, preparing again, or disabling Roads invalidates current results. Prior outputs, matching prepared geometry, execution inputs, and report caches are retained under `wepp/roads/history/` for explicit browsing.
+- Only a successful full Roads run publishes `wepp/roads/output/roads.current.json`. Old beta outputs and postprocessing alone do not establish current results; prepare and run Roads again.
+- Reports, queries, downloads, and previews reject unavailable current results with 409 `roads_results_unavailable`. Prepared geometry and historical files remain usable. A conflicting mutation returns 409 `roads_operation_busy`; retry after the active read or operation finishes.
+- `roads.lifecycle.lock` is a persistent coordination file, not a stale-lock marker. Do not delete it to clear a conflict. Archive/restore preserves its inode and excludes it from archive payloads.
+- The [preparation lifecycle contract](../../../../docs/schemas/roads-preparation-lifecycle-contract.md) defines publication, retention, and consumer admission. The shared implementation is `wepppy/wepp/interchange/_roads_lifecycle.py`.
 - Warning diagnostics are summarized in prepare/run outputs when mapped fields are missing or invalid.
 - Roads requires baseline WEPP outputs and does not replace the baseline `wepp/output/` dataset tree.
 

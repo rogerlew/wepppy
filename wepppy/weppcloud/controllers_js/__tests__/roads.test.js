@@ -408,6 +408,37 @@ describe("Roads controller", () => {
         );
     });
 
+    test.each(["bootstrap", "completion"])("%s renders a fresh summary while refreshing the panel", async (trigger) => {
+        httpMock.getJson.mockResolvedValue({ body: {
+            last_run_summary: { mapped_segment_count: 3, targeted_hillslope_count: 2 }
+        } });
+        if (trigger === "bootstrap") {
+            roads.bootstrap({});
+        } else {
+            await roads.runRoads();
+            roads.triggerEvent("ROADS_RUN_TASK_COMPLETED", { source: "test", job_id: "roads-job-1" });
+        }
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(document.getElementById("roads_info").textContent).toContain("Mapped segments: 3");
+        expect(document.getElementById("roads-results").textContent).toContain("Roads Run Results");
+    });
+
+    test("a result response started before preparation cannot restore old links", async () => {
+        let deliverOldResults;
+        httpMock.request.mockImplementationOnce(() => new Promise((resolve) => {
+            deliverOldResults = resolve;
+        }));
+        roads.bootstrap({});
+        await Promise.resolve();
+        await roads.prepareSegments();
+        deliverOldResults({ body: "<a>Old Roads results</a>" });
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(document.getElementById("roads-results").textContent).toContain("Run Roads");
+        expect(document.getElementById("roads-results").textContent).not.toContain("Old Roads results");
+    });
+
     test("apply mapping posts attribute_field_map payload", async () => {
         roads.bootstrap({});
         await Promise.resolve();

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 import errno
 import os
 import shutil
@@ -16,6 +18,7 @@ _ARCHIVE_PER_FILE_OVERHEAD_BYTES = 1024
 _ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives",)
 _PROJECT_CONFIG_TRANSACTION_FILES = frozenset({
     ".config-amendment.lock",
+    "roads.lifecycle.lock",
     ".config-amendment.pending.json",
 })
 
@@ -280,7 +283,8 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         wd_path = Path(wd)
 
         authority_wd = runtime.project_config_authority_wd(runid)
-        with runtime.project_config_lifecycle_guard(authority_wd):
+        roads_guard = roads_lifecycle.operation(wd_path, shared=True, create=True)
+        with runtime.project_config_lifecycle_guard(authority_wd), roads_guard:
             locked = [name for name, state in runtime.lock_statuses(runid).items() if name.endswith(".nodb") and state]
             if locked:
                 raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
@@ -419,47 +423,49 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     + ", ".join(locked)
                 )
 
-            for entry in sorted(wd.iterdir()):
-                if entry.name == "archives" or entry.name == ".config-amendment.lock":
-                    continue
+            roads_guard = roads_lifecycle.restore_operation(wd)
+            with roads_guard:
+                for entry in sorted(wd.iterdir()):
+                    if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock"}:
+                        continue
 
-                try:
-                    if entry.is_dir() and not entry.is_symlink():
-                        runtime.publish_status(status_channel, f"Removing directory {entry.relative_to(wd)}")
-                        _remove_restore_directory(entry)
-                    else:
-                        runtime.publish_status(status_channel, f"Removing file {entry.relative_to(wd)}")
-                        _remove_restore_file(entry)
-                except FileNotFoundError:
-                    continue
-
-            # ZIP ordering cannot expose a private payload before its ancestry
-            # is restricted. Owner access is temporary for readonly directories.
-            for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
-                directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
-                os.chmod(directory, mode | 0o700)
-
-            for member, target_path, relative_target in restore_members:
-                if member.is_dir():
-                    target_path.mkdir(parents=True, exist_ok=True)
-                    runtime.publish_status(status_channel, f"Restored directory {relative_target}")
-                    continue
-
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                with zf.open(member, "r") as src, open(target_path, "wb") as dst:
-                    shutil.copyfileobj(src, dst)
-
-                perm = member.external_attr >> 16
-                if perm:
                     try:
-                        os.chmod(target_path, perm)
-                    except OSError:
-                        pass
+                        if entry.is_dir() and not entry.is_symlink():
+                            runtime.publish_status(status_channel, f"Removing directory {entry.relative_to(wd)}")
+                            _remove_restore_directory(entry)
+                        else:
+                            runtime.publish_status(status_channel, f"Removing file {entry.relative_to(wd)}")
+                            _remove_restore_file(entry)
+                    except FileNotFoundError:
+                        continue
 
-                runtime.publish_status(status_channel, f"Restored file {relative_target}")
+                # ZIP ordering cannot expose a private payload before its ancestry
+                # is restricted. Owner access is temporary for readonly directories.
+                for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
+                    directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
+                    os.chmod(directory, mode | 0o700)
 
-            for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
-                os.chmod(directory, mode)
+                for member, target_path, relative_target in restore_members:
+                    if member.is_dir():
+                        target_path.mkdir(parents=True, exist_ok=True)
+                        runtime.publish_status(status_channel, f"Restored directory {relative_target}")
+                        continue
+
+                    target_path.parent.mkdir(parents=True, exist_ok=True)
+                    with zf.open(member, "r") as src, open(target_path, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+
+                    perm = member.external_attr >> 16
+                    if perm:
+                        try:
+                            os.chmod(target_path, perm)
+                        except OSError:
+                            pass
+
+                    runtime.publish_status(status_channel, f"Restored file {relative_target}")
+
+                for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
+                    os.chmod(directory, mode)
 
         from wepppy.nodb.persistence_events import notify_committed
         notify_committed(str(notification_wd), runid, "lifecycle")

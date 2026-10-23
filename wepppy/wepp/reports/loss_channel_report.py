@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Iterable, List
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import pandas as pd
 
 from wepppy.query_engine.payload import QueryRequest
@@ -23,6 +25,7 @@ class ChannelSummaryReport(ReportBase):
     _BASELINE_LOSS_DATASET = "wepp/output/interchange/loss_pw0.chn.parquet"
     _CHANNEL_DATASET = "watershed/channels.parquet"
 
+    @report_read()
     def __init__(self, wd: str | Path | Any, *, output_scope: str | None = None):
         loss = wd if self._is_loss_like(wd) else None
         if loss is not None:

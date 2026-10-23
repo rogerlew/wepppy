@@ -101,13 +101,24 @@ def _write_minimal_pass(path: Path, *, climate_token: str) -> None:
 
 
 def _ready_report_resources_stub(controller: Roads) -> dict[str, object]:
-    relpath = "wepp/roads/output/interchange/README.md"
+    from wepppy.wepp.interchange._roads_lifecycle import mandatory_paths
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    paths = sorted(mandatory_paths(False))
+    for relative in paths:
+        path = Path(controller.wd) / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix == '.parquet':
+            pq.write_table(pa.table({'stub_value': [1.0]}), path)
+        else:
+            path.write_text('orchestration fixture')
     return {
+        "is_single_storm": False,
         "status": "ready",
         "output_scope": "roads",
         "roads_output_relpath": "wepp/roads/output",
         "interchange_relpath": "wepp/roads/output/interchange",
-        "required_relpaths": [relpath],
+        "required_relpaths": paths,
         "missing_relpaths": [],
         "generated_at": 1234567890,
     }
@@ -2555,6 +2566,8 @@ def test_query_segment_detail_returns_manifest_and_wepp_fields(tmp_path: Path) -
         ],
     )
 
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    write_current_roads_fixture(tmp_path)
     detail = controller.query_segment_detail("roads-seg-000601")
 
     assert detail["segment_id"] == "roads-seg-000601"

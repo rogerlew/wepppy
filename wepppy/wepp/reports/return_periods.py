@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import json
 import logging
 from dataclasses import dataclass
@@ -445,6 +447,7 @@ def _serialize_metadata(mapping: Mapping[str, Any]) -> Dict[bytes, bytes]:
     return payload
 
 
+@report_read()
 def refresh_return_period_events(
     wd: str | Path,
     *,
@@ -668,6 +671,7 @@ def refresh_return_period_events(
 
 class ReturnPeriodDataset:
     """Loader and façade for the staged return-period parquet datasets."""
+    @report_read()
     def __init__(
         self,
         wd: str | Path,

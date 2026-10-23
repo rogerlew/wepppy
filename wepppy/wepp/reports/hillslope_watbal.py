@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import json
 import logging
 from collections import OrderedDict
@@ -49,6 +51,7 @@ class HillslopeWatbalReport(ReportBase):
         ]
     )
 
+    @report_read()
     def __init__(self, wd: str | Path, *, output_scope: str | None = None):
         self.wd = Path(wd).expanduser()
         if not self.wd.exists():

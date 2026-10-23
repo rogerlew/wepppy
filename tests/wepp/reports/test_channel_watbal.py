@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import shutil
 from pathlib import Path
 
@@ -297,6 +299,7 @@ def test_channel_watbal_uses_roads_output_scope(tmp_path):
     roads_frame.to_parquet(roads_path, index=False)
 
     baseline = ChannelWatbalReport(run_dir, output_scope="baseline")
+    write_current_roads_fixture(run_dir)
     roads = ChannelWatbalReport(run_dir, output_scope="roads")
 
     baseline_rows = [row.row for row in baseline.avg_annual_iter()]

@@ -260,6 +260,12 @@
   ]);
   window.glDashboardState = state;
 
+  ctx.onRoadsUnavailable = () => {
+    // Reload drops all previously materialized layers/caches and lets the
+    // authenticated page boundary explain the required fresh Roads run.
+    target.textContent = 'Run Roads to generate current results.';
+    window.location.reload();
+  };
   const queryEngine = createQueryEngine(ctx);
   const { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario } = queryEngine;
   let mapController;

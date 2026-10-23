@@ -6,6 +6,8 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
@@ -35,6 +37,7 @@ class TotalWatbalReport(ReportBase):
     _RATIO_COLUMNS = {"Rain + Melt (mm)", "Surface Runoff (mm)", "Lateral Flow (mm)", "ET (mm)", "Percolation (mm)"}
     _SEDIMENT_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, 6))
 
+    @report_read()
     def __init__(
         self,
         wd: str | Path,

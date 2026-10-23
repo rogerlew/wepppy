@@ -1,0 +1,21 @@
+{
+  "runid": "roads-lifecycle-archive-validation",
+  "uid": 1000,
+  "gid": 993,
+  "checks": {
+    "current": {
+      "catalog": 200,
+      "query_console": 200,
+      "query_info": 200,
+      "report": 200
+    },
+    "writer_busy": {
+      "catalog": 200,
+      "query_console": 200,
+      "query_info": 200,
+      "report": 409
+    }
+  },
+  "discovery_no_store": true,
+  "busy_catalog_omits_current_roads": true
+}

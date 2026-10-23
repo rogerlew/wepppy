@@ -25,6 +25,7 @@ from wepp_runner.wepp_runner import (make_hillslope_run,
     run_watershed,
 )
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.geojson_crs_inference import GeoBounds, infer_geojson_crs
 from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_monotonic_segments
@@ -831,6 +832,7 @@ class Roads(NoDbBase):
             self._timestamps["failed"] = int(time.time())
         raise exc
 
+    @roads_lifecycle.mutation
     def set_enabled(self, enabled: bool) -> None:
         requested_enabled = bool(enabled)
         if requested_enabled and not bool(getattr(self.watershed_instance, "delineation_backend_is_wbt", False)):
@@ -843,6 +845,8 @@ class Roads(NoDbBase):
                 "previous_enabled": bool(getattr(self, "_enabled", False)),
             },
         )
+        if not requested_enabled:
+            roads_lifecycle.retain(self.wd, replace_segments=True)
         with self.locked():
             self._enabled = requested_enabled
             self._timestamps["enabled"] = int(time.time())
@@ -860,6 +864,7 @@ class Roads(NoDbBase):
             },
         )
 
+    @roads_lifecycle.mutation
     def set_params(self, payload: Mapping[str, Any]) -> Dict[str, Any]:
         if not isinstance(payload, Mapping):
             raise ValueError("Roads params payload must be a JSON object.")
@@ -997,6 +1002,7 @@ class Roads(NoDbBase):
 
         params = self._normalize_params_with_defaults(params)
 
+        roads_lifecycle.retain(self.wd, replace_segments=True)
         with self.locked():
             self._roads_params = params
             self._timestamps["set_params"] = int(time.time())
@@ -1030,6 +1036,7 @@ class Roads(NoDbBase):
             if geometry_type not in {"LineString", "MultiLineString"}:
                 raise ValueError("Roads GeoJSON supports only LineString or MultiLineString geometries.")
 
+    @roads_lifecycle.mutation
     def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
         source_path = Path(src_path)
         if not source_path.is_absolute():
@@ -1092,6 +1099,7 @@ class Roads(NoDbBase):
         input_crs_source = crs_inference.source
 
         self._ensure_roads_dirs()
+        roads_lifecycle.retain(self.wd, replace_segments=True)
         target_path = Path(self.roads_upload_dir) / "roads.uploaded.geojson"
         shutil.copy2(source_path, target_path)
 
@@ -1157,6 +1165,7 @@ class Roads(NoDbBase):
         features = payload.get("features")
         if not isinstance(features, list):
             raise ValueError("Prepared roads segment GeoJSON is malformed.")
+        roads_lifecycle.segment_ids(features)
         self._append_roads_log(
             "run",
             "loaded_prepared_segments",
@@ -1269,6 +1278,7 @@ class Roads(NoDbBase):
             return routing_eligibility
         return "unknown"
 
+    @roads_lifecycle.inspection
     def query_map_segments_geojson(self) -> Dict[str, Any]:
         payload = self._load_prepared_segments_geojson()
         params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
@@ -1319,6 +1329,7 @@ class Roads(NoDbBase):
         )
         return response_payload
 
+    @roads_lifecycle.inspection
     def query_segment_detail(self, segment_id: str) -> Dict[str, Any]:
         segment_key = str(segment_id or "").strip()
         if not segment_key:
@@ -1365,7 +1376,8 @@ class Roads(NoDbBase):
                 "mapped_primary" if design_source_key == attribute_field_map.get("design") else "segment_property"
             )
 
-        execution_records = self._load_segment_execution_manifest()
+        execution_records = (self._load_segment_execution_manifest()
+                             if roads_lifecycle.available(self.wd) else {})
         execution_record = execution_records.get(segment_key)
         if not isinstance(execution_record, Mapping):
             execution_record = {}
@@ -1470,6 +1482,7 @@ class Roads(NoDbBase):
         )
         return result
 
+    @roads_lifecycle.mutation
     def prepare_segments(self) -> Dict[str, Any]:
         try:
             if not self.enabled:
@@ -1480,7 +1493,6 @@ class Roads(NoDbBase):
                 raise ValueError("No roads GeoJSON has been uploaded.")
 
             self._ensure_roads_dirs()
-            self._reset_roads_log("prepare")
             self._append_roads_log(
                 "prepare",
                 "start_prepare_segments",
@@ -1534,6 +1546,9 @@ class Roads(NoDbBase):
             )
             input_crs_value = crs_inference.crs
             input_crs_source = crs_inference.source
+            roads_lifecycle.retain(self.wd, replace_segments=True)
+            self._reset_roads_log("prepare")
+            self._ensure_roads_dirs()
             convert_kwargs = {
                 "input_geojson_path": staged_path,
                 "dem_path": raster_paths["dem_path"],
@@ -1570,6 +1585,7 @@ class Roads(NoDbBase):
 
             segment_payload = json.loads(Path(self.roads_monotonic_geojson_path).read_text(encoding="utf-8"))
             features = segment_payload.get("features", [])
+            roads_lifecycle.segment_ids(features)
             eligible_segments = 0
             mapped_candidates = 0
             decision_counts: Counter[str] = Counter()
@@ -1676,6 +1692,8 @@ class Roads(NoDbBase):
 
             return dict(prepare_summary)
         except Exception as exc:
+            if not roads_lifecycle.invalidated(self.wd):
+                raise
             self._record_error_and_raise(exc)
 
     @staticmethod
@@ -3805,6 +3823,7 @@ class Roads(NoDbBase):
 
             accounting_source(Path(self.wd))
             required_relpaths.append("wepp/roads/output/interchange/H.accounting.wat.parquet")
+        if corrected:
             required_relpaths.append(str(LEDGER))
         missing_relpaths = [relpath for relpath in required_relpaths if not Path(self.wd, relpath).exists()]
         if missing_relpaths:
@@ -3819,6 +3838,7 @@ class Roads(NoDbBase):
             )
 
         resources = {
+            "is_single_storm": is_single_storm,
             "status": "ready",
             "output_scope": "roads",
             "accounting_policy": "roads_modeled_area_v1" if corrected else "historical_unverified",
@@ -3859,6 +3879,7 @@ class Roads(NoDbBase):
             )
         return compose(Path(self.wd), canonical_ids, records, single_storm=is_single_storm)
 
+    @roads_lifecycle.mutation
     def run_roads_wepp(self) -> Dict[str, Any]:
         failed_run_summary: Optional[Dict[str, Any]] = None
         run_summary_base: Optional[Dict[str, Any]] = None
@@ -3878,6 +3899,7 @@ class Roads(NoDbBase):
                 {"top2wepp_count": len(top2wepp)},
             )
 
+            roads_lifecycle.retain(self.wd)
             with self.locked():
                 self._status = "running"
                 self._errors = []
@@ -5867,8 +5889,14 @@ class Roads(NoDbBase):
                 self._errors = []
                 self._timestamps["run_roads"] = int(time.time())
 
+            roads_lifecycle.publish(
+                self.wd, roads_report_resources,
+                single_storm=roads_report_resources["is_single_storm"],
+            )
             return dict(run_summary)
         except Exception as exc:
+            if not roads_lifecycle.invalidated(self.wd):
+                raise
             if failed_run_summary is None:
                 failed_run_summary = dict(run_summary_base or {})
                 failed_run_summary.update(
@@ -5901,8 +5929,12 @@ class Roads(NoDbBase):
         )
         return status_payload
 
+    @roads_lifecycle.inspection
     def query_summary(self) -> Dict[str, Any]:
         params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        last_run_summary = getattr(self, '_last_run_summary', None)
+        if last_run_summary and last_run_summary.get('status') == 'completed' and not roads_lifecycle.available(self.wd):
+            last_run_summary = None
         summary_payload = {
             "enabled": bool(getattr(self, "_enabled", False)),
             "uploaded_geojson_relpath": getattr(self, "_uploaded_geojson_relpath", None),
@@ -5911,7 +5943,7 @@ class Roads(NoDbBase):
             "attribute_field_map": dict(params.get("attribute_field_map", self._empty_attribute_field_map())),
             "discovered_attribute_catalog": getattr(self, "_uploaded_attribute_catalog", None),
             "last_prepare_summary": getattr(self, "_last_prepare_summary", None),
-            "last_run_summary": getattr(self, "_last_run_summary", None),
+            "last_run_summary": last_run_summary,
             "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
             "status": str(getattr(self, "_status", "idle")),
             "errors": list(getattr(self, "_errors", [])),

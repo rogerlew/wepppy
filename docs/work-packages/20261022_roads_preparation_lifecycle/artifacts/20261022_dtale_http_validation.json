@@ -1,0 +1,25 @@
+{
+  "runid": "roads-lifecycle-archive-validation",
+  "uid": 1000,
+  "gid": 993,
+  "checks": {
+    "current": {
+      "launch": 303,
+      "grid": 200
+    },
+    "writer_busy": {
+      "launch": 409,
+      "grid": 409
+    },
+    "reprepared": {
+      "launch": 409,
+      "grid": 409
+    },
+    "fresh_run": {
+      "launch": 303,
+      "grid": 200
+    }
+  },
+  "transport": "live browse:9009 -> dtale:9010; existing grid requests to actual D-Tale service",
+  "authentication": "existing scoped dev-agent token; isolated public validation project"
+}

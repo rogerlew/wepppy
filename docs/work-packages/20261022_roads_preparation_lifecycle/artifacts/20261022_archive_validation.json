@@ -1,0 +1,30 @@
+{
+  "source": "/wc1/runs/ro/roads-segment-summary-validation",
+  "restored": "/wc1/runs/ro/roads-lifecycle-archive-validation",
+  "uid": 1000,
+  "gid": 993,
+  "archive_sha256": "1ffe75b22778902440a5e8d536e497870699ba6bf01a60d854d0e8b6ad03b1c2",
+  "resources_verified": {
+    "wepp/roads/output/interchange/H.pass.parquet": "d7fca84bbf557ebe7f395fe02d89e2c36a96be71c39e36cd08a57e5e09b9c82e",
+    "wepp/roads/output/interchange/ebe_pw0.parquet": "d35ef90b4a2b328cc330f87c6c76f3ef013837ab953279943260894fc2048b3f",
+    "wepp/roads/output/interchange/README.md": "95c18010fb3b1418a13afd365b1e7c2d22ce17d11631b875e594b37a63c6a129",
+    "wepp/roads/output/interchange/H.wat.parquet": "813c5e4ab43ec80cccd8201c5bcfc28beb9f6a9aa25966aba21530c1f61b100c",
+    "wepp/roads/output/interchange/loss_pw0.out.parquet": "d31dae4a29fac40644bcb3d5d1dfc8cb90fd7287f79015af66957e9572321a1a",
+    "wepp/roads/output/interchange/loss_pw0.hill.parquet": "73480056e24c78d1477dc23c2ce1fa3829b01e915c33aae16aca424d66fd710a",
+    "wepp/roads/output/interchange/loss_pw0.chn.parquet": "5cd5089f80acdf677aefbc3269bc4e71ff824fc2f40f76897a63b619ba3e0954",
+    "wepp/roads/output/interchange/totalwatsed3.parquet": "3861538316423b744b75b85770c0ecaad1e703cc47e30ee8141cebee26c654ff",
+    "wepp/roads/output/interchange/roads_segment_loss_summary.parquet": "96acc980474f2800bcd8fa652ef3d40cad6898f04e8e6f80b1b78ed1fd858a5f",
+    "wepp/roads/output/interchange/H.accounting.wat.parquet": "2fe2e6f6e9bfc5745199e2afd9c32efd7902a5e30b38a57b2173fc1f7ea724eb",
+    "wepp/roads/segments/roads.accounting.json": "a33cf9a386524d672cb15c7af99a540a098fce8ea7662d3e8ab8a8ea3fab5f62",
+    "wepp/roads/output/roads.current.json": "c9053d4b52365b878e3ac6bac6fbe24bba087608e08ce285bdf8f843209a247e",
+    "wepp/roads/segments/roads.inslope.monotonic.geojson": "a82879942857cab0ffe4b690f51bbcc66d0565f59e23886f7288e87a7ba5e51d",
+    "wepp/roads/segments/roads.segment.pass.manifest.json": "8b76b817ac209d4343ccfead048b6a0124556268c07be888ffce10973f73bddf"
+  },
+  "history_receipts": [
+    "wepp/roads/history/658d582e913d4165a7dd8d710b928ef0/wepp/roads/output/roads.current.json"
+  ],
+  "lock_inode_preserved": true,
+  "lock_excluded_from_archive": true,
+  "restored_current": true,
+  "runtime_callbacks": "isolated RQ/status/cache callbacks; canonical real filesystem archive/restore"
+}

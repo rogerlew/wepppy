@@ -822,18 +822,32 @@ var Roads = (function () {
             controller.info.html("<div class=\"wc-stack-sm\">" + details.join("") + "</div>");
         }
 
+        var resultsRequestVersion = 0;
+        var resultsPanelSequence = 0;
+
+        function invalidateRoadsResults() {
+            resultsRequestVersion += 1;
+            if (controller.resultsContainer) {
+                controller.resultsContainer.textContent = "Run Roads to generate current results.";
+            }
+        }
+
         function renderRoadsResultsPanel() {
             if (!controller.resultsContainer || !http || typeof http.request !== "function") {
                 return Promise.resolve(null);
             }
+            var requestVersion = resultsRequestVersion;
+            var panelSequence = ++resultsPanelSequence;
             return http.request(resolveRunUrl("report/roads/results/")).then(function (result) {
                 var body = result && result.body;
-                if (typeof body === "string" && controller.resultsContainer) {
+                if (requestVersion === resultsRequestVersion && panelSequence === resultsPanelSequence && typeof body === "string" && controller.resultsContainer) {
                     controller.resultsContainer.innerHTML = body;
                 }
                 return body;
             }).catch(function (error) {
-                controller.pushResponseStacktrace(controller, toResponsePayload(http, error));
+                if (requestVersion === resultsRequestVersion && panelSequence === resultsPanelSequence) {
+                    controller.pushResponseStacktrace(controller, toResponsePayload(http, error));
+                }
                 return null;
             });
         }
@@ -859,7 +873,9 @@ var Roads = (function () {
             if (!http || typeof http.getJson !== "function") {
                 return Promise.resolve(null);
             }
+            var requestVersion = resultsRequestVersion;
             return http.getJson(resolveRunUrl("api/roads/results")).then(function (result) {
+                if (requestVersion !== resultsRequestVersion) { return null; }
                 var payload = result && result.body ? result.body : {};
                 if (taskKey === "prepare") {
                     renderPrepareSummary(payload.last_prepare_summary || null);
@@ -876,7 +892,9 @@ var Roads = (function () {
             if (!http || typeof http.getJson !== "function") {
                 return Promise.resolve(null);
             }
+            var requestVersion = resultsRequestVersion;
             return http.getJson(resolveRunUrl("api/roads/results")).then(function (result) {
+                if (requestVersion !== resultsRequestVersion) { return null; }
                 var payload = result && result.body ? result.body : {};
                 renderLatestRoadsSummary(payload);
                 return payload;
@@ -1068,6 +1086,7 @@ var Roads = (function () {
             });
             hideStacktrace();
 
+            invalidateRoadsResults();
             return http.request(resolveRunUrl(task.requestPath), {
                 method: "POST",
                 form: controller.form
@@ -1161,6 +1180,7 @@ var Roads = (function () {
                 formData.append("file", file);
 
                 var xhr = new window.XMLHttpRequest();
+                invalidateRoadsResults();
                 xhr.open("POST", resolveRunUrl("tasks/roads/upload_geojson"));
                 xhr.withCredentials = true;
 
@@ -1259,6 +1279,7 @@ var Roads = (function () {
                 emitter.emit("roads:mapping:started", { payload: payload });
             }
 
+            invalidateRoadsResults();
             return http.request(resolveRunUrl("tasks/roads/set_params"), {
                 method: "POST",
                 form: controller.form,

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root
+from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root, discovery_headers
+
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import json
 import logging
@@ -722,6 +724,7 @@ async def get_catalog(request: Request) -> JSONResponse:
     except ValueError as exc:
         return _error_response(400, "invalid_request", str(exc))
 
+    headers = discovery_headers(run_path, raw_entries)
     raw_entries = visible_entries(request, run_path, raw_entries)
     filtered_entries = _filter_catalog_entries(raw_entries)
     filtered_total = len(filtered_entries)
@@ -758,7 +761,7 @@ async def get_catalog(request: Request) -> JSONResponse:
     links = {
         "self": str(request.url),
     }
-    return JSONResponse({"data": data, "meta": meta, "links": links})
+    return JSONResponse({"data": data, "meta": meta, "links": links}, headers=headers)
 
 
 async def get_run(request: Request) -> JSONResponse:
@@ -890,6 +893,21 @@ async def execute_query(request: Request) -> JSONResponse:
     if not isinstance(payload, Mapping):
         return _error_response(400, "invalid_request", "Request body must be a JSON object")
 
+    dataset_values = payload.get('datasets', [])
+    if isinstance(dataset_values, list):
+        paths = [value if isinstance(value, str) else value.get('path') or value.get('dataset')
+                 for value in dataset_values if isinstance(value, (str, Mapping))]
+        paths = [path for path in paths if isinstance(path, str)]
+        require_datasets(request, run_path, paths)
+        try:
+            if any(roads_lifecycle.current_path(path) for path in paths):
+                with roads_lifecycle.current_read(run_path):
+                    pass
+        except roads_lifecycle.RoadsResultsUnavailable as exc:
+            response = _error_response(409, exc.code, str(exc))
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+
     try:
         query_request, normalized_payload, raw_entries, generated_at = _prepare_query_request(
             payload,
@@ -935,6 +953,10 @@ async def execute_query(request: Request) -> JSONResponse:
 
     try:
         result = run_query(context, query_request)
+    except roads_lifecycle.RoadsResultsUnavailable as exc:
+        response = _error_response(409, exc.code, str(exc))
+        response.headers['Cache-Control'] = 'no-store'
+        return response
     except FileNotFoundError as exc:
         return _error_response(404, "dataset_missing", str(exc))
     except ValueError as exc:
@@ -978,7 +1000,7 @@ async def execute_query(request: Request) -> JSONResponse:
         "execution": execution_meta,
     }
     meta = _with_trace_id(meta)
-    return JSONResponse({"data": data, "meta": meta})
+    return JSONResponse({"data": data, "meta": meta}, headers={"Cache-Control": "no-store"})
 
 
 async def activate_run_endpoint(request: Request) -> JSONResponse:

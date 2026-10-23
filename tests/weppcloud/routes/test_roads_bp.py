@@ -573,6 +573,8 @@ def test_report_roads_summary_includes_scoped_links_and_segment_exports(
     controller = RoadsStub.getInstance(run_dir)
     controller.set_enabled(True)
     controller.run_roads_wepp()
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    write_current_roads_fixture(run_dir)
 
     captured: Dict[str, Any] = {}
 
@@ -615,6 +617,8 @@ def test_report_roads_results_renders_run_results_panel(
     controller = RoadsStub.getInstance(run_dir)
     controller.set_enabled(True)
     controller.run_roads_wepp()
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    write_current_roads_fixture(run_dir)
 
     captured: Dict[str, Any] = {}
 

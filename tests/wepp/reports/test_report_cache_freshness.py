@@ -1,6 +1,8 @@
 """Real native/DuckDB cache generations; only controller acquisition is isolated."""
 from __future__ import annotations
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import json
 import os
 from pathlib import Path
@@ -81,6 +83,8 @@ def test_actual_report_changes_with_consumed_bytes(run, change):
         manifest.parent.mkdir(parents=True)
         manifest.write_text('[{"segment_run_id":900001,"target_hillslope_wepp_id":1}]')
         baseline = _rows(HillslopeWatbalReport(run))
+    if roads:
+        write_current_roads_fixture(run)
     constructor = (lambda: HillslopeWatbalReport(run, output_scope="roads" if roads else "baseline")) if change in {"wat", "translator", "roads"} else lambda: AverageAnnualsByLanduseReport(run)
     before = _rows(constructor())
     if change == "wat":

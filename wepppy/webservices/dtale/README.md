@@ -11,7 +11,7 @@ Tabs viewing the same dataset share server state and may also need reopening.
 
 Changing file timestamps alone does not reload identical data. Changed bytes
 refresh on the next launch even if timestamps were restored. An already loaded
-CSV remains a point-in-time view until reopened. Lazy Parquet pages verify the
+baseline or explicitly historical CSV remains a point-in-time view until reopened. Lazy Parquet pages verify the
 accepted source generation so a changed schema cannot be combined with old grid
 columns or counts. Missing optional maps do not prevent viewing the table.
 
@@ -32,3 +32,10 @@ and [local implementation guide](AGENTS.md).
 Validate with `wctl run-pytest tests/microservices/test_dtale_freshness.py` and the
 browse/D-Tale integration tests. Deployment acceptance also requires a normal
 browse launch and actual browser refresh/error behavior after service restart.
+
+Current Roads tables additionally follow the [Roads lifecycle contract](../../../docs/schemas/roads-preparation-lifecycle-contract.md).
+Each new preview request, including existing or derived viewer datasets, requires
+current Roads publication and unchanged source bytes. Invalidation returns 409
+`roads_results_unavailable`; run Roads successfully and reopen from browse.
+Shared admission lasts through response consumption. Explicit Roads history remains
+available without a current receipt.

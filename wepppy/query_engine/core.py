@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 import re
 from pathlib import Path
 
@@ -167,6 +169,12 @@ def _dataset_source_sql(
     entry = catalog.get(spec.path)
     fs_path = entry.fs_path if entry and entry.fs_path else spec.path
     dataset_path = _resolve_dataset_path(root, fs_path, spec.path)
+    if roads_lifecycle.current_path(spec.path):
+        expected = root.resolve() / spec.path
+        if dataset_path != expected:
+            raise roads_lifecycle.RoadsResultsUnavailable('Current Roads dataset cannot alias another source.')
+        with roads_lifecycle.current_read(root):
+            pass
     suffix = dataset_path.suffix.lower()
     requires_spatial = suffix in _GEO_READ_EXTENSIONS
     geometry_alias = _spatial_geometry_alias(spec, catalog) if requires_spatial else "geom"

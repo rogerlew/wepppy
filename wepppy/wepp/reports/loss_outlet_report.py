@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List, Optional
 
+from wepppy.wepp.interchange._roads_lifecycle import report_read
+
 import pandas as pd
 
 from wepppy.query_engine.payload import QueryRequest
@@ -32,6 +34,7 @@ class OutletSummaryReport:
 
     _BASELINE_DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
 
+    @report_read()
     def __init__(self, wd: str | Path | Any, *, output_scope: str | None = None):
         self._output_scope = normalize_output_scope(output_scope)
         self._dataset_path = scoped_dataset_path(self._BASELINE_DATASET_PATH, self._output_scope)

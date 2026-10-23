@@ -1,0 +1,21 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "helper_sha256": "5736148a8a34ef1fbe46e7104af8b3c1de0568b1b4005da9da02da4d3332ba7b",
+  "retention": {
+    "copy_count": 2,
+    "copy_snapshot_modes": [
+      "0o700",
+      "0o700"
+    ],
+    "final_snapshot_mode": "0o700",
+    "link_materialized": true,
+    "source_unchanged": true
+  },
+  "stale_nodb_rejected_before_body": true,
+  "noncurrent_alias_query_rejected": true,
+  "noncurrent_alias_inventory_visible": false
+}

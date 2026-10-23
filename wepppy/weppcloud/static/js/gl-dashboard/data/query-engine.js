@@ -9,6 +9,29 @@ import { getValue } from '../state.js';
  * Scenario is passed in the request body as "scenario" parameter.
  */
 export function createQueryEngine(ctx) {
+  let roadsUnavailable = false;
+
+  async function readResponse(resp) {
+    if (resp.status === 409) {
+      const body = await resp.json();
+      if (body.code === 'roads_results_unavailable') {
+        if (!roadsUnavailable && typeof ctx.onRoadsUnavailable === 'function') {
+          ctx.onRoadsUnavailable();
+        }
+        roadsUnavailable = true;
+      }
+    }
+    if (roadsUnavailable) {
+      const error = new Error('Run Roads to generate current results.');
+      error.code = 'roads_results_unavailable';
+      throw error;
+    }
+    if (!resp.ok) return null;
+    const result = await resp.json();
+    if (roadsUnavailable) throw new Error('Roads results are no longer current.');
+    return result;
+  }
+
   function encodePathComponentPreserveSemicolons(value) {
     // Composite runids use ";;" delimiters. Preserve ";" for readability while still
     // encoding characters that would truncate or corrupt the request (e.g. #, ?, space).
@@ -68,8 +91,7 @@ export function createQueryEngine(ctx) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!resp.ok) return null;
-    return resp.json();
+    return readResponse(resp);
   }
 
   async function postBaseQueryEngine(payload) {
@@ -79,8 +101,7 @@ export function createQueryEngine(ctx) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!resp.ok) return null;
-    return resp.json();
+    return readResponse(resp);
   }
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
@@ -94,8 +115,7 @@ export function createQueryEngine(ctx) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!resp.ok) return null;
-    return resp.json();
+    return readResponse(resp);
   }
 
   return { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario };

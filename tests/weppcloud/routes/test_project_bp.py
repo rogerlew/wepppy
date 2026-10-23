@@ -120,6 +120,14 @@ def project_client(
 
     dispatched: Dict[str, Any] = {}
     dispatched["current_user"] = current_user_stub
+    from wepppy.nodb.mods.roads import Roads
+    class RoadsStub:
+        enabled = False
+        def set_enabled(self, enabled):
+            self.enabled = enabled
+    roads_stub = RoadsStub()
+    dispatched['roads_controller'] = roads_stub
+    monkeypatch.setattr(Roads, 'getInstance', lambda wd: roads_stub)
 
     def fake_redis_connection_kwargs(db):
         dispatched["redis_db"] = db
@@ -687,6 +695,7 @@ def test_set_mod_roads_allows_when_wbt_backend(project_client):
     assert payload["Content"]["mod"] == "roads"
     assert payload["Content"]["enabled"] is True
     assert "roads" in controller.mods
+    assert dispatched["roads_controller"].enabled is True
 
 
 def test_set_mod_geneva_requires_wbt_backend(project_client):
@@ -924,3 +933,17 @@ def test_set_mod_returns_stacktrace_details_on_unexpected_error(
     details = payload["error"]["details"]
     assert "Traceback (most recent call last):" in details
     assert "RuntimeError: boom" in details
+
+
+def test_set_mod_roads_conflict_is_explicit(project_client):
+    from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+    from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
+    client, _, dispatched, run_dir, _ = project_client
+    dispatched['current_user'].roles = {'PowerUser'}
+    write_current_roads_fixture(run_dir)
+    with lifecycle.current_read(run_dir):
+        response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/set_mod',
+                               json={'mod': 'roads', 'enabled': True})
+    assert response.status_code == 409
+    assert response.get_json()['error']['code'] == 'roads_operation_busy'
+    assert response.headers['Cache-Control'] == 'no-store'

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+
 import io
 import shutil
 from pathlib import Path
@@ -149,6 +151,7 @@ def test_total_watbal_uses_roads_output_scope(tmp_path):
     roads_df.to_parquet(roads_path, index=False)
 
     baseline_report = TotalWatbalReport(run_dir, exclude_yr_indxs=[], output_scope="baseline")
+    write_current_roads_fixture(run_dir)
     roads_report = TotalWatbalReport(run_dir, exclude_yr_indxs=[], output_scope="roads")
 
     baseline_rows = [row.row for row in baseline_report]

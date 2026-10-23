@@ -1481,6 +1481,8 @@ def omni_return_period_client(wepp_client, monkeypatch):
                     table = table.set_column(table.schema.get_field_index('measure_value'), 'measure_value', values)
                 pq.write_table(table, target / filename)
             pq.write_table(pa.table({'completed': [True]}), target / 'loss_pw0.out.parquet')
+        from tests.roads_lifecycle_fixtures import write_current_roads_fixture
+        write_current_roads_fixture(directory)
         (directory / 'wepp.nodb').write_text('NoDb loading isolated; real datasets above')
         (directory / '_query_engine').mkdir()
         (directory / '_query_engine/catalog.json').write_text(wepp_module.json.dumps({'root': str(directory), 'files': []}))

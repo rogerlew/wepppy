@@ -1,0 +1,29 @@
+{
+  "root": "/wc1/runs/ro/roads-segment-summary-validation",
+  "uid": 1000,
+  "gid": 993,
+  "elapsed_seconds": 120.39711475372314,
+  "profile_rows": 34,
+  "receipt": {
+    "is_single_storm": false,
+    "policy": "roads_current_v1",
+    "required_relpaths": [
+      "wepp/roads/output/interchange/H.pass.parquet",
+      "wepp/roads/output/interchange/ebe_pw0.parquet",
+      "wepp/roads/output/interchange/README.md",
+      "wepp/roads/output/interchange/H.wat.parquet",
+      "wepp/roads/output/interchange/loss_pw0.out.parquet",
+      "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+      "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+      "wepp/roads/output/interchange/totalwatsed3.parquet",
+      "wepp/roads/output/interchange/roads_segment_loss_summary.parquet",
+      "wepp/roads/output/interchange/H.accounting.wat.parquet",
+      "wepp/roads/segments/roads.accounting.json"
+    ]
+  },
+  "history_count": 2,
+  "baseline_files_unchanged": 911,
+  "original_parquets_unchanged": 46,
+  "summary_sha256": "96acc980474f2800bcd8fa652ef3d40cad6898f04e8e6f80b1b78ed1fd858a5f",
+  "two_full_runs_and_repreparation": true
+}

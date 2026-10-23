@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
 import os
 from pathlib import Path
 from typing import Any, Dict
@@ -37,6 +39,12 @@ from .._common import *  # noqa: F401,F403
 roads_bp = Blueprint("roads", __name__)
 ROADS_UPLOAD_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
 _UPLOAD_CHUNK_BYTES = 1024 * 1024
+
+
+@roads_bp.after_request
+def _roads_no_store(response):
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 def _ensure_roads_controller(wd: str, cfg_fn: str) -> Roads:
@@ -255,7 +263,7 @@ def _roads_results_context(runid: str, config: str, controller: Roads) -> Dict[s
     if not isinstance(roads_run_summary, dict):
         roads_run_summary = {}
     roads_report_resources = roads_run_summary.get("roads_report_resources")
-    if not isinstance(roads_report_resources, dict):
+    if not roads_lifecycle.available(controller.wd) or not isinstance(roads_report_resources, dict):
         roads_report_resources = {}
     return {
         "roads_status": roads_status,
