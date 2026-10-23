@@ -1,0 +1,50 @@
+{
+  "reviewer": "accounting_contract_review",
+  "root": "/wc1/runs/ro/roads-validation-oct23-v2-unrutted",
+  "method": "Read-only production geometry and distance-sampling helpers, persisted watershed lengths; no model execution or NoDb deserialization",
+  "feature_osunum": "6",
+  "prepared_segment_id": "roads-seg-000001",
+  "upload_length_attribute_m": 1004.06,
+  "prepared_segment_length_m": 204.012211698352,
+  "road_raw_and_clamped_grade_pct": 6.195206132792172,
+  "road_parity_grade_pct": 0.5438057902778574,
+  "road_parity_width_m": 29.422268548896483,
+  "crossings": [
+    {
+      "topaz_id": 271,
+      "wepp_id": 61,
+      "overlap_length_m": 42.45271521264654,
+      "hillslope_length_m": 140.50966799187802,
+      "discha_sample_median_m": 188.45079040527344,
+      "fill_length_m": 30.0,
+      "downslope_landuse_length_m": 158.45079040527344,
+      "road_parity_length_m": 5.771508086413517,
+      "upstream_landuse_length_m": -53.71263049980894
+    },
+    {
+      "topaz_id": 272,
+      "wepp_id": 62,
+      "overlap_length_m": 69.63586176871127,
+      "hillslope_length_m": 69.0533229360709,
+      "discha_sample_median_m": 188.45079040527344,
+      "fill_length_m": 30.0,
+      "downslope_landuse_length_m": 158.45079040527344,
+      "road_parity_length_m": 9.467096210203415,
+      "upstream_landuse_length_m": -128.86456367940596
+    }
+  ],
+  "upstream_formula": "hillslope_length_m - road_parity_length_m - fill_length_m - downslope_landuse_length_m",
+  "failed_manifest_relpath": "wepp/roads/history/b8aba5dc0bed4ef3831a6a52192170d2/wepp/roads/segments/roads.segment.pass.manifest.json",
+  "failure_reason": "failed_non_positive_top_ofe",
+  "current_receipt_exists": false,
+  "source_sha256": {
+    "wepp/roads/segments/roads.inslope.monotonic.geojson": "4bc81006633461a85153ddbce1d797c835901bd7ef6e64c3b106aa8db3127926",
+    "watershed/hillslopes.parquet": "10b4c81a508e4ad0fcd99f7c7fb524df76772cdf9fcb0731fb12ec888672d8c9",
+    "dem/wbt/discha.tif": "adaa5b599514422d976f5776d6b6f180f805d5ad0a6dde03d5ce93c5748f913e",
+    "dem/wbt/subcatchments.WGS.geojson": "ceb5fe957468e5607e9c8afa470531a1114c8b30d2f16dad61df48145fb45c11",
+    "dem/dtm_UM1.tif": "dc0fb1e6d371d0e70ef92398927dbe63d869cf2408e0e48798f3831c01e8f2a9"
+  },
+  "production_helper_sha256": {
+    "wepppy/nodb/mods/roads/roads.py": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec"
+  }
+}

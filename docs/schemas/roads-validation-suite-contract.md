@@ -125,3 +125,19 @@ single-OFE pilot otherwise fails native execution. Regenerated two-OFE no-traffi
 results may change; numerical changes require measurement, since the retained
 legacy fill/forest plant numerical rows are currently identical. Historical
 outputs are not rewritten or certified. No model defaults or formulas change.
+
+## Infeasible full-upload unrutted control
+
+The unfiltered `clogging-starch` upload assigned entirely to unrutted design is
+also a negative acceptance case: explicit fill/buffer inputs (30 m at 10% each)
+produce non-positive upstream landuse OFEs for source feature OSUNUM `6`, on
+Topaz 271/272 (WEPP 61/62). Retain that rejection and prove no current receipt.
+Do not alter geometry formulas or silently discard failed records.
+
+A separate positive unrutted full-project execution may exclude only that exact
+source feature, bound by the original upload hash and feature identity. Record
+the exclusion and source/input/prepared/completed/skipped counts. No automatic
+"drop until pass" policy is permitted. The three additive controls retain the
+full upload; the unrutted subset is not a like-for-like watershed comparison or
+proof that the unmodified whole-site unrutted configuration succeeds. Retain both
+attempts and describe the distinction in the published report.
