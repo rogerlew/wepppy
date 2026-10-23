@@ -164,3 +164,13 @@ cache provenance. Never reuse a raw-backed or old-accounting cache merely becaus
 timestamps match. Missing/mismatched corrected artifacts fail regeneration/readiness
 rather than falling back to historical raw water. Baseline/raw diagnostics remain
 explicitly separate, with no auth or endpoint-selection changes.
+
+## Current-result lifecycle precedence
+
+The [Roads preparation lifecycle](roads-preparation-lifecycle-contract.md) is the
+upstream current-result admission rule (operator-approved, implementation pending).
+Accounting lineage validates the contents of eligible current outputs; it does
+not independently make old beta files current. Historical compatibility descriptions
+in this contract apply to explicit diagnostic reads only. Direct Roads-scoped
+reports require current admission before accounting validation. Retained historical
+snapshots include the accounting ledger and original prepared/manifest context.

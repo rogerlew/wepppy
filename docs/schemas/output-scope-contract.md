@@ -247,3 +247,17 @@ Road Segment Loss Summary values and provenance. This diagnostic uses original
 segment/profile exports, not receiving-hillslope results or watershed outlet
 values. Existing Parquet path and on-demand CSV/download authorization remain.
 Implementation conformance pending the segment-summary repair checkpoint.
+
+## Roads current-result lifecycle amendment
+
+Operator-approved replacement lifecycle, implementation pending: the
+[Roads preparation lifecycle contract](roads-preparation-lifecycle-contract.md)
+governs current Roads admission, locking, retained historical snapshots and HTTP
+unavailability. Preparation/input replacement invalidates current Roads results;
+a fresh successful full Roads execution publishes the current receipt last.
+File existence, cached catalog entries and old NoDb summaries cannot override it.
+Current Roads outputs keep their canonical paths; historical diagnostic snapshots
+may live under `wepp/roads/history/` and are not current output-scope fallbacks.
+Old beta output files require prepare/run recovery, not compatibility admission.
+Baseline reports, ordinary absent Roads projects and existing authorization remain
+unchanged. Current-result reads return the contracted 409 when unavailable.
