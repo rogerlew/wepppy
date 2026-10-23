@@ -158,6 +158,18 @@ child scenario to Query Engine; a terminal `;;omni;;<name>` URL already names th
 child endpoint. Labels use the exact child name. Batch-map dashboards do not
 expose this run-specific panel.
 
+## Asynchronous catalog coexistence (specified; implementation pending)
+
+[Query-engine catalog refresh](../../schemas/query-engine-catalog-refresh-contract.md)
+permits background metadata publication. The session snapshot rule above means
+an existing page cannot silently adopt replaced output/catalog provenance;
+publication invalidates that snapshot and requires the existing reload path.
+It does not prohibit authorized background maintenance. Preserve current
+stale/mismatched-source refusal, exact scenario ownership and readiness checks.
+Internal freshness barriers must be validated before upstream producers migrate;
+no new public endpoint, automatic data substitution or calculation change is
+introduced by this clarification.
+
 ## Observed streamflow overlay
 
 Accepted scope 2026-10-14; implementation and local real-artifact/browser

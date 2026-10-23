@@ -18,6 +18,15 @@
 - Applies to all NoDb controllers inheriting `NoDbBase`.
 - Does not redefine RQ/API payload schema (see `docs/schemas/rq-response-contract.md`).
 
+## Derived query catalog refresh (specified; implementation pending)
+
+[Query-engine catalog refresh](query-engine-catalog-refresh-contract.md) governs
+async-preferred metadata invalidation after artifact publication. Committed
+NoDb/scientific artifacts, durable catalog refresh intent and consumer readiness
+are separate outcomes. Do not hold controller locks for background catalog
+scans, or mirror maintenance job ownership in NoDb files. Existing synchronous
+callers retain their contracts until individually migrated with reader barriers.
+
 ## Canonical Storage Model
 - Each NoDb controller persists to exactly one `.nodb` JSON file under the run working directory.
 - The NoDb file is the durable state source of truth.

@@ -49,6 +49,35 @@ Creation access policy and its conditional 403/503 errors are defined in
 - Implementation conforms as of `41b23983d`: preallocated UUID RQ job IDs use
   the shared canonical generator and job lookup preserves exact stored IDs.
 
+## Query-engine catalog maintenance (specified; implementation pending)
+
+[Query-engine catalog refresh](query-engine-catalog-refresh-contract.md) defines
+per-project coalesced maintenance on existing infrastructure. Its internal
+refresh receipt does not replace the primary domain job response. Durable
+pending intent without enqueue must not fabricate a job ID.
+
+Reserve `query_catalog_refresh_<canonical-hyphenated-UUID>` exclusively for
+this maintenance task; the suffix comes from `new_rq_job_id()`. Preserve exact
+IDs. This is a bounded exception to ordinary UUID IDs, distinct from the
+Runs-catalog sweep prefix. Classify this prefix before payload deserialization
+in single, batch and recursive polling, including retained jobs after rollback.
+
+Job-info exposes only exact job_id, status, generic description
+`Query catalog maintenance`, started_at/ended_at, runid=null, result=null,
+exc_info=null, auth_actor=null and children={}. Failure uses the canonical
+error envelope with code `query_catalog_refresh_failed`, message
+`Query catalog maintenance failed; consult project diagnostics`, and opaque
+error_id. Unknown/expired IDs retain existing not-found HTTP behavior with
+generic details; unreadable/import-failed/abandoned retained jobs use sanitized
+failure without arguments, paths, requests or tracebacks. Preserve the prefix
+classifier for the retention lifetime, including rollback.
+
+Successful jobstatus retains its existing status-only response shape; sanitize
+its error paths using the same prefix policy. Public job state is not proof of
+catalog freshness. Detailed records use
+existing run-authorized project inspection/operator diagnostics. No new public
+endpoint, authentication policy or primary submission response is authorized.
+
 ## Batch leaf dependency specialization
 
 [Batch task boundary contract](batch-task-boundary-contract.md) defines the

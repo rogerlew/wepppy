@@ -16,6 +16,16 @@ identity. New caches bind compact report rows and additive source provenance in
 one Parquet file, so concurrent publication or a separate JSON write cannot bind
 rows from one generation to another generation's dependencies.
 
+## Asynchronous catalog coexistence (specified; implementation pending)
+
+[Query-engine catalog refresh](query-engine-catalog-refresh-contract.md) permits
+asynchronous producer notifications but does not relax this contract's consumed
+source selection, alias/schema identity or pre-publication freshness checks.
+Freshness-sensitive report contexts must cross a publication barrier and reload
+held catalog objects before use. A queued maintenance job is not evidence that
+a report's required source selection is current. Historical report availability
+and archived-source behavior remain unchanged.
+
 ## Consumed dependencies
 
 Water-balance identity includes the scope, selected H.wat path and SHA-256,

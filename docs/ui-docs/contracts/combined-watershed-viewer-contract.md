@@ -45,3 +45,13 @@ Verify all nine real Portland links on forest with a non-admin PortlandGroup mem
 Offline maintenance may prepare derived outputs for READONLY legacy runs without removing their READONLY marker: run the native writer against a visible staging copy, validate it, then publish only the manifest-owned derived files and a catalog built with the existing catalog-entry builder. This is explicit operator-invoked preparation, not ordinary activation or a request-time bypass. Refuse to overwrite an existing catalog/output of unknown provenance; preserve the marker and original files byte-for-byte. Retain staging/failure evidence through normal project inspection and document rollback.
 
 Exact preserved measures come from the already averaged `wepp/output/interchange/loss_pw0.hill.parquet`: key `wepp_id`, area `Hillslope Area` (ha), runoff/subrunoff/baseflow from their `* Volume` columns (m³) divided by `(area_ha * 10)` to obtain mm; loss from `Soil Loss` (kg) divided by area_ha; phosphorus from native `Total Pollutant` (kg) divided by area_ha for runs whose valid phosphorus options establish pollutant meaning. Do not average these rows again or substitute sediment yield/tonnes-per-hectare. Reject zero/nonfinite area. Match `wepp_id` to TopazID through existing watershed metadata or geometry; verify a one-to-one complete join. These formulas preserve the legacy report/viewer semantics and native schema rather than introducing parameterization.
+
+## Query catalog coordination (specified; implementation pending)
+
+[Query-engine catalog refresh](../../schemas/query-engine-catalog-refresh-contract.md)
+requires a stable shared lifecycle/publication guard. This does not revoke this
+contract's explicit operator-invoked READONLY preparation exception or grant it
+to generic refresh workers. Preparation and manifest-owned rollback join that
+guard while preserving staged exclusive publication, refusal to overwrite
+unknown outputs and hash-owned rollback. Generic async migration of this
+preparation workflow is excluded.
