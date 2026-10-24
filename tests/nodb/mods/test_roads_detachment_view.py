@@ -8,7 +8,7 @@ from pyproj import Transformer
 import pytest
 
 from tests.roads_lifecycle_fixtures import write_current_roads_fixture
-from wepppy.nodb.mods.roads import _detachment_view as view
+from wepppy.weppcloud.routes.nodb_api import _roads_detachment as view
 from wepppy.nodb.mods.roads._segment_loss_summary import SCHEMA
 from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
 

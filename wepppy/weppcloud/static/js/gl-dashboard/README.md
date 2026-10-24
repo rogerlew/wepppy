@@ -197,7 +197,7 @@ See the [water aggregation contract](../../../../../docs/schemas/hillslope-water
 tooltip/details/table, jet2 numeric legend and scope URL serialization. It consumes
 one authorized `resources/roads.json?view=detachment` response; do not split its
 geometry/CRS/manifest/profile reads in the browser or use query-engine's global
-unavailable latch for optional Roads reads. The backend `_detachment_view.py`
+unavailable latch for optional Roads reads. The route helper `routes/nodb_api/_roads_detachment.py`
 materializes the response inside the existing shared current-result guard.
 
 Scope navigation reloads the existing `output_scope` URL with a whitelisted
@@ -206,6 +206,11 @@ then apply visible selections through their normal data activation paths. Do not
 restore cached data, map scenario/comparison state or unsupported Flow Duration
 into Roads scope. `roads=on` is used by the Roads results entry; the scope selector
 preserves the independently selected visibility.
+
+Current-root query lifecycle failures invalidate the scoped scene and preserve the
+server recovery guidance. Named child/contrast failures remain graph-local; graph
+loaders rethrow lifecycle errors without caching empty series. An empty scenario
+path still addresses the current root and must retain root invalidation.
 
 Focused regressions: `tests/nodb/mods/test_roads_detachment_view.py`, route tests
 for Roads/GL Dashboard, and `__tests__/roads.test.js`. Live smoke accepts

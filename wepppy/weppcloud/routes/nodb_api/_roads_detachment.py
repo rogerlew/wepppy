@@ -9,7 +9,7 @@ import pyarrow.parquet as pq
 from pyproj import CRS, Transformer
 
 from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
-from ._segment_loss_summary import SCHEMA
+from wepppy.nodb.mods.roads._segment_loss_summary import SCHEMA
 
 __all__ = ['read_detachment_view']
 

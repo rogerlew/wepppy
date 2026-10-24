@@ -17,6 +17,11 @@ Users can display mean annual Roads detachment on prepared road centerlines and 
 
 ## Surprises & Discoveries
 
+The broad gate caught scientific publication source discovery including the new
+HTTP-only reader placed under NoDb Roads. Move that reader beside its route;
+retain the strict scientific source inventory and published identities unchanged.
+All 516 model cases passed before this provenance failure.
+
 Scope restoration needs both early preference hydration and actual dynamic-layer activation after discovery. A selected radio alone does not reload yearly data. Nullable defaults also require explicit type validation. Regression tests now cover these discovered failures.
 
 The prior successful rerun is valid artifact evidence, but cannot supply a missing renderer. Independent browser artifact requests can mix preparations with reused IDs; the server must materialize one response under the existing shared Roads guard.

@@ -60,7 +60,9 @@ is the default. The URL preserves the selected scope; map position and compatibl
 layer/graph choices travel with scope navigation. Roads uses the current run's
 outputs. Map scenarios/comparison are disabled there; Flow Duration remains
 Baseline-only. An unavailable Roads bookmark retains the lifecycle error and
-provides an **Open Baseline dashboard** link.
+provides an **Open Baseline dashboard** link. A supported scenario graph whose
+Roads results are unavailable shows its own error; the current project map remains
+available when its results are valid.
 
 **Roads soil detachment** is a separate visibility checkbox. It starts off on
 ordinary dashboard entry and on from the Roads results link. Lines represent

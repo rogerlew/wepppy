@@ -116,3 +116,31 @@ series. Graph errors remain literal text local to the selected graph.
 seconds (`/tmp/roads-browser-isolation.log`), including a child failure with the
 parent Roads map and scope still available. Correctness and security reviewers
 independently approved this final delta. These counts supersede earlier runs.
+
+Final observe-only telemetry includes the scenario-isolation delta:
+`/tmp/roads-code-quality-final.json` and `.md`. Seventeen changed files include one
+red file: existing graph-loaders complexity remains 34 → 34, with ten additional
+source lines for explicit lifecycle propagation. Graph controller complexity is
+unchanged at 20; query helper is 8 → 13. No new red complexity was introduced.
+The broader existing graph-loader refactor is outside this bounded fix.
+
+## Scientific provenance boundary correction
+
+The initial full command stopped with 6725 passed, 61 skipped and one failure in
+2917.96 seconds. All 516 native Roads matrix cases passed. The publication check
+found exactly one additional scientific-source inventory entry: the new display
+reader initially located under NoDb Roads. All 94 existing entries matched.
+Moved that HTTP-only adapter to `wepppy/weppcloud/routes/nodb_api/_roads_detachment.py`
+and updated imports. Its body is byte-equivalent after normalizing the single
+SCHEMA import. Scientific publication data, checker and source hashes remain
+unchanged. Independent correctness/security reviewers approved this separation.
+Focused reader/route/render plus publication checks: 282 passed in 21.79 seconds
+(`/tmp/roads-relocation-tests.log`).
+
+The full collection was repeated, and all 5133 node IDs from the publication test
+onward were passed to `wctl run-pytest @/workdir/wepppy/.roads-remaining-pytest-args
+--maxfail=1`. This completes remaining coverage without repeating the already
+passed model matrices. The temporary argument file is removed after execution;
+collection and remaining logs are `/tmp/roads-collected.log` and
+`/tmp/roads-remaining-pytest.log`. This is segmented coverage, not a claim of one
+uninterrupted green full-suite invocation.

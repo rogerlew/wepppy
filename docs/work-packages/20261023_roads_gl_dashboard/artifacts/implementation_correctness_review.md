@@ -242,3 +242,36 @@ superseding earlier entries:
 | `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` | `d16c9708b845a643e869febb9d68f29ceba3f053c403d35c1cac24095ffadef9` |
 | `wepppy/weppcloud/static/js/gl-dashboard/graphs/controller.js` | `59ccae10d2685e5c03212492fd04ee21854378ad69d753c3969609eacaa1a6d1` |
 | `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-roads.spec.js` | `3c3038ff6bde38f5a25529732328888dcf65dd84c70c6c0c6a5583ecd5f18404` |
+
+## Materializer relocation and publication provenance
+
+Rechecked 2026-10-24 06:43:25 UTC. The required broad Python run stopped after
+6725 passes at the unchanged Roads publication freshness assertion. Its diagnostic
+reported 94 identical source entries and one added file: the HTTP map materializer
+under `nodb/mods/roads`. The numerical model source set itself was unchanged.
+
+Relocating this response projection to
+`wepppy/weppcloud/routes/nodb_api/_roads_detachment.py` is appropriate: its sole
+runtime caller is the authorized web map route, and it neither builds model inputs
+nor changes producer summaries. The canonical summary `SCHEMA` remains imported
+from the model module. Route and real-reader test imports now use the new location.
+
+Independent equivalence check: replacing only the new absolute `SCHEMA` import
+with its prior relative spelling reproduces the previously reviewed materializer
+hash `f7e9d170...1381f0a0` exactly. The unchanged `source_hashes()` function now equals
+the published manifest for all 94 entries. Neither the publication checker nor
+the retained evidence hashes were rewritten or weakened. This is a module-boundary
+correction, not a claim that changed model code is covered by old numerical evidence.
+
+Reviewed `/tmp/roads-relocation-tests.log`: **282 passed**, covering the relocated
+reader, routes/rendering and unchanged publication tests. The existing route
+package uses lazy module loading; the absolute import does not require controller
+mutation or a new dependency. Post-relocation browser checks and the remainder of
+the broad Python gate are recorded separately by the parent.
+
+Relocation correctness approval: **pass; no new finding**. Final hashes:
+
+| File | SHA-256 |
+| --- | --- |
+| `wepppy/weppcloud/routes/nodb_api/_roads_detachment.py` | `dc9462b5f56c7f9661d582c797f1c8b2af6e680fda2f8257096942bc8dbf2645` |
+| `wepppy/weppcloud/routes/nodb_api/roads_bp.py` | `e3b2998c044b5ffe6a4b9150351f57f171ab23a64bb30bb138c207d96115f128` |

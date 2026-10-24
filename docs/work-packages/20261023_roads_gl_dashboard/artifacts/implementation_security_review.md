@@ -163,3 +163,27 @@ Updated/additional implementation SHA-256 values (supersede matching rows above)
 | `weppcloud/static/js/gl-dashboard/data/query-engine.js` | `06c9154f7684e11bb1014fa30692c46282eb8b30c069bd93741e8996ff5d36f5` |
 | `weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` | `d16c9708b845a643e869febb9d68f29ceba3f053c403d35c1cac24095ffadef9` |
 | `weppcloud/static/js/gl-dashboard/graphs/controller.js` | `59ccae10d2685e5c03212492fd04ee21854378ad69d753c3969609eacaa1a6d1` |
+
+## HTTP materializer relocation
+
+2026-10-24 06:42 UTC: independently verified the move from
+`wepppy/nodb/mods/roads/_detachment_view.py` to
+`wepppy/weppcloud/routes/nodb_api/_roads_detachment.py`. Reversing only the relative
+to absolute `SCHEMA` import in memory reproduces the committed `33d43f11a`
+materializer byte-for-byte. The old module is removed, and the route and test
+imports point to the new location. Search confirms the runtime caller remains
+the same authorized map route; no scientific producer acquires this dependency.
+
+The relocation changes neither data processing nor the authorization, shared
+guard, path validation or error boundaries. Published scientific evidence and its
+provenance checker are unchanged. Reviewed `/tmp/roads-relocation-tests.log`:
+**282 passed in 21.79 seconds**, including the materializer/route regressions and
+published Roads evidence checks. Security approval remains **pass**, with no open
+findings or risk acceptance.
+
+Final relocated-source hashes (supersede the old module and route rows above):
+
+| File under `wepppy/` | SHA-256 |
+| --- | --- |
+| `weppcloud/routes/nodb_api/_roads_detachment.py` | `dc9462b5f56c7f9661d582c797f1c8b2af6e680fda2f8257096942bc8dbf2645` |
+| `weppcloud/routes/nodb_api/roads_bp.py` | `e3b2998c044b5ffe6a4b9150351f57f171ab23a64bb30bb138c207d96115f128` |

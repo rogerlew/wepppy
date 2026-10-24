@@ -558,7 +558,7 @@ def resources_roads_geojson(runid: str, config: str) -> Response:
             return error_factory("Unsupported Roads map view.", status_code=400)
         from pyarrow import ArrowException
         from pyproj.exceptions import ProjError
-        from wepppy.nodb.mods.roads._detachment_view import read_detachment_view
+        from wepppy.weppcloud.routes.nodb_api._roads_detachment import read_detachment_view
         try:
             return jsonify(read_detachment_view(wd))
         except (OSError, ValueError, TypeError, KeyError, OverflowError, ArrowException, ProjError):
