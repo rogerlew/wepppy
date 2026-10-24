@@ -33,27 +33,21 @@ reviewed-file hashes and validation are in artifacts/review_manifest.json.
 The existing 39-line/34-profile inslope fixture supports source feasibility only;
 mixed-profile, projected CRS, races and browser transitions require runtime tests.
 
-## Next gate
+## Implementation outcome
 
-Execute the implementation ExecPlan, validate actual artifacts/browser behavior,
-and obtain independent implementation reviews. This review turn does not authorize deployment or
-claim the new layer/switch is already available. Current canonical decisions live
-outside this work package, especially the dashboard contract's Decision register,
-Dashboard output-scope switch, Coherent detachment view payload, and Error
-isolation and cache behavior sections. Review ExecPlan progress/outcomes updated.
+Complete locally at runtime revision `afebebcff`. Coherent HTTP view, prepared
+centerline renderer, accessible details/table, jet2 legend and Baseline/Roads
+switch are implemented. All twelve independent implementation findings are
+closed. Five feature browser tests, 1017 frontend tests and 282 final focused
+Python checks pass. Actual 39-line/34-profile values and geometry agree with
+source artifacts. Broad segmented coverage: 11764 passed, 155 skipped.
 
-## Implementation progress
+The initial scientific publication mismatch was resolved by moving the display
+adapter beside the route, preserving all 94 source identities and the strict
+checker. The final unrelated catalog browser check passed with the installed
+browser path. General dashboard smoke fixture/scroll timing limits remain
+documented in [implementation validation](artifacts/implementation_validation.md).
+See [implementation disposition](artifacts/implementation_disposition.md) and
+[manifest](artifacts/implementation_manifest.json) for final reviews/hashes.
 
-Coherent view, centerline renderer, accessible details/table, numeric legend and
-visible scope navigation are implemented. All twelve independent implementation
-findings are closed; see artifacts/implementation_disposition.md and the three
-implementation review artifacts. Focused Python/render 279, frontend 1007 and three
-live browser checks pass. Actual 39-line/34-profile HTTP propagation matches every
-source geometry/rate without changing source hashes. Broad Python regression and
-existing dashboard smoke checks remain running. No production deployment.
-
-Runtime checkpoint: `a3602bfdd62f7c26766ede7cd76e6942d24f512b`. Final acceptance waits for broad Python results; no push or production deployment.
-
-Final frontend recheck: 1012 tests and four live browser checks pass, including busy guidance and stale-scene suppression with Baseline recovery. Broad Python remains in progress.
-
-Final scenario-isolation recheck: 1017 frontend tests and five feature browser tests pass. COR-I05 independently closed; child graph failures preserve the current Roads map.
+No model rerun on the reported project, push or production deployment.

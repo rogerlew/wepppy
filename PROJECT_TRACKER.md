@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Implementation validation: [Roads GL Dashboard](docs/work-packages/20261023_roads_gl_dashboard/package.md) — guarded centerline detachment view and Baseline/Roads switch implemented against reviewed ancestor `2399f835c`; live artifact/browser checks pass, independent findings being closed and broad regression running. No model rerun or production deployment.
+Completed (local implementation): [Roads GL Dashboard](docs/work-packages/20261023_roads_gl_dashboard/package.md) — guarded centerline detachment and Baseline/Roads switch; twelve review findings closed. Real artifact/browser checks pass; 11764 Python passes across segmented coverage, 1017 frontend tests, five feature browser tests. General smoke limits retained. No production deployment.
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 

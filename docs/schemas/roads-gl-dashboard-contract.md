@@ -2,8 +2,8 @@
 
 Status: operator decisions D1–D4 accepted (2026-10-23), including an explicit
 dashboard output-scope switch. Independent contract reviews and dispositions
-complete (2026-10-24 UTC). Standalone checkpoint: `2399f835c`. Implementation
-and validation are tracked in the active Roads GL Dashboard work package. See the
+complete (2026-10-24 UTC). Standalone checkpoint: `2399f835c`. Implementation and local validation are complete; evidence and known general
+smoke limitations are retained in the Roads GL Dashboard work package. See the
 [review disposition](../work-packages/20261023_roads_gl_dashboard/artifacts/review_disposition.md).
 
 ## Intent and settled meaning

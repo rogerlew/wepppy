@@ -11,9 +11,9 @@ Users can display mean annual Roads detachment on prepared road centerlines and 
 - [x] Reviewed contract committed as standalone ancestor `2399f835c` before runtime edits.
 - [x] Implement coherent authorized detachment response and regression tests.
 - [x] Implement Roads overlay, accessible details, legends and scope transitions.
-- [ ] Validate real artifacts, HTTP/browser behavior and regression gates.
+- [x] Validate real artifacts, HTTP/browser behavior and regression gates.
 - [x] Obtain independent correctness/security/UX implementation reviews; twelve findings fixed and independently closed.
-- [ ] Update user/developer documentation and record final evidence.
+- [x] Update user/developer documentation and record final evidence.
 
 ## Surprises & Discoveries
 
@@ -32,7 +32,16 @@ Use the reviewed additive `resources/roads.json?view=detachment` response. Prese
 
 ## Outcomes & Retrospective
 
-Implementation and focused runtime/browser validation pass. Independent reviews pass. Broad Python regression and existing dashboard smoke checks remain in progress; no deployment claimed.
+Implemented and independently reviewed. Actual 39-line/34-profile artifacts agree
+with HTTP/browser rendering; five feature browser checks, 1017 frontend tests and
+282 final focused Python checks pass. Broad segmented coverage: 11764 passed,
+155 skipped. The source-provenance failure was corrected by moving the HTTP
+adapter beside its route; the final browser integration retry used the installed
+browser path. Existing general smoke fixture/timing limitations are retained in
+artifacts/implementation_validation.md. No deployment or push.
+
+Keep HTTP display adapters outside the scientific model source inventory. Do not
+weaken publication freshness checks to accommodate a new consumer.
 
 ## Context and Orientation
 
@@ -79,3 +88,5 @@ Revision: implementation and independent findings disposition completed; focused
 Revision: invalid-maximum edits retain active scale; scoped lifecycle failures preserve busy guidance and hide stale scene content while keeping Baseline navigation. Final frontend 1012/browser 4 checks pass; broad Python remains running.
 
 Revision: COR-I05 isolates child/contrast graph lifecycle failures from current-run admission. Final frontend 1017/browser 5 checks pass; independent correctness/security approval retained. Broad Python remains running.
+
+Revision: final broad coverage complete and all implementation gates dispositioned; package closed for local execution.

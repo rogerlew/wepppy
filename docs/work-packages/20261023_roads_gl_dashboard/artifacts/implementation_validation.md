@@ -35,7 +35,7 @@ authorization denial before view dispatch. Existing ordinary-map tests pass.
 - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref HEAD`: passed; no added broad production exception handler.
 - `git diff --check`: passed.
 - Work-package and all changed canonical/user/developer documentation lint: passed.
-- `wctl run-pytest tests --maxfail=1`: running; do not infer full-suite success from focused tests.
+- Broad Python coverage: 11764 passed, 155 skipped across the three segments described below; initial failures were resolved and retried.
 
 ## Browser evidence
 
@@ -74,8 +74,8 @@ on this host, so it was not used as a substitute fixture.
 ## Review and limits
 
 Independent correctness, security and UX implementation reviews are retained
-separately. Implementation findings were fixed with tests; broader regression
-completion remains an independent package acceptance gate. The response is a
+separately. All twelve implementation findings are closed; broad regression coverage is
+complete with the corrections and segmented execution recorded below. The response is a
 coherent snapshot, not live cross-session polling. This feature does not change
 scientific source production or certify unrelated watershed model behavior.
 
@@ -144,3 +144,30 @@ passed model matrices. The temporary argument file is removed after execution;
 collection and remaining logs are `/tmp/roads-collected.log` and
 `/tmp/roads-remaining-pytest.log`. This is segmented coverage, not a claim of one
 uninterrupted green full-suite invocation.
+
+## Final acceptance
+
+After relocation all five feature browser tests passed in 57.5 seconds
+(`/tmp/roads-browser-relocation.log`). The remaining Python segment passed 4863
+and skipped 94 before an unrelated catalog browser integration test inherited an
+incorrect `PLAYWRIGHT_BROWSERS_PATH` (missing the second `wepppy` directory).
+Retried that case and all final 176 node IDs with:
+
+```bash
+wctl exec weppcloud env \
+  PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers \
+  PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache \
+  /opt/venv/bin/pytest @/workdir/wepppy/.roads-remaining-pytest-args --maxfail=1
+```
+
+All 176 passed in 17.63 seconds (`/tmp/roads-final-tail-pytest.log`). Aggregate
+segmented coverage is 11764 passed and 155 skipped; the initial publication and
+browser-path failures are resolved. The initial command collected 11913 cases;
+final collection included six added focused regressions. All changed reader,
+route and render cases were also rechecked in the final 282-test focused run.
+Frontend: 121 suites/1017 passed. Correctness, security and UX approval retained;
+twelve findings closed. Documentation lint and changed-file broad-exception
+enforcement pass. No unresolved feature blocker; the existing general-dashboard
+smoke limitations above remain explicitly outside this feature acceptance.
+
+No push, production deployment or model rerun on the reported project.

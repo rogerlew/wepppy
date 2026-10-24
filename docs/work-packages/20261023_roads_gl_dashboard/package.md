@@ -1,13 +1,13 @@
 # Roads GL Dashboard
 
-Status: accepted operator decisions; independent contract review and disposition complete.
+Status: implementation complete and locally validated; independent contract and implementation reviews closed.
 The user subsequently authorized implementation; checkpoint `2399f835c` precedes runtime edits. Deployment is outside scope.
 
 ## Purpose and scope
 
 Expose current Roads soil detachment on prepared road centerlines and a visible
-Baseline/Roads output-scope switch. The existing dashboard supports scoped URLs
-but has no segment renderer or scope selector. This is a new UI capability, not
+Baseline/Roads output-scope switch. The implementation adds a segment renderer and scope selector to the existing
+scoped dashboard. This is a new UI capability, not
 a failed Roads model rerun. The reported clogging-starch rerun has 39 prepared
 lines and 34 summary rows; existing artifacts are read-only review evidence.
 
@@ -30,8 +30,8 @@ dashboards gain no scope semantics; child runs use their own data.
 High: a new consumer joins authorized project artifacts across asynchronous reads
 and exposes uploaded labels/geometry. Existing auth and lifecycle checks must
 remain authoritative. Dedicated security review is required, including valid-state
-noninterference; no new privileges are proposed. This is contract review, not
-evidence that future runtime boundaries pass.
+noninterference; no new privileges are proposed. Implementation security review and actual artifact/HTTP/browser evidence are
+retained in the implementation artifacts.
 
 ## Acceptance and authority
 
@@ -44,7 +44,7 @@ The subsequent “execute implementation” request authorizes implementation ag
 that checkpoint and the active implementation ExecPlan. No production deployment
 or model rerun is included.
 
-Future artifact acceptance follows actual generated geometry, manifest and summary
+Implementation artifact acceptance follows actual generated geometry, manifest and summary
 into authorized queries and the browser. Verify joins, units, legend, keyboard
 details, scope transitions and stale-result rejection; job success and screenshots
 alone do not establish numeric correctness. Preserve browse/download/archive access.
