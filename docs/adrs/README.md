@@ -111,3 +111,5 @@ Each ADR should normally include:
 - [ADR-0090: SBS unknown palette admission](ADR-0090-sbs-unknown-palette-admission.md)
 
 - [ADR-0092: PRISM temperature inversion midpoint repair](ADR-0092-prism-temperature-inversion-midpoint-proposal.md) (Accepted for implementation, 2026-10-13; conformance pending).
+
+- [ADR-0105: Roads dashboard detachment aggregation and display](ADR-0105-roads-dashboard-detachment-display.md) (Accepted and independently reviewed; implementation pending).

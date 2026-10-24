@@ -156,6 +156,13 @@ Server responses already delivered before another session mutates the project
 cannot be retracted; subsequent reads/reloads must reflect invalidation. Do not add
 a polling service or a live cross-session notification guarantee for this package.
 
+The accepted, not-yet-implemented
+[Roads dashboard layer](roads-gl-dashboard-contract.md#integration-and-acceptance-boundary)
+must materialize joined geometry, prepare metadata, manifest and summary within
+one existing shared read/admission guard. Separate per-file read success cannot
+prove a coherent result set when preparation-local IDs recur. This adds no new
+identity protocol or lock and does not relax mode-specific mandatory resources.
+
 Publication verifies required generated resources are readable and complete under
 the existing scope/accounting contracts. Segment/profile IDs are validated within
 the current set; synthetic replacement remainders are explicitly allowed without

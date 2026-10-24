@@ -1,5 +1,7 @@
 # PROJECT_TRACKER.md
 
+Contract reviewed: [Roads GL Dashboard](docs/work-packages/20261023_roads_gl_dashboard/package.md) — accepted centerline detachment display and Baseline/Roads switch; nine correctness/security/UX findings dispositioned and independently closed. ADR-0105 and checkpoint documents prepared; uncommitted, not implemented or deployed.
+
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
 Acceptance blocked: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — durable async requests, coalesced RQ recovery, reader/lifecycle barriers and native GIL release implemented; independent reviews closed and local segmented regression complete. Submission and hillslope consumers pass, but isolated Mill Creek watershed failed at year 100 with SOURCES3 date mismatch. Contract ancestor `dc2b2ddbe`; runtime checkpoint committed. Async rollout remains disabled; no production deployment or repair.

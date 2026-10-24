@@ -84,6 +84,27 @@ future change.
 | `/runs/<runid>/<config>/report/roads/results` | No | N/A | N/A | Roads Run Results panel; links are generated as roads-scoped where applicable. |
 
 ## Runs-Page Trigger and Discovery Contract
+
+### GL Dashboard scope discovery
+
+Accepted requirement; UI implementation pending the
+[Roads dashboard contract](roads-gl-dashboard-contract.md#dashboard-output-scope-switch)
+checkpoint: expose a visible **Output scope: Baseline / Roads** control inside
+the run dashboard, allowing navigation in both directions through the existing
+`output_scope` query parameter. Default remains baseline. Preserve compatible
+view state and reload scoped data rather than relabeling cached results.
+Current Roads lifecycle/resource eligibility controls availability, with a
+visible reason when unavailable and no silent baseline fallback. This selector
+is independent of the road-segment overlay, but upstream mode-specific mandatory
+resources still control current-result admission. A missing continuous-mode
+segment summary makes Roads scope unavailable; valid single-storm output may
+admit scope without mean-annual detachment. No new scope values are added.
+While Roads scope is active, incompatible map scenario/comparison choices remain
+disabled and unsupported active graphs are cleared with an explanation. Existing
+graph-specific scope rules remain authoritative. An unavailable Roads entry keeps
+the lifecycle status/code and a Baseline navigation link, after authorization;
+optional layer failures must not poison baseline queries or trigger reload loops.
+
 ### Baseline WEPP Run Results panel
 - Served by `/report/wepp/results`.
 - Link set is template-driven (`controls/wepp_reports.htm`) with conditional visibility for baseline artifacts:

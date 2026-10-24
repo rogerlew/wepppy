@@ -1,0 +1,61 @@
+{
+  "recorded_at_utc": "2026-10-24T05:41:45.345664+00:00",
+  "implementation_base_revision": "5227cb25831a1f86b2a70dd977d1cdad56a236cf",
+  "claim": "Independent contract review complete; checkpoint uncommitted; runtime unimplemented",
+  "findings_closed": {
+    "correctness": 4,
+    "security": 3,
+    "ux": 2
+  },
+  "open_findings": 0,
+  "final_file_sha256": {
+    "docs/schemas/roads-gl-dashboard-contract.md": "3cfb9eb59529fe226551ccfa904da42752b6522c61616f8dcab055f848e2d926",
+    "docs/schemas/output-scope-contract.md": "1b01fca3fbf792267764fa6df34fc535f7bed6e7f96a347c2a3a3335ca196358",
+    "docs/schemas/roads-preparation-lifecycle-contract.md": "6ab24cf434a78db908c50509ccb9ef9588dc38128732f1ec94f4d3da4bea384a",
+    "docs/adrs/ADR-0105-roads-dashboard-detachment-display.md": "f631859edeebcf206dbd637a0392b11958e2b28a0720e9b67c53b53bcab0f178",
+    "docs/ui-docs/gl-dashboard.md": "09085bf65fc2ebfecb32010dd90af2148ef06711460e44e5d18987666646cc75",
+    "docs/work-packages/20261023_roads_gl_dashboard/artifacts/2026-10-24_contract_decision.md": "b0cc22242111f4174253d1da2785a4240b1a42752d81651e5d90680648621da7",
+    "docs/work-packages/20261023_roads_gl_dashboard/artifacts/correctness_review.md": "6ca8126fd7a2e36e226c38778266f4026c859136cf307f914e00efd56def1900",
+    "docs/work-packages/20261023_roads_gl_dashboard/artifacts/review_disposition.md": "4544e0d59e582cde5fc118b62a12d4b0887aeec1a3ac1708a61e0dd4076e5165",
+    "docs/work-packages/20261023_roads_gl_dashboard/artifacts/security_review.md": "c5fb565a8b341406afc6c6c2081d080f40a4fc8224cba787790abe52246899da",
+    "docs/work-packages/20261023_roads_gl_dashboard/artifacts/ux_review.md": "3513dbb73b987629b9dd09e23466aa5382720eb0c292fd57818f1ab382db9266",
+    "docs/work-packages/20261023_roads_gl_dashboard/package.md": "22b9fc2668a4d1ea7fa2547545a3b763e25ebe38822f0f1b8b877a23943fb517",
+    "docs/work-packages/20261023_roads_gl_dashboard/prompts/active/review_execplan.md": "93003c65bad22c9ddddf155bc7c007c0944e96dcecef91da6af582557a3a450f",
+    "docs/work-packages/20261023_roads_gl_dashboard/tracker.md": "1133c08e100911ad208625c2939608c9a98946e00bb00a8e2923b2221242d639"
+  },
+  "documentation_checks": {
+    "docs/schemas/roads-gl-dashboard-contract.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/schemas/output-scope-contract.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/schemas/roads-preparation-lifecycle-contract.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/adrs/ADR-0105-roads-dashboard-detachment-display.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/ui-docs/gl-dashboard.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/adrs/README.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "PROJECT_TRACKER.md": {
+      "exit_code": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    "docs/work-packages/20261023_roads_gl_dashboard": {
+      "exit_code": 0,
+      "output": "\u2705 8 files validated, 0 errors, 0 warnings"
+    }
+  },
+  "note": "Reviewer artifacts retain initial and corrected findings plus reviewed hashes. Correctness/security independently confirmed final status-only editorial updates. No runtime tests or project mutations."
+}
