@@ -152,3 +152,21 @@ describe('scenario manager', () => {
     );
   });
 });
+
+test.each(['root-run', 'root-run;;omni;;child'])('Roads scope rejects programmatic map scenario/comparison re-entry for %s', async (runid) => {
+  const state = { currentScenarioPath: '', comparisonMode: false, weppSummary: { current: true } };
+  const setValue = jest.fn((key, value) => { state[key] = value; });
+  const postQueryEngine = jest.fn();
+  const onScenarioChange = jest.fn();
+  const manager = createScenarioManager({
+    ctx: { sitePrefix: '/weppcloud', runid, config: 'cfg', outputScope: 'roads' },
+    getState: () => state, setValue, setState: jest.fn(), postQueryEngine,
+    postBaseQueryEngine: jest.fn(), fetchWeppSummary: jest.fn(), weppDataManager: {}, onScenarioChange,
+  });
+  await manager.setScenario('_pups/omni/scenarios/another');
+  await manager.setComparisonMode(true);
+  expect(state).toEqual({ currentScenarioPath: '', comparisonMode: false, weppSummary: { current: true } });
+  expect(setValue).not.toHaveBeenCalled();
+  expect(postQueryEngine).not.toHaveBeenCalled();
+  expect(onScenarioChange).not.toHaveBeenCalled();
+});

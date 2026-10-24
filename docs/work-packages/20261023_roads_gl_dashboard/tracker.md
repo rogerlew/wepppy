@@ -45,9 +45,13 @@ isolation and cache behavior sections. Review ExecPlan progress/outcomes updated
 ## Implementation progress
 
 Coherent view, centerline renderer, accessible details/table, numeric legend and
-visible scope navigation are implemented. All ten independent implementation
+visible scope navigation are implemented. All eleven independent implementation
 findings are closed; see artifacts/implementation_disposition.md and the three
 implementation review artifacts. Focused Python/render 279, frontend 1007 and three
 live browser checks pass. Actual 39-line/34-profile HTTP propagation matches every
 source geometry/rate without changing source hashes. Broad Python regression and
 existing dashboard smoke checks remain running. No production deployment.
+
+Runtime checkpoint: `a3602bfdd62f7c26766ede7cd76e6942d24f512b`. Final acceptance waits for broad Python results; no push or production deployment.
+
+Final frontend recheck: 1012 tests and four live browser checks pass, including busy guidance and stale-scene suppression with Baseline recovery. Broad Python remains in progress.

@@ -98,3 +98,31 @@ No unresolved risk acceptance was used. The broader Python regression run remain
 a separate acceptance gate owned by the parent; its unfinished result is not
 reported as passing here. This verdict covers the inspected implementation and
 retained evidence, and does not authorize deployment or project mutations.
+
+## Final scoped-invalidation amendment
+
+2026-10-24 06:21 UTC: independently reviewed the final query-engine callback and
+dashboard invalidation delta. Only recognized lifecycle409 codes enter the
+existing latch. Server reasons are accepted as strings, passed through the
+callback/Error and rendered by the Roads controller with `textContent`; no HTML,
+URL, path selection or authorization behavior is added. The optional overlay
+fetch remains separate. Hiding `.gl-main` applies only to invalidated Roads scope
+and suppresses stale legends/plots while retaining sidebar Baseline navigation.
+No additional security finding was identified; approval remains **pass**.
+
+Reviewed `/tmp/roads-npm-complete.log`: **120 suites, 1012 tests passed**. The
+permanent query-engine tests preserve busy guidance for both lifecycle codes and
+invoke the invalidation callback once. Reviewed actual browser assertions and
+`/tmp/roads-browser-accepted.log`: **4 passed in 41.7 seconds**. The added browser
+case injects a Roads-scoped lifecycle409 with busy guidance, confirms the scene
+is hidden with no automatic reload, then navigates to Baseline and confirms a
+visible scene and populated baseline summary. Existing hostile-label and optional
+503 noninterference tests also pass in this run.
+
+Updated/additional implementation SHA-256 values (supersede matching rows above):
+
+| File under `wepppy/` | SHA-256 |
+| --- | --- |
+| `weppcloud/static/js/gl-dashboard.js` | `d94e2ac4c00eb9ad31e00d8e3d0d492a49c2a9034502463a5d2f3955fff2049f` |
+| `weppcloud/static/js/gl-dashboard/data/query-engine.js` | `5ca763aa0154df418cb0e33eab65f2789067a8b6b5f95a2dd76f6b6e8e8e9ea0` |
+| `weppcloud/static/js/gl-dashboard/roads.js` | `b3841ff287b1bd62653bf6aae44780e5ad5e54717e6d652965471133b0006f9f` |

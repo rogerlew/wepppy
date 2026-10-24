@@ -3,27 +3,33 @@ import { getValue } from '../state.js';
 /**
  * Query Engine HTTP helpers. No DOM/deck usage; relies on ctx for run context.
  * Returns POST wrappers scoped to the current run (and optional scenario).
- * 
+ *
  * Query Engine runs as a separate service at /query-engine/ (no sitePrefix).
  * URL format: /query-engine/runs/{runid}/{config}/query
  * Scenario is passed in the request body as "scenario" parameter.
  */
 export function createQueryEngine(ctx) {
   let roadsUnavailable = false;
+  let roadsUnavailableReason = 'Run Roads to generate current results.';
+  let roadsUnavailableCode = 'roads_results_unavailable';
 
   async function readResponse(resp) {
     if (resp.status === 409) {
       const body = await resp.json();
-      if (body.code === 'roads_results_unavailable') {
+      if (['roads_results_unavailable', 'roads_operation_busy'].includes(body.code)) {
+        roadsUnavailableCode = body.code;
+        const reason = typeof body.error === 'string' ? body.error : body.error?.message;
+        roadsUnavailableReason = typeof reason === 'string' && reason.trim() ? reason : (
+          body.code === 'roads_operation_busy' ? 'Roads is busy; wait for the active operation to finish.' : roadsUnavailableReason);
         if (!roadsUnavailable && typeof ctx.onRoadsUnavailable === 'function') {
-          ctx.onRoadsUnavailable();
+          ctx.onRoadsUnavailable(roadsUnavailableReason);
         }
         roadsUnavailable = true;
       }
     }
     if (roadsUnavailable) {
-      const error = new Error('Run Roads to generate current results.');
-      error.code = 'roads_results_unavailable';
+      const error = new Error(roadsUnavailableReason);
+      error.code = roadsUnavailableCode;
       throw error;
     }
     if (!resp.ok) return null;

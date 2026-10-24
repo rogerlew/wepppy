@@ -96,3 +96,27 @@ test('yearly data and Roads maximum survive scope roundtrip', async ({ page }) =
     expect(await page.evaluate(() => window.glDashboardState.activeGraphKey)).toBe('wepp-yearly');
   }
 });
+
+
+test('scoped lifecycle failure clears stale visuals without reload and keeps Baseline escape', async ({ page }) => {
+  test.setTimeout(120000);
+  const url = new URL(target); url.searchParams.set('output_scope', 'roads');
+  let navigations = 0;
+  page.on('framenavigated', (frame) => { if (frame === page.mainFrame()) navigations += 1; });
+  await page.route('**/query-engine/runs/**/query', async (route) => {
+    const body = route.request().postData() || '';
+    if (body.includes('wepp/roads/output')) {
+      await route.fulfill({ status: 409, json: { code: 'roads_results_unavailable', error: 'Roads is busy; wait for the active operation to finish.' } });
+    } else await route.continue();
+  });
+  await page.goto(url.href, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#gl-output-scope-status')).toContainText('Baseline remains available', { timeout: 60000 });
+  await expect(page.locator('#gl-output-scope-status')).toContainText('Roads is busy; wait');
+  await expect(page.locator('#gl-output-scope-status')).not.toContainText('Prepare and run');
+  await expect(page.locator('.gl-main')).toBeHidden();
+  expect(navigations).toBe(1);
+  await page.selectOption('#gl-output-scope', 'baseline');
+  await expect(page).toHaveURL(/output_scope=baseline/);
+  await expect(page.locator('.gl-main')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => !!window.glDashboardState?.weppSummary), { timeout: 60000 }).toBe(true);
+});

@@ -206,6 +206,8 @@ export function createRoadsController({ ctx, deck, getState, setValue, applyLaye
     input.addEventListener('change', () => {
       if (input.value !== '' && Number.isFinite(input.valueAsNumber) && input.valueAsNumber > 0) {
         maxOverride = input.valueAsNumber; setValue('roadsMaxOverride', maxOverride); rangeLabel.textContent = rangeText(maxValue()); applyLayers();
+      } else {
+        input.value = String(Number(maxValue().toPrecision(6)));
       }
     });
     inputLabel.append(input);

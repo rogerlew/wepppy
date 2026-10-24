@@ -100,3 +100,15 @@ describe('gl-dashboard query-engine routing', () => {
     expect(body.scenario).toBeUndefined();
   });
 });
+
+
+it.each(['roads_results_unavailable', 'roads_operation_busy'])('preserves busy lifecycle guidance for %s without requesting a rerun', async (code) => {
+  const message = 'Roads is busy; wait for the active operation to finish.';
+  global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 409, json: async () => ({ code, error: message }) });
+  const onRoadsUnavailable = jest.fn();
+  const engine = createQueryEngine({ runid: 'r', config: 'c', onRoadsUnavailable });
+  await expect(engine.postBaseQueryEngine({ datasets: ['wepp/roads/output/interchange/H.wat.parquet'] })).rejects.toThrow(message);
+  expect(onRoadsUnavailable).toHaveBeenCalledWith(message);
+  await expect(engine.postBaseQueryEngine({ datasets: [] })).rejects.toThrow(message);
+  expect(onRoadsUnavailable).toHaveBeenCalledTimes(1);
+});

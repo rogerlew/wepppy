@@ -76,3 +76,29 @@ separately. Implementation findings were fixed with tests; broader regression
 completion remains an independent package acceptance gate. The response is a
 coherent snapshot, not live cross-session polling. This feature does not change
 scientific source production or certify unrelated watershed model behavior.
+
+## Maintainability telemetry
+
+Observe-only code-quality comparison against `2399f835c` reports no red changed
+files. The guarded materializer's 117-line validation/assembly function and Roads
+controller complexity 24 are yellow. This bounded first implementation keeps the
+coherent read's validations together and isolates DOM/request state from existing
+baseline query code; it introduces no general abstraction or dependency. Existing
+route/test functions also grow within yellow bands. Reports are in
+`/tmp/roads-code-quality-final.json` and `/tmp/roads-code-quality-final.md`; existing
+root telemetry files were left untouched. Python complexity was unavailable
+because the host telemetry environment lacks radon; lengths/JS metrics were read.
+
+The final post-review Roads smoke recheck also passed all three tests in 36.3 seconds (`/tmp/roads-browser-postreview.log`). The maximum editor updates in place; ordinary entry skips scope-restoration activation.
+
+## Final error-path and frontend recheck
+
+`wctl run-npm test` now passes 120 suites/1012 tests after explicit root/child
+scenario-reentry tests, invalid maximum editing and lifecycle-message tests.
+Log: `/tmp/roads-npm-complete.log`. All four Roads browser checks pass in 41.7 seconds
+(`/tmp/roads-browser-accepted.log`). The fourth injects a scoped query 409 busy
+response: the server wait guidance remains literal, the invalid scene including
+legends/cached plots is hidden, navigation does not reload automatically, and
+selecting Baseline displays fresh baseline data. Optional overlay 503 isolation
+still passes separately. These final checks supersede earlier smaller feature
+suite counts; broad Python status remains separately reported.

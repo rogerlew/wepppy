@@ -54,7 +54,7 @@ the specific restored selections rather than just the presence of a layer.
 
 ## Reviewed snapshot and verdict
 
-- `wepppy/weppcloud/static/js/gl-dashboard/roads.js`: `f8ae275f740b3a6427bb5b0cbfdf7c51be32d3315c3cd47e83fd2bb215fe2926`
+- `wepppy/weppcloud/static/js/gl-dashboard/roads.js`: `b3841ff287b1bd62653bf6aae44780e5ad5e54717e6d652965471133b0006f9f`
 - `wepppy/weppcloud/static/js/gl-dashboard.js`: `d456c2d8735f6482d9bc1f112b928399c84d57fd86eb0859bf9c820face37528`
 - `wepppy/weppcloud/templates/gl_dashboard.htm`: `f17dbcba987dcd92f6714b3a2db3fe68184e5dca135598c5ae0627e8d665a63e`
 
@@ -62,3 +62,17 @@ the specific restored selections rather than just the presence of a layer.
 reviewed code. Final recheck includes the in-place maximum editor, all-state
 line-width note, updated source hash and three passing browser tests. This verdict does not waive the implementation plan's remaining
 browser, regression or artifact-validation gates.
+
+## Final bounded correction recheck
+
+Independently inspected the maximum-input rejection branch: blank, zero and
+other invalid edits restore the displayed active maximum without replacing the
+control or changing the applied scale. This preserves UX-06 closure and prevents
+a misleading zero entry beside an unchanged positive legend. The reviewed
+`roads.test.js` regression checks zero rejection, a valid override, retained
+focus and blank rejection after that override. Additional scenario-manager test
+cases verify that root and child Roads scopes reject programmatic map scenario
+and comparison re-entry without queries or state changes. These are inspected
+test definitions, not a newly executed test run by this reviewer. The source
+hash above includes this correction. UX verdict remains **pass**, with all
+findings closed; the broad Python suite is still pending.

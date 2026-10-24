@@ -139,3 +139,19 @@ test('nullable display preferences restore before detection without changing lay
   restoreDisplay(saved, () => state, setValue, { display: false });
   expect(state.weppLayers[0].visible).toBe(true);
 });
+
+
+test('invalid maximum edits keep displayed control and scale consistent', async () => {
+  const { controller, state } = setup(async () => ({ ok: true, json: async () => payload() }));
+  await controller.load();
+  const input = document.querySelector('#gl-roads-legend input');
+  input.focus();
+  input.value = '0'; input.dispatchEvent(new Event('change'));
+  expect(input.value).toBe('2.75');
+  expect(state.roadsMaxOverride).toBeUndefined();
+  input.value = '8'; input.dispatchEvent(new Event('change'));
+  expect(state.roadsMaxOverride).toBe(8);
+  expect(document.activeElement).toBe(input);
+  input.value = ''; input.dispatchEvent(new Event('change'));
+  expect(input.value).toBe('8');
+});

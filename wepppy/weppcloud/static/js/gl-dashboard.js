@@ -269,9 +269,12 @@
 
   let roadsController;
   let scopedResultsUnavailable = false;
-  ctx.onRoadsUnavailable = () => {
+  ctx.onRoadsUnavailable = (reason) => {
     scopedResultsUnavailable = true;
-    roadsController?.unavailable();
+    // Hide the invalid scoped scene (including legends and cached graphs), while
+    // the sidebar scope selector and actionable reason remain available.
+    if (ctx.outputScope === 'roads' && glMainEl) glMainEl.style.display = 'none';
+    roadsController?.unavailable(reason);
     // Clear the scoped scene without reloading into a 409 loop. The visible scope
     // control remains usable; no delayed detection can repaint stale Roads data.
     mapController?.applyLayers([basemapController.getBaseLayer()]);

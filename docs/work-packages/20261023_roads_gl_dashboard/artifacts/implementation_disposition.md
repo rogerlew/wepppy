@@ -9,6 +9,7 @@ not approve their own changes. Canonical normative behavior remains unchanged.
 | COR-I01 | Medium | Accepted. Explicit preference validation restores numeric/string fields whose defaults are null. Jest exercises restoration; browser preserves year and maximum across both scope directions. |
 | COR-I02 | Medium | Accepted. Reader rejects unsupported profile-scope enums; frontend uses conservative unclassified text. Real Parquet malformed-scope regression retained. |
 | COR-I03 | Medium | Accepted. Restored dynamic-layer visibility runs existing activation/data-refresh paths. Live browser verifies yearly summary, graph and selection after both scope transitions. |
+| COR-I04 | Medium | Accepted. Forward the server lifecycle reason through the scoped-query callback, including busy wait guidance. Hide the invalid scoped scene/legends/cached plots while retaining the sidebar Baseline escape; browser verifies no reload loop and fresh recovery. |
 | SEC-I01 | Medium | Accepted. Generation check immediately follows delayed 409 body await. Independent reproduction and permanent Jest regression prove obsolete failure cannot poison newer success. |
 | SEC-I02 | Low | Accepted. Validate nested CRS declaration shape; actual malformed artifact through map route returns sanitized422. |
 | UX-03 | High | Accepted. Restore data-driving preferences before detection and basemap initialization; activate dynamic layers after discovery. Controls and fetched data agree. |
@@ -18,7 +19,7 @@ not approve their own changes. Canonical normative behavior remains unchanged.
 | UX-07 | Low | Accepted. Line-width interpretation and remainder count precede the unavailable/negative-only legend branch. |
 
 Independent correctness, security and UX implementation artifacts record final
-passes and reviewed hashes. All ten implementation findings are closed. These
+passes and reviewed hashes. All eleven implementation findings are closed. These
 passes do not replace the broad regression gate or authorize production deployment.
 The nine earlier contract-review findings remain separately closed in
 review_disposition.md; they are not conflated with runtime evidence.

@@ -161,3 +161,44 @@ failure frequency. Scenario-dependent cases need a fixture with their prerequisi
 outputs for meaningful coverage. Keep the logs and these limits in final validation;
 no unrelated harness or dashboard redesign is required to close this feature's
 confirmed findings. Correctness approval remains unchanged, with no new blocker.
+
+## Scoped invalidation follow-up
+
+The 2026-10-24 06:19 UTC correction hides `.gl-main` on scoped Roads invalidation,
+covering old legends and cached graph DOM as well as the map. The sidebar is
+outside that container, so the actionable reason and Baseline navigation remain
+usable. Optional overlay errors retain their separate request path. Reviewed
+`/tmp/roads-browser-complete.log`: all four feature smoke tests pass in 39.7 seconds,
+including injected query-engine 409, no automatic reload, hidden invalid scene
+and successful fresh Baseline recovery. The visual invalidation correction passes.
+
+One additional error-state finding surfaced while reviewing that callback:
+
+| ID | Severity | Failure and correction | Status |
+| --- | --- | --- | --- |
+| COR-I04 | Medium | Shared read contention uses `roads_results_unavailable` with an explicit wait-for-busy-operation message. `data/query-engine.js::readResponse` discards the response body when calling `ctx.onRoadsUnavailable()`, and the new non-reloading callback calls `roadsController.unavailable()` with its prepare/run-again default. A transient busy read therefore tells the user to rerun. Forward the server's string `error` or `error.message` through the callback, with the default only for absent text, and retain a regression asserting the busy explanation without a rerun instruction. | Open pending correction |
+
+### COR-I04 closure and final accepted snapshot
+
+Rechecked 2026-10-24 06:21:47 UTC. **COR-I04 closed; correctness approval restored
+with no unresolved medium/high findings.** The query helper now preserves the
+server's string or nested error message, forwards it into the invalidation callback
+and retains the lifecycle code/message on its thrown error. Explicit
+`roads_operation_busy` receives the same bounded handling. The orchestrator passes
+the reason to the Roads controller without replacing it with rerun guidance.
+
+An independent Node probe of the actual query helper confirms both lifecycle codes
+retain their original code and nested busy message in callback and thrown error.
+Permanent tests cover both codes. Reviewed `/tmp/roads-npm-complete.log`:
+**120 suites, 1012 tests passed**. Reviewed `/tmp/roads-browser-accepted.log`:
+**4 passed in 41.7 seconds**. The final browser case explicitly checks busy/wait
+guidance, absence of a prepare/run instruction, hidden invalid scene, no reload
+and fresh Baseline recovery. Existing broad-smoke limitations recorded above remain.
+
+Final hashes superseding earlier entries:
+
+| File | SHA-256 |
+| --- | --- |
+| `wepppy/weppcloud/static/js/gl-dashboard.js` | `d94e2ac4c00eb9ad31e00d8e3d0d492a49c2a9034502463a5d2f3955fff2049f` |
+| `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js` | `5ca763aa0154df418cb0e33eab65f2789067a8b6b5f95a2dd76f6b6e8e8e9ea0` |
+| `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-roads.spec.js` | `1a2eedce78bdb666c02fb938af20677ff45bd0caae340b149dbbb4911948a9fa` |
