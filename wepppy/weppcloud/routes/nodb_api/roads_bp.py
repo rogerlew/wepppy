@@ -192,6 +192,7 @@ def _roads_run_results_report_links(
                     runid=runid,
                     config=config,
                     output_scope="roads",
+                    roads="on",
                 ),
                 "description": "Roads-scoped interchange datasets in map analytics.",
             },
@@ -551,6 +552,21 @@ def query_roads_summary(runid: str, config: str) -> Response:
 def resources_roads_geojson(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+    view = request.args.get("view")
+    if view is not None:
+        if view != "detachment":
+            return error_factory("Unsupported Roads map view.", status_code=400)
+        from pyarrow import ArrowException
+        from pyproj.exceptions import ProjError
+        from wepppy.nodb.mods.roads._detachment_view import read_detachment_view
+        try:
+            return jsonify(read_detachment_view(wd))
+        except (OSError, ValueError, TypeError, KeyError, OverflowError, ArrowException, ProjError):
+            # Read boundary: preserve lifecycle exceptions for the shared 409 mapper;
+            # malformed artifacts never expose paths or parser tracebacks to clients.
+            current_app.logger.warning("Roads detachment view could not be materialized", exc_info=True)
+            return error_factory("Roads detachment data is invalid or unreadable. Inspect Roads artifacts or contact support.",
+                                 status_code=422, code="roads_detachment_invalid")
     controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
     disabled_response = _require_enabled(controller)
     if disabled_response is not None:

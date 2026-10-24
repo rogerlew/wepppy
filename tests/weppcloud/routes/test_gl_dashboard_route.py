@@ -219,3 +219,26 @@ def test_flow_duration_query_child_flag_uses_terminal_omni_segment(gl_dashboard_
     response = client.get(f"/runs/{runid}/cfg/gl-dashboard")
     assert response.status_code == 200
     assert captured["kwargs"]["flow_duration"]["child_endpoint"] is expected
+
+
+def test_initial_unavailable_roads_keeps_status_and_baseline_escape(gl_dashboard_client, monkeypatch, tmp_path):
+    from wepppy.wepp.interchange._roads_lifecycle import protect_flask_response
+    client, captured, _ = gl_dashboard_client
+    # The real admission guard emits its HTTP409 response; the dashboard catches
+    # only that post-authorization lifecycle error and renders an escaped view.
+    monkeypatch.setattr(gl_dashboard_module, 'authorize', lambda *args: protect_flask_response(tmp_path))
+    response = client.get('/runs/run-123/cfg/gl-dashboard?output_scope=roads')
+    assert response.status_code == 409
+    assert response.headers['Cache-Control'] == 'no-store'
+    assert captured['template_name'] == 'gl_dashboard_unavailable.htm'
+    assert captured['kwargs']['code'] == 'roads_results_unavailable'
+
+
+def test_initial_unauthorized_roads_does_not_render_project_state(gl_dashboard_client, monkeypatch):
+    from flask import abort
+    client, captured, _ = gl_dashboard_client
+    client.application.register_error_handler(403, lambda exc: ('Forbidden', 403))
+    monkeypatch.setattr(gl_dashboard_module, 'authorize', lambda *args: abort(403))
+    response = client.get('/runs/run-123/cfg/gl-dashboard?output_scope=roads')
+    assert response.status_code == 403
+    assert not captured

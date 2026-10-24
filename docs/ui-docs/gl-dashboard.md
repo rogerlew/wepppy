@@ -22,7 +22,7 @@
 
 ## Overview
 
-Accepted, independently reviewed extension (not implemented):
+Roads display and scope semantics:
 [Roads soil-detachment layer and Baseline/Roads scope switch](../schemas/roads-gl-dashboard-contract.md).
 Read-only feasibility and artifact findings are in the [static evaluation](../dev-notes/roads-gl-dashboard-static-evaluation.md).
 
@@ -52,6 +52,37 @@ comparison differences. This does not change OpenET products.
 - **Legends Panel:** Floating, collapsible panel showing active layer colormaps
 - **Omni Graph Integration:** Boxplot/bar chart visualizations for scenario + contrast analysis
 - **OpenET Yearly Graph:** Full-size ET graph with dataset radios + water year controls
+
+## Roads results
+
+Use **Output scope** to switch between Baseline and Roads WEPP datasets. Baseline
+is the default. The URL preserves the selected scope; map position and compatible
+layer/graph choices travel with scope navigation. Roads uses the current run's
+outputs. Map scenarios/comparison are disabled there; Flow Duration remains
+Baseline-only. An unavailable Roads bookmark retains the lifecycle error and
+provides an **Open Baseline dashboard** link.
+
+**Roads soil detachment** is a separate visibility checkbox. It starts off on
+ordinary dashboard entry and on from the Roads results link. Lines represent
+prepared road centerlines only. Mixed road/fill/buffer/land-use profiles contribute
+full modeled area, with an explicit label; no abstract MOFE footprints are mapped.
+The metric is mean annual detachment in t/ha/year, not sediment export or
+incremental road impact. Multiple profiles use summed annual detachment divided
+by summed modeled area, multiplied by ten. No second annualization is applied.
+
+The jet2 legend uses zero to project maximum, with an editable maximum and reset.
+Negative results are purple; partial/no-results lines are gray, never treated as
+zero. Missing numeric results have no numeric scale. Select a line or use the
+keyboard-accessible **Road segment results** table for persistent profile details.
+Lengths are labeled **Modeled source road-segment length** and are never summed
+across profiles. Replacement remainders are counted separately and not drawn.
+
+If Roads is unavailable, its visible reason distinguishes current-result admission,
+authorization and read failure. Other baseline layers remain usable. Prepare and
+run Roads again only when the lifecycle message calls for it; retry or contact
+support for a transport/read error. Reload after another session replaces results;
+this view does not poll for cross-session changes. Existing browse/download source
+artifacts remain available under their established access rules.
 
 ## Access Control
 

@@ -262,6 +262,8 @@ def roads_client(
         path = f"/runs/{runid}/{config}/{suffix}"
         if scope:
             path = f"{path}?output_scope={scope}"
+        if values.get("roads"):
+            path += "&roads=" + values["roads"]
         return path
 
     monkeypatch.setattr(roads_module, "url_for_run", _fake_url_for_run)
@@ -639,7 +641,7 @@ def test_report_roads_results_renders_run_results_panel(
     links = kwargs["roads_report_links"]
     assert any(link["href"].endswith("/report/wepp/summary?output_scope=roads") for link in links)
     assert any(link["href"].endswith("/report/wepp/yearly_watbal?output_scope=roads") for link in links)
-    assert any(link["href"].endswith("/gl-dashboard?output_scope=roads") for link in links)
+    assert any(link["href"].endswith("/gl-dashboard?output_scope=roads&roads=on") for link in links)
     assert any(
         link["href"].endswith("/download/wepp/roads/output/interchange/roads_segment_loss_summary.parquet?as_csv=1")
         for link in links
@@ -693,7 +695,7 @@ def test_report_roads_results_hides_non_single_storm_links_when_resources_absent
     assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=roads" not in hrefs
     assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/avg_annual_watbal?output_scope=roads" not in hrefs
     assert f"/runs/{RUN_ID}/{CONFIG}/plot/wepp/streamflow?output_scope=roads" not in hrefs
-    assert f"/runs/{RUN_ID}/{CONFIG}/gl-dashboard?output_scope=roads" in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/gl-dashboard?output_scope=roads&roads=on" in hrefs
     assert f"/runs/{RUN_ID}/{CONFIG}/storm-event-analyzer?output_scope=roads" in hrefs
 
 
@@ -822,3 +824,43 @@ def test_report_roads_segment_summary_returns_404_when_missing(roads_client):
     assert response.status_code == 404
     payload = response.get_json()
     assert "was not found" in payload["error"]["message"]
+
+
+def test_detachment_view_reads_real_artifacts_and_rejects_malformed_crs(roads_client):
+    from tests.nodb.mods.test_roads_detachment_view import sources
+    client, *_rest = roads_client
+    root = Path(_rest[-1])
+    folder = sources(root)
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view=detachment")
+    assert response.status_code == 200
+    assert response.headers['Cache-Control'] == 'no-store'
+    assert response.json['features'][0]['properties']['roads_detachment']['rate_t_ha_year'] == 2.75
+    path = folder / 'roads.inslope.monotonic.geojson'
+    data = json.loads(path.read_text())
+    data['crs'] = {'type': 'name', 'properties': []}
+    path.write_text(json.dumps(data))
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view=detachment")
+    assert response.status_code == 422
+    assert str(root) not in response.get_data(as_text=True)
+    assert 'Traceback' not in response.get_data(as_text=True)
+
+
+def test_detachment_view_absence_and_unknown_view(roads_client):
+    client, *_ = roads_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view=detachment")
+    assert response.status_code == 409
+    assert response.headers['Cache-Control'] == 'no-store'
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view=unknown")
+    assert response.status_code == 400
+
+
+def test_detachment_authorization_precedes_view_and_artifact_access(roads_client):
+    client, *_ = roads_client
+    # Exercise the real authorization boundary with no login manager, outside
+    # TESTING's explicit public-fixture bypass; no materializer stub is involved.
+    client.application.config['TESTING'] = False
+    client.application.register_error_handler(403, lambda exc: ('Forbidden', 403))
+    for view in ('detachment', 'unknown'):
+        response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view={view}")
+        assert response.status_code == 403
+        assert response.headers['Cache-Control'] == 'no-store'

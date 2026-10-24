@@ -243,6 +243,7 @@ export function createScenarioManager({
   }
 
   async function setScenario(scenarioPath) {
+    if (ctx.outputScope === 'roads') return;
     const nextScenario = scenarioPath || '';
     const currentState = getState();
     if (nextScenario === currentState.currentScenarioPath) return;
@@ -291,6 +292,7 @@ export function createScenarioManager({
   }
 
   async function setComparisonMode(enabled) {
+    if (ctx.outputScope === 'roads') return;
     const desired = !!enabled;
     setValue('comparisonMode', desired);
 

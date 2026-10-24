@@ -23,6 +23,7 @@
     : `${ctx.sitePrefix || ''}/static/js/gl-dashboard/`;
   const moduleSuffix = scriptQuery || '';
 
+  let roadsModule;
   let config;
   let batchKeysModule;
   let colorsModule;
@@ -48,6 +49,7 @@
 
   try {
     [
+      roadsModule,
       config,
       batchKeysModule,
       colorsModule,
@@ -71,6 +73,7 @@
       rapDataModule,
       openetDataModule,
     ] = await Promise.all([
+      import(`${moduleBase}roads.js${moduleSuffix}`),
       import(`${moduleBase}config.js${moduleSuffix}`),
       import(`${moduleBase}batch-keys.js${moduleSuffix}`),
       import(`${moduleBase}colors.js${moduleSuffix}`),
@@ -192,6 +195,7 @@
     initialZoom = Math.max(2, Math.min(16, Math.log2(360 / (span || 0.001)) + 0.5));
   }
 
+  const scopeRestore = roadsModule.readScopeRestore(window.location.hash);
   const initialViewState = {
     longitude: mapCenter && mapCenter[0] != null ? mapCenter[0] : ctx.longitude || -114.5,
     latitude: mapCenter && mapCenter[1] != null ? mapCenter[1] : ctx.latitude || 43.8,
@@ -200,6 +204,7 @@
     maxZoom: 17,
     pitch: 0,
     bearing: 0,
+    ...roadsModule.restoredView(scopeRestore),
   };
   const dashboardMode =
     ctx.mode === DASHBOARD_MODES.BATCH ? DASHBOARD_MODES.BATCH : DASHBOARD_MODES.RUN;
@@ -215,7 +220,9 @@
     channelLabelsVisible: false,
     sbsColorShiftEnabled: false,
     rusleATolerance: null,
+    ...(ctx.outputScope === 'roads' ? { currentScenarioPath: '', comparisonMode: false } : {}),
   });
+  roadsModule.restoreDisplay(scopeRestore, getState, setValue, { layers: false });
   const state = getState();
   function bindStateKeys(keys) {
     keys.forEach((key) => {
@@ -260,11 +267,18 @@
   ]);
   window.glDashboardState = state;
 
+  let roadsController;
+  let scopedResultsUnavailable = false;
   ctx.onRoadsUnavailable = () => {
-    // Reload drops all previously materialized layers/caches and lets the
-    // authenticated page boundary explain the required fresh Roads run.
-    target.textContent = 'Run Roads to generate current results.';
-    window.location.reload();
+    scopedResultsUnavailable = true;
+    roadsController?.unavailable();
+    // Clear the scoped scene without reloading into a 409 loop. The visible scope
+    // control remains usable; no delayed detection can repaint stale Roads data.
+    mapController?.applyLayers([basemapController.getBaseLayer()]);
+    setValue('activeGraphKey', null);
+    timeseriesGraph?.hide();
+    yearSlider?.hide?.();
+    monthSlider?.hide?.();
   };
   const queryEngine = createQueryEngine(ctx);
   const { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario } = queryEngine;
@@ -709,7 +723,7 @@
       }
       timeseriesGraph && timeseriesGraph.clearHighlight();
     },
-    getTooltip: (info) => layerUtils.formatTooltip(info),
+    getTooltip: (info) => roadsController?.tooltip(info) || layerUtils.formatTooltip(info),
     onError: (error) => {
       console.error('gl-dashboard render error', error);
     },
@@ -775,7 +789,14 @@
 
   function applyLayers({ skipLegendUpdate = false, skipGraphSync = false } = {}) {
     if (!layerUtils || !mapController) return;
+    if (scopedResultsUnavailable) {
+      mapController.applyLayers([basemapController.getBaseLayer()]);
+      return;
+    }
     const stack = layerUtils.buildLayerStack(basemapController.getBaseLayer());
+    roadsController?.sync();
+    const roadsLayer = roadsController?.layer();
+    if (roadsLayer) stack.push(roadsLayer);
     mapController.applyLayers(stack);
     if (!skipGraphSync) {
       suppressApplyLayersOnModeChange = true;
@@ -807,6 +828,7 @@
   if (!omniContrasts.length) {
     graphDefs = graphDefs.filter((group) => group.key !== 'omni-contrasts');
   }
+  if (ctx.outputScope === 'roads') graphDefs = graphDefs.filter((group) => group.key !== 'flow-duration');
   if (ctx.mode === 'batch') graphDefs = graphDefs.filter((group) => group.key !== 'flow-duration');
   let baseScenarioLabel = getState().baseScenarioLabel || 'Undisturbed';
   const graphScenarios = [{ name: baseScenarioLabel, path: '' }].concat(
@@ -1297,6 +1319,10 @@
     return true;
   }
 
+  roadsController = roadsModule.createRoadsController({
+    ctx, deck, getState, setValue, applyLayers, jet2Color,
+  });
+
   function initializeDashboard() {
     // Synchronous UI setup - runs immediately
     bindScenarioSelector();
@@ -1317,6 +1343,7 @@
       renderGraphList();
     }
     applyLayers(); // Render map immediately with base layers
+    roadsController.load();
 
     // Async layer detection - fire and forget, don't block page
     (async () => {
@@ -1345,6 +1372,30 @@
           }
         }
         await Promise.all(detectionTasks);
+        if (scopeRestore.layers) {
+          roadsModule.restoreDisplay(scopeRestore, getState, setValue, { display: false });
+          // Restored visibility is a selection, not loaded data. Use the normal
+          // activation paths so yearly/event/monthly values and graphs match it.
+          const visible = (key) => (getState()[key] || []).some((layer) => layer.visible);
+          if (visible('weppYearlyLayers')) await activateWeppYearlyLayer();
+          if (visible('weppYearlyChannelLayers')) await activateWeppYearlyChannelLayer();
+          if (visible('weppEventLayers')) await refreshWeppEventData();
+          if (visible('rapLayers') || getState().rapCumulativeMode) {
+            await refreshRapData();
+            await loadRapTimeseriesData();
+          }
+          if (visible('openetLayers')) {
+            await refreshOpenetData();
+            await loadOpenetTimeseriesData();
+          }
+          updateLayerList();
+          const restoredGraph = scopeRestore.graph;
+          if (restoredGraph && graphDefs.some((group) => group.items?.some((item) => item.key === restoredGraph)) &&
+              !(ctx.outputScope === 'roads' && restoredGraph === 'flow-duration')) {
+            await activateGraphItem(restoredGraph);
+          }
+          applyLayers();
+        }
       } catch (err) {
         console.warn('gl-dashboard: layer detection failed', err);
       }

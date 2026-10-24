@@ -11,6 +11,8 @@ const SUBSCRIBERS_KEY = '__GL_DASHBOARD_STATE_SUBSCRIBERS__';
 
 const defaultState = {
   dashboardMode: 'run',
+  roadsVisible: false,
+  roadsMaxOverride: null,
   batchModeEnabled: false,
   currentScenarioPath: '',
   comparisonMode: false,

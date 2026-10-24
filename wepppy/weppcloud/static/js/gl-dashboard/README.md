@@ -190,3 +190,26 @@ remain unavailable through ranges, differences, colors and tooltips. The emitted
 payload uses Query Engine dataset0's bound relation for topology subqueries;
 `test_gl_dashboard_et_sql.py` executes both builders' SQL against real DuckDB.
 See the [water aggregation contract](../../../../../docs/schemas/hillslope-water-aggregation-contract.md).
+
+## Roads detachment and output scope
+
+`roads.js` owns the optional Roads request state, centerline layer, literal-text
+tooltip/details/table, jet2 numeric legend and scope URL serialization. It consumes
+one authorized `resources/roads.json?view=detachment` response; do not split its
+geometry/CRS/manifest/profile reads in the browser or use query-engine's global
+unavailable latch for optional Roads reads. The backend `_detachment_view.py`
+materializes the response inside the existing shared current-result guard.
+
+Scope navigation reloads the existing `output_scope` URL with a whitelisted
+display snapshot in the hash. Restore data-driving preferences before detection,
+then apply visible selections through their normal data activation paths. Do not
+restore cached data, map scenario/comparison state or unsupported Flow Duration
+into Roads scope. `roads=on` is used by the Roads results entry; the scope selector
+preserves the independently selected visibility.
+
+Focused regressions: `tests/nodb/mods/test_roads_detachment_view.py`, route tests
+for Roads/GL Dashboard, and `__tests__/roads.test.js`. Live smoke accepts
+`GL_DASHBOARD_ROADS_URL` and runs `tests/smoke/gl-dashboard-roads.spec.js`. It checks
+actual generated summary/geometry propagation, numerical aggregation, keyboard
+details and both scope directions. The canonical behavior is
+[Roads GL dashboard contract](../../../../../docs/schemas/roads-gl-dashboard-contract.md).

@@ -1,0 +1,17 @@
+{
+  "run": "clogging-starch",
+  "prepared_lines": 39,
+  "summary_profiles": 34,
+  "all_geometry_and_rates_match": true,
+  "simulation_years": 16,
+  "http_status": 200,
+  "cache_control": "no-store",
+  "read_seconds": 0.051137,
+  "source_sha256": {
+    "wepp/roads/segments/roads.inslope.monotonic.geojson": "a82879942857cab0ffe4b690f51bbcc66d0565f59e23886f7288e87a7ba5e51d",
+    "wepp/roads/segments/roads.inslope.summary.json": "fcb72b2edeaceff90208da8f8ef17e3c1120e636b15ba4f28c5412ccd9b839ea",
+    "wepp/roads/segments/roads.segment.pass.manifest.json": "8b76b817ac209d4343ccfead048b6a0124556268c07be888ffce10973f73bddf",
+    "wepp/roads/output/interchange/roads_segment_loss_summary.parquet": "d661ca3fd40d915bf9d6b82d4468b4223956f62149dc15d171432eac45a8c845"
+  },
+  "source_artifacts_unchanged": true
+}

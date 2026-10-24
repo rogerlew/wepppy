@@ -3,9 +3,9 @@
 ## Status
 
 2026-10-24 UTC: independent contract review and disposition complete at starting
-implementation revision `5227cb25831a1f86b2a70dd977d1cdad56a236cf`. The prepared
-standalone checkpoint remains uncommitted. No runtime edits, project mutation,
-model rerun or deployment. Package date uses Pacific time; events use UTC.
+implementation revision `5227cb25831a1f86b2a70dd977d1cdad56a236cf`. Standalone checkpoint committed as `2399f835c`. The user subsequently authorized
+implementation; active plan is prompts/active/implementation_execplan.md. No
+project mutation, model rerun or deployment is planned. Package date uses Pacific time; events use UTC.
 
 ## Progress
 
@@ -35,9 +35,19 @@ mixed-profile, projected CRS, races and browser transitions require runtime test
 
 ## Next gate
 
-Commit the standalone contract checkpoint when authorized, then prepare and execute
-an implementation ExecPlan. This review turn does not authorize deployment or
+Execute the implementation ExecPlan, validate actual artifacts/browser behavior,
+and obtain independent implementation reviews. This review turn does not authorize deployment or
 claim the new layer/switch is already available. Current canonical decisions live
 outside this work package, especially the dashboard contract's Decision register,
 Dashboard output-scope switch, Coherent detachment view payload, and Error
 isolation and cache behavior sections. Review ExecPlan progress/outcomes updated.
+
+## Implementation progress
+
+Coherent view, centerline renderer, accessible details/table, numeric legend and
+visible scope navigation are implemented. All ten independent implementation
+findings are closed; see artifacts/implementation_disposition.md and the three
+implementation review artifacts. Focused Python/render 279, frontend 1007 and three
+live browser checks pass. Actual 39-line/34-profile HTTP propagation matches every
+source geometry/rate without changing source hashes. Broad Python regression and
+existing dashboard smoke checks remain running. No production deployment.

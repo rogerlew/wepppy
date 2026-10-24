@@ -880,6 +880,27 @@
     <p class="wc-text-muted">Water events use physical WAT runoff and area-weighted local ET.
       {{ usersum_doc_link('weppcloud', 'water-balance-and-runoff.md', 'Understanding water balance and runoff') }}.
     </p>
+    {% if dashboard_mode == "run" %}
+    <section aria-label="Output scope">
+      <label for="gl-output-scope"><strong>Output scope</strong></label>
+      <select id="gl-output-scope" aria-describedby="gl-output-scope-status">
+        <option value="baseline" {% if output_scope != 'roads' %}selected{% endif %}>Baseline</option>
+        <option value="roads" {% if output_scope == 'roads' %}selected{% endif %}
+          {% if not (roads_scope | default({})).get('available') %}disabled{% endif %}>Roads</option>
+      </select>
+      <p id="gl-output-scope-status" role="status">{{ (roads_scope | default({})).get('reason') or '' }}</p>
+    </section>
+    <section id="gl-roads-panel" aria-label="Roads soil detachment">
+      <label class="gl-layer-item"><input type="checkbox" id="gl-roads-visible" disabled> Roads soil detachment</label>
+      <p id="gl-roads-status" role="status">Checking current Roads results…</p>
+      <div id="gl-roads-legend" hidden></div>
+      <details id="gl-roads-details" hidden>
+        <summary>Road segment results</summary>
+        <div id="gl-roads-selection" tabindex="-1"></div>
+        <div id="gl-roads-table" style="overflow:auto;max-height:24rem;"></div>
+      </details>
+    </section>
+    {% endif %}
     <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0;">
       <input type="checkbox" id="gl-sbs-color-shift-toggle" />
       <span>Apply Color Shift</span>
@@ -1038,6 +1059,7 @@
       "config": config,
       "outputScope": output_scope | default("baseline", true),
       "weppPaths": wepp_paths | default({}, true),
+      "roadsScope": roads_scope | default({}, true),
       "sitePrefix": site_prefix,
       "tileUrl": tile_url,
       "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js",

@@ -1,7 +1,7 @@
 # Roads GL Dashboard
 
 Status: accepted operator decisions; independent contract review and disposition complete.
-Runtime implementation, checkpoint commit and deployment are not part of this review turn.
+The user subsequently authorized implementation; checkpoint `2399f835c` precedes runtime edits. Deployment is outside scope.
 
 ## Purpose and scope
 
@@ -39,10 +39,10 @@ This turn completes when independent correctness/security/UX findings are
 dispositioned, reviewers confirm medium/high closure, ADR and canonical amendments
 agree, and documentation checks pass. Retain review timestamps and file hashes.
 Those review gates passed with nine findings closed; the prepared checkpoint is
-uncommitted. This is specification approval only, not implementation acceptance.
-Implementation requires the standalone ancestor checkpoint under the contract-first
-standard and an implementation ExecPlan. The earlier async-catalog commit/push
-authorization does not authorize committing this new package automatically.
+committed as `2399f835c`. Specification approval is not implementation acceptance.
+The subsequent “execute implementation” request authorizes implementation against
+that checkpoint and the active implementation ExecPlan. No production deployment
+or model rerun is included.
 
 Future artifact acceptance follows actual generated geometry, manifest and summary
 into authorized queries and the browser. Verify joins, units, legend, keyboard
@@ -55,3 +55,5 @@ Review plan: [review_execplan.md](prompts/active/review_execplan.md).
 Progress and dispositions: [tracker.md](tracker.md).
 Decision checkpoint: [contract_decision.md](artifacts/2026-10-24_contract_decision.md).
 
+
+Implementation plan: [implementation_execplan.md](prompts/active/implementation_execplan.md).

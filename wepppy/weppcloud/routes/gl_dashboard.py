@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 import os
-from flask import current_app
+from flask import current_app, make_response
+from werkzeug.exceptions import HTTPException
 
 from .gl_dashboard_flow_duration import flow_duration_context
 from ._common import *  # noqa: F401,F403
@@ -120,7 +121,21 @@ def _get_omni_contrasts(wd: str):
     "/runs/<string:runid>/<config>/gl-dashboard", strict_slashes=False
 )
 def gl_dashboard(runid: str, config: str):
-    authorize(runid, config)
+    try:
+        authorize(runid, config)
+    except HTTPException as exc:
+        response = exc.get_response()
+        payload = response.get_json(silent=True) or {}
+        if response.status_code != 409 or payload.get("code") not in {"roads_results_unavailable", "roads_operation_busy"}:
+            raise
+        # Authorization ran first. Preserve the lifecycle status/code while giving
+        # a user opening a stale Roads bookmark a usable Baseline escape.
+        response = make_response(render_template(
+            "gl_dashboard_unavailable.htm", runid=runid, config=config,
+            reason=payload.get("error"), code=payload["code"],
+        ), 409)
+        response.headers["Cache-Control"] = "no-store"
+        return response
     try:
         output_scope = normalize_output_scope(request.args.get("output_scope"))
     except ValueError as exc:
@@ -130,6 +145,16 @@ def gl_dashboard(runid: str, config: str):
 
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
+
+    from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+    try:
+        with roads_lifecycle.current_read(wd):
+            roads_scope = {"available": True, "reason": None}
+    except roads_lifecycle.RoadsResultsUnavailable as exc:
+        roads_scope = {"available": False, "reason": str(exc)}
+    except (OSError, ValueError):
+        logger.warning("Cannot inspect Roads scope readiness", exc_info=True)
+        roads_scope = {"available": False, "reason": "Roads readiness could not be read. Reload or contact support."}
 
     site_prefix = current_app.config.get("SITE_PREFIX", "/weppcloud")
     tile_url = current_app.config.get(
@@ -204,6 +229,7 @@ def gl_dashboard(runid: str, config: str):
         flow_duration=flow_duration_context(wd, omni_scenarios, output_scope, query_run_is_child=runid.split(";;")[-2:-1] == ["omni"]),
         omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
+        roads_scope=roads_scope,
         output_scope=output_scope,
         wepp_paths=_build_wepp_paths(output_scope),
         mode="run",
