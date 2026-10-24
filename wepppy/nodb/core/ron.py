@@ -96,7 +96,8 @@ from wepppy.nodb.duckdb_agents import (
 )
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
-from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
+from wepppy.query_engine.activate import activate_query_engine
+from wepppy.query_engine import request_catalog_refresh
 
 from .map_object import Map
 
@@ -581,7 +582,7 @@ class Ron(NoDbBase):
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
         assert _exists(self.dem_fn)
-        update_catalog_entry(self.wd, self.dem_fn)
+        request_catalog_refresh(self.wd, self.dem_fn)
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -890,7 +891,7 @@ class Ron(NoDbBase):
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, dem_src]) == base:
-            update_catalog_entry(self.wd, dest)
+            request_catalog_refresh(self.wd, dest)
         else:
             self.logger.info(
                 "Skipping catalog update for external DEM symlink: %s", dem_src

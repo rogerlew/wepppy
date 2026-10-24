@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation
+
 import errno
 import os
 import secrets
@@ -1463,6 +1465,8 @@ def prepare_fork_run(
         env=env,
     )
     publish_status(status_channel, "Copying project files... done.")
+
+    invalidate_catalog_incarnation(new_wd)
 
     _write_fork_redisprep_namespace(new_wd, new_runid)
 

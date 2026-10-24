@@ -20,7 +20,7 @@ from wepppy.all_your_base.geo import raster_stacker
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.core import Ron
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     "PolarisNoDbLockedException",
@@ -486,7 +486,7 @@ class Polaris(NoDbBase):
                 output_fn,
                 resample=request_d["resample"],
             )
-            update_catalog_entry(self.wd, output_relpath)
+            request_catalog_refresh(self.wd, output_relpath)
             metadata["status"] = "aligned"
             records.append(metadata)
 

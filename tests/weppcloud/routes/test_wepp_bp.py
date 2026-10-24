@@ -1484,8 +1484,8 @@ def omni_return_period_client(wepp_client, monkeypatch):
         from tests.roads_lifecycle_fixtures import write_current_roads_fixture
         write_current_roads_fixture(directory)
         (directory / 'wepp.nodb').write_text('NoDb loading isolated; real datasets above')
-        (directory / '_query_engine').mkdir()
-        (directory / '_query_engine/catalog.json').write_text(wepp_module.json.dumps({'root': str(directory), 'files': []}))
+        (directory / '_query_engine').mkdir(exist_ok=True)
+        (directory / '_query_engine/catalog.json').write_text(wepp_module.json.dumps({'version': 1, 'root': str(directory), 'files': []}))
         (directory / 'READONLY').touch()
     (root / 'omni.nodb').write_text('NoDb loading isolated')
     omni = SimpleNamespace(scenarios=[{'type': name} for name in names], _scenario_run_state=[])

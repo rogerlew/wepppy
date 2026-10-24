@@ -104,7 +104,7 @@ def test_run_rusle_c_factor_observed_rap_writes_artifacts_manifest_and_catalog(
     )
 
     catalog_updates: list[str] = []
-    monkeypatch.setattr(c_integration, "update_catalog_entry", lambda _wd, relpath: catalog_updates.append(relpath))
+    monkeypatch.setattr(c_integration, "request_catalog_refresh", lambda _wd, relpath: catalog_updates.append(relpath))
 
     result = c_integration.run_rusle_c_factor(
         wd=str(tmp_path),
@@ -389,7 +389,7 @@ def test_run_rusle_c_factor_scenario_sbs_writes_disturbed_class_alignment_and_lo
     )
 
     catalog_updates: list[str] = []
-    monkeypatch.setattr(c_integration, "update_catalog_entry", lambda _wd, relpath: catalog_updates.append(relpath))
+    monkeypatch.setattr(c_integration, "request_catalog_refresh", lambda _wd, relpath: catalog_updates.append(relpath))
 
     result = c_integration.run_rusle_c_factor(
         wd=str(tmp_path),

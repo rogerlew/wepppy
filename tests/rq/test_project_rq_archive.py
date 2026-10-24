@@ -747,3 +747,34 @@ def test_prism_source_attempts_survive_archive_restore(archive_rq_environment, s
     (attempt / 'source/provider/bulk.csv.gz').unlink()
     project.restore_archive_rq('demo', archive.name)
     for relative, content in expected.items(): assert (root / relative).read_bytes() == content
+
+
+def test_restore_retires_catalog_receipts_and_rotates_incarnation(archive_rq_environment, monkeypatch):
+    from wepppy.query_engine.catalog_refresh import resolve_scope
+
+    project, tmp_path, _, _ = archive_rq_environment
+    monkeypatch.setenv("QUERY_CATALOG_ROOTS_JSON", json.dumps([{
+        "path": str(tmp_path), "namespace": "archive-test", "layout": "flat",
+        "coordination": str(tmp_path.parent / (tmp_path.name + "-coordination")),
+    }]))
+    root = tmp_path / "demo"
+    root.mkdir()
+    old_scope = resolve_scope(root, create=True)
+    child = root / "_pups/omni/scenarios/burned"
+    child.mkdir(parents=True)
+    old_child_scope = resolve_scope(child, create=True)
+    receipt = root / "_query_engine/refresh/requests/old-request.json"
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text('{"state": "pending"}')
+    project.archive_rq("demo")
+    archive = next((root / "archives").glob("*.zip"))
+    with zipfile.ZipFile(archive) as bundle:
+        assert bundle.read("_query_engine/refresh/requests/old-request.json") == receipt.read_bytes()
+    project.restore_archive_rq("demo", archive.name)
+    restored_scope = resolve_scope(root)
+    assert restored_scope.incarnation != old_scope.incarnation
+    assert resolve_scope(child).incarnation != old_child_scope.incarnation
+    assert not receipt.exists()
+    retained = list((root / "_query_engine/refresh/attempts").glob("retired-*/old-request.json"))
+    assert len(retained) == 1
+    assert retained[0].read_text() == '{"state": "pending"}'

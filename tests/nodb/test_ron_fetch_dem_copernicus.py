@@ -48,7 +48,7 @@ def _make_detached_ron(tmp_path: Path, dem_db: str) -> Ron:
 
 def _patch_post_fetch_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(ron_module, "RedisPrep", _DummyRedisPrep)
-    monkeypatch.setattr(ron_module, "update_catalog_entry", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(ron_module, "request_catalog_refresh", lambda *_args, **_kwargs: None)
 
 
 def test_fetch_dem_uses_copernicus_backend_when_scheme_is_copernicus(

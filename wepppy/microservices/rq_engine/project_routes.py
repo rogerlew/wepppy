@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import (
+    catalog_lifecycle_guard, invalidate_catalog_incarnation,
+)
+
 import asyncio
 import errno
 import json
@@ -259,10 +263,12 @@ def _create_run_dir(user_email: str | None) -> tuple[str, str]:
     while True:
         runid = generate_runid(user_email or "")
         wd = get_wd(runid)
-        if os.path.exists(wd):
-            continue
-        os.makedirs(wd)
-        return runid, wd
+        with catalog_lifecycle_guard(wd, allow_missing=True):
+            if os.path.exists(wd):
+                continue
+            os.makedirs(wd)
+            invalidate_catalog_incarnation(wd)
+            return runid, wd
 
 
 def _merge_creation_values(

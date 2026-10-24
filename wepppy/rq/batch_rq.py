@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
 """
 RQ tasks that orchestrate batch WEPP runs across a watershed collection.
 
@@ -465,44 +467,45 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
             StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
             return {'batch_name': batch_name, 'deleted': False, 'already_missing': True}
 
-        active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
-        if active_jobs:
-            raise RuntimeError(
-                "Batch cannot be deleted while jobs are active. "
-                f"Active jobs: {_format_active_jobs_text(active_jobs)}"
-            )
+        with catalog_lifecycle_guard(batch_runner.wd):
+            active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
+            if active_jobs:
+                raise RuntimeError(
+                    "Batch cannot be deleted while jobs are active. "
+                    f"Active jobs: {_format_active_jobs_text(active_jobs)}"
+                )
 
-        batch_wd = Path(batch_runner.wd).resolve()
-        runids = _collect_batch_runids(batch_wd, batch_name)
+            batch_wd = Path(batch_runner.wd).resolve()
+            runids = _collect_batch_runids(batch_wd, batch_name)
 
-        for runid in runids:
-            _cleanup_batch_run_cache_and_locks(runid)
+            for runid in runids:
+                _cleanup_batch_run_cache_and_locks(runid)
 
-        wd_targets: list[str] = [str(batch_wd)]
-        base_wd = batch_wd / '_base'
-        if base_wd.exists():
-            wd_targets.append(str(base_wd))
-        runs_dir = batch_wd / 'runs'
-        if runs_dir.exists():
-            wd_targets.extend(str(path) for path in runs_dir.iterdir() if path.is_dir())
+            wd_targets: list[str] = [str(batch_wd)]
+            base_wd = batch_wd / '_base'
+            if base_wd.exists():
+                wd_targets.append(str(base_wd))
+            runs_dir = batch_wd / 'runs'
+            if runs_dir.exists():
+                wd_targets.extend(str(path) for path in runs_dir.iterdir() if path.is_dir())
 
-        try:
-            BatchRunner.cleanup_run_instances(str(batch_wd))
-        except Exception as exc:
-            logger.warning("batch_rq: failed to cleanup BatchRunner instance for %s - %s", batch_wd, exc)
-
-        for wd in wd_targets:
             try:
-                NoDbBase.cleanup_run_instances(wd)
+                BatchRunner.cleanup_run_instances(str(batch_wd))
             except Exception as exc:
-                logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
+                logger.warning("batch_rq: failed to cleanup BatchRunner instance for %s - %s", batch_wd, exc)
 
-        if batch_wd.exists():
-            shutil.rmtree(batch_wd)
+            for wd in wd_targets:
+                try:
+                    NoDbBase.cleanup_run_instances(wd)
+                except Exception as exc:
+                    logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
 
-        StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
-        StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
-        return {'batch_name': batch_name, 'deleted': True}
+            if batch_wd.exists():
+                shutil.rmtree(batch_wd)
+
+            StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
+            StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
+            return {'batch_name': batch_name, 'deleted': True}
 
     except Exception as exc:
         # Boundary catch: preserve contract behavior while logging unexpected failures.

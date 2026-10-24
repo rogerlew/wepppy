@@ -173,8 +173,12 @@ def test_catalog_aliases_are_consumed_and_symlink_destination_preserved(run):
         if entry["path"] == "watershed/hillslopes.parquet":
             entry["schema"]["fields"].append({"name": "WeppID"})
     catalog_path.write_text(json.dumps(catalog))
-    # Aliases changed even though the selected data bytes and paths did not.
-    assert AverageAnnualsByLanduseReport(run).cache_status == "built"
+    # A fabricated catalog alias is repaired from the actual source before
+    # proving report freshness; unchanged source bytes retain the current cache.
+    assert AverageAnnualsByLanduseReport(run).cache_status == "current"
+    repaired = json.loads(catalog_path.read_text())
+    hillslopes = next(entry for entry in repaired["files"] if entry["path"] == "watershed/hillslopes.parquet")
+    assert "WeppID" not in {field["name"] for field in hillslopes["schema"]["fields"]}
 
 
 def test_native_destination_mode_and_concurrent_generations(run):

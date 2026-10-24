@@ -50,7 +50,7 @@ from wepppy.landcover.rap import RAP_Band, RangelandAnalysisPlatformV3
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 from .rap import RAPPointData
 

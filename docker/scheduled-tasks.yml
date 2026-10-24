@@ -4,6 +4,15 @@ initial_delay_seconds: 900
 jitter_seconds: 300
 
 tasks:
+  - name: query_catalog_refresh
+    func: wepppy.rq.query_catalog_rq.reconcile_query_catalogs
+    enabled: "${QUERY_CATALOG_REFRESH_ENABLED:-false}"
+    interval_seconds: "${QUERY_CATALOG_REFRESH_INTERVAL_SECONDS:-30}"
+    initial_delay_seconds: 0
+    jitter_seconds: 0
+    queue: batch
+    job_timeout: 3600
+    result_ttl: 86400
   - name: wmesque_sync
     func: wepppy.rq.wmesque_rq.sync_wmesque_rq
     enabled: "${WMESQUE_SYNC_ENABLED:-false}"

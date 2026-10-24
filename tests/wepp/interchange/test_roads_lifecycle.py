@@ -269,3 +269,126 @@ def test_readonly_mutation_preserves_current_artifacts(tmp_path):
     assert (tmp_path / lifecycle.RECEIPT).read_bytes() == before
     assert lifecycle.available(tmp_path)
     assert not (tmp_path / lifecycle.HISTORY).exists()
+
+
+def _roads_refresh_writer(root, entered, finish, result):
+    from wepppy.query_engine.catalog_refresh import record_catalog_refresh, refresh_catalog
+    try:
+        with lifecycle.operation(root):
+            entered.set()
+            if not finish.wait(10):
+                raise RuntimeError('archive contender did not start')
+            record_catalog_refresh(root, None)
+            refresh_catalog(root)
+        result.put('published')
+    except BaseException as exc:
+        result.put(repr(exc))
+
+
+def test_archive_catalog_guard_and_roads_refresh_complete_without_inversion(tmp_path, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    from zipfile import ZipFile
+    from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
+    root = tmp_path / 'runs' / 'demo'
+    root.mkdir(parents=True)
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([{
+        'path': str(tmp_path / 'runs'), 'namespace': 'roads-order-test', 'layout': 'flat',
+        'coordination': str(tmp_path / 'coordination'),
+    }]))
+    publish(root)
+    context = multiprocessing.get_context('spawn')
+    entered, finish, result = context.Event(), context.Event(), context.Queue()
+    process = context.Process(target=_roads_refresh_writer, args=(root, entered, finish, result))
+    process.start()
+    archive_started = Event()
+    archive_acquired = Event()
+
+    def archive():
+        archive_started.set()
+        with catalog_lifecycle_guard(root), lifecycle.operation(root, shared=True, create=True):
+            archive_acquired.set()
+            with ZipFile(tmp_path / 'project.zip', 'w') as bundle:
+                bundle.write(root / '_query_engine/catalog.json', 'catalog.json')
+
+    try:
+        assert entered.wait(10)
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(archive)
+            assert archive_started.wait(5)
+            assert not archive_acquired.wait(0.1)
+            finish.set()
+            assert result.get(timeout=10) == 'published'
+            future.result(timeout=10)
+        process.join(timeout=10)
+        assert process.exitcode == 0
+        with ZipFile(tmp_path / 'project.zip') as bundle:
+            assert json.loads(bundle.read('catalog.json'))['files']
+    finally:
+        finish.set()
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=5)
+
+
+def test_concurrent_roads_readers_preserve_shared_admission(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    publish(tmp_path)
+    second_entered, release = Event(), Event()
+
+    def read():
+        with lifecycle.current_read(tmp_path):
+            second_entered.set()
+            assert release.wait(5)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        try:
+            with lifecycle.current_read(tmp_path):
+                future = executor.submit(read)
+                assert second_entered.wait(2), 'ordinary shared reader was rejected'
+                with pytest.raises(lifecycle.RoadsOperationBusy), lifecycle.operation(tmp_path):
+                    pass
+        finally:
+            release.set()
+        future.result(timeout=5)
+
+
+@pytest.mark.parametrize('archive_shared', [False, True])
+def test_reader_catalog_barrier_finishes_during_archive_or_writer_admission(tmp_path, archive_shared):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    from wepppy.query_engine.catalog_refresh import (
+        catalog_lifecycle_guard, ensure_catalog_fresh, pending_catalog_requests,
+        record_catalog_refresh, refresh_catalog,
+    )
+
+    publish(tmp_path)
+    refresh_catalog(tmp_path)
+    record_catalog_refresh(tmp_path)
+    catalog_owned, reader_waiting = Event(), Event()
+
+    def lifecycle_contender():
+        with catalog_lifecycle_guard(tmp_path):
+            catalog_owned.set()
+            assert reader_waiting.wait(5)
+            if archive_shared:
+                with lifecycle.operation(tmp_path, shared=True):
+                    assert json.loads((tmp_path / '_query_engine/catalog.json').read_text())['files']
+            else:
+                # Restore/mutation must fail immediately and release catalog ownership.
+                with pytest.raises(lifecycle.RoadsOperationBusy), lifecycle.operation(tmp_path):
+                    pass
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        with lifecycle.current_read(tmp_path):
+            future = executor.submit(lifecycle_contender)
+            try:
+                assert catalog_owned.wait(5)
+            finally:
+                reader_waiting.set()
+            assert ensure_catalog_fresh(tmp_path)['files']
+            future.result(timeout=5)
+    assert not pending_catalog_requests(tmp_path)

@@ -5,6 +5,8 @@ combined-viewer-preparation directory for working/failed/complete evidence.
 """
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
 import argparse
 import hashlib
 import json
@@ -115,6 +117,11 @@ def _verify(base, entries):
 
 
 def prepare(wd):
+    with catalog_lifecycle_guard(wd):
+        return _prepare_guarded(wd)
+
+
+def _prepare_guarded(wd):
     base = Path(wd).resolve(strict=True)
     state = _contained(base, STATE_DIR)
     manifest_path = state / 'manifest.json'
@@ -186,6 +193,11 @@ def prepare(wd):
 
 
 def rollback(wd):
+    with catalog_lifecycle_guard(wd):
+        return _rollback_guarded(wd)
+
+
+def _rollback_guarded(wd):
     base = Path(wd).resolve(strict=True)
     state = _contained(base, STATE_DIR)
     manifest = json.loads((state / 'manifest.json').read_text())

@@ -20,7 +20,7 @@ from rasterio.warp import reproject
 
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from .c_formula import compute_c_from_fg_pct, compute_observed_rap_fg_pct
@@ -658,7 +658,7 @@ def run_rusle_c_factor(
         _write_float_raster(fg_path, fg, dem_profile)
 
         for path in (c_path, fg_path):
-            update_catalog_entry(wd, _relative_path(wd, path))
+            request_catalog_refresh(wd, _relative_path(wd, path))
 
         c_manifest = {
             "mode": "observed_rap",
@@ -692,7 +692,7 @@ def run_rusle_c_factor(
             ),
         }
         update_c_manifest(manifest_path, c_manifest)
-        update_catalog_entry(wd, _relative_path(wd, manifest_path))
+        request_catalog_refresh(wd, _relative_path(wd, manifest_path))
 
         return RusleCResult(
             c=c_path,
@@ -797,7 +797,7 @@ def run_rusle_c_factor(
     if sbs_4class is not None:
         catalog_paths.append(sbs_4class_path)
     for path in catalog_paths:
-        update_catalog_entry(wd, _relative_path(wd, path))
+        request_catalog_refresh(wd, _relative_path(wd, path))
 
     if sbs_4class is None:
         sbs_counts: dict[str, int] = {}
@@ -848,7 +848,7 @@ def run_rusle_c_factor(
         ),
     }
     update_c_manifest(manifest_path, c_manifest)
-    update_catalog_entry(wd, _relative_path(wd, manifest_path))
+    request_catalog_refresh(wd, _relative_path(wd, manifest_path))
 
     return RusleCResult(
         c=c_path,

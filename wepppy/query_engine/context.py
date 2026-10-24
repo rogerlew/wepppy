@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from wepppy.query_engine.catalog import DatasetCatalog, load_catalog
-
-LOGGER = logging.getLogger(__name__)
+from wepppy.query_engine.catalog import CatalogEntry, DatasetCatalog
 
 
 @dataclass(slots=True)
@@ -19,6 +17,24 @@ class RunContext:
     base_dir: Path
     scenario: str | None
     catalog: DatasetCatalog
+
+
+def refresh_run_context(
+    context: RunContext, required_paths: Iterable[str] | None = None
+) -> RunContext:
+    """Cross the catalog freshness barrier and replace held metadata.
+
+    Explicit paths verify the selected source and schema even when a producer
+    died before recording its invalidation. With no paths, drain pending intent
+    only; ordinary discovery must not rescan every source on each read.
+    """
+    from wepppy.query_engine.catalog_refresh import ensure_catalog_fresh
+
+    data = ensure_catalog_fresh(context.base_dir, required_paths=required_paths)
+    context.catalog = DatasetCatalog(
+        Path(data["root"]), [CatalogEntry(**entry) for entry in data.get("files", [])]
+    )
+    return context
 
 
 def _normalize_relative_scenario_parts(raw_scenario: str) -> tuple[str, ...]:
@@ -107,29 +123,24 @@ def resolve_run_context(
 
     scenario_dir = _resolve_scenario_dir(base, scenario)
 
-    catalog: DatasetCatalog | None = None
+    catalog_path = scenario_dir / "_query_engine" / "catalog.json"
     try:
-        catalog = load_catalog(scenario_dir)
+        catalog_path.stat()
     except FileNotFoundError:
         if not auto_activate:
             raise
-    except Exception:  # pragma: no cover - defensive rebuild on corrupt catalogs
-        if not auto_activate:
-            raise
-        LOGGER.warning("Existing catalog for %s is unreadable; rebuilding", scenario_dir, exc_info=True)
-        catalog = None
+        from wepppy.query_engine.activate import activate_query_engine
 
-    if catalog is None:
-        if auto_activate:
-            from wepppy.query_engine.activate import activate_query_engine
+        activate_query_engine(
+            scenario_dir,
+            run_interchange=run_interchange,
+            force_refresh=force_refresh,
+        )
 
-            activate_query_engine(
-                scenario_dir,
-                run_interchange=run_interchange,
-                force_refresh=force_refresh,
-            )
-            catalog = load_catalog(scenario_dir)
-        else:
-            raise FileNotFoundError(scenario_dir / "_query_engine" / "catalog.json")
-
-    return RunContext(runid=runid, base_dir=scenario_dir, scenario=scenario, catalog=catalog)
+    # Existing derived metadata must cross the repair/publication boundary before
+    # parsing. This also repairs malformed catalogs without running interchange.
+    context = RunContext(
+        runid=runid, base_dir=scenario_dir, scenario=scenario,
+        catalog=DatasetCatalog(scenario_dir, []),
+    )
+    return refresh_run_context(context)

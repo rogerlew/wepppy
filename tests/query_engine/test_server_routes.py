@@ -130,7 +130,7 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
     def fake_activate_query_engine(path, *, run_interchange: bool = True, force_refresh: bool = False):
         return {}
 
-    def fake_run_query(context, payload):
+    def fake_run_query(context, payload, *, authorize=None):
         return QueryResult(records=[{"value": 1}], schema=[], row_count=1, sql="SELECT 1")
 
     monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
@@ -277,7 +277,7 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
             catalog=DummyCatalog(),
         )
 
-    def fake_run_query(context, payload):
+    def fake_run_query(context, payload, *, authorize=None):
         return QueryResult(records=[{"value": 1}], schema=[], row_count=1, sql="SELECT 1")
 
     monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)

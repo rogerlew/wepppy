@@ -172,3 +172,5 @@ change ctime without changing its open bytes. See the canonical contract's
 * If you add behaviors that depend on environment variables, also expose a test
   seam so targeted pytest modules can simulate edge cases without rewriting
   global process state.
+
+Artifact producers use `wepppy.query_engine.request_catalog_refresh` after publication. Managed asynchronous refresh is rollout-gated; standalone calls remain synchronous. Do not swallow durable admission errors. Keep query/report/finalizer readiness barriers synchronous; see `docs/schemas/query-engine-catalog-refresh-contract.md`.

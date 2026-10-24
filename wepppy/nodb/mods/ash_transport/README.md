@@ -32,13 +32,13 @@ Primary consumers include incident hydrologists, Burned Area Emergency Response 
 - Markdown documentation (`ash/post/README.md`) is regenerated from actual parquet schemas using `generate_ashpost_documentation`, keeping analysts aligned with the precise column definitions.
 
 ### 4. Catalog and Telemetry
-- Successful runs call `update_catalog_entry(wd, "ash")`, registering artifacts with the Redis-backed query engine catalog so downstream consumers discover ash products automatically.
+- Successful runs call `request_catalog_refresh(wd, "ash")` after artifact publication. With asynchronous refresh enabled, managed projects persist durable refresh intent before queue admission; standalone execution remains synchronous. Query and report readiness barriers publish current filesystem catalog metadata before consumption.
 - `RedisPrep.timestamp(TaskEnum.run_watar)` marks ash completion in Redis DB 2, driving control-panel status indicators and historical telemetry.
 
 ### 5. Batch Runner Integration
 - The Batch Runner UI always exposes the generic `Run WATAR` directive. It executes and participates in leaf completion only when the cloned project contains `ash.nodb`; no Ash-specific route or queue is introduced.
 - WATAR runs after both WEPP hillslope and watershed completion timestamps. Batch Runner repairs and validates `H.pass.parquet`, `H.wat.parquet`, and `totalwatsed3.parquet` under one ordered climate/landuse/watershed NoDir lock before calling `Ash.run_ash` with the controller's persisted fire date and initial depths.
-- AshPost completion owns the `run_watar` timestamp. Failures propagate with the timestamp absent for the normal Batch Runner retry path. A no-data AshPost result is successful and refreshes the catalog with null return-period state, without publishing the normal version manifest or generated dataset documentation.
+- AshPost completion owns the `run_watar` timestamp. Failures propagate with the timestamp absent for the normal Batch Runner retry path. A no-data AshPost result is successful and requests catalog refresh with null return-period state, without publishing the normal version manifest or generated dataset documentation.
 - Ash settings are copied when a leaf is first cloned. To apply later `_base` Ash changes to an existing leaf, run the batch with **Remove existing files** enabled.
 
 
@@ -98,7 +98,7 @@ Watanabe static mode computes each daily transport increment as `delta_M = (A / 
 - Raster overrides rely on `wepppyo3.raster_characteristics.identify_median_single_raster_key`; ensure the shared library is available in the execution environment.
 - `AshPost` regenerates watershed aggregates and documentation idempotently, allowing post-processing reruns without re-simulating hillslopes.
 - All mutations must occur inside `with ash.locked():` or `with ash_post.locked():` blocks to respect Redis-backed locking. Avoid mutating state while multiprocessing tasks execute.
-- Telemetry signals (catalog updates and Redis timestamps) fire only after successful runs; failed hillslope tasks are canceled and raised back to the caller for troubleshooting.
+- Refresh requests and Redis timestamps follow successful artifact publication; task finalizers retain synchronous catalog readiness; failed hillslope tasks are canceled and raised back to the caller for troubleshooting.
 
 ## Further Reading
 

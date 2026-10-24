@@ -79,10 +79,7 @@ from wepppy.nodb.mods.omni.omni_run_orchestration_service import OmniRunOrchestr
 from wepppy.nodb.mods.omni.omni_station_catalog_service import OmniStationCatalogService
 from wepppy.nodb.mods.omni.omni_state_contrast_mixin import OmniStateContrastMixin
 
-try:
-    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except ImportError:  # pragma: no cover - optional dependency
-    _update_catalog_entry = None
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     'OMNI_REL_DIR',
@@ -853,19 +850,8 @@ class Omni(OmniStateContrastMixin, NoDbBase):
             self._reset_omni_owned_state()
 
     def _refresh_catalog(self, rel_path: Optional[str] = None) -> None:
-        """Best-effort catalog refresh for Omni artifacts."""
-        if _update_catalog_entry is None:
-            return
-        target = rel_path or OMNI_REL_DIR
-        try:
-            _update_catalog_entry(self.wd, target)
-        except Exception:  # pragma: no cover - catalog refresh best effort
-            LOGGER.warning(
-                "Failed to refresh catalog for Omni artifacts in %s (target=%s)",
-                self.wd,
-                target,
-                exc_info=True,
-            )
+        """Record refresh intent after publishing Omni artifacts."""
+        request_catalog_refresh(self.wd, rel_path or OMNI_REL_DIR)
 
     @property
     def omni_dir(self) -> str:

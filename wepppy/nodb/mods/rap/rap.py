@@ -47,7 +47,7 @@ from wepppy.landcover.rap import (
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
 
-from wepppy.query_engine import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     'RAPNoDbLockedException',
@@ -187,7 +187,7 @@ class RAP(NoDbBase):
             self._rap_year = year
             self._rap_mgr = rap_mgr
 
-        update_catalog_entry(self.wd, self.rap_dir)
+        request_catalog_refresh(self.wd, self.rap_dir)
 
     def on(self, evt: TriggerEvents) -> None:
         pass

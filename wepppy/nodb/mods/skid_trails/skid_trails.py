@@ -33,10 +33,7 @@ from wepppy.all_your_base.geo import GeoTransformer
 
 import numpy as np
 
-try:
-    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except ImportError:  # pragma: no cover - optional dependency
-    _update_catalog_entry = None
+from wepppy.query_engine import request_catalog_refresh
 
 LOGGER = logging.getLogger(__name__)
 
@@ -355,11 +352,7 @@ class SkidTrails(NoDbBase):
         with open(_join(self.skid_trails_dir, 'skid_trails0.geojson'), 'w') as fp:
             fp.write(js)
 
-        if _update_catalog_entry is not None:
-            try:
-                _update_catalog_entry(self.wd, 'skid_trails')
-            except Exception:  # pragma: no cover - catalog refresh best effort
-                LOGGER.warning("Failed to refresh catalog for skid trails in %s", self.wd, exc_info=True)
+        request_catalog_refresh(self.wd, 'skid_trails')
 
         with self.locked():
             self.skidtrails = skidtrails

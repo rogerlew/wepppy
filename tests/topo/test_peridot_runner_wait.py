@@ -151,7 +151,7 @@ def test_post_abstract_watershed_prefers_parquet_sources(
     catalog_updates = []
     monkeypatch.setattr(
         peridot_runner,
-        "_update_catalog_entry",
+        "request_catalog_refresh",
         lambda wd, rel: catalog_updates.append((wd, rel)),
     )
 
@@ -168,7 +168,7 @@ def test_post_abstract_watershed_prefers_parquet_sources(
     assert str(channels_df["chn_enum"].dtype) == "Int32"
     assert (watershed_dir / "hillslopes.csv").exists()
     assert (watershed_dir / "channels.csv").exists()
-    assert (str(tmp_path), "watershed/flowpaths.parquet") in catalog_updates
+    assert catalog_updates == [(str(tmp_path), "watershed")]
 
 
 @pytest.mark.unit
@@ -365,7 +365,7 @@ def test_post_abstract_watershed_retries_empty_ids_until_finalized(
         return None, None
 
     monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setattr(peridot_runner, "request_catalog_refresh", lambda *_args, **_kwargs: None)
     monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
     monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
 
@@ -423,7 +423,7 @@ def test_post_abstract_watershed_retries_transient_table_read_failure(
         return None, None
 
     monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setattr(peridot_runner, "request_catalog_refresh", lambda *_args, **_kwargs: None)
     monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
     monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
 
@@ -573,7 +573,7 @@ def test_post_abstract_watershed_times_out_when_ids_never_finalize(
         return None, None
 
     monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setattr(peridot_runner, "request_catalog_refresh", lambda *_args, **_kwargs: None)
     monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.03")
     monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
 
@@ -619,7 +619,7 @@ def test_post_abstract_watershed_rejects_invalid_centroid(
         }
     ).to_parquet(watershed_dir / "channels.parquet", index=False)
 
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setattr(peridot_runner, "request_catalog_refresh", lambda *_args, **_kwargs: None)
 
     with pytest.raises(ValueError, match="Invalid watershed centroid"):
         peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)

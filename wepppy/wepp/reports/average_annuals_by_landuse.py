@@ -105,11 +105,27 @@ class AverageAnnualsByLanduseReport(ReportBase):
         if history_without_catalog:
             context._context = RunContext(str(self.wd), self.wd, None, DatasetCatalog(self.wd, []))
         _normalize_report_context(context, paths)
-        # Repair an incomplete catalog only for actually present local sources,
-        # retaining historical reads when a required source has been archived.
-        present = [path for path in paths if not context.catalog.has(path) and (self.wd / path).is_file()]
+        # Verify existing selections as well as missing membership. Schema and
+        # fs_path changes affect SQL even when an entry was already cataloged.
+        # Absent archived sources remain eligible for historical report reads.
+        present = []
+        for path in paths:
+            entry = context.catalog.get(path)
+            selected = _resolve_dataset_path(
+                context.catalog.root, entry.fs_path if entry and entry.fs_path else path, path
+            )
+            if selected.is_file():
+                present.append(path)
         if present and not history_without_catalog:
+            # Preserve the in-memory relocation of unavailable historical inputs;
+            # the barrier only verifies files that can actually be read.
+            unavailable = {path: context.catalog.get(path) for path in paths if path not in present}
             context.ensure_datasets(*present)
+            if unavailable:
+                context.context.catalog = DatasetCatalog(
+                    context.catalog.root,
+                    [unavailable.get(entry.path) or entry for entry in context.catalog.entries()],
+                )
             _normalize_report_context(context, paths)
         dependencies = {}
         for logical in paths:

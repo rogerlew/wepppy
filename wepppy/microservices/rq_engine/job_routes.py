@@ -20,6 +20,10 @@ from wepppy.rq.job_info import (
     get_wepppy_rq_jobs_info,
 )
 from wepppy.rq.jobinfo_payloads import extract_job_ids
+from wepppy.rq.query_catalog_disclosure import (
+    is_query_catalog_job,
+    maintenance_error as query_catalog_maintenance_error,
+)
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
@@ -312,6 +316,8 @@ def jobstatus(job_id: str, request: Request):
             reason="exception",
         )
         from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if is_query_catalog_job(job_id):
+            return JSONResponse(query_catalog_maintenance_error(), status_code=500)
         if is_catalog_job(job_id):
             return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Error Handling Request")
@@ -381,6 +387,8 @@ def jobinfo(job_id: str, request: Request):
             reason="exception",
         )
         from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if is_query_catalog_job(job_id):
+            return JSONResponse(query_catalog_maintenance_error(), status_code=500)
         if is_catalog_job(job_id):
             return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Error Handling Request")
@@ -449,6 +457,8 @@ async def jobinfo_batch(request: Request):
             reason="exception",
         )
         from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
+        if any(is_query_catalog_job(job_id) for job_id in job_ids):
+            return JSONResponse(query_catalog_maintenance_error(), status_code=500)
         if any(is_catalog_job(job_id) for job_id in job_ids):
             return JSONResponse(maintenance_error(), status_code=500)
         return error_response_with_traceback("Failed to retrieve batch job info")
@@ -475,7 +485,9 @@ async def jobinfo_batch(request: Request):
 )
 def canceljob(job_id: str, request: Request):
     from wepppy.rq.run_catalog_rq import is_catalog_job, maintenance_error
-    catalog_job = is_catalog_job(job_id)
+    catalog_job = is_catalog_job(job_id) or is_query_catalog_job(job_id)
+    if is_query_catalog_job(job_id):
+        maintenance_error = query_catalog_maintenance_error
     try:
         claims, accepted_scopes = _authorize_cancel_request(request)
     except AuthError as exc:

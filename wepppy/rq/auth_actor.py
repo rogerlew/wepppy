@@ -183,7 +183,14 @@ def install_rq_auth_actor_hook() -> None:
                         if should_save_meta:
                             job.meta = meta
                             try:
-                                job.save_meta()
+                                pipeline = kwargs.get("pipeline")
+                                if pipeline is None:
+                                    job.save_meta()
+                                else:
+                                    # Metadata belongs to the caller's enqueue
+                                    # transaction; an aborted WATCH must leave
+                                    # neither a job nor a metadata-only hash.
+                                    pipeline.hset(job.key, "meta", job.serializer.dumps(job.meta))
                             except (redis.exceptions.RedisError, OSError) as exc:  # pragma: no cover - logging only
                                 _LOGGER.debug(
                                     "Unable to persist enqueue metadata for job %s: %s",

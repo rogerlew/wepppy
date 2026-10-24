@@ -1,0 +1,32 @@
+{
+  "anonymous_browse": 302,
+  "archive": "qcat-archive-20261023.20261023T204802Z.zip",
+  "archive_sha256": "23d74b6b58f0e6fcf0dbd35ae03b9ad0a4fb9e3cd2fd9b16d332e9a37fc77c80",
+  "auth": "real scoped session JWT cookie plus live Redis marker; no login UI",
+  "authorized_browse": 200,
+  "bytes_and_modes_preserved": true,
+  "complete": true,
+  "downloads_before": [
+    {
+      "mode": "0o640",
+      "path": "_query_engine/refresh/requests/22e5daec-347f-4aef-93d7-877cd5406bf7.json",
+      "sha256": "1d200872ea6da863d70d2b9fa996ad0ee704a6b95af48bee9727892f198662b7",
+      "status": 200
+    },
+    {
+      "mode": "0o640",
+      "path": "_query_engine/refresh/attempts/8596752a-8e89-4848-a7f6-b4cca9db9a0e.json",
+      "sha256": "715d3a7c33a494d2a8fb17dcb9da5a679617e8ae70c54821f137a78203cc2768",
+      "status": 200
+    }
+  ],
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "incarnation_changed": true,
+  "retired_receipt_download": 200,
+  "root": "/wc1/runs/qc/qcat-archive-20261023",
+  "runid": "qcat-archive-20261023",
+  "uid": 1000
+}

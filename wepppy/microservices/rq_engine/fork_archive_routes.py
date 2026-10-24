@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import (
+    catalog_lifecycle_guard, invalidate_catalog_incarnation,
+)
+
 import logging
 import os
 from pathlib import Path
@@ -1046,6 +1050,8 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             and planned_values.get("target_runid") == new_runid
             and planned_values.get("state", "planned") != "succeeded"
         )
+        # The guard remains outside replacement/configuration guards through admission.
+        fork_admission.enter_context(catalog_lifecycle_guard(new_wd, allow_missing=True))
         replacement_lease = None
         if requested_runid:
             if _exists(new_wd):
@@ -1236,6 +1242,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             if parent_dir:
                 os.makedirs(parent_dir, exist_ok=True)
             os.makedirs(new_wd, exist_ok=True)
+            invalidate_catalog_incarnation(new_wd)
             if replacement_lease is not None:
                 replacement_lease.checkpoint()
             if profile_claimed:

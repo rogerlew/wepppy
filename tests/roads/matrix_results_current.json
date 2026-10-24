@@ -58521,13 +58521,13 @@
       "selection": {
         "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
         "source_features": 55,
-        "input_features": 55,
-        "excluded": []
+        "excluded": [],
+        "input_features": 55
       },
       "prepared_features": 39,
       "input_sha256": "58e0aed07da821c4c28d157275a5b0223afb127b0382e72cd18b1957e4c1216f",
-      "root": "/wc1/runs/ro/roads-validation-oct23-v2-bd",
-      "completed_at": 1792773857,
+      "root": "/wc1/runs/ro/roads-qcat-async-20261023-bd",
+      "completed_at": 1792791816,
       "completed_profiles": 34,
       "summary_profiles": 34,
       "execution_counts": {
@@ -58571,10 +58571,10 @@
         55
       ],
       "accounting_state": "ready",
-      "accounting_sha256": "a8f9685bb7664f77518c0f0c6b68b490bae7cac636f6e55a3ead71d71ee5f65e",
-      "totalwatsed_sha256": "7e4cd5cf37c5811cd4b66d33660765ef7f9e160aa3bc845969aeee9b47f9ed96",
+      "accounting_sha256": "f9781ce0c3917ec84012eae271655b494ad1f648bf536e6a864e86b84d8b7254",
+      "totalwatsed_sha256": "036c35abc7d565eb4635fc04f7ae822dcb1b0c4558395231e4bef5380d2c9f9f",
       "totalwatsed_rows": 5844,
-      "summary_sha256": "8ee3c6ea07be8821fa267041b49c3c623082a578b8b3b6496eb9213e7d4a068d",
+      "summary_sha256": "02194140830dec35225e5ae075f2f4d89c5fec934a167168cc2e6c7723949fe9",
       "experiment_unrutted_fill_buffer": "30 m at 10% each",
       "protected_baseline_files": 911,
       "unchanged_source_files": 2383,
@@ -59223,13 +59223,13 @@
       "selection": {
         "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
         "source_features": 55,
-        "input_features": 55,
-        "excluded": []
+        "excluded": [],
+        "input_features": 55
       },
       "prepared_features": 39,
       "input_sha256": "65d2a1f1100acca3565db08c8ab26223947eda67986b03d11e3aa6fbe69d16c5",
-      "root": "/wc1/runs/ro/roads-validation-oct23-v2-rd",
-      "completed_at": 1792773856,
+      "root": "/wc1/runs/ro/roads-qcat-async-20261023-rd",
+      "completed_at": 1792791922,
       "completed_profiles": 34,
       "summary_profiles": 34,
       "execution_counts": {
@@ -59273,10 +59273,10 @@
         55
       ],
       "accounting_state": "ready",
-      "accounting_sha256": "bb724026c728faf190f2c26ad88f5433ac4f6f559aecd38c6eded0b978dac2fb",
-      "totalwatsed_sha256": "8ea90b8a65fc0ff672d66cff09149e2bba32b98b6fa83de823ec71ae7acf53da",
+      "accounting_sha256": "475ae309c653468fdb047b69011dde21f54d0ea5f1a7ce1272d66b77fdc5e4f1",
+      "totalwatsed_sha256": "009c91ffd317958745d59e98629d1438052c48ea2df87a67ebb573e0c4349c69",
       "totalwatsed_rows": 5844,
-      "summary_sha256": "e11d59535b687036cb003665551b1b94a244f91acef308f6501ba308da78f8f2",
+      "summary_sha256": "ee558d35079bbbcd8df0b4474ac75c1a5ff13c140b98adc2c46a7fe745322eb2",
       "experiment_unrutted_fill_buffer": "30 m at 10% each",
       "protected_baseline_files": 911,
       "unchanged_source_files": 2383,
@@ -60129,13 +60129,13 @@
       "selection": {
         "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
         "source_features": 55,
-        "input_features": 55,
-        "excluded": []
+        "excluded": [],
+        "input_features": 55
       },
       "prepared_features": 39,
       "input_sha256": "6edc76a30755cad0dbbbb9724f1bb53170c0446814d2c8f4e6b103a7b30b750d",
-      "root": "/wc1/runs/ro/roads-validation-oct23-v2-rutted",
-      "completed_at": 1792773876,
+      "root": "/wc1/runs/ro/roads-qcat-async-20261023-rutted",
+      "completed_at": 1792792057,
       "completed_profiles": 34,
       "summary_profiles": 34,
       "execution_counts": {
@@ -60179,10 +60179,10 @@
         55
       ],
       "accounting_state": "ready",
-      "accounting_sha256": "c063e4d0649a7f71543c0dff20b0efcdb91a6e27e18e8423f24fb4a57af938eb",
-      "totalwatsed_sha256": "b92f779f3789403a74cdb85db0cc7f25c9aa2ba2ed3c5acf03fc602ed4b8d2e1",
+      "accounting_sha256": "eecc290cec61faf9069eadc342dbb32a18fa6011c87cebb50572b4a5724f033c",
+      "totalwatsed_sha256": "f8433b9ccfab1483d3f50eadcd3b0cd29c95cfa54dd07b32929630ddc3ce34cc",
       "totalwatsed_rows": 5844,
-      "summary_sha256": "fa714001b1862fb4c551bc483beb116538050602cf1b18cd3e9321efd7665319",
+      "summary_sha256": "7e2d035d6453c24d4ec7967717986115ac591ff8bd83c6caef1ed3c4d7d9471f",
       "experiment_unrutted_fill_buffer": "30 m at 10% each",
       "protected_baseline_files": 911,
       "unchanged_source_files": 2383,
@@ -60254,8 +60254,8 @@
       },
       "prepared_features": 38,
       "input_sha256": "0a4406cb9e518804c1f0e9b5c4b0ac6d51b0f665704088c63a3233fbacb64e69",
-      "root": "/wc1/runs/ro/roads-validation-oct23-unrutted-positive",
-      "completed_at": 1792774463,
+      "root": "/wc1/runs/ro/roads-qcat-async-20261023-unrutted",
+      "completed_at": 1792792140,
       "completed_profiles": 1,
       "summary_profiles": 2,
       "execution_counts": {
@@ -60284,10 +60284,10 @@
         28
       ],
       "accounting_state": "ready",
-      "accounting_sha256": "50ef8ffda8154f4c6ff7336b0161d75545da5fa18202cb3bed7c19ec1f0a3d15",
-      "totalwatsed_sha256": "3ed0260d4698eb3de2cfa879e85d5f0549affd942318cfaeae7ce2cedfd0205c",
+      "accounting_sha256": "f1a8e7a0e20d968cda636cdf3e144b20b661a3ad22b97d4ec7de30ece4bcc686",
+      "totalwatsed_sha256": "c4970883f4498a08dcb23330fc809ba3bb4dd2adc402bb5b07d62902039e5528",
       "totalwatsed_rows": 5844,
-      "summary_sha256": "04da5b9db39e3b87b2cd7bd5c1d2ae181db9e76410155593237409388b7ca918",
+      "summary_sha256": "0c055ad4359ee9934cbadb7d626c784ff6b4536da105df141a0f46481b4d1796",
       "experiment_unrutted_fill_buffer": "30 m at 10% each",
       "protected_baseline_files": 911,
       "unchanged_source_files": 2383,

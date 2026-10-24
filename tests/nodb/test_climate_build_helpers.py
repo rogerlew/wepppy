@@ -788,7 +788,7 @@ def test_run_prism_revision_updates_catalog_and_sub_maps(
         lambda *_args, **_kwargs: ({}, {"1": ".par"}, {"1": "a.cli"}),
     )
     monkeypatch.setattr(helper_module, "_wait_for_prism_revision_futures", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(helper_module, "update_catalog_entry", lambda wd, area: catalog_updates.append((wd, area)))
+    monkeypatch.setattr(helper_module, "request_catalog_refresh", lambda wd, area: catalog_updates.append((wd, area)))
 
     helper_module.run_prism_revision(climate)
 

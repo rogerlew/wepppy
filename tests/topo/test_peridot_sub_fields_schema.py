@@ -28,7 +28,7 @@ def _patch_watershed(monkeypatch: pytest.MonkeyPatch) -> None:
     import wepppy.nodb.core as nodb_core
 
     monkeypatch.setattr(nodb_core, "Watershed", _DummyWatershed)
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setattr(peridot_runner, "request_catalog_refresh", lambda *_args, **_kwargs: None)
 
 
 def _write_fields_csv(sub_fields_dir: Path) -> None:

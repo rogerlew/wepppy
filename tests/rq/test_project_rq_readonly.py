@@ -56,6 +56,7 @@ def _configure_readonly_env(
     tmp_path: Path,
     prep: _PrepStub,
 ):
+    (tmp_path / "demo").mkdir(exist_ok=True)
     published: list[tuple[str, str]] = []
     published_commands: list[tuple[str, str]] = []
 
@@ -141,3 +142,72 @@ def test_set_run_readonly_rq_publishes_exception_for_unexpected_prep_errors(
 
     assert any("EXCEPTION set_run_readonly_rq(demo, readonly=True)" in message for _, message in published)
     assert any("manifest.json creation failed" in message for _, message in published_commands)
+
+
+def test_readonly_drains_parent_and_nested_receipts_before_manifest(tmp_path, monkeypatch):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from wepppy.query_engine.catalog_refresh import record_catalog_refresh, pending_catalog_requests
+    from wepppy.query_engine.context import RunContext, refresh_run_context
+    from wepppy.query_engine.catalog import load_catalog
+
+    _configure_readonly_env(monkeypatch, tmp_path, _PrepStub())
+    monkeypatch.setenv("QUERY_CATALOG_ROOTS_JSON", json.dumps([{
+        "path": str(tmp_path), "namespace": "readonly-test", "layout": "flat",
+        "coordination": str(tmp_path.parent / (tmp_path.name + "-coordination")),
+    }]))
+    root = tmp_path / "demo"
+    child = root / "_pups/omni/scenarios/burned"
+    for scope in (root, child):
+        (scope / "soils").mkdir(parents=True)
+        pq.write_table(pa.table({"value": [3]}), scope / "soils/soils.parquet")
+        record_catalog_refresh(scope, "soils/soils.parquet")
+
+    class Ron:
+        is_child_run = False
+        timed = staticmethod(lambda _label: contextlib.nullcontext())
+
+        @property
+        def readonly(self):
+            return (root / "READONLY").exists()
+
+        @readonly.setter
+        def readonly(self, value):
+            if value:
+                assert all(not pending_catalog_requests(scope) for scope in (root, child))
+                (root / "READONLY").touch()
+            else:
+                (root / "READONLY").unlink(missing_ok=True)
+
+    monkeypatch.setattr(project_rq.Ron, "getInstance", lambda _wd: Ron())
+    manifest = root / "manifest.json"
+    def create_manifest(_wd):
+        assert (root / "READONLY").exists()
+        manifest.write_text("complete")
+    monkeypatch.setattr(sys.modules["wepppy.microservices.browse"], "create_manifest", create_manifest)
+    project_rq.set_run_readonly_rq("demo", readonly=True)
+    before = {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
+    for scope in (root, child):
+        context = RunContext("demo", scope, None, load_catalog(scope))
+        refresh_run_context(context, ["soils/soils.parquet"])
+        assert context.catalog
+    assert before == {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
+    assert manifest.read_text() == "complete"
+
+
+def test_readonly_catalog_failure_preserves_writable_state_and_pending_intent(tmp_path, monkeypatch):
+    import pyarrow as pa
+    from wepppy.query_engine.catalog_refresh import record_catalog_refresh, pending_catalog_requests
+
+    _configure_readonly_env(monkeypatch, tmp_path, _PrepStub())
+    root = tmp_path / 'demo'
+    (root / 'soils').mkdir()
+    (root / 'soils/soils.parquet').write_bytes(b'not parquet')
+    record_catalog_refresh(root, 'soils/soils.parquet')
+    ron = project_rq.Ron.getInstance(str(root))
+    with pytest.raises((pa.ArrowInvalid, ValueError)):
+        project_rq.set_run_readonly_rq('demo', readonly=True)
+    assert not ron.readonly
+    assert not (root / 'READONLY').exists()
+    assert not (root / 'manifest.json').exists()
+    assert pending_catalog_requests(root)

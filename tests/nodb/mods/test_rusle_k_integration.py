@@ -121,7 +121,7 @@ def test_run_rusle_k_factors_writes_artifacts_manifest_and_comparison(
     _write_test_raster(reference_raster, np.asarray([[0.20, 0.25], [0.30, 0.35]]))
 
     catalog_updates: list[str] = []
-    monkeypatch.setattr(k_integration, "update_catalog_entry", lambda _wd, relpath: catalog_updates.append(relpath))
+    monkeypatch.setattr(k_integration, "request_catalog_refresh", lambda _wd, relpath: catalog_updates.append(relpath))
 
     result = k_integration.run_rusle_k_factors(
         str(wd),
@@ -177,7 +177,7 @@ def test_run_rusle_k_factors_writes_only_selected_mode_outputs(
     _write_polaris_layers(tmp_path)
 
     catalog_updates: list[str] = []
-    monkeypatch.setattr(k_integration, "update_catalog_entry", lambda _wd, relpath: catalog_updates.append(relpath))
+    monkeypatch.setattr(k_integration, "request_catalog_refresh", lambda _wd, relpath: catalog_updates.append(relpath))
 
     result = k_integration.run_rusle_k_factors(
         str(tmp_path),

@@ -616,9 +616,15 @@ def test_dump_soils_parquet_round_trips_local_fallback_provenance(
         property(lambda _self: SimpleNamespace(translator_factory=lambda: None)),
     )
     catalog_entries = []
+    def record_published_soils(wd, rel_path):
+        # Refresh admission must follow the final, readable artifact publication.
+        published = pd.read_parquet(Path(wd) / rel_path)
+        assert published.loc[0, "mukey"] == "20"
+        assert not list((Path(wd) / "soils").glob(".soils.parquet.*.tmp"))
+        catalog_entries.append((wd, rel_path))
+
     monkeypatch.setattr(
-        "wepppy.nodb.core.soils.update_catalog_entry",
-        lambda wd, rel_path: catalog_entries.append((wd, rel_path)),
+        "wepppy.nodb.core.soils.request_catalog_refresh", record_published_soils
     )
 
     parquet_path = soils_dir / "soils.parquet"

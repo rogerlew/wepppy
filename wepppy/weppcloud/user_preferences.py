@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
 from dataclasses import dataclass
 from datetime import datetime
 from contextlib import contextmanager, nullcontext
@@ -592,19 +594,24 @@ def cleanup_new_run_directory(runid: str, wd: str) -> None:
         or os.path.commonpath((target, runs_root)) != runs_root
     ):
         raise ValueError("Refusing to clean an unexpected run directory")
+    # Validate before the guard creates coordination files, then recheck under it.
     target_stat = os.lstat(target)
     if stat.S_ISLNK(target_stat.st_mode) or not stat.S_ISDIR(target_stat.st_mode):
         raise ValueError("Refusing to clean a symlink or non-directory run path")
-    if not _RMTREE_AVOIDS_SYMLINK_ATTACKS:
-        raise RuntimeError("Safe file-descriptor-based directory cleanup is unavailable")
+    with catalog_lifecycle_guard(target):
+        target_stat = os.lstat(target)
+        if stat.S_ISLNK(target_stat.st_mode) or not stat.S_ISDIR(target_stat.st_mode):
+            raise ValueError("Refusing to clean a symlink or non-directory run path")
+        if not _RMTREE_AVOIDS_SYMLINK_ATTACKS:
+            raise RuntimeError("Safe file-descriptor-based directory cleanup is unavailable")
 
-    NoDbBase.cleanup_run_instances(target)
-    clear_locks(runid)
-    _delete_failed_run_lock_hash(runid)
-    clear_nodb_file_cache(runid)
-    _assert_failed_run_nodb_cache_empty(str(Path(target).resolve()))
-    _delete_failed_run_wd_cache(runid)
-    shutil.rmtree(target)
+        NoDbBase.cleanup_run_instances(target)
+        clear_locks(runid)
+        _delete_failed_run_lock_hash(runid)
+        clear_nodb_file_cache(runid)
+        _assert_failed_run_nodb_cache_empty(str(Path(target).resolve()))
+        _delete_failed_run_wd_cache(runid)
+        shutil.rmtree(target)
 
 
 def register_owned_run(

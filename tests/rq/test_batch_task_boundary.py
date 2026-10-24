@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 from types import SimpleNamespace
 
@@ -315,13 +317,34 @@ def test_production_worker_preserves_identity_and_forks_each_stage(workflow):
     from wepppy.rq.rq_worker import WepppyRqWorker
     w = workflow
     _, hills, water = w.dispatch()
-    WepppyRqWorker([w.queue], connection=w.connection).work(burst=True, max_jobs=2)
+    # A real worker owns its supervisor process. The shared pytest process may
+    # already own Redis or multiprocessing children from unrelated tests; those
+    # correctly make production execution containment refuse reuse.
+    unrelated = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+
+    def work_in_child():
+        WepppyRqWorker([w.queue], connection=w.connection).work(burst=True, max_jobs=2)
+
+    worker = multiprocessing.get_context("fork").Process(target=work_in_child)
+    try:
+        worker.start()
+        worker.join(timeout=30)
+        assert not worker.is_alive(), "isolated production worker did not finish"
+        assert worker.exitcode == 0
+        assert unrelated.poll() is None, "worker must not contain pytest's unrelated children"
+    finally:
+        if worker.is_alive():
+            worker.kill()
+            worker.join(timeout=5)
+        unrelated.terminate()
+        unrelated.wait(timeout=5)
     hills.refresh(); water.refresh()
     assert hills.get_status() == water.get_status() == JobStatus.FINISHED
     assert water.return_value()[0] is True
     assert hills.meta["runid"] == water.meta["runid"] == "batch;;demo;;leaf"
     assert hills.meta["batch_handoff"]["pid"] != water.meta["watershed_stage_started"]["pid"]
-    assert hills.meta["batch_handoff"]["pid"] != os.getpid()
+    assert hills.meta["batch_handoff"]["pid"] not in {os.getpid(), worker.pid}
+    assert water.meta["watershed_stage_started"]["pid"] not in {os.getpid(), worker.pid}
     w.drain()
 
 

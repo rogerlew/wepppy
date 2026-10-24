@@ -133,7 +133,7 @@ def acquire(controller, start_year=None, end_year=None) -> None:
             controller._rap_start_year = start
             controller._rap_end_year = end
             controller._rap_mgr = manager
-    module.update_catalog_entry(controller.wd, controller.rap_dir)
+    module.request_catalog_refresh(controller.wd, controller.rap_dir)
 
 
 def analyze(controller, *, verbose=False) -> None:
@@ -180,7 +180,7 @@ def analyze(controller, *, verbose=False) -> None:
             _check_inputs(controller, snapshot, analysis=True)
             publications.enter_context(publish_files(stage, controller.rap_dir, controller))
             controller.data = data
-    module.update_catalog_entry(controller.wd, "rap/rap_ts.parquet")
+    module.request_catalog_refresh(controller.wd, "rap/rap_ts.parquet")
     controller.logger.info("analysis complete...")
     try:
         prep = module.RedisPrep.getInstance(controller.wd)

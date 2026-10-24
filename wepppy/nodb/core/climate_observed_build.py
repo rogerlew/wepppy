@@ -253,4 +253,4 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
                     except OSError:
                         climate.logger.exception("Unable to update retained PRISM attempt status at %s", stage)
                     climate.logger.error("PRISM revision failed; artifacts retained at %s", stage)
-    helpers.update_catalog_entry(climate.wd, "climate")
+    helpers.request_catalog_refresh(climate.wd, "climate")

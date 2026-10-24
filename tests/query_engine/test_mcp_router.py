@@ -93,7 +93,23 @@ def _bootstrap_run(tmp_path, runid: str, files: list[dict[str, Any]] | None = No
                 },
             }
         ]
+    # Query validation verifies the selected artifact, not just catalog membership.
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    for entry in files:
+        if entry.get("extension") != ".parquet":
+            continue
+        source = run_dir / entry["path"]
+        source.parent.mkdir(parents=True, exist_ok=True)
+        fields = entry.get("schema", {}).get("fields", [])
+        columns = {
+            field["name"]: ([1] if field["type"] in {"INTEGER", "INT64"} else ["value"])
+            for field in fields
+        }
+        pq.write_table(pa.table(columns or {"value": [1]}), source)
     catalog = {
+        "version": 1,
         "files": files,
         "generated_at": "2024-05-07T16:33:22Z",
         "root": str(run_dir),
@@ -921,7 +937,7 @@ def test_execute_query_dry_run(monkeypatch, tmp_path):
 
     called = {"value": False}
 
-    def fake_run_query(context, payload):
+    def fake_run_query(context, payload, *, authorize=None):
         called["value"] = True
         return SimpleNamespace(records=[], schema=None, row_count=0, formatted=None, sql=None)
 
@@ -967,7 +983,7 @@ def test_execute_query_success(monkeypatch, tmp_path):
     monkeypatch.setattr(
         router,
         "run_query",
-        lambda context, payload: SimpleNamespace(
+        lambda context, payload, **kwargs: SimpleNamespace(
             records=[{"soil_loss": 0.42}],
             schema=[{"name": "soil_loss", "type": "double"}],
             row_count=1,

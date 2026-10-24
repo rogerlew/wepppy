@@ -66,7 +66,7 @@ def test_acquire_and_align_skips_existing_and_respects_force_refresh(
     )
     monkeypatch.setattr(
         polaris,
-        "update_catalog_entry",
+        "request_catalog_refresh",
         lambda _wd, relpath: catalog_updates.append(relpath),
     )
     monkeypatch.setattr(polaris.RedisPrep, "tryGetInstance", lambda _wd: None)

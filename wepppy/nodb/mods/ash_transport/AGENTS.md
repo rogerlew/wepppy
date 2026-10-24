@@ -33,7 +33,7 @@
 2. **Aggregation**: Processes every `H{wepp_id}_ash.parquet`, joins metadata, casts numeric types (uint8/uint16), converts per-area metrics to totals, and computes cumulative transport.
 3. **Statistics**: Builds daily, annual, burn-class, and cumulative tables; calculates Weibull-based return periods in the required native kernel.
 4. **Output**: Writes parquet files with Arrow metadata (`units`, `description`, dataset version info) and renders `post/README.md` documenting schema previews.
-5. **Catalog**: Calls `update_catalog_entry` so dashboards and DuckDB agents discover the newly generated datasets.
+5. **Catalog**: Calls `request_catalog_refresh` after artifact publication; managed asynchronous admission persists intent, and query/report barriers ensure discovery before consumption.
 
 ### AshPost Expectations
 - Schema metadata must remain in sync with the parquet columns. Update `COLUMN_DESCRIPTIONS`, `UINT16_COLUMNS`, `UINT8_COLUMNS`, and helper transformations when adding/removing columns.
@@ -59,7 +59,7 @@
 ## Interactions & Dependencies
 - Relies on upstream NoDb controllers: `Watershed`, `Wepp`, `Climate`, `Landuse`, `Ron`. Ensure they are hydrated before invoking `Ash`.
 - Uses `wepppy.climates.cligen.ClimateFile` and `wepppy.wepp.interchange.hill_wat_interchange.load_hill_wat_dataframe`. Keep interfaces compatible when refactoring those packages.
-- Catalog integration depends on `wepppy.query_engine.activate.update_catalog_entry`; verify query-engine metadata when introducing new parquet schemas.
+- Catalog integration depends on `wepppy.query_engine.request_catalog_refresh`; verify query-engine metadata when introducing new parquet schemas.
 - Telemetry hooks leverage `RedisPrep`. Handle `FileNotFoundError` when redis prep is optional.
 
 ## Adding or Updating Models

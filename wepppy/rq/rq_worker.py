@@ -79,6 +79,10 @@ class JobCancelledException(Exception):
 
 def _extract_runid(job: Job) -> str | None:
     """Best-effort runid extraction for jobs with positional or keyword args."""
+    if str(getattr(job, "id", "")).startswith("query_catalog_refresh_"):
+        # Catalog jobs authorize canonical project scopes themselves; never turn
+        # their filesystem locator into an ordinary runid/logging path.
+        return None
     if getattr(job, "func_name", None) in {
         "wepppy.rq.batch_rq.run_batch_hillslopes_rq",
         "wepppy.rq.batch_rq.run_batch_watershed_rq",
@@ -117,8 +121,9 @@ class WepppyRqWorker(Worker):
 
     def register_birth(self):
         super().register_birth()
+        from wepppy.rq.query_catalog_rq import catalog_worker_configuration
+        self.connection.hset(self.key, "query_catalog_configuration", json.dumps(catalog_worker_configuration()))
         if os.getenv("WEPPPY_PROJECT_COMMIT_MODE", "disabled") == "postgres":
-            import json
             from wepppy.rq.run_catalog_rq import deployment_identity
             self.connection.hset(self.key, "run_catalog_configuration", json.dumps({
                 "protocol": 1, "database": deployment_identity(),

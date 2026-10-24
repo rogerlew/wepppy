@@ -975,22 +975,26 @@ def test_normalize_fork_omni_links_removal_rollback_restores_raw_target(
     ("undisturbify", "skip_wepp_runs_output", "expected"),
     [(False, False, False), (False, True, True), (True, False, True), (True, True, True)],
 )
+@pytest.mark.parametrize("has_catalog", [False, True])
 def test_prepare_fork_run_passes_effective_skip_mode_to_omni_normalizer(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     undisturbify: bool,
     skip_wepp_runs_output: bool,
     expected: bool,
+    has_catalog: bool,
 ) -> None:
     import wepppy.rq.project_rq_fork as fork_helpers
 
     source = tmp_path / "source"
     destination = tmp_path / "destination"
     source.mkdir()
+    from wepppy.query_engine.catalog_refresh import resolve_scope
+    source_scope = resolve_scope(source, create=True) if has_catalog else None
     observed: list[bool] = []
 
     def _fake_rsync(**_kwargs) -> None:
-        destination.mkdir()
+        shutil.copytree(source, destination)
 
     def _capture(_new_wd: str, *, skip_wepp_runs_output: bool = False) -> int:
         observed.append(skip_wepp_runs_output)
@@ -1020,6 +1024,9 @@ def test_prepare_fork_run_passes_effective_skip_mode_to_omni_normalizer(
         )
 
     assert observed == [expected]
+    assert resolve_scope(destination).incarnation
+    if source_scope is not None:
+        assert resolve_scope(destination).incarnation != source_scope.incarnation
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
@@ -2639,3 +2646,32 @@ def test_prepare_fork_run_skip_wepp_copy_ensures_output_dirs(
     assert not (target_wd / "wepp" / "runs" / "source-only.run").exists()
     assert not (target_wd / "wepp" / "output" / "source-only.txt").exists()
     assert any("Ensured empty directories exist: wepp/runs and wepp/output." in message for message in published)
+
+
+@pytest.mark.parametrize("metadata_component", ["_query_engine", "_query_engine/refresh"])
+def test_prepare_fork_refuses_copied_catalog_metadata_symlink(tmp_path, monkeypatch, metadata_component):
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source = tmp_path / "source"
+    destination = tmp_path / "destination"
+    outside = tmp_path / "other-project"
+    source.mkdir()
+    outside.mkdir()
+    (outside / "evidence.json").write_text("untouched")
+    link = source / metadata_component
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output",
+                        lambda **_kwargs: shutil.copytree(source, destination, symlinks=True))
+    before = {p.relative_to(outside): p.read_bytes() for p in outside.rglob("*") if p.is_file()}
+    with pytest.raises(ValueError, match="[Ss]ymlink|metadata"):
+        fork_helpers.prepare_fork_run(
+            "source-run", "destination-run", undisturbify=False, status_channel="source-run:fork",
+            publish_status=lambda *_args: None, get_wd=lambda _: str(source),
+            get_primary_wd=lambda _: str(destination), wait_for_paths=lambda *_a, **_kw: None,
+            ron_cls=object(), disturbed_cls=object(), landuse_cls=object(), soils_cls=object(),
+            initialize_ttl=None, clean_env_for_system_tools=lambda: {"PATH": "/usr/bin:/bin"},
+        )
+    assert before == {p.relative_to(outside): p.read_bytes() for p in outside.rglob("*") if p.is_file()}
+    assert sorted(p.name for p in outside.iterdir()) == ["evidence.json"]

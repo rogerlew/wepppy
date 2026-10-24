@@ -40,7 +40,7 @@ from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 from wepppy.climates.prism.daily_client import (
     retrieve_historical_timeseries as prism_retrieve_historical_timeseries,
 )
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
 from wepppyo3.climate import cli_revision as pyo3_cli_revision
 from wepppy.nodb.core.climate_multiple_build import (
@@ -1167,7 +1167,7 @@ def run_prism_revision(climate: "Climate", verbose: bool = False) -> None:
 
         climate.sub_par_fns = sub_par_fns
         climate.sub_cli_fns = sub_cli_fns
-        update_catalog_entry(wd, "climate")
+        request_catalog_refresh(wd, "climate")
 
 
 

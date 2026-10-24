@@ -15,6 +15,7 @@ from pathlib import Path
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
+from starlette.exceptions import HTTPException
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -40,6 +41,7 @@ from .auth import (
 )
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.catalog import resolve_dataset_path_alias
+from wepppy.query_engine.catalog_refresh import ensure_catalog_fresh
 from wepppy.query_engine.payload import QueryRequest
 
 LOGGER = logging.getLogger(__name__)
@@ -143,7 +145,9 @@ def _absolute_url(request: Request, path: str) -> str:
     return f"{base_url}{path}"
 
 
-def _load_catalog_data(run_path: os.PathLike[str]) -> tuple[list[dict[str, Any]], str | None]:
+def _load_catalog_data(
+    run_path: os.PathLike[str], *, required_paths: Iterable[str] | None = None
+) -> tuple[list[dict[str, Any]], str | None]:
     """Load catalog JSON for a run path and return entries plus timestamp.
 
     Args:
@@ -157,10 +161,16 @@ def _load_catalog_data(run_path: os.PathLike[str]) -> tuple[list[dict[str, Any]]
     """
     catalog_path = resolve_catalog_path(run_path)
     if not catalog_path.exists():
-        raise FileNotFoundError(catalog_path)
+        # Preserve first-use MCP 404 semantics, but never report accepted
+        # asynchronous indexing as a missing catalog.
+        requests = catalog_path.parent / "refresh" / "requests"
+        if not any(requests.glob("*.json")):
+            raise FileNotFoundError(catalog_path)
+        ensure_catalog_fresh(run_path, required_paths=required_paths)
     data = json.loads(catalog_path.read_text(encoding="utf-8"))
     if not isinstance(data, Mapping):
         raise ValueError(f"Catalog payload at {catalog_path} must be a JSON object")
+    data = ensure_catalog_fresh(run_path, required_paths=required_paths)
     files = data.get("files")
     entries = files if isinstance(files, list) else []
     generated_at = data.get("generated_at") or data.get("generatedAt")
@@ -283,6 +293,7 @@ def _prepare_query_request(
     *,
     runid: str,
     run_path: os.PathLike[str],
+    request: Request | None = None,
 ) -> tuple[QueryRequest, Mapping[str, Any], list[dict[str, Any]], str | None]:
     """Validate the inbound payload and build a QueryRequest instance.
 
@@ -305,22 +316,13 @@ def _prepare_query_request(
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid") from exc
 
-    catalog_index = OrderedDict()
-    for entry in raw_entries:
-        if isinstance(entry, Mapping):
-            path = entry.get("path")
-            if isinstance(path, str):
-                catalog_index[path] = entry
-    catalog_paths = set(catalog_index)
-
     datasets_value = payload.get("datasets")
     if not isinstance(datasets_value, Sequence) or isinstance(datasets_value, (str, bytes)):
         raise QueryValidationException(400, "invalid_request", "'datasets' must be a list")
 
     sanitized_datasets: list[Any] = []
-    missing: list[str] = []
 
-    for index, dataset in enumerate(datasets_value):
+    for dataset in datasets_value:
         if isinstance(dataset, str):
             path = dataset
             sanitized = {"path": path}
@@ -333,14 +335,35 @@ def _prepare_query_request(
         else:
             raise QueryValidationException(400, "invalid_request", "Dataset entries must be strings or objects")
 
-        path_str = str(path)
+        sanitized_datasets.append(sanitized)
+
+    paths = [str(dataset["path"]) for dataset in sanitized_datasets]
+    if request is not None:
+        require_datasets(request, run_path, paths, entries=raw_entries)
+    try:
+        raw_entries, generated_at = _load_catalog_data(run_path, required_paths=paths)
+    except FileNotFoundError as exc:
+        raise QueryValidationException(
+            422, "dataset_missing", "One or more datasets were not found in the catalog",
+            {"missing": paths},
+        ) from exc
+    except (OSError, ValueError) as exc:
+        LOGGER.warning("Failed catalog freshness check for %s", runid, exc_info=True)
+        raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid") from exc
+    if request is not None:
+        require_datasets(request, run_path, paths, entries=raw_entries)
+    catalog_paths = {
+        entry["path"] for entry in raw_entries
+        if isinstance(entry, Mapping) and isinstance(entry.get("path"), str)
+    }
+    missing: list[str] = []
+    for dataset in sanitized_datasets:
+        path_str = str(dataset["path"])
         resolved_path = resolve_dataset_path_alias(path_str, available_paths=catalog_paths)
         if resolved_path is None:
             missing.append(path_str)
         else:
-            sanitized["path"] = resolved_path
-
-        sanitized_datasets.append(sanitized)
+            dataset["path"] = resolved_path
 
     if missing:
         raise QueryValidationException(
@@ -833,6 +856,7 @@ async def validate_query(request: Request) -> JSONResponse:
             payload,
             runid=runid,
             run_path=run_path,
+            request=request,
         )
     except QueryValidationException as exc:
         return _error_response(exc.status_code, exc.code, exc.detail, exc.meta)
@@ -913,6 +937,7 @@ async def execute_query(request: Request) -> JSONResponse:
             payload,
             runid=runid,
             run_path=run_path,
+            request=request,
         )
     except QueryValidationException as exc:
         return _error_response(exc.status_code, exc.code, exc.detail, exc.meta)
@@ -952,7 +977,15 @@ async def execute_query(request: Request) -> JSONResponse:
     started = time.perf_counter()
 
     try:
-        result = run_query(context, query_request)
+        result = run_query(
+            context, query_request,
+            authorize=lambda fresh: require_datasets(
+                request, fresh.base_dir, [spec.path for spec in query_request.dataset_specs],
+                entries=fresh.catalog.entries(),
+            ),
+        )
+    except HTTPException:
+        raise
     except roads_lifecycle.RoadsResultsUnavailable as exc:
         response = _error_response(409, exc.code, str(exc))
         response.headers['Cache-Control'] = 'no-store'

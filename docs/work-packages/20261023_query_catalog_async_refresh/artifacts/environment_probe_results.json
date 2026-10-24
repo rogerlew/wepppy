@@ -1,0 +1,1197 @@
+{
+  "native_nfs_stable": {
+    "root": "/wc1/runs/qc/qcat-mill-creek-20261023/climate",
+    "mount": "NFS4 10.0.0.2:/",
+    "uid": 1000,
+    "gid": 993,
+    "scans": [
+      {
+        "seconds": 0.04233660292811692,
+        "heartbeats": 38,
+        "entries": 5
+      },
+      {
+        "seconds": 0.04126786394044757,
+        "heartbeats": 38,
+        "entries": 5
+      },
+      {
+        "seconds": 0.04178976779803634,
+        "heartbeats": 39,
+        "entries": 5
+      },
+      {
+        "seconds": 0.04026719811372459,
+        "heartbeats": 37,
+        "entries": 5
+      },
+      {
+        "seconds": 0.040212021907791495,
+        "heartbeats": 37,
+        "entries": 5
+      }
+    ],
+    "max_heartbeat_gap_seconds": 0.0011568849440664053
+  },
+  "native_nfs_active_tree_responsiveness_only": {
+    "root": "/wc1/runs/qc/qcat-mill-creek-20261023",
+    "mount": "NFS4 10.0.0.2:/",
+    "uid": 1000,
+    "gid": 993,
+    "total_seconds": 1.4566346490755677,
+    "scans": [
+      {
+        "seconds": 0.3051625080406666,
+        "heartbeats": 281,
+        "entries": 91
+      },
+      {
+        "seconds": 0.2611815510317683,
+        "heartbeats": 241,
+        "entries": 91
+      },
+      {
+        "seconds": 0.3125175319146365,
+        "heartbeats": 288,
+        "entries": 91
+      },
+      {
+        "seconds": 0.29427368589676917,
+        "heartbeats": 272,
+        "entries": 91
+      },
+      {
+        "seconds": 0.2834627360571176,
+        "heartbeats": 261,
+        "entries": 91
+      }
+    ],
+    "max_heartbeat_gap_seconds": 0.0011975569650530815
+  },
+  "submission_variants": [
+    {
+      "variant": "missing",
+      "runid": "qcat-v3-missing-20261023",
+      "status": 200,
+      "seconds": 1.1016391161829233,
+      "body": {
+        "job_id": "5ac4fb5a-598e-441c-902b-291454952860"
+      },
+      "pending": 1,
+      "final_pending": 0,
+      "final_catalog_entries": 58
+    },
+    {
+      "variant": "malformed",
+      "runid": "qcat-v3-malformed-20261023",
+      "status": 200,
+      "seconds": 0.9044467590283602,
+      "body": {
+        "job_id": "fca7a5f5-89d0-4c54-9b5b-60580c18b3b1"
+      },
+      "pending": 1,
+      "final_pending": 1,
+      "final_catalog_entries": null
+    },
+    {
+      "variant": "populated",
+      "runid": "qcat-v3-populated-20261023",
+      "status": 200,
+      "seconds": 0.8392991041764617,
+      "body": {
+        "job_id": "ebc202f3-a4fa-4fc9-963d-08fe1014436d"
+      },
+      "pending": 1,
+      "final_pending": 0,
+      "final_catalog_entries": 92
+    }
+  ],
+  "producer_sigkill_recovery": {
+    "child_returncode": -9,
+    "producer": "Soils.dump_soils_parquet",
+    "kill_boundary": "after atomic replacement and fsync, before request_catalog_refresh",
+    "rows_after_kill": 1908,
+    "mtime_before_ns": 1792788134394726754,
+    "mtime_after_ns": 1792788563999624075,
+    "receipts_after_kill": 0,
+    "inventory_ticks": [
+      {
+        "state": "pending",
+        "admitted": 1,
+        "visited": 3,
+        "failures": 0,
+        "unavailable_namespaces": [],
+        "cycle_started_at": 1792788564.1282692,
+        "completed_at": null
+      }
+    ],
+    "catalog_entry": {
+      "extension": ".parquet",
+      "modified": "2026-10-23T20:49:23.999624+00:00",
+      "path": "soils/soils.parquet",
+      "schema": {
+        "fields": [
+          {
+            "name": "topaz_id",
+            "type": "int32"
+          },
+          {
+            "name": "wepp_id",
+            "type": "int32"
+          },
+          {
+            "name": "mukey",
+            "type": "string"
+          },
+          {
+            "name": "fname",
+            "type": "string"
+          },
+          {
+            "name": "soils_dir",
+            "type": "string"
+          },
+          {
+            "name": "build_date",
+            "type": "string"
+          },
+          {
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "name": "color",
+            "type": "string"
+          },
+          {
+            "name": "area",
+            "type": "double"
+          },
+          {
+            "name": "pct_coverage",
+            "type": "double"
+          },
+          {
+            "name": "clay",
+            "type": "double"
+          },
+          {
+            "name": "sand",
+            "type": "double"
+          },
+          {
+            "name": "avke",
+            "type": "null"
+          },
+          {
+            "name": "ll",
+            "type": "null"
+          },
+          {
+            "name": "bd",
+            "type": "double"
+          },
+          {
+            "name": "simple_texture",
+            "type": "string"
+          },
+          {
+            "name": "soil_depth",
+            "type": "double"
+          },
+          {
+            "name": "rock",
+            "type": "double"
+          },
+          {
+            "name": "raw_mukey",
+            "type": "string"
+          },
+          {
+            "name": "shadow_cluster_id",
+            "type": "null"
+          },
+          {
+            "name": "shadow_search_radius_m",
+            "type": "null"
+          },
+          {
+            "name": "shadow_proposed_mukey",
+            "type": "null"
+          },
+          {
+            "name": "shadow_candidate_support_json",
+            "type": "null"
+          },
+          {
+            "name": "shadow_reason",
+            "type": "null"
+          },
+          {
+            "name": "substituted_mukey",
+            "type": "null"
+          },
+          {
+            "name": "substitution_reason",
+            "type": "null"
+          },
+          {
+            "name": "selection_policy",
+            "type": "null"
+          },
+          {
+            "name": "global_mukey",
+            "type": "null"
+          },
+          {
+            "name": "source_location_wgs84_json",
+            "type": "null"
+          },
+          {
+            "name": "candidate_raster_json",
+            "type": "null"
+          },
+          {
+            "name": "search_radius_m",
+            "type": "null"
+          },
+          {
+            "name": "candidate_support_json",
+            "type": "null"
+          },
+          {
+            "name": "source_profile_json",
+            "type": "null"
+          },
+          {
+            "name": "selected_profile_json",
+            "type": "null"
+          },
+          {
+            "name": "fallback_reason",
+            "type": "null"
+          }
+        ]
+      },
+      "size_bytes": 67972
+    },
+    "pending_after_recovery": 0
+  },
+  "malformed_recovery_retest": {
+    "admission": {
+      "state": "queued",
+      "job_id": "query_catalog_refresh_511dfb29-bf76-4c95-99e1-2bd67934f7ee"
+    },
+    "entries": 59,
+    "pending": 0,
+    "state": {
+      "acknowledged": [
+        "e6c663b3-64f2-4abf-a775-57b2b38f0257"
+      ],
+      "catalog_digest": "9d0ba3e403db7e8e0a73bf304307254310afc8a3e3a05f31e45ddde8f72b0e95",
+      "incarnation": "650afe7c-c793-471a-ab77-6c44696c7524",
+      "protocol": 1,
+      "publication_id": "04675e00-9614-438a-8992-0d1bec435b79",
+      "state": "current",
+      "updated_at": "2026-10-23T20:50:31.692935+00:00",
+      "scope_id": "83f2ddcbb2e7833e73bef2759d0159716709a82421d20ff858272c1088a6a6ef",
+      "pending_count": 0,
+      "oldest_pending_at": null
+    }
+  },
+  "private_test_owners": {
+    "database_host": "postgres",
+    "database": "wepppy",
+    "created_run_associations": [
+      {
+        "runid": "qcat-mill-creek-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      },
+      {
+        "runid": "qcat-missing-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      },
+      {
+        "runid": "qcat-v2-missing-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      },
+      {
+        "runid": "qcat-v3-missing-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      },
+      {
+        "runid": "qcat-v3-malformed-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      },
+      {
+        "runid": "qcat-v3-populated-20261023",
+        "owner_label": "dev-agent",
+        "anonymous_status": 404
+      }
+    ]
+  },
+  "authenticated_report_during_execution": {
+    "auth_method": "real dedicated local dev-agent Flask session seeded in testclient; actual authorizers; login CAPTCHA not exercised",
+    "anonymous_report_status": 404,
+    "reports": [
+      {
+        "path": "/report/wepp/run_summary",
+        "status": 200,
+        "seconds": 0.3534432789310813,
+        "bytes": 79,
+        "sha256": "09b1ff542a56d30fb828882217f1665652fc31667a13a191af4e9a65ac012cc2",
+        "hillslopes_ran": 751
+      }
+    ]
+  },
+  "updated_core_crosshost_guard": {
+    "core_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+    "holder": "{\"role\": \"forest-holder\", \"uid\": 1000, \"gid\": 993}\n",
+    "holder_rc": 0,
+    "contender": "{\"role\": \"forest1-core-contender\", \"uid\": 1000, \"gid\": 993, \"wait_seconds\": 3.7012497540563345}\n",
+    "contender_rc": 0,
+    "contender_err": ""
+  },
+  "updated_core_threads": {
+    "wait_seconds": 2.001937298104167,
+    "uid": 1000,
+    "gid": 993,
+    "nested_reentrant": true
+  },
+  "scientific_binary_parity": {
+    "comparison": "local filesystem versus read-only docker exec on wepp1 docker-rq-engine-1",
+    "wepp_261010_hill_sha256": "d8ea3a07a29ef1e754c5362bd7931cc3a93486d75faa32df5c5f2e821c22d698",
+    "wepp_261010_sha256": "1dd1ca75cf53f9a0606cf5a598312d4e680e161df631156360d4a20dbcb6f17e",
+    "both_match": true
+  },
+  "final_worker_source": {
+    "uid": 1000,
+    "gid": 993,
+    "source_sha256": {
+      "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "wepppy/query_engine/activate.py": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+      "wepppy/query_engine/context.py": "03cc2eb1e54e2502b0539c3724fcff3317c71184ffff1ab09a6ce488e161b77b",
+      "wepppy/query_engine/core.py": "9e90a7cc9601df29fd166c44fcc8436f8762b6b2b38dbce299d0c947eb41258a",
+      "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+      "wepppy/rq/wepp_rq.py": "0569becc1b9c00bdbb6a88af4aedfb5300eb759bc180e80a40e887d704b25f42",
+      "wepppy/rq/wepp_rq_stage_post.py": "4749552f7e02fe1f67eae39f2094dd6e8975e2a97bac058f1bd2c9239c51eae9",
+      "wepppy/wepp/interchange/hill_interchange.py": "90532e628cdb5bfb12c7c103b6ef4cb898a5517467527406addf3a770ec3d8e0",
+      "wepppy/wepp/interchange/watershed_interchange.py": "b75810487c116124b543f765376a92229874df4b0764a076fa14e6086d763b12"
+    },
+    "completed_hillslope_job": {
+      "job_id": "bb3b09ab-8393-4bbe-a3fa-cd505f7b9ede",
+      "runid": "qcat-mill-creek-20261023",
+      "status": "finished",
+      "result": null,
+      "started_at": "2026-10-23 20:51:22.985675",
+      "ended_at": "2026-10-23 21:08:15.835981",
+      "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('qcat-mill-creek-20261023')",
+      "elapsed_s": 1012.850306,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "native_extensions": {
+      "wepppyo3.wepp_interchange.wepp_interchange_rust": {
+        "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+      }
+    },
+    "secondary_worker": {
+      "name": "qcat-mill-creek-watershed-20261023",
+      "queue": "qcat-mill-creek-model-20261023",
+      "max_jobs": 1,
+      "same_source_as_primary": true,
+      "source_sha256": {
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/query_engine/activate.py": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+        "wepppy/query_engine/context.py": "03cc2eb1e54e2502b0539c3724fcff3317c71184ffff1ab09a6ce488e161b77b",
+        "wepppy/query_engine/core.py": "9e90a7cc9601df29fd166c44fcc8436f8762b6b2b38dbce299d0c947eb41258a",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+        "wepppy/rq/wepp_rq.py": "0569becc1b9c00bdbb6a88af4aedfb5300eb759bc180e80a40e887d704b25f42",
+        "wepppy/rq/wepp_rq_stage_post.py": "4749552f7e02fe1f67eae39f2094dd6e8975e2a97bac058f1bd2c9239c51eae9",
+        "wepppy/wepp/interchange/hill_interchange.py": "90532e628cdb5bfb12c7c103b6ef4cb898a5517467527406addf3a770ec3d8e0",
+        "wepppy/wepp/interchange/watershed_interchange.py": "b75810487c116124b543f765376a92229874df4b0764a076fa14e6086d763b12"
+      },
+      "harness_sha256": "5b07838800b3792ad4be914bac09889bdd0133ad34f95c123c9d3e2295660d25"
+    },
+    "native_wrapper_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/__init__.py",
+    "native_wrapper_sha256": "69289cd2af86e36e3a3881b63b993bb02eb461267380f13922bc1a73402d5958"
+  },
+  "final_source_submission_variants": {
+    "results": [
+      {
+        "variant": "missing",
+        "runid": "qcat-v3-missing-20261023",
+        "status": 200,
+        "seconds": 1.1004348879214376,
+        "body": {
+          "job_id": "5a17dbbb-93fa-4ebd-b6ae-eeb9da887eb9"
+        },
+        "soil_mode_before": "0o640",
+        "soil_mode_after": "0o644",
+        "pending": 0,
+        "catalog_entries": 58,
+        "catalog_mode": "0o644",
+        "model_job_disposition": "canceled after queued-state verification; no model execution"
+      },
+      {
+        "variant": "malformed",
+        "runid": "qcat-v3-malformed-20261023",
+        "status": 200,
+        "seconds": 0.891383107053116,
+        "body": {
+          "job_id": "348628fc-3b8e-4407-8a32-c0540b2d8e44"
+        },
+        "soil_mode_before": "0o640",
+        "soil_mode_after": "0o644",
+        "pending": 0,
+        "catalog_entries": 59,
+        "catalog_mode": "0o600",
+        "model_job_disposition": "canceled after queued-state verification; no model execution"
+      },
+      {
+        "variant": "populated",
+        "runid": "qcat-v3-populated-20261023",
+        "status": 200,
+        "seconds": 0.821491512004286,
+        "body": {
+          "job_id": "cb76622c-9645-4caa-adde-bcc5ed3e09d1"
+        },
+        "soil_mode_before": "0o640",
+        "soil_mode_after": "0o644",
+        "pending": 0,
+        "catalog_entries": 92,
+        "catalog_mode": "0o640",
+        "model_job_disposition": "canceled after queued-state verification; no model execution"
+      }
+    ],
+    "source_sha256": {
+      "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "wepppy/nodb/core/soils.py": "c8c93c20cb40e0ed0fb7edbde61a0126f21028adfcb10ea6d118d0036aad1b98",
+      "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+    }
+  },
+  "completed_hillslope_products": [
+    {
+      "name": "H.ebe.parquet",
+      "rows": 8552063,
+      "row_groups": 1908,
+      "bytes": 120826521
+    },
+    {
+      "name": "H.element.parquet",
+      "rows": 16426060,
+      "row_groups": 1908,
+      "bytes": 459923151
+    },
+    {
+      "name": "H.loss.parquet",
+      "rows": 9540,
+      "row_groups": 1908,
+      "bytes": 3837828
+    },
+    {
+      "name": "H.pass.parquet",
+      "rows": 128229048,
+      "row_groups": 1908,
+      "bytes": 2930862555
+    },
+    {
+      "name": "H.soil.parquet",
+      "rows": 128229048,
+      "row_groups": 1908,
+      "bytes": 1670525199
+    },
+    {
+      "name": "H.wat.parquet",
+      "rows": 128229048,
+      "row_groups": 1908,
+      "bytes": 2798503453
+    }
+  ],
+  "pipeline_after_hillslope_interchange": {
+    "elapsed_seconds": 2336.4021731079556,
+    "job_tree": {
+      "job_id": "9e59da85-e50a-4d5c-bfa3-5033fb89d466",
+      "runid": "qcat-mill-creek-20261023",
+      "status": "finished",
+      "result": null,
+      "started_at": "2026-10-23 20:42:47.584472",
+      "ended_at": "2026-10-23 20:42:48.338257",
+      "description": "wepppy.rq.wepp_rq.run_wepp_rq('qcat-mill-creek-20261023')",
+      "elapsed_s": 0.753785,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {
+        "0": [
+          {
+            "job_id": "956792d1-a71d-4134-a5e0-1c86537aaeab",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:42:48.344214",
+            "ended_at": "2026-10-23 20:42:55.233224",
+            "description": "wepppy.rq.wepp_rq._prep_slopes_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 6.88901,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "c900abf3-c5d3-4226-b49b-772cbbed2f48",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:42:55.240393",
+            "ended_at": "2026-10-23 20:43:16.132788",
+            "description": "wepppy.rq.wepp_rq._prep_managements_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 20.892395,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "345755ca-f62d-404e-a260-1ada19b8563c",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:45:16.592155",
+            "ended_at": "2026-10-23 20:51:13.205559",
+            "description": "wepppy.rq.wepp_rq._prep_soils_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 356.613404,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "3173bdcd-4f79-453a-a688-e88c1b24b306",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:51:13.224244",
+            "ended_at": "2026-10-23 20:51:16.946979",
+            "description": "wepppy.rq.wepp_rq._prep_climates_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 3.722735,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "cc78f365-7913-4d83-a846-8a87557b0d46",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:51:16.957393",
+            "ended_at": "2026-10-23 20:51:22.976032",
+            "description": "wepppy.rq.wepp_rq._prep_remaining_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 6.018639,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "1": [
+          {
+            "job_id": "bb3b09ab-8393-4bbe-a3fa-cd505f7b9ede",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 20:51:22.985675",
+            "ended_at": "2026-10-23 21:08:15.835981",
+            "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 1012.850306,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "2": [
+          {
+            "job_id": "95895e06-3ce4-4dc0-bb77-d90e5a4b6a86",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 21:08:36.578887",
+            "ended_at": "2026-10-23 21:11:27.339782",
+            "description": "wepppy.rq.wepp_rq._prep_watershed_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 170.760895,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "947d984f-0d97-47c4-a706-3db71cbb717f",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 21:11:27.349275",
+            "ended_at": "2026-10-23 21:46:27.013215",
+            "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 2099.66394,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "582c678c-7d70-4e7c-815d-2a6f3c0b2b80",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-23 21:46:29.494379",
+            "ended_at": "2026-10-23 21:47:32.905163",
+            "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": 63.410784,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "3": [
+          {
+            "job_id": "65a2df6e-acca-4223-8c1a-f053733e68a7",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "started",
+            "result": null,
+            "started_at": "2026-10-23 21:14:19.226162",
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq.run_watershed_rq('qcat-mill-creek-20261023', wepp_bin='wepp_261010')",
+            "elapsed_s": 1993.737928,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "4": [
+          {
+            "job_id": "c5079727-9621-4935-a477-59eceed0447a",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "4ce59d69-f2d2-4f0c-981a-ddbc376f44eb",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "1c60eae9-1119-4dcb-8246-cd1e6c3be6fe",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "4cb4361d-2f68-4abc-937e-0b096406c3d5",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "5dce8c3a-a7da-4540-a4fe-c1e7e63ae107",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "5": [
+          {
+            "job_id": "573b5e52-f866-40f7-bd1e-9f388c131373",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('qcat-mill-creek-20261023')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "6": [
+          {
+            "job_id": "cab4321f-d23a-4e21-a4ea-65dcadc08647",
+            "runid": "qcat-mill-creek-20261023",
+            "status": "deferred",
+            "result": null,
+            "started_at": null,
+            "ended_at": null,
+            "description": "wepppy.rq.wepp_rq._log_complete_rq('qcat-mill-creek-20261023', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+            "elapsed_s": null,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ]
+      }
+    },
+    "pending_receipts": 0
+  },
+  "watershed_timeout": {
+    "job_id": "65a2df6e-acca-4223-8c1a-f053733e68a7",
+    "status": "started",
+    "timeout_seconds": 43200,
+    "started_at_utc": "2026-10-23 21:14:19.226162",
+    "computed_deadline_utc": "2026-10-24 09:14:19.226162",
+    "checked_at_utc": "2026-10-23 21:51:06.153668"
+  },
+  "hillslope_partial_consumers": {
+    "scope": "completed hillslope consumers only; watershed still executing",
+    "catalog_query": [
+      {
+        "hillslopes": 1908,
+        "rows": 9540
+      }
+    ],
+    "water_balance_report": {
+      "status": "failed",
+      "exception": "ValueError: duplicate hillslope daily OFE observation",
+      "evidence_log": "/tmp/qcat-hillslope-partial.log",
+      "raw_source_duplicate": "H1.wat.dat contains two distinct day 365/year 104 observations; no source or validation changes"
+    },
+    "anonymous_status": 404,
+    "authenticated_routes": [
+      {
+        "path": "/runs/qcat-mill-creek-20261023/disturbed9002_wbt/report/wepp/run_summary",
+        "status": 200,
+        "seconds": 0.15969058498740196,
+        "bytes": 80,
+        "sha256": "7243540b9e0289c2d62ed83665b777d0c8cbea05a270dfdc6403bb0e86af3dfd",
+        "hillslopes_ran": 1908
+      }
+    ],
+    "live_download": {
+      "status": 200,
+      "bytes": 3837828,
+      "sha256": "f2193cab273d68d950226cf7a35eb9d33399e4c71e6a61a83048a4a98c093ab6"
+    },
+    "pending_receipts": 0,
+    "raw_duplicate_evidence": {
+      "path": "wepp/output/H1.wat.dat",
+      "key": {
+        "ofe": 1,
+        "julian": 365,
+        "simulation_year": 104
+      },
+      "rows": [
+        "1  365  104    5.40    5.40   0.0000000E+00    0.16    0.17    0.00   0.2408027E+00   0.0000000E+00    0.00    1.60  545.95    0.00   11.04    0.0000000E+00    0.00    0.00   68400.00     545.95    1800.00     888.32     127.20      43.35",
+        "1  365  104    3.50    2.23   0.0000000E+00    0.11    0.12    0.00   0.2408027E+00   0.0000000E+00    0.00    1.46  538.60    0.00    2.92    0.0000000E+00    0.00    0.00   68400.00     538.60    1800.00     888.32     127.20      43.35"
+      ]
+    }
+  },
+  "terminal_model": {
+    "terminal": {
+      "elapsed_seconds": 6335.195399870165,
+      "job_tree": {
+        "job_id": "9e59da85-e50a-4d5c-bfa3-5033fb89d466",
+        "runid": "qcat-mill-creek-20261023",
+        "status": "failed",
+        "result": null,
+        "started_at": "2026-10-23 20:42:47.584472",
+        "ended_at": "2026-10-23 20:42:48.338257",
+        "description": "wepppy.rq.wepp_rq.run_wepp_rq('qcat-mill-creek-20261023')",
+        "elapsed_s": 0.753785,
+        "exc_info": null,
+        "auth_actor": null,
+        "culvert_batch_uuid": null,
+        "children": {
+          "0": [
+            {
+              "job_id": "956792d1-a71d-4134-a5e0-1c86537aaeab",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:42:48.344214",
+              "ended_at": "2026-10-23 20:42:55.233224",
+              "description": "wepppy.rq.wepp_rq._prep_slopes_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 6.88901,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "c900abf3-c5d3-4226-b49b-772cbbed2f48",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:42:55.240393",
+              "ended_at": "2026-10-23 20:43:16.132788",
+              "description": "wepppy.rq.wepp_rq._prep_managements_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 20.892395,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "345755ca-f62d-404e-a260-1ada19b8563c",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:45:16.592155",
+              "ended_at": "2026-10-23 20:51:13.205559",
+              "description": "wepppy.rq.wepp_rq._prep_soils_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 356.613404,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "3173bdcd-4f79-453a-a688-e88c1b24b306",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:51:13.224244",
+              "ended_at": "2026-10-23 20:51:16.946979",
+              "description": "wepppy.rq.wepp_rq._prep_climates_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 3.722735,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "cc78f365-7913-4d83-a846-8a87557b0d46",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:51:16.957393",
+              "ended_at": "2026-10-23 20:51:22.976032",
+              "description": "wepppy.rq.wepp_rq._prep_remaining_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 6.018639,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "1": [
+            {
+              "job_id": "bb3b09ab-8393-4bbe-a3fa-cd505f7b9ede",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 20:51:22.985675",
+              "ended_at": "2026-10-23 21:08:15.835981",
+              "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 1012.850306,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "2": [
+            {
+              "job_id": "95895e06-3ce4-4dc0-bb77-d90e5a4b6a86",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 21:08:36.578887",
+              "ended_at": "2026-10-23 21:11:27.339782",
+              "description": "wepppy.rq.wepp_rq._prep_watershed_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 170.760895,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "947d984f-0d97-47c4-a706-3db71cbb717f",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 21:11:27.349275",
+              "ended_at": "2026-10-23 21:46:27.013215",
+              "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 2099.66394,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "582c678c-7d70-4e7c-815d-2a6f3c0b2b80",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "finished",
+              "result": null,
+              "started_at": "2026-10-23 21:46:29.494379",
+              "ended_at": "2026-10-23 21:47:32.905163",
+              "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": 63.410784,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "3": [
+            {
+              "job_id": "65a2df6e-acca-4223-8c1a-f053733e68a7",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "failed",
+              "result": null,
+              "started_at": "2026-10-23 21:14:19.226783",
+              "ended_at": "2026-10-23 22:59:54.227594",
+              "description": "wepppy.rq.wepp_rq.run_watershed_rq('qcat-mill-creek-20261023', wepp_bin='wepp_261010')",
+              "elapsed_s": 6335.000811,
+              "exc_info": "Traceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/rq/worker.py\", line 1430, in perform_job\n    rv = job.perform()\n         ^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1280, in perform\n    self._result = self._execute()\n                   ^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1317, in _execute\n    result = self.func(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/exception_logging.py\", line 57, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq.py\", line 656, in run_watershed_rq\n    status, duration = run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepp_runner/wepp_runner.py\", line 1724, in run_watershed\n    raise Exception(f'Error running wepp for watershed \\nSee <a href=\"{href}\">{_stderr_fn}</a>')\nException: Error running wepp for watershed \nSee <a href=\"browse/wepp/runs/pw0.err\">/wc1/runs/qc/qcat-mill-creek-20261023/wepp/runs/pw0.err</a>\n",
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "4": [
+            {
+              "job_id": "c5079727-9621-4935-a477-59eceed0447a",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "4ce59d69-f2d2-4f0c-981a-ddbc376f44eb",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "1c60eae9-1119-4dcb-8246-cd1e6c3be6fe",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "4cb4361d-2f68-4abc-937e-0b096406c3d5",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            },
+            {
+              "job_id": "5dce8c3a-a7da-4540-a4fe-c1e7e63ae107",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "5": [
+            {
+              "job_id": "573b5e52-f866-40f7-bd1e-9f388c131373",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('qcat-mill-creek-20261023')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ],
+          "6": [
+            {
+              "job_id": "cab4321f-d23a-4e21-a4ea-65dcadc08647",
+              "runid": "qcat-mill-creek-20261023",
+              "status": "deferred",
+              "result": null,
+              "started_at": null,
+              "ended_at": null,
+              "description": "wepppy.rq.wepp_rq._log_complete_rq('qcat-mill-creek-20261023', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+              "elapsed_s": null,
+              "exc_info": null,
+              "auth_actor": null,
+              "culvert_batch_uuid": null,
+              "children": {}
+            }
+          ]
+        }
+      },
+      "pending_receipts": 0
+    },
+    "error_tail": [
+      "SIMULATION YEAR =          96",
+      "SIMULATION YEAR =          97",
+      "SIMULATION YEAR =          98",
+      "SIMULATION YEAR =          99",
+      "SIMULATION YEAR =         100",
+      "PASS components error: SOURCES3 date mismatch",
+      "Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL",
+      "STOP 1"
+    ],
+    "files": [
+      {
+        "path": "wepp/runs/pw0.err",
+        "bytes": 679556,
+        "sha256": "2a8e29641c1db74e1378624c997ff0f8607445686671c67ed1eae29753d814dc"
+      },
+      {
+        "path": "wepp/output/H1.wat.dat",
+        "bytes": 16400165,
+        "sha256": "33d1aaa3f41a8df7b25be67118f5d8b728ddb22489a766d1b1b48db2deaf4278"
+      },
+      {
+        "path": "qcat-validation-watershed-worker.json",
+        "bytes": 10884,
+        "sha256": "cc738421105e33714ec956d588940a03aa4f54d3e7c83cb9e2d933e827950bc2"
+      },
+      {
+        "path": "wepp/output/interchange/totalwatsed3.parquet",
+        "bytes": 13531110,
+        "sha256": "00d2c5606c2046874145ab0527443fcf108165fa29bf3a5aaafcb96b82756f18"
+      }
+    ],
+    "queues": {
+      "qcat-mill-creek-model-20261023": 0,
+      "qcat-mill-creek-catalog-20261023": 0
+    },
+    "registered_owned_workers": [],
+    "active_owned_processes": [],
+    "final_validators_executed": false,
+    "process_completion": {
+      "primary_worker_exit": 0,
+      "watershed_worker_exit": 0,
+      "supervisor_exit": 1,
+      "active_owned_host_processes": [],
+      "finalization_log_exists": false
+    },
+    "log_hashes": [
+      {
+        "path": "/tmp/qcat-completion-supervisor.log",
+        "bytes": 8938,
+        "sha256": "f01d5798730734bac764579310c93f9fb94fd18a36d5f32416e1fed00188534a"
+      },
+      {
+        "path": "/tmp/qcat-mill-creek-watershed-worker.log",
+        "bytes": 12037,
+        "sha256": "1a7ac50cefadc1874ebbafd59aec2a07f29e249f072a0fc499813b73a783940b"
+      },
+      {
+        "path": "/tmp/qcat-hillslope-partial.log",
+        "bytes": 1109,
+        "sha256": "ecf5848d193129e7f015eca7c0ede372e2bc18440ae40f00d14ea160441f11eb"
+      }
+    ],
+    "input_path_assessment": {
+      "run_prompt_head": [
+        "M",
+        "Yes",
+        "1",
+        "2",
+        "../output/pass_pw0.txt",
+        "1908",
+        "M",
+        "Y",
+        "../output/H1.pass.dat",
+        "M",
+        "Y",
+        "../output/H2.pass.dat"
+      ],
+      "observed_pass_family": "legacy ASCII H*.pass.dat; master pass_pw0.txt",
+      "native_build_contains_preserved_calendar_hbp_changes": true,
+      "assessment": "Watershed subprocess consumes raw binary-produced ASCII PASS, not HBP or derived Parquet. Native calendar.rs change exposes existing Gregorian predicate; hill_hbp.rs changes concern HBP parsing. This path evidence does not establish original-source baseline success/failure or a causal link to separate duplicate raw H.wat observations."
+    }
+  }
+}

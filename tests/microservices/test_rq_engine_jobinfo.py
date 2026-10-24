@@ -369,8 +369,9 @@ def _issue_rq_token(
 
 @pytest.mark.parametrize("roles", [[], ["Admin"], ["Root"]])
 @pytest.mark.parametrize("failure", [False, True])
-def test_catalog_cancellation_requires_operator_and_redacts(monkeypatch, roles, failure):
-    identifier = "run_catalog_sweep_00000000-0000-4000-8000-000000000001"
+@pytest.mark.parametrize("prefix", ["run_catalog_sweep_", "query_catalog_refresh_"])
+def test_catalog_cancellation_requires_operator_and_redacts(monkeypatch, roles, failure, prefix):
+    identifier = prefix + "00000000-0000-4000-8000-000000000001"
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
     token = _issue_rq_token(monkeypatch, extra_claims={"token_class": "service", "runs": ["unrelated"], "roles": roles})
     observed = []
@@ -865,3 +866,36 @@ def test_workflow_cancellation_does_not_treat_batch_identifier_as_run(monkeypatc
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/canceljob/job")
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize("endpoint,helper", [("jobstatus", "get_wepppy_rq_job_status"), ("jobinfo", "get_wepppy_rq_job_info")])
+def test_query_catalog_outer_failure_is_sanitized(monkeypatch, endpoint, helper):
+    def fail(identifier):
+        raise ImportError("private-query-catalog-source-and-path")
+    monkeypatch.setattr(job_routes, helper, fail)
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/{endpoint}/query_catalog_refresh_00000000-0000-4000-8000-000000000001")
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "query_catalog_refresh_failed"
+    assert "private-query-catalog" not in response.text
+    assert "traceback" not in response.text.lower()
+
+
+def test_query_catalog_batch_outer_failure_is_sanitized(monkeypatch):
+    def fail(identifiers):
+        raise ImportError("private-query-catalog-source-and-path")
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fail)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/jobinfo", json={"job_ids": ["query_catalog_refresh_00000000-0000-4000-8000-000000000001"]})
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "query_catalog_refresh_failed"
+    assert "private-query-catalog" not in response.text
+
+
+@pytest.mark.parametrize("endpoint,helper", [("jobstatus", "get_wepppy_rq_job_status"), ("jobinfo", "get_wepppy_rq_job_info")])
+def test_query_catalog_missing_retains_not_found(monkeypatch, endpoint, helper):
+    monkeypatch.setattr(job_routes, helper, lambda identifier: {"job_id": identifier, "status": "not_found"})
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/{endpoint}/query_catalog_refresh_00000000-0000-4000-8000-000000000001")
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"

@@ -37,7 +37,7 @@ from osgeo import gdal
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.nodb.base import NoDbBase, TriggerEvents
 from wepppy.nodb.core import Ron, Watershed
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 from .shrubland_map import ShrublandMap
 
@@ -210,7 +210,7 @@ class Shrubland(NoDbBase):
                 wmesque_endpoint=self.wmesque_endpoint
             )
 
-            update_catalog_entry(self.wd, self.shrubland_dir)
+            request_catalog_refresh(self.wd, self.shrubland_dir)
 
     def on(self, evt: TriggerEvents) -> None:
         pass

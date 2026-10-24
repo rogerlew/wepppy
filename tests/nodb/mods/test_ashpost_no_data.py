@@ -38,7 +38,7 @@ def test_run_post_treats_no_data_as_success_and_updates_catalog(
     catalog_calls: list[tuple[str, str]] = []
     monkeypatch.setattr(
         ashpost_module,
-        "update_catalog_entry",
+        "request_catalog_refresh",
         lambda wd, key: catalog_calls.append((wd, key)),
     )
 
@@ -105,7 +105,7 @@ def test_native_failure_does_not_publish_metadata_or_catalog(monkeypatch, tmp_pa
     monkeypatch.setattr(ashpost_module,'watershed_daily_aggregated',fail)
     monkeypatch.setattr(ashpost_module,'write_version_manifest',unexpected)
     monkeypatch.setattr(ashpost_module,'generate_ashpost_documentation',unexpected)
-    monkeypatch.setattr(ashpost_module,'update_catalog_entry',unexpected)
+    monkeypatch.setattr(ashpost_module,'request_catalog_refresh',unexpected)
     with pytest.raises(ValueError,match='invalid native input'):
         ashpost.run_post()
     assert output.read_bytes() == b'historical unversioned output'

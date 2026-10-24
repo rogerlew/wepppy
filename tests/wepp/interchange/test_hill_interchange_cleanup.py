@@ -199,7 +199,7 @@ def test_hillslope_interchange_forwards_worker_bound_to_every_converter(
     monkeypatch.setattr(hill_interchange, "_expected_hillslopes", lambda _base: 3)
     monkeypatch.setattr(hill_interchange, "remove_incompatible_interchange", lambda _path: None)
     monkeypatch.setattr(hill_interchange, "write_version_manifest", lambda _path: None)
-    monkeypatch.setattr(hill_interchange, "_update_catalog_entry", None)
+    monkeypatch.setattr(hill_interchange, "request_catalog_refresh", lambda *_args, **_kwargs: None)
 
     try:
         result = hill_interchange.run_wepp_hillslope_interchange(

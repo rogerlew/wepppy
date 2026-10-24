@@ -78,7 +78,7 @@ import pandas as pd
 from deprecated import deprecated
 
 from wepppy.landcover import LandcoverMap
-from wepppy.query_engine import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 from wepppy.wepp.management import (
     InvalidManagementKey,
     ManagementMapLoadError,
@@ -1088,7 +1088,7 @@ class Landuse(NoDbBase):
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, landuse_src]) == base:
-            update_catalog_entry(self.wd, dest)
+            request_catalog_refresh(self.wd, dest)
         else:
             self.logger.info(
                 "Skipping catalog update for external landuse symlink: %s",
@@ -1158,7 +1158,7 @@ class Landuse(NoDbBase):
         if retrieve_nlcd:
             wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
-            update_catalog_entry(self.wd, lc_fn)
+            request_catalog_refresh(self.wd, lc_fn)
         elif not _exists(lc_fn):
             raise FileNotFoundError(f"'{lc_fn}' not found!")
             
@@ -1224,7 +1224,7 @@ class Landuse(NoDbBase):
 
         wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
                          v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
-        update_catalog_entry(self.wd, lc_fn)
+        request_catalog_refresh(self.wd, lc_fn)
 
         # read the keys out of the raster
         nlcd, transform, proj = read_raster(lc_fn, dtype=np.int32)
@@ -1433,7 +1433,7 @@ class Landuse(NoDbBase):
             lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
             wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize, 
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
-            update_catalog_entry(self.wd, lc_fn)
+            request_catalog_refresh(self.wd, lc_fn)
 
             if wepppyo3 is None:
                 lc = LandcoverMap(lc_fn)
@@ -2456,7 +2456,7 @@ class Landuse(NoDbBase):
         df = df.loc[:, preferred_order + remaining]
 
         df.to_parquet(_join(self.lc_dir, "landuse.parquet"), index=False)
-        update_catalog_entry(self.wd, 'landuse/landuse.parquet')
+        request_catalog_refresh(self.wd, 'landuse/landuse.parquet')
 
     @property
     def hill_table(self) -> List[Dict]:

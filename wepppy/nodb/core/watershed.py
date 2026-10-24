@@ -114,7 +114,7 @@ from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.query_engine import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 from wepppy.nodb.duckdb_agents import (
     get_watershed_subs_summary,
@@ -1321,10 +1321,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                 else:
                     self._structure = None
 
-            try:
-                update_catalog_entry(self.wd, 'watershed')
-            except (FileNotFoundError, PermissionError, ValueError, OSError, json.JSONDecodeError) as exc:
-                self.logger.warning("Failed to refresh catalog for watershed outputs: %s", exc)
+            request_catalog_refresh(self.wd, 'watershed')
 
     @property
     def sub_area(self) -> float:

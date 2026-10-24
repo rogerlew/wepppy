@@ -19,7 +19,7 @@ The WEPPcloud Query Engine is a **DuckDB-powered analytical service** that expos
 - **No write operations**: The query engine is read-only; it does not modify datasets or accept INSERT/UPDATE/DELETE operations
 - **No streaming**: Large result sets are truncated by `limit`; there is no cursor-based pagination or streaming API (yet)
 - **No cross-run queries**: Each query targets a single run directory; joins across different WEPPcloud runs are not supported
-- **No real-time updates**: Catalogs are generated during activation and do not automatically refresh when new files appear
+- **No filesystem watcher**: Producer notifications and periodic reconciliation maintain catalogs when async refresh is enabled; query readers verify required sources before use.
 - **No `ST_Transform` expressions**: PROJ transformations can read external grid files outside DuckDB's filesystem switch, so the query API rejects this function
 
 ### Architecture Components
@@ -80,16 +80,17 @@ The WEPPcloud Query Engine is a **DuckDB-powered analytical service** that expos
 | `formatter.py` | Result serialization (Arrow → JSON, schema extraction, timeseries reshaping) |
 | `catalog.py` | Dataset catalog loading and schema lookup (`DatasetCatalog`, `CatalogEntry`) |
 | `context.py` | Run directory resolution and catalog access (`RunContext`) |
-| `activate.py` | Catalog generation from run directory contents |
+| `activate.py` | Synchronous catalog generation from run directory contents |
+| `catalog_refresh.py` | Durable producer requests, guarded atomic publication, lifecycle identity and reader freshness |
 | `app/query_presets.py` | Curated example queries organized by category |
 
 ### Request Flow
 
 1. **HTTP Request** → User submits JSON payload to `/query-engine/runs/{runid}/{config}/query`
 2. **Route Handler** → `app/server.py::run_query_endpoint()` receives request
-3. **Context Resolution** → `context.resolve_run_context(runid, scenario=...)` locates run directory and loads `catalog.json`
+3. **Context Resolution** → `context.resolve_run_context(runid, scenario=...)` locates the run and resolves pending or malformed catalog metadata through the freshness barrier.
 4. **Payload Validation** → `payload.QueryRequest` dataclass validates and normalizes the JSON structure
-5. **Query Planning** → `core.build_query_plan(payload, catalog)` generates DuckDB SQL with proper joins, filters, and aggregations
+5. **Query Planning** → Required physical sources and schemas are revalidated, held catalogs reload, and endpoint authorization checks the final source selection before `core.build_query_plan(payload, catalog)` generates SQL.
 6. **Execution** → `executor.DuckDBExecutor.execute(sql)` runs the query in an isolated connection
 7. **Formatting** → `formatter.format_table(arrow_table)` converts Arrow Table to JSON with schema metadata
 8. **Response** → JSON payload returned with `records`, `schema`, `sql` (if requested), and error details (if failed)
@@ -161,7 +162,11 @@ Before querying, a run must be **activated** to generate the `catalog.json` file
 
 Note: Activation enforces a directory-only contract for root resources. Legacy WD-root sidecars (for example `landuse.parquet`, `soils.parquet`, `climate.<name>.parquet`, `watershed.<name>.parquet`) are treated as migration-required and are not cataloged as queryable datasets.
 
-Once activated, the catalog is cached until the next activation or until files are modified. Repeated calls to `activate_query_engine` reuse the existing `catalog.json` unless `force_refresh=True` is provided (useful after interchange jobs finish).
+Repeated calls to `activate_query_engine` retain their synchronous return shape and reuse the existing catalog unless `force_refresh=True`. Query/report readers independently verify required source schema and selection before reuse; catalog presence or queue completion alone does not establish freshness.
+
+Artifact producers use `request_catalog_refresh(wd, asset_path)` after publishing files. Managed async operation requires `QUERY_CATALOG_REFRESH_ENABLED=true` and explicit `QUERY_CATALOG_ROOTS_JSON`; default-disabled and standalone operation remain synchronous. Enabled producers durably record intent before coalesced admission to the existing batch queue. Redis/worker outages retain pending work without an inline full-scan fallback.
+
+Project-authorized browse/download and archives retain `_query_engine/refresh` status, requests and attempts; these records are excluded from dataset indexing. Readiness-sensitive callers use `ensure_catalog_fresh`, while `update_catalog_entry` remains an explicit synchronous API. See the [refresh contract](../../docs/schemas/query-engine-catalog-refresh-contract.md) for source-selection and readonly rules, and the [operations guide](../../docs/dev-notes/query-catalog-refresh-operations.md) for configuration, recovery and rollout gates.
 
 ### Query Execution Model
 

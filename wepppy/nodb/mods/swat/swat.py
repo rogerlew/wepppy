@@ -789,16 +789,9 @@ class Swat(SwatTxtInOutMixin, SwatRecallMixin, SwatConnectivityMixin, NoDbBase):
                 status_channel, f"SWAT interchange: {self.swat_interchange_status}"
             )
 
-        try:
-            from wepppy.query_engine.activate import update_catalog_entry
+        from wepppy.query_engine import request_catalog_refresh
 
-            update_catalog_entry(self.wd, interchange_dir)
-        except Exception:
-            self.logger.warning(
-                "SWAT interchange: query-engine catalog update failed for %s",
-                interchange_dir,
-                exc_info=True,
-            )
+        request_catalog_refresh(self.wd, interchange_dir)
 
         return summary
 

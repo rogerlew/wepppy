@@ -139,7 +139,7 @@ def _patch_fetch_dem_dependencies(
     monkeypatch.setattr(ron_module.time, "time", clock.time)
     monkeypatch.setattr(ron_module.time, "sleep", clock.sleep)
     monkeypatch.setattr(ron_module, "RedisPrep", _DummyRedisPrep)
-    monkeypatch.setattr(ron_module, "update_catalog_entry", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(ron_module, "request_catalog_refresh", lambda *_args, **_kwargs: None)
 
 
 def test_fetch_dem_uses_default_150_second_block_when_rate_cap_hit(

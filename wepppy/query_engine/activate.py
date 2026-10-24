@@ -10,6 +10,7 @@ from pathlib import Path
 from collections.abc import Callable, Iterable
 
 from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
+from .catalog_refresh import catalog_snapshot, publish_catalog, is_refresh_path
 
 LOGGER = logging.getLogger(__name__)
 
@@ -214,6 +215,7 @@ def activate_query_engine(
         )
         checkpoint()
 
+    publication_snapshot = catalog_snapshot(base)
     catalog_entries = _build_catalog(base)
     checkpoint()
 
@@ -226,7 +228,7 @@ def activate_query_engine(
 
     catalog_path = query_engine_dir / "catalog.json"
     checkpoint()
-    catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True), encoding="utf-8")
+    publish_catalog(base, catalog, snapshot=publication_snapshot)
 
     return catalog
 
@@ -276,11 +278,15 @@ def update_catalog_entry(
             raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'")
         catalog_entry_path = "/".join(normalized_parts)
 
+    if is_refresh_path(catalog_entry_path) or is_refresh_path(resolved_target):
+        raise ValueError("Refresh metadata is not a query dataset")
+
     catalog_path = base / "_query_engine" / "catalog.json"
     if not catalog_path.exists():
         # fall back to full activation
         return activate_query_engine(base, run_interchange=False)
 
+    publication_snapshot = catalog_snapshot(base)
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     files: list[dict[str, object]] = catalog.get("files", [])
     files_by_path = {entry["path"]: entry for entry in files}
@@ -290,6 +296,9 @@ def update_catalog_entry(
 
     if target.exists():
         if target.is_dir():
+            prefix = catalog_entry_path.rstrip("/") + "/"
+            files_by_path = {key: value for key, value in files_by_path.items()
+                             if key != catalog_entry_path and not key.startswith(prefix)}
             new_entries = _build_catalog_subset(base, target)
             for entry in new_entries:
                 files_by_path[entry["path"]] = entry
@@ -301,11 +310,13 @@ def update_catalog_entry(
             files_by_path[entry["path"]] = entry
             updated_entry = entry
     else:
-        files_by_path.pop(catalog_entry_path, None)
+        prefix = catalog_entry_path.rstrip("/") + "/"
+        files_by_path = {key: value for key, value in files_by_path.items()
+                         if key != catalog_entry_path and not key.startswith(prefix)}
 
     catalog["files"] = sorted(files_by_path.values(), key=lambda item: item["path"])
     catalog["generated_at"] = datetime.now(timezone.utc).isoformat()
-    catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True), encoding="utf-8")
+    publish_catalog(base, catalog, snapshot=publication_snapshot)
 
     return updated_entry
 
@@ -395,7 +406,8 @@ def _build_catalog(base: Path) -> list[dict[str, object]]:
         str(base),
     )
     LOGGER.info("wepp interchange: catalog scan via WEPPpyo3")
-    return _canonicalize_nodir_parquets(base, entries)
+    return _canonicalize_nodir_parquets(base, [entry for entry in entries
+                                              if not is_refresh_path(entry["path"])])
 
 
 def _build_catalog_subset(base: Path, directory: Path) -> list[dict[str, object]]:
@@ -482,6 +494,8 @@ def _build_entry(
     Returns:
         Catalog entry dictionary or None when unsupported.
     """
+    if is_refresh_path(path.relative_to(base) if path.is_relative_to(base) else path) or is_refresh_path(path.resolve()):
+        return None
     suffix = path.suffix.lower()
     if suffix not in SUPPORTED_EXTENSIONS:
         return None
@@ -577,6 +591,8 @@ def _iter_catalog_files(base: Path, *, directory: Path | None = None) -> Iterabl
 
     while stack:
         current = stack.pop()
+        if is_refresh_path(current.relative_to(base) if current.is_relative_to(base) else current):
+            continue
         try:
             resolved_current = current.resolve()
         except FileNotFoundError:
@@ -586,7 +602,7 @@ def _iter_catalog_files(base: Path, *, directory: Path | None = None) -> Iterabl
             continue
         visited_paths.add(current)
 
-        if not _is_allowed_target(base, resolved_current):
+        if is_refresh_path(resolved_current) or not _is_allowed_target(base, resolved_current):
             continue
 
         is_symlink_dir = current.is_symlink()
@@ -599,9 +615,14 @@ def _iter_catalog_files(base: Path, *, directory: Path | None = None) -> Iterabl
             with os.scandir(current) as entries:
                 for entry in entries:
                     entry_path = Path(entry.path)
+                    if is_refresh_path(entry_path.relative_to(base)):
+                        continue
                     try:
                         resolved_entry = entry_path.resolve()
                     except FileNotFoundError:
+                        continue
+
+                    if is_refresh_path(resolved_entry):
                         continue
 
                     if entry.is_dir(follow_symlinks=False):

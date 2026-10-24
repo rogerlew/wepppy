@@ -16,7 +16,7 @@ from rasterio.errors import RasterioError
 from rasterio.fill import fillnodata
 
 from wepppy.all_your_base.geo import raster_stacker
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 from .k_compare import ComparisonThresholds, compare_k_modes_to_reference, write_comparison_summary_json
 from .k_epic import OM_TO_OC_FACTOR, compute_polaris_epic_k
@@ -549,8 +549,8 @@ def _resolve_optional_cfvo_layer_paths(
     os.makedirs(_join(wd, "polaris"), exist_ok=True)
     raster_stacker(raw_top, match_top, aligned_top, resample="bilinear")
     raster_stacker(raw_sub, match_sub, aligned_sub, resample="bilinear")
-    update_catalog_entry(wd, _relative_path(wd, aligned_top))
-    update_catalog_entry(wd, _relative_path(wd, aligned_sub))
+    request_catalog_refresh(wd, _relative_path(wd, aligned_top))
+    request_catalog_refresh(wd, _relative_path(wd, aligned_sub))
 
     return (aligned_top, aligned_sub), {
         "status": "available",
@@ -846,7 +846,7 @@ def run_rusle_k_factors(
     for path in catalog_paths:
         if path is None:
             continue
-        update_catalog_entry(wd, _relative_path(wd, path))
+        request_catalog_refresh(wd, _relative_path(wd, path))
 
     reference_samples_path: str | None = None
     comparison_path: str | None = None
@@ -895,8 +895,8 @@ def run_rusle_k_factors(
         comparison_path = _join(rusle_dir, "k_benchmark_comparison_summary.json")
         write_comparison_summary_json(comparison_path, comparison_payload)
 
-        update_catalog_entry(wd, _relative_path(wd, reference_samples_path))
-        update_catalog_entry(wd, _relative_path(wd, comparison_path))
+        request_catalog_refresh(wd, _relative_path(wd, reference_samples_path))
+        request_catalog_refresh(wd, _relative_path(wd, comparison_path))
 
     k_manifest = {
         "generated_utc": _utc_now_iso(),

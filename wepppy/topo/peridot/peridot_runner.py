@@ -22,6 +22,8 @@ from wepppy.io_wait import (
     get_peridot_input_poll_s,
 )
 
+from wepppy.query_engine import request_catalog_refresh
+
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
 except ImportError:  # pragma: no cover - optional catalog support
@@ -516,14 +518,8 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
         },
     )
 
-    if _update_catalog_entry is not None:
-        try:
-            _update_catalog_entry(wd, "watershed/hillslopes.parquet")
-            _update_catalog_entry(wd, "watershed/channels.parquet")
-            _update_catalog_entry(wd, "watershed/flowpaths.parquet")
-            _update_catalog_entry(wd, "watershed")
-        except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
-            LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
+    # One subtree request covers the finalized tables and generated README.
+    request_catalog_refresh(wd, "watershed")
 
     ws_centroid = float(np.mean(lngs)), float(np.mean(lats))
     if (
@@ -614,11 +610,7 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
     os.remove(_join(wd, 'ag_fields/sub_fields/field_flowpaths.csv'))
     os.remove(_join(wd, 'ag_fields/sub_fields/fields.csv'))
 
-    if _update_catalog_entry is not None:
-        try:
-            _update_catalog_entry(wd, 'ag_fields/sub_fields')
-        except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
-            LOGGER.warning("Failed to refresh catalog for ag_fields/sub_fields in %s", wd, exc_info=True)
+    request_catalog_refresh(wd, 'ag_fields/sub_fields')
 
     return len(field_df), len(fps_df)
 

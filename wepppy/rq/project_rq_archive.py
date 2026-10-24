@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import (
+    catalog_lifecycle_guard, invalidate_catalog_incarnation,
+)
+
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import errno
@@ -284,7 +288,7 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
 
         authority_wd = runtime.project_config_authority_wd(runid)
         roads_guard = roads_lifecycle.operation(wd_path, shared=True, create=True)
-        with runtime.project_config_lifecycle_guard(authority_wd), roads_guard:
+        with catalog_lifecycle_guard(wd_path), runtime.project_config_lifecycle_guard(authority_wd), roads_guard:
             locked = [name for name, state in runtime.lock_statuses(runid).items() if name.endswith(".nodb") and state]
             if locked:
                 raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
@@ -393,7 +397,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"Preparing to restore from {archive_name}")
 
         authority_wd = runtime.project_config_authority_wd(runid)
-        with runtime.project_config_lifecycle_guard(authority_wd), runtime.zip_file_cls(archive_path, mode="r") as zf:
+        with catalog_lifecycle_guard(wd), runtime.project_config_lifecycle_guard(authority_wd), runtime.zip_file_cls(archive_path, mode="r") as zf:
             failed_member = zf.testzip()
             if failed_member:
                 raise zipfile.BadZipFile(
@@ -463,6 +467,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                             pass
 
                     runtime.publish_status(status_channel, f"Restored file {relative_target}")
+
+                # Copied refresh receipts are historical, never authority for old jobs.
+                invalidate_catalog_incarnation(wd)
 
                 for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
                     os.chmod(directory, mode)

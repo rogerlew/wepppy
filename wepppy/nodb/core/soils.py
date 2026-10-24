@@ -108,7 +108,7 @@ from wepppy.nodb.duckdb_agents import (
 )
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
-from wepppy.query_engine import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     'SoilsNoDbLockedException',
@@ -705,7 +705,7 @@ class Soils(NoDbBase):
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, soils_src]) == base:
-            update_catalog_entry(self.wd, dest)
+            request_catalog_refresh(self.wd, dest)
         else:
             self.logger.info(
                 "Skipping catalog update for external soils symlink: %s",
@@ -758,7 +758,7 @@ class Soils(NoDbBase):
             self._soils_is_vrt = False
             ssurgo_fn = self.ssurgo_fn
             wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize, v=self.wmesque_version)
-            update_catalog_entry(self.wd, ssurgo_fn)
+            request_catalog_refresh(self.wd, ssurgo_fn)
 
             domsoil_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
@@ -1110,7 +1110,7 @@ class Soils(NoDbBase):
                                 ssurgo_fn, _map.cellsize, 
                                 v=self.wmesque_version, 
                                 wmesque_endpoint=self.wmesque_endpoint)
-            update_catalog_entry(self.wd, ssurgo_fn)
+            request_catalog_refresh(self.wd, ssurgo_fn)
 
         # Make SSURGO Soils
         sm = SurgoMap(ssurgo_fn)
@@ -2033,7 +2033,7 @@ class Soils(NoDbBase):
                         v=self.wmesque_version,
                         wmesque_endpoint=self.wmesque_endpoint,
                     )
-                    update_catalog_entry(self.wd, ssurgo_fn)
+                    request_catalog_refresh(self.wd, ssurgo_fn)
                 elif not _exists(ssurgo_fn):
                     raise FileNotFoundError(f"'{ssurgo_fn}' not found!")
 
@@ -2338,7 +2338,7 @@ class Soils(NoDbBase):
         finally:
             if temporary_path.exists():
                 temporary_path.unlink()
-        update_catalog_entry(self.wd, 'soils/soils.parquet')
+        request_catalog_refresh(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
         if not _exists(self.soils_dir):

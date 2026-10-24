@@ -84,29 +84,39 @@ def operation(root: str | Path, *, shared=False, create=False):
     if root in _WRITERS.get():
         yield
         return
-    lock_path = _path(root, LOCK)
-    try:
-        fd = os.open(lock_path, (os.O_RDONLY if shared and not create else os.O_RDWR | os.O_CREAT) | os.O_NOFOLLOW, 0o666)
-    except FileNotFoundError as exc:
-        if shared:
-            raise RoadsResultsUnavailable() from exc
-        raise
-    token = None
-    try:
-        if not stat.S_ISREG(os.fstat(fd).st_mode) or os.fstat(fd).st_nlink != 1:
-            raise ValueError('Invalid Roads coordination file')
-        try:
-            fcntl.flock(fd, (fcntl.LOCK_SH if shared else fcntl.LOCK_EX) | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            error = RoadsResultsUnavailable if shared else RoadsOperationBusy
-            raise error('Roads is busy; wait for the active operation to finish.') from exc
+    # Writers acquire catalog before Roads. Readers retain concurrent SH admission
+    # and take only short catalog barriers: writer EX is nonblocking, so a reader
+    # holding Roads cannot deadlock behind a writer holding catalog ownership.
+    from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+    with ExitStack() as guards:
         if not shared:
-            token = _WRITERS.set(_WRITERS.get() | {root})
-        yield
-    finally:
-        if token is not None:
-            _WRITERS.reset(token)
-        os.close(fd)
+            try:
+                guards.enter_context(catalog_lifecycle_guard(root, blocking=False))
+            except BlockingIOError as exc:
+                raise RoadsOperationBusy('Roads is busy; wait for the active operation to finish.') from exc
+        lock_path = _path(root, LOCK)
+        try:
+            fd = os.open(lock_path, (os.O_RDONLY if shared and not create else os.O_RDWR | os.O_CREAT) | os.O_NOFOLLOW, 0o666)
+        except FileNotFoundError as exc:
+            if shared:
+                raise RoadsResultsUnavailable() from exc
+            raise
+        token = None
+        try:
+            if not stat.S_ISREG(os.fstat(fd).st_mode) or os.fstat(fd).st_nlink != 1:
+                raise ValueError('Invalid Roads coordination file')
+            try:
+                fcntl.flock(fd, (fcntl.LOCK_SH if shared else fcntl.LOCK_EX) | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                error = RoadsResultsUnavailable if shared else RoadsOperationBusy
+                raise error('Roads is busy; wait for the active operation to finish.') from exc
+            if not shared:
+                token = _WRITERS.set(_WRITERS.get() | {root})
+            yield
+        finally:
+            if token is not None:
+                _WRITERS.reset(token)
+            os.close(fd)
 
 
 def mandatory_paths(single_storm: bool) -> set[str]:

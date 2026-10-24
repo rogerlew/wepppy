@@ -21,7 +21,7 @@ from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.core import Climate, Landuse, Ron, Watershed
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.polaris import Polaris
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh, update_catalog_entry
 
 from .c_integration import RusleCResult, run_rusle_c_factor
 from .k_integration import RusleKResult, run_rusle_k_factors
@@ -661,7 +661,7 @@ class Rusle(NoDbBase):
         os.makedirs(self.rusle_rap_dir, exist_ok=True)
         manager = RangelandAnalysisPlatformV3(wd=self.rusle_rap_dir, bbox=extent)
         rap_path = manager.get_dataset_fn(rap_year)
-        update_catalog_entry(self.wd, _relative_path(self.wd, rap_path))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, rap_path))
         return rap_path
 
     def _selected_k_path(self, k_result: RusleKResult, *, default_k_mode: str) -> str:
@@ -949,7 +949,7 @@ class Rusle(NoDbBase):
         )
         r_path = _join(self.rusle_dir, "r.tif")
         self._write_constant_from_dem(dem_path, r_path, r_scalar)
-        update_catalog_entry(self.wd, _relative_path(self.wd, r_path))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, r_path))
 
         channel_mask = watershed.netful if watershed.netful and _exists(watershed.netful) else None
         ls_result: RusleLsResult = run_rusle_ls_factor(
@@ -960,7 +960,7 @@ class Rusle(NoDbBase):
         )
         for path in asdict(ls_result).values():
             if path and _exists(path):
-                update_catalog_entry(self.wd, _relative_path(self.wd, path))
+                request_catalog_refresh(self.wd, _relative_path(self.wd, path))
 
         k_result: RusleKResult = run_rusle_k_factors(
             self.wd,
@@ -969,7 +969,7 @@ class Rusle(NoDbBase):
             default_k_mode=options["default_k_mode"],
             write_default_k=False,
         )
-        update_catalog_entry(self.wd, _relative_path(self.wd, k_result.manifest))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, k_result.manifest))
 
         c_output_filename = f"c_{options['c_mode']}.tif"
         if options["c_mode"] == "observed_rap":
@@ -1001,7 +1001,7 @@ class Rusle(NoDbBase):
 
         p_path = _join(self.rusle_dir, "p.tif")
         self._write_constant_from_dem(dem_path, p_path, float(options["p_value"]))
-        update_catalog_entry(self.wd, _relative_path(self.wd, p_path))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, p_path))
 
         selected_k_path = self._selected_k_path(k_result, default_k_mode=options["default_k_mode"])
         a_filename = f"a_{options['c_mode']}_{options['default_k_mode']}.tif"
@@ -1014,7 +1014,7 @@ class Rusle(NoDbBase):
             p_path=p_path,
             output_path=a_path,
         )
-        update_catalog_entry(self.wd, _relative_path(self.wd, a_path))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, a_path))
 
         artifacts = {
             "r_relpath": _relative_path(self.wd, r_path),
@@ -1027,6 +1027,7 @@ class Rusle(NoDbBase):
         readme_path = self._write_readme(options=options, artifacts=artifacts, r_manifest=r_manifest)
         readme_relpath = _relative_path(self.wd, readme_path)
         try:
+            # README is not a supported catalog asset; preserve immediate validation.
             update_catalog_entry(self.wd, readme_relpath)
         except ValueError as exc:
             if "Unsupported asset type" not in str(exc):
@@ -1079,7 +1080,7 @@ class Rusle(NoDbBase):
         ):
             manifest["rusle"]["scenario_sbs_rock_fraction"] = dict(c_manifest["rock_fraction_of_sbs_bare"])
         _write_manifest(manifest_path, manifest)
-        update_catalog_entry(self.wd, _relative_path(self.wd, manifest_path))
+        request_catalog_refresh(self.wd, _relative_path(self.wd, manifest_path))
 
         with self.locked():
             self._last_build_artifacts = artifacts

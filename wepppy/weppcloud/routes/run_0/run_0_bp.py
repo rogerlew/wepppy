@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard, invalidate_catalog_incarnation
 import math
 
 from datetime import datetime
@@ -2661,11 +2662,13 @@ def create_run_dir(current_user):
         runid = generate_runid(email)
 
         wd = get_wd(runid)
-        if _exists(wd):
-            continue
+        with catalog_lifecycle_guard(wd, allow_missing=True):
+            if _exists(wd):
+                continue
 
-        os.makedirs(wd)
-        dir_created = True
+            os.makedirs(wd)
+            invalidate_catalog_incarnation(wd)
+            dir_created = True
 
     return runid, wd
 

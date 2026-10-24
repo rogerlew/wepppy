@@ -857,23 +857,16 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     except roads_lifecycle.RoadsResultsUnavailable as exc:
         return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
                             headers={'Cache-Control': 'no-store'})
-    missing = [spec.path for spec in payload.dataset_specs if not context.catalog.has(spec.path)]
-    if missing:
-        message = f"Dataset(s) not found: {', '.join(missing)}"
-        stacktrace_text = "".join(traceback.format_stack())
-        LOGGER.warning("Query referenced missing datasets for %s: %s", run_path, missing)
-        return JSONResponse(
-            {
-                "error": message,
-                "stacktrace": stacktrace_text,
-                "exc_info": stacktrace_text,
-                "status_code": 404,
-            },
-            status_code=404,
-        )
-
     try:
-        result = run_query(context, payload)
+        result = run_query(
+            context, payload,
+            authorize=lambda fresh: require_datasets(
+                request, fresh.base_dir, [spec.path for spec in payload.dataset_specs],
+                entries=fresh.catalog.entries(),
+            ),
+        )
+    except HTTPException:
+        raise
     except roads_lifecycle.RoadsResultsUnavailable as exc:
         return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
                             headers={'Cache-Control': 'no-store'})

@@ -1,0 +1,1280 @@
+{
+  "reviewed_utc": "2026-10-23T21:53:30.379957+00:00",
+  "reviewer": "implementation_correctness_review",
+  "disposition": "Approved to publish freshly regenerated Roads scientific evidence; no scientific differences found.",
+  "scope_limit": "This artifact approves evidence publication only, not production rollout.",
+  "prior_results_sha256": "f8fed5c145c507548db0c331e1d7e603a9f54cd72e399db5bef930b6203dab11",
+  "prior_provenance_sha256": "eec985dfbc4d2bec1f6ad03fc384b0206666a4bccf0a632c7a7847ceab53a5a7",
+  "fresh_analysis_sha256": "0c4982c62fcdfc8c2f47956eed20a39617147713267f55731a18ac88a1e944f9",
+  "matrix": {
+    "root": "/tmp/roads-qcat-async-20261023/roads_matrix0",
+    "cases": 516,
+    "factorial_cases": 504,
+    "one_factor_cases": 12,
+    "all_case_metadata_and_numeric_summaries_exactly_equal": true,
+    "all_recorded_artifact_hashes_revalidated": true,
+    "raw_input_output_template_differences": {
+      "input_sha256": [],
+      "output_sha256": [],
+      "template_sha256": []
+    },
+    "calendar": [
+      {
+        "table": "H.pass.parquet",
+        "rows": 3015504,
+        "complete_profile_groups": 516,
+        "unique_daily_records_per_group": 5844,
+        "years": [
+          2000,
+          2001,
+          2002,
+          2003,
+          2004,
+          2005,
+          2006,
+          2007,
+          2008,
+          2009,
+          2010,
+          2011,
+          2012,
+          2013,
+          2014,
+          2015
+        ]
+      },
+      {
+        "table": "H.wat.parquet",
+        "rows": 6942672,
+        "complete_profile_groups": 1188,
+        "unique_daily_records_per_group": 5844,
+        "years": [
+          2000,
+          2001,
+          2002,
+          2003,
+          2004,
+          2005,
+          2006,
+          2007,
+          2008,
+          2009,
+          2010,
+          2011,
+          2012,
+          2013,
+          2014,
+          2015
+        ]
+      }
+    ]
+  },
+  "source_changes": {
+    "wepppy/wepp/interchange/_roads_lifecycle.py": {
+      "prior": "94b17afb10e8686afbcc9308e1893bc27e5dd924d87ebe9c5142aeca018e6836",
+      "fresh": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd"
+    },
+    "wepppy/wepp/interchange/hill_interchange.py": {
+      "prior": "0b09d2e5681a4d618b679383b9a9baa232da19f158a9b22a4d6fd312ad502e92",
+      "fresh": "90532e628cdb5bfb12c7c103b6ef4cb898a5517467527406addf3a770ec3d8e0"
+    },
+    "wepppy/wepp/interchange/watershed_interchange.py": {
+      "prior": "cef3631a67f18f1ab0ca5edef204c5f5f7668b861a5b8b410f74cce5c6968624",
+      "fresh": "b75810487c116124b543f765376a92229874df4b0764a076fa14e6086d763b12"
+    }
+  },
+  "prior_native_sha256": {
+    "wepp_interchange_rust.so": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e"
+  },
+  "fresh_native_sha256": {
+    "wepp_interchange_rust.so": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+  },
+  "projects": [
+    {
+      "design": "inslope_bd",
+      "prior_root": "/wc1/runs/ro/roads-validation-oct23-v2-bd",
+      "fresh_root": "/wc1/runs/ro/roads-qcat-async-20261023-bd",
+      "validation_sha256": "c46b1ddf260487ed22523eb8b37d6641410d5df2181ebb1a13eac2b6a1d5499e",
+      "scientific_validation_fields_exactly_equal": [
+        "design",
+        "management_readback",
+        "selection",
+        "prepared_features",
+        "completed_profiles",
+        "summary_profiles",
+        "execution_counts",
+        "skipped_reasons",
+        "routing_mode_counts",
+        "target_ids",
+        "accounting_state",
+        "totalwatsed_rows",
+        "experiment_unrutted_fill_buffer",
+        "protected_baseline_files",
+        "unchanged_source_files",
+        "reconciliation",
+        "params",
+        "input_sha256"
+      ],
+      "completed_profiles": 34,
+      "summary_profiles": 34,
+      "target_ids": [
+        1,
+        27,
+        28,
+        30,
+        31,
+        33,
+        38,
+        40,
+        43,
+        44,
+        52,
+        53,
+        54,
+        55
+      ],
+      "selection": {
+        "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
+        "source_features": 55,
+        "excluded": [],
+        "input_features": 55
+      },
+      "reconciliation": {
+        "modeled_area_m2": 441820.29,
+        "target_modes": {
+          "additive": 14,
+          "unchanged": 52
+        },
+        "mean_annual_mm": {
+          "Precipitation": 2097.631479473107,
+          "Runoff": 192.00351425502964,
+          "Lateral Flow": 1212.3678364383595,
+          "Baseflow": 89.01213681496588,
+          "Percolation": 77.06726747685407,
+          "ET": 606.2393552892613
+        },
+        "baseline_mean_annual_mm": {
+          "Precipitation": 2097.6314794731074,
+          "Runoff": 191.6924476920808,
+          "Lateral Flow": 1223.8857787160473,
+          "Baseflow": 75.03501141984354,
+          "Percolation": 62.88012748171036,
+          "ET": 609.2094471654555
+        },
+        "baseline_area_m2": 441820.2900000001,
+        "daily_area_water_reconciliation": true
+      },
+      "actual_daily_reconciliation_passed": true,
+      "unchanged_source_files": 2383,
+      "unchanged_baseline_files": 911,
+      "input_difference_count": 35,
+      "input_difference_only_root_paths_in_err_logs": true,
+      "tables": [
+        {
+          "table": "H.accounting.wat.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "a8f9685bb7664f77518c0f0c6b68b490bae7cac636f6e55a3ead71d71ee5f65e",
+          "fresh_sha256": "f9781ce0c3917ec84012eae271655b494ad1f648bf536e6a864e86b84d8b7254"
+        },
+        {
+          "table": "H.ebe.parquet",
+          "rows": 13215,
+          "columns": 20,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "3e40aa9fa2070a0f60f5c939374b8f596ff94880a639cb6143091ee23ce51362",
+          "fresh_sha256": "904d425d838b1c6bf3fbf14ab224521d9173db66bbf67ecf1ad8eebb6dded4fd"
+        },
+        {
+          "table": "H.element.parquet",
+          "rows": 25267,
+          "columns": 30,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "db1ff8561be759ed4666394068ced3aee0d325c8ad2f8de259e781f9d06a6247",
+          "fresh_sha256": "4f33702daca96ee8fc8de946bf415231295204ff2f0babe68a4bc4e1b8e07540"
+        },
+        {
+          "table": "H.loss.parquet",
+          "rows": 170,
+          "columns": 11,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "8cf9298888e534d011c4f8af1360c89fb67e91cac7964c849c61110750d5d8b8",
+          "fresh_sha256": "b38e54ac9f45cdd44d5b0b9309e6624718479b7c3da099260e800f4a13ff2ce5"
+        },
+        {
+          "table": "H.pass.parquet",
+          "rows": 584400,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "699d0e4b8fd78e264ef7cd1087d1e39c1be39fa641577424ad12aac50c876dd3",
+          "fresh_sha256": "2b8fc8e13060161762f5f53a949230ccd3eb0ed2a7c1c53e85d399b860743e78"
+        },
+        {
+          "table": "H.soil.parquet",
+          "rows": 198696,
+          "columns": 21,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "61b1a5c498ad549ea7568d705d98a3ab5fa517d3101bb6b118e2509b1e48dc29",
+          "fresh_sha256": "7916532f264d858a917360c453758d8550dfce8f427c20e8dff52aacfc978999"
+        },
+        {
+          "table": "H.wat.parquet",
+          "rows": 198696,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "22d10421799570b4c14c3ddb9badcf56274ec91326636d97c9d525d476cd1efe",
+          "fresh_sha256": "64759836170089dfff0a914918e89aa919f64ff4a2fc84c5264963e2d345ae8e"
+        },
+        {
+          "table": "ebe_pw0.parquet",
+          "rows": 5844,
+          "columns": 15,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "56d0d180c2299325f89f07da99787a9c34e43127e25be77736d9944436aca45b",
+          "fresh_sha256": "b0b34fc5e1092ffe01c42c5d68eb3589452c6b20a537ee44b05b4dba48af9f84"
+        },
+        {
+          "table": "loss_pw0.all_years.chn.parquet",
+          "rows": 432,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "56b6bb2bf88029108c042500177ef9cdc0ad51264776d4e60fbb4ec958f9d4fa",
+          "fresh_sha256": "8ff7fff7bfb7787e0fa5129bf6c4476fe2b02051cf478c4c28bfd906f13c46b0"
+        },
+        {
+          "table": "loss_pw0.all_years.class_data.parquet",
+          "rows": 80,
+          "columns": 9,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "37d82ae9c39a84e0a16eb620d49366030b798d526aff42eee6089d0cecdcc266",
+          "fresh_sha256": "6fad3d4989727e6f8c3bd8217e82f4fec101de5320b883d0c9da722e140df97f"
+        },
+        {
+          "table": "loss_pw0.all_years.hill.parquet",
+          "rows": 1056,
+          "columns": 13,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "b57539aebfef44a9cca3ae3da0ecdbba98642bb9c640f75e4a5c836cc40f9212",
+          "fresh_sha256": "bdf5a7c826f27dd82048c910ec9a536e920d1e28c37540bee2c94643c8f67c04"
+        },
+        {
+          "table": "loss_pw0.all_years.out.parquet",
+          "rows": 144,
+          "columns": 4,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "3c5a65ce8a1e5f623bbc061b0559351c3463125e6ed23498b3cc08739a3160fc",
+          "fresh_sha256": "0cc634c318357921232f8cff235bfe44a7ff973d48f683c00b69ac1f26b006f3"
+        },
+        {
+          "table": "loss_pw0.chn.parquet",
+          "rows": 27,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "51cb93b1739e0597cc93a6d88d233fe06a6c3747219b4407ec6d4843a3ce458e",
+          "fresh_sha256": "884d9b301bb7d83fb67428b90c57a73f0e49f7bbeb12803b1c3d3a62c8a88dee"
+        },
+        {
+          "table": "loss_pw0.class_data.parquet",
+          "rows": 5,
+          "columns": 8,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "8e613258d670efd01e4ba6b8899210778a8e23b636ac4975dce867897029b3c5",
+          "fresh_sha256": "337db9162ded0468f8820b9a0803e5fd82c3fa6587eabdf3b303540ea8b22133"
+        },
+        {
+          "table": "loss_pw0.hill.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "64b15809afb9161ccb6c6dfe72b15c4c266fbeb85a82700025c4bda4c1c10d44",
+          "fresh_sha256": "7fb37612ebb68704ec781a7f18b3b447330e98cdbe44615387cf78ca5d661ae6"
+        },
+        {
+          "table": "loss_pw0.out.parquet",
+          "rows": 11,
+          "columns": 3,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "aa0d569bc9af6270207ffa2d9003214fa5a1d0d9d7ee9c03e0b6dc8407f44a69",
+          "fresh_sha256": "86546c47eadee809b14b44deb43308e57226db593cf77c1e7adba3f5ebad5f9e"
+        },
+        {
+          "table": "pass_pw0.events.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "61dc5f209345178e417e51ddc7d43f87f3a9536c8f6508d8880616744ddc3da0",
+          "fresh_sha256": "395137dea526336f4ae9dcabc840d0d30be5a26db9e4b5fc3bcd4d03781f9efd"
+        },
+        {
+          "table": "pass_pw0.metadata.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "782ea31c39c07d73c2277873fec759f8549955878cceced1149de3064ee78cf2",
+          "fresh_sha256": "09f666277e86ad7bcdb4eed51584b149b88f2646841df855060a2e30a38b7692"
+        },
+        {
+          "table": "roads_segment_loss_summary.parquet",
+          "rows": 34,
+          "columns": 34,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [
+            "source_sha256"
+          ],
+          "prior_sha256": "8ee3c6ea07be8821fa267041b49c3c623082a578b8b3b6496eb9213e7d4a068d",
+          "fresh_sha256": "02194140830dec35225e5ae075f2f4d89c5fec934a167168cc2e6c7723949fe9"
+        },
+        {
+          "table": "totalwatsed3.parquet",
+          "rows": 5844,
+          "columns": 79,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "7e4cd5cf37c5811cd4b66d33660765ef7f9e160aa3bc845969aeee9b47f9ed96",
+          "fresh_sha256": "036c35abc7d565eb4635fc04f7ae822dcb1b0c4558395231e4bef5380d2c9f9f"
+        }
+      ]
+    },
+    {
+      "design": "inslope_rd",
+      "prior_root": "/wc1/runs/ro/roads-validation-oct23-v2-rd",
+      "fresh_root": "/wc1/runs/ro/roads-qcat-async-20261023-rd",
+      "validation_sha256": "550f42fa763bfaaa05f94fd2591f23b505bc184fd714404c91249256a82c84e4",
+      "scientific_validation_fields_exactly_equal": [
+        "design",
+        "management_readback",
+        "selection",
+        "prepared_features",
+        "completed_profiles",
+        "summary_profiles",
+        "execution_counts",
+        "skipped_reasons",
+        "routing_mode_counts",
+        "target_ids",
+        "accounting_state",
+        "totalwatsed_rows",
+        "experiment_unrutted_fill_buffer",
+        "protected_baseline_files",
+        "unchanged_source_files",
+        "reconciliation",
+        "params",
+        "input_sha256"
+      ],
+      "completed_profiles": 34,
+      "summary_profiles": 34,
+      "target_ids": [
+        1,
+        27,
+        28,
+        30,
+        31,
+        33,
+        38,
+        40,
+        43,
+        44,
+        52,
+        53,
+        54,
+        55
+      ],
+      "selection": {
+        "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
+        "source_features": 55,
+        "excluded": [],
+        "input_features": 55
+      },
+      "reconciliation": {
+        "modeled_area_m2": 441820.29,
+        "target_modes": {
+          "additive": 14,
+          "unchanged": 52
+        },
+        "mean_annual_mm": {
+          "Precipitation": 2097.631479473107,
+          "Runoff": 192.00351425502964,
+          "Lateral Flow": 1212.3678364383595,
+          "Baseflow": 89.01213681496588,
+          "Percolation": 77.06726747685407,
+          "ET": 606.2393552892613
+        },
+        "baseline_mean_annual_mm": {
+          "Precipitation": 2097.6314794731074,
+          "Runoff": 191.6924476920808,
+          "Lateral Flow": 1223.8857787160473,
+          "Baseflow": 75.03501141984354,
+          "Percolation": 62.88012748171036,
+          "ET": 609.2094471654555
+        },
+        "baseline_area_m2": 441820.2900000001,
+        "daily_area_water_reconciliation": true
+      },
+      "actual_daily_reconciliation_passed": true,
+      "unchanged_source_files": 2383,
+      "unchanged_baseline_files": 911,
+      "input_difference_count": 35,
+      "input_difference_only_root_paths_in_err_logs": true,
+      "tables": [
+        {
+          "table": "H.accounting.wat.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "bb724026c728faf190f2c26ad88f5433ac4f6f559aecd38c6eded0b978dac2fb",
+          "fresh_sha256": "475ae309c653468fdb047b69011dde21f54d0ea5f1a7ce1272d66b77fdc5e4f1"
+        },
+        {
+          "table": "H.ebe.parquet",
+          "rows": 13215,
+          "columns": 20,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "5cdcba59496ce88b65b181f6f4261c527915bbcdb4d633a3b06df1df42962360",
+          "fresh_sha256": "d0203ff502192b812146cbbea9d6996e92502e441ce8153f6b1b5324a664e6cf"
+        },
+        {
+          "table": "H.element.parquet",
+          "rows": 25267,
+          "columns": 30,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "af233656ed103048ce0ab2085d453ec5e5011b7dbfc8ff420ca4873854788d4f",
+          "fresh_sha256": "4439563056fe57fd34cb135933b923dda549551fdbc00b5d6a18f6e98b3b764c"
+        },
+        {
+          "table": "H.loss.parquet",
+          "rows": 170,
+          "columns": 11,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "6ddb533a9be2d34da187be6896a95a8013aeac146b382cea0925bba37e707756",
+          "fresh_sha256": "8c1f8ad655479295117cfba31b40a14e733239adbbc6b22b97b629414b9a62b9"
+        },
+        {
+          "table": "H.pass.parquet",
+          "rows": 584400,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "d29a7b4cab3112f986f97dcb3bb1473619b66262779dc3544f987a1cb1981acc",
+          "fresh_sha256": "ad867487179003cc99b2586bf67ac111204a84b5f6fd8e324e35d01beed8a51a"
+        },
+        {
+          "table": "H.soil.parquet",
+          "rows": 198696,
+          "columns": 21,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "ebe65de45a437a557ebec30a5731f4d956a98c835abcc6dbbac1d3c92c326e43",
+          "fresh_sha256": "dbac536449b9696d3977e39e337578a0937f6361cfa23d13c9fb74130b8aa5b2"
+        },
+        {
+          "table": "H.wat.parquet",
+          "rows": 198696,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "813e6f6c4dfae078fe27a7e9d28f9dcdaca2902ffb95cb5afa1d103585f0cdb4",
+          "fresh_sha256": "1487c2692831e1c3c7d4cb2615e9e47972fe45ea0e73ce2b0be75d733bcee513"
+        },
+        {
+          "table": "ebe_pw0.parquet",
+          "rows": 5844,
+          "columns": 15,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "aad2d8a2a3ad04ce446f024ab664c5f07ebcd10cfebf092a1be353b471500e83",
+          "fresh_sha256": "b6b8edba7229e9b5767e80b2349248f61617d8dc9a6b65b96af97484f8039b6b"
+        },
+        {
+          "table": "loss_pw0.all_years.chn.parquet",
+          "rows": 432,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "32efbb16e7d40d5da6986c8daabd766cb6d106efe172f80eb83a9a6e9ecd1b1f",
+          "fresh_sha256": "1db80dfb54d43a1f8db0cd357afc0cb3309bf8297f453b8efe0a1d1183650eb9"
+        },
+        {
+          "table": "loss_pw0.all_years.class_data.parquet",
+          "rows": 80,
+          "columns": 9,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "ce3648c6b4906b0c1444ed6fe71e82f2e5df501f805652e3da62b5564f315103",
+          "fresh_sha256": "5e6d4eb90fb1f17ea043e78a35e66b1e38322d52f111b90ab16dae40e758398d"
+        },
+        {
+          "table": "loss_pw0.all_years.hill.parquet",
+          "rows": 1056,
+          "columns": 13,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "84116af94ff9c68f995fc80ea4d8f4e70777cedc187085ba16673f94c6c6423e",
+          "fresh_sha256": "c048a7e52df0708ea18c2465e1fc1ab67a378ebd2f70b2ee2988580ede2e825c"
+        },
+        {
+          "table": "loss_pw0.all_years.out.parquet",
+          "rows": 144,
+          "columns": 4,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "ac2c57e020d4355a1d63795fc6ba6bcb956e7067023353393c4ceef99d32cc97",
+          "fresh_sha256": "7c3c37bff9b253ee09f7455cf04f0aa463567091b44d6f9f4493226c34962883"
+        },
+        {
+          "table": "loss_pw0.chn.parquet",
+          "rows": 27,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "cd9e423045f8dfea12d025fccf9a9636b9b30fedb3dd0b3cafb32584589e62dc",
+          "fresh_sha256": "bc250957876ee36004973c756270f47a29df766a2781db1f13dd48ce06dfb6d2"
+        },
+        {
+          "table": "loss_pw0.class_data.parquet",
+          "rows": 5,
+          "columns": 8,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "708d5b0adc620f805801efa1c47664c56657af83af23534f13fc8fd70de09dc8",
+          "fresh_sha256": "008092e636ced0940d0fcbb866e015d0a8ff2f3ffeabeea5d254bfcd87563671"
+        },
+        {
+          "table": "loss_pw0.hill.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "9902558dafa79749752c391a9449485f540fc18c0d1a0db39f5706017c179722",
+          "fresh_sha256": "c79310da824dd746851a2e85306ab637da6c653fee8794cda5d74280e56a5284"
+        },
+        {
+          "table": "loss_pw0.out.parquet",
+          "rows": 11,
+          "columns": 3,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "ca48119ab992a7ffcb4c3dd8f1db889bea7099bd2a29f42d0cad5bbcd59a6de4",
+          "fresh_sha256": "4cde6cbe534a69cd82f3e04e8b2fdf36c81e94cc0314e6f5232b12e5476d0e7b"
+        },
+        {
+          "table": "pass_pw0.events.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "e0d2897b36a6a464231b3c8c1b587050fbe86c9aff5193417549fd06c18e620f",
+          "fresh_sha256": "6eb1ab9c3091710d03aeac563eff027a0e238e47cfee6a7f4151038a6291fc13"
+        },
+        {
+          "table": "pass_pw0.metadata.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "d2aa117ed574c45430c3e9514ba4abac709571b50f8e400537ac9b1eb0adb91b",
+          "fresh_sha256": "09ae51431fd82442e58289f7cbc8aaa50ae38f1da780eaac62015b3de1f2c7f4"
+        },
+        {
+          "table": "roads_segment_loss_summary.parquet",
+          "rows": 34,
+          "columns": 34,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [
+            "source_sha256"
+          ],
+          "prior_sha256": "e11d59535b687036cb003665551b1b94a244f91acef308f6501ba308da78f8f2",
+          "fresh_sha256": "ee558d35079bbbcd8df0b4474ac75c1a5ff13c140b98adc2c46a7fe745322eb2"
+        },
+        {
+          "table": "totalwatsed3.parquet",
+          "rows": 5844,
+          "columns": 79,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "8ea90b8a65fc0ff672d66cff09149e2bba32b98b6fa83de823ec71ae7acf53da",
+          "fresh_sha256": "009c91ffd317958745d59e98629d1438052c48ea2df87a67ebb573e0c4349c69"
+        }
+      ]
+    },
+    {
+      "design": "outslope_rutted",
+      "prior_root": "/wc1/runs/ro/roads-validation-oct23-v2-rutted",
+      "fresh_root": "/wc1/runs/ro/roads-qcat-async-20261023-rutted",
+      "validation_sha256": "a6eaeaae0c525d3e74c2cddd6fa539a122fe429c4060398842695133a1b4b1dc",
+      "scientific_validation_fields_exactly_equal": [
+        "design",
+        "management_readback",
+        "selection",
+        "prepared_features",
+        "completed_profiles",
+        "summary_profiles",
+        "execution_counts",
+        "skipped_reasons",
+        "routing_mode_counts",
+        "target_ids",
+        "accounting_state",
+        "totalwatsed_rows",
+        "experiment_unrutted_fill_buffer",
+        "protected_baseline_files",
+        "unchanged_source_files",
+        "reconciliation",
+        "params",
+        "input_sha256"
+      ],
+      "completed_profiles": 34,
+      "summary_profiles": 34,
+      "target_ids": [
+        1,
+        27,
+        28,
+        30,
+        31,
+        33,
+        38,
+        40,
+        43,
+        44,
+        52,
+        53,
+        54,
+        55
+      ],
+      "selection": {
+        "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
+        "source_features": 55,
+        "excluded": [],
+        "input_features": 55
+      },
+      "reconciliation": {
+        "modeled_area_m2": 441820.29,
+        "target_modes": {
+          "additive": 14,
+          "unchanged": 52
+        },
+        "mean_annual_mm": {
+          "Precipitation": 2097.6314794731074,
+          "Runoff": 207.83141447576736,
+          "Lateral Flow": 1196.6664475212117,
+          "Baseflow": 94.11943935556262,
+          "Percolation": 82.19889394414467,
+          "ET": 605.0463829286648
+        },
+        "baseline_mean_annual_mm": {
+          "Precipitation": 2097.6314794731074,
+          "Runoff": 191.6924476920808,
+          "Lateral Flow": 1223.8857787160473,
+          "Baseflow": 75.03501141984354,
+          "Percolation": 62.88012748171036,
+          "ET": 609.2094471654555
+        },
+        "baseline_area_m2": 441820.2900000001,
+        "daily_area_water_reconciliation": true
+      },
+      "actual_daily_reconciliation_passed": true,
+      "unchanged_source_files": 2383,
+      "unchanged_baseline_files": 911,
+      "input_difference_count": 35,
+      "input_difference_only_root_paths_in_err_logs": true,
+      "tables": [
+        {
+          "table": "H.accounting.wat.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "c063e4d0649a7f71543c0dff20b0efcdb91a6e27e18e8423f24fb4a57af938eb",
+          "fresh_sha256": "eecc290cec61faf9069eadc342dbb32a18fa6011c87cebb50572b4a5724f033c"
+        },
+        {
+          "table": "H.ebe.parquet",
+          "rows": 37955,
+          "columns": 20,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "bc781e221df32389db2e6e878213b0c4b7e02d6aeb7bddd664df53b882d87f55",
+          "fresh_sha256": "b78e038de315de4992129e19496bbac40fa7dfd6e7f22748c0f60d7102d1faaa"
+        },
+        {
+          "table": "H.element.parquet",
+          "rows": 146139,
+          "columns": 30,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "8c31250349e0653ac9ceae94ff3402d4a0b243e6aa88b8f0937c3a4148571195",
+          "fresh_sha256": "131a63d63b38a54526f6f95e59cfdd966d283eba22c2c7478f151c55074622da"
+        },
+        {
+          "table": "H.loss.parquet",
+          "rows": 170,
+          "columns": 11,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "324d3e98bf77e779983b3e048869b019f65dc74529ec552c12b19deb40ba3218",
+          "fresh_sha256": "8dec02664da504eecb7ac60ed2d885ee610bc6dc6454e091eb2868d88c75f84a"
+        },
+        {
+          "table": "H.pass.parquet",
+          "rows": 584400,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "021f70c474d6a6f90ee0a38eefb50d8aa4b965b5735c81d21feadbe660241939",
+          "fresh_sha256": "c5f043a9fbab912fbba6dcae19d68ede98a2ffd3b55ce89f0810afe2194e25cf"
+        },
+        {
+          "table": "H.soil.parquet",
+          "rows": 596088,
+          "columns": 21,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "5b0336014452c212bdcac2d99d3e18f121f59a3ab2fee745dd9a3240e37d130b",
+          "fresh_sha256": "976a69cc9037d16b9226d09df4844450df7e5ca1ae2bf38d4ac3a6db60c15826"
+        },
+        {
+          "table": "H.wat.parquet",
+          "rows": 596088,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "8953cb4d930abe3c736b6898da54fd40fa85c616dab77cc8f64812dd484d1b35",
+          "fresh_sha256": "d37555fdf5e545514eb7fd157867dfc731efa653bccfbead831c0854b1e1b720"
+        },
+        {
+          "table": "ebe_pw0.parquet",
+          "rows": 5844,
+          "columns": 15,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "4639c77f243e7188cc54d08b4eb589caae9b26402a35ad9c33dec556c0dfd2e7",
+          "fresh_sha256": "ca50aa5dd3abe2cfbcc10c1c61121265ec52f8c238f97f6126d0d8790f6c041e"
+        },
+        {
+          "table": "loss_pw0.all_years.chn.parquet",
+          "rows": 432,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "b8979c7221916cb790f3c36924e40de68f208a87b075aee7d1356c3646348374",
+          "fresh_sha256": "7e9108533d401a46ebacaaa554ec570b17b32cc235007550b9dcdf17ea794b72"
+        },
+        {
+          "table": "loss_pw0.all_years.class_data.parquet",
+          "rows": 80,
+          "columns": 9,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "5fbe3683ec16ce193b4ee59ef4ee4890f3899e65508c0704d33f696297bdb29f",
+          "fresh_sha256": "c8330d5fc7a30b3cdc00625029fa9423208c4b0707f46fea2ee81d8292309814"
+        },
+        {
+          "table": "loss_pw0.all_years.hill.parquet",
+          "rows": 1056,
+          "columns": 13,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "62d74b6f85b0313d30b3b9612fab83e1c34a5bd5d9bc1201bfc491ce4a555173",
+          "fresh_sha256": "f790e1dd986ddf75189c3f35b49a48404a81b872024334518c2eeaf2c17566fa"
+        },
+        {
+          "table": "loss_pw0.all_years.out.parquet",
+          "rows": 144,
+          "columns": 4,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "468580cdfc8824b2a250d495526def23f3b9149352750728907db6035e268abc",
+          "fresh_sha256": "94a7d8ed33880e0730fae6a5390ec131b9bb3fe61a035d0deac80ee59c991cb1"
+        },
+        {
+          "table": "loss_pw0.chn.parquet",
+          "rows": 27,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "5d979b3c89ab02ceee9591baa02f35cd2a37f9e29b490192004fbbbdd42acc1c",
+          "fresh_sha256": "562421c62ce0d39de474df28ed4c27efb5f8e44680eacabc4f4b77db9d926260"
+        },
+        {
+          "table": "loss_pw0.class_data.parquet",
+          "rows": 5,
+          "columns": 8,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "6f1ebf86720fa051602bf17a30d9bf85b8c82e256afeb2b9ccabed054ce81aaf",
+          "fresh_sha256": "f15dd99903fe8d07a563a3cd38468a8aced1efaa4a1afc528f4a837a8374b7ea"
+        },
+        {
+          "table": "loss_pw0.hill.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "dc0a011f6ace55a73443832380de53555fac901b781c34d2a1f59913c271864e",
+          "fresh_sha256": "88c61457f8d786f76b5bee204488ee1896d928fa1a223f43ca657406db79a40c"
+        },
+        {
+          "table": "loss_pw0.out.parquet",
+          "rows": 11,
+          "columns": 3,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "26fbbd93765428a35608c8e4e0ade73a270d51c1cea53d4b944018ff66c01d6c",
+          "fresh_sha256": "30c71d6752c8436811b3464f4671c8631dd58194f909afba4086f3b0d97ff23d"
+        },
+        {
+          "table": "pass_pw0.events.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "750d4935ce3dd8f9518c1a3e8888fc4fdcc8e6fc33885d4ee2862a999a823012",
+          "fresh_sha256": "f86c57dfafc8b229add76ace26a3b7cb0361d5af5261019a74e5a74b07ecb2f6"
+        },
+        {
+          "table": "pass_pw0.metadata.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "0d948ec40f0f2e908bc04231cd324ab92d2f032b9850e011d42783fe37a50cb3",
+          "fresh_sha256": "4980b09aa8c0dac0784eb7a117be9447533df2fd63864bcebe40b503036e1f4e"
+        },
+        {
+          "table": "roads_segment_loss_summary.parquet",
+          "rows": 34,
+          "columns": 34,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [
+            "source_sha256"
+          ],
+          "prior_sha256": "fa714001b1862fb4c551bc483beb116538050602cf1b18cd3e9321efd7665319",
+          "fresh_sha256": "7e2d035d6453c24d4ec7967717986115ac591ff8bd83c6caef1ed3c4d7d9471f"
+        },
+        {
+          "table": "totalwatsed3.parquet",
+          "rows": 5844,
+          "columns": 79,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "b92f779f3789403a74cdb85db0cc7f25c9aa2ba2ed3c5acf03fc602ed4b8d2e1",
+          "fresh_sha256": "f8433b9ccfab1483d3f50eadcd3b0cd29c95cfa54dd07b32929630ddc3ce34cc"
+        }
+      ]
+    },
+    {
+      "design": "outslope_unrutted",
+      "prior_root": "/wc1/runs/ro/roads-validation-oct23-unrutted-positive",
+      "fresh_root": "/wc1/runs/ro/roads-qcat-async-20261023-unrutted",
+      "validation_sha256": "47a0075da21941157513ec91e7fde38ed2ad17c130d17c520e34c5c650704a7f",
+      "scientific_validation_fields_exactly_equal": [
+        "design",
+        "management_readback",
+        "selection",
+        "prepared_features",
+        "completed_profiles",
+        "summary_profiles",
+        "execution_counts",
+        "skipped_reasons",
+        "routing_mode_counts",
+        "target_ids",
+        "accounting_state",
+        "totalwatsed_rows",
+        "experiment_unrutted_fill_buffer",
+        "protected_baseline_files",
+        "unchanged_source_files",
+        "reconciliation",
+        "params",
+        "input_sha256"
+      ],
+      "completed_profiles": 1,
+      "summary_profiles": 2,
+      "target_ids": [
+        28
+      ],
+      "selection": {
+        "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
+        "source_features": 55,
+        "excluded": [
+          {
+            "OSUNUM": "6",
+            "sha256": "b30f47d5562e899813769eb37c84be30f9a242d429c8aa6f87c534d791902b22",
+            "reason": "reviewed_non_positive_upstream_ofe_control"
+          }
+        ],
+        "input_features": 54
+      },
+      "reconciliation": {
+        "modeled_area_m2": 441813.35000000003,
+        "target_modes": {
+          "unchanged": 65,
+          "replacement": 1
+        },
+        "mean_annual_mm": {
+          "Precipitation": 2097.6310575208117,
+          "Runoff": 188.06177916845428,
+          "Lateral Flow": 1210.882320896709,
+          "Baseflow": 94.48963524950216,
+          "Percolation": 82.640827067867,
+          "ET": 606.2348708792695
+        },
+        "baseline_mean_annual_mm": {
+          "Precipitation": 2097.6314794731074,
+          "Runoff": 191.6924476920808,
+          "Lateral Flow": 1223.8857787160473,
+          "Baseflow": 75.03501141984354,
+          "Percolation": 62.88012748171036,
+          "ET": 609.2094471654555
+        },
+        "baseline_area_m2": 441820.2900000001,
+        "daily_area_water_reconciliation": true
+      },
+      "actual_daily_reconciliation_passed": true,
+      "unchanged_source_files": 2383,
+      "unchanged_baseline_files": 911,
+      "input_difference_count": 3,
+      "input_difference_only_root_paths_in_err_logs": true,
+      "tables": [
+        {
+          "table": "H.accounting.wat.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "50ef8ffda8154f4c6ff7336b0161d75545da5fa18202cb3bed7c19ec1f0a3d15",
+          "fresh_sha256": "f1a8e7a0e20d968cda636cdf3e144b20b661a3ad22b97d4ec7de30ece4bcc686"
+        },
+        {
+          "table": "H.ebe.parquet",
+          "rows": 791,
+          "columns": 20,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "d2ffdca92f1c373893a9fd9ed08ab16a0b642310b2775f9bc9ee9c9fda7e60e9",
+          "fresh_sha256": "77cd54ca6036a5f7da620489fbc94dcaa785deec04b3acd7f45bc6c8a5c8b79f"
+        },
+        {
+          "table": "H.element.parquet",
+          "rows": 3275,
+          "columns": 30,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "a6a4b1b8c034da4f4bfe8763bf5e2908bdea57e718e27e95ba03dbfbf4d4cfa4",
+          "fresh_sha256": "c7bd6695799460334a4af772ce1ef5748bffe77ce427e184867f5e70a0fc25ae"
+        },
+        {
+          "table": "H.loss.parquet",
+          "rows": 10,
+          "columns": 11,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "720afe7464b6b96b45c5ca40e4ff2247be9807341db113b59fa1de08e1088f10",
+          "fresh_sha256": "40d02a75d1798364c31b14fd16c3da86d9dcc7d07edf9c71ab848056b96dbf69"
+        },
+        {
+          "table": "H.pass.parquet",
+          "rows": 397392,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "1d49e5a3915598d2cc4f79d9937f9f1bd5db35b80b315467428f154770f50c61",
+          "fresh_sha256": "0ac5bc81fcbe7300628609b7c61b5b503aa6b7398693fd197ea2121e381b6949"
+        },
+        {
+          "table": "H.soil.parquet",
+          "rows": 23376,
+          "columns": 21,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "4b226df489522771f67a32cdb83d8896dd65ae9e63e3a1187aef877f7a2960e1",
+          "fresh_sha256": "b7515604628ba9e7ae23cc10cf9148cec8df13e9b6f77054f5fb975c670f2acc"
+        },
+        {
+          "table": "H.wat.parquet",
+          "rows": 23376,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "601c5871bbe31a1c1b2209d58f7da5bfd5f7df0535d1909c4b57651b2b7554d2",
+          "fresh_sha256": "a638661218b4fd5bd41afeeae50b8de9b18822375bb0d0b7a74a61465484c61b"
+        },
+        {
+          "table": "ebe_pw0.parquet",
+          "rows": 5844,
+          "columns": 15,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "4980497bdd1e46553720dba81c4055ce79e46f08807ffaab00e22dd9762c5bb4",
+          "fresh_sha256": "e5a30a150bd10d101e8e3242ebbde2e9bb91e35a0e89d548a7750d718026177b"
+        },
+        {
+          "table": "loss_pw0.all_years.chn.parquet",
+          "rows": 432,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "eb517659a533884860fbfdf940ceb20120752f1505ee9be24b7aa934a6a378f0",
+          "fresh_sha256": "9d047afb59c41d54a4babe4951930c6fe1524d43480f35b86a2a0c71feb0f66a"
+        },
+        {
+          "table": "loss_pw0.all_years.class_data.parquet",
+          "rows": 80,
+          "columns": 9,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "5eb9eabc6f35c0b0d2ce4bf991192b9be14b7365063ca6b89d98fa69bf3d2620",
+          "fresh_sha256": "9394cc4edd9c386bd5e5929c140e1802ebb7c6ce5fc06896dcf4b7d65c30e767"
+        },
+        {
+          "table": "loss_pw0.all_years.hill.parquet",
+          "rows": 1056,
+          "columns": 13,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "7c05074cc23aff56fff873c6246d6a8a89bf18ffc0ef4ec70a70607f330e9219",
+          "fresh_sha256": "64e37f053d72f56d632ca2b8887b16ef1d6b5628cafb5a13450a75bcf0306f86"
+        },
+        {
+          "table": "loss_pw0.all_years.out.parquet",
+          "rows": 144,
+          "columns": 4,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "3543dd0d6e119bf3fb016e112e2cec75ee9d67219c0e86a7a81573046eaca1b2",
+          "fresh_sha256": "c81c5c5f1f83d8078a40c292212e406701cc2709272c23f62e58cef763a3a79d"
+        },
+        {
+          "table": "loss_pw0.chn.parquet",
+          "rows": 27,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "28c5ff7c3ce8c76747f35d339817709e14eca7c62353ae57c2e5c6f12d524a02",
+          "fresh_sha256": "f5b210acde841a95fd95558ec10ddce8a033c61b21c069a14db8c447778310e9"
+        },
+        {
+          "table": "loss_pw0.class_data.parquet",
+          "rows": 5,
+          "columns": 8,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "74016895ebde1dc9a8a595e72dd7446ad299dc7cbf6098ab3e99df5141bf8b17",
+          "fresh_sha256": "25c0ac51decc455cc8c662c36dd9a3a35397d59b1a9511eafd5b2477668a4db0"
+        },
+        {
+          "table": "loss_pw0.hill.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "f0718fa4318b40de91d85c3c7134fdfe251313bba06da2d9fa2687572f9a499a",
+          "fresh_sha256": "1c546d9d16b19c8e19800dbe5f5969e1cd9bd9f043ca6698201a32a2fbf0d037"
+        },
+        {
+          "table": "loss_pw0.out.parquet",
+          "rows": 11,
+          "columns": 3,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "d4cc6bea7f176e68a3640af2dde44b850e19efaf73318607ddda4ec6e3c5f279",
+          "fresh_sha256": "04e0ce63468f9c7dae01fb6399e3d321cbe193847eced4934ac7f1c7f2ec8f55"
+        },
+        {
+          "table": "pass_pw0.events.parquet",
+          "rows": 385704,
+          "columns": 32,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "e4be963a517755e1d9498ef919e7f770ebcfe450b5c054e7b35d785db2aad0ef",
+          "fresh_sha256": "a25acd0f353df80dcce0aba8a5e44f90395707cc668b964421ca388c611ca2aa"
+        },
+        {
+          "table": "pass_pw0.metadata.parquet",
+          "rows": 66,
+          "columns": 12,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "fade603bc691f9f5f11f862ba40bb6075a3a26ef0d6cf01818d866eeaec8989b",
+          "fresh_sha256": "b452a53953c5a88a92a1b0ed9077ee3ca847374e8d43ae828ab750abcca85bd7"
+        },
+        {
+          "table": "roads_segment_loss_summary.parquet",
+          "rows": 2,
+          "columns": 34,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [
+            "source_sha256"
+          ],
+          "prior_sha256": "04da5b9db39e3b87b2cd7bd5c1d2ae181db9e76410155593237409388b7ca918",
+          "fresh_sha256": "0c055ad4359ee9934cbadb7d626c784ff6b4536da105df141a0f46481b4d1796"
+        },
+        {
+          "table": "totalwatsed3.parquet",
+          "rows": 5844,
+          "columns": 79,
+          "arrow_values_exactly_equal": true,
+          "arrow_schema_exactly_equal": true,
+          "metadata_fields_changed": [],
+          "prior_sha256": "3ed0260d4698eb3de2cfa879e85d5f0549affd942318cfaeae7ce2cedfd0205c",
+          "fresh_sha256": "c4970883f4498a08dcb23330fc809ba3bb4dd2adc402bb5b07d62902039e5528"
+        }
+      ]
+    }
+  ],
+  "negative_control": {
+    "root": "/wc1/runs/ro/roads-validation-oct23-v2-unrutted",
+    "source_upload_sha256": "8c25c4938f8142395df6be7703bc0ddf2a8ff3f28bf7cb3b2ffa71b5f4385405",
+    "input_features": 55,
+    "excluded_features": 0,
+    "failed_records": [
+      {
+        "design": "outslope_unrutted",
+        "inclusion_ratio": 0.8373128747729807,
+        "overlap_length_m": 42.45271521264654,
+        "reason": "failed_non_positive_top_ofe",
+        "routing_mode": "outslope_unrutted_replacement",
+        "segment_hillslope_id": "roads-seg-000001::h271",
+        "segment_id": "roads-seg-000001",
+        "status": "failed",
+        "target_hillslope_topaz_id": 271,
+        "target_hillslope_wepp_id": 61
+      },
+      {
+        "design": "outslope_unrutted",
+        "inclusion_ratio": 0.9443416438818563,
+        "overlap_length_m": 69.63586176871127,
+        "reason": "failed_non_positive_top_ofe",
+        "routing_mode": "outslope_unrutted_replacement",
+        "segment_hillslope_id": "roads-seg-000001::h272",
+        "segment_id": "roads-seg-000001",
+        "status": "failed",
+        "target_hillslope_topaz_id": 272,
+        "target_hillslope_wepp_id": 62
+      }
+    ],
+    "manifest_relpath": "wepp/roads/history/b8aba5dc0bed4ef3831a6a52192170d2/wepp/roads/segments/roads.segment.pass.manifest.json",
+    "manifest_sha256": "4dc268e92188559c69602e31d05d570ce21bb3297dde32ee1e3bf9f4619d54db",
+    "current_receipt_absent": true,
+    "unchanged_source_files": 2383,
+    "unchanged_baseline_files": 911
+  },
+  "publication_readback": {
+    "reviewed_utc": "2026-10-23T21:59:50.567679+00:00",
+    "published_generated_utc": "2026-10-23T21:57:58.480826+00:00",
+    "status": "passed",
+    "provenance_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
+    "results_sha256": "1735920cb524f8ac11bb7161c9e05a1b6806d849fb96b482dca788d0ba815e62",
+    "report_sha256": "1a8bf2fc0b1bcd6eaac06fcf0e6d22c0a302a7e8daa5235c6078a2947579e941",
+    "vendor_sha256": "1a8bf2fc0b1bcd6eaac06fcf0e6d22c0a302a7e8daa5235c6078a2947579e941",
+    "approved_analysis_sha256_unchanged": true,
+    "case_payload_matches_approved_analysis": true,
+    "case_artifact_identities_match_approved_analysis": true,
+    "current_source_and_native_identities_verified": true,
+    "all_four_validation_json_digests_unchanged": true,
+    "published_project_records_match_approved_validation": true,
+    "project_summary_and_totalwatsed_hashes_match_approval": true,
+    "negative_control_matches_approval": true,
+    "report_render_matches_payload": true,
+    "usersum_vendor_bytes_match": true,
+    "usersum_role_navigation_and_link_preserved": true
+  }
+}

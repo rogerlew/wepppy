@@ -18,7 +18,7 @@ from wepppy.config.secrets import require_secret
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.core import Climate, ClimateMode, Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     "OpenETNoDbLockedException",
@@ -546,7 +546,7 @@ class OpenET_TS(NoDbBase):
                 compression="snappy",
                 index=False,
             )
-            update_catalog_entry(self.wd, "openet/openet_ts.parquet")
+            request_catalog_refresh(self.wd, "openet/openet_ts.parquet")
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.fetch_openet_ts)
 

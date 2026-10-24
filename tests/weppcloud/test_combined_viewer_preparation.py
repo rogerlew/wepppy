@@ -100,3 +100,33 @@ def test_rollback_rejects_manifest_source_deletion(tmp_path):
         rollback(root)
     assert (root / 'READONLY').read_text() == 'keep me'
     assert (root / '_query_engine/catalog.json').exists()
+
+
+@pytest.mark.parametrize('operation', ['prepare', 'rollback'])
+def test_offline_operation_waits_for_shared_catalog_guard(tmp_path, monkeypatch, operation):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    import wepppy.weppcloud.combined_viewer_preparation as preparation
+    from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
+    root = tmp_path / 'runs' / 'demo'
+    root.mkdir(parents=True)
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([{
+        'path': str(tmp_path / 'runs'), 'namespace': 'offline-test', 'layout': 'flat',
+        'coordination': str(tmp_path / 'coordination'),
+    }]))
+    entered = Event()
+    started = Event()
+    monkeypatch.setattr(preparation, '_' + operation + '_guarded', lambda _wd: entered.set())
+
+    def invoke():
+        started.set()
+        getattr(preparation, operation)(root)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        with catalog_lifecycle_guard(root):
+            future = executor.submit(invoke)
+            assert started.wait(5)
+            assert not entered.wait(0.1)
+        future.result(timeout=5)
+    assert entered.is_set()

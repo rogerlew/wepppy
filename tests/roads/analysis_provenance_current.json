@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-23T17:15:49.598557+00:00",
+  "generated_utc": "2026-10-23T21:57:58.480826+00:00",
   "source_sha256": {
     "tests/roads/__init__.py": "bef705ed73208990edbfc6d17dcb3840f089f0b81eb745b82fc83022dc478848",
     "tests/roads/analysis_context.md": "4c6d2879e5a2c349b9d8cb4a6b2f1b13bb66dccbd9b94908b307a4f3426a127c",
@@ -62,7 +62,7 @@
     "wepppy/nodb/mods/roads/monotonic_segments.py": "2b8d6be522233b6444ca21639dfc46a63775125178f97241cc8c4120f911ad5f",
     "wepppy/nodb/mods/roads/roads.py": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
     "wepppy/wepp/interchange/__init__.py": "58d56d3715cb2274982c55d8b7246c29eae5d97c1717dd78ab83b702967229c0",
-    "wepppy/wepp/interchange/_roads_lifecycle.py": "94b17afb10e8686afbcc9308e1893bc27e5dd924d87ebe9c5142aeca018e6836",
+    "wepppy/wepp/interchange/_roads_lifecycle.py": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
     "wepppy/wepp/interchange/_rust_interchange.py": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
     "wepppy/wepp/interchange/_utils.py": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
     "wepppy/wepp/interchange/ag_fields_interchange.py": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
@@ -72,7 +72,7 @@
     "wepppy/wepp/interchange/hec_ras_buffer.py": "efdd053a477f97893d08ab05774b4914960277bcbbde0db3e95d88c12b00d684",
     "wepppy/wepp/interchange/hill_ebe_interchange.py": "7439dcf7faf97208cac29db6f0eb99159347a2c4c30ff46d521c4b5c96ca8bc4",
     "wepppy/wepp/interchange/hill_element_interchange.py": "3ef87fd496be28350d7ef404242ee2fc2baeeee8e48a756d5dba1400ce7e8a07",
-    "wepppy/wepp/interchange/hill_interchange.py": "0b09d2e5681a4d618b679383b9a9baa232da19f158a9b22a4d6fd312ad502e92",
+    "wepppy/wepp/interchange/hill_interchange.py": "90532e628cdb5bfb12c7c103b6ef4cb898a5517467527406addf3a770ec3d8e0",
     "wepppy/wepp/interchange/hill_loss_interchange.py": "ab7eab3500a07c57d3fb16b2ae914680f17e44ac04940202fbad5d5db22c4473",
     "wepppy/wepp/interchange/hill_pass_interchange.py": "92f9a271c1965122d4e13899aeac52fa6f512ef468257664d822c16c62b4c30a",
     "wepppy/wepp/interchange/hill_soil_interchange.py": "248e885dca8d33a7a980fc8c409061c8356fc98887979e41a12677ba6b7e1e96",
@@ -88,7 +88,7 @@
     "wepppy/wepp/interchange/watershed_chanwb_interchange.py": "21249f4c9107998e8e51c02370b347163e971ef3cafb9beb4c52be48ab7ee6b0",
     "wepppy/wepp/interchange/watershed_chnwb_interchange.py": "9b31a662d3a7f8ea5d275518f5c20da22dcb07dc15e37c38ab0e09b727f7b05b",
     "wepppy/wepp/interchange/watershed_ebe_interchange.py": "980571185a6b1da4303705b32bb2e7f38352817321ed428528c72863a6e0e3bb",
-    "wepppy/wepp/interchange/watershed_interchange.py": "cef3631a67f18f1ab0ca5edef204c5f5f7668b861a5b8b410f74cce5c6968624",
+    "wepppy/wepp/interchange/watershed_interchange.py": "b75810487c116124b543f765376a92229874df4b0764a076fa14e6086d763b12",
     "wepppy/wepp/interchange/watershed_loss.py": "899a499a8750a6750f7163e58d31fa6ae1e6ffbab364daf3cb3e8d67d106dfce",
     "wepppy/wepp/interchange/watershed_loss_interchange.py": "c2eed0ad152eed2a2a637661d9e663dcbc1705b6050f802f08d974d0b3902914",
     "wepppy/wepp/interchange/watershed_pass_interchange.py": "262541119873181b7e230408478a561d366bc30344728a29c1e2e79e7fba4e95",
@@ -188,7 +188,7 @@
       "wepppy/nodb/mods/roads/monotonic_segments.py": "2b8d6be522233b6444ca21639dfc46a63775125178f97241cc8c4120f911ad5f",
       "wepppy/nodb/mods/roads/roads.py": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
       "wepppy/wepp/interchange/__init__.py": "58d56d3715cb2274982c55d8b7246c29eae5d97c1717dd78ab83b702967229c0",
-      "wepppy/wepp/interchange/_roads_lifecycle.py": "94b17afb10e8686afbcc9308e1893bc27e5dd924d87ebe9c5142aeca018e6836",
+      "wepppy/wepp/interchange/_roads_lifecycle.py": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
       "wepppy/wepp/interchange/_rust_interchange.py": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
       "wepppy/wepp/interchange/_utils.py": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
       "wepppy/wepp/interchange/ag_fields_interchange.py": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
@@ -198,7 +198,7 @@
       "wepppy/wepp/interchange/hec_ras_buffer.py": "efdd053a477f97893d08ab05774b4914960277bcbbde0db3e95d88c12b00d684",
       "wepppy/wepp/interchange/hill_ebe_interchange.py": "7439dcf7faf97208cac29db6f0eb99159347a2c4c30ff46d521c4b5c96ca8bc4",
       "wepppy/wepp/interchange/hill_element_interchange.py": "3ef87fd496be28350d7ef404242ee2fc2baeeee8e48a756d5dba1400ce7e8a07",
-      "wepppy/wepp/interchange/hill_interchange.py": "0b09d2e5681a4d618b679383b9a9baa232da19f158a9b22a4d6fd312ad502e92",
+      "wepppy/wepp/interchange/hill_interchange.py": "90532e628cdb5bfb12c7c103b6ef4cb898a5517467527406addf3a770ec3d8e0",
       "wepppy/wepp/interchange/hill_loss_interchange.py": "ab7eab3500a07c57d3fb16b2ae914680f17e44ac04940202fbad5d5db22c4473",
       "wepppy/wepp/interchange/hill_pass_interchange.py": "92f9a271c1965122d4e13899aeac52fa6f512ef468257664d822c16c62b4c30a",
       "wepppy/wepp/interchange/hill_soil_interchange.py": "248e885dca8d33a7a980fc8c409061c8356fc98887979e41a12677ba6b7e1e96",
@@ -214,7 +214,7 @@
       "wepppy/wepp/interchange/watershed_chanwb_interchange.py": "21249f4c9107998e8e51c02370b347163e971ef3cafb9beb4c52be48ab7ee6b0",
       "wepppy/wepp/interchange/watershed_chnwb_interchange.py": "9b31a662d3a7f8ea5d275518f5c20da22dcb07dc15e37c38ab0e09b727f7b05b",
       "wepppy/wepp/interchange/watershed_ebe_interchange.py": "980571185a6b1da4303705b32bb2e7f38352817321ed428528c72863a6e0e3bb",
-      "wepppy/wepp/interchange/watershed_interchange.py": "cef3631a67f18f1ab0ca5edef204c5f5f7668b861a5b8b410f74cce5c6968624",
+      "wepppy/wepp/interchange/watershed_interchange.py": "b75810487c116124b543f765376a92229874df4b0764a076fa14e6086d763b12",
       "wepppy/wepp/interchange/watershed_loss.py": "899a499a8750a6750f7163e58d31fa6ae1e6ffbab364daf3cb3e8d67d106dfce",
       "wepppy/wepp/interchange/watershed_loss_interchange.py": "c2eed0ad152eed2a2a637661d9e663dcbc1705b6050f802f08d974d0b3902914",
       "wepppy/wepp/interchange/watershed_pass_interchange.py": "262541119873181b7e230408478a561d366bc30344728a29c1e2e79e7fba4e95",
@@ -223,18 +223,18 @@
       "wepppy/wepp/interchange/watershed_totalwatsed_export.py": "305863a39842b10469c83caf5a3427cb4736456deb49a70b89ce91c0295cd551"
     },
     "native_sha256": {
-      "wepp_interchange_rust.so": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e"
+      "wepp_interchange_rust.so": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
     }
   },
   "native_sha256": {
-    "wepp_interchange_rust.so": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e"
+    "wepp_interchange_rust.so": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
   },
-  "matrix_root": "/tmp/roads-matrix-verified-oct23/roads_matrix0",
+  "matrix_root": "/tmp/roads-qcat-async-20261023/roads_matrix0",
   "project_roots": [
-    "/wc1/runs/ro/roads-validation-oct23-v2-bd",
-    "/wc1/runs/ro/roads-validation-oct23-v2-rd",
-    "/wc1/runs/ro/roads-validation-oct23-v2-rutted",
-    "/wc1/runs/ro/roads-validation-oct23-unrutted-positive"
+    "/wc1/runs/ro/roads-qcat-async-20261023-bd",
+    "/wc1/runs/ro/roads-qcat-async-20261023-rd",
+    "/wc1/runs/ro/roads-qcat-async-20261023-rutted",
+    "/wc1/runs/ro/roads-qcat-async-20261023-unrutted"
   ],
   "case_artifacts": [
     {
@@ -12106,12 +12106,6 @@
       }
     }
   ],
-  "results_sha256": "f8fed5c145c507548db0c331e1d7e603a9f54cd72e399db5bef930b6203dab11",
-  "report_sha256": "69ac12140d779b92ed06c383adeb671a0ab4ab5f81b1dfd23541040d59bdc32b",
-  "interpretation_revision": {
-    "previous_report_sha256": "7461a96d06d2869d8f230790adc6bccc48bb85606a9d53f63d251e5785074498",
-    "previous_context_sha256": "9e02992a1e55038ccc2cf356adbdd6f4f9eb6694efb39ab8ac3af0a4cf11f20f",
-    "native_analysis_utc": "2026-10-23T17:13:57.836923+00:00",
-    "review": "Independent accounting reviewer: qualify near-zero denominator in no-traffic/low-traffic contrast; all native metrics independently reconciled."
-  }
+  "results_sha256": "1735920cb524f8ac11bb7161c9e05a1b6806d849fb96b482dca788d0ba815e62",
+  "report_sha256": "1a8bf2fc0b1bcd6eaac06fcf0e6d22c0a302a7e8daa5235c6078a2947579e941"
 }

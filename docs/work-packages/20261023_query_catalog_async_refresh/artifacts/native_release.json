@@ -1,0 +1,31 @@
+{
+  "source_base_revision": "c941cb6f17884904bf1420ad0ed8a808bac5c330",
+  "contract_checkpoint": "dc2b2ddbe8cfedbd4bae024310f03447ca813c32",
+  "prior_binary_sha256": "4ae01a243bebb596e6bf719626804a04e8ebdced7d9134e170f2af2a1bd31b6e",
+  "binary_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+  "source_sha256": {
+    "wepp_interchange/src/lib.rs": "0f57ebd7b31f8f4447a91fbed7fcdc5db80eb535267a1118c9ca3118626a8f2b",
+    "wepp_interchange/src/catalog.rs": "f688eca2073a8c276fd4fe62adc166535cb6060670e5ec26e7a4a46c1b02f83c",
+    "wepp_interchange/src/calendar.rs": "8e811b51f51cdbf9189986732dd7fcf789ae6b548d01afcc9b7fa9c8f6bb4a0b",
+    "wepp_interchange/src/hill_hbp.rs": "2b5ec9cb7a8498d6c3386378d845d6cd343845e489030f3b3f58720c675d1b73"
+  },
+  "unrelated_source_edits_included": [
+    "wepp_interchange/src/calendar.rs",
+    "wepp_interchange/src/hill_hbp.rs"
+  ],
+  "build_command": "PYO3_PYTHON=/home/workdir/wepppy/.venv/bin/python PYTHON_SYS_EXECUTABLE=/home/workdir/wepppy/.venv/bin/python cargo build --release --offline -p wepp_interchange_rust -j4",
+  "publication": "same-directory staging and atomic rename",
+  "production_deployment": false,
+  "validation": {
+    "pre_refresh_python_regressions": "2 failed: catalog maintenance indexed and heartbeat starved (0.191 s scan)",
+    "python_release_regressions": "2 passed; real 12000-entry traversal permits Python heartbeat; Parquet schema and maintenance exclusion readback pass",
+    "rust_tests": "111 unit tests and 17 integration tests passed",
+    "rust_command": "PYO3_PYTHON=/home/workdir/wepppy/.venv/bin/python RUSTFLAGS='-C link-arg=-lpython3.12' cargo test --offline -p wepp_interchange_rust",
+    "python_command": "PYTHONPATH=release/linux/py312 /home/workdir/wepppy/.venv/bin/python -m pytest tests/wepp_interchange/test_catalog_refresh.py -q",
+    "format": "rustfmt --check --edition 2021 --config skip_children=true wepp_interchange/src/lib.rs wepp_interchange/src/catalog.rs passed",
+    "diff_check": "passed",
+    "environment_limit": "Local filesystem heartbeat/parity only; NFS production-equivalent workflow remains parent implementation gate"
+  },
+  "native_commit": "47e51b8e73146872056b68934977db56d91c9119",
+  "commit_scope_note": "Catalog source, test and paired build committed; preexisting calendar/HBP and module-registry source edits remain unstaged. Dirty-input provenance retained; no production readiness claim."
+}

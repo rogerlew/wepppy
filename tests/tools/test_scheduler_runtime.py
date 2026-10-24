@@ -285,3 +285,15 @@ def test_wmesque_uses_coalesced_enqueue(monkeypatch):
     spec = scheduler._normalize_tasks([config], {})[0]
     assert scheduler._enqueue_task(_RecordingQueue('batch', object()), scheduler.TaskState(spec, None, 0))
     assert calls == [{'timeout':3600, 'result_ttl':86400}]
+
+
+def test_query_catalog_reconciliation_dispatches_bounded_inventory(monkeypatch):
+    from wepppy.rq import query_catalog_rq
+    calls = []
+    monkeypatch.setattr(query_catalog_rq, "reconcile_query_catalogs", lambda **kwargs: calls.append(kwargs) or {})
+    config = {"name": "query_catalog", "func": "wepppy.rq.query_catalog_rq.reconcile_query_catalogs",
+              "interval_seconds": 30, "enabled": True, "queue": "batch"}
+    spec = scheduler._normalize_tasks([config], {})[0]
+    queue = _RecordingQueue("batch", object())
+    assert scheduler._enqueue_task(queue, scheduler.TaskState(spec, None, 0))
+    assert calls == [{"queue": queue}]

@@ -4,16 +4,7 @@ import time
 
 import pytest
 
-import importlib.util
-import sys
-from pathlib import Path
-
-MODULE_PATH = Path(__file__).resolve().parents[2] / "wepppy" / "weppcloud" / "utils" / "auth_tokens.py"
-spec = importlib.util.spec_from_file_location("wepppy.weppcloud.utils.auth_tokens", MODULE_PATH)
-auth_tokens = importlib.util.module_from_spec(spec)
-sys.modules["wepppy.weppcloud.utils.auth_tokens"] = auth_tokens
-assert spec.loader is not None
-spec.loader.exec_module(auth_tokens)
+from wepppy.weppcloud.utils import auth_tokens
 
 pytestmark = pytest.mark.unit
 

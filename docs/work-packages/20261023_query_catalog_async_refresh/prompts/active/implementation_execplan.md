@@ -6,37 +6,45 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep P
 
 Remove catalog traversal from eligible artifact-producing requests without losing updates, breaking immediate reports, or allowing old background work to publish into a replaced project. Reproduce the Mill Creek submission failure on an isolated copy; prove responsive submission, actual model execution and correct catalog-backed consumption after repair.
 
-The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. This scaffold does not start implementation or authorize production deployment/repair. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
+The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. The operator subsequently instructed execution of this plan; implementation and validation are now active. Production deployment/repair remain separately authorized. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
 
 ## Progress
 
 - [x] 2026-10-23 UTC: Contract and independent reviews committed as standalone ancestor `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`.
 - [x] 2026-10-23 UTC: Caller inventory and all ten review dispositions retained; execution plan, launch prompt and evidence matrix scaffolded.
-- [ ] M0: Revalidate source inventory, native baseline, environment and implementation ownership.
-- [ ] M1: Implement coordinated atomic publication and lifecycle identity, plus native GIL release.
-- [ ] M2: Implement durable invalidation, coalesced admission, worker and recovery.
-- [ ] M3: Implement internal freshness barriers and safe maintenance status.
-- [ ] M4: Migrate incident producer wave and prove immediate consumers.
-- [ ] M5: Migrate remaining eligible managed producers; preserve offline APIs.
-- [ ] M6: Complete failure/race, artifact/browser/archive and regression validation; independent implementation reviews.
-- [ ] M7: Record deployment/recovery readiness; deployment and production repair remain separately authorized actions.
+- [x] 2026-10-23 UTC: Reviewed implementation clarification checkpoint `9435cd2cb` preserves explicit source authority and concurrent Roads reads; independent correctness/security evidence retained.
+- [x] 2026-10-23 UTC: M0 ancestry/source/host baseline and explicit agent ownership recorded; additional lifecycle entry points incorporated. Production-equivalent acceptance remains in M6.
+- [x] 2026-10-23 UTC: M1 implemented and locally validated, including native parity/GIL tests, cross-host NFS and thread guards, lifecycle/READONLY/archive regressions. Production identity parity remains a rollout gate.
+- [x] 2026-10-23 UTC: M2 implemented; 26 real Redis tests plus actual producer SIGKILL-before-receipt recovery and malformed-catalog repair passed. Fleet capacity and companion configuration remain rollout preflights.
+- [x] 2026-10-23 UTC: M3 barriers, malformed-catalog repair and sanitized maintenance status implemented. Final consolidated suite: 293 passed, 2 opt-in benchmark skips, including real Redis, query/report, producer and readonly tests.
+- [ ] M4: Producer wave implemented; isolated submissions and 1,908-hillslope query/summary/download pass. Full model acceptance blocked: watershed failed at year 100 with SOURCES3 date mismatch; water-balance consumption also rejects duplicate daily records in raw model output.
+- [x] 2026-10-23 UTC: M5 family dispositions and explicit producer migrations complete; 162 focused plus 32 RUSLE/Omni tests passed, retained synchronous callers documented.
+- [ ] M6: Local failure/race, browser/archive, segmented regression and independent reviews complete; full scientific workflow and production-equivalent acceptance remain unproved.
+- [x] 2026-10-23 UTC: M7 handoff records release HOLD, exact source/native provenance and recovery/preflight requirements; no deployment or production repair.
 
 ## Surprises & Discoveries
 
 The apparent soil writer stall followed a fast Parquet write. A missing catalog invoked native traversal of 4,561 NFS-backed files, holding the GIL long enough to miss Uvicorn's five-second heartbeat. Production probes measured 8.56 s scan and 5.70 s heartbeat gap; local temporary Parquet write was 0.011 s, not an NFS write benchmark.
 
+Actual cross-host testing found `flock` did not exclude an NFS client from a server-local filesystem contender. POSIX `lockf` with per-owner thread coordination passed both cross-host and same-process tests. Independent review also exposed same-size/mtime schema replacement and parent-to-child source override cases; strict barriers must read actual source schema and select the current authorized source.
+
 Existing report helpers generally check missing catalog membership, not freshness of already-indexed schemas/paths. Existing restore deletes `_query_engine`, so a lock there cannot fence managed lifecycle replacement. Queue deduplication alone cannot recover a crash between artifact publication and invalidation.
+
+The unchanged 184-year isolated model produced duplicate daily observations in raw `H1.wat.dat` beginning simulation year 104. The strict water-balance report rejects those observations; catalog query, authenticated summary and exact-byte download pass. The watershed then failed at simulation year 100 at 22:59:54 UTC with `PASS components error: SOURCES3 date mismatch` and `STOP 1`. Original production raw output is absent, so baseline attribution is unproved; the paired native build also includes explicitly recorded preexisting calendar/HBP edits. The scoped supervisor stopped on failure without finalization. Retain these acceptance limitations without changing scientific inputs or weakening validation.
 
 ## Decision Log
 
 - 2026-10-23 / operator and reviewed checkpoint: Async preferred for eligible producer notifications; preserve explicit synchronous APIs and externally synchronous readers/finalizers.
 - 2026-10-23 / reviewed contract: Durable immutable receipt acknowledgment plus recurring source reconciliation; Redis admission/discovery is not sole durable intent.
 - 2026-10-23 / reviewed contract: Stable external managed-owner guard; standalone local mode only outside managed identity/roots; preserve READONLY offline preparation exception.
+- 2026-10-23 / implementation review: Preserve explicit permitted parent `fs_path` selection without a matching producer receipt; captured producer intent and full recurring reconciliation advance canonical child selection. Canonical Reader freshness section retains the rationale.
+- 2026-10-23 / implementation: Enabled mode requires explicit root configuration; unavailable configured namespaces are degraded and retried. Default remains disabled. ADR-0104 records provisional operational bounds and required fleet measurement.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
+- 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 
 ## Outcomes & Retrospective
 
-Scaffold only. No runtime source edits, queue mutations, native builds, deployment or production repair. Contract ancestry gate is satisfied for future work based on this branch; runtime conformance remains pending.
+Runtime implementation complete across native/publication/queue/lifecycle/readers/polling/producers; correctness, security and QA findings closed. Consolidated suite passed 293 tests (2 opt-in benchmark skips); final metadata fix passed 70 focused tests and 17 independent security cases. Broad coverage completed in segments: the last full attempt passed 7,629 tests before exposing the corrected transaction-metadata bug, then the final remaining segment passed 5,108 tests/18 skips. This is not one green full-suite run. The unchanged Mill Creek model reached a terminal watershed date-mismatch failure at year 100; full workflow acceptance remains blocked, while submission and hillslope catalog consumers passed. No production deployment or repair. Runtime changes are committed with this implementation checkpoint; exact task-file hashes and paired native provenance are retained. Release remains on hold pending scientific acceptance and production parity.
 
 ## Context and Orientation
 
@@ -132,3 +140,7 @@ All probes use isolated copies and unique namespaces unless explicitly authorize
 ## Artifacts and Acceptance Claims
 
 Use `artifacts/execution_evidence.md` for status, exact commands, project IDs, timestamps, revisions and semantic readback. Record implemented, locally validated, environment validated, deployed, repaired and incident resolved separately. Persisted state/RQ success alone cannot prove output correctness. This package closes only after every selected migration row is implemented or explicitly retained synchronous, reviews are clear, and residual deployment/repair scope is accurately handed off.
+
+2026-10-23 revision note: recorded completed implementation/review and segmented regression, the transactional enqueue metadata correction, and the terminal scientific failure. M4/M6 remain open because successful catalog behavior cannot substitute for the failed full-workflow acceptance criterion. All isolated model workers stopped; private diagnostic artifacts remain available for follow-up.
+
+Commit/push handoff: user authorized committing and pushing the implementation. This checkpoint includes the reviewed task files and retained validation evidence; paired native commit is `47e51b8e73146872056b68934977db56d91c9119`. Earlier uncommitted-state notes are chronological. Scientific acceptance remains blocked, async rollout remains disabled, and no deployment or production repair is authorized by this push.

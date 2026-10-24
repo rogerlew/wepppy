@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+
 import errno
 import logging
 import os
@@ -67,6 +69,13 @@ def _delete_db_record(runid: str) -> None:
 
 
 def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = False, runtime: DeleteRuntime) -> None:
+    """Serialize deletion against catalog publishers without recreating a missing run."""
+    target = Path(wd or runtime.get_wd(runid)).resolve()
+    with catalog_lifecycle_guard(target, allow_missing=True):
+        _delete_run_guarded(runid, str(target), delete_files=delete_files, runtime=runtime)
+
+
+def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: DeleteRuntime) -> None:
     """Delete a run database record, optionally removing the run directory."""
     job = runtime.get_current_job()
     job_id = getattr(job, "id", "sync")

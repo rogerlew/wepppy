@@ -28,7 +28,7 @@ import pyarrow.parquet as pq
 from wepppy.nodb.base import NoDbBase
 
 
-from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.query_engine import request_catalog_refresh
 
 from .ashpost_documentation import generate_ashpost_documentation
 from .ashpost_versioning import (
@@ -302,7 +302,7 @@ class AshPost(NoDbBase):
             else:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
 
-        update_catalog_entry(self.wd, 'ash')
+        request_catalog_refresh(self.wd, 'ash')
         
     @property
     def meta(self) -> Mapping[str, Any]:

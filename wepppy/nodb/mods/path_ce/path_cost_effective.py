@@ -40,10 +40,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-try:
-    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except ImportError:  # pragma: no cover - optional dependency
-    _update_catalog_entry = None
+from wepppy.query_engine import request_catalog_refresh
 
 from wepppy.wepp.interchange.schema_utils import pa_field
 from wepppy.nodb.base import NoDbBase, nodb_setter
@@ -669,15 +666,5 @@ class PathCostEffective(NoDbBase):
         }
 
     def _refresh_catalog(self) -> None:
-        if _update_catalog_entry is None:
-            return
-        try:
-            relative_dir = str(self.path_dir.relative_to(self.wd))
-        except ValueError:
-            relative_dir = self.path_dir.name
-        try:
-            _update_catalog_entry(self.wd, relative_dir)
-        except Exception:  # pragma: no cover - best effort
-            LOGGER.warning(
-                "Failed to refresh catalog for PATH CE artifacts in %s", self.wd, exc_info=True
-            )
+        relative_dir = str(self.path_dir.relative_to(self.wd))
+        request_catalog_refresh(self.wd, relative_dir)

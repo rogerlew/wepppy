@@ -15,6 +15,10 @@ from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.utils import utcnow
 from wepppy.rq.run_catalog_rq import is_catalog_job, safe_job_details
+from wepppy.rq.query_catalog_disclosure import (
+    is_query_catalog_job, get_query_catalog_job_details,
+    safe_job_details as safe_query_catalog_details,
+)
 
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -103,7 +107,7 @@ def _build_queue_snapshot(
 
 
 def _resolve_runid(job: Job) -> str | None:
-    if is_catalog_job(job.id):
+    if is_catalog_job(job.id) or is_query_catalog_job(job.id):
         return None
     meta = job.meta if isinstance(job.meta, dict) else {}
     runid = meta.get("runid")
@@ -141,6 +145,8 @@ def recursive_get_job_details(
     queue_candidates: list[Tuple[str, str, str | None]] | None = None,
 ) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
+    if is_query_catalog_job(job.id):
+        return get_query_catalog_job_details(job.id, redis_conn)
     if is_catalog_job(job.id):
         return safe_job_details(job.id, job)
     elapsed_s = None
@@ -197,6 +203,12 @@ def recursive_get_job_details(
     for key, child_job_id in job.meta.items():
         if key.startswith('jobs:'):
             job_order = key.split(',')[0].split(':')[1]
+            if is_query_catalog_job(child_job_id):
+                child_job_info = get_query_catalog_job_details(child_job_id, redis_conn)
+                if child_job_info.get("status") == "not_found":
+                    child_job_info = None
+                job_info.setdefault("children", {}).setdefault(job_order, []).append(child_job_info)
+                continue
             try:
                 child_job = Job.fetch(child_job_id, connection=redis_conn)
                 child_job_info = (
@@ -241,6 +253,13 @@ def recursive_get_job_details(
 
 def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
     """Return the recursive job tree for a single job id."""
+    if is_query_catalog_job(job_id):
+        try:
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+                return get_query_catalog_job_details(job_id, connection)
+        except Exception:  # broad-except: reserved-job disclosure boundary, including connection setup.
+            logger.exception("Query catalog job polling failed job_id=%s", job_id)
+            return safe_query_catalog_details(job_id)
     if is_catalog_job(job_id):
         try:
             with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
@@ -296,6 +315,9 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
         for job_id in normalized_ids:
+            if is_query_catalog_job(job_id):
+                results[job_id] = get_query_catalog_job_details(job_id, redis_conn)
+                continue
             try:
                 job = Job.fetch(job_id, connection=redis_conn)
             except NoSuchJobError:
@@ -411,6 +433,23 @@ def _latest_timestamp_iso(*values: Any) -> str | None:
 
 def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
     """Return an aggregated status summary for a job tree rooted at ``job_id``."""
+    if is_query_catalog_job(job_id):
+        details = get_wepppy_rq_job_info(job_id)
+        if details.get("status") == "not_found":
+            return details
+        completed = int(details["status"] in {"finished", "failed", "stopped", "canceled"})
+        result = {
+            "job_id": job_id, "runid": None, "status": details["status"],
+            "started_at": details["started_at"], "ended_at": details["ended_at"],
+            "progress": {
+                "completed": completed, "total": 1, "unit": "jobs",
+                "percent": float(completed * 100),
+                "updated_at": _latest_timestamp_iso(details["ended_at"], details["started_at"]) or UNKNOWN_PROGRESS_UPDATED_AT,
+            },
+        }
+        if "error" in details:
+            result.update(error=details["error"], error_id=details["error_id"])
+        return result
     now = utcnow()
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:

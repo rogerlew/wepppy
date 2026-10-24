@@ -20,10 +20,7 @@ from .watershed_pass_interchange import run_wepp_watershed_pass_interchange
 from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
 from .versioning import remove_incompatible_interchange, write_version_manifest
 
-try:
-    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except Exception:  # pragma: no cover - optional dependency
-    _update_catalog_entry = None
+from wepppy.query_engine import request_catalog_refresh
 
 LOGGER = logging.getLogger(__name__)
 PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
@@ -165,15 +162,11 @@ def run_wepp_watershed_interchange(
 
     write_version_manifest(interchange_dir)
 
-    if _update_catalog_entry is not None:
-        try:
-            run_root = base.parents[1]
-        except IndexError:
-            run_root = base
-        try:
-            _update_catalog_entry(run_root, str(interchange_dir))
-        except Exception:  # pragma: no cover - best effort catalog sync
-            LOGGER.warning("Failed to refresh query engine catalog for %s", run_root, exc_info=True)
+    try:
+        run_root = base.parents[1]
+    except IndexError:
+        run_root = base
+    request_catalog_refresh(run_root, str(interchange_dir))
 
     if delete_after_interchange:
         log_path = base / "interchange.log"

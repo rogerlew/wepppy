@@ -64,8 +64,8 @@ def _install_stubbed_tasks(monkeypatch: pytest.MonkeyPatch, *, calls: list[str])
     )
     monkeypatch.setattr(
         watershed_interchange_module,
-        "_update_catalog_entry",
-        None,
+        "request_catalog_refresh",
+        lambda *_args, **_kwargs: None,
     )
 
 

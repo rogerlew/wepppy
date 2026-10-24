@@ -54,10 +54,7 @@ from .routing_schemes import (
 from os.path import exists as _exists
 from os.path import join as _join
 
-try:
-    from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except ImportError:  # pragma: no cover - optional dependency
-    _update_catalog_entry = None
+from wepppy.query_engine import request_catalog_refresh
 
 __all__ = [
     'AgFieldsNoDbLockedException',
@@ -298,15 +295,8 @@ class AgFields(NoDbBase):
                 if os.path.exists(staged_path):
                     os.unlink(staged_path)
 
-        if _update_catalog_entry is not None:
-            try:
-                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
-            except ValueError:
-                relative_path = 'ag_fields'
-            try:
-                _update_catalog_entry(self.wd, relative_path)
-            except Exception as exc:  # broad-except: optional catalog refresh must not reject a valid upload
-                self.logger.warning("Failed to refresh catalog for rotation schedule: %s", exc)
+        relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
+        request_catalog_refresh(self.wd, relative_path)
 
         return dict(field_id_duplicates=sorted(duplicates))
 

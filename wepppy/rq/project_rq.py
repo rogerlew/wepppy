@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.query_engine.catalog_refresh import catalog_guard_identity, catalog_lifecycle_guard
+
 """
 RQ tasks that manage project-level preparation, execution, and archival flows.
 
@@ -1133,89 +1135,106 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, readonly={readonly})')
 
     wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    previous_state = ron.readonly
-    prep = RedisPrep.tryGetInstance(wd)
+    with catalog_lifecycle_guard(wd):
+        ron = Ron.getInstance(wd)
+        previous_state = ron.readonly
+        prep = RedisPrep.tryGetInstance(wd)
 
-    try:
-        if prep is not None:
-            try:
-                prep.set_rq_job_id('set_readonly', job.id)
-                prep.remove_timestamp(TaskEnum.set_readonly)
-            except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
-                pass
+        try:
+            if prep is not None:
+                try:
+                    prep.set_rq_job_id('set_readonly', job.id)
+                    prep.remove_timestamp(TaskEnum.set_readonly)
+                except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
+                    pass
 
-        if readonly:
-            if not previous_state:
-                ron.readonly = True
+            if readonly:
+                if not previous_state:
+                    # The owner guard prevents new receipts until READONLY is visible.
+                    # Finish nested scopes too: freezing pending metadata would leave
+                    # strict readers unable to repair it without mutating a frozen run.
+                    from pathlib import Path
+                    from wepppy.query_engine.catalog_refresh import (
+                        pending_catalog_requests, refresh_catalog,
+                    )
+                    base = Path(wd).resolve()
+                    scopes = {base}
+                    scopes.update(marker.parents[2] for marker in
+                                  base.rglob('_query_engine/refresh/incarnation.json')
+                                  if not marker.is_symlink() and
+                                  marker.resolve().is_relative_to(base))
+                    for scope in sorted(scopes):
+                        if pending_catalog_requests(scope):
+                            refresh_catalog(scope)
+                    ron.readonly = True
 
-            if ron.is_child_run:
+                if ron.is_child_run:
+                    StatusMessenger.publish_command(
+                        runid,
+                        f'rq:{job.id} {MANIFEST_FILENAME} skipped (child run)'
+                    )
+                else:
+                    StatusMessenger.publish(
+                        status_channel,
+                        f'rq:{job.id} STATUS {MANIFEST_FILENAME} creation started'
+                    )
+                    with ron.timed('Create manifest'):
+                        create_manifest(wd)
+                        if not _exists(_join(wd, MANIFEST_FILENAME)):
+                            raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
+                    StatusMessenger.publish_command(
+                        runid,
+                        f'rq:{job.id} {MANIFEST_FILENAME} creation finished'
+                    )
+            else:
+                if previous_state:
+                    ron.readonly = False
+
+                remove_manifest(wd)
+                if _exists(_join(wd, MANIFEST_FILENAME)):
+                    raise RuntimeError(f'Unable to remove {MANIFEST_FILENAME}')
                 StatusMessenger.publish_command(
                     runid,
-                    f'rq:{job.id} {MANIFEST_FILENAME} skipped (child run)'
+                    f'rq:{job.id} {MANIFEST_FILENAME} removed'
                 )
-            else:
+
+            try:
+                from wepppy.weppcloud.utils.run_ttl import sync_ttl_policy
+
+                sync_ttl_policy(wd, touched_by="readonly")
+            except Exception as exc:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:346", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 StatusMessenger.publish(
                     status_channel,
-                    f'rq:{job.id} STATUS {MANIFEST_FILENAME} creation started'
+                    f'rq:{job.id} STATUS TTL sync failed ({exc})',
                 )
-                with ron.timed('Create manifest'):
-                    create_manifest(wd)
-                    if not _exists(_join(wd, MANIFEST_FILENAME)):
-                        raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
-                StatusMessenger.publish_command(
-                    runid,
-                    f'rq:{job.id} {MANIFEST_FILENAME} creation finished'
-                )
-        else:
-            if previous_state:
-                ron.readonly = False
 
-            remove_manifest(wd)
-            if _exists(_join(wd, MANIFEST_FILENAME)):
-                raise RuntimeError(f'Unable to remove {MANIFEST_FILENAME}')
-            StatusMessenger.publish_command(
-                runid,
-                f'rq:{job.id} {MANIFEST_FILENAME} removed'
-            )
+            if prep is not None:
+                try:
+                    prep.timestamp(TaskEnum.set_readonly)
+                except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
+                    pass
 
-        try:
-            from wepppy.weppcloud.utils.run_ttl import sync_ttl_policy
-
-            sync_ttl_policy(wd, touched_by="readonly")
-        except Exception as exc:
-            # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:346", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} STATUS TTL sync failed ({exc})',
-            )
-
-        if prep is not None:
-            try:
-                prep.timestamp(TaskEnum.set_readonly)
-            except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
-                pass
-
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, readonly={readonly})')
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:359", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        try:
-            if ron.readonly != previous_state:
-                ron.readonly = previous_state
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, readonly={readonly})')
         except Exception:
             # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:363", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            pass
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:359", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+            try:
+                if ron.readonly != previous_state:
+                    ron.readonly = previous_state
+            except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:363", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+                pass
 
-        failure_suffix = 'creation failed' if readonly else 'removal failed'
-        StatusMessenger.publish_command(
-            runid,
-            f'rq:{job.id} {MANIFEST_FILENAME} {failure_suffix}'
-        )
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, readonly={readonly})')
-        raise
+            failure_suffix = 'creation failed' if readonly else 'removal failed'
+            StatusMessenger.publish_command(
+                runid,
+                f'rq:{job.id} {MANIFEST_FILENAME} {failure_suffix}'
+            )
+            StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, readonly={readonly})')
+            raise
 
 
 @with_exception_logging
@@ -2911,7 +2930,11 @@ def fork_rq(
                 kwargs["skip_omni_scenarios_contrasts"] = True
             return _build_fork_rsync_cmd(run_right, **kwargs)
 
-        with project_config_lifecycle_guard(_project_config_authority_wd(runid)):
+        with ExitStack() as catalog_guards:
+            owners = {catalog_guard_identity(path): path for path in (get_wd(runid), new_wd)}
+            for owner in sorted(owners):
+                catalog_guards.enter_context(catalog_lifecycle_guard(owners[owner], allow_missing=True))
+            catalog_guards.enter_context(project_config_lifecycle_guard(_project_config_authority_wd(runid)))
             new_wd = _fork_helpers.prepare_fork_run(
                 runid,
                 new_runid,
@@ -2932,23 +2955,23 @@ def fork_rq(
                 build_rsync_cmd=_fork_rsync_command,
                 clean_env_for_system_tools=_clean_env_for_system_tools,
             )
-        if skip_omni_scenarios_contrasts:
-            if _fork_helpers._has_regular_fork_file(new_wd, "omni.nodb"):
-                _reset_forked_omni(new_runid, new_wd, status_channel)
-                _reset_forked_run_job_markers(
-                    new_runid,
-                    new_wd,
-                    status_channel,
-                    reset_redisprep=False,
-                )
+            if skip_omni_scenarios_contrasts:
+                if _fork_helpers._has_regular_fork_file(new_wd, "omni.nodb"):
+                    _reset_forked_omni(new_runid, new_wd, status_channel)
+                    _reset_forked_run_job_markers(
+                        new_runid,
+                        new_wd,
+                        status_channel,
+                        reset_redisprep=False,
+                    )
+                else:
+                    StatusMessenger.publish(
+                        status_channel,
+                        "No Omni controller found; skipping Omni reset.\n",
+                    )
+                    _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
             else:
-                StatusMessenger.publish(
-                    status_channel,
-                    "No Omni controller found; skipping Omni reset.\n",
-                )
                 _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
-        else:
-            _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 
         if undisturbify:
             # Persist lineage before any child can run or fail on another worker.

@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
-
 import re
+from collections.abc import Callable
 from pathlib import Path
 
 from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.context import RunContext
-from wepppy.query_engine.executor import DuckDBExecutor
 from wepppy.query_engine.formatter import QueryResult, format_table
 from wepppy.query_engine.payload import DatasetSpec, JoinSpec, QueryPlan, QueryRequest, QuerySource
 
@@ -169,6 +167,8 @@ def _dataset_source_sql(
     entry = catalog.get(spec.path)
     fs_path = entry.fs_path if entry and entry.fs_path else spec.path
     dataset_path = _resolve_dataset_path(root, fs_path, spec.path)
+    from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
+
     if roads_lifecycle.current_path(spec.path):
         expected = root.resolve() / spec.path
         if dataset_path != expected:
@@ -484,17 +484,29 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
     return QueryPlan(sql=sql, params=[], requires_spatial=requires_spatial, sources=sources)
 
 
-def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
+def run_query(
+    run_context: RunContext, payload: QueryRequest, *,
+    authorize: Callable[[RunContext], None] | None = None,
+) -> QueryResult:
     """Execute a QueryRequest against DuckDB and format the results.
 
     Args:
         run_context: Resolved run metadata with catalog and working paths.
         payload: Query request to execute.
+        authorize: Optional boundary policy check on the final refreshed context,
+            run before query planning or reading dataset rows.
 
     Returns:
         QueryResult with JSON-safe records, optional schema, and metadata.
     """
+    from wepppy.query_engine.context import refresh_run_context
+
+    refresh_run_context(run_context, [spec.path for spec in payload.dataset_specs])
+    if authorize is not None:
+        authorize(run_context)
     plan = build_query_plan(payload, run_context.catalog)
+    from wepppy.query_engine.executor import DuckDBExecutor
+
     executor = DuckDBExecutor(run_context.base_dir)
     table = executor.execute(
         plan.sql,

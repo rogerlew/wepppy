@@ -1,0 +1,15 @@
+# Reader freshness barriers
+
+M3 implements internal barriers without adding pending states or client polling. Context resolution drains accepted pending work; query execution verifies required source paths and schemas and reloads held metadata before planning. Report `ensure_datasets` performs the same checks even for existing entries. Discovery without explicit required paths drains pending intent without rescanning every artifact.
+
+HTTP and MCP authorize requested dependencies before targeted refresh and authorize the final refreshed catalog selection immediately before query planning. The optional `run_query(..., authorize=...)` callback preserves internal Python callers while closing the authorization gap between endpoint validation and core refresh. Roads availability guards remain in place.
+
+Average annual report proof observes actual selected files before cache decisions. Fabricated catalog schema fields are repaired from artifact schemas; if the actual dependency bytes, selection, and consumed aliases are unchanged, the existing cache remains current. This follows the unchanged report cache freshness contract: catalog corruption alone is not a scientific input mutation. Actual schema changes invalidate held metadata before queries and report proof.
+
+The storm-event payload builders remain pure: repository search found no production callers beyond the module itself. GL source-status discovery retains its strict refusal on catalog/source mismatch; eventual pending refresh is consumed by query/context barriers. Return-period initial activation and trailing refresh calls remain synchronous because they mix immediate discovery and offline script paths. Geneva immediate-update reads remain synchronous with the common execution barrier.
+
+Regression coverage includes held-context schema replacement without receipt, memoized report contexts, readonly refusal without catalog publication, and final physical-selection authorization. Existing HTTP, MCP, query, and historical/relocated report suites exercise compatibility; validation results are recorded in the implementation handoff.
+
+Validation: all 115 context, core, HTTP, and MCP tests passed in the targeted run; after the relocation/source-selection fixes, all 51 report freshness tests passed. Context/core stubtests, `check-test-stubs`, and this artifact's Markdown lint passed. Explicit producer intent permits canonical child precedence during refresh; the ordinary reader barrier preserves explicit catalog source selections.
+
+An explicit allowed parent `fs_path` remains authoritative at a reader barrier: a child file alone cannot prove that the selected parent is stale. An explicit asset producer receipt selects the canonical child; full reconciliation follows the existing native activation selection. Existing catalogs cross the repair boundary before context parsing, so malformed derived metadata can be rebuilt with retained repair evidence before the first query. Missing-catalog activation and readonly refusal retain their previous boundaries.

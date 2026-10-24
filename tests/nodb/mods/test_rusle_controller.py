@@ -206,13 +206,14 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     )
     catalog_updates: list[str] = []
 
-    def _fake_update_catalog_entry(_wd: str, relpath: str):
+    def _fake_request_catalog_refresh(_wd: str, relpath: str):
         catalog_updates.append(relpath)
         if relpath.endswith("README.md"):
             raise ValueError("Unsupported asset type for '/tmp/rusle/README.md'")
         return None
 
-    monkeypatch.setattr(rusle_module, "update_catalog_entry", _fake_update_catalog_entry)
+    monkeypatch.setattr(rusle_module, "request_catalog_refresh", _fake_request_catalog_refresh)
+    monkeypatch.setattr(rusle_module, "update_catalog_entry", _fake_request_catalog_refresh)
 
     def _fake_ls(
         _wd: str,
@@ -432,7 +433,7 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
             "summary": {"layers_requested": 12},
         },
     )
-    monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, relpath: relpath)
+    monkeypatch.setattr(rusle_module, "request_catalog_refresh", lambda _wd, relpath: relpath)
     monkeypatch.setattr(rusle_module, "_resolve_momm2025_annual_precip_in", lambda _climate: 43.6)
 
     def _fake_select_momm(centroid_lnglat, *, annual_precip_in=None):
@@ -638,7 +639,7 @@ def test_build_observed_rap_forwards_rock_fraction_and_records_manifest_provenan
         },
     )
     monkeypatch.setattr(controller, "_resolve_observed_rap", lambda extent, rap_year: str(rap_path))
-    monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, relpath: relpath)
+    monkeypatch.setattr(rusle_module, "request_catalog_refresh", lambda _wd, relpath: relpath)
 
     def _fake_ls(
         _wd: str,
