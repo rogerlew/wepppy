@@ -2,8 +2,10 @@
 
 Contract ancestor: `2399f835c`; original implementation base: `5227cb258`.
 Validation uses the existing forest development Compose stack. Web workers were
-gracefully reloaded to load changed routes. No production deployment, original
-project mutation, Roads rerun, model calculation or persisted schema migration.
+gracefully reloaded to load changed routes. No production deployment, Roads rerun, model calculation, source-output mutation
+or persisted schema migration. The initial probe reached the legacy map route
+before worker reload and used its existing query-log behavior; the new detachment
+materializer does not append that log.
 
 ## Artifact and HTTP evidence
 
@@ -85,7 +87,7 @@ controller complexity 24 are yellow. This bounded first implementation keeps the
 coherent read's validations together and isolates DOM/request state from existing
 baseline query code; it introduces no general abstraction or dependency. Existing
 route/test functions also grow within yellow bands. Reports are in
-`/tmp/roads-code-quality-final.json` and `/tmp/roads-code-quality-final.md`; existing
+`/tmp/roads-code-quality-accepted.json` and `/tmp/roads-code-quality-accepted.md`; existing
 root telemetry files were left untouched. Python complexity was unavailable
 because the host telemetry environment lacks radon; lengths/JS metrics were read.
 
@@ -102,3 +104,15 @@ legends/cached plots is hidden, navigation does not reload automatically, and
 selecting Baseline displays fresh baseline data. Optional overlay 503 isolation
 still passes separately. These final checks supersede earlier smaller feature
 suite counts; broad Python status remains separately reported.
+
+## Final scenario isolation recheck
+
+Correctness finding COR-I05 exposed a child-scenario 409 incorrectly invalidating
+the current run. Query requests now distinguish the current root from named child
+or contrast runs; graph loaders propagate lifecycle failures without caching empty
+series. Graph errors remain literal text local to the selected graph.
+`wctl run-npm test`: 121 suites, 1017 tests passed
+(`/tmp/roads-npm-isolation.log`). All five Roads browser checks passed in 48.0
+seconds (`/tmp/roads-browser-isolation.log`), including a child failure with the
+parent Roads map and scope still available. Correctness and security reviewers
+independently approved this final delta. These counts supersede earlier runs.

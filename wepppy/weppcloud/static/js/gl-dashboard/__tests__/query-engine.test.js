@@ -112,3 +112,16 @@ it.each(['roads_results_unavailable', 'roads_operation_busy'])('preserves busy l
   await expect(engine.postBaseQueryEngine({ datasets: [] })).rejects.toThrow(message);
   expect(onRoadsUnavailable).toHaveBeenCalledTimes(1);
 });
+
+
+it.each(['_pups/omni/scenarios/missing', '_pups/omni/contrasts/2'])('isolates foreign Roads failure at %s from current-run queries', async (path) => {
+  const onRoadsUnavailable = jest.fn();
+  const engine = createQueryEngine({ runid: 'r', config: 'c', onRoadsUnavailable });
+  global.fetch.mockResolvedValueOnce({ ok: false, status: 409, json: async () => ({ code: 'roads_results_unavailable', error: 'Child Roads results unavailable.' }) });
+  await expect(engine.postQueryEngineForScenario({ datasets: [] }, path)).rejects.toMatchObject({ code: 'roads_results_unavailable', foreignScenario: true });
+  expect(onRoadsUnavailable).not.toHaveBeenCalled();
+  await expect(engine.postBaseQueryEngine({ datasets: [] })).resolves.toEqual({ ok: true });
+  global.fetch.mockResolvedValueOnce({ ok: false, status: 409, json: async () => ({ code: 'roads_results_unavailable', error: 'Current Roads unavailable.' }) });
+  await expect(engine.postQueryEngineForScenario({ datasets: [] }, '')).rejects.toThrow('Current Roads unavailable.');
+  expect(onRoadsUnavailable).toHaveBeenCalledWith('Current Roads unavailable.');
+});

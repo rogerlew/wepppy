@@ -202,3 +202,43 @@ Final hashes superseding earlier entries:
 | `wepppy/weppcloud/static/js/gl-dashboard.js` | `d94e2ac4c00eb9ad31e00d8e3d0d492a49c2a9034502463a5d2f3955fff2049f` |
 | `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js` | `5ca763aa0154df418cb0e33eab65f2789067a8b6b5f95a2dd76f6b6e8e8e9ea0` |
 | `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-roads.spec.js` | `1a2eedce78bdb666c02fb938af20677ff45bd0caae340b149dbbb4911948a9fa` |
+
+## Cross-context lifecycle isolation
+
+COR-I05 (High) was identified during the parent's final cross-context audit:
+Roads-scope Omni/contrast graphs use `postQueryEngineForScenario` with Roads paths.
+A child without current Roads results can return 409 even when the current run
+is valid. The shared response handler previously latched that child failure and
+hid the current run's scene. An independent actual-helper probe reproduced a
+child failure invoking root invalidation and poisoning a subsequent successful
+parent response. Existing graph-loader catches could also cache the failed
+scenario as an empty series.
+
+Rechecked 2026-10-24 06:30:55 UTC: **COR-I05 closed**. Scenario/contrast request
+wrappers now pass their resolved request context to the response handler. Foreign
+lifecycle failures throw a local tagged error before mutating current-run state;
+empty-scenario/current-run requests retain scene invalidation. Graph loaders
+narrowly rethrow lifecycle errors before empty-cache handling. The graph controller
+renders the affected scenario's reason using text content without hiding the map.
+
+Independent probes now confirm both named-scenario and contrast 409s produce zero
+root invalidations and permit a subsequent successful parent query. Permanent
+tests cover both targets, empty-path current-run invalidation, and failed graph
+retry without empty caching for hillslope, channel and outlet loaders.
+
+Reviewed `/tmp/roads-npm-isolation.log`: **121 suites, 1017 tests passed**.
+Reviewed `/tmp/roads-browser-isolation.log`: **5 passed in 48.0 seconds**. The new
+case injects one unavailable graph scenario and verifies its explicit graph reason,
+visible parent scene, enabled Roads scope and retained detachment layer. This is
+browser fault injection, not a claim that a real child model execution was run.
+
+Final correctness approval: **pass, COR-I01 through COR-I05 closed**. Earlier
+broader-smoke and full-suite acceptance qualifications still apply. Final hashes
+superseding earlier entries:
+
+| File | SHA-256 |
+| --- | --- |
+| `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js` | `06c9154f7684e11bb1014fa30692c46282eb8b30c069bd93741e8996ff5d36f5` |
+| `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` | `d16c9708b845a643e869febb9d68f29ceba3f053c403d35c1cac24095ffadef9` |
+| `wepppy/weppcloud/static/js/gl-dashboard/graphs/controller.js` | `59ccae10d2685e5c03212492fd04ee21854378ad69d753c3969609eacaa1a6d1` |
+| `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-roads.spec.js` | `3c3038ff6bde38f5a25529732328888dcf65dd84c70c6c0c6a5583ecd5f18404` |

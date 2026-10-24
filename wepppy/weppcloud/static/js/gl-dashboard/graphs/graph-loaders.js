@@ -67,6 +67,10 @@ const CUMULATIVE_MEASURE_MAP = {
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+function rethrowRoadsLifecycle(error) {
+  if (['roads_results_unavailable', 'roads_operation_busy'].includes(error?.code)) throw error;
+}
+
 export function createGraphLoaders(deps) {
   const {
     cacheNamespace: rawCacheNamespace,
@@ -277,6 +281,7 @@ export function createGraphLoaders(deps) {
       state.hillslopeAreaCache[cacheKey] = totalArea;
       return rows;
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load hillslope loss data', { scenPath, err });
       state.hillLossCache[cacheKey] = [];
       return [];
@@ -314,6 +319,7 @@ export function createGraphLoaders(deps) {
       }
       return rows;
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load channel loss data', err);
       state.channelLossCache[cacheKey] = [];
       return [];
@@ -352,6 +358,7 @@ export function createGraphLoaders(deps) {
       }
       return map;
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load outlet data', err);
       state.outletAllYearsCache[cacheKey] = {};
       return {};
@@ -709,6 +716,7 @@ export function createGraphLoaders(deps) {
         startMonth,
       };
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load climate yearly data', err);
       return null;
     }
@@ -843,6 +851,7 @@ export function createGraphLoaders(deps) {
         disableMapHighlight: true,
       };
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load OpenET yearly data', err);
       return null;
     }
@@ -1200,6 +1209,7 @@ export function createGraphLoaders(deps) {
         },
       };
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load RAP timeseries', err);
       return null;
     }
@@ -1309,6 +1319,7 @@ export function createGraphLoaders(deps) {
         tooltipFormatter,
       };
     } catch (err) {
+      rethrowRoadsLifecycle(err);
       console.warn('gl-dashboard: failed to load WEPP yearly timeseries', err);
       return null;
     }

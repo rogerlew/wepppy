@@ -13,14 +13,21 @@ export function createQueryEngine(ctx) {
   let roadsUnavailableReason = 'Run Roads to generate current results.';
   let roadsUnavailableCode = 'roads_results_unavailable';
 
-  async function readResponse(resp) {
+  async function readResponse(resp, currentRun = true) {
     if (resp.status === 409) {
       const body = await resp.json();
       if (['roads_results_unavailable', 'roads_operation_busy'].includes(body.code)) {
-        roadsUnavailableCode = body.code;
         const reason = typeof body.error === 'string' ? body.error : body.error?.message;
-        roadsUnavailableReason = typeof reason === 'string' && reason.trim() ? reason : (
-          body.code === 'roads_operation_busy' ? 'Roads is busy; wait for the active operation to finish.' : roadsUnavailableReason);
+        const message = typeof reason === 'string' && reason.trim() ? reason : (
+          body.code === 'roads_operation_busy' ? 'Roads is busy; wait for the active operation to finish.' : 'Run Roads to generate current results.');
+        if (!currentRun) {
+          const error = new Error(message);
+          error.code = body.code;
+          error.foreignScenario = true;
+          throw error;
+        }
+        roadsUnavailableCode = body.code;
+        roadsUnavailableReason = message;
         if (!roadsUnavailable && typeof ctx.onRoadsUnavailable === 'function') {
           ctx.onRoadsUnavailable(roadsUnavailableReason);
         }
@@ -97,7 +104,7 @@ export function createQueryEngine(ctx) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(body),
     });
-    return readResponse(resp);
+    return readResponse(resp, !scenario && !contrastRunId);
   }
 
   async function postBaseQueryEngine(payload) {
@@ -121,7 +128,7 @@ export function createQueryEngine(ctx) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(body),
     });
-    return readResponse(resp);
+    return readResponse(resp, !scenario && !contrastRunId);
   }
 
   return { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario };

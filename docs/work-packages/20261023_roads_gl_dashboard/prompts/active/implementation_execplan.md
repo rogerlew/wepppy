@@ -12,7 +12,7 @@ Users can display mean annual Roads detachment on prepared road centerlines and 
 - [x] Implement coherent authorized detachment response and regression tests.
 - [x] Implement Roads overlay, accessible details, legends and scope transitions.
 - [ ] Validate real artifacts, HTTP/browser behavior and regression gates.
-- [x] Obtain independent correctness/security/UX implementation reviews; eleven findings fixed and independently closed.
+- [x] Obtain independent correctness/security/UX implementation reviews; twelve findings fixed and independently closed.
 - [ ] Update user/developer documentation and record final evidence.
 
 ## Surprises & Discoveries
@@ -72,3 +72,5 @@ Revision: initial implementation plan records new user authorization and ancesto
 Revision: implementation and independent findings disposition completed; focused Python 279, frontend 1007 and live browser 3 checks pass. Broad regression remains running.
 
 Revision: invalid-maximum edits retain active scale; scoped lifecycle failures preserve busy guidance and hide stale scene content while keeping Baseline navigation. Final frontend 1012/browser 4 checks pass; broad Python remains running.
+
+Revision: COR-I05 isolates child/contrast graph lifecycle failures from current-run admission. Final frontend 1017/browser 5 checks pass; independent correctness/security approval retained. Broad Python remains running.

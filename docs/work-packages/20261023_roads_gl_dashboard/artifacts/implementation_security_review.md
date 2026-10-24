@@ -126,3 +126,40 @@ Updated/additional implementation SHA-256 values (supersede matching rows above)
 | `weppcloud/static/js/gl-dashboard.js` | `d94e2ac4c00eb9ad31e00d8e3d0d492a49c2a9034502463a5d2f3955fff2049f` |
 | `weppcloud/static/js/gl-dashboard/data/query-engine.js` | `5ca763aa0154df418cb0e33eab65f2789067a8b6b5f95a2dd76f6b6e8e8e9ea0` |
 | `weppcloud/static/js/gl-dashboard/roads.js` | `b3841ff287b1bd62653bf6aae44780e5ad5e54717e6d652965471133b0006f9f` |
+
+## Cross-context invalidation correction
+
+2026-10-24 06:30 UTC: the correctness reviewer subsequently identified COR-I05:
+a foreign scenario/contrast lifecycle failure could invalidate the current run's
+map through the shared query latch. Independently reviewed the correction in the
+query transport, graph loaders and graph controller. Request-target classification
+is captured from the scenario/contrast routing for that request. A foreign
+lifecycle failure throws a typed local error before touching the current-run
+latch or its callback. Base requests and an empty scenario path retain current-run
+invalidation. Existing route authorization and source selection remain unchanged.
+
+Graph loaders rethrow only the two lifecycle codes before writing an empty cache
+entry. The controller presents the local reason using `textContent`, behind its
+existing activation-generation check, so the new diagnostic adds no HTML sink
+and obsolete graph activations cannot repaint it. This correction restores valid
+current-run noninterference without hiding the failed scenario request.
+
+Inspected the permanent scenario/contrast isolation tests, empty-path current-run
+check and graph retry tests. `/tmp/roads-npm-isolation.log` reports **121 suites,
+1017 tests passed**. Inspected browser assertions and
+`/tmp/roads-browser-isolation.log`: **5 passed in 48.0 seconds**. The added case
+injects an unavailable graph scenario through browser-only bootstrap/transport
+fixtures, confirms a local graph explanation, and retains the visible current-run
+scene, enabled Roads scope and Roads line layer. It performs no project mutation.
+
+Security gate remains **pass**, with no unresolved findings or risk acceptance.
+The correction is bounded to error-state ownership and safe presentation; no new
+authentication, filesystem, persistence or execution boundary is introduced.
+
+Updated/additional implementation SHA-256 values (supersede matching rows above):
+
+| File under `wepppy/` | SHA-256 |
+| --- | --- |
+| `weppcloud/static/js/gl-dashboard/data/query-engine.js` | `06c9154f7684e11bb1014fa30692c46282eb8b30c069bd93741e8996ff5d36f5` |
+| `weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` | `d16c9708b845a643e869febb9d68f29ceba3f053c403d35c1cac24095ffadef9` |
+| `weppcloud/static/js/gl-dashboard/graphs/controller.js` | `59ccae10d2685e5c03212492fd04ee21854378ad69d753c3969609eacaa1a6d1` |

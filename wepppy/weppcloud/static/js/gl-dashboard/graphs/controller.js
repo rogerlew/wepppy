@@ -214,7 +214,9 @@ export function createGraphController({
       console.warn('gl-dashboard: failed to activate graph', err);
       getGraph()?.hide();
       if (graphEmptyEl) {
-        graphEmptyEl.textContent = 'Unable to load graph data.';
+        graphEmptyEl.textContent = ['roads_results_unavailable', 'roads_operation_busy'].includes(err?.code)
+          ? `${err.foreignScenario ? 'Selected scenario Roads results: ' : ''}${err.message}`
+          : 'Unable to load graph data.';
         graphEmptyEl.style.display = '';
       }
     } finally {

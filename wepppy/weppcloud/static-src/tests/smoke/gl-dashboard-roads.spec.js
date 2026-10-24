@@ -120,3 +120,33 @@ test('scoped lifecycle failure clears stale visuals without reload and keeps Bas
   await expect(page.locator('.gl-main')).toBeVisible();
   await expect.poll(() => page.evaluate(() => !!window.glDashboardState?.weppSummary), { timeout: 60000 }).toBe(true);
 });
+
+test('unavailable scenario graph does not invalidate current Roads map', async ({ page }) => {
+  test.setTimeout(120000);
+  await page.addInitScript(() => {
+    let context;
+    Object.defineProperty(window, 'GL_DASHBOARD_CONTEXT', {
+      configurable: true, get: () => context,
+      set(value) {
+        value.omniScenarios = [{ name: 'Unavailable test scenario', path: '_pups/omni/scenarios/missing-test' }];
+        context = value;
+      },
+    });
+  });
+  await page.route('**/query-engine/runs/**/query', async (route) => {
+    const body = route.request().postDataJSON();
+    if (body?.scenario === 'missing-test') {
+      await route.fulfill({ status: 409, json: { code: 'roads_results_unavailable', error: 'Run Roads for this scenario.' } });
+    } else await route.continue();
+  });
+  const url = new URL(target); url.searchParams.set('output_scope', 'roads'); url.searchParams.set('roads', 'on');
+  await page.goto(url.href, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#gl-roads-visible')).toBeEnabled({ timeout: 60000 });
+  const graph = page.locator('#graph-omni-soil-loss-hill');
+  await graph.evaluate((el) => { el.closest('details').open = true; });
+  await graph.check();
+  await expect(page.locator('#gl-graph-empty')).toContainText('Selected scenario Roads results', { timeout: 60000 });
+  await expect(page.locator('.gl-main')).toBeVisible();
+  await expect(page.locator('#gl-output-scope option[value=roads]')).toBeEnabled();
+  expect(await page.evaluate(() => window.glDashboardDeck.props.layers.some((layer) => layer.id === 'roads-detachment'))).toBe(true);
+});
