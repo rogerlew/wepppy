@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-09-09T20:15:24Z`
+- Generated (UTC): `2026-10-16T06:01:26Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,11 +27,11 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 997 | 130.0 | 333.0 | 687.4 | 996.0 | 2106.08 | 5697.0 |
-| `python_prod_max_function_len` | 814 | 61.5 | 111.0 | 181.1 | 238.4 | 389.0 | 2233.0 |
+| `python_prod_file_sloc` | 1092 | 130.0 | 306.5 | 678.8 | 965.6 | 2087.9 | 5706.0 |
+| `python_prod_max_function_len` | 907 | 58.0 | 105.5 | 172.0 | 228.7 | 388.58 | 2249.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| `js_source_file_sloc` | 207 | 255.0 | 577.0 | 1224.8 | 1598.6 | 2433.58 | 2835.0 |
-| `js_source_max_cc` | 207 | 6.0 | 20.0 | 33.0 | 43.4 | 85.7 | 155.0 |
+| `js_source_file_sloc` | 232 | 242.0 | 550.5 | 1113.6 | 1559.05 | 2333.76 | 2840.0 |
+| `js_source_max_cc` | 232 | 6.0 | 19.0 | 32.0 | 42.9 | 84.45 | 155.0 |
 
 ## Changed Files
 
@@ -43,31 +43,31 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/roads/roads.py` | 5697 |
-| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 5274 |
-| `tests/weppcloud/routes/test_pure_controls_render.py` | 4368 |
-| `tests/nodb/mods/test_features_export_service.py` | 3251 |
-| `tests/nodb/mods/test_roads_controller.py` | 3240 |
-| `wepppy/nodb/mods/features_export/service.py` | 3026 |
-| `tests/nodb/mods/test_omni.py` | 2929 |
-| `wepppy/rq/project_rq.py` | 2809 |
-| `wepppy/wepp/management/managements.py` | 2548 |
-| `wepppy/nodb/core/wepp.py` | 2440 |
+| `wepppy/nodb/mods/roads/roads.py` | 5706 |
+| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 5349 |
+| `tests/weppcloud/routes/test_pure_controls_render.py` | 4546 |
+| `tests/nodb/mods/test_roads_controller.py` | 3256 |
+| `tests/nodb/mods/test_features_export_service.py` | 3209 |
+| `wepppy/nodb/mods/features_export/service.py` | 3099 |
+| `tests/nodb/mods/test_omni.py` | 2972 |
+| `wepppy/rq/project_rq.py` | 2818 |
+| `wepppy/wepp/management/managements.py` | 2623 |
+| `wepppy/nodb/core/wepp.py` | 2423 |
 
 ### `python_max_function_len_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 2233 |
+| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 2249 |
 | `wepppy/nodb/mods/roads/roads.py` | 2126 |
 | `tests/nodb/mods/disturbed/live_e2e/runbook.py` | 768 |
-| `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 631 |
-| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 613 |
+| `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 641 |
+| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 631 |
 | `wepppy/nodb/mods/path_ce/data_prep.py` | 541 |
 | `wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py` | 528 |
 | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | 470 |
-| `wepppy/weppcloud/routes/run_0/run_0_bp.py` | 395 |
-| `wepppy/eu/soils/esdac/esdac.py` | 389 |
+| `wepppy/microservices/rq_engine/project_routes.py` | 412 |
+| `wepppy/weppcloud/routes/run_0/run_0_bp.py` | 396 |
 
 ### `python_max_cc_top20`
 
@@ -77,15 +77,15 @@ _No entries._
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/weppcloud/controllers_js/omni.js` | 2835 |
+| `wepppy/weppcloud/controllers_js/omni.js` | 2840 |
 | `wepppy/weppcloud/controllers_js/features_export.js` | 2690 |
-| `wepppy/weppcloud/controllers_js/map_gl.js` | 2458 |
-| `wepppy/weppcloud/controllers_js/project.js` | 2051 |
+| `wepppy/weppcloud/controllers_js/map_gl.js` | 2459 |
+| `wepppy/weppcloud/controllers_js/project.js` | 2055 |
 | `wepppy/weppcloud/controllers_js/ag_fields.js` | 1997 |
 | `wepppy/weppcloud/controllers_js/batch_runner.js` | 1915 |
 | `wepppy/weppcloud/controllers_js/channel_gl.js` | 1873 |
+| `wepppy/weppcloud/controllers_js/control_base.js` | 1751 |
 | `wepppy/weppcloud/controllers_js/geneva_summary_report.js` | 1747 |
-| `wepppy/weppcloud/controllers_js/control_base.js` | 1746 |
 | `wepppy/weppcloud/controllers_js/subcatchment_delineation.js` | 1636 |
 
 ### `js_max_cc_top20`
@@ -96,12 +96,12 @@ _No entries._
 | `wepppy/weppcloud/controllers_js/wepp.js` | 93 |
 | `wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js` | 86 |
 | `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js` | 81 |
+| `wepppy/weppcloud/controllers_js/postfire_debris_flow.js` | 74 |
 | `wepppy/weppcloud/controllers_js/dss_export.js` | 58 |
 | `wepppy/weppcloud/controllers_js/control_base.js` | 57 |
 | `wepppy/weppcloud/controllers_js/project.js` | 52 |
-| `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js` | 47 |
+| `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js` | 48 |
 | `wepppy/weppcloud/controllers_js/features_export.js` | 46 |
-| `wepppy/weppcloud/controllers_js/utils.js` | 45 |
 
 ## Review Guidance
 
