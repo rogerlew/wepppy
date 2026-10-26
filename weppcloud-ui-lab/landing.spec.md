@@ -77,7 +77,8 @@
        - Link: `https://www.uidaho.edu/`
      - **Portland State University:**
        - Image: `/weppcloud/static/images/Portland_State_University_logo.svg`
-       - Caption: "Portland State University"
+       - Caption: "Let Knowledge Serve the City — Portland State University"
+       - Motto source: `https://www.pdx.edu/urban-studies-planning/psus-motto`
        - Link: `https://www.pdx.edu/`
        - Official logo source: `https://www.pdx.edu/themes/custom/pdxd8/psulogo_horiz-spot.svg`
        - Preserve logo colors on a light background in both themes.
@@ -125,6 +126,11 @@
        - Funding acknowledgment caption below logo
        - Optional link to funding program website
    - **Logo mappings:**
+     - **USDA Forest Service and ORISE:**
+       - Image: `/weppcloud/static/images/Logo_of_the_United_States_Forest_Service.svg`
+       - Caption: "This work was funded through joint venture agreements 22-JV-11261953-063, 23-JV-11261954-064, and 23-JV-11261976-080 with the USDA Forest Service and interagency agreement 22-IA-11261975-090 between ORISE and the USDA Forest Service."
+       - Link: `https://www.fs.usda.gov/`
+       - Preserve this operator-supplied acknowledgment verbatim in both themes.
      - **NSF Idaho EPSCoR:**
        - Image: **MISSING** - Need NSF logo (e.g., `nsf-logo.svg` or `nsf-epscor-logo.png`)
        - Caption: "This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792."

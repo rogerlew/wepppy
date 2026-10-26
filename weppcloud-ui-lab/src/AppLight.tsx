@@ -199,7 +199,7 @@ const AFFILIATIONS: Affiliation[] = [
   },
   {
     name: 'Portland State University',
-    caption: 'Portland State University',
+    caption: 'Let Knowledge Serve the City — Portland State University',
     logo: '/weppcloud/static/images/Portland_State_University_logo.svg',
     link: 'https://www.pdx.edu/',
     hasLightBackground: true,
@@ -257,6 +257,12 @@ type Sponsor = {
 }
 
 const SPONSORS: Sponsor[] = [
+  {
+    name: 'USDA Forest Service and ORISE',
+    caption: 'This work was funded through joint venture agreements 22-JV-11261953-063, 23-JV-11261954-064, and 23-JV-11261976-080 with the USDA Forest Service and interagency agreement 22-IA-11261975-090 between ORISE and the USDA Forest Service.',
+    logo: '/weppcloud/static/images/Logo_of_the_United_States_Forest_Service.svg',
+    link: 'https://www.fs.usda.gov/',
+  },
   {
     name: 'NSF Idaho EPSCoR',
     caption: 'This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792.',
