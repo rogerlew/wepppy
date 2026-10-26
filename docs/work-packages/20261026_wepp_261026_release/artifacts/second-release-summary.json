@@ -1,0 +1,14 @@
+{
+  "timestamp_utc": "2026-10-26T20:37:52.618620+00:00",
+  "hill_count": 491,
+  "exit_code": 0,
+  "watershed_seconds": 112.52361383102834,
+  "total_seconds": 380.77154203131795,
+  "success": true,
+  "binary_sha256": {
+    "wepp": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "wepp_hill": "0955134900c63378d7990a1c36a477dd9056e4c7db8de7528a9b486192f6976d"
+  },
+  "stdout_tail": "                \n\n  Enter name of file containing storm data -->                     \n\n file name read in: pw0.cli                                                                                                        \n\n  Enter name of file containing soil data -->                      \n\n file name read in: pw0.sol                                                                                                        \n Please enter the irrigation option\n ----------------------------------\n [0] no irrigation\n  1  sprinkler, fixed date\n  2  sprinkler, depletion level\n  3  sprinkler, combination\n  4  furrow,    fixed date\n  5  furrow,    depletion\n  6  furrow,    combination\n -----------------------------------\n Enter irrigation option [0]\n\n\n NO IRRIGATION SELECTED.\n\n\n  Enter number of years to simulate --> \n     \n SIMULATION YEAR =           1\n     \n SIMULATION YEAR =           2\n     \n SIMULATION YEAR =           3\n     \n SIMULATION YEAR =           4\n     \n SIMULATION YEAR =           5\n     \n SIMULATION YEAR =           6\n     \n SIMULATION YEAR =           7\n     \n SIMULATION YEAR =           8\n     \n SIMULATION YEAR =           9\n\n WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY\n",
+  "stderr": ""
+}

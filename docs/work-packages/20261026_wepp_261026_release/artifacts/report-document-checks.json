@@ -1,0 +1,30 @@
+{
+  "status": "261026 revision 1 author checks passed; historical editions preserved",
+  "pages": 49,
+  "pdf_sha256": "57320794cd53e86cb0d4ce699f635042f5d52b306ca279cfaee33cf1220e3d2c",
+  "figures": 13,
+  "numeric_anchors_checked": [
+    "707.63910",
+    "12.50683",
+    "621811.88",
+    "203706.71",
+    "218,974",
+    "129,496",
+    "200,984",
+    "1,267,735,665.682",
+    "1,272,337,711.84",
+    "6,380,525.06",
+    "155.439362",
+    "693,768",
+    "3,288"
+  ],
+  "historical_261010_source_coverage_paths": 2031,
+  "current_cumulative_model_sources": 18,
+  "out_of_page_text_words": 0,
+  "embedded_files": 0,
+  "javascript": false,
+  "poppler_xml_control_glyphs": 2,
+  "return_level_rows": 144,
+  "return_level_display_values_checked": 48,
+  "caveat": "Automated checks supplement manual review; they do not certify scientific accuracy or disclosure rights"
+}

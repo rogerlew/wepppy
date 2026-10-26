@@ -1,0 +1,11 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: e5e59e83256a19ba5fc9b5f5c8401f3848e11e73
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 0
+
+Net delta (all changed files): +0
+Result: PASS

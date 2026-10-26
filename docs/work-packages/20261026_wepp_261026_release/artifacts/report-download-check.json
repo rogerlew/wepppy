@@ -1,0 +1,21 @@
+{
+  "caddy_static_status": 200,
+  "content_type": "application/pdf",
+  "download_sha256": "57320794cd53e86cb0d4ce699f635042f5d52b306ca279cfaee33cf1220e3d2c",
+  "public_manifest_status": 200,
+  "public_manifest_bytes_match": true,
+  "usersum": {
+    "changelog": {
+      "status": 200,
+      "prior_static_links_preserved": 2,
+      "new_pdf_link_present": true
+    },
+    "model": {
+      "status": 200,
+      "prior_static_links_preserved": 6,
+      "new_pdf_link_present": true
+    }
+  },
+  "environment": "local running development stack, existing forwarded-HTTPS route",
+  "production_deployment": false
+}

@@ -1,0 +1,92 @@
+{
+  "collected": 11941,
+  "covered": 11941,
+  "unique_passes": 11791,
+  "unique_test_skips": 150,
+  "collection_import_skips": [
+    "tests/sbs_map/test_sbs_map_large_fixtures.py"
+  ],
+  "missing_nodes": [],
+  "observed_failures": [
+    "tests/nodb/test_project_config_builder_snapshot.py::test_single_inputs_are_independent_creation_capabilities[vanilla_cligen-single-ofe]",
+    "tests/nodb/test_wepp_binary_policy.py::test_old_builder_project_can_persist_new_release_without_config_migration[wepp_261010]",
+    "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain"
+  ],
+  "unresolved_failures": [],
+  "failures_with_later_pass": [
+    "tests/nodb/test_project_config_builder_snapshot.py::test_single_inputs_are_independent_creation_capabilities[vanilla_cligen-single-ofe]",
+    "tests/nodb/test_wepp_binary_policy.py::test_old_builder_project_can_persist_new_release_without_config_migration[wepp_261010]",
+    "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain"
+  ],
+  "reports": {
+    "wepp-261026-full.report.jsonl": {
+      "passed": 2460,
+      "skipped": 47,
+      "sha256": "40ffad1b4ccd973762ea991c3e857b7e95c4a59a117701aa5716dfc31885f687"
+    },
+    "release-selection.jsonl": {
+      "passed": 40,
+      "skipped": 0,
+      "sha256": "0d08e27de8d7d0a77b463d9daf53ef2fac408ab9d106218b2a00c2b4d8fb4051"
+    },
+    "remainder.jsonl": {
+      "passed": 2616,
+      "skipped": 3,
+      "sha256": "c19dd2b396af2fcff0c7c3eebdc62298b49e259abd6db23b17e1f248e2c2a35a"
+    },
+    "soil-0.jsonl": {
+      "passed": 53,
+      "skipped": 0,
+      "sha256": "789fe3a9fece26ebbc646fb0fe43e41ce9ab52392acc016348ec84859a3acf85"
+    },
+    "soil-1.jsonl": {
+      "passed": 52,
+      "skipped": 0,
+      "sha256": "15e6c946db075894dddcf96ea81ba9194c585c3ce4aad4542e6a472b97cc9343"
+    },
+    "soil-2.jsonl": {
+      "passed": 52,
+      "skipped": 0,
+      "sha256": "d2b6c24d2f37f15d822a6d422aa60383d035142a01a3695e33045962116eeec7"
+    },
+    "soil-3.jsonl": {
+      "passed": 52,
+      "skipped": 0,
+      "sha256": "145387f2e1768efd0c775a7c4562066a5e9aaf96f540084d97c48960ed436b18"
+    },
+    "tail-0.jsonl": {
+      "passed": 1225,
+      "skipped": 9,
+      "sha256": "d507044d52cee281d144cde6bed0cae866af05c9fd700409affc905f9e0b8ad7"
+    },
+    "tail-1-r2.jsonl": {
+      "passed": 1363,
+      "skipped": 2,
+      "sha256": "24f0d5edbbdd3b7ab7c373356e9dfe9bcd323313f8448c27852601147e93d0b8"
+    },
+    "tail-1-r3.jsonl": {
+      "passed": 36,
+      "skipped": 0,
+      "sha256": "9644a11a60146ecb718eb3b17635db1e601e90faf6f69f3e5630f54aaeefbad8"
+    },
+    "tail-1.jsonl": {
+      "passed": 113,
+      "skipped": 0,
+      "sha256": "f8862acc4a3a76d186b6ec6718abc5d97fd4c72e40140fd164cad94d93e5235c"
+    },
+    "tail-2.jsonl": {
+      "passed": 1266,
+      "skipped": 88,
+      "sha256": "d3763bb10a3f1cb1c4efb6c7dac8a6c0d314fe3bbc69ba7c45ecdaf82c29d346"
+    },
+    "tail-3.jsonl": {
+      "passed": 2519,
+      "skipped": 1,
+      "sha256": "0dc56ede902819a8cdaeaf25504b94db8ff1d2b65f04bce42725f71650099f5c"
+    }
+  },
+  "collection_sha256": "f3cc1ed3308bab66dc31bf3c41e283f97c50815cfbb4819dcccda712b28cf823",
+  "covered_node_set_sha256": "dc5965bf9d9216b722490e0c954018bcf0b4d297e0f84b49508b966acb82e929",
+  "all_collected_nodes_covered": true,
+  "scope": "Segmented execution; earlier failures and interruption retained; no tests excluded"
+}

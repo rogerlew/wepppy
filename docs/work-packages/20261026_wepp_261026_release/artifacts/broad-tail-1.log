@@ -1,0 +1,76 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_project_config_capabilities.py tests/nodb/test_project_config_serialization.py tests/nodb/test_ron_fetch_dem_rate_limit.py tests/nodb/test_single_input_policy.py tests/nodb/test_soils_parquet_area_fallback.py tests/nodb/test_type_hints.py tests/nodb/test_user_defined_cli_parquet.py tests/nodb/test_watershed_runtime_contract.py tests/nodb/test_wepp_binary_policy.py tests/nodb/test_wepp_input_parser.py tests/nodb/test_wepp_nodb_post_utils.py tests/omni/test_honeyed_marathoner_sediment_inversion_fixture.py tests/profile_recorder/test_profile_recorder.py tests/query_engine/test_catalog_refresh.py tests/query_engine/test_mcp_auth.py tests/query_engine/test_storm_event_analyzer.py tests/roads/test_roads_publication.py tests/rq/test_batch_rq_retry_selection.py tests/rq/test_cancel_job.py tests/rq/test_culvert_rq_nodir_guards.py tests/rq/test_directory_lock_cleanup.py tests/rq/test_fork_failure.py tests/rq/test_job_info.py tests/rq/test_land_and_soil_rq_guards.py tests/rq/test_optional_discord_imports.py tests/rq/test_project_rq_archive_helpers.py tests/rq/test_project_rq_fork.py tests/rq/test_query_catalog_disclosure.py tests/rq/test_rq_worker_runid.py tests/rq/test_submission_recovery.py tests/rq/test_wepp_rq_dss_helpers.py tests/rq/test_wepp_singleflight_tracking.py tests/runtime_paths/test_fs_parquet_contract.py tests/runtime_paths/test_wepp_inputs_compat.py tests/scripts/test_deploy_production_plan.py tests/services/test_wmesque_retrieve.py tests/shape_converter/integration/test_runtime_hardening_api.py tests/shape_converter/unit/test_archive_validation.py tests/shape_converter/unit/test_health_routes.py tests/shape_converter/unit/test_ui_endpoints.py tests/soils/test_ssurgo_fc_wp_sanitization.py tests/soils/test_ssurgo_serialization.py tests/test_2_validate_managements.py tests/test_all_your_base_objective_functions.py tests/test_nodb_core_import_hygiene.py tests/test_webclients_elevation.py tests/tools/test_check_broad_exceptions.py tests/tools/test_forest_workflow_bootstrap.py tests/tools/test_hillslope_mofe_scireview_compare.py tests/tools/test_migrations_runner.py tests/tools/test_run_pytest_sharded.py tests/tools/test_ssurgo_masked_valid_evaluation.py tests/topo/test_osm_roads_cache.py tests/topo/test_peridot_runner_wait.py tests/topo/test_terrain_processor_wbt_integration.py tests/topo/test_watershed_abstraction_slope_file.py tests/topo/test_wbt_topaz_conditioning_integration.py tests/wepp/interchange/test_hec_ras_boundary.py tests/wepp/interchange/test_interchange_documentation.py tests/wepp/interchange/test_roads_lifecycle.py tests/wepp/interchange/test_versioning.py tests/wepp/interchange/test_watershed_ebe_interchange.py tests/wepp/interchange/test_watershed_totalwatsed_export.py tests/wepp/management/test_rotation_stack.py tests/wepp/reports/test_channel_watbal.py tests/wepp/reports/test_loss_reports.py tests/wepp/reports/test_return_periods_phase7.py tests/wepp/soils/utils/test_wepp_soil_util.py tests/wepp/test_single_input_soil_formats.py tests/wepp/test_wepp_frost_opts.py tests/wepp/test_wepp_runner_outputs.py tests/wepp_runner/test_pass_family_selection.py tests/weppcloud/bootstrap/test_pre_receive.py tests/weppcloud/routes/test_admin_usermod_contract.py tests/weppcloud/routes/test_blueprint_registration.py tests/weppcloud/routes/test_climate_bp.py tests/weppcloud/routes/test_config_builder_ui.py tests/weppcloud/routes/test_diagnostics_page.py tests/weppcloud/routes/test_feature_access_routes.py tests/weppcloud/routes/test_geneva_wp08_routes.py tests/weppcloud/routes/test_interchange_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_poweruser_onboarding_presentation.py tests/weppcloud/routes/test_readme_md.py tests/weppcloud/routes/test_roads_bp.py tests/weppcloud/routes/test_run_0_builder_maturity.py tests/weppcloud/routes/test_run_config.py tests/weppcloud/routes/test_security_auth_forms.py tests/weppcloud/routes/test_soils_bp.py tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_user_profile_contract.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_wepp_bp.py tests/weppcloud/test_auth_remember_cookie.py tests/weppcloud/test_combined_viewer_preparation.py tests/weppcloud/test_context_processors_static_url.py tests/weppcloud/test_gl_dashboard_et_sql.py tests/weppcloud/test_registration_name_validation.py tests/weppcloud/test_run_catalog_reader.py tests/weppcloud/test_ui_foundation_css.py tests/weppcloud/test_usersum_template_wiring.py tests/weppcloud/utils/test_helpers_authorize.py tests/weppcloud/utils/test_run_ttl.py --maxfail=1 --report-log=/workdir/wepppy/.pytest_cache/wepp-261026-segmented/tail-1.jsonl
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1506 items
+
+tests/nodb/test_project_config_capabilities.py ......................... [  1%]
+..............                                                           [  2%]
+tests/nodb/test_project_config_serialization.py .......................  [  4%]
+tests/nodb/test_ron_fetch_dem_rate_limit.py ......                       [  4%]
+tests/nodb/test_single_input_policy.py .........................         [  6%]
+tests/nodb/test_soils_parquet_area_fallback.py ..                        [  6%]
+tests/nodb/test_type_hints.py .....                                      [  6%]
+tests/nodb/test_user_defined_cli_parquet.py ...                          [  6%]
+tests/nodb/test_watershed_runtime_contract.py ..........                 [  7%]
+tests/nodb/test_wepp_binary_policy.py F
+
+=================================== FAILURES ===================================
+_ test_old_builder_project_can_persist_new_release_without_config_migration[wepp_261010] _
+
+old_project = <wepppy.nodb.core.wepp.Wepp object at 0x7be6a10f29c0>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-24/test_old_builder_project_can_p0')
+binary = 'wepp_261010'
+
+    @pytest.mark.parametrize('binary', ['wepp_261010', 'wepp_261021'])
+    def test_old_builder_project_can_persist_new_release_without_config_migration(old_project, tmp_path, binary):
+        from wepppy.nodb.core import Wepp
+        before = {name: (tmp_path / name).read_bytes() for name in ('config.cfg', 'config-manifest.json')}
+>       assert project_wepp_binary_options(old_project) == ('wepp_260803', 'wepp_261010', 'wepp_261021')
+E       AssertionError: assert ('wepp_260803...'wepp_261026') == ('wepp_260803...'wepp_261021')
+E
+E         Left contains one more item: 'wepp_261026'
+E         Use -v to get more diff
+
+tests/nodb/test_wepp_binary_policy.py:45: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated report log file: /workdir/wepppy/.pytest_cache/wepp-261026-segmented/tail-1.jsonl -
+=========================== short test summary info ============================
+FAILED tests/nodb/test_wepp_binary_policy.py::test_old_builder_project_can_persist_new_release_without_config_migration[wepp_261010]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================= 1 failed, 113 passed, 14 warnings in 14.46s ==================

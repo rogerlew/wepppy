@@ -1,0 +1,32 @@
+[
+  {
+    "role": "watershed",
+    "source_paths": [
+      "/tmp/wepp-zero-duration-20261026/U1-source/src/wepp",
+      "/workdir/wepp-forest-release-20261009/release/wepp_261026"
+    ],
+    "normalization": "objcopy --strip-debug --remove-section=.note.gnu.build-id",
+    "normalized_sha256": [
+      "2ebde632a757f17a375b771eb80e8801c68393745e349994e3a935b252231e8d",
+      "2ebde632a757f17a375b771eb80e8801c68393745e349994e3a935b252231e8d"
+    ],
+    "equal_complete_normalized_files": true,
+    "release_file_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd"
+  },
+  {
+    "role": "hillslope",
+    "source_paths": [
+      "/tmp/wepp-zero-duration-20261026/U1-source/src/wepp_hill",
+      "/workdir/wepp-forest-release-20261009/release/wepp_261026_hill"
+    ],
+    "normalization": "objcopy --strip-debug --remove-section=.note.gnu.build-id",
+    "normalized_sha256": [
+      "f00f5839dcbe618fbbc18ed702d7571bff28800f16421bccd306c1fbe9f162dc",
+      "f00f5839dcbe618fbbc18ed702d7571bff28800f16421bccd306c1fbe9f162dc"
+    ],
+    "equal_complete_normalized_files": true,
+    "release_file_sha256": "0955134900c63378d7990a1c36a477dd9056e4c7db8de7528a9b486192f6976d",
+    "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd"
+  }
+]

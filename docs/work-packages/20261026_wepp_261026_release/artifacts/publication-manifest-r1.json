@@ -1,0 +1,23 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261026",
+  "document_revision": "1",
+  "document_date": "2026-10-26",
+  "publication_status": "approved",
+  "approved_on": "2026-10-26",
+  "approval_record": "Owner request to complete release gates, release as wepp_261026 and re-version the wepp_261010 release note; independently tasked AI scope reviews and final artifact checks completed",
+  "pdf_filename": "wepp_261026_release-notes-r1.pdf",
+  "pdf_sha256": "57320794cd53e86cb0d4ce699f635042f5d52b306ca279cfaee33cf1220e3d2c",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261026/wepp_261026_release-notes-r1.pdf",
+  "pages": 49,
+  "figures": 13,
+  "model_source_identity": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "binary_sha256": {
+    "wepp_261026": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "wepp_261026_hill": "0955134900c63378d7990a1c36a477dd9056e4c7db8de7528a9b486192f6976d"
+  },
+  "derived_from": "wepp_261010 release notes revision2, with inherited261021 technical repairs and new261026 evidence; prior editions unchanged",
+  "review_scope": "Independent AI scientific, implementation/linkage and disclosure reviews; no human peer-review or institutional endorsement claim",
+  "known_limitation": "Late return uses existing midnight effective support; actual hourly occurrence and physical hillslope peak are not reconstructed; signed exchange/clipping remain open",
+  "production_deployment": false
+}

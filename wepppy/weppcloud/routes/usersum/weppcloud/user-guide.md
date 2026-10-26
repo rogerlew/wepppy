@@ -106,9 +106,14 @@ and select an installed compatible release. This does not recreate the project
 or change its original config/manifest. MOFE projects require WBT and declared
 MOFE support; projects with single landuse/soil uploads also require declared
 native input-reader support. The current certified choices include 260803 and
-261010. The default remains 260803. After changing releases, rerun hillslopes
+261010, 261021 and 261026. The default remains 260803. After changing releases, rerun hillslopes
 and the watershed together so their intermediate outputs match. A saved legacy
 release can remain visible but unavailable as a new selection.
+
+261026 repairs late soil-return metadata while retaining a routing approximation
+that places return support at midnight. Review the timing and physical-peak
+limits in the [261026 release notes](/weppcloud/static/reports/wepp/release-notes/wepp_261026/wepp_261026_release-notes-r1.pdf)
+when choosing it for a project.
 
 ---
 

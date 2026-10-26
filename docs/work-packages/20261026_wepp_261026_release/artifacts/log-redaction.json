@@ -1,0 +1,110 @@
+[
+  {
+    "file": "wepp-261026-wepppy-full.log",
+    "source_sha256": "e4ab4c64b3f064702f6b289faa2b73260fc644eab2deca48aa3596026979a5b5",
+    "retained_sha256": "e4ab4c64b3f064702f6b289faa2b73260fc644eab2deca48aa3596026979a5b5",
+    "jwt_redacted": false
+  },
+  {
+    "file": "wepp-261026-document-final.log",
+    "source_sha256": "5a17c4e726a1da9a23ccd02f1ab14d4af54c24ad6fff61b29a9eb01bb48f1c62",
+    "retained_sha256": "5a17c4e726a1da9a23ccd02f1ab14d4af54c24ad6fff61b29a9eb01bb48f1c62",
+    "jwt_redacted": false
+  },
+  {
+    "file": "wepp-261026-broad-exceptions.log",
+    "source_sha256": "ec08dde06d764400afc2bdd8dfd07da898703448e5338200094c070a50810c42",
+    "retained_sha256": "ec08dde06d764400afc2bdd8dfd07da898703448e5338200094c070a50810c42",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-remainder.log",
+    "source_sha256": "d63997c6bfa1b8111904dd84acbaf13d23769f0a5e5cdb4c2ac34f410278963c",
+    "retained_sha256": "98e12432f76c1266c59896a0b087ea1f0baea2003e7998919e911fc1f34fdca6",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-1-r3.log",
+    "source_sha256": "40b3cc9539be9cf6218a1e352d5c3fe226676ea3d95293c26ec568b3802163e8",
+    "retained_sha256": "40b3cc9539be9cf6218a1e352d5c3fe226676ea3d95293c26ec568b3802163e8",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-1-r2.log",
+    "source_sha256": "298b7faa0b2e2bad02575fb690b487ff2de7e30912fef357c763867026dce7c5",
+    "retained_sha256": "6fc7a6225afadbc638970aa1188dcc280549a727b2a1595adde480efa45ef314",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-soil-0.log",
+    "source_sha256": "177c961f29cac72a36316d1d0f8da4a934e1edf5c6ba9d0cd429f36df875a71c",
+    "retained_sha256": "177c961f29cac72a36316d1d0f8da4a934e1edf5c6ba9d0cd429f36df875a71c",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-0.log",
+    "source_sha256": "6cb8c746848140265bef83724c19acd535043b5305b9decba389a72d7897abe7",
+    "retained_sha256": "6cb8c746848140265bef83724c19acd535043b5305b9decba389a72d7897abe7",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-soil-3.log",
+    "source_sha256": "b611c457c59070373522fe7f93741a13589c0c830ca4f53ca0e1a70dbee83c2e",
+    "retained_sha256": "b611c457c59070373522fe7f93741a13589c0c830ca4f53ca0e1a70dbee83c2e",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-driver.log",
+    "source_sha256": "30c5dfffd9cdb7f419a79b23839650d2c6dbf729e5d85594628894adfc3603d1",
+    "retained_sha256": "30c5dfffd9cdb7f419a79b23839650d2c6dbf729e5d85594628894adfc3603d1",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-1.log",
+    "source_sha256": "840064d419f0c982fa9055da24a4f30153e79f8ec4e18f5a9fca0073b7128fac",
+    "retained_sha256": "55309b5b31889aeba0c7fd5863a9d78a87b414a7e57a0edd3763b348f1759143",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-driver.log",
+    "source_sha256": "f9a3b0ad71369a8f7ca39b51c1414398c15887ecbec23380ac69afd7d9faf179",
+    "retained_sha256": "f9a3b0ad71369a8f7ca39b51c1414398c15887ecbec23380ac69afd7d9faf179",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-2.log",
+    "source_sha256": "2155cfb4b73a335ec331baf61c31bbb273b98573d82f975846a05e806392f581",
+    "retained_sha256": "2155cfb4b73a335ec331baf61c31bbb273b98573d82f975846a05e806392f581",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-1-r2-driver.log",
+    "source_sha256": "e6dfbba5ce7d29f2a696a13ea897093c267ee73627c424450e8dca5e13a2e914",
+    "retained_sha256": "e6dfbba5ce7d29f2a696a13ea897093c267ee73627c424450e8dca5e13a2e914",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-soil-1.log",
+    "source_sha256": "6b06e03c7379c93a032f0e39b27caf358f9dcc5cb50968bf9ef7a8f208ee629b",
+    "retained_sha256": "6b06e03c7379c93a032f0e39b27caf358f9dcc5cb50968bf9ef7a8f208ee629b",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-release-selection.log",
+    "source_sha256": "a37a0956a5375d2603adcdc5ea2f38f7459885af0ee8c79bb0977a6f6c05f1ba",
+    "retained_sha256": "a37a0956a5375d2603adcdc5ea2f38f7459885af0ee8c79bb0977a6f6c05f1ba",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-soil-2.log",
+    "source_sha256": "0073e09b6a8282c673c9cb088954f12d591897b8e746b143d748d7e524ab7310",
+    "retained_sha256": "0073e09b6a8282c673c9cb088954f12d591897b8e746b143d748d7e524ab7310",
+    "jwt_redacted": false
+  },
+  {
+    "file": "broad-tail-3.log",
+    "source_sha256": "6bc730ebcd1fc9aee44cee73d781c96074be77039b79a225c135e42229868362",
+    "retained_sha256": "6bc730ebcd1fc9aee44cee73d781c96074be77039b79a225c135e42229868362",
+    "jwt_redacted": false
+  }
+]

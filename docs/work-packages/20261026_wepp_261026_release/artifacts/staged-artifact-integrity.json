@@ -1,0 +1,5 @@
+{
+  "staged_incident_checksum_files": 109,
+  "all_match": true,
+  "csv_policy": "Preserve captured byte-addressed CSV line endings using scoped gitattributes"
+}

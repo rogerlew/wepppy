@@ -1,5 +1,7 @@
 # PROJECT_TRACKER.md
 
+Completed (released; not deployed): [WEPP 261026 release](docs/work-packages/20261026_wepp_261026_release/package.md) — paired late-return metadata repair, both affected watersheds validated, 534 native and 11,791 WEPPpy passes, reviewed 49-page cumulative report. Defaults unchanged.
+
 Completed (deployed): [Culvert JWT automatic renewal](docs/work-packages/20261026_culvert_jwt_renewal/package.md) — daily user systemd timer on wepp1, restricted SSH installation and per-task credential-file reads on wepp2. Real service/timer rotations and same-process authentication pass; independent reviews closed; 20 focused tests and 11,786 segmented broad passes. Browser-path and off-host-alert follow-ups documented.
 
 Completed (local implementation): [Roads GL Dashboard](docs/work-packages/20261023_roads_gl_dashboard/package.md) — guarded centerline detachment and Baseline/Roads switch; twelve review findings closed. Real artifact/browser checks pass; 11764 Python passes across segmented coverage, 1017 frontend tests, five feature browser tests. General smoke limits retained. No production deployment.

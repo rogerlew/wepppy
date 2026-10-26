@@ -1,0 +1,41 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/wepp_runner/test_run_hillslope_retries.py tests/wepp/test_wepp_runner_outputs.py tests/wepp_runner/test_binary_capabilities.py tests/wepp_runner/test_pass_family_selection.py tests/wepp/interchange/test_watershed_pass_interchange.py tests/wepp/interchange/test_ag_fields_interchange.py tests/wepp/interchange/test_roads_lifecycle.py
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 90 items
+
+tests/wepp_runner/test_run_hillslope_retries.py .......                  [  7%]
+tests/wepp/test_wepp_runner_outputs.py .                                 [  8%]
+tests/wepp_runner/test_binary_capabilities.py ....................       [ 31%]
+tests/wepp_runner/test_pass_family_selection.py ...................      [ 52%]
+tests/wepp/interchange/test_watershed_pass_interchange.py s              [ 53%]
+tests/wepp/interchange/test_ag_fields_interchange.py ................... [ 74%]
+..                                                                       [ 76%]
+tests/wepp/interchange/test_roads_lifecycle.py .....................     [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/wepp_runner/test_run_hillslope_retries.py::test_run_hillslope_retries_timeout_and_logs_flake
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wepp/interchange/test_roads_lifecycle.py::test_stream_keeps_admission_until_send_finishes
+tests/wepp/interchange/test_roads_lifecycle.py::test_stream_keeps_admission_until_send_finishes
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/wepp/interchange/test_roads_lifecycle.py::test_stream_keeps_admission_until_send_finishes
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/wepp/interchange/test_roads_lifecycle.py::test_stream_keeps_admission_until_send_finishes
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 89 passed, 1 skipped, 6 warnings in 24.59s ==================

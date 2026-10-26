@@ -1,0 +1,14 @@
+{
+  "timestamp_utc": "2026-10-26T20:33:25.892753+00:00",
+  "hill_count": 491,
+  "exit_code": 1,
+  "watershed_seconds": 36.06060258671641,
+  "total_seconds": 263.44701313227415,
+  "success": false,
+  "binary_sha256": {
+    "wepp": "e2c83b1a691fad3ffe29acf1588dadbecfeec9b027391df8b7fddcf4908d2971",
+    "wepp_hill": "81591bf0301604aa25002d641e3c8e5d22e15c747b179f1613e7c329233f4965"
+  },
+  "stdout_tail": "                                          \n   9.99999975E-06   9.99999975E-06  0.500000000    \n\n  Enter name of file containing slope data -->                     \n\n file name read in: pw0.slp                                                                                                        \n\n  Enter name of file containing storm data -->                     \n\n file name read in: pw0.cli                                                                                                        \n\n  Enter name of file containing soil data -->                      \n\n file name read in: pw0.sol                                                                                                        \n Please enter the irrigation option\n ----------------------------------\n [0] no irrigation\n  1  sprinkler, fixed date\n  2  sprinkler, depletion level\n  3  sprinkler, combination\n  4  furrow,    fixed date\n  5  furrow,    depletion\n  6  furrow,    combination\n -----------------------------------\n Enter irrigation option [0]\n\n\n NO IRRIGATION SELECTED.\n\n\n  Enter number of years to simulate --> \n     \n SIMULATION YEAR =           1\n CHRQIN_INVALID_DURATION          534         394   0.00000000    \n",
+  "stderr": "STOP 1\n"
+}

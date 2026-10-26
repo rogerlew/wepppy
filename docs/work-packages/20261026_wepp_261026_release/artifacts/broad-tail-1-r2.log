@@ -1,0 +1,339 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_wepp_binary_policy.py tests/nodb/test_wepp_input_parser.py tests/nodb/test_wepp_nodb_post_utils.py tests/omni/test_honeyed_marathoner_sediment_inversion_fixture.py tests/profile_recorder/test_profile_recorder.py tests/query_engine/test_catalog_refresh.py tests/query_engine/test_mcp_auth.py tests/query_engine/test_storm_event_analyzer.py tests/roads/test_roads_publication.py tests/rq/test_batch_rq_retry_selection.py tests/rq/test_cancel_job.py tests/rq/test_culvert_rq_nodir_guards.py tests/rq/test_directory_lock_cleanup.py tests/rq/test_fork_failure.py tests/rq/test_job_info.py tests/rq/test_land_and_soil_rq_guards.py tests/rq/test_optional_discord_imports.py tests/rq/test_project_rq_archive_helpers.py tests/rq/test_project_rq_fork.py tests/rq/test_query_catalog_disclosure.py tests/rq/test_rq_worker_runid.py tests/rq/test_submission_recovery.py tests/rq/test_wepp_rq_dss_helpers.py tests/rq/test_wepp_singleflight_tracking.py tests/runtime_paths/test_fs_parquet_contract.py tests/runtime_paths/test_wepp_inputs_compat.py tests/scripts/test_deploy_production_plan.py tests/services/test_wmesque_retrieve.py tests/shape_converter/integration/test_runtime_hardening_api.py tests/shape_converter/unit/test_archive_validation.py tests/shape_converter/unit/test_health_routes.py tests/shape_converter/unit/test_ui_endpoints.py tests/soils/test_ssurgo_fc_wp_sanitization.py tests/soils/test_ssurgo_serialization.py tests/test_2_validate_managements.py tests/test_all_your_base_objective_functions.py tests/test_nodb_core_import_hygiene.py tests/test_webclients_elevation.py tests/tools/test_check_broad_exceptions.py tests/tools/test_forest_workflow_bootstrap.py tests/tools/test_hillslope_mofe_scireview_compare.py tests/tools/test_migrations_runner.py tests/tools/test_run_pytest_sharded.py tests/tools/test_ssurgo_masked_valid_evaluation.py tests/topo/test_osm_roads_cache.py tests/topo/test_peridot_runner_wait.py tests/topo/test_terrain_processor_wbt_integration.py tests/topo/test_watershed_abstraction_slope_file.py tests/topo/test_wbt_topaz_conditioning_integration.py tests/wepp/interchange/test_hec_ras_boundary.py tests/wepp/interchange/test_interchange_documentation.py tests/wepp/interchange/test_roads_lifecycle.py tests/wepp/interchange/test_versioning.py tests/wepp/interchange/test_watershed_ebe_interchange.py tests/wepp/interchange/test_watershed_totalwatsed_export.py tests/wepp/management/test_rotation_stack.py tests/wepp/reports/test_channel_watbal.py tests/wepp/reports/test_loss_reports.py tests/wepp/reports/test_return_periods_phase7.py tests/wepp/soils/utils/test_wepp_soil_util.py tests/wepp/test_single_input_soil_formats.py tests/wepp/test_wepp_frost_opts.py tests/wepp/test_wepp_runner_outputs.py tests/wepp_runner/test_pass_family_selection.py tests/weppcloud/bootstrap/test_pre_receive.py tests/weppcloud/routes/test_admin_usermod_contract.py tests/weppcloud/routes/test_blueprint_registration.py tests/weppcloud/routes/test_climate_bp.py tests/weppcloud/routes/test_config_builder_ui.py tests/weppcloud/routes/test_diagnostics_page.py tests/weppcloud/routes/test_feature_access_routes.py tests/weppcloud/routes/test_geneva_wp08_routes.py tests/weppcloud/routes/test_interchange_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_poweruser_onboarding_presentation.py tests/weppcloud/routes/test_readme_md.py tests/weppcloud/routes/test_roads_bp.py tests/weppcloud/routes/test_run_0_builder_maturity.py tests/weppcloud/routes/test_run_config.py tests/weppcloud/routes/test_security_auth_forms.py tests/weppcloud/routes/test_soils_bp.py tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_user_profile_contract.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_wepp_bp.py tests/weppcloud/test_auth_remember_cookie.py tests/weppcloud/test_combined_viewer_preparation.py tests/weppcloud/test_context_processors_static_url.py tests/weppcloud/test_gl_dashboard_et_sql.py tests/weppcloud/test_registration_name_validation.py tests/weppcloud/test_run_catalog_reader.py tests/weppcloud/test_ui_foundation_css.py tests/weppcloud/test_usersum_template_wiring.py tests/weppcloud/utils/test_helpers_authorize.py tests/weppcloud/utils/test_run_ttl.py --maxfail=1 --report-log=/workdir/wepppy/.pytest_cache/wepp-261026-segmented/tail-1-r2.jsonl
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1394 items
+
+tests/nodb/test_wepp_binary_policy.py ..............                     [  1%]
+tests/nodb/test_wepp_input_parser.py ................................... [  3%]
+................................................                         [  6%]
+tests/nodb/test_wepp_nodb_post_utils.py ......                           [  7%]
+tests/omni/test_honeyed_marathoner_sediment_inversion_fixture.py ....    [  7%]
+tests/profile_recorder/test_profile_recorder.py ....                     [  7%]
+tests/query_engine/test_catalog_refresh.py ............................. [ 10%]
+.............                                                            [ 10%]
+tests/query_engine/test_mcp_auth.py .........                            [ 11%]
+tests/query_engine/test_storm_event_analyzer.py ..........               [ 12%]
+tests/roads/test_roads_publication.py ...                                [ 12%]
+tests/rq/test_batch_rq_retry_selection.py .............................. [ 14%]
+...........                                                              [ 15%]
+tests/rq/test_cancel_job.py ..........                                   [ 16%]
+tests/rq/test_culvert_rq_nodir_guards.py .....                           [ 16%]
+tests/rq/test_directory_lock_cleanup.py .................                [ 17%]
+tests/rq/test_fork_failure.py ..................                         [ 19%]
+tests/rq/test_job_info.py ..................                             [ 20%]
+tests/rq/test_land_and_soil_rq_guards.py ....                            [ 20%]
+tests/rq/test_optional_discord_imports.py ...                            [ 20%]
+tests/rq/test_project_rq_archive_helpers.py ...                          [ 21%]
+tests/rq/test_project_rq_fork.py ....................................... [ 23%]
+........................................................................ [ 29%]
+..                                                                       [ 29%]
+tests/rq/test_query_catalog_disclosure.py ..............                 [ 30%]
+tests/rq/test_rq_worker_runid.py .......                                 [ 30%]
+tests/rq/test_submission_recovery.py ..........                          [ 31%]
+tests/rq/test_wepp_rq_dss_helpers.py ....                                [ 31%]
+tests/rq/test_wepp_singleflight_tracking.py .................            [ 32%]
+tests/runtime_paths/test_fs_parquet_contract.py ..........               [ 33%]
+tests/runtime_paths/test_wepp_inputs_compat.py ......                    [ 34%]
+tests/scripts/test_deploy_production_plan.py ..                          [ 34%]
+tests/services/test_wmesque_retrieve.py ..s                              [ 34%]
+tests/shape_converter/integration/test_runtime_hardening_api.py ..       [ 34%]
+tests/shape_converter/unit/test_archive_validation.py ................   [ 35%]
+tests/shape_converter/unit/test_health_routes.py ......                  [ 36%]
+tests/shape_converter/unit/test_ui_endpoints.py .....                    [ 36%]
+tests/soils/test_ssurgo_fc_wp_sanitization.py ......                     [ 36%]
+tests/soils/test_ssurgo_serialization.py ..                              [ 37%]
+tests/test_2_validate_managements.py ..........                          [ 37%]
+tests/test_all_your_base_objective_functions.py ..........               [ 38%]
+tests/test_nodb_core_import_hygiene.py .                                 [ 38%]
+tests/test_webclients_elevation.py .....s                                [ 39%]
+tests/tools/test_check_broad_exceptions.py ...............               [ 40%]
+tests/tools/test_forest_workflow_bootstrap.py ..                         [ 40%]
+tests/tools/test_hillslope_mofe_scireview_compare.py ..                  [ 40%]
+tests/tools/test_migrations_runner.py ....                               [ 40%]
+tests/tools/test_run_pytest_sharded.py ............                      [ 41%]
+tests/tools/test_ssurgo_masked_valid_evaluation.py .............         [ 42%]
+tests/topo/test_osm_roads_cache.py ........                              [ 43%]
+tests/topo/test_peridot_runner_wait.py ......................            [ 44%]
+tests/topo/test_terrain_processor_wbt_integration.py ....                [ 44%]
+tests/topo/test_watershed_abstraction_slope_file.py .................... [ 46%]
+..............                                                           [ 47%]
+tests/topo/test_wbt_topaz_conditioning_integration.py .                  [ 47%]
+tests/wepp/interchange/test_hec_ras_boundary.py .                        [ 47%]
+tests/wepp/interchange/test_interchange_documentation.py ......          [ 47%]
+tests/wepp/interchange/test_roads_lifecycle.py .....................     [ 49%]
+tests/wepp/interchange/test_versioning.py ....                           [ 49%]
+tests/wepp/interchange/test_watershed_ebe_interchange.py .....           [ 50%]
+tests/wepp/interchange/test_watershed_totalwatsed_export.py ...          [ 50%]
+tests/wepp/management/test_rotation_stack.py ........                    [ 50%]
+tests/wepp/reports/test_channel_watbal.py ...                            [ 51%]
+tests/wepp/reports/test_loss_reports.py .......                          [ 51%]
+tests/wepp/reports/test_return_periods_phase7.py ..                      [ 51%]
+tests/wepp/soils/utils/test_wepp_soil_util.py .......................... [ 53%]
+..................................                                       [ 56%]
+tests/wepp/test_single_input_soil_formats.py ........................... [ 57%]
+........................................................................ [ 63%]
+.........................................................                [ 67%]
+tests/wepp/test_wepp_frost_opts.py .......                               [ 67%]
+tests/wepp/test_wepp_runner_outputs.py .                                 [ 67%]
+tests/wepp_runner/test_pass_family_selection.py ...................      [ 69%]
+tests/weppcloud/bootstrap/test_pre_receive.py ..........                 [ 69%]
+tests/weppcloud/routes/test_admin_usermod_contract.py .............      [ 70%]
+tests/weppcloud/routes/test_blueprint_registration.py .                  [ 70%]
+tests/weppcloud/routes/test_climate_bp.py .............................. [ 73%]
+...                                                                      [ 73%]
+tests/weppcloud/routes/test_config_builder_ui.py ........                [ 73%]
+tests/weppcloud/routes/test_diagnostics_page.py .......                  [ 74%]
+tests/weppcloud/routes/test_feature_access_routes.py ................... [ 75%]
+..............................                                           [ 77%]
+tests/weppcloud/routes/test_geneva_wp08_routes.py ..........             [ 78%]
+tests/weppcloud/routes/test_interchange_bp.py ...                        [ 78%]
+tests/weppcloud/routes/test_omni_bp.py ...                               [ 78%]
+tests/weppcloud/routes/test_poweruser_onboarding_presentation.py ....... [ 79%]
+..............                                                           [ 80%]
+tests/weppcloud/routes/test_readme_md.py ............................... [ 82%]
+........                                                                 [ 83%]
+tests/weppcloud/routes/test_roads_bp.py ........................         [ 85%]
+tests/weppcloud/routes/test_run_0_builder_maturity.py .......            [ 85%]
+tests/weppcloud/routes/test_run_config.py ......................         [ 87%]
+tests/weppcloud/routes/test_security_auth_forms.py ...........           [ 87%]
+tests/weppcloud/routes/test_soils_bp.py ......                           [ 88%]
+tests/weppcloud/routes/test_treatments_bp.py .....                       [ 88%]
+tests/weppcloud/routes/test_user_profile_contract.py ....                [ 88%]
+tests/weppcloud/routes/test_usersum_docs_contracts.py ....               [ 89%]
+tests/weppcloud/routes/test_wepp_bp.py ................................. [ 91%]
+..............................................                           [ 94%]
+tests/weppcloud/test_auth_remember_cookie.py ..........                  [ 95%]
+tests/weppcloud/test_combined_viewer_preparation.py .........            [ 96%]
+tests/weppcloud/test_context_processors_static_url.py ...                [ 96%]
+tests/weppcloud/test_gl_dashboard_et_sql.py .........                    [ 97%]
+tests/weppcloud/test_registration_name_validation.py ....                [ 97%]
+tests/weppcloud/test_run_catalog_reader.py .......F
+
+=================================== FAILURES ===================================
+____________________ test_real_file_sql_http_browser_chain _____________________
+
+reader_app = (<Flask 'test_run_catalog_reader'>, <module 'wepppy.weppcloud.routes.user' from '/workdir/wepppy/wepppy/weppcloud/routes/user.py'>, Engine(postgresql://wepppy:***@postgres:5432/wepppy))
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-28/test_real_file_sql_http_browse0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78bad04febd0>
+
+    @pytest.mark.slow
+    def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
+        import os
+        from pathlib import Path
+        import subprocess
+        import threading
+        from jinja2 import DictLoader
+        from werkzeug.serving import make_server
+        from tests.nodb.test_base_boundary_characterization import _DummyNoDb, _RedisStub
+        from wepppy.nodb import base, persistence_events
+        from wepppy.weppcloud.run_catalog.adapter import Adapter, Settings
+        from wepppy.weppcloud.run_catalog.paths import Roots
+
+        app, routes, engine = reader_app
+        roots = Roots(primary=str(tmp_path), legacy=str(tmp_path / "legacy"))
+        directory = tmp_path / "ru" / "run-1"
+        directory.mkdir(parents=True)
+        monkeypatch.setattr(base, "redis_lock_client", _RedisStub())
+        monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+        monkeypatch.setattr(persistence_events, "_observer", Adapter(Settings("postgres", "catalog"), roots, lambda: engine))
+
+        class MetadataController(_DummyNoDb):
+            filename = "ron.nodb"
+
+        controller = MetadataController(str(directory))
+        with controller.locked(validate_on_success=False):
+            controller._name = "Source to browser"
+            controller._scenario = ""
+            controller._map = None
+        with engine.connect() as connection:
+            assert connection.scalar(sa.select(catalog.c.dirty_revision).where(catalog.c.run_id == 1)) == 2
+        assert repository.refresh(engine, 1, roots) == "ready"
+        template = Path(__file__).parents[2] / "wepppy/weppcloud/templates/user/runs2.html"
+        app.jinja_loader = DictLoader({"user/runs2.html": template.read_text(),
+                                      "base_pure.htm": '{% block body %}{% endblock %}{% block script_extras %}{% endblock %}'})
+        app.jinja_env.globals["static_url"] = lambda path: "/static/" + path
+        viewer = SimpleNamespace(id=1, is_authenticated=True, has_role=lambda role: False)
+        monkeypatch.setattr(routes, "current_user", viewer)
+        app.jinja_env.globals["current_user"] = viewer
+        monkeypatch.setattr(routes, "_is_admin_runs_viewer", lambda: False)
+        for path, endpoint in (("/runs", "runs"), ("/runs/catalog", "runs_catalog"), ("/runs/map-data", "runs_map_data")):
+            app.add_url_rule(path, "user." + endpoint, getattr(routes, endpoint).__wrapped__)
+        app.add_url_rule("/runs/users", "user.runs_users", lambda: {})
+        app.add_url_rule("/profile", "user.profile", lambda: "")
+        app.add_url_rule("/docs/<doc_id>", "usersum.view_doc", lambda doc_id: doc_id)
+        server = make_server("127.0.0.1", 0, app, threaded=True)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        source_root = Path(__file__).parents[2]
+        static_source = source_root / "wepppy/weppcloud/static-src"
+        environment = dict(os.environ)
+        environment.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(static_source / ".playwright-browsers"))
+        javascript = """const { chromium } = require('playwright');
+    (async () => {
+      const browser = await chromium.launch({headless: true});
+      try {
+        const page = await browser.newPage();
+        const origin = process.argv[1];
+        await page.route('**/*', route => route.request().url().startsWith(origin) ? route.continue() : route.abort());
+        await page.goto(origin + '/runs', {waitUntil: 'domcontentloaded'});
+        await page.getByRole('cell', {name: 'Source to browser', exact: true}).waitFor();
+        await page.getByText('Visible (metadata updating)', {exact: true}).waitFor();
+        const summary = await page.locator('#runs_catalog_status').textContent();
+        if (!summary.includes('Metadata updating: 1. Unavailable projects: 1.')) throw new Error(summary);
+        const payload = await page.evaluate(async () => (await fetch('/runs/map-data')).json());
+        if (payload.runs.some(run => run.runid === 'run-4')) throw new Error('unauthorized run');
+        console.log('file -> observer -> PostgreSQL -> HTTP -> Chromium: PASS');
+      } finally { await browser.close(); }
+    })().catch(error => { console.error(error); process.exit(1); });
+    """
+        try:
+            result = subprocess.run(["node", "-e", javascript, f"http://127.0.0.1:{server.server_port}"],
+                                    cwd=static_source, env=environment, capture_output=True, text=True, timeout=60)
+>           assert result.returncode == 0, result.stderr
+E           AssertionError: browserType.launch: Executable doesn't exist at /workdir/wepppy/weppcloud/static-src/.playwright-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell
+E             ╔═════════════════════════════════════════════════════════════════════════╗
+E             ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+E             ║ Please run the following command to download new browsers:              ║
+E             ║                                                                         ║
+E             ║     npx playwright install                                              ║
+E             ║                                                                         ║
+E             ║ <3 Playwright Team                                                      ║
+E             ╚═════════════════════════════════════════════════════════════════════════╝
+E                 at [eval]:3:34
+E                 at [eval]:17:3
+E                 at [eval]-wrapper:6:24 {
+E               name: 'Error'
+E             }
+E
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['node', '-e', "const { chromium } = require('playwright');\n(async () => {\n  const browser = a...════════════════════════╝\n    at [eval]:3:34\n    at [eval]:17:3\n    at [eval]-wrapper:6:24 {\n  name: 'Error'\n}\n").returncode
+
+/workdir/wepppy/tests/weppcloud/test_run_catalog_reader.py:220: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/shape_converter/integration/test_runtime_hardening_api.py: 4 warnings
+tests/shape_converter/unit/test_health_routes.py: 10 warnings
+tests/shape_converter/unit/test_ui_endpoints.py: 10 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pre_receive_logs_push_for_multi_ofe_slp
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pre_receive_new_ref_logs_only_introduced_commits
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1506105) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/rq/test_fork_failure.py: 179 warnings
+tests/rq/test_job_info.py: 9 warnings
+tests/rq/test_query_catalog_disclosure.py: 1 warning
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+tests/rq/test_fork_failure.py: 18 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:260: DeprecationWarning: Passing a string or function for `on_failure` is deprecated, pass `Callback` instead
+    warnings.warn(
+
+tests/rq/test_fork_failure.py: 27 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:227: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_successful_prerequisite_has_no_failure_side_effect
+tests/rq/test_fork_failure.py::test_reporting_error_preserves_job_failure
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:58: DeprecationWarning: The `push_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_successful_prerequisite_has_no_failure_side_effect
+tests/rq/test_fork_failure.py::test_reporting_error_preserves_job_failure
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:72: DeprecationWarning: The `pop_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+tests/rq/test_fork_failure.py: 10 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:796: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn("job.exc_info is deprecated, use job.latest_result() instead.", DeprecationWarning)
+
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+tests/rq/test_fork_failure.py::test_actual_rq_callback_records_failure_and_preserves_strict_tree
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:860: DeprecationWarning: job.result is deprecated, use job.return_value instead.
+    warnings.warn("job.result is deprecated, use job.return_value instead.", DeprecationWarning)
+
+tests/rq/test_fork_failure.py::test_actual_work_horse_death_reports_fork_failure
+  /opt/venv/lib/python3.12/site-packages/rq/worker.py:1172: DeprecationWarning: This process (pid=1506105) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    child_pid = os.fork()
+
+tests/rq/test_land_and_soil_rq_guards.py::test_land_and_soil_rq_aborts_before_landuse_build_on_archive_root
+tests/rq/test_land_and_soil_rq_guards.py::test_land_and_soil_rq_aborts_on_soils_guard_after_landuse_build
+tests/rq/test_project_rq_fork.py::test_fork_finalizer_failed_dependency_emits_failure_and_releases_claim
+tests/rq/test_project_rq_fork.py::test_fork_rq_reset_marker_failure_emits_fork_failed
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/rq/test_wepp_rq_dss_helpers.py::test_write_dss_channel_geojson_writes_filtered_channels_with_metadata
+  /workdir/wepppy/wepppy/rq/wepp_rq_dss.py:208: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+
+tests/weppcloud/routes/test_admin_usermod_contract.py::test_usermod_get_is_root_only_and_renders_contract
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/weppcloud/routes/test_admin_usermod_contract.py::test_usermod_get_is_root_only_and_renders_contract
+tests/weppcloud/routes/test_security_auth_forms.py::test_real_security_routes_require_csrf_before_cap[/login-payload0]
+tests/weppcloud/routes/test_security_auth_forms.py::test_real_security_routes_require_csrf_before_cap[/register-payload1]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/weppcloud/routes/test_climate_bp.py::test_climate_catalog_denies_before_controller_or_registry_access
+  /workdir/wepppy/wepppy/weppcloud/routes/_common.py:109: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/weppcloud/routes/test_wepp_bp.py: 14 warnings
+  /workdir/wepppy/wepppy/weppcloud/routes/nodb_api/wepp_bp.py:316: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+
+tests/weppcloud/test_auth_remember_cookie.py::test_opted_in_cookie_is_secure_and_refreshes
+tests/weppcloud/test_auth_remember_cookie.py::test_opted_in_cookie_is_secure_and_refreshes
+tests/weppcloud/test_auth_remember_cookie.py::test_remember_cookie_restores_identity_without_session
+tests/weppcloud/test_auth_remember_cookie.py::test_remember_cookie_restores_identity_without_session
+tests/weppcloud/test_auth_remember_cookie.py::test_opt_out_deletes_preexisting_remember_cookie
+tests/weppcloud/test_auth_remember_cookie.py::test_real_login_opt_out_clears_cookie_before_form_short_circuit
+tests/weppcloud/test_auth_remember_cookie.py::test_logout_deletes_remember_cookie
+tests/weppcloud/test_auth_remember_cookie.py::test_security_logout_deletes_session_and_remember_cookies
+tests/weppcloud/test_auth_remember_cookie.py::test_rotating_user_identity_invalidates_copied_remember_cookie
+  /opt/venv/lib/python3.12/site-packages/flask_login/login_manager.py:488: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires = datetime.utcnow() + duration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated report log file: /workdir/wepppy/.pytest_cache/wepp-261026-segmented/tail-1-r2.jsonl -
+=========================== short test summary info ============================
+FAILED tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+===== 1 failed, 1363 passed, 2 skipped, 328 warnings in 233.70s (0:03:53) ======
