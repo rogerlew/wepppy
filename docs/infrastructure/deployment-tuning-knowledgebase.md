@@ -453,3 +453,22 @@ Compatibility validation: 53 WMesque catalog/priority tests passed locally and i
 wepp1's candidate FastAPI 0.162.0 image using a disposable Compose `wmesque2`
 container with the patched module and tests mounted read-only. Coverage includes
 health/OpenAPI, published raster retrieval, revision handling and client failover.
+
+## wepp3 Docker build DNS ordering (2026-10-26)
+
+The normal Docker build network failed resolving Debian although the host and
+running worker resolved it. Direct container TCP connections worked. The build
+resolver inherited `/run/systemd/resolve/resolv.conf`; its first three entries
+were `192.168.100.7`, `129.101.119.220`, and a duplicate `192.168.100.7`.
+The first server returned SERVFAIL for Debian, the second timed out, and libc's
+three-nameserver limit excluded the working campus servers later in the list.
+
+With operator approval, changed only the global DNS setting in
+`/etc/systemd/resolved.conf` from `192.168.100.7 129.101.119.220` to
+`129.101.254.173 129.101.254.174`, after verifying both from the default Docker
+bridge. Original config: `/var/backups/resolved.conf.wepp3-20261026T111632Z`.
+Restarted only systemd-resolved. New default-network containers resolved Debian
+and GitHub; Tailscale link DNS remained intact and the existing fork/archive
+worker's start time and zero restart count were unchanged. Per-link DNS, search
+domains and runtime container networks were preserved. No host-network build
+override or Docker daemon restart was needed.
