@@ -1,6 +1,6 @@
 # ADR-0106: Scheduled Culvert JWT renewal
 
-Status: accepted operator direction, implementation pending.
+Status: accepted; implemented and validated on wepp1/wepp2, 2026-10-26 UTC.
 
 ## Decision provenance
 

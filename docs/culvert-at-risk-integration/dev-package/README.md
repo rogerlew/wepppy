@@ -32,6 +32,8 @@ Culvert_web_app developers and stakeholders integrating with the wepp.cloud culv
 
 ## Authentication (JWT)
 
+Production Culvert credentials are renewed by the [systemd renewal mechanism](../jwt-renewal.md). The deployed identity remains submit-only; the broader example below is not the production registration.
+
 `/rq-engine/api/culverts-wepp-batch/*` now requires a bearer token. `jobstatus`/`jobinfo` are open
 by default, and their access is governed by `RQ_ENGINE_POLL_AUTH_MODE`: `open` accepts anonymous
 polling, `token_optional` accepts anonymous polling but validates a supplied bearer token, and

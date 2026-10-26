@@ -41,7 +41,7 @@ Sources: [token specification](../dev-notes/auth-token.spec.md), [agent API cont
 
 ### Culvert client registration and compatibility
 
-Operator-authorized automatic renewal (2026-10-26) follows [Culvert JWT renewal](culvert-jwt-renewal-contract.md): the registered identity and submit scope remain unchanged; operator-maintained registration is stable across fresh jti/expiry values. Conformance pending implementation.
+Operator-authorized automatic renewal (2026-10-26) follows [Culvert JWT renewal](culvert-jwt-renewal-contract.md): the registered identity and submit scope remain unchanged; operator-maintained registration is stable across fresh jti/expiry values. This renewal mechanism was deployed and validated through systemd and the live Culvert worker on 2026-10-26 UTC.
 
 The operator identifies `culvert-web-app` at `/workdir/Culvert_web_app` on `wepp2` as the authorized integration; it targets `wepp.cloud`. Current configured operation credential: `sub=culvert-batch-submit-90d`, audience `rq-engine`, service class, `service_groups=culverts`, scope `culvert:batch:submit`, no run claims. Preserve this independently registered service identity without human membership or a new per-batch operation claim. Register the subject/audience/service-group combination through operator-owned configuration tied to this integration key; normal signature, expiry, revocation and operation scopes remain mandatory. Credential renewal/subject changes require explicit registration maintenance, never arbitrary self-registration from JWT fields. Retain existing classless compatibility only for an explicitly registered legacy shape, not every scope-bearing token.
 

@@ -1,6 +1,6 @@
 # Culvert JWT renewal contract
 
-Status: approved operator direction, implementation conformance pending (2026-10-26 UTC).
+Status: implemented and environment-validated on wepp1/wepp2 (2026-10-26 UTC); off-host notification destination remains unconfigured.
 
 ## Authority and purpose
 

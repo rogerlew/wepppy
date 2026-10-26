@@ -9,13 +9,15 @@ Culvert submissions must not stop every 90 days because a human forgot credentia
 ## Progress
 
 - [x] (2026-10-26 UTC) Inspected production and scaffolded package/contract.
-- [ ] Reviewed and committed contract checkpoint.
-- [ ] Implemented and tested scripts, units and client file loading.
-- [ ] Independent implementation/security reviews passed.
-- [ ] Deployed and exercised systemd; verified changed JWT in real worker.
+- [x] (2026-10-26 UTC) Reviewed and committed contract checkpoint `4cd8e9cb1`.
+- [x] (2026-10-26 UTC) Implemented scripts/units/helper; 20 focused regressions passed.
+- [x] (2026-10-26 UTC) Independent pre-deployment reviews passed after malformed-token fix.
+- [x] (2026-10-26 16:45 UTC) Deployed and exercised both service and timer; verified changed JWT and HTTP acceptance in same-process worker probes.
 - [ ] Documented operations and final evidence.
 
 ## Surprises & Discoveries
+
+Bare wepp2 resolves to LAN on wepp1; the source-restricted key rejected the first systemd attempt. Explicit Tailscale FQDN restored the intended path without broadening access.
 
 Both hosts lack general passwordless sudo; wepp1 already has lingering user systemd. Use this existing operational identity instead of adding privileges. Culvert worker runs as root and reads the existing instance mount, so a host-user-owned 0600 credential file is readable without mount or identity changes.
 
@@ -53,6 +55,6 @@ Python stdlib, existing wctl/Docker issuer, SSH, user systemd, and HTTPS validat
 
 ## Outcomes & Retrospective
 
-Pending implementation and real-systemd validation.
+Renewal is deployed and accepted through actual timer/service/SSH/filesystem/container boundaries. No model analysis rerun claimed. Full suite and final review records pending. External alert destination is unconfigured; local health receipt/journal active.
 
 Initial revision: 2026-10-26 UTC; bounded execution authorized by user.

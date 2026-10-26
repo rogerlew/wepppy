@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew the registered Culvert submission JWT on wepp2
+
+[Service]
+Type=oneshot
+WorkingDirectory=/workdir/wepppy
+ExecStart=/usr/bin/python3 %h/.local/libexec/weppcloud-culvert-token-rotation.py renew
+TimeoutStartSec=5min
+UMask=0077
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+NoNewPrivileges=true
