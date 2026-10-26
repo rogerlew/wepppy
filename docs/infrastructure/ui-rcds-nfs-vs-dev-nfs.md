@@ -85,6 +85,143 @@ script ran on the server, these timings exclude the NFS protocol, client mount
 behavior, and 1 GbE network path. A cluster-client run against an exported
 path is required to characterize the end-to-end Kubernetes NFS experience.
 
+### I-CREWS wpc1 RAIDZ2 and wpc2 NFS client (2026-10-14)
+
+Ran the unchanged canonical helper with `--fsync-files --fsync-dirs --sync`,
+default 3100 files/31 directories/4 KiB payload, as `roger` (UID 1002). Three
+sequential repetitions per host used fresh scratch roots, with `/tmp` tested
+after each storage path. All scratch roots were removed and cleanup verified.
+
+Server: wpc1, eight 22 TB WD SATA HDDs in one RAIDZ2 vdev, no separate log or
+special vdev; Ubuntu 26.04.1, OpenZFS 2.4.1, 256 GiB RAM. Dedicated dataset
+`tank/nfs-benchmark` at `/wc1/nfs-benchmark`: lz4, recordsize 128K, sync=standard,
+1 TiB quota. Both hosts' `/tmp` paths are NVMe-backed XFS.
+
+Client: wpc2, `/mnt/wpc1-benchmark`, NFSv4.2/TCP, hard, rsize/wsize 1 MiB,
+default single connection. Export is sync/root_squash, restricted to wpc2's
+172.27.192.245 address; server listens at 172.27.192.244:2049. Existing campus
+10G interfaces, MTU 1500; secondary NICs disconnected. No tuning during runs.
+
+Median seconds across three repetitions:
+
+| Path | Create | Delete | Fsynced rewrite | Sync |
+| --- | ---: | ---: | ---: | ---: |
+| wpc1 local ZFS | 0.193 | 0.076 | 57.243 | 0.002 |
+| wpc1 local /tmp | 0.198 | 0.071 | 0.744 | 0.028 |
+| wpc2 NFS to wpc1 | 138.225 | 45.129 | 128.910 | 0.001 |
+| wpc2 local /tmp | 0.240 | 0.069 | 0.821 | 0.002 |
+
+ZFS fsynced rewrites ranged 56.569–62.098 s; NFS rewrites 128.593–132.845 s.
+Compared with the historical production baseline above, the NFS median is about
+4.6x slower creating, 9.1x slower deleting and 3.7x slower rewriting. These are
+cross-environment comparisons, not a controlled attribution to one setting.
+
+The local ZFS fsync cost shows a backend stable-write latency component before
+NFS overhead. A live NFS interval showed millisecond-scale write RPC latency;
+client counters showed no retransmissions during the run. Initial create lacks
+explicit fsync, but synchronous NFS export semantics differ from buffered local
+creation. Fast local buffered create/delete does not establish fast durable NFS
+metadata operations. Do not infer bulk throughput from these compressible small
+files or treat system-wide `sync_s` as a per-filesystem metric.
+
+This first pass retained standard/sync as its baseline. The later operator-
+authorized hypothesis tests below explicitly compare acknowledgment policies
+on generated data. No hardware change is selected by the initial comparison;
+final run-data policy remains a separate decision.
+
+Raw samples, source hash and configuration are retained in the private
+`weppcloud-deployments` repository under
+`docs/work-packages/20261014-nfs-benchmark/artifacts/metadata-baseline.txt` and
+`hosts/icrews/nfs-benchmark.md`. Source helper SHA256:
+`4f2b275d6e55871d4a5c47c35e6e6b419dbf8b6296015a66feac013e6a305982`.
+
+### Forest/forest1 durability inspection (2026-10-14)
+
+Read-only inspection found a material mismatch with the I-CREWS benchmark:
+
+| Setting | forest1 serving forest | wpc1 serving wpc2 |
+| --- | --- | --- |
+| Data pool | zfs_pool0, four approximately 2 TB HDDs, RAIDZ1 | tank, eight 22 TB HDDs, RAIDZ2 |
+| Separate log/special vdev | None | None |
+| ZFS sync | disabled (local property) | standard |
+| Export durability | async in /etc/exports and active /var/lib/nfs/etab | sync |
+| Export root mapping | no_root_squash | root_squash |
+| Client | NFSv4.2, soft, 32 KiB rsize/wsize | NFSv4.2, hard, 1 MiB rsize/wsize |
+| Measured ping | 0.277 ms mean, three packets | Earlier 0.529 ms mean, three packets |
+
+forest1 pool was ONLINE with zero errors, 82% allocated, and a clean October 11
+scrub. Physical models reported Hitachi HUA72302 (three) and ST2000DM001-9YN1
+(one); Samsung SSD 850 hosts the OS and is not a log vdev. recordsize=128K,
+compression=on, logbias=latency, atime=on. OpenZFS userland 2.2.2-0ubuntu9.5,
+module 2.2.2-0ubuntu9.4; Ubuntu 24.04.4. Server 10.0.0.2 on enp131s0f0 reports
+10 Gb/s full duplex; forest routes directly from 10.0.0.1 on ens5f0.
+
+The export permits both 10.0.0.0/24 and 192.168.1.0/24. The active export table
+confirms async/no_root_squash. Noninteractive sudo was unavailable; no privilege
+workaround, disk-cache change, service change or new benchmark was attempted.
+Drive write-cache/flush policy was not verified.
+
+**Interpretation correction:** current forest does not provide the same fsync
+semantics as wpc1. ZFS sync=disabled ignores synchronous-write requests; the
+async export is another durability difference. The earlier 22–34x timing ratios
+remain arithmetic comparisons of recorded runs, but do not establish equivalent-
+durability performance or prove a network/hardware disadvantage. This inspection
+establishes current settings, not what was configured at the January benchmark.
+A contemporaneous test with matched durability is needed to quantify attribution.
+
+References: [OpenZFS sync property](https://openzfs.github.io/openzfs-docs/man/master/7/zfsprops.7.html#sync)
+and [NFS exports](https://www.man7.org/linux/man-pages/man5/exports.5.html).
+
+### I-CREWS controlled hypothesis tests (2026-10-14)
+
+Roger selected forest/forest1 as the preferred operational reference: forest's
+sync-disabled configuration has not been problematic in his experience, whereas
+wepp1/2/3 NFS latency and reliability have been highly problematic. A separate
+work package tested which settings explain the performance gap, without changing
+forest, production hosts, pool topology or network.
+
+Same canonical tool/flush flags and three samples per case, on the disposable
+benchmark dataset. The standard/sync row reuses the preceding same-day control;
+new cases were sequential, not randomized. Median seconds:
+
+| ZFS sync | NFS export | Create | Delete | Rewrite |
+| --- | --- | ---: | ---: | ---: |
+| standard | sync | 138.225 | 45.129 | 128.910 |
+| disabled | sync | 4.434 | 2.341 | 4.652 |
+| standard | async | 5.848 | 2.119 | 5.028 |
+| disabled | async | 5.352 | 2.809 | 5.485 |
+
+Local ZFS rewrite fell from 57.243 s to 0.187 s with sync disabled. Either
+acknowledgment-layer change brought NFS into the historical forest range on
+unchanged I-CREWS hardware and network. The effects are not additive; both
+settings affect whether an operation waits for stable storage. Thus the initial
+22–34x forest comparison does not establish a RAIDZ2 or campus-network defect.
+
+On disabled/async, 32 KiB client request sizes gave a 4.250 s median rewrite
+versus 5.485 s at 1 MiB; this smaller, order-sensitive difference needs crossover
+and bulk-I/O validation before adoption. nconnect=4 gave 6.184 s and did not
+help the serial workload. Hard mounts and root squash were retained throughout.
+
+Updated ranking: (1) ZFS acknowledgment behavior, (2) NFS export acknowledgment
+behavior, (3) HDD stable-write cost when required, (4) secondary client knobs,
+(5) topology/RTT, (6) controller/JBOD fault or inefficiency. First two strongly
+supported and interacting; layout-specific cost and controller flush behavior
+remain unisolated. No evidence requires reformatting the pool or adding hardware
+to attain forest-like metadata performance. Twenty LAN pings averaged 0.427 ms
+with no loss; all 223 selected NIC error/drop/pause counters per host were zero;
+controller/CacheVault Optimal, all eight disks' native error counts zero.
+
+All 18 new trials cleaned their scratch roots. Original standard/sync and client
+automount/1 MiB/single connection restored; parent datasets untouched, pool healthy,
+101 retained checksums passed on both hosts. Final client counters: 672644 calls,
+zero retransmissions. These tests establish metadata performance, not crash
+behavior or long-term application reliability. Run-data policy is an explicit
+next adoption decision; database/queue-state policy is separate.
+
+Reproducible runner and evidence are in private `weppcloud-deployments`:
+`tools/nfs-hypotheses.py` and
+`docs/work-packages/20261014-nfs-hypotheses/artifacts/`.
+
 ## Comparison (baseline production / forest.local dev)
 
 Ratios (production time ÷ forest.local time):
