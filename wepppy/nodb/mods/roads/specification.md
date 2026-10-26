@@ -115,7 +115,10 @@ governs segment identity and current-result eligibility. Preparation replaces th
 segment set and invalidates all prior current Roads results before geometry is
 overwritten. A fresh successful Roads run is required. No stable-ID reconciliation
 or beta compatibility admission is required. This applies to producer artifacts,
-reports, downloads, query caches and dashboard consumers, not just NoDb summaries.
+reports, query caches and dashboard consumers, not just NoDb summaries. Generic
+browse/download reflects actual files under the
+[browse filesystem contract](../../../../docs/schemas/browse-filesystem-contract.md);
+only security and PII protections may restrict filesystem access.
 
 State machine contract:
 

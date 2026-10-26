@@ -182,13 +182,11 @@ a later registration must not reuse a prior overlay after its file disappears.
 Optional overlay parse/read failures, absent controller state and absent paths
 retain table-launch availability: remove the affected old registration and map
 choice/default references instead of blocking the table or retaining stale maps.
-Already materialized eager datasets remain point-in-time views until relaunched,
-subject to current-output admission. For current Roads sources, the
-[Roads lifecycle contract](roads-preparation-lifecycle-contract.md#implementation-admission-and-retention-contract)
-takes precedence: subsequent requests, including derived viewers, require current
-publication and the accepted source bytes. Explicit historical Roads sources remain
-ordinary point-in-time diagnostic views. This applies the approved current-result
-boundary to previews; it introduces no durable segment identity or dataset version.
+Already materialized eager datasets remain point-in-time views until relaunched.
+Physical file previews follow the [browse filesystem contract](browse-filesystem-contract.md):
+Roads publication receipts, lifecycle status and result eligibility cannot gate
+file viewing, including derived viewers. Existing source-byte consistency and
+security checks remain; they must not become model freshness filters.
 
 A lazy Parquet instance retains the accepted content fingerprint. Check it before
 and after each filesystem-backed count/page query, and before returning cached

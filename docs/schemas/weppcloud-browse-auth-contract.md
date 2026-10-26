@@ -2,6 +2,12 @@
 > Authoritative contract for browse microservice authentication and authorization behavior.
 > **See also:** `docs/schemas/weppcloud-session-contract.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
+## Filesystem transparency
+
+The [browse filesystem contract](browse-filesystem-contract.md) governs inventory
+and delivery. Only security and PII guards may restrict actual file access;
+model freshness, lifecycle receipts and result eligibility must not filter it.
+
 ## Normative Status
 
 FA-01 amendment prepared 2026-10-01; implementation/checkpoint pending. The

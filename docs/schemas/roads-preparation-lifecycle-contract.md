@@ -1,8 +1,12 @@
 # Roads preparation and result lifecycle
 
-Status: implemented and locally environment-validated (2026-10-23 UTC).
+Status: original lifecycle implemented and locally environment-validated (2026-10-23 UTC).
+October 26 filesystem-transparency amendment: accepted; implementation conformance
+and production rollout pending. The historical implementation reference below
+does not certify this amendment.
 This is the upstream authority for preparation identity and current-result
-eligibility across Roads producers, reports, downloads and GL Dashboard.
+eligibility across Roads producers, reports and GL Dashboard. Generic filesystem
+access follows the [browse filesystem contract](browse-filesystem-contract.md).
 Implementation and retained evidence: [Roads lifecycle package](../work-packages/20261022_roads_preparation_lifecycle/package.md), runtime commit `e4d28c9ad`. Production deployment is separate.
 
 ## Decision and rationale
@@ -72,13 +76,14 @@ Existing legacy parsing of diagnostic artifacts does not make them current resul
 
 ## Consumer behavior and acceptance
 
-Reports, result download links, query-backed views and GL Dashboard use the same
+Reports, model-result link presentation, query-backed views and GL Dashboard use the same
 current-result eligibility. UI wording is simple: **Run Roads to generate results**
 after successful preparation, or the actual preparation/run error on failure.
 No user-facing preparation versions, lineage controls or compatibility switches.
 
 Required acceptance: successful run -> prepare again -> no current Roads results
-in any consumer -> fresh successful run -> new results only. Repeat with changed
+in model consumers -> fresh successful run -> new results only. Generic filesystem
+browsing and downloads continue to expose actual files, including diagnostics. Repeat with changed
 geometry but reused sequential IDs, failed/interrupted preparation, failed run,
 late job completion, page reload, cached query results, multiple profiles per
 segment, and archive/restore. Verify baseline remains intact and historical
@@ -132,17 +137,20 @@ otherwise interrupted invalidation remains non-current and retains whatever hist
 was already moved. Retries must not destroy it. Keep source-relative
 layout in history and permit normal authorized browsing/download/archive of history.
 
-Direct current-prefix browse, schema, preview, CSV and binary downloads, aria2c
-inventory, current Roads report links and scope-based report/dashboard reads, and
-query execution all honor the same admission. Query checks classify both logical
-catalog IDs and resolved physical sources, including cached plans and parent-source
-paths: a current logical ID must not silently resolve into historical data. Historic
-paths explicitly requested as history remain ordinary authorized diagnostic reads.
-Current-prefix directories may explain unavailability, but must not advertise stale
-or in-progress files as current results. Parent directory inventories must not offer
-an invalid current output subtree as ready data.
+Generic browse, schema, file previews, CSV/binary downloads and aria2c inventories
+MUST reflect actual directory contents under the
+[browse filesystem contract](browse-filesystem-contract.md). They neither require
+current Roads admission nor take Roads lifecycle read locks. Existing security
+and PII protections remain. Physical stale/partial/legacy files and permitted
+aliases remain accessible for diagnosis; listing them does not certify results.
 
-Current-result HTTP reads unavailable due to lifecycle state use status 409 and
+Roads report/dashboard reads and query execution retain current-result admission.
+Query checks classify logical catalog IDs and resolved sources, including cached
+plans and parent sources. Historical queries explicitly requested as history
+remain diagnostic reads. Model result UI may explain unavailability without
+restricting the generic filesystem access paths.
+
+Model-report/query HTTP reads unavailable due to lifecycle state use status 409 and
 code `roads_results_unavailable`, with a useful preparation/run action. A conflicting
 mutation uses 409 and `roads_operation_busy`. Preserve authentication/authorization
 before these responses. Current-result HTTP responses use Cache-Control: no-store;
@@ -153,7 +161,7 @@ Ordinary absent Roads state must not break baseline routes or whole-project brow
 The request that initiated invalidation clears its Roads result view and ignores
 older in-flight results using existing request cancellation/state mechanisms.
 Server responses already delivered before another session mutates the project
-cannot be retracted; subsequent reads/reloads must reflect invalidation. Do not add
+cannot be retracted; subsequent model-result reads/reloads must reflect invalidation. Do not add
 a polling service or a live cross-session notification guarantee for this package.
 
 The accepted, not-yet-implemented
@@ -197,8 +205,8 @@ receive a fabricated one. Preserve the coordination file through root cleanup.
 Roads-specific report caches outside the output tree are also current-result
 artifacts: `wepp/reports/cache/hillslope_watbal_summary_roads.parquet`, its
 `.meta.json` sidecar and `hillslope_watbal_summary_roads.attempts/` tree. Invalidation
-retains these under history with their source-relative paths; query/browse/download
-classification includes them. Preserve baseline cache siblings. New Roads report
+retains these under history with their source-relative paths; model-query classification includes them. Generic browse/download does not
+apply this eligibility classification. Preserve baseline cache siblings. New Roads report
 caches must explicitly participate in this inventory rather than relying on output-
 prefix discovery alone.
 
