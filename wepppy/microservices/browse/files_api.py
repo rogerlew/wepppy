@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from wepppy.microservices.browse._roads import guarded_response
-
 import fnmatch
 import mimetypes
 import os
@@ -1019,64 +1017,62 @@ async def _handle_files_request(
         on_forbidden_target=_raise_forbidden_path,
     )
 
-    async def build():
-        if not os.path.lexists(abs_path):
-            path_display = _display_rel_path(rel_path) or "."
-            label = "Path" if meta else "Directory"
-            _raise_files_error(
-                HTTPStatus.NOT_FOUND,
-                f"{label} '{path_display}' does not exist",
-                code="path_not_found",
-                details=f"No entry at {path_display}",
-            )
+    if not os.path.lexists(abs_path):
+        path_display = _display_rel_path(rel_path) or "."
+        label = "Path" if meta else "Directory"
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"{label} '{path_display}' does not exist",
+            code="path_not_found",
+            details=f"No entry at {path_display}",
+        )
 
-        resolved_violation = validate_resolved_target(wd, abs_path)
-        if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
-            if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
-                resolved_violation = None
-        if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
-            _raise_forbidden_path(resolved_violation)
-        if resolved_violation is not None:
-            _raise_outside_or_invalid_path()
+    resolved_violation = validate_resolved_target(wd, abs_path)
+    if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
+        if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            resolved_violation = None
+    if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
+        _raise_forbidden_path(resolved_violation)
+    if resolved_violation is not None:
+        _raise_outside_or_invalid_path()
 
-        using_manifest = os.path.exists(deps.manifest_path(wd))
+    using_manifest = os.path.exists(deps.manifest_path(wd))
 
-        if meta:
-            return await _files_meta_response(
-                runid=runid,
-                config=config,
-                wd=wd,
-                rel_path=rel_path,
-                abs_path=abs_path,
-                using_manifest=using_manifest,
-                deps=deps,
-            )
-
-        if not os.path.isdir(abs_path):
-            path_display = _display_rel_path(rel_path) or "."
-            _raise_files_error(
-                HTTPStatus.BAD_REQUEST,
-                f"Path '{path_display}' is not a directory",
-                code="not_a_directory",
-                details="Requested path is not a directory.",
-            )
-
-        return await _files_list_response(
+    if meta:
+        return await _files_meta_response(
             runid=runid,
             config=config,
             wd=wd,
             rel_path=rel_path,
             abs_path=abs_path,
-            limit=limit,
-            offset=offset,
-            pattern=pattern,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            hide_mixed_nodir=not is_admin,
+            using_manifest=using_manifest,
             deps=deps,
-            auth_context=auth_context,
         )
-    return await guarded_response(abs_path, build)
+
+    if not os.path.isdir(abs_path):
+        path_display = _display_rel_path(rel_path) or "."
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            f"Path '{path_display}' is not a directory",
+            code="not_a_directory",
+            details="Requested path is not a directory.",
+        )
+
+    return await _files_list_response(
+        runid=runid,
+        config=config,
+        wd=wd,
+        rel_path=rel_path,
+        abs_path=abs_path,
+        limit=limit,
+        offset=offset,
+        pattern=pattern,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        hide_mixed_nodir=not is_admin,
+        deps=deps,
+        auth_context=auth_context,
+    )
 
 
 def build_files_handlers(deps: FilesApiDependencies):

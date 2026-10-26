@@ -16,10 +16,10 @@ The original explicit 120-second wepp1 timeout remains in scope, without deploym
 
 - [x] Read production evidence and run bounded HTTP load probes; no 500 reproduced.
 - [x] Record operator-authorized contract reversal and canonical amendments.
-- [ ] Obtain contract reviews and commit standalone contract checkpoint.
-- [ ] Restore generic file paths; add direct filesystem and security regressions.
-- [ ] Run targeted and broad checks, large-project readback, review and close.
-- [ ] Commit implementation; deployment remains separate.
+- [x] Obtain contract reviews and commit standalone contract checkpoint 8b56c3d94.
+- [x] Restore generic file paths; 333 targeted regressions pass, large project readback passes.
+- [x] Run targeted and broad checks, large-project readback, review and close.
+- [x] Commit implementation; deployment remains separate.
 
 ## Surprises & Discoveries
 
@@ -62,5 +62,10 @@ logging and original-500 limits as follow-ups, not claimed fixes.
 
 ## Outcomes & Retrospective
 
-Execution pending. Local-only closure must distinguish implemented/validated
-behavior from production rollout and unresolved historical root cause.
+Completed locally on 2026-10-26. Contract checkpoint 8b56c3d94 precedes
+implementation. Focused suite: 333 passed; full regression coverage completed
+in segments after correcting one obsolete filename-ban expectation. Exact
+commands, results and environment are in execution_evidence.md. Independent
+correctness/security findings resolved. Production rollout and the historical
+500 root cause remain separate. Logs must survive container recreation in a
+follow-up; this package does not implement persistent logging.

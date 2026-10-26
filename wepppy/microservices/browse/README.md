@@ -7,6 +7,17 @@
 - It protects the main site from aggressive crawlers that were hammering directory listings while keeping the familiar `/browse`, `/download`, and `gdalinfo` features intact.
 - The microservice runs under gunicorn with uvicorn workers (port 9009 in production) and is fronted by Caddy in the Docker deployments; legacy systemd service files remain for non-Docker installs.
 
+## Filesystem access contract
+
+Browse, file inspection, downloads and aria2c manifests reflect actual directory
+contents. Only security and PII guards may restrict existing files: authorization,
+containment and sensitive-path protections remain mandatory. Stale, partial,
+legacy or unreceipted model outputs are inspectable; generic file access does
+not certify scientific results and does not take model lifecycle locks.
+User-selected search/sort/pagination remains available. Raw retired archive files
+are ordinary downloadable files, without virtual archive traversal. See the
+[canonical filesystem contract](../../../docs/schemas/browse-filesystem-contract.md).
+
 ## High-level architecture
 - **Application**: `wepppy/microservices/browse/browse.py`
   - Creates a Starlette app and registers the browse UI plus compatibility download and gdalinfo helper routes.

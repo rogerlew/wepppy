@@ -142,34 +142,6 @@ def test_retained_link_is_materialized_before_its_target_moves(tmp_path):
     assert retained.read_text() == 'old input'
 
 
-def test_stream_keeps_admission_until_send_finishes(tmp_path):
-    import asyncio
-    from starlette.responses import FileResponse
-    from wepppy.microservices.browse._roads import guarded_response
-
-    publish(tmp_path)
-    path = tmp_path / lifecycle.OUTPUT / 'interchange/README.md'
-    async def exercise():
-        async def build():
-            return FileResponse(path)
-        response = await guarded_response(path, build)
-        # Same-process different descriptor still contends with the shared lock.
-        with pytest.raises(lifecycle.RoadsOperationBusy), lifecycle.operation(tmp_path):
-            pass
-        messages = []
-        async def send(message):
-            messages.append(message)
-            with pytest.raises(lifecycle.RoadsOperationBusy), lifecycle.operation(tmp_path):
-                pass
-        async def receive():
-            return {'type': 'http.request'}
-        await response({'type': 'http', 'method': 'GET', 'headers': []}, receive, send)
-        assert any(message['type'] == 'http.response.body' for message in messages)
-        with lifecycle.operation(tmp_path):
-            pass
-    asyncio.run(exercise())
-
-
 def test_single_storm_receipt_includes_pass_accounting_without_wat(tmp_path):
     from wepppy.wepp.interchange import roads_accounting
     prepared(tmp_path)

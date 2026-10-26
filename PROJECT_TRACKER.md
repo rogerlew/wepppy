@@ -1,3 +1,5 @@
+Completed locally: [Browse filesystem transparency and timeout](docs/work-packages/20261026_browse_worker_timeout/package.md) — restored physical file access with security/PII guards; 333 focused tests and segmented broad regression coverage pass; explicit 120-second wepp1 timeout validated. Production deployment remains separate.
+
 # PROJECT_TRACKER.md
 
 Completed (released; not deployed): [WEPP 261026 release](docs/work-packages/20261026_wepp_261026_release/package.md) — paired late-return metadata repair, both affected watersheds validated, 534 native and 11,791 WEPPpy passes, reviewed 49-page cumulative report. Defaults unchanged.

@@ -33,9 +33,9 @@ Validate with `wctl run-pytest tests/microservices/test_dtale_freshness.py` and 
 browse/D-Tale integration tests. Deployment acceptance also requires a normal
 browse launch and actual browser refresh/error behavior after service restart.
 
-Current Roads tables additionally follow the [Roads lifecycle contract](../../../docs/schemas/roads-preparation-lifecycle-contract.md).
-Each new preview request, including existing or derived viewer datasets, requires
-current Roads publication and unchanged source bytes. Invalidation returns 409
-`roads_results_unavailable`; run Roads successfully and reopen from browse.
-Shared admission lasts through response consumption. Explicit Roads history remains
-available without a current receipt.
+Physical file viewers follow the [browse filesystem contract](../../../docs/schemas/browse-filesystem-contract.md).
+Roads receipts, model freshness and lifecycle locks do not gate file viewing.
+Private dataset scopes, viewer reauthorization, containment and sensitive-path
+protections remain mandatory. Eager datasets remain acquired snapshots; lazy
+readers retain their ordinary byte-generation checks and report `changed_source`
+when the source changes or disappears. Reopen to read the actual current file.

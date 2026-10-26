@@ -7,7 +7,6 @@ import pytest
 
 flask = pytest.importorskip("flask")
 Flask = flask.Flask
-Forbidden = pytest.importorskip("werkzeug.exceptions").Forbidden
 
 import wepppy.weppcloud.routes.diff.diff as diff_module
 import wepppy.weppcloud.utils.helpers as helpers
@@ -49,9 +48,9 @@ def diff_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         yield client, left_root, right_root
 
 
-def test_diff_comparer_uses_directory_runtime_paths(diff_client) -> None:
+@pytest.mark.parametrize("rel", ["watershed/hillslopes/h001.slp", "watershed.nodir", "watershed.nodir/hillslopes/h001.slp"])
+def test_diff_comparer_uses_directory_runtime_paths(diff_client, rel) -> None:
     client, left_root, right_root = diff_client
-    rel = "watershed/hillslopes/h001.slp"
 
     left_file = left_root / rel
     right_file = right_root / rel
@@ -70,11 +69,13 @@ def test_diff_comparer_uses_directory_runtime_paths(diff_client) -> None:
     assert payload["right_download_url"].endswith(f"/run-right/{rel}")
 
 
-def test_diff_comparer_rejects_archive_boundary_alias_syntax(diff_client) -> None:
-    client, _left_root, _right_root = diff_client
+def test_diff_comparer_does_not_traverse_opaque_archive(diff_client) -> None:
+    client, left_root, _right_root = diff_client
+    (left_root / "watershed.nodir").write_bytes(b"opaque archive")
 
-    with pytest.raises(Forbidden):
-        client.get("/runs/run-left/cfg/diff/watershed.nodir/hillslopes/h001.slp?diff=run-right")
+    response = client.get("/runs/run-left/cfg/diff/watershed.nodir/hillslopes/h001.slp?diff=run-right")
+
+    assert "does not exist" in response.get_json()["error"]["message"]
 
 
 def test_diff_comparer_maps_left_archive_only_root_to_nodir_error(diff_client) -> None:

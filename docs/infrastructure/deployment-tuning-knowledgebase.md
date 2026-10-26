@@ -27,6 +27,37 @@ Source-of-truth files: `docker/docker-compose.prod.yml`, `docker/caddy/Caddyfile
 Operational note:
 - Hosts can drift from repository state. Always verify live container command lines before attributing timeout behavior.
 
+## Production browse worker timeout
+
+The wepp1 override (`docker/docker-compose.prod.wepp1.yml`) explicitly sets
+browse's Gunicorn `--timeout 120` with eight Uvicorn workers. This replaces the
+implicit 30-second worker-silence timeout. The 30-second graceful shutdown
+setting is separate. Caddy's project browse/aria2c read timeout remains ten
+minutes. Development and base production Compose are unchanged. See
+[ADR-0108](../adrs/ADR-0108-production-browse-worker-timeout.md).
+
+This mitigates worker recycling during temporary blocking I/O; it does not
+limit every request to 120 seconds or repair the NAS. Threaded manifest work
+can remain slow while heartbeats continue. The October 23 dressy-kiss HTTP 500
+arrived in two seconds and has no retained traceback tying it to this setting.
+
+After the separately authorized deployment, Roger should verify the effective
+command, repeat a representative authenticated manifest download, and compare
+worker timeouts per hour, directory latency and memory with the pre-rollout
+snapshot. Review after 14 days of operation. Rising latency, occupied workers,
+or recurring 500s require a fresh incident record; do not mark NFS or manifest
+recovery from a healthy container alone. If the setting worsens service,
+revert the option through `scripts/deploy-production.sh`. Consider lowering it
+after storage/event-loop remediation and representative workload evidence.
+
+Logging follow-up: current browse/Caddy `json-file` logs are tied to container
+lifetime, Gunicorn access logging is disabled, and no Caddy access log is
+configured. Deployment force-recreates containers. Preserve errors outside
+container lifecycle on local storage and add sanitized request/status/duration
+records before relying on historical incident correlation. Retention must
+include rotation and a demonstrated container-recreation survival check.
+Per-run NFS exception logs alone would not close this observability gap.
+
 ## Package Synthesis (Deployment/Infra/Tuning)
 Reviewed mini-work-packages and work-packages with deployment-impacting outcomes:
 

@@ -430,7 +430,7 @@ def test_loader_config_fallback_rebinds_when_preferred_root_source_appears(tmp_p
 
 
 @pytest.mark.parametrize('extension', ['parquet', 'csv'])
-def test_existing_roads_preview_rejects_invalidated_results(tmp_path, dtale_service, extension):
+def test_roads_preview_uses_file_generation_not_model_lifecycle(tmp_path, dtale_service, extension):
     from tests.roads_lifecycle_fixtures import write_current_roads_fixture
     from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
     module = dtale_service
@@ -448,17 +448,20 @@ def test_existing_roads_preview_rejects_invalidated_results(tmp_path, dtale_serv
     with lifecycle.operation(tmp_path):
         lifecycle.retain(tmp_path)
     response = _grid(module, data_id)
-    assert response.status_code == 409
-    assert response.json['code'] == 'roads_results_unavailable'
-    assert response.headers['Cache-Control'] == 'no-store'
+    if extension == 'parquet':
+        # Lazy reads cannot read a file that was physically moved.
+        assert response.status_code == 200
+        assert response.json['success'] is False
+        assert response.json['code'] == 'changed_source'
+    else:
+        # An acquired eager table is a snapshot, not a current-results claim.
+        assert response.status_code == 200
     response.close()
-    module.DATASET_ROADS_SOURCES[data_id] = (module.DATASETS[data_id],)
     module.global_state.cleanup(data_id)
-    assert data_id not in module.DATASET_ROADS_SOURCES
 
 
 @pytest.mark.parametrize('extension', ['parquet', 'csv'])
-def test_roads_preview_rejects_current_alias_to_history(tmp_path, dtale_service, extension):
+def test_roads_preview_accepts_permitted_physical_alias(tmp_path, dtale_service, extension):
     from tests.roads_lifecycle_fixtures import write_current_roads_fixture
     from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
     module = dtale_service
@@ -479,11 +482,32 @@ def test_roads_preview_rejects_current_alias_to_history(tmp_path, dtale_service,
     source.rename(historical)
     source.symlink_to(historical)
     assert lifecycle.available(tmp_path)
-    for response in (_grid(module, data_id), _load(module, tmp_path, relative)):
-        assert response.status_code == 409
-        assert response.json['code'] == 'roads_results_unavailable'
-        assert response.headers['Cache-Control'] == 'no-store'
-        response.close()
+    response = _grid(module, data_id)
+    assert response.status_code == 200
+    if extension == 'parquet':
+        assert response.json['code'] == 'changed_source'
+    response.close()
+    reopened = _load(module, tmp_path, relative)
+    assert reopened.status_code == 200
+    reopened.close()
     historical_response = _load(module, tmp_path, str(historical.relative_to(tmp_path)))
     assert historical_response.status_code == 200
     historical_response.close()
+
+
+@pytest.mark.parametrize('extension', ['parquet', 'csv'])
+def test_roads_file_preview_needs_no_publication_receipt(tmp_path, dtale_service, extension):
+    source = tmp_path / 'wepp/roads/output' / f'partial.{extension}'
+    source.parent.mkdir(parents=True)
+    frame = pd.DataFrame({'a': [3, 4]})
+    if extension == 'parquet':
+        frame.to_parquet(source)
+    else:
+        frame.to_csv(source, index=False)
+    response = _load(dtale_service, tmp_path, str(source.relative_to(tmp_path)))
+    assert response.status_code == 200
+    grid = _grid(dtale_service, response.json['data_id'])
+    assert grid.status_code == 200
+    assert grid.json.get('success') is not False
+    assert 'error' not in grid.json
+    response.close()

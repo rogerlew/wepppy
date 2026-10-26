@@ -86,6 +86,8 @@ services:
     volumes: *wepp1-volumes
     command:
       - gunicorn
+      - --timeout
+      - "120"
       - --workers
       - "8"
       - --bind

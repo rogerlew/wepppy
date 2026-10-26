@@ -1,8 +1,8 @@
 # Roads preparation and result lifecycle
 
 Status: original lifecycle implemented and locally environment-validated (2026-10-23 UTC).
-October 26 filesystem-transparency amendment: accepted; implementation conformance
-and production rollout pending. The historical implementation reference below
+October 26 filesystem-transparency amendment: implemented and locally validated;
+production rollout pending. The historical implementation reference below
 does not certify this amendment.
 This is the upstream authority for preparation identity and current-result
 eligibility across Roads producers, reports and GL Dashboard. Generic filesystem

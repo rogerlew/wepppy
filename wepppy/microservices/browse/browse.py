@@ -46,8 +46,6 @@ For maintenance purposes, adjust template markup within the dedicated `templates
 module should remain focused on routing, filesystem queries, and response orchestration.
 """
 
-from wepppy.microservices.browse._roads import guarded_response
-
 import asyncio
 import os
 import re
@@ -1235,21 +1233,19 @@ async def _handle_schema_request(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
     )
-    async def build():
-        if not os.path.isfile(target_path):
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail="Path not found.",
-            )
-
-        columns = await asyncio.to_thread(_read_parquet_schema, target_path)
-        return JSONResponse(
-            {
-                "path": subpath_value,
-                "columns": columns,
-            }
+    if not os.path.isfile(target_path):
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Path not found.",
         )
-    return await guarded_response(target_path, build)
+
+    columns = await asyncio.to_thread(_read_parquet_schema, target_path)
+    return JSONResponse(
+        {
+            "path": subpath_value,
+            "columns": columns,
+        }
+    )
 
 
 async def _handle_browse_request(
@@ -1296,18 +1292,16 @@ async def _handle_browse_request(
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
-    async def build():
-        result = await _browse_tree_helper(
-            runid,
-            subpath_value,
-            wd,
-            flask_request,
-            config,
-            allow_recorder=allow_recorder,
-            is_admin=is_admin,
-        )
-        return ensure_response(result)
-    return await guarded_response(Path(wd) / subpath_value, build)
+    result = await _browse_tree_helper(
+        runid,
+        subpath_value,
+        wd,
+        flask_request,
+        config,
+        allow_recorder=allow_recorder,
+        is_admin=is_admin,
+    )
+    return ensure_response(result)
 
 
 async def browse_culvert_root(request: StarletteRequest):

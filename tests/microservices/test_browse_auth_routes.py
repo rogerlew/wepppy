@@ -2373,3 +2373,47 @@ def test_private_browse_stale_session_cookie_redirects_for_reauth(
     assert parsed.path == f"/weppcloud/runs/{runid}/"
     next_value = parse_qs(parsed.query).get("next", [""])[0]
     assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+
+
+@pytest.mark.parametrize("state", ["legacy", "invalid_receipt", "locked"])
+def test_physical_roads_files_remain_browsable_without_current_results(
+    tmp_path: Path, load_secure_browse, state: str,
+) -> None:
+    import fcntl
+    from contextlib import ExitStack
+
+    runid = "physical-roads"
+    root = tmp_path / runid
+    _touch(root / "PUBLIC", "")
+    relative = "wepp/roads/output/partial.txt"
+    _touch(root / relative, "actual partial output")
+    _touch(root / "watershed.nodir", "opaque retired archive")
+    if state == "invalid_receipt":
+        _touch(root / "wepp/roads/output/roads.current.json", "not a receipt")
+    (root / "alias.txt").symlink_to(root / relative)
+    browse = load_secure_browse({runid: root}, SITE_PREFIX="/weppcloud")
+    prefix = f"/weppcloud/runs/{runid}/cfg"
+    with ExitStack() as stack:
+        if state == "locked":
+            lock = stack.enter_context((root / "roads.lifecycle.lock").open("w"))
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        client = stack.enter_context(TestClient(browse.create_app()))
+        directory_download = client.get(prefix + "/download/wepp/roads/output/")
+        assert directory_download.status_code == 404
+        listing = client.get(prefix + "/browse/wepp/roads/output/")
+        assert listing.status_code == 200
+        assert "partial.txt" in listing.text
+        metadata = client.get(prefix + "/files/" + relative + "?meta=true",
+                              headers={"Authorization": "Bearer " + _issue_service_token(runid)})
+        assert metadata.status_code == 200
+        for filename, expected in ((relative, b"actual partial output"),
+                                   ("alias.txt", b"actual partial output"),
+                                   ("watershed.nodir", b"opaque retired archive")):
+            response = client.get(prefix + "/download/" + filename)
+            assert response.status_code == 200
+            assert response.content == expected
+        manifest = client.get(prefix + "/aria2c.spec")
+        assert manifest.status_code == 200
+        entries = {line.removeprefix(" out=") for line in manifest.text.splitlines()
+                   if line.startswith(" out=")}
+        assert {relative, "alias.txt", "watershed.nodir"} <= entries

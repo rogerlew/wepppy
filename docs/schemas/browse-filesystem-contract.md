@@ -1,6 +1,6 @@
 # Browse and download filesystem contract
 
-Status: accepted by Roger on 2026-10-26; implementation conformance pending.
+Status: accepted by Roger on 2026-10-26; implemented and locally validated; production rollout pending.
 
 ## Authority and intent
 

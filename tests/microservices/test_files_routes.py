@@ -510,7 +510,7 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     assert response.status_code == 200
     spec = response.text
     assert "visible.txt" in spec
-    assert "watershed.nodir" not in spec
+    assert "watershed.nodir" in spec
     assert "nested/table.csv" in spec
     assert ".secret" not in spec
     assert "profile.events.jsonl" not in spec
@@ -555,7 +555,7 @@ def test_aria2c_spec_uses_external_host_and_site_prefix(tmp_path: Path, monkeypa
         "download/watershed.nodir",
     ],
 )
-def test_archive_boundary_paths_rejected_in_directory_mode(
+def test_retired_archives_are_physical_files_without_virtual_traversal(
     tmp_path: Path,
     monkeypatch,
     load_browse,
@@ -578,20 +578,18 @@ def test_archive_boundary_paths_rejected_in_directory_mode(
     with TestClient(app) as client:
         response = client.get(f"/weppcloud/runs/{runid}/{config}/{endpoint}")
 
-    assert response.status_code == 400
-    if endpoint.startswith("files/"):
-        payload = response.json()
-        assert payload["error"]["code"] == "path_outside_root"
-        assert "archive boundary paths are retired" in payload["error"]["details"]
+    if endpoint == "download/watershed.nodir":
+        assert response.status_code == 200
+        assert response.content == (run_root / "watershed.nodir").read_bytes()
+    elif endpoint == "files/watershed.nodir?meta=true":
+        assert response.status_code == 200
     else:
-        content_type = response.headers.get("content-type", "")
-        if "application/json" in content_type:
-            assert response.json()["detail"] == "Invalid path."
-        else:
-            assert response.text == "Invalid path."
+        # Archive members are not physical directory entries.
+        assert response.status_code == 404
 
 
-def test_dtale_archive_boundary_rejected_in_directory_mode(
+
+def test_dtale_does_not_traverse_opaque_archive(
     tmp_path: Path,
     monkeypatch,
     load_browse,
@@ -615,14 +613,10 @@ def test_dtale_archive_boundary_rejected_in_directory_mode(
             follow_redirects=False,
         )
 
-    assert response.status_code == 400
-    if "application/json" in response.headers.get("content-type", ""):
-        assert response.json()["detail"] == "Invalid path."
-    else:
-        assert response.text == "Invalid path."
+    assert response.status_code == 404
 
 
-def test_gdalinfo_archive_boundary_rejected_in_directory_mode(
+def test_gdalinfo_does_not_traverse_opaque_archive(
     tmp_path: Path,
     monkeypatch,
     load_browse,
@@ -651,11 +645,7 @@ def test_gdalinfo_archive_boundary_rejected_in_directory_mode(
             f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
         )
 
-    assert response.status_code == 400
-    if "application/json" in response.headers.get("content-type", ""):
-        assert response.json()["detail"] == "Invalid path."
-    else:
-        assert response.text == "Invalid path."
+    assert response.status_code == 404
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
 def test_files_symlink_target_outside_root(tmp_path: Path, monkeypatch, load_browse):
     runid = "run-321"

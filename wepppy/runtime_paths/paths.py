@@ -50,8 +50,8 @@ def normalize_relpath(raw: str) -> str:
 def parse_external_subpath(rel: str, *, allow_admin_alias: bool) -> tuple[str, NoDirView]:
     """Parse external browse/download path syntax.
 
-    Archive boundary aliases (``<root>.nodir/...`` and ``<root>/nodir/...``)
-    are intentionally retired in directory-only mode.
+    Paths identify actual filesystem entries. Retired archive-looking names are
+    ordinary files/directories; this does not enable virtual archive traversal.
     """
 
     if rel is None:
@@ -61,17 +61,6 @@ def parse_external_subpath(rel: str, *, allow_admin_alias: bool) -> tuple[str, N
     norm = normalize_relpath(raw)
     if norm in ("", "."):
         return ".", "effective"
-
-    parts = norm.split("/")
-    first = parts[0]
-
-    if first.endswith(".nodir"):
-        root = first[: -len(".nodir")]
-        if root in NODIR_ROOTS:
-            raise ValueError("archive boundary paths are retired")
-
-    if allow_admin_alias and len(parts) >= 2 and parts[1] == "nodir" and parts[0] in NODIR_ROOTS:
-        raise ValueError("archive boundary paths are retired")
 
     return norm, "effective"
 

@@ -1,0 +1,2 @@
+{"index": 0, "started_utc": "2026-10-26T21:48:44.289612+00:00", "path": "aria2c.spec", "error": "ReadTimeout", "seconds": 45.112}
+{"phase": "manifest", "concurrency": 1, "started_utc": "2026-10-26T21:48:44.288290+00:00", "results": 1}
