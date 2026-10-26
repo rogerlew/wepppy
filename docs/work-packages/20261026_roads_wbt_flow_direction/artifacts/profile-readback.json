@@ -1,0 +1,57 @@
+{
+  "roads-seg-000001": {
+    "run_id": 900001,
+    "width_m": 4.0,
+    "road_length_m": 204.012,
+    "buffer_length_m": 102.627,
+    "buffer_slope": 0.4,
+    "slope_sha256": "4b32385b121e94e26a5a82cd289d178cf020ba7c99dcc144f7a9c1ea8856f591",
+    "water_rows": 11688,
+    "pass_rows": 5844,
+    "days": 5844
+  },
+  "roads-seg-000020": {
+    "run_id": 900020,
+    "width_m": 4.0,
+    "road_length_m": 76.769,
+    "buffer_length_m": 103.941,
+    "buffer_slope": 0.4,
+    "slope_sha256": "9a40540ad0381d19e89273ced9921d1c2ff4c1db1007483cee1918c5d6fd92b0",
+    "water_rows": 11688,
+    "pass_rows": 5844,
+    "days": 5844
+  },
+  "roads-seg-000021": {
+    "run_id": 900021,
+    "width_m": 4.0,
+    "road_length_m": 0.424,
+    "buffer_length_m": 102.627,
+    "buffer_slope": 0.4,
+    "slope_sha256": "613e9d357301f2eaec33b46663598c67748affef56f840dd256300d7729bf3a4",
+    "water_rows": 11688,
+    "pass_rows": 5844,
+    "days": 5844
+  },
+  "roads-seg-000022": {
+    "run_id": 900022,
+    "width_m": 4.0,
+    "road_length_m": 3.915,
+    "buffer_length_m": 96.971,
+    "buffer_slope": 0.4,
+    "slope_sha256": "4b4551f1a016980468023522d6f2a3aa36949c996575bb8952a3459b100c6208",
+    "water_rows": 11688,
+    "pass_rows": 5844,
+    "days": 5844
+  },
+  "roads-seg-000023": {
+    "run_id": 900023,
+    "width_m": 4.0,
+    "road_length_m": 1.258,
+    "buffer_length_m": 97.799,
+    "buffer_slope": 0.4,
+    "slope_sha256": "dec8198c80a39864e902c0255edcdb1c5bb706105e23bad59eb27f8754efd69e",
+    "water_rows": 11688,
+    "pass_rows": 5844,
+    "days": 5844
+  }
+}

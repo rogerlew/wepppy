@@ -1,0 +1,125 @@
+{
+  "collected": 11947,
+  "covered": 11947,
+  "unique_passes": 11795,
+  "unique_test_skips": 152,
+  "collection_import_skips": [
+    "tests/sbs_map/test_sbs_map_large_fixtures.py"
+  ],
+  "missing_nodes": [],
+  "observed_failures": [
+    "tests/nodb/mods/test_swat_interchange.py::test_build_recall_connections_reads_sidecar_watershed_parquets",
+    "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain"
+  ],
+  "unresolved_failures": [],
+  "failures_with_later_pass": [
+    "tests/nodb/mods/test_swat_interchange.py::test_build_recall_connections_reads_sidecar_watershed_parquets",
+    "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain"
+  ],
+  "reports": {
+    "roads-wbt-full.jsonl": {
+      "passed": 405,
+      "skipped": 26,
+      "sha256": "8660878b49b9be219a65e93d73270cbd68308bdc2de9b2dc1b09ee838af2eca7"
+    },
+    "disturbed-0.jsonl": {
+      "passed": 18,
+      "skipped": 0,
+      "sha256": "24722ea7c8838c65945973abfab8d102ab1082d534fb08f74560f1b9318caa2c"
+    },
+    "disturbed-1.jsonl": {
+      "passed": 17,
+      "skipped": 0,
+      "sha256": "1fa0ccf8f562d53f8d240cbe245c1ce2e7a3a1f0e644ac25f43ce659e247faed"
+    },
+    "disturbed-2.jsonl": {
+      "passed": 17,
+      "skipped": 0,
+      "sha256": "1e7862247b3ebd2953c29b2642dbe42bbfabe1b2954074c728a015e6c69d5841"
+    },
+    "disturbed-3.jsonl": {
+      "passed": 17,
+      "skipped": 0,
+      "sha256": "ae6f7d27887913b4435dfa7ba75e219e9a86ba0632e4480303e51a13c8fc5591"
+    },
+    "late-0.jsonl": {
+      "passed": 694,
+      "skipped": 0,
+      "sha256": "e19b09187c9d788de664fbb4bad04b55a82670c630962f48d4bc69dbc0fc69fc"
+    },
+    "late-1-resume.jsonl": {
+      "passed": 676,
+      "skipped": 0,
+      "sha256": "e5f30fe8e20ca7ae5513cfc9db2dfbaac7f7ec80f690c9e5f8f27b5ade225c1e"
+    },
+    "late-1.jsonl": {
+      "passed": 15,
+      "skipped": 0,
+      "sha256": "d05b39cff58f771cf02b47d619a5ae0dc3add3f685f818fc8219dbc5ffd310bf"
+    },
+    "late-2.jsonl": {
+      "passed": 692,
+      "skipped": 1,
+      "sha256": "bfab7dfcaace2cb785b1b1f7519639e3a364b2bd3d297c14317687c75662ec1f"
+    },
+    "late-3.jsonl": {
+      "passed": 691,
+      "skipped": 2,
+      "sha256": "b54c99443a652d96925e425ac54bfb44173de8ae8c9dfc21b8579db6e0163485"
+    },
+    "rest-0-resume.jsonl": {
+      "passed": 36,
+      "skipped": 0,
+      "sha256": "912858546c5765dc4ca8628a071ab1b6cabc51c57b47fa6ee15cc83e54fe72ec"
+    },
+    "rest-0.jsonl": {
+      "passed": 2719,
+      "skipped": 2,
+      "sha256": "bfebe514b4e75b8fdcda53e740b395712703340b17e423a0a36b7a43c2779b37"
+    },
+    "rest-1.jsonl": {
+      "passed": 2321,
+      "skipped": 91,
+      "sha256": "97a69e8f66072cf832ea5569c847546a4fd70f7b6c0c09915c0742898719a3c6"
+    },
+    "rest-2.jsonl": {
+      "passed": 780,
+      "skipped": 20,
+      "sha256": "0db736bf525526b70d0d9053f0f806ee81fa163714b161e29ef5455bc634cfd9"
+    },
+    "rest-3.jsonl": {
+      "passed": 2472,
+      "skipped": 10,
+      "sha256": "479fabcac460785e00087a633e83986523cf91bafe27ffa71a564b21e89a66f2"
+    },
+    "soil-0.jsonl": {
+      "passed": 58,
+      "skipped": 0,
+      "sha256": "67b73feea42933cd981f2a9c077ebae35176379abebe58e4a5e13ee76d2f5973"
+    },
+    "soil-1.jsonl": {
+      "passed": 58,
+      "skipped": 0,
+      "sha256": "2b17d8291911d74906afcbd2235d8b44a71ea9abe316be0a932321bfde3ccd5c"
+    },
+    "soil-2.jsonl": {
+      "passed": 57,
+      "skipped": 0,
+      "sha256": "e9e245af5dc0ee0e85c95d4d3ff59ef6ab25cc864aebbcabd19d6c6a276b3017"
+    },
+    "soil-3.jsonl": {
+      "passed": 57,
+      "skipped": 0,
+      "sha256": "5fa67263a1ea872f89a8a5869cc57b04d0dda6e66a2eedddbb5ac398d5909ffc"
+    },
+    "swat-isolated.jsonl": {
+      "passed": 8,
+      "skipped": 0,
+      "sha256": "4295d33b1706c9609e4e7a322e1ed6881eb5749e952132aa00835baa8bb412a5"
+    }
+  },
+  "collection_sha256": "83fcd261994e46609272764a07cb62b7828619031256c600fbef7e12fe352967",
+  "covered_node_set_sha256": "39b97baf70187ebc4c1cf9c75f25a9312b7c24820d4e8ec44e02404c00ae6500",
+  "all_collected_nodes_covered": true,
+  "scope": "Segmented execution after canonical run interruption; no test exclusions"
+}

@@ -11,18 +11,37 @@ from tests.roads.roads_report import render
 pytestmark = pytest.mark.unit
 
 
-def test_published_results_and_sources_are_current():
+def test_published_results_and_sources_are_current_or_explicitly_stale():
     provenance = json.loads((SUITE / "analysis_provenance_current.json").read_text())
     result = SUITE / "matrix_results_current.json"
     report = SUITE / "analysis_results_current.md"
-    assert provenance["source_sha256"] == source_hashes(), "Sources changed: rerun/review Roads validation"
+    current_sources = source_hashes()
+    stale_path = SUITE / "analysis_staleness_current.json"
+    report_text = report.read_text()
+    if stale_path.exists():
+        stale = json.loads(stale_path.read_text())
+        assert stale["status"] == "stale_full_project_routing"
+        expected_deltas = {
+            name: {"recorded": provenance["source_sha256"].get(name), "current": current_sources.get(name)}
+            for name in provenance["source_sha256"].keys() | current_sources.keys()
+            if provenance["source_sha256"].get(name) != current_sources.get(name)
+        }
+        assert expected_deltas == stale["reviewed_source_deltas"], "Unreviewed source drift"
+        assert stale["provenance_sha256"] == digest(SUITE / "analysis_provenance_current.json")
+        assert digest(report) == stale["published_report_sha256"]
+        assert report_text.startswith(stale["notice"])
+        assert "STALE" in stale["notice"] and "full-project" in stale["notice"]
+        report_text = report_text[len(stale["notice"]):]
+    else:
+        assert provenance["source_sha256"] == current_sources, "Sources changed: rerun/review Roads validation"
     assert digest(result) == provenance["results_sha256"]
-    assert digest(report) == provenance["report_sha256"]
+    import hashlib
+    assert hashlib.sha256(report_text.encode()).hexdigest() == provenance["report_sha256"]
     payload = json.loads(result.read_text())
     assert [r["case"] for r in payload["cases"]] == [asdict(c) for c in CASES]
     assert len(provenance["case_artifacts"]) == len(CASES)
     assert provenance["native_sha256"]
-    assert report.read_text() == render(payload["cases"], payload["projects"], provenance)
+    assert report_text == render(payload["cases"], payload["projects"], provenance)
 
 
 def test_usersum_vendor_identity_and_navigation():

@@ -1,5 +1,9 @@
 # Repair Roads WBT flow directions
 
+Completed 2026-10-26 UTC. Paired local implementation and isolated project
+validation pass; native commit 71ec98a, contract checkpoint 3a542d939. Production
+deployment and original-project recovery are not claimed.
+
 ## Purpose
 
 A user running Roads on WBT project clogging-starch must get modeled output for
@@ -11,10 +15,10 @@ This plan is an end-to-end repair, not a surrogate or disconnected scaffold.
 ## Progress
 
 - [x] Diagnose source and native boundary; confirm five converted traces succeed.
-- [ ] Commit accepted contract checkpoint after two independent reviews.
-- [ ] Add native and caller regressions; implement and rebuild paired artifact.
-- [ ] Validate all directions, legacy/error behavior and isolated full project.
-- [ ] Run required checks, independent correctness review and close package.
+- [x] Commit accepted contract checkpoint after two independent reviews.
+- [x] Add native and caller regressions; implement and rebuild paired artifact.
+- [x] Validate all directions, legacy/error behavior and isolated full project.
+- [x] Run required checks, independent correctness review and close package.
 
 ## Context
 
@@ -89,11 +93,23 @@ No backend autodetection or UI choice; no new native-core routing algorithm.
 
 ## Outcomes & Retrospective
 
-Pending implementation and evidence. Final claim must distinguish validated local
-paired release from production deployment and original-project recovery.
+Local paired implementation passes native 23 tests, focused 108, publication 14
+and isolated full-project acceptance: 35 executed, five recovered, four NoData
+skips. Source snapshot and baseline hashes unchanged. Broad coverage is complete: all 11,947 collected nodes, 11,795 passes, 152
+test skips and one collection-module skip; no unresolved failures. Both final
+independent reviews PASS. No production deployment or original repair.
 
 Publication dependency: tests/roads fingerprints roads.py. Preserve the historical
 516-profile dataset and execution source hashes. Mark full-project evidence stale
 with a visible report notice and exact reviewed source-delta receipt; regression
 must reject any unacknowledged drift. This uses the existing validation-suite
 contract's explicit stale-marking allowance, not a claim of rerun results.
+
+
+Final retrospective: initial fixture-only TOPAZ tests missed WBT production
+semantics. Independent compass-neighbor tests and actual raster-to-report evidence
+now cover the failing boundary. Broad segmented execution exposed a SWAT fixture
+setup isolation failure and a browser-cache path error; both have retained later
+passing runs. No unrelated production fixes or tolerance relaxations were added.
+See ../../artifacts/broad-coverage-summary.json for exact accounting and
+../../artifacts/20261026_correctness_review.md for the final independent review.

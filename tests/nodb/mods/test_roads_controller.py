@@ -1404,6 +1404,7 @@ def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract
     import wepppyo3.roads_flowpath as roads_flowpath_module
 
     def _fake_trace(_subwta_path, _flovec_path, _relief_path, seed_row: int, seed_col: int, **_kwargs):
+        assert _kwargs["wbt"] is True
         tracer_calls.append((seed_row, seed_col))
         return {
             "seed_row": seed_row,

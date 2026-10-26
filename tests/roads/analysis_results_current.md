@@ -1,3 +1,5 @@
+> **STALE full-project routing evidence (2026-10-26):** The historical results below predate the Roads WBT flow-direction correction and selected-binary forwarding fix. Five connected site segments were incorrectly skipped. The 516 fixed-profile simulations are retained as historical profile evidence; the full-project coverage and totals do not validate the corrected workflow. Fresh isolated repair evidence is recorded in work package `20261026_roads_wbt_flow_direction`. Original results and execution provenance are preserved.
+
 # Roads parameter validation — current results
 
 Site: **clogging-starch**. **516/516 profile cases completed**: 504 factorial combinations and 12 one-factor controls. All four textures—clay, loam, sand and silt—are included. Three full-upload additive checks and a separately qualified unrutted subset check completed; the full-upload unrutted control was rejected.

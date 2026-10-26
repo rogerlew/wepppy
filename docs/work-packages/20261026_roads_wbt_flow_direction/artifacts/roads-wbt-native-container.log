@@ -1,0 +1,18 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest /workdir/wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py -k 'not matches_peridot_cli' -o cache_dir=/tmp/roads-wbt-native-cache --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+cachedir: /tmp/roads-wbt-native-cache
+rootdir: /workdir
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 23 items / 1 deselected / 22 selected
+
+../wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py ...... [ 27%]
+................                                                         [100%]
+
+=============================== warnings summary ===============================
+wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py: 22 warnings
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: The given matrix is equal to Affine.identity or its flipped counterpart. GDAL may ignore this matrix and save no geotransform without raising an error. This behavior is somewhat driver-specific.
+    dataset = writer(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 22 passed, 1 deselected, 22 warnings in 2.29s =================

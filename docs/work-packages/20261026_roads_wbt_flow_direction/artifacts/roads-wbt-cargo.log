@@ -1,0 +1,86 @@
+   Compiling num-traits v0.2.19
+   Compiling memchr v2.7.6
+   Compiling pyo3-build-config v0.22.6
+   Compiling zerocopy-derive v0.8.36
+   Compiling lazy_static v1.5.0
+   Compiling nom v7.1.3
+   Compiling serde_core v1.0.228
+   Compiling num-integer v0.1.46
+   Compiling zerocopy v0.8.36
+   Compiling num-bigint v0.4.6
+   Compiling cexpr v0.6.0
+   Compiling bindgen v0.66.1
+   Compiling num-rational v0.4.2
+   Compiling num-iter v0.1.45
+   Compiling num-complex v0.4.6
+   Compiling num v0.4.3
+   Compiling chrono v0.4.39
+   Compiling crossbeam-utils v0.8.21
+   Compiling serde v1.0.228
+   Compiling serde_derive v1.0.228
+   Compiling half v2.7.1
+   Compiling ahash v0.8.12
+   Compiling arrow-buffer v53.4.1
+   Compiling flate2 v1.1.5
+   Compiling arrow-data v53.4.1
+   Compiling cmake v0.1.57
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v0.2.7
+   Compiling crossbeam-epoch v0.9.18
+   Compiling arrow-array v53.4.1
+   Compiling geo-types v0.7.18
+   Compiling gdal-sys v0.9.1
+   Compiling proj-sys v0.23.2
+   Compiling atoi v2.0.0
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling aho-corasick v1.1.4
+   Compiling anstyle v1.0.14
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling rayon-core v1.13.0
+   Compiling arrow-select v53.4.1
+   Compiling anstyle-query v1.1.5
+   Compiling thiserror v2.0.18
+   Compiling either v1.15.0
+   Compiling colorchoice v1.0.5
+   Compiling regex-syntax v0.8.8
+   Compiling anstream v0.6.21
+   Compiling arrow-cast v53.4.1
+   Compiling regex-automata v0.4.13
+   Compiling crossbeam-deque v0.8.6
+   Compiling ordered-float v2.10.1
+   Compiling error-stack v0.4.1
+   Compiling thiserror-impl v2.0.18
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.0
+   Compiling log v0.4.29
+   Compiling clap_builder v4.5.60
+   Compiling thrift v0.17.0
+   Compiling regex v1.12.2
+   Compiling peridot v0.1.0 (/home/workdir/peridot)
+   Compiling gdal v0.16.0
+   Compiling serde_json v1.0.149
+   Compiling arrow-ipc v53.4.1
+   Compiling itertools v0.12.1
+   Compiling clap_derive v4.5.55
+   Compiling pyo3 v0.22.6
+   Compiling csv-core v0.1.13
+   Compiling is-terminal v0.4.17
+   Compiling termcolor v1.4.1
+   Compiling humantime v2.3.0
+   Compiling env_logger v0.10.2
+   Compiling parquet v53.4.1
+   Compiling pyo3-macros v0.22.6
+   Compiling csv v1.4.0
+   Compiling clap v4.5.60
+   Compiling interp v1.0.3
+   Compiling proj v0.27.2
+   Compiling geojson v0.24.2
+   Compiling rayon v1.11.0
+   Compiling roads_flowpath_rust v0.1.0 (/home/workdir/wepppyo3/roads_flowpath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 51.72s
+     Running unittests src/lib.rs (target/debug/deps/roads_flowpath_rust-e20dc10cb5cf1b76)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

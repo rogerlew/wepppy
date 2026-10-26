@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0
+cachedir: /tmp/roads-wbt-host-cache
+rootdir: /home/workdir/wepppyo3
+plugins: reportlog-0.4.0, libtmux-0.47.0, dash-2.9.3, cov-7.0.0, anyio-4.12.1, timeout-2.4.0
+collected 23 items
+
+tests/roads_flowpath/test_trace_downslope_flowpath.py .................. [ 78%]
+.....                                                                    [100%]
+
+=============================== warnings summary ===============================
+tests/roads_flowpath/test_trace_downslope_flowpath.py: 23 warnings
+  /workdir/wepppy/.venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: The given matrix is equal to Affine.identity or its flipped counterpart. GDAL may ignore this matrix and save no geotransform without raising an error. This behavior is somewhat driver-specific.
+    dataset = writer(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 23 passed, 23 warnings in 20.44s =======================

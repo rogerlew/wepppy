@@ -1,0 +1,147 @@
+{
+  "status": "passed",
+  "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so",
+  "native_sha256": "5d1f7be2e8176af5d762936b8c5cbe290450c2c2cbe134055d296f8fbd730a34",
+  "executed": 35,
+  "skipped": [
+    "roads-seg-000034",
+    "roads-seg-000035",
+    "roads-seg-000038",
+    "roads-seg-000039"
+  ],
+  "recovered": [
+    "roads-seg-000001",
+    "roads-seg-000020",
+    "roads-seg-000021",
+    "roads-seg-000022",
+    "roads-seg-000023"
+  ],
+  "receipt": {
+    "is_single_storm": false,
+    "policy": "roads_current_v1",
+    "required_relpaths": [
+      "wepp/roads/output/interchange/H.pass.parquet",
+      "wepp/roads/output/interchange/ebe_pw0.parquet",
+      "wepp/roads/output/interchange/README.md",
+      "wepp/roads/output/interchange/H.wat.parquet",
+      "wepp/roads/output/interchange/loss_pw0.out.parquet",
+      "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+      "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+      "wepp/roads/output/interchange/totalwatsed3.parquet",
+      "wepp/roads/output/interchange/roads_segment_loss_summary.parquet",
+      "wepp/roads/output/interchange/H.accounting.wat.parquet",
+      "wepp/roads/segments/roads.accounting.json"
+    ]
+  },
+  "outputs": {
+    "modeled_area_m2": 442501.53,
+    "target_modes": {
+      "additive": 13,
+      "unchanged": 35
+    },
+    "mean_annual_mm": {
+      "Precipitation": 2097.6295342033895,
+      "Runoff": 212.19609826781752,
+      "Lateral Flow": 1226.5455297061953,
+      "Baseflow": 38.98471441993834,
+      "Percolation": 26.819629143052524,
+      "ET": 621.7061603939301
+    },
+    "baseline_mean_annual_mm": {
+      "Precipitation": 2097.62953420339,
+      "Runoff": 208.40590687053668,
+      "Lateral Flow": 1248.1257240174825,
+      "Baseflow": 17.810556220795288,
+      "Percolation": 5.33930465385905,
+      "ET": 625.4361748937624
+    },
+    "baseline_area_m2": 442501.53,
+    "daily_area_water_reconciliation": true
+  },
+  "parquet": {
+    "H.accounting.wat.parquet": {
+      "rows": 280512,
+      "sha256": "c9c388aaa3460eec2faa30e12f15ac0444e4196450bbee790a73bcda48e42b2b"
+    },
+    "H.ebe.parquet": {
+      "rows": 17235,
+      "sha256": "253ac71fcaae222b55459d34ec7223d1ce6dfaa23944316619c1049860132fd4"
+    },
+    "H.element.parquet": {
+      "rows": 36671,
+      "sha256": "5f37d03ee0ad51c227e228855acb21843357493c2b465a77253d21a97c2e8d0b"
+    },
+    "H.loss.parquet": {
+      "rows": 175,
+      "sha256": "9a931ff69286f811bcfb2e1bb07882d22feab18148e619bfb3c2018cb3fba3ba"
+    },
+    "H.pass.parquet": {
+      "rows": 485052,
+      "sha256": "703bad59b5ac0ba0e1e2d622b6dbad3599bdb29146b937356c3f50100d92d24b"
+    },
+    "H.soil.parquet": {
+      "rows": 233760,
+      "sha256": "5cfe7c28143136a073d8345ada6b07de3181bd75edd967d14b26dfa798785367"
+    },
+    "H.wat.parquet": {
+      "rows": 233760,
+      "sha256": "46b31c4cb4653ed3a29084cf53d160221e0b89031490e5e60bdfa8a1cde5c560"
+    },
+    "ebe_pw0.parquet": {
+      "rows": 5844,
+      "sha256": "db78383fb20b785605b3ab6fc0d443ce7b76c4b392d58d43a414c99b15fd20da"
+    },
+    "loss_pw0.all_years.chn.parquet": {
+      "rows": 304,
+      "sha256": "d81af7a12da0bab9c76741200cded568a3d68c91383ff3397dbdde60efd53bc5"
+    },
+    "loss_pw0.all_years.class_data.parquet": {
+      "rows": 80,
+      "sha256": "046574afe15a28217309e6fe3f1ff40c60d71cf853c0d811ddfeef1c97cbce49"
+    },
+    "loss_pw0.all_years.hill.parquet": {
+      "rows": 768,
+      "sha256": "b725211d5c2ea28f51f7a18da64be22e5fd37c1c502a0a2d902b8ffb6613b87f"
+    },
+    "loss_pw0.all_years.out.parquet": {
+      "rows": 144,
+      "sha256": "6c47b93d2279e67b9c531654d1145114868be78546579cd047c79f3082e2e519"
+    },
+    "loss_pw0.chn.parquet": {
+      "rows": 19,
+      "sha256": "75e1502c636cbf9cf504753910a7ad5001d8632449929e4df34e627ebe4915f8"
+    },
+    "loss_pw0.class_data.parquet": {
+      "rows": 5,
+      "sha256": "59db65ed0a80fca3ea894a07867be96dcf4978117736622c0f4b143acd2b55ff"
+    },
+    "loss_pw0.hill.parquet": {
+      "rows": 48,
+      "sha256": "25b7be95f8611898360bdf7d34fffba77ba1d5a614e3dfd55913cb6d74283469"
+    },
+    "loss_pw0.out.parquet": {
+      "rows": 11,
+      "sha256": "9420b8a702367f4acbc87a149297c8754b3d2e1a2a611733b86b16862c84d3ba"
+    },
+    "pass_pw0.events.parquet": {
+      "rows": 280512,
+      "sha256": "2e1e55bebe05e0c1a37231442dcc9a81dd0d736bc8542b57f35b11c7957ba2bf"
+    },
+    "pass_pw0.metadata.parquet": {
+      "rows": 48,
+      "sha256": "12d34ee40f7749d5c6b46ccb3b3ac22553acfb680960169f9baf12576b58fb62"
+    },
+    "roads_segment_loss_summary.parquet": {
+      "rows": 35,
+      "sha256": "b7c9f383f89e6d123d6e52a2107d68c8b5ca30e08ecf32fbacb343bcd67a2425"
+    },
+    "totalwatsed3.parquet": {
+      "rows": 5844,
+      "sha256": "d4a9c4842ab89b4beaba49e0f98aa16f1fff50e1b3410308a4ec0c7907e5f064"
+    }
+  },
+  "source_unchanged": true,
+  "baseline_unchanged": true,
+  "production_deployed": false,
+  "root": "/wc1/ablation/20261026_roads_wbt_flow_direction/candidate"
+}

@@ -1,0 +1,42 @@
+{
+  "roads-seg-000001": {
+    "execution_status": "completed",
+    "trace_termination_reason": "hit_channel",
+    "buffer_length_m": 102.62741699796953,
+    "target_hillslope_wepp_id": 48,
+    "segment_run_id": 900001,
+    "profile_error": null
+  },
+  "roads-seg-000020": {
+    "execution_status": "completed",
+    "trace_termination_reason": "hit_channel",
+    "buffer_length_m": 103.94112549695427,
+    "target_hillslope_wepp_id": 34,
+    "segment_run_id": 900020,
+    "profile_error": null
+  },
+  "roads-seg-000021": {
+    "execution_status": "completed",
+    "trace_termination_reason": "hit_channel",
+    "buffer_length_m": 102.6274169979695,
+    "target_hillslope_wepp_id": 34,
+    "segment_run_id": 900021,
+    "profile_error": null
+  },
+  "roads-seg-000022": {
+    "execution_status": "completed",
+    "trace_termination_reason": "hit_channel",
+    "buffer_length_m": 96.97056274847714,
+    "target_hillslope_wepp_id": 34,
+    "segment_run_id": 900022,
+    "profile_error": null
+  },
+  "roads-seg-000023": {
+    "execution_status": "completed",
+    "trace_termination_reason": "hit_channel",
+    "buffer_length_m": 97.79898987322332,
+    "target_hillslope_wepp_id": 34,
+    "segment_run_id": 900023,
+    "profile_error": null
+  }
+}

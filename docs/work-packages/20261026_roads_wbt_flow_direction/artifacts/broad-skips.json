@@ -1,0 +1,762 @@
+{
+  "tests/climate/test_cligen_wc1_parity.py::test_wc1_breakpoint_cli_peak_intensity_parity_and_contract": [
+    "/workdir/wepppy/tests/climate/test_cligen_wc1_parity.py",
+    248,
+    "Skipped: /wc1/runs/co/cowled-apparatchik not found"
+  ],
+  "tests/climate/test_climate_scaling.py::test_prcp_scaling_matches_rust_round1[0.0]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    31,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_prcp_scaling_matches_rust_round1[0.5]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    31,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_prcp_scaling_matches_rust_round1[1.0]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    31,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_prcp_scaling_matches_rust_round1[1.23]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    31,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_prcp_scaling_matches_rust_round1[2.5]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    31,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_nonzero_offset_diverges_from_rust[1.23-0.1]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    66,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climate/test_climate_scaling.py::test_nonzero_offset_diverges_from_rust[0.8--0.2]": [
+    "/workdir/wepppy/tests/climate/test_climate_scaling.py",
+    66,
+    "Skipped: Missing test input: test.cli"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[ownership]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[fifo]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[processes]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[persistent]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[outage]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[lost-reply]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[clocks]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[killed]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[corruption]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_redis_boundary[heartbeat]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_socket_timeout_recovery[enqueue]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_socket_timeout_recovery[poll]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_socket_timeout_recovery[renew]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/gridmet/test_admission_redis.py::test_real_socket_timeout_recovery[release]": [
+    "/workdir/wepppy/tests/climates/gridmet/test_admission_redis.py",
+    25,
+    "Skipped: Set GRIDMET_ADMISSION_TEST_REDIS_HOST to an isolated real Redis service"
+  ],
+  "tests/climates/noaa/test_atlas14_download.py::test_atlas14_download_intensity": [
+    "/workdir/wepppy/tests/climates/noaa/test_atlas14_download.py",
+    45,
+    "Skipped: Set ATLAS14_DOWNLOADS=1 to run NOAA Atlas 14 live download tests."
+  ],
+  "tests/climates/noaa/test_atlas14_download.py::test_atlas14_download_depth": [
+    "/workdir/wepppy/tests/climates/noaa/test_atlas14_download.py",
+    45,
+    "Skipped: Set ATLAS14_DOWNLOADS=1 to run NOAA Atlas 14 live download tests."
+  ],
+  "tests/climates/noaa/test_atlas14_download.py::test_atlas14_download_english_units": [
+    "/workdir/wepppy/tests/climates/noaa/test_atlas14_download.py",
+    45,
+    "Skipped: Set ATLAS14_DOWNLOADS=1 to run NOAA Atlas 14 live download tests."
+  ],
+  "tests/climates/noaa/test_atlas14_download.py::test_atlas14_no_coverage": [
+    "/workdir/wepppy/tests/climates/noaa/test_atlas14_download.py",
+    45,
+    "Skipped: Set ATLAS14_DOWNLOADS=1 to run NOAA Atlas 14 live download tests."
+  ],
+  "tests/topo/test_osm_roads_postgres_integration.py::test_postgres_metadata_store_roundtrip_and_advisory_lock": [
+    "/workdir/wepppy/tests/topo/test_osm_roads_postgres_integration.py",
+    123,
+    "Skipped: Set OSM_ROADS_POSTGRES_INTEGRATION=1 to include Postgres OSM roads integration tests in broader runs."
+  ],
+  "tests/topo/test_osm_roads_postgres_integration.py::test_osm_roads_service_hits_postgres_backed_cache": [
+    "/workdir/wepppy/tests/topo/test_osm_roads_postgres_integration.py",
+    165,
+    "Skipped: Set OSM_ROADS_POSTGRES_INTEGRATION=1 to include Postgres OSM roads integration tests in broader runs."
+  ],
+  "tests/wepp/peakflow_census/test_peakflow_census.py::test_phase2a_immutable_evidence_parity_and_precision": [
+    "/workdir/wepppy/tests/wepp/peakflow_census/test_peakflow_census.py",
+    212,
+    "Skipped: Phase 2A evidence is unavailable"
+  ],
+  "tests/nodb/mods/disturbed/test_disturbed_lookup_live_e2e.py::test_disturbed_lookup_live_runbook_deterministic": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_disturbed_lookup_live_e2e.py",
+    28,
+    "Skipped: Set DISTURBED_LOOKUP_LIVE_E2E=1 or pass --live-disturbed-lookup-e2e to run disturbed lookup live E2E tests."
+  ],
+  "tests/query_engine/test_benchmarks.py::test_landuse_dict_payload": [
+    "/workdir/wepppy/tests/query_engine/test_benchmarks.py",
+    27,
+    "Skipped: Run directory /wc1/runs/or/orchestral-ringing not available in test environment"
+  ],
+  "tests/query_engine/test_benchmarks.py::test_totalwatsed_aggregate_cache": [
+    "/workdir/wepppy/tests/query_engine/test_benchmarks.py",
+    27,
+    "Skipped: Run directory /wc1/runs/ri/riddled-headmaster not available in test environment"
+  ],
+  "tests/roads/test_roads_project.py::test_design_project[inslope_bd]": [
+    "/workdir/wepppy/tests/roads/test_roads_project.py",
+    19,
+    "Skipped: Set ROADS_VALIDATION_SOURCE to the pinned clogging-starch fixture"
+  ],
+  "tests/roads/test_roads_project.py::test_design_project[inslope_rd]": [
+    "/workdir/wepppy/tests/roads/test_roads_project.py",
+    19,
+    "Skipped: Set ROADS_VALIDATION_SOURCE to the pinned clogging-starch fixture"
+  ],
+  "tests/roads/test_roads_project.py::test_design_project[outslope_rutted]": [
+    "/workdir/wepppy/tests/roads/test_roads_project.py",
+    19,
+    "Skipped: Set ROADS_VALIDATION_SOURCE to the pinned clogging-starch fixture"
+  ],
+  "tests/roads/test_roads_project.py::test_design_project[outslope_unrutted]": [
+    "/workdir/wepppy/tests/roads/test_roads_project.py",
+    19,
+    "Skipped: Set ROADS_VALIDATION_SOURCE to the pinned clogging-starch fixture"
+  ],
+  "tests/roads/test_roads_project.py::test_full_upload_unrutted_rejection": [
+    "/workdir/wepppy/tests/roads/test_roads_project.py",
+    25,
+    "Skipped: Set ROADS_VALIDATION_SOURCE to the pinned clogging-starch fixture"
+  ],
+  "tests/test_0_imports.py::TestImports::test_import_weppcloud2": [
+    "/workdir/wepppy/tests/test_0_imports.py",
+    31,
+    "Skipped: weppcloud2 package not installed in this environment"
+  ],
+  "tests/wepp/interchange/test_watershed_pass_interchange.py::test_watershed_pass_interchange_writes_parquet": [
+    "/workdir/wepppy/tests/wepp/interchange/test_watershed_pass_interchange.py",
+    29,
+    "Skipped: pass_pw0 dataset not available in test fixture"
+  ],
+  "tests/docker/test_canary_smoke_contract.py::test_compose_contract_renders_only_minimum_isolated_services": [
+    "/workdir/wepppy/tests/docker/test_canary_smoke_contract.py",
+    36,
+    "Skipped: Docker Compose v2 is unavailable in this environment: See 'docker --help'"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_pixel_values[1-1]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    348,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_pixel_values[2-2]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    348,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_pixel_values[3-3]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    348,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_color_table[1-expected_color0]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    366,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_color_table[2-expected_color1]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    366,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_color_table[3-expected_color2]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    366,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestUniformSBSGeneration::test_uniform_sbs_all_standard_colors": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    390,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestColorTablePreservation::test_raster_stacker_preserves_color_table": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    415,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestColorTablePreservation::test_get_sbs_preserves_color_table": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    431,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestBurnClassAssignment::test_class_pixel_map_correct[1-131]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    446,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestBurnClassAssignment::test_class_pixel_map_correct[2-132]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    446,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestBurnClassAssignment::test_class_pixel_map_correct[3-133]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    446,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestBurnClassAssignment::test_uniform_low_not_assigned_high": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    465,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestBurnClassAssignment::test_uniform_moderate_not_assigned_high": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    476,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestSBSModeAndUniformSeverity::test_sbs_mode_set_to_uniform": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    490,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestSBSModeAndUniformSeverity::test_uniform_severity_set_correctly[1]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    494,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestSBSModeAndUniformSeverity::test_uniform_severity_set_correctly[2]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    494,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestSBSModeAndUniformSeverity::test_uniform_severity_set_correctly[3]": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    494,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/disturbed/test_sbs_validation.py::TestSBSModeAndUniformSeverity::test_validate_preserves_mode_and_severity": [
+    "/workdir/wepppy/tests/nodb/mods/disturbed/test_sbs_validation.py",
+    499,
+    "Skipped: Test run directory /wc1/runs/le/legato-alkalinity not found"
+  ],
+  "tests/nodb/mods/test_observed_processing.py::test_observed_model_fit_regression": [
+    "/workdir/wepppy/tests/nodb/mods/test_observed_processing.py",
+    96,
+    "Skipped: Observed regression run dir not available: /wc1/runs/un/unpresidential-shabbiness"
+  ],
+  "tests/nodb/mods/test_observed_processing.py::test_observed_model_fit_with_archive_form_allowlisted_roots": [
+    "/workdir/wepppy/tests/nodb/mods/test_observed_processing.py",
+    132,
+    "Skipped: Observed regression run dir not available: /wc1/runs/un/unpresidential-shabbiness"
+  ],
+  "tests/nodb/mods/test_observed_processing.py::test_observed_model_fit_with_valid_archive_form_allowlisted_roots": [
+    "/workdir/wepppy/tests/nodb/mods/test_observed_processing.py",
+    168,
+    "Skipped: Observed regression run dir not available: /wc1/runs/un/unpresidential-shabbiness"
+  ],
+  "tests/nodb/test_ron_map.py::test_raster_intersection_normal_extent": [
+    "/workdir/wepppy/tests/nodb/test_ron_map.py",
+    136,
+    "Skipped: Test needs raster in UTM projection matching Map's UTM zone"
+  ],
+  "tests/nodb/test_ron_map.py::test_raster_intersection_single_pixel": [
+    "/workdir/wepppy/tests/nodb/test_ron_map.py",
+    172,
+    "Skipped: Test needs raster in UTM projection matching Map's UTM zone"
+  ],
+  "tests/nodb/test_ron_map.py::test_raster_intersection_discard_values": [
+    "/workdir/wepppy/tests/nodb/test_ron_map.py",
+    359,
+    "Skipped: Test needs raster in UTM projection matching Map's UTM zone"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_real_two_stage_completion_and_retry[None]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    154,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_real_two_stage_completion_and_retry[hillslope]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    154,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_real_two_stage_completion_and_retry[watershed]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    154,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_handoff_never_runs_watershed[missing]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    189,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_handoff_never_runs_watershed[json]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    189,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_handoff_never_runs_watershed[old_attempt]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    189,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_handoff_never_runs_watershed[symlink]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    189,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_handoff_never_runs_watershed[rq_mismatch]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    189,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_tree_cancel_between_stages_and_retry": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    213,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_duplicate_live_submission_is_rejected": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    227,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_zero_selected_leaves_only_finalizes": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    239,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_identity_failure_handler_cannot_write[foreign_leaf]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    248,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_identity_failure_handler_cannot_write[foreign_root]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    248,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_invalid_identity_failure_handler_cannot_write[path]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    248,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_stopped_hillslope_releases_failure_observer": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    266,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_receipt_publication_failure_retains_outputs_and_blocks_science": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    282,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_omni_finalizer_is_linked_before_leaf_completion": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    296,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_production_worker_preserves_identity_and_forks_each_stage": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    316,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_leaf_metadata_includes_hillslope_elapsed_time": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    351,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_root_dispatch_failure_reconciles_before_retry": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    365,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_real_nodb_phase_reload_clears_only_scoped_cache[False]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    385,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_real_nodb_phase_reload_clears_only_scoped_cache[True]": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    385,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_mixed_leaves_finalize_after_both_terminal_stages": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    442,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_concurrent_omni_attachments_preserve_both_dependencies": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    457,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_omni_link_failure_does_not_announce_batch_completion": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    495,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_batch_task_boundary.py::test_omni_lock_timeout_happens_before_submission": [
+    "/workdir/wepppy/tests/rq/test_batch_task_boundary.py",
+    518,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_project_rq_fork_nfs.py::test_omni_quarantine_capture_restore_and_collision_on_nfs": [
+    "/workdir/wepppy/tests/rq/test_project_rq_fork_nfs.py",
+    17,
+    "Skipped: WEPPPY_NFS_TEST_ROOT is required for explicit NFS parity"
+  ],
+  "tests/rq/test_project_rq_fork_nfs.py::test_omni_pre_capture_leaf_swaps_on_nfs[regular]": [
+    "/workdir/wepppy/tests/rq/test_project_rq_fork_nfs.py",
+    17,
+    "Skipped: WEPPPY_NFS_TEST_ROOT is required for explicit NFS parity"
+  ],
+  "tests/rq/test_project_rq_fork_nfs.py::test_omni_pre_capture_leaf_swaps_on_nfs[directory]": [
+    "/workdir/wepppy/tests/rq/test_project_rq_fork_nfs.py",
+    17,
+    "Skipped: WEPPPY_NFS_TEST_ROOT is required for explicit NFS parity"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_concurrent_admission_coalesces_one_job": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    57,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_incompatible_worker_blocks_without_losing_request": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    73,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_existing_started_job_retained_until_terminal": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    85,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_scope_incarnation_separates_old_queued_work": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    100,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_receipt_free_crash_gap_recovered_by_inventory": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    111,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_redis_discovery_loss_recovers_filesystem_receipts": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    125,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_explicit_suspension_is_not_retried": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    134,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_nested_inventory_scopes_and_bounded_resume": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    146,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_worker_does_not_publish_old_incarnation": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    159,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_arrival_after_worker_snapshot_gets_successor": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    170,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_failed_attempt_retains_request_and_backoff": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    199,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_no_repeat_request_after_clean_tick": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    214,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_receipt_free_nested_source_inventory[rhessys/scenarios/scenario]": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    227,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_receipt_free_nested_source_inventory[runs/child]": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    227,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_receipt_free_nested_source_inventory[_base/runs/child]": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    227,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_disabled_consumer_configuration_blocks_admission": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    241,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_cycle_completion_waits_for_acknowledgment": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    252,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_new_cycle_resets_errors_and_retains_previous_evidence": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    264,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_missing_namespace_degrades_and_retries_on_next_tick": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    278,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_missing_redundant_alias_does_not_degrade": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    294,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_ambiguous_transaction_commit_coalesces_on_retry": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    304,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_killed_worker_recovers_after_rq_abandonment": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    337,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_real_watch_conflict_keeps_durable_request": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    406,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_query_catalog_rq.py::test_queued_child_fails_after_owner_freeze": [
+    "/workdir/wepppy/tests/rq/test_query_catalog_rq.py",
+    486,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_real_queued_sweep_publishes_sql_and_safe_tree": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    48,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_real_rq_atomic_admission_and_private_terminal_record": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    100,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_no_workers_skip_repeated_ticks_then_recover": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    144,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[busy]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[suspended]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[unknown]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[missing_state]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[missing]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[expired]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[nonexpiring]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[dead]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[other_queue]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[reused_name]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[missing_config]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[malformed_config]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[invalid_encoding]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[wrong_database]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[wrong_protocol]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_unavailable_worker_does_not_change_admission[wrong_mode]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    157,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_idle_worker_in_mixed_pool_is_enough": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    202,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_global_suspension_and_observation_are_passive": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    208,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_existing_sweep_survives_busy_pool_and_repeated_ticks[queued]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    231,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_existing_sweep_survives_busy_pool_and_repeated_ticks[started]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    231,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_existing_sweep_survives_busy_pool_and_repeated_ticks[deferred]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    231,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_existing_sweep_survives_busy_pool_and_repeated_ticks[scheduled]": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    231,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_worker_loss_after_observation_still_coalesces": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    247,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/rq/test_run_catalog_rq.py::test_redis_observation_error_is_not_silenced": [
+    "/workdir/wepppy/tests/rq/test_run_catalog_rq.py",
+    267,
+    "Skipped: redis-server executable required for isolated RQ integration"
+  ],
+  "tests/soils/test_ssurgo.py::test_query_mukeys_in_extent_returns_expected_sample": [
+    "/workdir/wepppy/tests/soils/test_ssurgo.py",
+    60,
+    "Skipped: Set SSURGO_INTEGRATION=1 to run SSURGO integration tests."
+  ],
+  "tests/soils/test_ssurgo.py::test_query_mukeys_in_extent_handles_small_bbox": [
+    "/workdir/wepppy/tests/soils/test_ssurgo.py",
+    60,
+    "Skipped: Set SSURGO_INTEGRATION=1 to run SSURGO integration tests."
+  ],
+  "tests/soils/test_ssurgo.py::test_surgo_collection_builds_valid_wepp_soils": [
+    "/workdir/wepppy/tests/soils/test_ssurgo.py",
+    60,
+    "Skipped: Set SSURGO_INTEGRATION=1 to run SSURGO integration tests."
+  ],
+  "tests/soils/test_ssurgo.py::test_surgo_collection_handles_sparse_extent": [
+    "/workdir/wepppy/tests/soils/test_ssurgo.py",
+    60,
+    "Skipped: Set SSURGO_INTEGRATION=1 to run SSURGO integration tests."
+  ],
+  "tests/soils/test_ssurgo.py::test_surgo_collection_writes_min_depth_soil": [
+    "/workdir/wepppy/tests/soils/test_ssurgo.py",
+    60,
+    "Skipped: Set SSURGO_INTEGRATION=1 to run SSURGO integration tests."
+  ],
+  "tests/services/test_wmesque_retrieve.py::test_wmesque_retrieve_aligns_arc_and_tif": [
+    "/workdir/wepppy/tests/services/test_wmesque_retrieve.py",
+    27,
+    "Skipped: Set WMESQUE_INTEGRATION=1 to exercise the remote WMesque raster service."
+  ],
+  "tests/test_webclients_elevation.py::test_elevationquery_real_api_call": [
+    "/workdir/wepppy/tests/test_webclients_elevation.py",
+    71,
+    "Skipped: Integration test - requires network access"
+  ]
+}

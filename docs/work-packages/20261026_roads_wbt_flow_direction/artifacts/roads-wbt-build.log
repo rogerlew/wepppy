@@ -1,0 +1,8 @@
+   Compiling pyo3-build-config v0.22.6
+   Compiling peridot v0.1.0 (/home/workdir/peridot)
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling roads_flowpath_rust v0.1.0 (/home/workdir/wepppyo3/roads_flowpath)
+    Finished `release` profile [optimized] target(s) in 24.40s

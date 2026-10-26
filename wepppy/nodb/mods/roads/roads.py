@@ -4078,6 +4078,7 @@ class Roads(NoDbBase):
                                 seed_col,
                                 channel_path=trace_context["paths"]["channel_raster_path"],
                                 max_steps=trace_max_steps,
+                                wbt=True,
                             )
                         except Exception as exc:
                             skipped_segments.append({"segment_id": segment_id, "reason": "trace_execution_failed"})

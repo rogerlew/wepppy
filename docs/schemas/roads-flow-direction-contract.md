@@ -1,6 +1,6 @@
 # Roads WBT flow-direction contract
 
-Status: accepted intent, implementation pending (2026-10-26).
+Status: implemented and locally validated (2026-10-26); production deployment pending.
 
 ## Scope and decision
 

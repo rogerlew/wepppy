@@ -1,0 +1,17 @@
+{
+  "status": "stale_full_project_routing",
+  "notice": "> **STALE full-project routing evidence (2026-10-26):** The historical results below predate the Roads WBT flow-direction correction and selected-binary forwarding fix. Five connected site segments were incorrectly skipped. The 516 fixed-profile simulations are retained as historical profile evidence; the full-project coverage and totals do not validate the corrected workflow. Fresh isolated repair evidence is recorded in work package `20261026_roads_wbt_flow_direction`. Original results and execution provenance are preserved.\n\n",
+  "provenance_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
+  "published_report_sha256": "263174f8f56c94a9fb2773572d16f65593453df4816a6d38b7a069e97a924d7a",
+  "reviewed_source_deltas": {
+    "tests/roads/test_roads_publication.py": {
+      "recorded": "bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c",
+      "current": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
+    },
+    "wepppy/nodb/mods/roads/roads.py": {
+      "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
+      "current": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201"
+    }
+  },
+  "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails."
+}

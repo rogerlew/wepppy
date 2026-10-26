@@ -182,6 +182,13 @@ release so that the watershed reader supports the generated PASS format. An
 unversioned watershed executable can fail with an input conversion error when
 reading version 3 PASS files from a dated release.
 
+Roads requires WBT delineation. Downslope tracing explicitly consumes Whitebox
+D8 pointers through the paired `wepppyo3.roads_flowpath` release. The native
+adapter normalizes those pointers in memory; TOPAZ-style subcatchment IDs do
+not mean that the direction raster uses TOPAZ codes. Deploy the caller and
+native module together, then rerun Roads to regenerate affected results.
+See the [flow-direction contract](../../../../docs/schemas/roads-flow-direction-contract.md).
+
 ## Results and Artifacts
 
 ### What the user sees

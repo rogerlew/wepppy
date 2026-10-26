@@ -1,0 +1,55 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest /workdir/wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py -k whitebox --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 23 items / 3 deselected / 20 selected
+
+../wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py F
+
+=================================== FAILURES ===================================
+______ test_whitebox_directions_reach_independent_neighbors[1-neighbor0] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-40/test_whitebox_directions_reach0')
+direction = 1, neighbor = (0, 2)
+
+    @pytest.mark.parametrize('direction,neighbor', [
+        (1, (0, 2)), (2, (1, 2)), (4, (2, 2)), (8, (2, 1)),
+        (16, (2, 0)), (32, (1, 0)), (64, (0, 0)), (128, (0, 1)),
+    ])
+    def test_whitebox_directions_reach_independent_neighbors(tmp_path, direction, neighbor):
+        """Oracle is the Whitebox compass layout, not the conversion helper."""
+        subwta = np.full((3, 3), 11, dtype=np.int32)
+        subwta[neighbor] = 14
+        flow = np.zeros((3, 3), dtype=np.uint8)
+        flow[1, 1] = direction
+        relief = np.full((3, 3), 99., dtype=np.float32)
+        relief[1, 1] = 100.
+        for name, values, dtype in [('subwta', subwta, 'int32'), ('flovec', flow, 'uint8'),
+                                     ('relief', relief, 'float32')]:
+            _write_raster(tmp_path / f'{name}.tif', values, dtype)
+        flow_path = tmp_path / 'flovec.tif'
+        original = flow_path.read_bytes()
+>       result = trace_downslope_flowpath(str(tmp_path / 'subwta.tif'), str(flow_path),
+            str(tmp_path / 'relief.tif'), 1, 1, wbt=True)
+E       TypeError: trace_downslope_flowpath() got an unexpected keyword argument 'wbt'
+
+../wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py:200: TypeError
+=============================== warnings summary ===============================
+wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py::test_whitebox_directions_reach_independent_neighbors[1-neighbor0]
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: The given matrix is equal to Affine.identity or its flipped counterpart. GDAL may ignore this matrix and save no geotransform without raising an error. This behavior is somewhat driver-specific.
+    dataset = writer(
+
+../../opt/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /opt/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /workdir/.pytest_cache/v/cache/nodeids: [Errno 13] Permission denied: '/workdir/pytest-cache-files-6wfp3tow'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../../opt/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /opt/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /workdir/.pytest_cache/v/cache/lastfailed: [Errno 13] Permission denied: '/workdir/pytest-cache-files-yjk6q18e'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../wepppyo3/tests/roads_flowpath/test_trace_downslope_flowpath.py::test_whitebox_directions_reach_independent_neighbors[1-neighbor0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================= 1 failed, 3 deselected, 3 warnings in 1.04s ==================

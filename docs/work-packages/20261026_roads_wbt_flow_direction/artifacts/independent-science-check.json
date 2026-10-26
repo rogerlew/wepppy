@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "recovered_geometry": [
+    {
+      "segment": "roads-seg-000001",
+      "steps": 48,
+      "length_m": 102.62741699796953,
+      "channel": 204,
+      "segment_run_id": 900001
+    },
+    {
+      "segment": "roads-seg-000020",
+      "steps": 47,
+      "length_m": 103.94112549695427,
+      "channel": 154,
+      "segment_run_id": 900020
+    },
+    {
+      "segment": "roads-seg-000021",
+      "steps": 48,
+      "length_m": 102.6274169979695,
+      "channel": 154,
+      "segment_run_id": 900021
+    },
+    {
+      "segment": "roads-seg-000022",
+      "steps": 46,
+      "length_m": 96.97056274847714,
+      "channel": 154,
+      "segment_run_id": 900022
+    },
+    {
+      "segment": "roads-seg-000023",
+      "steps": 46,
+      "length_m": 97.79898987322332,
+      "channel": 154,
+      "segment_run_id": 900023
+    }
+  ],
+  "parquet_hash_and_rowcounts": 20,
+  "report_rows": 35
+}

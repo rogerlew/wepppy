@@ -1,0 +1,13 @@
+{
+  "base_revision": "47e51b8e73146872056b68934977db56d91c9119",
+  "peridot_revision": "3cef07bdc93a595016d80d0619718809a1bdccc8",
+  "source_sha256": {
+    "roads_flowpath/src/lib.rs": "bc6235dcaf30592cd6e599088a350b09c62a8a17f8297092fdc837b3e2b9750d",
+    "roads_flowpath/Cargo.toml": "c583aad2ac9a6e1191e71803996f4dc2422d574fcbe4f5874e09c3ac496650a9"
+  },
+  "previous_binary_sha256": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+  "binary_sha256": "5d1f7be2e8176af5d762936b8c5cbe290450c2c2cbe134055d296f8fbd730a34",
+  "build_command": "PYO3_PYTHON=/usr/bin/python3.12 cargo build --release --offline -p roads_flowpath_rust -j4",
+  "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+  "publication": "atomic rename; local release tree only; production unchanged"
+}

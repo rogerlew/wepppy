@@ -1,0 +1,118 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 693 items
+
+tests/nodb/mods/test_postfire_debris_flow_source_transport.py ...        [  0%]
+tests/nodb/mods/test_rap_ts_cover_transform.py .                         [  0%]
+tests/nodb/mods/test_roads_segment_loss_summary.py .......               [  1%]
+tests/nodb/mods/test_rusle_controller.py ...                             [  2%]
+tests/nodb/mods/test_rusle_k_nomograph.py .                              [  2%]
+tests/nodb/mods/test_swat_interchange.py E
+
+==================================== ERRORS ====================================
+_ ERROR at setup of test_build_recall_connections_reads_sidecar_watershed_parquets _
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-59/test_build_recall_connections_0')
+
+    @pytest.fixture
+    def swat_instance(tmp_path):
+        wd = tmp_path / "run"
+        wd.mkdir()
+
+        swat_bin = tmp_path / "swat_bin"
+        swat_bin.write_text("#!/bin/sh\nexit 0\n")
+        os.chmod(swat_bin, 0o755)
+
+        cfg_path = tmp_path / "config.cfg"
+        cfg_path.write_text(
+            "\n".join(
+                [
+                    "[nodb]",
+                    'mods = ["swat"]',
+                    "",
+                    "[swat]",
+                    "enabled = true",
+                    f"swat_bin = {swat_bin}",
+                    "swat_interchange_enabled = true",
+                    "swat_interchange_chunk_rows = 10",
+                    "",
+                    "[interchange]",
+                    "delete_after_interchange = false",
+                    "",
+                ]
+            )
+            + "\n"
+        )
+
+>       instance = Swat(str(wd), str(cfg_path))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/nodb/mods/test_swat_interchange.py:75:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+wepppy/nodb/mods/swat/swat.py:127: in __init__
+    with self.locked():
+/usr/local/lib/python3.12/contextlib.py:144: in __exit__
+    next(self.gen)
+wepppy/nodb/base.py:1682: in locked
+    self.dump_and_unlock(validate=validate_on_success)
+wepppy/nodb/base.py:1704: in dump_and_unlock
+    self.dump()
+wepppy/nodb/base.py:1777: in dump
+    self._assert_lock_owned_for_dump()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <wepppy.nodb.mods.swat.swat.Swat object at 0x748dec47bad0>
+
+    def _assert_lock_owned_for_dump(self) -> None:
+        """Fail when this instance no longer owns the distributed lock."""
+
+        lock_client = _ensure_redis_lock_client()
+        lock_key = self._distributed_lock_key
+        stored_payload = lock_client.get(lock_key)
+        if stored_payload is None:
+            # Keep legacy compatibility hash fields aligned with distributed lock truth.
+            lock_client.hset(self.runid, self._file_lock_key, 'false')
+            _set_local_lock_token(self, None)
+>           raise RuntimeError("cannot dump to unlocked db")
+E           RuntimeError: cannot dump to unlocked db
+
+wepppy/nodb/base.py:1732: RuntimeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated report log file: /workdir/wepppy/.pytest_cache/roads-wbt-segmented/late-1.jsonl -
+=========================== short test summary info ============================
+ERROR tests/nodb/mods/test_swat_interchange.py::test_build_recall_connections_reads_sidecar_watershed_parquets
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 15 passed, 8 warnings, 1 error in 8.75s ====================
