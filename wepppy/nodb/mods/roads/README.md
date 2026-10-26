@@ -176,6 +176,12 @@ The prepare stage is where bad design mapping shows up first. If the mapped `des
 
 If the upload or Roads parameters changed after prepare, the run stage requires a fresh prepare cycle.
 
+Roads inherits the baseline project's selected WEPP binary for both segment runs
+and the watershed rerun. Input preparation and execution must use the same
+release so that the watershed reader supports the generated PASS format. An
+unversioned watershed executable can fail with an input conversion error when
+reading version 3 PASS files from a dated release.
+
 ## Results and Artifacts
 
 ### What the user sees

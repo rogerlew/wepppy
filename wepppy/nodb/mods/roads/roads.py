@@ -5818,7 +5818,7 @@ class Roads(NoDbBase):
                     pass_family=self.wepp_instance.pass_family,
                     wepp_bin=self.wepp_instance.wepp_bin,
                 )
-                run_watershed(self.roads_runs_dir)
+                run_watershed(self.roads_runs_dir, wepp_bin=self.wepp_instance.wepp_bin)
                 from wepppy.wepp.interchange.roads_accounting import mark_routed
 
                 mark_routed(Path(self.wd))

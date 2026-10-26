@@ -1233,7 +1233,12 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
         captured_make["wepp_bin"] = wepp_bin
 
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", _fake_make)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda runs_dir: None)
+    captured_run: dict[str, object] = {}
+
+    def _fake_run(runs_dir: str, *, wepp_bin: str | None = None) -> None:
+        captured_run.update(runs_dir=runs_dir, wepp_bin=wepp_bin)
+
+    monkeypatch.setattr(roads_module, "run_watershed", _fake_run)
     monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
@@ -1255,6 +1260,11 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "combined"
     assert summary["roads_log_relpath"] == "wepp/roads/roads.log"
     assert Path(controller.roads_log_path).exists()
+    assert captured_run == {
+        "runs_dir": controller.roads_runs_dir,
+        "wepp_bin": controller.wepp_instance.wepp_bin,
+    }
+    assert captured_make["wepp_bin"] == captured_run["wepp_bin"]
     assert captured_make["years"] == 25
     assert captured_make["runs_dir"] == controller.roads_runs_dir
 
@@ -1467,7 +1477,7 @@ def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract
         lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: None)
     monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
@@ -1620,7 +1630,7 @@ def test_run_roads_wepp_runs_outslope_rutted_channel_associated_with_fill_defaul
         lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: None)
     monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
@@ -1833,7 +1843,7 @@ def test_run_roads_wepp_routes_outslope_rutted_non_channel_with_three_ofe_contra
         lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: None)
     monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
@@ -2024,7 +2034,7 @@ def test_run_roads_wepp_skips_non_channel_routable_segment_when_trace_does_not_r
         lambda self, **_kwargs: (_ for _ in ()).throw(RuntimeError("should not combine")),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: None)
     monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
@@ -2173,7 +2183,7 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
         lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: (_ for _ in ()).throw(Exception("watershed boom")))
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: (_ for _ in ()).throw(Exception("watershed boom")))
 
     with pytest.raises(Exception, match="watershed boom"):
         controller.run_roads_wepp()
