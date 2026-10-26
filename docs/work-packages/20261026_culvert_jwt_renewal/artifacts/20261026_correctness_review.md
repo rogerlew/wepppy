@@ -112,3 +112,7 @@ evidence are retained in operator state and this package. Model archive tests
 are not applicable because this workflow creates no model/project records.
 
 Reviewer sign-off: `renewal_contract_correctness`, 2026-10-26 UTC.
+
+## Post-review validation addendum — Codex, 2026-10-26 UTC
+
+The broad-suite obligation pending at review time is now recorded in [validation summary](20261026_validation_summary.md): 11,786 unique passes and 155 skips across broad/tail segments after a process-local correction for the existing browser-cache path. No runtime code changed after the reviewed/deployed hash. Reviewer verdict and operational limitations above are unchanged.

@@ -1,6 +1,6 @@
 # Culvert JWT automatic renewal
 
-Status: active, 2026-10-26 UTC. Owner: Roger Lew. Implementer: Codex.
+Status: Closed 2026-10-26 UTC (deployed and environment-validated). Owner: Roger Lew. Implementer: Codex.
 
 ## Problem and scope
 
@@ -24,6 +24,12 @@ Daily success/no-op receipt, systemd failure/journal and local last-attempt heal
 
 ## References
 
-- [ExecPlan](prompts/active/implementation_execplan.md)
+- [ExecPlan](prompts/completed/implementation_execplan.md)
 - [Tracker](tracker.md)
 - [Renewal contract](../../schemas/culvert-jwt-renewal-contract.md)
+
+## Outcome
+
+Daily renewal is enabled on wepp1 and consumed without rotation-time restarts on wepp2. Service and timer acceptance passed with real credential replacement and same-process HTTP authentication. Twenty focused tests passed; segmented repository coverage has 11,786 passing cases and 155 skips after correcting the browser path for the tail process. Independent correctness/security gates pass with no unresolved findings. See [validation summary](artifacts/20261026_validation_summary.md) and [live evidence](artifacts/20261026_live_validation.md).
+
+Durable mechanism and recovery rules are promoted to the renewal contract and [operator runbook](../../culvert-at-risk-integration/jwt-renewal.md). External notifications and observation of the first ordinary daily trigger remain documented operational follow-ups, not completed claims. No model-analysis recovery claimed.

@@ -1,6 +1,6 @@
 # PROJECT_TRACKER.md
 
-Active: [Culvert JWT automatic renewal](docs/work-packages/20261026_culvert_jwt_renewal/package.md) — systemd issuer-side renewal, restricted delivery and live worker validation; contract checkpoint in review.
+Completed (deployed): [Culvert JWT automatic renewal](docs/work-packages/20261026_culvert_jwt_renewal/package.md) — daily user systemd timer on wepp1, restricted SSH installation and per-task credential-file reads on wepp2. Real service/timer rotations and same-process authentication pass; independent reviews closed; 20 focused tests and 11,786 segmented broad passes. Browser-path and off-host-alert follow-ups documented.
 
 Completed (local implementation): [Roads GL Dashboard](docs/work-packages/20261023_roads_gl_dashboard/package.md) — guarded centerline detachment and Baseline/Roads switch; twelve review findings closed. Real artifact/browser checks pass; 11764 Python passes across segmented coverage, 1017 frontend tests, five feature browser tests. General smoke limits retained. No production deployment.
 
@@ -29,7 +29,7 @@ Completed (source/local validation): [Gregorian calendar repair](docs/work-packa
 Completed (investigation/design): [ASCII PASS century failure](docs/work-packages/20261021_ascii_pass_century_investigation/package.md) — reproduced year-102 stop in the 200-year project; confirmed legacy/Gregorian mismatch and stale climate buffer reuse. Robust repair identified; no implementation or deployment.
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-21
+**Last Updated**: 2026-10-26
 **Active Packages**: 46
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 

@@ -116,3 +116,7 @@ full model execution, or exhaustive failure coverage.
 
 Sign-off: independent security reviewer; approve the reviewed bounded mechanism
 with the limits above recorded. No production changes were made by this review.
+
+## Post-review validation addendum — Codex, 2026-10-26 UTC
+
+The broad-suite obligation pending at review time is now recorded in [validation summary](20261026_validation_summary.md): 11,786 unique passes and 155 skips across broad/tail segments after a process-local correction for the existing browser-cache path. No runtime code changed after the reviewed/deployed hash. Reviewer verdict and operational limitations above are unchanged.

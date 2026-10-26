@@ -1,5 +1,7 @@
 # Automate Culvert JWT renewal with systemd
 
+Completed 2026-10-26 UTC: deployed the daily user timer, verified actual service/timer rotations and same-process worker authentication, and closed independent reviews. Focused tests pass; segmented broad coverage and the existing browser-path limitation are recorded in the validation summary.
+
 This living ExecPlan follows docs/prompt_templates/codex_exec_plans.md.
 
 ## Purpose / Big Picture
@@ -13,7 +15,7 @@ Culvert submissions must not stop every 90 days because a human forgot credentia
 - [x] (2026-10-26 UTC) Implemented scripts/units/helper; 20 focused regressions passed.
 - [x] (2026-10-26 UTC) Independent pre-deployment reviews passed after malformed-token fix.
 - [x] (2026-10-26 16:45 UTC) Deployed and exercised both service and timer; verified changed JWT and HTTP acceptance in same-process worker probes.
-- [ ] Documented operations and final evidence.
+- [x] (2026-10-26 17:41 UTC) Documented operations, final reviews and segmented regression evidence.
 
 ## Surprises & Discoveries
 
@@ -55,6 +57,8 @@ Python stdlib, existing wctl/Docker issuer, SSH, user systemd, and HTTPS validat
 
 ## Outcomes & Retrospective
 
-Renewal is deployed and accepted through actual timer/service/SSH/filesystem/container boundaries. No model analysis rerun claimed. Full suite and final review records pending. External alert destination is unconfigured; local health receipt/journal active.
+Renewal is deployed and accepted through actual timer/service/SSH/filesystem/container boundaries. No model analysis rerun claimed. Final reviews PASS. Required broad run stopped at an existing browser-path error after 11,610 passes/155 skips; corrected-path tail passed 183 cases, giving 11,786 unique passes across segments. External alert destination is unconfigured; local health receipt/journal active.
 
 Initial revision: 2026-10-26 UTC; bounded execution authorized by user.
+
+Closeout revision, 2026-10-26 UTC: actual timer acceptance completed; canonical browser-cache environment mismatch documented and tail validated with existing browser location. Source/runtime hashes and bounded companion patch retained. Operational rules live outside this closed package. No unrelated deployment or model retry performed.

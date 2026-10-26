@@ -2,10 +2,7 @@ diff --git a/README.md b/README.md
 index 3f1f93b76..2cdf39490 100644
 --- a/README.md
 +++ b/README.md
-@@ -981,3 +981,7 @@ Made with support from the **U.S. Department of Transportation** and the **USDA
- [🌐 Web App](https://culvert-at-risk.org) · [📖 Manual](https://culvert-at-risk.org/static/manual/manual.pdf) · [✉️ Support](mailto:support@culvert-at-risk.org)
- 
- </div>
+@@ -983,0 +984,4 @@ Made with support from the **U.S. Department of Transportation** and the **USDA
 +
 +### Production WEPPcloud credential renewal
 +
@@ -14,15 +11,9 @@ diff --git a/culvert_app/tasks/wepp_cloud_integration_task.py b/culvert_app/task
 index 4fad1481c..bea71d177 100644
 --- a/culvert_app/tasks/wepp_cloud_integration_task.py
 +++ b/culvert_app/tasks/wepp_cloud_integration_task.py
-@@ -126,9 +126,8 @@ def run_wepp_cloud_analysis(user_id, project_name, ws_shapefile_path,
-     )
- 
-     wepp_host = os.getenv('WEPPCLOUD_HOST', 'wepp.cloud')
+@@ -129,3 +129,2 @@ def run_wepp_cloud_analysis(user_id, project_name, ws_shapefile_path,
 -    wepp_token = os.getenv('WEPPCLOUD_TOKEN')
 -    if not wepp_token:
 -        raise ValueError("WEPPCLOUD_TOKEN not configured in .env file")
 +    from tasks.weppcloud_token import load_weppcloud_token
 +    wepp_token = load_weppcloud_token()
-     
-     lock_key = f"wepp_cloud:{user_id}:{project_name}"
-     lock_token = f"{os.getpid()}:{uuid.uuid4()}"

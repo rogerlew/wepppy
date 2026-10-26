@@ -8,7 +8,7 @@ Venue: operator/Codex conversation, 2026-10-26 UTC. Participants: Roger Lew (dec
 
 ## Decision
 
-Use a daily persistent systemd timer on wepp1 under the existing lingering operator user. Issue the same 90-day submit-only identity when at most 30 days remain. Deliver with restricted SSH over Tailscale, validate before atomic replacement and read a file per submission. Keep prior credential for recovery. These are operational scheduling bounds, not model parameter changes.
+Use a daily persistent systemd timer on wepp1 under the existing lingering operator user. Issue the same 90-day submit-only identity when at most 30 days remain. Deliver with restricted SSH over Tailscale, validate before atomic replacement and read a file per submission. Keep prior credential for recovery. These are operational scheduling bounds, not model parameter changes. Operational limits are 16,384 characters per credential read, 30 seconds per HTTPS verification, 15 seconds for SSH connection setup, 120 seconds per issuer/SSH subprocess, and 5 minutes per systemd invocation. Daily scheduling adds up to 15 minutes of jitter. These bounds reject unreasonable credential input and prevent a stalled dependency from leaving renewal running indefinitely; ordinary JWTs are far smaller and observed renewal completes in seconds.
 
 ## Rationale and alternatives
 

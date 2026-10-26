@@ -38,6 +38,7 @@
   - `/cancel_task/...` writes Redis flag, `check_cancellation` raises `TaskCancelledError`.
 
 ## WEPP Cloud Integration and JWT Security (reviewed 2026-02-09)
+- Production renewal update (2026-10-26): follow [JWT renewal operations](jwt-renewal.md). The registered wepp2 credential is submit-only and is read through `WEPPCLOUD_TOKEN_FILE` per task. A lingering user systemd timer on wepp1 renews and delivers it. Do not broaden scopes during renewal based on the general recommendations below.
 - Integration files:
   - `culvert_app/tasks/build_payload.py`: builds payload ZIP from ws_deln/hydrogeo outputs.
   - `culvert_app/tasks/submit_payload.py`: upload + polling client for rq-engine culvert endpoints.
@@ -56,7 +57,7 @@
   - `wepp_cloud_integration_task.py` constructs `/rq-engine/api/jobstatus/{job_id}` directly instead of using the response `status_url`; this is less robust when reverse-proxy prefixes or route shapes change.
 - Token strategy guidance:
   - Prefer short-lived tokens (for example 1 hour) with only required scopes.
-  - Use the long-lived Culvert service JWT for submission, retry, and authenticated status polling; it includes `rq:status`.
+  - Service JWT operation rights depend on issued scopes. The deployed production credential permits submission only; retry or authenticated polling would require separately authorized scopes.
   - Use the returned `browse_token` (batch-scoped; `runs` includes `batch_uuid`) only for browse/download access; it is not a polling credential.
   - Do not commit `WEPPCLOUD_TOKEN`; inject it via environment/secret manager.
   - Recommended minimum scopes for end-to-end flow: `culvert:batch:submit` and `rq:status`.

@@ -33,6 +33,9 @@ introduce `rq:status`, retry, or administrative privileges.
 | wepp2 | `/workdir/culvert_app_instance_dir/.weppcloud-auth/previous` | One prior credential for recovery, mode 0600 |
 | wepp2 | `/workdir/Culvert_web_app/culvert_app/tasks/weppcloud_token.py` | Per-invocation loader copied from `dev-package/scripts/weppcloud_token.py` |
 
+The client loader/task change is retained in Culvert_web_app commit `a2bd7bf62`;
+the operator script and units are retained in WEPPpy commit `2b334ded7`.
+
 The existing instance mount exposes the credential to the container as
 `/app/instance/.weppcloud-auth/token`. Set this exact path in
 `WEPPCLOUD_TOKEN_FILE` in the app's existing `.env`. The integration task calls
@@ -169,3 +172,12 @@ analysis. Never print the token while collecting evidence.
 
 All renewal operations serialize through file locks. No automatic revocation,
 model retry, batch submission or full-stack restart is performed.
+
+To retire this mechanism, disable the timer with `systemctl --user disable --now
+weppcloud-culvert-token-renew.timer`, remove only the `culvert-jwt-renewal`
+public-key entry from wepp2's `authorized_keys`, and remove its dedicated private
+key from wepp1. Preserve the installed token until another credential source is
+configured and verified. Removing it while `WEPPCLOUD_TOKEN_FILE` is set breaks
+new submissions. If the delivery key is compromised, remove its authorized-key
+entry first, then replace the key and inspect the installed credential before
+reenabling the timer.

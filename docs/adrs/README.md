@@ -113,3 +113,5 @@ Each ADR should normally include:
 - [ADR-0092: PRISM temperature inversion midpoint repair](ADR-0092-prism-temperature-inversion-midpoint-proposal.md) (Accepted for implementation, 2026-10-13; conformance pending).
 
 - [ADR-0105: Roads dashboard detachment aggregation and display](ADR-0105-roads-dashboard-detachment-display.md) (Accepted and independently reviewed; implementation pending).
+
+- [ADR-0106: Scheduled Culvert JWT renewal](ADR-0106-culvert-jwt-renewal.md) (Accepted, deployed and validated on wepp1/wepp2, 2026-10-26).

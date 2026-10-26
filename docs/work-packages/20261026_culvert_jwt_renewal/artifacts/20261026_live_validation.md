@@ -59,7 +59,7 @@ Token directory mode 0700, token and previous files mode 0600, owned by roger. A
 
 A structurally valid forged signature was rejected by the live API with HTTP 401 and by restricted installation; installed fingerprint remained unchanged. `systemd-analyze --user verify` passed. Final normal timer next trigger: 2026-10-27 08:10:48 UTC. Final normal service receipt: `not_due`, unchanged fingerprint.
 
-Public Culvert website returned HTTP 200. No bearer tokens/private keys retained in this artifact. Final script/unit/helper hash parity and review dispositions recorded in final review artifacts.
+Public Culvert website returned HTTP 200. No bearer tokens/private keys retained in this artifact. Final script/unit/helper hash parity and review dispositions recorded in final review artifacts. Source implementation commit: WEPPpy `2b334ded7`; companion Culvert_web_app `a2bd7bf62` on its existing Production branch. The retained client patch has zero context (`git apply --unidiff-zero` if used); the helper source is separately tracked in WEPPpy dev-package scripts.
 
 ## Claims and limits
 
