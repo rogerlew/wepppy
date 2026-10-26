@@ -384,9 +384,9 @@ async def api_dataset_retrieve(
     dataset: str = Path(..., description="Path to the dataset, e.g., 'fire/severity/2020'"),
     bbox: Tuple[float, float, float, float] = Depends(parse_bbox),
     cellsize: float = Query(30.0, gt=0, description="Output cell size in meters."),
-    resample: Optional[str] = Query(None, enum=resample_methods),
-    _format: str = Query("GTiff", enum=format_drivers, alias="format"),
-    gdaldem: Optional[str] = Query(None, enum=gdaldem_modes),
+    resample: Optional[str] = Query(None, json_schema_extra={"enum": resample_methods}),
+    _format: str = Query("GTiff", json_schema_extra={"enum": format_drivers}, alias="format"),
+    gdaldem: Optional[str] = Query(None, json_schema_extra={"enum": gdaldem_modes}),
     expected_revision: Optional[str] = Query(None, pattern=r"^[0-9a-f]{64}$"),
     bbox_crs: Optional[str] = Query(
         None,

@@ -32,6 +32,19 @@ def make_dataset(root, name="test/map", value=7):
     return path
 
 
+def test_retrieve_schema_choices_and_health():
+    with TestClient(wmesque2.app) as client:
+        assert client.get("/health").json() == {"status": "OK"}
+        schema = client.get("/openapi.json").json()
+    parameters = {item["name"]: item["schema"] for item in
+                  schema["paths"]["/retrieve/{dataset}"]["get"]["parameters"]}
+    for name, choices in (("resample", wmesque2.resample_methods),
+                          ("format", wmesque2.format_drivers),
+                          ("gdaldem", wmesque2.gdaldem_modes)):
+        assert parameters[name]["enum"] == list(choices)
+    assert parameters["format"]["default"] == "GTiff"
+
+
 def test_publish_sync_adoption_and_legacy(tmp_path, monkeypatch):
     master, replica = tmp_path / "master", tmp_path / "replica"
     master.mkdir(); replica.mkdir()

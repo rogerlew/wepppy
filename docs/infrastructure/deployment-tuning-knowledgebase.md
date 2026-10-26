@@ -438,3 +438,18 @@ stopped-worker deployment/recovery is supported; no separate bypass is needed.
 Execution regressions cover running/stopped workers with zero, positive,
 unavailable and malformed query results. These are shell-harness checks;
 production identity, mount and Redis parity must still be verified on rollout.
+
+## WMesque2 FastAPI startup compatibility (2026-10-26)
+
+A fresh production build selected FastAPI 0.162.0 and failed WMesque2 startup
+because `Query` no longer accepts the legacy arbitrary `enum` keyword. Declare
+resample/format/gdaldem choices through `json_schema_extra={"enum": choices}`.
+This preserves OpenAPI choices, parameter aliases/defaults and the existing
+raster-processing validation. Check `/health`, `/openapi.json` and actual raster
+retrieval under the candidate runtime before accepting cutover. The deployment
+stability gate caught the restart loop after its initial health snapshot.
+
+Compatibility validation: 53 WMesque catalog/priority tests passed locally and in
+wepp1's candidate FastAPI 0.162.0 image using a disposable Compose `wmesque2`
+container with the patched module and tests mounted read-only. Coverage includes
+health/OpenAPI, published raster retrieval, revision handling and client failover.
