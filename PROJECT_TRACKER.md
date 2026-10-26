@@ -2,6 +2,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active: [Roads WBT flow-direction repair](docs/work-packages/20261026_roads_wbt_flow_direction/package.md) — native encoding correction, paired artifact and isolated project acceptance.
+
 Completed (released; not deployed): [WEPP 261026 release](docs/work-packages/20261026_wepp_261026_release/package.md) — paired late-return metadata repair, both affected watersheds validated, 534 native and 11,791 WEPPpy passes, reviewed 49-page cumulative report. Defaults unchanged.
 
 Completed (deployed): [Culvert JWT automatic renewal](docs/work-packages/20261026_culvert_jwt_renewal/package.md) — daily user systemd timer on wepp1, restricted SSH installation and per-task credential-file reads on wepp2. Real service/timer rotations and same-process authentication pass; independent reviews closed; 20 focused tests and 11,786 segmented broad passes. Browser-path and off-host-alert follow-ups documented.
