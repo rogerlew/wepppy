@@ -671,3 +671,26 @@ or exceptions; existing maintenance cancellation authority remains Admin/Root.
 Operator-only admission results may distinguish capacity, ordinary backlog,
 paused/exhausted/expired pilot and invalid authority as pending/unavailable
 conditions. They never acknowledge durable intent or imply artifact freshness.
+
+## RQ 2.12 runtime migration (implementation pending)
+
+The authorized runtime target is exactly RQ 2.12.0. This dependency migration
+MUST preserve existing submission acknowledgments, opaque job identifiers,
+status/error payloads, authorization and ownership checks, metadata propagation,
+strict prerequisites and already-approved failure-tolerant finalizers. Internal
+execution identifiers MUST NOT replace application job identifiers. Serialize
+status enums by their values and preserve the existing timestamp wire contract.
+
+Native RQ webhook configuration and delivery MUST remain disabled and unexposed.
+The migration MUST NOT introduce webhook infrastructure, queue topology, runtime
+identity, permission, NoDb persistence or scientific-output changes. Rationale:
+upgrade the task runtime independently of future webhook functionality and
+retain current user workflows.
+
+Before cutover, validate historical queued, deferred, scheduled, running, completed
+and failed state explicitly. Unsupported transitions require a preserving drain
+or migration procedure; never discard retained jobs to make cutover succeed.
+Do not assume mixed-version workers or rollback against 2.x-written Redis state
+are safe. Actual Redis/workers, API/auth and fresh generated-artifact acceptance
+are required, including metadata isolation and cancellation/process containment.
+Production migration remains separately authorized.
