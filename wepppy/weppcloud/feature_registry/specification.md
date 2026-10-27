@@ -81,6 +81,24 @@ Classification rules for maintainers/implementers:
 - Do not classify as `stable` if regional transferability, validation coverage, or operational support is still materially unresolved.
 - Public feature inspection and action permission are separate under FA-01.
 
+## Public Metadata Catalog
+
+Accepted intent 2026-10-27; implementation conformance pending.
+All validated feature and config registry metadata is public, including
+Internal and publication-embargo entries. The Usersum catalog at
+`/usersum/features/` lists every loaded entry in source order, without applying
+feature-action, menu, configuration-launch, or documentation-role filters to
+its rows. This publishes already open-source metadata and does not authorize
+actions, launch projects, expose account membership, or change resource access.
+The existing runtime loaders remain authoritative, including effective config
+maturity overrides; do not create a second metadata copy or change registry
+values for presentation. Group-only access must be described as group-only,
+not as permission granted by the legacy minimum role.
+
+The [Usersum public catalog contract](../routes/usersum/specification.md#public-feature-catalog)
+defines presentation, discovery, and failure behavior. The registry page is
+informational; all existing runtime authorization policies remain applicable.
+
 ## Feature Registry MVP Schema
 
 Required fields per feature entry:

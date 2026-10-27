@@ -17,6 +17,39 @@ Primary module: `wepppy/weppcloud/routes/usersum/`
 - Provide ranked search with PostgreSQL FTS + `pg_trgm`, with explicit fallback behavior.
 - Preserve compatibility with existing usersum and command-bar endpoints.
 
+## Public Feature Catalog
+
+Accepted intent 2026-10-27; implementation conformance pending.
+`GET /usersum/features/` renders a public Jinja page in the existing Usersum
+shell. It lists every feature and interface configuration returned by the
+validated registry loaders, in registry order, without filtering by login,
+role, group, backend, maturity, or the Usersum role selector. Internal and
+publication-embargo entries are included: open-source registry metadata is
+public information, distinct from permission to execute a feature or read a
+protected resource. Existing document visibility and feature authorization
+remain unchanged. See the [registry specification](../../feature_registry/specification.md#public-metadata-catalog).
+
+Separate feature and interface tables show label, stable id, maturity,
+internal reason and embargo date when present, role/access policy, and backend.
+Feature rows also show prerequisites; configuration rows show replacement ids
+when present. Group-only policy must not be presented as role-granted access.
+Configuration maturity uses effective runtime overrides, matching the existing
+registry loader. This is a catalog of registered entries, not an inventory of
+every unregistered application capability or project-owned Builder config.
+
+The page links to the user guide's maturity definitions and explains that
+listing does not grant access. The Usersum index links to the catalog outside
+the curated document sections. No generated Markdown/index copy, search-index
+entry, JavaScript dependency, run state, or account membership lookup is needed.
+Shared shell navigation retains its existing document visibility behavior.
+
+Registry text is autoescaped. Optional absent metadata displays an explicit
+neutral value, and an empty registry produces an empty-state message. Invalid
+registry data retains the loader's explicit failure contract; do not substitute
+an empty or partial catalog on error. No caller-supplied filesystem path or
+registry selector is accepted. Use application URL helpers for links so proxy
+prefixes remain correct.
+
 ## Role Model
 
 Usersum roles are mutually exclusive at the document level.
