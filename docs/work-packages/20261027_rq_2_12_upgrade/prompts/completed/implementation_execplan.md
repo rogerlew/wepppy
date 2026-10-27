@@ -1,6 +1,8 @@
 # Upgrade forest to RQ 2.12.0 with preserved task behavior
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current.
+Completed 2026-10-27: exact RQ 2.12.0 is installed across forest; API/model/artifact acceptance, complete isolated regression and independent reviews pass. Production unchanged; webhooks disabled.
+
+This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective current.
 
 ## Purpose / Big Picture
 
@@ -10,16 +12,20 @@ Users must retain existing submission, status, dependency, cancellation, recover
 
 - [x] (2026-10-27 19:10 UTC) Read onboarding and standards; verified local forest Docker context and development preset.
 - [x] (2026-10-27 19:10 UTC) Scaffold package and record unchanged behavior/small complexity budget.
-- [ ] Review and commit standalone contract checkpoint before implementation.
-- [ ] M1: inventory, package provenance, existing tests and disposable 1.16.2 workflow baseline.
-- [ ] M2: pin exact dependency and implement only evidenced compatibility repairs.
-- [ ] M3: direct Redis/process regressions, metadata and historical-state coverage.
-- [ ] M4: rebuild/recreate safe local services and complete API/artifact/rollback acceptance.
-- [ ] M5: required gates, independent review closure, durable docs and archive.
+- [x] (2026-10-27 19:12 UTC) Two independent checkpoint reviews passed; standalone ancestor `b1054fac7` committed.
+- [x] (2026-10-27 19:24 UTC) M1 inventory/provenance, baseline 363+122+51 tests and actual API/model/report baseline retained.
+- [x] M2: pin exact dependency and implement only evidenced compatibility repairs.
+- [x] M3: direct Redis/process regressions, metadata and historical-state coverage.
+- [x] M4: rebuild/recreate safe local services and complete API/artifact/rollback acceptance.
+- [x] M5: required gates, independent review closure, durable docs and archive.
 
 ## Surprises & Discoveries
 
-The repository already has unrelated Roads edits. Preserve them and distinguish their baseline failures. Host resolves to forest; Docker context default points to unix:///var/run/docker.sock. Installed wctl selects development Compose. No runtime changes yet.
+Released2.12 removes utcnow and Job.get_redis_server_version, returns status enums and string dependency IDs, and uses composite started entries. Status consumers include generated manifests, CLI, admin Jinja and external dashboard, not just API JSON. Actual stopped1.16 jobs released strict as well as tolerant children; preserve the canonical strict block while restoring only approved tolerant finalizers. Metadata post-enqueue writes raced actual Redis publication and leaked profile-only hashes before pipeline commit; regression-first repair joins the original transaction.
+
+The first canonical build resolved four unrelated newer packages from loose inputs. Retain actual forest FastAPI0.143.1/narwhals2.27.1/pkginfo1.13/dateutil2.9.0.post0 through exact input pins, then rebuild. Original fixture binary lacked resolvable libgfortran; normal API selecting installed wepp_261026 produced a valid paired baseline without bypass.
+
+The repository already has unrelated Roads edits. Preserve them and distinguish their baseline failures. Host resolves to forest; Docker context default points to unix:///var/run/docker.sock. Installed wctl selects development Compose. All 17 affected forest containers were rebuilt/recreated at 19:36–19:39 UTC; installed RQ is 2.12.0. Unrelated services and data were preserved.
 
 ## Decision Log
 
@@ -27,7 +33,7 @@ The repository already has unrelated Roads edits. Preserve them and distinguish 
 
 ## Outcomes & Retrospective
 
-Investigation underway. No implementation, runtime cutover or acceptance claim yet.
+Implementation and forest cutover complete. Actual API acceptance passed the 18-node model graph, 155 byte-identical consumed inputs, 25 scientific Parquet comparisons, three CSV reports, ownership/cancellation/resubmission and archive/download/restore of 417 files. Installed targeted validation passed 598 tests plus 13 lifecycle cases without skips. Complete isolated committed-source regression passed 11,948 tests with 226 skips in 3,304.46 seconds. Correctness and security reviews closed with no open medium/high findings. The original working-tree run failed only on separately reproduced unrelated Roads provenance drift; no unrelated files or historical publication metadata were altered.
 
 ## Context and Orientation
 
@@ -78,3 +84,17 @@ Store compatibility matrix, dependency provenance, baseline/post-change logs, en
 Keep current application API and worker public signatures unless the released 2.12.0 distribution requires a specific repair. Do not port unreleased master/3.x execution-parameter signatures. RQ execution tracking changes Redis internals; inspect public APIs before interpreting raw started-registry members. Required croniter dependency tax and full pinned environment compatibility must be established before adoption.
 
 Revision note: 2026-10-27 19:10 UTC — initial authorized execution plan; investigation and review precede implementation and cutover.
+
+Revision note: 2026-10-27 19:24 UTC — record baseline completion, confirmed repairs and actual-runtime dependency drift; final environment gates remain open.
+
+Revision note: 2026-10-27 — implementation `b5cac8166` and dashboard `91f62b9` installed; see artifacts/forest_cutover.md, rebuilt_targeted_validation.md and lifecycle_evidence.md. Scheduler inherited idle sockets reproduced on both versions and repaired without disconnecting active pubsub. Final full-suite/review gate remains open.
+
+Revision note: 2026-10-27 — reviewer requested a destructive sentinel check on one disposable output to prove restore effect. The repeat restore failed before extraction with NFS EBUSY from web-worker-held run log descriptors after report reads. M4 is reopened until graceful owned-environment recovery and actual file restoration pass; full pytest remains running. No unrelated process or state may be discarded.
+
+Revision note: 2026-10-27 — deleted-output restore now passes after documented graceful web reload and idle rq-engine restart closed stale log descriptors; the full pytest exec survived. An RQ-free FileHandler/NFS reproduction and unchanged archive/NoDb/report source establish an existing lifecycle limitation. Retain this limitation and recovery in durable operator guidance, without expanding the migration into a logging refactor.
+
+Revision note: 2026-10-27 20:31 UTC — required working-tree full run stopped after 6,810 passes/61 skips on preexisting Roads source-provenance mismatch, reproduced under original RQ 1.16.2. Preserve unrelated uncommitted accessor and historical staleness record. Start complete isolated full suite using exact rebuilt image and all five committed counterparts mounted read-only. This avoids endorsing unrelated drift or claiming a failed invocation passed. A partial continuation was deliberately interrupted before isolation; retain its SIGINT/StopRequested receipt.
+
+Retrospective observation: run inexpensive publication/source-hash guards before long scientific matrices when the starting tree is dirty. The existing Roads guard first surfaced after 46 minutes; early attribution would have selected committed-source isolation before that cost. This is a workflow lesson, not a new service, dependency or testing framework.
+
+Revision note: 2026-10-27 21:28 UTC — complete isolated full suite passed (11,948 passed, 226 skipped), final review sign-offs retained, 17 installed runtimes healthy and 11 workers idle. Owned test container cleanup preserved shared Redis and all unrelated work. Durable contract and recovery guidance promoted; archive this completed plan.

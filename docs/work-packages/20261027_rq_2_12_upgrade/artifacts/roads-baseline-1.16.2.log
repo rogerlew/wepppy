@@ -1,0 +1,257 @@
+INFO:wctl2:docker compose run --rm --no-deps -T --name rq212-roads-baseline rq212-roads-baseline -c 'import rq,redis,sys,subprocess; print("BASELINE_RUNTIME",rq.__version__,redis.__version__,rq.__file__,flush=True); sys.exit(subprocess.call([sys.executable,"-m","pytest","tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale","-vv","-p","no:cacheprovider"]))'
+time="2026-10-27T13:27:01-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container rq212-roads-baseline Creating 
+ Container rq212-roads-baseline Created 
+BASELINE_RUNTIME 1.16.2 6.2.0 /opt/venv/lib/python3.12/site-packages/rq/__init__.py
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 1 item
+
+tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale FAILED [100%]
+
+=================================== FAILURES ===================================
+______ test_published_results_and_sources_are_current_or_explicitly_stale ______
+
+    def test_published_results_and_sources_are_current_or_explicitly_stale():
+        provenance = json.loads((SUITE / "analysis_provenance_current.json").read_text())
+        result = SUITE / "matrix_results_current.json"
+        report = SUITE / "analysis_results_current.md"
+        current_sources = source_hashes()
+        stale_path = SUITE / "analysis_staleness_current.json"
+        report_text = report.read_text()
+        if stale_path.exists():
+            stale = json.loads(stale_path.read_text())
+            assert stale["status"] == "stale_full_project_routing"
+            expected_deltas = {
+                name: {"recorded": provenance["source_sha256"].get(name), "current": current_sources.get(name)}
+                for name in provenance["source_sha256"].keys() | current_sources.keys()
+                if provenance["source_sha256"].get(name) != current_sources.get(name)
+            }
+>           assert expected_deltas == stale["reviewed_source_deltas"], "Unreviewed source drift"
+E           AssertionError: Unreviewed source drift
+E           assert {'wepppy/nodb/mods/roads/roads.py': {'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec', 'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978'}, 'tests/roads/test_roads_publication.py': {'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c', 'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862'}} == {'tests/roads/test_roads_publication.py': {'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c', 'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862'}, 'wepppy/nodb/mods/roads/roads.py': {'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec', 'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201'}}
+E             
+E             Common items:
+E             {'tests/roads/test_roads_publication.py': {'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862',
+E                                                        'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c'}}
+E             Differing items:
+E             {'wepppy/nodb/mods/roads/roads.py': {'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978', 'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec'}} != {'wepppy/nodb/mods/roads/roads.py': {'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201', 'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec'}}
+E             
+E             Full diff:
+E               {
+E                   'tests/roads/test_roads_publication.py': {
+E                       'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862',
+E                       'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c',
+E                   },
+E                   'wepppy/nodb/mods/roads/roads.py': {
+E             -         'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201',
+E             +         'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978',
+E                       'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec',
+E                   },
+E               }
+
+tests/roads/test_roads_publication.py:29: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+Error connecting to Redis: Error 111 connecting to localhost:6379. Connection refused.
+------------------------------ Captured log setup ------------------------------
+CRITICAL root:base.py:436 Error connecting to Redis (NODB_CACHE) with pool: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 433, in <module>
+    redis_nodb_cache_client.ping()
+  File "/opt/venv/lib/python3.12/site-packages/redis/commands/core.py", line 1219, in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 623, in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 629, in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/utils.py", line 191, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 1530, in get_connection
+    connection.connect()
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+CRITICAL root:base.py:454 Error connecting to Redis (STATUS) with pool: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 451, in <module>
+    redis_status_client.ping()
+  File "/opt/venv/lib/python3.12/site-packages/redis/commands/core.py", line 1219, in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 623, in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 629, in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/utils.py", line 191, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 1530, in get_connection
+    connection.connect()
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+CRITICAL root:base.py:472 Error connecting to Redis (LOCK) with pool: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 469, in <module>
+    redis_lock_client.ping()
+  File "/opt/venv/lib/python3.12/site-packages/redis/commands/core.py", line 1219, in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 623, in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 629, in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/utils.py", line 191, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 1530, in get_connection
+    connection.connect()
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+CRITICAL root:base.py:490 Error connecting to Redis (LOG_LEVEL) with pool: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 487, in <module>
+    redis_log_level_client.ping()
+  File "/opt/venv/lib/python3.12/site-packages/redis/commands/core.py", line 1219, in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 623, in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/client.py", line 629, in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/utils.py", line 191, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 1530, in get_connection
+    connection.connect()
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/opt/venv/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+=============================== warnings summary ===============================
+tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale - AssertionError: Unreviewed source drift
+assert {'wepppy/nodb/mods/roads/roads.py': {'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec', 'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978'}, 'tests/roads/test_roads_publication.py': {'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c', 'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862'}} == {'tests/roads/test_roads_publication.py': {'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c', 'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862'}, 'wepppy/nodb/mods/roads/roads.py': {'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec', 'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201'}}
+  
+  Common items:
+  {'tests/roads/test_roads_publication.py': {'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862',
+                                             'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c'}}
+  Differing items:
+  {'wepppy/nodb/mods/roads/roads.py': {'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978', 'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec'}} != {'wepppy/nodb/mods/roads/roads.py': {'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201', 'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec'}}
+  
+  Full diff:
+    {
+        'tests/roads/test_roads_publication.py': {
+            'current': 'b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862',
+            'recorded': 'bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c',
+        },
+        'wepppy/nodb/mods/roads/roads.py': {
+  -         'current': '25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201',
+  +         'current': 'bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978',
+            'recorded': 'c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec',
+        },
+    }
+======================== 1 failed, 2 warnings in 10.13s ========================
+

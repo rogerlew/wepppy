@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+{"phase": "baseline", "inputs": 184, "parquets": 25, "reports": {"outlet": 9, "hillslopes": 29, "channels": 12}}

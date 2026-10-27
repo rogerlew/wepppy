@@ -1,0 +1,6 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+archive [('aa7d6a85-db4e-4336-a5f5-2b629a63ee13', 'started')]
+archive [('aa7d6a85-db4e-4336-a5f5-2b629a63ee13', 'finished')]
+restore [('8bf53817-5400-4b97-9a2d-c7897f41ee9b', 'queued')]
+restore [('8bf53817-5400-4b97-9a2d-c7897f41ee9b', 'started')]
+restore [('8bf53817-5400-4b97-9a2d-c7897f41ee9b', 'finished')]

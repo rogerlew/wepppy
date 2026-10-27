@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose run --rm --no-deps -T -e PYTHONPATH=/tmp/rq212-dashboard/rq20:/rq-dashboard -v /tmp/rq212-dashboard:/tmp/rq212-dashboard:ro -v /workdir/wepppy/.pytest_cache/rq212-baseline:/tmp/rq212-redis:ro rq-dashboard python /tmp/rq212-dashboard/probe.py --orphan
+time="2026-10-27T12:25:11-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-rq-dashboard-run-e640674412ea Creating 
+ Container docker-rq-dashboard-run-e640674412ea Created 
+127.0.0.1 - - [27/Oct/2026 19:25:12] "GET /rq-dashboard/0/data/job/rq212-dashboard-ad9df0e6-6883-43be-a85d-d223641dfa37-child.json HTTP/1.1" 200 -
+{"http_status": 200, "payload": {"created_at": "2026-10-27T19:25:12.548621+00:00", "depends_on": ["rq212-dashboard-ad9df0e6-6883-43be-a85d-d223641dfa37-parent"], "depends_on_status": ["active"], "description": "math.sqrt(9)", "ended_at": null, "enqueued_at": null, "exc_info": null, "id": "rq212-dashboard-ad9df0e6-6883-43be-a85d-d223641dfa37-child", "metadata": "{}", "origin": "rq212-dashboard-ad9df0e6-6883-43be-a85d-d223641dfa37", "result": null, "status": "deferred"}, "rq": "2.0.0"}
+127.0.0.1 - - [27/Oct/2026 19:25:12] "POST /rq-dashboard/queue/rq212-dashboard-ad9df0e6-6883-43be-a85d-d223641dfa37/started/empty HTTP/1.1" 200 -
+{"orphan_http_status": 200, "payload": {"status": "OK"}, "remaining_started": 0, "rq": "2.0.0"}

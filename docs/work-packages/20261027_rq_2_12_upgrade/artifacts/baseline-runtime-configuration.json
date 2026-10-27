@@ -1,0 +1,429 @@
+[
+  {
+    "name": "/weppcloud",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "gunicorn",
+      "--workers",
+      "4",
+      "--threads",
+      "2",
+      "--timeout",
+      "1800",
+      "--bind",
+      "0.0.0.0:8000",
+      "--log-level",
+      "info",
+      "--forwarded-allow-ips",
+      "192.168.1.1",
+      "--max-requests",
+      "1000",
+      "--max-requests-jitter",
+      "200",
+      "wepppy.weppcloud.app:app"
+    ],
+    "entrypoint": [
+      "./docker/weppcloud-entrypoint.sh"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-rq-engine",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "uvicorn",
+      "wepppy.microservices.rq_engine:app",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8042"
+    ],
+    "entrypoint": [
+      "/opt/venv/bin/python",
+      "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+      "--"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-rq-worker",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "bash",
+      "-lc",
+      "set -euo pipefail\nREDIS_PASSWORD=\"$(cat /run/secrets/redis_password)\"\nexec /opt/venv/bin/rq worker-pool -n \"6\" -u \"redis://[REDACTED]@redis:6379/9\" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default\n"
+    ],
+    "entrypoint": [
+      "/opt/venv/bin/python",
+      "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+      "--"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-rq-worker-batch",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "bash",
+      "-lc",
+      "set -euo pipefail\nREDIS_PASSWORD=\"$(cat /run/secrets/redis_password)\"\nexec /opt/venv/bin/rq worker-pool -n \"4\" -u \"redis://[REDACTED]@redis:6379/9\" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch\n"
+    ],
+    "entrypoint": [
+      "/opt/venv/bin/python",
+      "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+      "--"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-rq-worker-fork-archive",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "bash",
+      "-lc",
+      "set -euo pipefail\nREDIS_PASSWORD=\"$(cat /run/secrets/redis_password)\"\nexec /opt/venv/bin/rq worker-pool -n \"1\" -u \"redis://[REDACTED]@redis:6379/9\" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker fork-archive\n"
+    ],
+    "entrypoint": [
+      "/opt/venv/bin/python",
+      "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+      "--"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-scheduler",
+    "image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+    "configured_image": "wepppy-dev",
+    "user": "1000:993",
+    "cmd": [
+      "python",
+      "-m",
+      "wepppy.tools.scheduler"
+    ],
+    "entrypoint": [
+      "/opt/venv/bin/python",
+      "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+      "--"
+    ],
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "name": "/wepppy-rq-dashboard",
+    "image": "sha256:ce30e371321ebe535c233c075202fc91b4f15d9fbf0bdeb9eb7757043ae6319a",
+    "configured_image": "docker-rq-dashboard",
+    "user": "",
+    "cmd": [
+      "bash",
+      "-lc",
+      "set -euo pipefail\npassword=\"$(cat /run/secrets/redis_password)\"\nexport RQ_DASHBOARD_REDIS_URL=\"redis://[REDACTED]@redis:6379/9\"\nexec gunicorn --bind 0.0.0.0:9181 --workers \"2\" --threads \"2\" --timeout \"30\" --log-level info \"rq_dashboard.app:create_app()\"\n"
+    ],
+    "entrypoint": null,
+    "project": "docker",
+    "config_files": "/home/workdir/wepppy/docker/docker-compose.dev.yml",
+    "mounts": [
+      {
+        "source": "/home/workdir/rq-dashboard",
+        "destination": "/rq-dashboard",
+        "rw": true
+      }
+    ]
+  }
+]

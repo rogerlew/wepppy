@@ -672,7 +672,7 @@ Operator-only admission results may distinguish capacity, ordinary backlog,
 paused/exhausted/expired pilot and invalid authority as pending/unavailable
 conditions. They never acknowledge durable intent or imply artifact freshness.
 
-## RQ 2.12 runtime migration (implementation pending)
+## RQ 2.12 runtime migration
 
 The authorized runtime target is exactly RQ 2.12.0. This dependency migration
 MUST preserve existing submission acknowledgments, opaque job identifiers,

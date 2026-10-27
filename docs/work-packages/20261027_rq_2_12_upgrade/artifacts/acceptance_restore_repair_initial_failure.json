@@ -1,0 +1,135 @@
+{
+  "started": "2026-10-27T19:49:05.177975+00:00",
+  "rq": "2.12.0",
+  "source": "rlew-international-refuge",
+  "target": "rq212-20261027-upgraded",
+  "config": "disturbed-wbt-profile",
+  "requests": [
+    {
+      "path": "/rq-engine/api/runs/rq212-20261027-upgraded/disturbed-wbt-profile/restore-archive",
+      "payload": {
+        "archive_name": "rq212-20261027-upgraded.20261027T194322Z.zip"
+      },
+      "status": 200,
+      "response": {
+        "job_id": "711e653e-0c07-4f31-863c-78bad9ebe088"
+      }
+    }
+  ],
+  "auth": "Existing dev-agent session; actual HTTP profile CSRF mint and bearer API",
+  "workers_before": [
+    {
+      "name": "659701ad95a74ace9fec9bedb0f7526a",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "7e0f3f3b3c8b4d8f8790702d5821f6cc",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4393b598e67444d8aa44b373aa2a8502",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "58bff36fd42b4b76b3cc3c41b0ebd169",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "cb2ee21afa94471695be18ac6b31fd7f",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "3b859946ab484618a064100f454e6273",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "b014782473a04aaa9e238d66b6405e20",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4c34ac2b0e3e4a3eb21a3ab6f639915b",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "145241df3c65446292008db3746bac1b",
+      "queues": [
+        "batch"
+      ],
+      "job": "run_catalog_sweep_3ed924ba-583d-436a-8fca-031b1f4d28db",
+      "state": "busy"
+    },
+    {
+      "name": "bd62b686b356441bacd1a2e0194bc331",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "1ed895dd4ff84417a44828b60c883ab5",
+      "queues": [
+        "fork-archive"
+      ],
+      "job": null,
+      "state": "idle"
+    }
+  ],
+  "repair": {
+    "relative_path": "wepp/output/interchange/loss_pw0.out.parquet",
+    "archive": "rq212-20261027-upgraded.20261027T194322Z.zip",
+    "before_sha256": "1a41623beb5222c62aecd740edc6de07e6a7dc1db46a0c6f06e7308394ee3af7",
+    "archive_sha256": "1a41623beb5222c62aecd740edc6de07e6a7dc1db46a0c6f06e7308394ee3af7",
+    "absent_after_injection": true
+  },
+  "restore": {
+    "job_id": "711e653e-0c07-4f31-863c-78bad9ebe088",
+    "tree": {
+      "job_id": "711e653e-0c07-4f31-863c-78bad9ebe088",
+      "runid": "rq212-20261027-upgraded",
+      "status": "failed",
+      "result": null,
+      "started_at": "2026-10-27 19:49:06.309897",
+      "ended_at": "2026-10-27 19:49:07.359658",
+      "description": "wepppy.rq.project_rq.restore_archive_rq('rq212-20261027-upgraded', 'rq212-20261027-upgraded.20261027T194322Z.zip')",
+      "elapsed_s": 1.049761,
+      "exc_info": "Traceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/rq/worker/base.py\", line 1552, in perform_job\n    return_value = job.perform()\n                   ^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1368, in perform\n    self._result = self._execute()\n                   ^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1428, in _execute\n    result = self.func(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/exception_logging.py\", line 57, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/project_rq.py\", line 3072, in restore_archive_rq\n    _archive_helpers.restore_archive_rq(runid, archive_name, runtime=_archive_runtime())\n  File \"/workdir/wepppy/wepppy/rq/project_rq_archive.py\", line 442, in restore_archive_rq\n    _remove_restore_file(entry)\n  File \"/workdir/wepppy/wepppy/rq/project_rq_archive.py\", line 247, in _remove_restore_file\n    path.unlink()\n  File \"/usr/local/lib/python3.12/pathlib.py\", line 1342, in unlink\n    os.unlink(self)\nOSError: [Errno 16] Device or resource busy: '/wc1/runs/rq/rq212-20261027-upgraded/.nfs000000000019b67100000081'\n",
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "polled": "2026-10-27T19:49:09.315316+00:00"
+  }
+}

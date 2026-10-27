@@ -1,0 +1,864 @@
+{
+  "jobs": [
+    {
+      "job_id": "b025aae4-91b4-4c26-9ae9-78b38d436fbe",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.fork_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "f41755d614034435a5c2e5160f566e9f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:30.739655+00:00",
+      "ended_at": "2026-10-27 19:39:32.603007+00:00"
+    },
+    {
+      "job_id": "36f3e436-8508-489a-a8b3-5273281f6a12",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq.run_wepp_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:34.267651+00:00",
+      "ended_at": "2026-10-27 19:39:35.087370+00:00"
+    },
+    {
+      "job_id": "1e457c34-5409-4576-bef0-1e4a1eebf75a",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq.run_wepp_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:59.258712+00:00",
+      "ended_at": "2026-10-27 19:40:00.117870+00:00"
+    },
+    {
+      "job_id": "2eff2250-6e50-490f-b10c-40c4222d5655",
+      "status": "canceled",
+      "function": "wepppy.rq.project_rq.fork_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "316bc73388bf4793b74977c047abd6f5",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "ae761d3b-9868-497c-b753-4b409ae83da0",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.fork_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "b08aade961104687b624824cbb6d3f33",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:42:17.996449+00:00",
+      "ended_at": "2026-10-27 19:42:19.972333+00:00"
+    },
+    {
+      "job_id": "fd878587-de29-4d08-b9b9-d56a110ae472",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_slopes_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:35.073235+00:00",
+      "ended_at": "2026-10-27 19:39:35.262848+00:00"
+    },
+    {
+      "job_id": "455acc9f-2f89-4f4d-a6c8-c7f2a2a641ac",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_managements_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:35.073222+00:00",
+      "ended_at": "2026-10-27 19:39:35.717829+00:00"
+    },
+    {
+      "job_id": "11446166-755c-4e14-ad76-880e8f39bc8e",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_soils_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:35.073028+00:00",
+      "ended_at": "2026-10-27 19:39:57.009534+00:00"
+    },
+    {
+      "job_id": "74241d3b-e15e-4caa-8753-eb4d594fcc3f",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_climates_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:35.073202+00:00",
+      "ended_at": "2026-10-27 19:39:35.225653+00:00"
+    },
+    {
+      "job_id": "037382b9-2222-4e95-b373-9816bc7f1dc0",
+      "status": "failed",
+      "function": "wepppy.rq.wepp_rq._prep_remaining_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:39:57.047477+00:00",
+      "ended_at": "2026-10-27 19:39:57.186658+00:00"
+    },
+    {
+      "job_id": "5bac9e9a-1128-4447-b6b3-c9c43f839c86",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._run_hillslopes_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "09fb9c18-da8a-4220-bdc2-64c3b8032b68",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._prep_watershed_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "37e5e7d7-7706-4fb7-bb18-0a264cc4e8c3",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "8d8ccc83-1df2-4bbe-90a1-03ca41285c9d",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._build_totalwatsed3_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "c2a13a08-7eb0-4c82-b4e0-3468768e21a3",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq.run_watershed_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "d743ea12-3d0c-47c6-b43f-0129d3faba3e",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "cc4902b2-a5e9-4970-a4a0-867ab88b8b32",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "fa4b911d-1323-45e7-90aa-f3087fcb1b0f",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "c6fb4cf6-30fd-4f16-b231-1aabd8e65d74",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "fa5e84b0-9252-40f0-acb7-1c323702e84d",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._analyze_return_periods_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "1634562c-a1b7-49c1-8cf0-b44991581d2a",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._post_gpkg_export_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "928ae3a2-eb13-453c-8d28-09e0ed80916e",
+      "status": "canceled",
+      "function": "wepppy.rq.wepp_rq._log_complete_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "2963543bc82e44488e670487aa9f111b",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": null,
+      "ended_at": null
+    },
+    {
+      "job_id": "30aa1719-b8ed-46c4-acbf-106aceda12c4",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_slopes_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:00.101105+00:00",
+      "ended_at": "2026-10-27 19:40:00.254942+00:00"
+    },
+    {
+      "job_id": "52d64289-6aff-4fbc-b63f-07a06051cb6b",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_managements_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:00.097814+00:00",
+      "ended_at": "2026-10-27 19:40:00.722955+00:00"
+    },
+    {
+      "job_id": "1d3d1267-a879-477b-a589-8fb6b2e64580",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_soils_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:00.097643+00:00",
+      "ended_at": "2026-10-27 19:40:22.066390+00:00"
+    },
+    {
+      "job_id": "94938c00-5f5f-4d6a-b8e2-ac27c52a38ee",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_climates_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:00.097731+00:00",
+      "ended_at": "2026-10-27 19:40:00.239250+00:00"
+    },
+    {
+      "job_id": "17a57a30-c4a5-45a0-b7ab-430f1853e6ad",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_remaining_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:22.116430+00:00",
+      "ended_at": "2026-10-27 19:40:22.418695+00:00"
+    },
+    {
+      "job_id": "2b203a33-aedc-4a0e-bdc6-13feb27b07fa",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._run_hillslopes_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:22.452312+00:00",
+      "ended_at": "2026-10-27 19:40:22.950587+00:00"
+    },
+    {
+      "job_id": "eb1db899-c57b-4a2b-abdc-127f224552f2",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._prep_watershed_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:22.988079+00:00",
+      "ended_at": "2026-10-27 19:40:23.243001+00:00"
+    },
+    {
+      "job_id": "0e2664a3-121d-4f87-86e0-49fed32d0e1f",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:22.988326+00:00",
+      "ended_at": "2026-10-27 19:40:24.176802+00:00"
+    },
+    {
+      "job_id": "083fec8a-3c7b-45f2-b02b-d6289888dbba",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._build_totalwatsed3_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:24.216133+00:00",
+      "ended_at": "2026-10-27 19:40:25.262067+00:00"
+    },
+    {
+      "job_id": "1f6b862e-9769-474a-b269-f6a1ae4c1236",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq.run_watershed_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:23.282009+00:00",
+      "ended_at": "2026-10-27 19:40:34.080221+00:00"
+    },
+    {
+      "job_id": "2074e947-abed-4edb-a4f4-24ca6a32633c",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:34.120624+00:00",
+      "ended_at": "2026-10-27 19:40:34.297367+00:00"
+    },
+    {
+      "job_id": "a5848c81-3c10-4d33-b817-635654520951",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:34.120409+00:00",
+      "ended_at": "2026-10-27 19:40:34.621917+00:00"
+    },
+    {
+      "job_id": "11515f66-0bb4-4586-856d-00bcb25e0da6",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._post_make_loss_grid_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:34.120314+00:00",
+      "ended_at": "2026-10-27 19:40:34.520248+00:00"
+    },
+    {
+      "job_id": "2340bc79-7516-4620-9f59-cc57fc38370a",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:34.335429+00:00",
+      "ended_at": "2026-10-27 19:40:38.970726+00:00"
+    },
+    {
+      "job_id": "22263d73-48a3-4c0f-8814-4b950861087f",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._analyze_return_periods_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:39.011019+00:00",
+      "ended_at": "2026-10-27 19:40:40.558856+00:00"
+    },
+    {
+      "job_id": "ae59e0b2-e70c-4ebf-bc5a-8dc391a6df12",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._post_gpkg_export_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:40.599616+00:00",
+      "ended_at": "2026-10-27 19:40:42.965379+00:00"
+    },
+    {
+      "job_id": "74ed78f0-458d-4d66-a3b6-aeeecaa4520a",
+      "status": "finished",
+      "function": "wepppy.rq.wepp_rq._log_complete_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "374c871bbd764b0d88648502c00a167f",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:43.001619+00:00",
+      "ended_at": "2026-10-27 19:40:43.102012+00:00"
+    },
+    {
+      "job_id": "4e85d338-8350-44c6-861b-493f48250e14",
+      "status": "finished",
+      "function": "time.sleep",
+      "auth_actor": null,
+      "correlation_id": null,
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:40:45.570816+00:00",
+      "ended_at": "2026-10-27 19:42:15.571533+00:00"
+    },
+    {
+      "job_id": "019bd6c0-81e8-4fef-a01c-22495fc2d809",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.archive_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "0fe484d021134551a6cef8882a32709e",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:42:20.029225+00:00",
+      "ended_at": "2026-10-27 19:42:23.026066+00:00"
+    },
+    {
+      "job_id": "aa7d6a85-db4e-4336-a5f5-2b629a63ee13",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.archive_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "01bf9eaa0b3f42d1b7ea0d033495060c",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:43:22.715837+00:00",
+      "ended_at": "2026-10-27 19:43:25.398620+00:00"
+    },
+    {
+      "job_id": "8bf53817-5400-4b97-9a2d-c7897f41ee9b",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.restore_archive_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "93367438948243eb8f6e22539e69c7c4",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:43:26.723188+00:00",
+      "ended_at": "2026-10-27 19:43:30.434722+00:00"
+    },
+    {
+      "job_id": "711e653e-0c07-4f31-863c-78bad9ebe088",
+      "status": "failed",
+      "function": "wepppy.rq.project_rq.restore_archive_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "d7b580cacf0446c2af2080ba757891c7",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:49:06.309897+00:00",
+      "ended_at": "2026-10-27 19:49:07.359658+00:00"
+    },
+    {
+      "job_id": "cb1c0901-5564-45a9-a649-5aeebe7135e5",
+      "status": "finished",
+      "function": "wepppy.rq.project_rq.restore_archive_rq",
+      "auth_actor": {
+        "token_class": "user",
+        "user_id": 9,
+        "roles": [
+          "admin",
+          "root"
+        ]
+      },
+      "correlation_id": "7ea01aa4c5cd437f91a12bfb55c12897",
+      "profile_keys": [],
+      "webhook_count": 0,
+      "started_at": "2026-10-27 19:51:41.165876+00:00",
+      "ended_at": "2026-10-27 19:51:45.622022+00:00"
+    }
+  ],
+  "workers": [
+    {
+      "name": "bd62b686b356441bacd1a2e0194bc331",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "1ed895dd4ff84417a44828b60c883ab5",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "4393b598e67444d8aa44b373aa2a8502",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "4c34ac2b0e3e4a3eb21a3ab6f639915b",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "b014782473a04aaa9e238d66b6405e20",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "58bff36fd42b4b76b3cc3c41b0ebd169",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "7e0f3f3b3c8b4d8f8790702d5821f6cc",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "3b859946ab484618a064100f454e6273",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "659701ad95a74ace9fec9bedb0f7526a",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "cb2ee21afa94471695be18ac6b31fd7f",
+      "current_job_id": null,
+      "state": "idle"
+    },
+    {
+      "name": "145241df3c65446292008db3746bac1b",
+      "current_job_id": null,
+      "state": "idle"
+    }
+  ]
+}

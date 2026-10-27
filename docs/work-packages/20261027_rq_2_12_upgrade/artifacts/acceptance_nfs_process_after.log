@@ -1,0 +1,9 @@
+    PID    PPID COMMAND
+      1       0 /sbin/docker-init -- ./docker/weppcloud-entrypoint.sh gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+      7       1 /opt/venv/bin/python /opt/venv/bin/gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+   1011       0 /opt/venv/bin/python /opt/venv/bin/pytest tests --maxfail=1
+  79975       7 /opt/venv/bin/python /opt/venv/bin/gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+  79976       7 /opt/venv/bin/python /opt/venv/bin/gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+  79977       7 /opt/venv/bin/python /opt/venv/bin/gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+  79978       7 /opt/venv/bin/python /opt/venv/bin/gunicorn --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app
+ 110107       0 ps -eo pid,ppid,args

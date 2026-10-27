@@ -1,0 +1,57 @@
+[
+  {
+    "service": "weppcloud",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "rq-engine",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "rq-worker",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "rq-worker-batch",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "rq-worker-fork-archive",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "scheduler",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "rq-dashboard",
+    "exit": 0,
+    "output": "{\"rq\": \"2.0.0\", \"redis\": \"5.2.0\", \"uid\": 0, \"gid\": 0, \"groups\": [0]}"
+  },
+  {
+    "service": "query-engine",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "profile-playback",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "browse",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  },
+  {
+    "service": "download",
+    "exit": 0,
+    "output": "{\"rq\": \"1.16.2\", \"redis\": \"6.2.0\", \"uid\": 1000, \"gid\": 993, \"groups\": [993]}"
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "starting_revision": "9231f2427d33b64f971992ac969fd9420c49afd3",
+  "current_revision": "b5cac8166eaf067ac2ef79c440a82314c114111b",
+  "committed_diff_empty": true,
+  "working_status": [
+    " M wepppy/nodb/mods/roads/roads.py"
+  ],
+  "files": [
+    {
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "starting_committed_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+      "current_committed_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+      "working_tree_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978"
+    },
+    {
+      "path": "tests/roads/test_roads_publication.py",
+      "starting_committed_sha256": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862",
+      "current_committed_sha256": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862",
+      "working_tree_sha256": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
+    },
+    {
+      "path": "tests/roads/analysis_staleness_current.json",
+      "starting_committed_sha256": "03086b1e2ba661a55b645362670fb2d8be1444cd52fa1509f8c0a59c9bd52280",
+      "current_committed_sha256": "03086b1e2ba661a55b645362670fb2d8be1444cd52fa1509f8c0a59c9bd52280",
+      "working_tree_sha256": "03086b1e2ba661a55b645362670fb2d8be1444cd52fa1509f8c0a59c9bd52280"
+    },
+    {
+      "path": "tests/roads/analysis_provenance_current.json",
+      "starting_committed_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
+      "current_committed_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
+      "working_tree_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0"
+    }
+  ],
+  "preimplementation_dirty_disclosure": "b1054fac7:docs/work-packages/20261027_rq_2_12_upgrade/prompts/active/implementation_execplan.md:22",
+  "initial_working_tree_hash_captured": false,
+  "old_runtime_image": "sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf",
+  "committed_only_fixture": {
+    "image": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "rq": "2.12.0",
+    "source": "git show HEAD:wepppy/nodb/mods/roads/roads.py",
+    "read_only_bind_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+    "working_tree_sha256_after": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
+    "result": "3 passed, 2 warnings, 9.32s"
+  }
+}

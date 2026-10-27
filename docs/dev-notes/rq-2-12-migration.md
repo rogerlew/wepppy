@@ -8,12 +8,39 @@ the contract. Native RQ webhooks remain disabled and unexposed; do not pass
 webhook configuration to enqueue APIs or add delivery infrastructure.
 
 The normative boundary is
-[RQ runtime migration](../schemas/rq-response-contract.md#rq-212-runtime-migration-implementation-pending).
+[RQ runtime migration](../schemas/rq-response-contract.md#rq-212-runtime-migration).
 The [execution package](../work-packages/20261027_rq_2_12_upgrade/package.md)
 retains versioned distribution provenance, compatibility findings, baseline
-fixtures and acceptance evidence. The bounded historical replay and isolated
-original-state rollback pass; rebuilt-runtime and full lifecycle acceptance
-remain pending. This document does not authorize production rollout.
+fixtures and acceptance evidence. Forest now runs the rebuilt RQ 2.12.0 runtime;
+model/artifact, historical-state and metadata acceptance pass. The isolated
+committed-source full suite passed 11,948 tests (226 skipped), alongside 598
+targeted and 13 lifecycle passes. Independent reviews closed without open
+medium/high findings. The original working-tree full run separately retains an
+unrelated Roads publication-hash failure; those edits were preserved. This
+document does not authorize production rollout.
+
+## Validated forest state
+
+The [forest cutover record](../work-packages/20261027_rq_2_12_upgrade/artifacts/forest_cutover.md)
+and [runtime readback](../work-packages/20261027_rq_2_12_upgrade/artifacts/forest_runtime.json)
+record all 17 relevant containers importing installed RQ 2.12.0 after canonical
+build and recreation. The main image is `88a982e44d31`, dashboard image
+`019fbdf6ba5c`, application revision `b5cac8166` and patched dashboard sibling
+revision `91f62b9`. Eleven workers registered on the existing queues: six
+default, four batch and one fork/archive. Identities, groups, mounts and umask
+remain unchanged. Original images and a protected quiescent recovery snapshot
+were retained; no Redis flush, volume deletion or unrelated-job termination
+occurred.
+
+Actual authenticated model acceptance completed an 18-node tree on a disposable
+fork. [Paired comparison](../work-packages/20261027_rq_2_12_upgrade/artifacts/acceptance_paired_comparison.json)
+verified 155 model inputs, scientific values and schemas in 25 output Parquets,
+and exact outlet/hillslope/channel CSV results against the 1.16.2 baseline.
+Diagnostic timestamps and encoded Parquet metadata differ; decoded schemas and
+scientific values agree. [Archive/restore acceptance](../work-packages/20261027_rq_2_12_upgrade/artifacts/acceptance_archive_restore.json)
+verified a 710-member archive, 417 generated model files restored byte-for-byte,
+and authenticated archive download with HTTP 200. These are bounded fixture
+results, not certification of every project or model configuration.
 
 ## Developer compatibility rules
 
@@ -42,13 +69,14 @@ pre-publication boundary directly, including enqueue failure and ambiguous
 acknowledgment recovery, rather than checking metadata only after enqueue returns.
 The [metadata regression evidence](../work-packages/20261027_rq_2_12_upgrade/artifacts/metadata_evidence.md)
 retains the original publication-boundary failures and repaired 1.16.2/2.12.0
-results; final rebuilt-runtime validation remains separate.
+results. The installed rebuilt-runtime metadata and historical suites subsequently
+passed together: ten tests, including the two historical replay tests.
 
 A retry attempt failure must not be mistaken for terminal failure. Process
 termination and directory-lock ownership rules still apply independently of RQ
-status: never release a lock while its writers may remain alive. A discovered
-running-stop/finalizer lifecycle incompatibility is under repair; this guide
-does not claim that gate passes. Targeted regression entry points include
+status: never release a lock while its writers may remain alive. The repaired
+running-stop path releases the approved tolerant finalizer while leaving strict
+children blocked, with direct subprocess evidence. Targeted entry points include
 `tests/rq/test_rq212_historical.py`, `tests/rq/test_rq212_lifecycle.py` and
 `tests/rq/test_rq212_metadata.py`; use their documented disposable Redis
 requirements through `wctl`, alongside existing recovery and cancellation tests.
@@ -62,9 +90,12 @@ after stop would violate the existing contract.
 
 Pool testing also reproduced an inherited scheduler socket defect under both
 1.16.2 and 2.12.0. The bounded repair disconnects only idle Redis-pool connections
-before a scheduler fork so it cannot inherit the supervisor's later blocking
-dequeue socket. Validation is pending. Queue topology, pool counts, scheduler
-policy and production defaults are unchanged.
+before both initial-scheduler and maintenance-takeover forks, leaving in-use
+connections such as pubsub intact. This prevents an orphan scheduler from
+retaining the supervisor's later blocking dequeue socket and consuming the first
+job intended for its replacement. Both real fork paths and the 13-case lifecycle
+suite passed; see [worker evidence](../work-packages/20261027_rq_2_12_upgrade/artifacts/worker_compatibility_repairs.md#scheduler-fork-and-worker-replacement).
+Queue topology, pool counts, scheduler policy and production defaults are unchanged.
 
 ## Historical jobs and migration gate
 
@@ -77,7 +108,9 @@ state, preserving queued and deferred work. The
 records two passing tests each under original 1.16.2, candidate 2.12.0 and an
 original-state restoration under 1.16.2 after candidate execution. Candidate
 replay used an isolated import path with actual Redis, scheduler and forked
-workers; the final rebuilt forest interpreter replay remains pending.
+workers. The same historical tests subsequently passed using installed RQ 2.12.0
+in the recreated forest runtime, without the candidate import overlay. The
+historical artifact records its exact source, image and interpreter provenance.
 
 | State written by 1.16.2 | Required handling | Candidate evidence |
 | --- | --- | --- |
@@ -104,7 +137,8 @@ retains these existing forest versions: `fastapi==0.143.1`,
 These pins prevent unrelated upgrades; only RQ and required croniter should
 differ in the main installed-distribution comparison. See
 [dependency drift evidence](../work-packages/20261027_rq_2_12_upgrade/artifacts/dependency_runtime_drift.md).
-The final rebuilt-image comparison remains a release gate.
+The [installed distribution comparison](../work-packages/20261027_rq_2_12_upgrade/artifacts/installed-dependency-delta.json)
+confirmed that intended two-package delta in the final rebuilt main image.
 
 The dashboard uses Python 3.12 because RQ 2.12 requires Python 3.10 or later.
 Its separate dependency image retains existing Gunicorn 23.0.0, Redis 5.2.0 and
@@ -119,6 +153,7 @@ Rebuilding its dependency image does not install source repairs. Before its
 The reviewed starting revision is
 `860ce63b45c4f70db53f21f6fc04a052c6fed90f`; the retained patch fixes dependency-ID
 decoding and orphan started-execution cleanup, with two regression tests.
+Forest carries these repairs at sibling revision `91f62b9`.
 
 For that inspected baseline, check and apply the owned patch:
 
@@ -214,6 +249,23 @@ same reviewed service-scoped lifecycle mechanism. Validate version, worker
 registration, pending work and actual artifact-producing behavior before
 resuming admission. Remove only disposable resources owned by this package;
 retained original projects and unrelated jobs remain untouched.
+
+### Existing NFS repeated-restore limitation
+
+On NFS, repeated restore after application/report reads can fail with `EBUSY`
+when an API/web process still holds an unlinked log file as `.nfs*`. A direct
+[FileHandler probe without RQ](../work-packages/20261027_rq_2_12_upgrade/artifacts/acceptance_nfs_mechanism.json)
+reproduced this mechanism; closing the descriptor released the file. The RQ
+upgrade does not repair this existing limitation, and a later restore can leave
+another open log handle.
+
+Inspect the exact `.nfs*` descriptor owners and active requests before recovery.
+Safely drain/recycle only the holding API/web processes, preserving unrelated
+jobs and container-exec sessions, then retry the supported restore workflow.
+For graceful Gunicorn reload, identify its actual master PID; PID 1 may be
+`docker-init`. Do not blindly unlink `.nfs*`, clear locks or change queue state.
+Forest's bounded process recycle and subsequent canonical restore recovered the
+deliberately removed output with its original hash and an HTTP 200 outlet CSV.
 
 ## Production planning
 

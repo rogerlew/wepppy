@@ -1,0 +1,145 @@
+{
+  "started": "2026-10-27T19:51:39.319226+00:00",
+  "rq": "2.12.0",
+  "source": "rlew-international-refuge",
+  "target": "rq212-20261027-upgraded",
+  "config": "disturbed-wbt-profile",
+  "requests": [
+    {
+      "path": "/rq-engine/api/runs/rq212-20261027-upgraded/disturbed-wbt-profile/restore-archive",
+      "payload": {
+        "archive_name": "rq212-20261027-upgraded.20261027T194322Z.zip"
+      },
+      "status": 200,
+      "response": {
+        "job_id": "cb1c0901-5564-45a9-a649-5aeebe7135e5"
+      }
+    }
+  ],
+  "auth": "Existing dev-agent session; actual HTTP profile CSRF mint and bearer API",
+  "workers_before": [
+    {
+      "name": "bd62b686b356441bacd1a2e0194bc331",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "cb2ee21afa94471695be18ac6b31fd7f",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "b014782473a04aaa9e238d66b6405e20",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4393b598e67444d8aa44b373aa2a8502",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "58bff36fd42b4b76b3cc3c41b0ebd169",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "1ed895dd4ff84417a44828b60c883ab5",
+      "queues": [
+        "fork-archive"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4c34ac2b0e3e4a3eb21a3ab6f639915b",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "3b859946ab484618a064100f454e6273",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "7e0f3f3b3c8b4d8f8790702d5821f6cc",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "659701ad95a74ace9fec9bedb0f7526a",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "145241df3c65446292008db3746bac1b",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    }
+  ],
+  "repair": {
+    "relative_path": "wepp/output/interchange/loss_pw0.out.parquet",
+    "archive": "rq212-20261027-upgraded.20261027T194322Z.zip",
+    "before_sha256": "1a41623beb5222c62aecd740edc6de07e6a7dc1db46a0c6f06e7308394ee3af7",
+    "archive_sha256": "1a41623beb5222c62aecd740edc6de07e6a7dc1db46a0c6f06e7308394ee3af7",
+    "absent_after_injection": true,
+    "absent_before_retry": true,
+    "after_sha256": "1a41623beb5222c62aecd740edc6de07e6a7dc1db46a0c6f06e7308394ee3af7"
+  },
+  "recovery": "Idle local web master HUP and rq-engine graceful restart closed stale package log FDs; pytest and RQ workers preserved.",
+  "restore": {
+    "job_id": "cb1c0901-5564-45a9-a649-5aeebe7135e5",
+    "tree": {
+      "job_id": "cb1c0901-5564-45a9-a649-5aeebe7135e5",
+      "runid": "rq212-20261027-upgraded",
+      "status": "finished",
+      "result": null,
+      "started_at": "2026-10-27 19:51:41.165876",
+      "ended_at": "2026-10-27 19:51:45.622022",
+      "description": "wepppy.rq.project_rq.restore_archive_rq('rq212-20261027-upgraded', 'rq212-20261027-upgraded.20261027T194322Z.zip')",
+      "elapsed_s": 4.456146,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "polled": "2026-10-27T19:51:47.222170+00:00"
+  },
+  "report": {
+    "path": "/weppcloud/runs/rq212-20261027-upgraded/disturbed-wbt-profile/report/wepp/summary/?format=csv&table=outlet",
+    "status": 200,
+    "sha256": "296eecafb32c741fd8157078c1653ba8d4bceb79f2ace6242b0b5fb7bae36548",
+    "equals_pre_injection": true
+  },
+  "finished": "2026-10-27T19:51:47.940503+00:00"
+}

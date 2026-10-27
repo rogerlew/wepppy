@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+archive [('019bd6c0-81e8-4fef-a01c-22495fc2d809', 'queued')]
+archive [('019bd6c0-81e8-4fef-a01c-22495fc2d809', 'started')]
+archive [('019bd6c0-81e8-4fef-a01c-22495fc2d809', 'finished')]
+Traceback (most recent call last):
+  File "<stdin>", line 143, in <module>
+  File "/opt/venv/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://wc.bearhive.duckdns.org/weppcloud/runs/rq212-20261027-upgraded/disturbed-wbt-profile/download/archives/rq212-20261027-upgraded.20261027T194220Z.zip

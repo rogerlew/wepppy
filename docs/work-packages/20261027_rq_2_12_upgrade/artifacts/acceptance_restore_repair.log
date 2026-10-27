@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+restore [('cb1c0901-5564-45a9-a649-5aeebe7135e5', 'started')]
+restore [('cb1c0901-5564-45a9-a649-5aeebe7135e5', 'started')]
+restore [('cb1c0901-5564-45a9-a649-5aeebe7135e5', 'finished')]

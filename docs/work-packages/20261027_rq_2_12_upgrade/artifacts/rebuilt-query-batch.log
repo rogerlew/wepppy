@@ -1,0 +1,118 @@
+INFO:wctl2:docker compose exec -T -e BATCH_BOUNDARY_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock weppcloud bash -lc 'cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/rq/test_batch_task_boundary.py tests/rq/test_query_catalog_rq.py tests/rq/test_query_catalog_pilot.py -q -rs --maxfail=1'
+...............................................F
+=================================== FAILURES ===================================
+_______________ test_killed_worker_recovers_after_rq_abandonment _______________
+
+catalog_queue = (PosixPath('/tmp/pytest-of-unknown/pytest-3/test_killed_worker_recovers_af0/runs'), Queue('batch'), <test_query_catalog_rq.CatalogWorker object at 0x7e52453f4da0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e4edf5346b0>
+
+    def test_killed_worker_recovers_after_rq_abandonment(catalog_queue, monkeypatch):
+        import multiprocessing
+        import time
+        from rq.registry import StartedJobRegistry
+    
+        root, queue, worker = catalog_queue
+        path = project(root)
+        core.record_catalog_refresh(path, "values.csv")
+        first = tasks.enqueue_catalog_refresh(path, queue=queue, timeout=10)["job_id"]
+        context = multiprocessing.get_context("fork")
+        entered = context.Event()
+        original = core.refresh_catalog
+    
+        def pause_before_scan(*args, **kwargs):
+            entered.set()
+            time.sleep(60)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(core, "refresh_catalog", pause_before_scan)
+        worker.register_death()
+        process = context.Process(target=worker.work, kwargs={"burst": True})
+        process.start()
+        try:
+            assert entered.wait(10), "worker did not enter refresh boundary"
+            process.kill()
+            process.join(10)
+            assert not process.is_alive()
+        finally:
+            if process.is_alive():
+                process.kill()
+                process.join(10)
+        assert core.pending_catalog_requests(path)
+        # Real RQ abandonment cleanup, advancing its cutoff to avoid waiting TTL.
+        StartedJobRegistry(queue=queue).cleanup(timestamp=time.time() + 7200)
+        assert queue.fetch_job(first).get_status() == JobStatus.FAILED
+        monkeypatch.setattr(core, "refresh_catalog", original)
+        worker.register_death()
+        worker.register_birth()
+        worker.set_state("idle")
+        tasks.reconcile_query_catalogs(queue=queue)
+        successor = queue.get_job_ids()[0]
+        assert successor != first
+        drain(queue, worker)
+>       assert core.pending_catalog_requests(path) == []
+E       AssertionError: assert [{'asset_path...col': 1, ...}] == []
+E         
+E         Left contains one more item: {'asset_path': 'values.csv', 'created_at': '2026-10-27T19:40:09.316986+00:00', 'incarnation': '35d58085-f003-4495-8cfa-98bfd70971b5', 'protocol': 1, ...}
+E         Use -v to get more diff
+
+tests/rq/test_query_catalog_rq.py:413: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  rq.registry:registry.py:308 StartedJobRegistry cleanup: query_catalog_refresh_44417975-2c59-4b90-bf05-6a1231b2b8db Moved to FailedJobRegistry, due to AbandonedJobError, at 2026-10-27 19:40:09.403837+00:00
+WARNING  rq.registry:registry.py:308 StartedJobRegistry cleanup: b4c81d07-881e-409a-b0ad-104f1d9c911c Moved to FailedJobRegistry, due to AbandonedJobError, at 2026-10-27 19:40:09.405951+00:00
+WARNING  rq.registry:registry.py:308 StartedJobRegistry cleanup: e1e2ec95-34fc-4f52-bd39-1a064b5b7fd8 Moved to FailedJobRegistry, due to AbandonedJobError, at 2026-10-27 19:40:09.409057+00:00
+INFO     rq.worker:base.py:959 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: started with PID 1958, version 2.12.0
+INFO     rq.worker:base.py:1055 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: subscribing to channel rq:pubsub:query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd
+INFO     rq.worker:base.py:963 *** Listening on batch...
+INFO     rq.worker:base.py:455 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: cleaning registries for queue: batch
+INFO     rq.worker:base.py:1136 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: batch: wepppy.rq.batch_rq._final_batch_complete_rq('demo') (27022147-50ff-40f2-9ac2-d933fcb9dff8)
+ERROR    wepppy.rq.batch_rq:batch_rq.py:1014 Boundary exception at wepppy/rq/batch_rq.py:512
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/batch_rq.py", line 977, in _final_batch_complete_rq
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/batch_runner.py", line 943, in getInstanceFromBatchName
+    raise FileNotFoundError(f"Batch '{batch_name}' does not exist. wd: {batch_wd}")
+FileNotFoundError: Batch 'demo' does not exist. wd: /wc1/batch/demo
+ERROR    rq.worker:base.py:1291 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: job 27022147-50ff-40f2-9ac2-d933fcb9dff8: exception raised while executing (wepppy.rq.batch_rq._final_batch_complete_rq)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/batch_rq.py", line 977, in _final_batch_complete_rq
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/nodb/batch_runner.py", line 943, in getInstanceFromBatchName
+    raise FileNotFoundError(f"Batch '{batch_name}' does not exist. wd: {batch_wd}")
+FileNotFoundError: Batch 'demo' does not exist. wd: /wc1/batch/demo
+
+INFO     rq.worker:base.py:630 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: done, quitting
+INFO     rq.worker:base.py:1086 Worker query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd: unsubscribing from channel rq:pubsub:query-catalog-test-2c0ebf6b34e84759b4c44000a3e9a9fd
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_batch_task_boundary.py::test_duplicate_live_submission_is_rejected
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:853: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn('job.exc_info is deprecated, use job.latest_result() instead.', DeprecationWarning)
+
+tests/rq/test_batch_task_boundary.py::test_production_worker_preserves_identity_and_forks_each_stage
+tests/rq/test_batch_task_boundary.py::test_concurrent_omni_attachments_preserve_both_dependencies
+tests/rq/test_batch_task_boundary.py::test_concurrent_omni_attachments_preserve_both_dependencies
+tests/rq/test_query_catalog_rq.py::test_killed_worker_recovers_after_rq_abandonment
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1958) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 47 passed, 7 warnings in 25.30s

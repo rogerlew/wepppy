@@ -1,0 +1,19 @@
+services:
+  rq212-roads-committed:
+    image: sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b
+    init: true
+    user: '1000:993'
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp
+    working_dir: /workdir/wepppy
+    environment:
+      PYTHONPATH: /workdir/wepppy
+      PYTHONDONTWRITEBYTECODE: '1'
+      MPLCONFIGDIR: /tmp/matplotlib
+    volumes:
+      - /workdir/wepppy:/workdir/wepppy:ro
+      - /workdir/wepppyo3:/workdir/wepppyo3:ro
+      - /tmp/rq212-baseline/roads-committed.py:/workdir/wepppy/wepppy/nodb/mods/roads/roads.py:ro
+    entrypoint: /opt/venv/bin/python

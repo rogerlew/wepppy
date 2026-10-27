@@ -1,0 +1,7 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+restore [('711e653e-0c07-4f31-863c-78bad9ebe088', 'queued')]
+restore [('711e653e-0c07-4f31-863c-78bad9ebe088', 'failed')]
+Traceback (most recent call last):
+  File "<stdin>", line 144, in <module>
+  File "<stdin>", line 91, in wait
+AssertionError: [('711e653e-0c07-4f31-863c-78bad9ebe088', 'failed')]

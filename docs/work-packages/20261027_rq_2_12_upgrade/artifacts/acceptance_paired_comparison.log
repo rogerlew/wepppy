@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -
+PASS: 184 files, 25 Parquets, 3 reports

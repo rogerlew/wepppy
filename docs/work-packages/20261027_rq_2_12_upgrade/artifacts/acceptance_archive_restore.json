@@ -1,0 +1,169 @@
+{
+  "started": "2026-10-27T19:43:21.227909+00:00",
+  "rq": "2.12.0",
+  "source": "rlew-international-refuge",
+  "target": "rq212-20261027-upgraded",
+  "config": "disturbed-wbt-profile",
+  "requests": [
+    {
+      "path": "/rq-engine/api/runs/rq212-20261027-upgraded/disturbed-wbt-profile/archive",
+      "payload": {
+        "comment": "RQ212 paired artifact validation"
+      },
+      "status": 200,
+      "response": {
+        "job_id": "aa7d6a85-db4e-4336-a5f5-2b629a63ee13"
+      }
+    },
+    {
+      "path": "/rq-engine/api/runs/rq212-20261027-upgraded/disturbed-wbt-profile/restore-archive",
+      "payload": {
+        "archive_name": "rq212-20261027-upgraded.20261027T194322Z.zip"
+      },
+      "status": 200,
+      "response": {
+        "job_id": "8bf53817-5400-4b97-9a2d-c7897f41ee9b"
+      }
+    }
+  ],
+  "auth": "Existing dev-agent session; actual HTTP profile CSRF mint and bearer API",
+  "workers_before": [
+    {
+      "name": "58bff36fd42b4b76b3cc3c41b0ebd169",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "b014782473a04aaa9e238d66b6405e20",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "659701ad95a74ace9fec9bedb0f7526a",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "7e0f3f3b3c8b4d8f8790702d5821f6cc",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "3b859946ab484618a064100f454e6273",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "1ed895dd4ff84417a44828b60c883ab5",
+      "queues": [
+        "fork-archive"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "145241df3c65446292008db3746bac1b",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4c34ac2b0e3e4a3eb21a3ab6f639915b",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "4393b598e67444d8aa44b373aa2a8502",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "bd62b686b356441bacd1a2e0194bc331",
+      "queues": [
+        "default"
+      ],
+      "job": null,
+      "state": "idle"
+    },
+    {
+      "name": "cb2ee21afa94471695be18ac6b31fd7f",
+      "queues": [
+        "batch"
+      ],
+      "job": null,
+      "state": "idle"
+    }
+  ],
+  "archive": {
+    "job_id": "aa7d6a85-db4e-4336-a5f5-2b629a63ee13",
+    "tree": {
+      "job_id": "aa7d6a85-db4e-4336-a5f5-2b629a63ee13",
+      "runid": "rq212-20261027-upgraded",
+      "status": "finished",
+      "result": null,
+      "started_at": "2026-10-27 19:43:22.715837",
+      "ended_at": "2026-10-27 19:43:25.398620",
+      "description": "wepppy.rq.project_rq.archive_rq('rq212-20261027-upgraded', 'RQ212 paired artifact validation')",
+      "elapsed_s": 2.682783,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "polled": "2026-10-27T19:43:25.784681+00:00"
+  },
+  "archive_manifest": {
+    "name": "rq212-20261027-upgraded.20261027T194322Z.zip",
+    "members": 710,
+    "validated_generated_files": 417
+  },
+  "download": {
+    "path": "/weppcloud/runs/rq212-20261027-upgraded/disturbed-wbt-profile/download/archives/rq212-20261027-upgraded.20261027T194322Z.zip",
+    "status": 200,
+    "bytes": 14251084,
+    "sha256": "209aa2117ce703b5d323b6162ac41f16e439da07ce1c42aecc84b4c9caf03b76"
+  },
+  "restore": {
+    "job_id": "8bf53817-5400-4b97-9a2d-c7897f41ee9b",
+    "tree": {
+      "job_id": "8bf53817-5400-4b97-9a2d-c7897f41ee9b",
+      "runid": "rq212-20261027-upgraded",
+      "status": "finished",
+      "result": null,
+      "started_at": "2026-10-27 19:43:26.723188",
+      "ended_at": "2026-10-27 19:43:30.434722",
+      "description": "wepppy.rq.project_rq.restore_archive_rq('rq212-20261027-upgraded', 'rq212-20261027-upgraded.20261027T194322Z.zip')",
+      "elapsed_s": 3.711534,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "polled": "2026-10-27T19:43:32.761634+00:00"
+  },
+  "restored_generated_files": 417,
+  "finished": "2026-10-27T19:43:33.750637+00:00"
+}

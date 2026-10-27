@@ -1,0 +1,12 @@
+[
+  {
+    "rq": "1.16.2",
+    "rq_file": "/opt/venv/lib/python3.12/site-packages/rq/__init__.py",
+    "redis": "6.2.0"
+  },
+  {
+    "rq": "2.12.0",
+    "rq_file": "/workdir/wepppy/.pytest_cache/rq212-deps/rq/__init__.py",
+    "redis": "6.2.0"
+  }
+]

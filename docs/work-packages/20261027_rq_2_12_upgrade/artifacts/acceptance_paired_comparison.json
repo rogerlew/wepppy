@@ -1,0 +1,906 @@
+{
+  "inputs": {
+    "chan.inp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "chntyp.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "gwcoeff.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p1.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p1.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p1.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p1.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p1.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p1.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p10.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p10.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p10.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p10.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p10.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p10.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p11.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p11.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p11.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p11.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p11.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p11.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p12.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p12.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p12.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p12.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p12.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p12.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p13.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p13.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p13.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p13.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p13.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p13.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p14.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p14.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p14.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p14.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p14.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p14.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p15.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p15.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p15.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p15.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p15.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p15.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p16.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p16.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p16.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p16.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p16.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p16.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p17.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p17.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p17.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p17.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p17.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p17.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p18.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p18.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p18.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p18.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p18.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p18.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p19.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p19.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p19.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p19.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p19.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p19.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p2.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p2.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p2.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p2.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p2.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p2.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p20.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p20.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p20.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p20.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p20.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p20.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p21.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p21.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p21.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p21.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p21.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p21.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p22.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p22.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p22.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p22.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p22.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p22.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p23.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p23.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p23.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p23.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p23.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p23.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p24.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p24.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p24.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p24.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p24.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p24.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p25.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p25.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p25.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p25.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p25.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p25.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p26.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p26.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p26.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p26.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p26.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p26.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p27.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p27.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p27.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p27.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p27.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p27.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p28.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p28.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p28.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p28.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p28.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p28.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p3.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p3.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p3.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p3.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p3.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p3.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p4.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p4.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p4.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p4.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p4.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p4.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p5.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p5.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p5.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p5.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p5.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p5.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p6.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p6.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p6.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p6.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p6.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p6.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p7.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p7.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p7.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p7.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p7.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p7.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p8.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p8.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p8.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p8.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p8.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p8.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p9.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p9.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "p9.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p9.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p9.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "p9.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pmetpara.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.chn": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.cli": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.err": {
+      "diagnostic": true,
+      "byte_equal": false
+    },
+    "pw0.imp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.man": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.run": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.slp": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.sol": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "pw0.str": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "snow.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "tc.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    },
+    "wepp_ui.txt": {
+      "byte_equal": true,
+      "run_identity_normalized_equal": true
+    }
+  },
+  "parquets": {
+    "H.ebe.parquet": {
+      "rows": 112,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "H.element.parquet": {
+      "rows": 4140,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "H.loss.parquet": {
+      "rows": 140,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "H.pass.parquet": {
+      "rows": 61376,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "H.soil.parquet": {
+      "rows": 61376,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "H.wat.parquet": {
+      "rows": 61376,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "chan.out.parquet": {
+      "rows": 2192,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "chanwb.parquet": {
+      "rows": 2192,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "chnwb.parquet": {
+      "rows": 24112,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "ebe_pw0.parquet": {
+      "rows": 2192,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.all_years.chn.parquet": {
+      "rows": 66,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.all_years.class_data.parquet": {
+      "rows": 30,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.all_years.hill.parquet": {
+      "rows": 168,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.all_years.out.parquet": {
+      "rows": 54,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.chn.parquet": {
+      "rows": 11,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.class_data.parquet": {
+      "rows": 5,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.hill.parquet": {
+      "rows": 28,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "loss_pw0.out.parquet": {
+      "rows": 11,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "pass_pw0.events.parquet": {
+      "rows": 61376,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "pass_pw0.metadata.parquet": {
+      "rows": 28,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "return_period_event_ranks.parquet": {
+      "rows": 14131,
+      "ordered_value_equality": false,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "return_period_events.parquet": {
+      "rows": 2192,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": true
+    },
+    "soil_pw0.parquet": {
+      "rows": 24112,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "tc_out.parquet": {
+      "rows": 2138,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    },
+    "totalwatsed3.parquet": {
+      "rows": 2192,
+      "ordered_value_equality": true,
+      "all_value_equality": true,
+      "byte_equal": false
+    }
+  },
+  "reports": {
+    "outlet": {
+      "rows_equal": true,
+      "rows": 9
+    },
+    "hillslopes": {
+      "rows_equal": true,
+      "rows": 29
+    },
+    "channels": {
+      "rows_equal": true,
+      "rows": 12
+    }
+  }
+}

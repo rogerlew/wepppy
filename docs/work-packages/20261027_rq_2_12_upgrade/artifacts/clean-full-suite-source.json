@@ -1,0 +1,59 @@
+{
+  "revision": "b5cac8166",
+  "rationale": "Exclude all pre-existing unrelated dirty tracked files together, without changing the user working tree; rebuilt runtime and canonical pytest command otherwise unchanged.",
+  "overlays": [
+    {
+      "path": "tests/weppcloud/routes/test_pure_controls_render.py",
+      "committed_sha256": "b8d6365731c7c730930e721317a2c16bc2f6c8bf602be05f4932e419bc4fba00",
+      "preserved_working_sha256": "f64cc42ee95e35f9308655e67fd14c244342efa93ef328c0c571ba7de98c91de"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/README.md",
+      "committed_sha256": "160434858c0336513e486c6b06f3a3fc5dedb71e6071bfde8cdd751c2e2153c5",
+      "preserved_working_sha256": "8d9a49397d9b7d5be5eaeaac83e6a99d03291c2e8d1ea1966eb762d99ae3c301"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "committed_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+      "preserved_working_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/specification.md",
+      "committed_sha256": "53ec38699b5a8535434912c04b08bf624ca02db68838bbd6eec033ee7cab5978",
+      "preserved_working_sha256": "1e4407d1910c9cd4589df8aa3271725c7617a5f431b57f4fe309b7e4c939aaa9"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/controls/roads_pure.htm",
+      "committed_sha256": "9b9060b4af208921462cdedcfd0d0e9b785cc5b68bc625b341f024dd503d5175",
+      "preserved_working_sha256": "10d0327dcfdf11daf52c93fd397b6e257cb8e5a0d7509209389ace62237c2ed0"
+    }
+  ],
+  "command": [
+    "wctl",
+    "run",
+    "--rm",
+    "--no-deps",
+    "-T",
+    "--pull",
+    "never",
+    "--name",
+    "rq212-clean-gates",
+    "--entrypoint",
+    "/bin/bash",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--volume",
+    "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/tests/weppcloud/routes/test_pure_controls_render.py:/workdir/wepppy/tests/weppcloud/routes/test_pure_controls_render.py:ro",
+    "--volume",
+    "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/README.md:/workdir/wepppy/wepppy/nodb/mods/roads/README.md:ro",
+    "--volume",
+    "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/roads.py:/workdir/wepppy/wepppy/nodb/mods/roads/roads.py:ro",
+    "--volume",
+    "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/specification.md:/workdir/wepppy/wepppy/nodb/mods/roads/specification.md:ro",
+    "--volume",
+    "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/weppcloud/templates/controls/roads_pure.htm:/workdir/wepppy/wepppy/weppcloud/templates/controls/roads_pure.htm:ro",
+    "weppcloud",
+    "-lc",
+    "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --maxfail=1"
+  ]
+}

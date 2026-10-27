@@ -1,0 +1,654 @@
+INFO:wctl2:docker compose build weppcloud
+ Image wepppy-dev Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 507B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.dev
+#2 transferring dockerfile: 6.79kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 0.5s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/python:3.12-slim
+#5 DONE 0.4s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 297B done
+#6 DONE 0.0s
+
+#7 [ 1/14] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 4.58kB done
+#8 DONE 0.0s
+
+#9 [ 2/14] RUN apt-get update &&     apt-get install -y --no-install-recommends         build-essential         curl         ca-certificates         gnupg         git         git-lfs         gfortran         pkg-config         cmake         gdal-bin         libgdal-dev         libproj-dev         proj-bin         libgeos-dev         libhdf5-dev         libnetcdf-dev         libopenblas-dev         liblapack-dev         libcurl4-openssl-dev         libssl-dev         libffi-dev         libpq-dev         libxml2-dev         libxslt1-dev         libjpeg-dev         libpng-dev         libtiff-dev         libwebp-dev         libzip-dev         libbz2-dev         liblzma-dev         zlib1g-dev         aria2         rsync         libglib2.0-0         libdbus-1-3         libatk1.0-0         libatk-bridge2.0-0         libatspi2.0-0         libx11-6         libxcomposite1         libxdamage1         libxext6         libxfixes3         libxrandr2         libgbm1         libxcb1         libxkbcommon0         libasound2 &&     git lfs install --system &&     rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [ 3/14] RUN set -eux;     NODE_MAJOR=20;     mkdir -p /etc/apt/keyrings;     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg;     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list;     apt-get update &&     apt-get install -y --no-install-recommends nodejs &&     node --version && npm --version &&     rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [ 4/14] RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-26.1.4.tgz" -o /tmp/docker.tgz &&     tar -xzf /tmp/docker.tgz -C /tmp &&     mv /tmp/docker/docker /usr/local/bin/docker &&     chmod +x /usr/local/bin/docker &&     rm -rf /tmp/docker /tmp/docker.tgz
+#11 CACHED
+
+#12 [ 5/14] RUN curl -LsSf https://astral.sh/uv/install.sh | sh &&     ln -s /root/.local/bin/uv /usr/local/bin/uv
+#12 CACHED
+
+#13 [ 6/14] COPY docker/requirements-uv.txt docker/requirements-stubs-uv.txt ./
+#13 DONE 0.2s
+
+#14 [ 7/14] RUN uv venv /opt/venv &&     . /opt/venv/bin/activate &&     uv pip install --requirement requirements-uv.txt &&     GDAL_CONFIG=/usr/bin/gdal-config uv pip install         --no-binary fiona         --reinstall-package fiona         fiona==1.10.1 &&     uv pip install --requirement requirements-stubs-uv.txt
+#14 0.468 Using CPython 3.12.16 interpreter at: /usr/local/bin/python
+#14 0.468 Creating virtual environment at: /opt/venv
+#14 0.717 Using Python 3.12.16 environment at: /opt/venv
+#14 1.145    Updating https://github.com/google/brotli (HEAD)
+#14 4.793     Updated https://github.com/google/brotli (089e71983611a42643d75194fedfde086c5e58af)
+#14 9.188 Resolved 308 packages in 8.46s
+#14 9.339    Building brotli @ git+https://github.com/google/brotli@089e71983611a42643d75194fedfde086c5e58af
+#14 9.345 Downloading cryptography (4.3MiB)
+#14 9.345 Downloading networkx (2.0MiB)
+#14 9.357 Downloading setuptools (1.2MiB)
+#14 9.359 Downloading pygments (1.2MiB)
+#14 9.361 Downloading pydantic-core (2.0MiB)
+#14 9.361 Downloading pyarrow (45.4MiB)
+#14 9.363 Downloading lxml (5.0MiB)
+#14 9.364 Downloading pandas (12.1MiB)
+#14 9.365 Downloading plotly (9.2MiB)
+#14 9.366 Downloading pynacl (1.3MiB)
+#14 9.367 Downloading sympy (5.9MiB)
+#14 9.368 Downloading dask (1.4MiB)
+#14 9.369 Downloading rasterio (20.5MiB)
+#14 9.370 Downloading fonttools (4.7MiB)
+#14 9.371 Downloading pillow (6.8MiB)
+#14 9.371 Downloading plotnine (1.2MiB)
+#14 9.372 Downloading lz4 (1.3MiB)
+#14 9.373 Downloading sqlalchemy (3.1MiB)
+#14 9.391 Downloading duckdb (19.2MiB)
+#14 9.392 Downloading debugpy (4.0MiB)
+#14 9.392 Downloading dash (6.9MiB)
+#14 9.393 Downloading scikit-image (14.3MiB)
+#14 9.394 Downloading scikit-learn (8.7MiB)
+#14 9.395 Downloading netcdf4 (9.0MiB)
+#14 9.395 Downloading shapely (2.4MiB)
+#14 9.396 Downloading cython (3.4MiB)
+#14 9.396 Downloading xarray (1.3MiB)
+#14 9.397 Downloading jedi (1.3MiB)
+#14 9.412 Downloading fiona (16.4MiB)
+#14 9.412 Downloading pyproj (9.1MiB)
+#14 9.412 Downloading notebook (9.5MiB)
+#14 9.413 Downloading scipy (36.4MiB)
+#14 9.414 Downloading pyogrio (31.8MiB)
+#14 9.414 Downloading kiwisolver (1.4MiB)
+#14 9.415 Downloading numpy (17.1MiB)
+#14 9.416 Downloading mypy (12.7MiB)
+#14 9.416 Downloading pycurl (4.4MiB)
+#14 9.417 Downloading cftime (1.3MiB)
+#14 9.418 Downloading matplotlib (7.9MiB)
+#14 9.418 Downloading bokeh (6.9MiB)
+#14 9.428 Downloading blosc2 (4.2MiB)
+#14 9.429 Downloading pythran (4.1MiB)
+#14 9.430 Downloading pulp (15.6MiB)
+#14 9.431 Downloading dtale (16.6MiB)
+#14 9.432 Downloading statsmodels (10.2MiB)
+#14 9.434 Downloading tables (6.9MiB)
+#14 9.435 Downloading babel (8.4MiB)
+#14 9.946  Downloaded pygments
+#14 9.946    Building gdal==3.10.2
+#14 9.951  Downloaded setuptools
+#14 10.07  Downloaded pynacl
+#14 10.08  Downloaded plotnine
+#14 10.12  Downloaded lz4
+#14 10.12  Downloaded xarray
+#14 10.12  Downloaded cftime
+#14 10.18  Downloaded dask
+#14 10.24  Downloaded jedi
+#14 10.24  Downloaded kiwisolver
+#14 10.44  Downloaded networkx
+#14 10.49  Downloaded pydantic-core
+#14 10.65    Building speaklater==1.3
+#14 10.65    Building asciitree==0.3.3
+#14 10.72  Downloaded shapely
+#14 10.73    Building flask-principal==0.4.0
+#14 10.83    Building psycopg2==2.9.9
+#14 10.83    Building ssh-import-id==5.11
+#14 10.94  Downloaded sqlalchemy
+#14 11.01       Built asciitree==0.3.3
+#14 11.05       Built speaklater==1.3
+#14 11.05  Downloaded cython
+#14 11.16       Built flask-principal==0.4.0
+#14 11.16       Built ssh-import-id==5.11
+#14 11.35  Downloaded pythran
+#14 11.35  Downloaded cryptography
+#14 11.38  Downloaded debugpy
+#14 11.42  Downloaded blosc2
+#14 11.45  Downloaded pycurl
+#14 11.57  Downloaded fonttools
+#14 11.57    Building olefile==0.46
+#14 11.60  Downloaded lxml
+#14 11.79    Building pyrsistent==0.18.1
+#14 11.80    Building cmarkgfm==0.8.0
+#14 11.87    Building pynvim==0.4.2
+#14 11.99       Built olefile==0.46
+#14 11.99  Downloaded sympy
+#14 12.02    Building netifaces==0.11.0
+#14 12.08    Building cdo==1.5.6
+#14 12.27  Downloaded bokeh
+#14 12.27  Downloaded pillow
+#14 12.27  Downloaded dash
+#14 12.27       Built pynvim==0.4.2
+#14 12.33  Downloaded tables
+#14 12.45       Built cdo==1.5.6
+#14 12.60  Downloaded matplotlib
+#14 12.73  Downloaded babel
+#14 12.80  Downloaded netcdf4
+#14 12.80  Downloaded scikit-learn
+#14 12.85  Downloaded plotly
+#14 12.89  Downloaded pyproj
+#14 12.90    Building pydsstools==2.4.0
+#14 12.94  Downloaded notebook
+#14 12.99  Downloaded statsmodels
+#14 13.29  Downloaded pandas
+#14 13.39  Downloaded mypy
+#14 13.73  Downloaded scikit-image
+#14 13.76  Downloaded pulp
+#14 13.81  Downloaded dtale
+#14 13.81  Downloaded fiona
+#14 13.86  Downloaded numpy
+#14 13.95  Downloaded duckdb
+#14 14.04  Downloaded rasterio
+#14 14.51  Downloaded pyogrio
+#14 14.61  Downloaded scipy
+#14 14.68       Built pyrsistent==0.18.1
+#14 14.76  Downloaded pyarrow
+#14 15.60       Built netifaces==0.11.0
+#14 23.83       Built psycopg2==2.9.9
+#14 24.81       Built cmarkgfm==0.8.0
+#14 53.46       Built gdal==3.10.2
+#14 60.25       Built brotli @ git+https://github.com/google/brotli@089e71983611a42643d75194fedfde086c5e58af
+#14 74.94       Built pydsstools==2.4.0
+#14 75.03 Prepared 308 packages in 1m 05s
+#14 75.29 Installed 308 packages in 253ms
+#14 75.29  + affine==2.4.0
+#14 75.29  + aioredis==2.0.1
+#14 75.29  + alembic==1.13.1
+#14 75.29  + amqp==5.3.1
+#14 75.29  + annotated-doc==0.0.5
+#14 75.29  + annotated-types==0.8.0
+#14 75.29  + anyascii==0.3.2
+#14 75.29  + anyio==4.14.2
+#14 75.29  + appdirs==1.4.4
+#14 75.29  + argon2-cffi==23.1.0
+#14 75.29  + argon2-cffi-bindings==21.2.0
+#14 75.29  + asciitree==0.3.3
+#14 75.29  + astroid==4.3.4
+#14 75.29  + asttokens==3.0.0
+#14 75.29  + async-timeout==4.0.3
+#14 75.29  + attrs==24.2.0
+#14 75.29  + authlib==1.6.12
+#14 75.29  + awesome-codename==1.0.0
+#14 75.29  + babel==2.9.1
+#14 75.29  + backcall==0.2.0
+#14 75.29  + backports-zstd==1.8.0
+#14 75.29  + bcrypt==3.2.2
+#14 75.29  + beautifulsoup4==4.10.0
+#14 75.29  + beniget==0.4.1
+#14 75.29  + billiard==3.6.4.0
+#14 75.29  + bleach==6.1.0
+#14 75.29  + blinker==1.9.0
+#14 75.29  + blosc2==3.7.2
+#14 75.29  + bokeh==3.8.2
+#14 75.29  + bottleneck==1.3.8
+#14 75.29  + branca==0.8.2
+#14 75.29  + brotli==1.2.0 (from git+https://github.com/google/brotli@089e71983611a42643d75194fedfde086c5e58af)
+#14 75.29  + build==1.2.2.post1
+#14 75.29  + cached-property==1.5.2
+#14 75.29  + cachelib==0.17.0
+#14 75.29  + cachetools==5.4.0
+#14 75.29  + cdo==1.5.6
+#14 75.29  + certifi==2024.8.30
+#14 75.29  + cffi==2.0.0
+#14 75.29  + cftime==1.6.3
+#14 75.29  + chardet==4.0.0
+#14 75.29  + charset-normalizer==3.4.0
+#14 75.29  + choreographer==1.2.1
+#14 75.29  + click==8.1.7
+#14 75.29  + click-didyoumean==0.3.1
+#14 75.29  + click-plugins==1.1.1
+#14 75.29  + click-repl==0.3.0
+#14 75.29  + cligj==0.7.2
+#14 75.29  + cloudpickle==3.1.2
+#14 75.29  + cmarkgfm==0.8.0
+#14 75.29  + comm==0.2.2
+#14 75.29  + contourpy==1.2.1
+#14 75.29  + coverage==7.11.3
+#14 75.29  + croniter==6.0.0
+#14 75.29  + cryptography==46.0.7
+#14 75.29  + cycler==0.11.0
+#14 75.29  + cython==3.0.10
+#14 75.29  + dash==4.2.0
+#14 75.29  + dash-bootstrap-components==2.0.4
+#14 75.29  + dask==2026.1.1
+#14 75.29  + dask-expr==2.0.0
+#14 75.29  + debugpy==1.8.13
+#14 75.29  + decorator==4.4.2
+#14 75.29  + defusedxml==0.7.1
+#14 75.29  + deprecated==1.2.14
+#14 75.29  + distributed==2026.1.1
+#14 75.29  + distro==1.9.0
+#14 75.29  + dnspython==2.6.1
+#14 75.29  + dotenv==0.9.9
+#14 75.29  + dtale==3.22.0
+#14 75.29  + duckdb==1.1.1
+#14 75.29  + email-validator==2.1.1
+#14 75.29  + entrypoints==0.4
+#14 75.29  + et-xmlfile==2.0.0
+#14 75.29  + exceptiongroup==1.2.2
+#14 75.29  + executing==2.2.0
+#14 75.29  + fastapi==0.143.1
+#14 75.29  + fasteners==0.14.1
+#14 75.29  + fastjsonschema==2.21.1
+#14 75.29  + fiona==1.10.1
+#14 75.29  + flask==3.1.3
+#14 75.29  + flask-compress==1.25
+#14 75.29  + flask-jwt-extended==4.6.0
+#14 75.29  + flask-login==0.6.3
+#14 75.29  + flask-mail==0.10.0
+#14 75.29  + flask-mailman==1.1.0
+#14 75.29  + flask-migrate==4.0.7
+#14 75.29  + flask-principal==0.4.0
+#14 75.29  + flask-security==5.6.1
+#14 75.29  + flask-security-too==5.6.1
+#14 75.29  + flask-session==0.4.0
+#14 75.29  + flask-sqlalchemy==3.1.1
+#14 75.29  + flask-wtf==1.2.1
+#14 75.29  + flexcache==0.3
+#14 75.29  + flexparser==0.4
+#14 75.29  + folium==0.20.0
+#14 75.29  + fonttools==4.61.0
+#14 75.29  + fs==2.4.12
+#14 75.29  + fsspec==2022.1.0
+#14 75.29  + future==1.0.0
+#14 75.29  + gast==0.5.2
+#14 75.29  + gdal==3.10.2
+#14 75.29  + geopandas==1.1.2
+#14 75.29  + git-filter-repo==2.45.0
+#14 75.29  + greenlet==3.1.1
+#14 75.29  + gunicorn==23.0.0
+#14 75.29  + h11==0.16.0
+#14 75.29  + heapdict==1.0.1
+#14 75.29  + httpcore==1.0.9
+#14 75.29  + httpx==0.27.2
+#14 75.29  + idna==3.15
+#14 75.29  + imageio==2.34.1
+#14 75.29  + importlib-metadata==8.6.1
+#14 75.29  + importlib-resources==6.5.2
+#14 75.29  + iniconfig==1.1.1
+#14 75.29  + ipykernel==6.29.5
+#14 75.29  + ipython==8.35.0
+#14 75.29  + ipython-genutils==0.2.0
+#14 75.29  + isort==5.6.4
+#14 75.29  + itsdangerous==2.2.0
+#14 75.29  + janus==2.0.0
+#14 75.29  + jedi==0.18.0
+#14 75.29  + jeepney==0.7.1
+#14 75.29  + jinja2==3.1.6
+#14 75.29  + joblib==1.6.0
+#14 75.29  + jsonpickle==3.0.4
+#14 75.29  + jsonschema==3.2.0
+#14 75.29  + jupyter-client==8.6.3
+#14 75.29  + jupyter-core==5.7.2
+#14 75.29  + jupyterlab-pygments==0.3.0
+#14 75.29  + kaleido==1.2.0
+#14 75.29  + keyring==23.5.0
+#14 75.29  + kiwisolver==1.4.8
+#14 75.29  + kombu==5.5.0
+#14 75.29  + lazy-loader==0.6
+#14 75.29  + lazy-object-proxy==1.10.0
+#14 75.29  + libtmux==0.47.0
+#14 75.29  + locket==1.0.0
+#14 75.29  + logistro==2.0.1
+#14 75.29  + lxml==6.1.0
+#14 75.29  + lz4==4.4.5
+#14 75.29  + mako==1.3.12
+#14 75.29  + markdown-it-py==4.2.0
+#14 75.29  + markupsafe==3.0.2
+#14 75.29  + matplotlib==3.9.0
+#14 75.29  + matplotlib-inline==0.1.7
+#14 75.29  + mccabe==0.6.1
+#14 75.29  + mdurl==0.1.2
+#14 75.29  + metpy==1.6.2
+#14 75.29  + missingno==0.5.2
+#14 75.29  + mistune==3.2.1
+#14 75.29  + mizani==0.11.4
+#14 75.29  + monotonic==1.6
+#14 75.29  + more-itertools==8.10.0
+#14 75.29  + mpmath==1.3.0
+#14 75.29  + msgpack==1.2.1
+#14 75.29  + mypy==1.18.2
+#14 75.29  + mypy-extensions==1.1.0
+#14 75.29  + narwhals==2.27.1
+#14 75.29  + nbclient==0.10.2
+#14 75.29  + nbconvert==7.17.1
+#14 75.29  + nbformat==5.10.4
+#14 75.29  + ndindex==1.10.1
+#14 75.29  + nest-asyncio==1.5.4
+#14 75.29  + netcdf4==1.7.3
+#14 75.29  + netifaces==0.11.0
+#14 75.29  + networkx==3.7
+#14 75.29  + notebook==6.4.12
+#14 75.29  + numexpr==2.10.0
+#14 75.29  + numpy==1.26.0
+#14 75.29  + oauthlib==3.2.2
+#14 75.29  + olefile==0.46
+#14 75.29  + openpyxl==3.0.9
+#14 75.29  + opentelemetry-api==1.45.1
+#14 75.29  + orjson==3.13.0
+#14 75.29  + owslib==0.31.0
+#14 75.29  + packaging==24.0
+#14 75.29  + pandas==2.2.2
+#14 75.29  + pandocfilters==1.5.0
+#14 75.29  + paramiko==3.5.1
+#14 75.29  + parso==0.8.1
+#14 75.29  + partd==1.4.2
+#14 75.29  + passlib==1.7.4
+#14 75.29  + pathspec==1.1.1
+#14 75.29  + patsy==0.5.6
+#14 75.29  + pbr==5.8.0
+#14 75.29  + pexpect==4.8.0
+#14 75.29  + pickleshare==0.7.5
+#14 75.29  + pillow==12.2.0
+#14 75.29  + pint==0.23
+#14 75.29  + pkginfo==1.13
+#14 75.29  + platformdirs==2.5.1
+#14 75.29  + plotly==7.1.0
+#14 75.29  + plotnine==0.13.6
+#14 75.29  + pluggy==1.6.0
+#14 75.29  + ply==3.11
+#14 75.29  + pooch==1.8.1
+#14 75.29  + prometheus-client==0.9.0
+#14 75.29  + prompt-toolkit==3.0.50
+#14 75.29  + psutil==7.0.0
+#14 75.29  + psycopg2==2.9.9
+#14 75.29  + ptyprocess==0.7.0
+#14 75.29  + pulp==3.3.0
+#14 75.29  + pure-eval==0.2.3
+#14 75.29  + py==1.11.0
+#14 75.29  + py-cpuinfo==9.0.0
+#14 75.29  + pyarrow==23.0.1
+#14 75.29  + pyarrow-hotfix==0.6
+#14 75.29  + pyasn1==0.6.3
+#14 75.29  + pyasn1-modules==0.4.0
+#14 75.29  + pycparser==2.22
+#14 75.29  + pycurl==7.45.6
+#14 75.29  + pydantic==2.9.2
+#14 75.29  + pydantic-core==2.23.4
+#14 75.29  + pydsstools==2.4.0
+#14 75.29  + pygments==2.20.0
+#14 75.29  + pyjwt==2.15.1
+#14 75.29  + pynacl==1.6.2
+#14 75.29  + pynvim==0.4.2
+#14 75.29  + pyogrio==0.13.0
+#14 75.29  + pyparsing==2.4.7
+#14 75.29  + pyproj==3.7.1
+#14 75.29  + pyproject-hooks==1.2.0
+#14 75.29  + pyrsistent==0.18.1
+#14 75.29  + pysocks==1.7.1
+#14 75.29  + pytest==9.0.3
+#14 75.29  + pytest-cov==7.0.0
+#14 75.29  + pytest-reportlog==0.4.0
+#14 75.29  + pytest-timeout==2.4.0
+#14 75.29  + python-dateutil==2.9.0.post0
+#14 75.29  + python-dotenv==1.2.2
+#14 75.29  + python-frontmatter==1.1.0
+#14 75.29  + python-multipart==0.0.31
+#14 75.29  + pythran==0.10.0
+#14 75.29  + pytz==2022.1
+#14 75.29  + pyyaml==6.0.2
+#14 75.29  + pyzmq==26.4.0
+#14 75.29  + rasterio==1.3.10
+#14 75.29  + redis==6.2.0
+#14 75.29  + requests==2.33.0
+#14 75.29  + requests-toolbelt==1.0.0
+#14 75.29  + retrying==1.4.2
+#14 75.29  + rich==15.0.0
+#14 75.29  + rq==2.12.0
+#14 75.29  + rsa==4.9
+#14 75.29  + scikit-image==0.24.0
+#14 75.29  + scikit-learn==1.9.1
+#14 75.29  + scipy==1.13.1
+#14 75.29  + seaborn==0.13.2
+#14 75.29  + secretstorage==3.3.1
+#14 75.30  + send2trash==1.8.3
+#14 75.30  + setuptools==78.1.1
+#14 75.30  + shapely==2.0.4
+#14 75.30  + shellingham==1.5.4
+#14 75.30  + simplejson==4.2.0
+#14 75.30  + six==1.16.0
+#14 75.30  + sniffio==1.3.1
+#14 75.30  + snuggs==1.4.7
+#14 75.30  + sortedcontainers==2.1.0
+#14 75.30  + soupsieve==2.3.1
+#14 75.30  + speaklater==1.3
+#14 75.30  + speedtest-cli==2.1.3
+#14 75.30  + sqlalchemy==2.0.30
+#14 75.30  + sqlalchemy-utils==0.41.2
+#14 75.30  + squarify==0.4.5
+#14 75.30  + ssh-import-id==5.11
+#14 75.30  + stack-data==0.6.3
+#14 75.30  + starlette==0.49.1
+#14 75.30  + statsmodels==0.14.2
+#14 75.30  + stone==3.3.1
+#14 75.30  + strsimpy==0.2.1
+#14 75.30  + suds==1.1.2
+#14 75.30  + sympy==1.9
+#14 75.30  + tables==3.11.1
+#14 75.30  + tblib==1.7.0
+#14 75.30  + terminado==0.13.1
+#14 75.30  + testpath==0.5.0
+#14 75.30  + testresources==2.0.1
+#14 75.30  + texttable==1.6.4
+#14 75.30  + threadpoolctl==3.7.0
+#14 75.30  + tifffile==2026.3.3
+#14 75.30  + tinycss2==1.2.1
+#14 75.30  + toml==0.10.2
+#14 75.30  + tomli==2.2.1
+#14 75.30  + toolz==1.2.0
+#14 75.30  + tornado==6.5.6
+#14 75.30  + traitlets==5.14.3
+#14 75.30  + typer==0.12.5
+#14 75.30  + typing-extensions==4.12.0
+#14 75.30  + typing-inspection==0.4.2
+#14 75.30  + tzdata==2025.1
+#14 75.30  + ufolib2==0.13.1
+#14 75.30  + urllib3==2.7.0
+#14 75.30  + utm==0.8.1
+#14 75.30  + uvicorn==0.30.6
+#14 75.30  + versioneer==0.29
+#14 75.30  + vine==5.1.0
+#14 75.30  + wcwidth==0.2.13
+#14 75.30  + webencodings==0.5.1
+#14 75.30  + werkzeug==3.1.6
+#14 75.30  + what3words==3.4.0
+#14 75.30  + wrapt==1.17.3
+#14 75.30  + wtforms==3.2.1
+#14 75.30  + xarray==2025.6.1
+#14 75.30  + xlrd==2.0.2
+#14 75.30  + xyzservices==2025.1.0
+#14 75.30  + zict==3.0.0
+#14 75.30  + zipp==3.21.0
+#14 75.68 Using Python 3.12.16 environment at: /opt/venv
+#14 75.87 Resolved 6 packages in 176ms
+#14 75.93    Building fiona==1.10.1
+#14 224.7       Built fiona==1.10.1
+#14 224.8 Prepared 1 package in 2m 28s
+#14 224.8 Uninstalled 1 package in 6ms
+#14 224.8 Installed 1 package in 3ms
+#14 224.8  ~ fiona==1.10.1
+#14 224.8 Using Python 3.12.16 environment at: /opt/venv
+#14 225.1 Resolved 34 packages in 281ms
+#14 225.2 Prepared 16 packages in 84ms
+#14 225.2 Installed 16 packages in 18ms
+#14 225.2  + matplotlib-stubs==0.3.11
+#14 225.2  + pandas-stubs==3.0.5.260914
+#14 225.2  + types-authlib==1.8.0.20260911
+#14 225.2  + types-cffi==2.1.0.20260827
+#14 225.2  + types-click==7.1.8
+#14 225.2  + types-deprecated==1.3.1.20260928
+#14 225.2  + types-flask==1.1.6
+#14 225.2  + types-jinja2==2.11.9
+#14 225.2  + types-markupsafe==1.1.10
+#14 225.2  + types-pyopenssl==24.1.0.20240722
+#14 225.2  + types-pyyaml==6.0.12.20260906
+#14 225.2  + types-redis==4.6.0.20241004
+#14 225.2  + types-requests==2.33.0.20261006
+#14 225.2  + types-setuptools==84.0.0.20261006
+#14 225.2  + types-shapely==2.1.0.20260728
+#14 225.2  + types-werkzeug==1.0.9
+#14 DONE 226.9s
+
+#15 [ 8/14] RUN /opt/venv/bin/python -c "import duckdb;                con = duckdb.connect();                con.execute('SET home_directory=\'/tmp\'');                con.execute('INSTALL spatial;');                con.execute('LOAD spatial;');                con.close()"
+#15 DONE 5.9s
+
+#16 [ 9/14] RUN set -eux;     mkdir -p /opt/vendor;     if git clone --depth=1 --branch "master" "https://github.com/rogerlew/weppcloud-wbt.git" /opt/vendor/weppcloud-wbt; then         :;     else         git clone --depth=1 "https://github.com/rogerlew/weppcloud-wbt.git" /opt/vendor/weppcloud-wbt;         cd /opt/vendor/weppcloud-wbt;         git fetch --depth=1 origin "master";         git checkout "master";     fi;     cd /opt/vendor/weppcloud-wbt;     git lfs pull || true;     rm -rf /opt/vendor/weppcloud-wbt/.git;     test -f /opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py;     if git clone --depth=1 --branch "main" "https://github.com/wepp-in-the-woods/wepppyo3.git" /opt/vendor/wepppyo3; then         :;     else         git clone --depth=1 "https://github.com/wepp-in-the-woods/wepppyo3.git" /opt/vendor/wepppyo3;         cd /opt/vendor/wepppyo3;         git fetch --depth=1 origin "main";         git checkout "main";     fi;     cd /opt/vendor/wepppyo3;     git lfs pull || true;     rm -rf /opt/vendor/wepppyo3/.git;     test -d /opt/vendor/wepppyo3/release/linux/py312/wepppyo3
+#16 0.874 + mkdir -p /opt/vendor
+#16 0.876 + git clone --depth=1 --branch master https://github.com/rogerlew/weppcloud-wbt.git /opt/vendor/weppcloud-wbt
+#16 0.878 Cloning into '/opt/vendor/weppcloud-wbt'...
+#16 18.05 Updating files:  26% (316/1196)Updating files:  27% (323/1196)Updating files:  27% (334/1196)Updating files:  28% (335/1196)Updating files:  29% (347/1196)Updating files:  30% (359/1196)Updating files:  31% (371/1196)Updating files:  32% (383/1196)Updating files:  33% (395/1196)Updating files:  34% (407/1196)Updating files:  35% (419/1196)Updating files:  36% (431/1196)Updating files:  37% (443/1196)Updating files:  38% (455/1196)Updating files:  39% (467/1196)Updating files:  40% (479/1196)Updating files:  41% (491/1196)Updating files:  42% (503/1196)Updating files:  43% (515/1196)Updating files:  44% (527/1196)Updating files:  45% (539/1196)Updating files:  46% (551/1196)Updating files:  47% (563/1196)Updating files:  48% (575/1196)Updating files:  49% (587/1196)Updating files:  50% (598/1196)Updating files:  51% (610/1196)Updating files:  52% (622/1196)Updating files:  53% (634/1196)Updating files:  54% (646/1196)Updating files:  55% (658/1196)Updating files:  56% (670/1196)Updating files:  57% (682/1196)Updating files:  58% (694/1196)Updating files:  59% (706/1196)Updating files:  60% (718/1196)Updating files:  61% (730/1196)Updating files:  62% (742/1196)Updating files:  63% (754/1196)Updating files:  64% (766/1196)Updating files:  65% (778/1196)Updating files:  66% (790/1196)Updating files:  67% (802/1196)Updating files:  68% (814/1196)Updating files:  69% (826/1196)Updating files:  70% (838/1196)Updating files:  71% (850/1196)Updating files:  72% (862/1196)Updating files:  73% (874/1196)Updating files:  74% (886/1196)Updating files:  75% (897/1196)Updating files:  76% (909/1196)Updating files:  77% (921/1196)Updating files:  78% (933/1196)Updating files:  79% (945/1196)Updating files:  80% (957/1196)Updating files:  81% (969/1196)Updating files:  82% (981/1196)Updating files:  83% (993/1196)Updating files:  84% (1005/1196)Updating files:  85% (1017/1196)Updating files:  86% (1029/1196)Updating files:  87% (1041/1196)Updating files:  88% (1053/1196)Updating files:  89% (1065/1196)Updating files:  90% (1077/1196)Updating files:  91% (1089/1196)Updating files:  92% (1101/1196)Updating files:  93% (1113/1196)Updating files:  94% (1125/1196)Updating files:  95% (1137/1196)Updating files:  96% (1149/1196)Updating files:  97% (1161/1196)Updating files:  98% (1173/1196)Updating files:  99% (1185/1196)Updating files: 100% (1196/1196)Updating files: 100% (1196/1196), done.
+#16 19.78 + :
+#16 19.78 + cd /opt/vendor/weppcloud-wbt
+#16 19.78 + git lfs pull
+#16 19.83 + rm -rf /opt/vendor/weppcloud-wbt/.git
+#16 19.87 + test -f /opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py
+#16 19.87 + git clone --depth=1 --branch main https://github.com/wepp-in-the-woods/wepppyo3.git /opt/vendor/wepppyo3
+#16 19.87 Cloning into '/opt/vendor/wepppyo3'...
+#16 28.39 Updating files:  37% (579/1542)Updating files:  38% (586/1542)Updating files:  39% (602/1542)Updating files:  40% (617/1542)Updating files:  41% (633/1542)Updating files:  42% (648/1542)Updating files:  43% (664/1542)Updating files:  44% (679/1542)Updating files:  45% (694/1542)Updating files:  46% (710/1542)Updating files:  47% (725/1542)Updating files:  48% (741/1542)Updating files:  49% (756/1542)Updating files:  50% (771/1542)Updating files:  51% (787/1542)Updating files:  52% (802/1542)Updating files:  53% (818/1542)Updating files:  54% (833/1542)Updating files:  55% (849/1542)Updating files:  56% (864/1542)Updating files:  57% (879/1542)Updating files:  58% (895/1542)Updating files:  59% (910/1542)Updating files:  60% (926/1542)Updating files:  61% (941/1542)Updating files:  62% (957/1542)Updating files:  63% (972/1542)Updating files:  64% (987/1542)Updating files:  65% (1003/1542)Updating files:  66% (1018/1542)Updating files:  67% (1034/1542)Updating files:  68% (1049/1542)Updating files:  69% (1064/1542)Updating files:  70% (1080/1542)Updating files:  71% (1095/1542)Updating files:  72% (1111/1542)Updating files:  73% (1126/1542)Updating files:  74% (1142/1542)Updating files:  75% (1157/1542)Updating files:  76% (1172/1542)Updating files:  77% (1188/1542)Updating files:  78% (1203/1542)Updating files:  79% (1219/1542)Updating files:  80% (1234/1542)Updating files:  81% (1250/1542)Updating files:  82% (1265/1542)Updating files:  83% (1280/1542)Updating files:  84% (1296/1542)Updating files:  84% (1300/1542)Updating files:  85% (1311/1542)Updating files:  86% (1327/1542)Updating files:  87% (1342/1542)Updating files:  88% (1357/1542)Updating files:  89% (1373/1542)Updating files:  90% (1388/1542)Updating files:  91% (1404/1542)Updating files:  92% (1419/1542)Updating files:  93% (1435/1542)Updating files:  94% (1450/1542)Updating files:  95% (1465/1542)Updating files:  96% (1481/1542)Updating files:  97% (1496/1542)Updating files:  98% (1512/1542)Updating files:  99% (1527/1542)Updating files: 100% (1542/1542)Updating files: 100% (1542/1542), done.
+#16 30.92 Filtering content:   1% (2/127)Filtering content:   2% (3/127)Filtering content:   3% (4/127), 5.39 MiB | 3.87 MiB/sFiltering content:   4% (6/127), 5.39 MiB | 3.87 MiB/sFiltering content:   5% (7/127), 5.39 MiB | 3.87 MiB/sFiltering content:   6% (8/127), 5.39 MiB | 3.87 MiB/sFiltering content:   7% (9/127), 5.39 MiB | 3.87 MiB/sFiltering content:   8% (11/127), 5.39 MiB | 3.87 MiB/sFiltering content:   9% (12/127), 16.12 MiB | 11.01 MiB/sFiltering content:  10% (13/127), 16.12 MiB | 11.01 MiB/sFiltering content:  11% (14/127), 16.12 MiB | 11.01 MiB/sFiltering content:  12% (16/127), 16.12 MiB | 11.01 MiB/sFiltering content:  13% (17/127), 16.12 MiB | 11.01 MiB/sFiltering content:  14% (18/127), 16.12 MiB | 11.01 MiB/sFiltering content:  15% (20/127), 16.12 MiB | 11.01 MiB/sFiltering content:  16% (21/127), 16.12 MiB | 11.01 MiB/sFiltering content:  17% (22/127), 16.12 MiB | 11.01 MiB/sFiltering content:  18% (23/127), 16.12 MiB | 11.01 MiB/sFiltering content:  19% (25/127), 16.12 MiB | 11.01 MiB/sFiltering content:  20% (26/127), 44.84 MiB | 23.47 MiB/sFiltering content:  21% (27/127), 44.84 MiB | 23.47 MiB/sFiltering content:  22% (28/127), 44.84 MiB | 23.47 MiB/sFiltering content:  23% (30/127), 44.84 MiB | 23.47 MiB/sFiltering content:  24% (31/127), 44.84 MiB | 23.47 MiB/sFiltering content:  25% (32/127), 44.84 MiB | 23.47 MiB/sFiltering content:  26% (34/127), 44.84 MiB | 23.47 MiB/sFiltering content:  27% (35/127), 44.84 MiB | 23.47 MiB/sFiltering content:  28% (36/127), 44.84 MiB | 23.47 MiB/sFiltering content:  29% (37/127), 44.84 MiB | 23.47 MiB/sFiltering content:  30% (39/127), 44.84 MiB | 23.47 MiB/sFiltering content:  31% (40/127), 44.84 MiB | 23.47 MiB/sFiltering content:  32% (41/127), 44.84 MiB | 23.47 MiB/sFiltering content:  33% (42/127), 44.84 MiB | 23.47 MiB/sFiltering content:  34% (44/127), 44.84 MiB | 23.47 MiB/sFiltering content:  35% (45/127), 44.84 MiB | 23.47 MiB/sFiltering content:  36% (46/127), 44.84 MiB | 23.47 MiB/sFiltering content:  37% (47/127), 44.84 MiB | 23.47 MiB/sFiltering content:  38% (49/127), 44.84 MiB | 23.47 MiB/sFiltering content:  39% (50/127), 44.84 MiB | 23.47 MiB/sFiltering content:  40% (51/127), 44.84 MiB | 23.47 MiB/sFiltering content:  41% (53/127), 44.84 MiB | 23.47 MiB/sFiltering content:  42% (54/127), 44.84 MiB | 23.47 MiB/sFiltering content:  43% (55/127), 44.84 MiB | 23.47 MiB/sFiltering content:  44% (56/127), 44.84 MiB | 23.47 MiB/sFiltering content:  45% (58/127), 44.84 MiB | 23.47 MiB/sFiltering content:  46% (59/127), 44.84 MiB | 23.47 MiB/sFiltering content:  47% (60/127), 44.84 MiB | 23.47 MiB/sFiltering content:  48% (61/127), 44.84 MiB | 23.47 MiB/sFiltering content:  49% (63/127), 44.84 MiB | 23.47 MiB/sFiltering content:  50% (64/127), 44.84 MiB | 23.47 MiB/sFiltering content:  51% (65/127), 44.84 MiB | 23.47 MiB/sFiltering content:  52% (67/127), 44.84 MiB | 23.47 MiB/sFiltering content:  53% (68/127), 44.84 MiB | 23.47 MiB/sFiltering content:  54% (69/127), 45.56 MiB | 18.45 MiB/sFiltering content:  55% (70/127), 45.56 MiB | 18.45 MiB/sFiltering content:  56% (72/127), 45.56 MiB | 18.45 MiB/sFiltering content:  57% (73/127), 45.56 MiB | 18.45 MiB/sFiltering content:  58% (74/127), 45.56 MiB | 18.45 MiB/sFiltering content:  59% (75/127), 45.56 MiB | 18.45 MiB/sFiltering content:  60% (77/127), 45.56 MiB | 18.45 MiB/sFiltering content:  61% (78/127), 45.56 MiB | 18.45 MiB/sFiltering content:  62% (79/127), 45.56 MiB | 18.45 MiB/sFiltering content:  63% (81/127), 45.56 MiB | 18.45 MiB/sFiltering content:  64% (82/127), 45.56 MiB | 18.45 MiB/sFiltering content:  65% (83/127), 45.56 MiB | 18.45 MiB/sFiltering content:  66% (84/127), 45.56 MiB | 18.45 MiB/sFiltering content:  67% (86/127), 45.56 MiB | 18.45 MiB/sFiltering content:  68% (87/127), 45.56 MiB | 18.45 MiB/sFiltering content:  69% (88/127), 45.56 MiB | 18.45 MiB/sFiltering content:  70% (89/127), 45.56 MiB | 18.45 MiB/sFiltering content:  71% (91/127), 45.56 MiB | 18.45 MiB/sFiltering content:  72% (92/127), 45.56 MiB | 18.45 MiB/sFiltering content:  73% (93/127), 45.56 MiB | 18.45 MiB/sFiltering content:  74% (94/127), 45.56 MiB | 18.45 MiB/sFiltering content:  75% (96/127), 45.56 MiB | 18.45 MiB/sFiltering content:  76% (97/127), 45.56 MiB | 18.45 MiB/sFiltering content:  77% (98/127), 45.56 MiB | 18.45 MiB/sFiltering content:  78% (100/127), 45.56 MiB | 18.45 MiB/sFiltering content:  79% (101/127), 45.56 MiB | 18.45 MiB/sFiltering content:  80% (102/127), 45.56 MiB | 18.45 MiB/sFiltering content:  81% (103/127), 45.56 MiB | 18.45 MiB/sFiltering content:  82% (105/127), 45.56 MiB | 18.45 MiB/sFiltering content:  83% (106/127), 45.56 MiB | 18.45 MiB/sFiltering content:  84% (107/127), 45.56 MiB | 18.45 MiB/sFiltering content:  85% (108/127), 45.56 MiB | 18.45 MiB/sFiltering content:  86% (110/127), 45.56 MiB | 18.45 MiB/sFiltering content:  87% (111/127), 45.56 MiB | 18.45 MiB/sFiltering content:  88% (112/127), 45.56 MiB | 18.45 MiB/sFiltering content:  89% (114/127), 45.77 MiB | 14.99 MiB/sFiltering content:  90% (115/127), 45.77 MiB | 14.99 MiB/sFiltering content:  91% (116/127), 45.77 MiB | 14.99 MiB/sFiltering content:  92% (117/127), 45.77 MiB | 14.99 MiB/sFiltering content:  92% (118/127), 45.77 MiB | 14.99 MiB/sFiltering content:  93% (119/127), 45.77 MiB | 14.99 MiB/sFiltering content:  94% (120/127), 45.77 MiB | 14.99 MiB/sFiltering content:  95% (121/127), 45.77 MiB | 14.99 MiB/sFiltering content:  96% (122/127), 45.77 MiB | 14.99 MiB/sFiltering content:  97% (124/127), 45.77 MiB | 14.99 MiB/sFiltering content:  98% (125/127), 73.06 MiB | 18.16 MiB/sFiltering content:  99% (126/127), 163.78 MiB | 13.74 MiB/sFiltering content:  99% (126/127), 325.41 MiB | 12.81 MiB/sFiltering content: 100% (127/127), 325.41 MiB | 12.81 MiB/sFiltering content: 100% (127/127), 508.84 MiB | 16.32 MiB/sFiltering content: 100% (127/127), 508.84 MiB | 15.88 MiB/s, done.
+#16 61.68 + :
+#16 61.68 + cd /opt/vendor/wepppyo3
+#16 61.68 + git lfs pull
+#16 61.74 + rm -rf /opt/vendor/wepppyo3/.git
+#16 61.89 + test -d /opt/vendor/wepppyo3/release/linux/py312/wepppyo3
+#16 DONE 66.8s
+
+#17 [10/14] RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" &&     printf '/workdir/wepppy/\n' > "${SITE_PACKAGES}/wepppy.pth" &&     printf '/workdir/wepppy/services/cao/src/\n' > "${SITE_PACKAGES}/cao.pth" &&     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" &&     printf '/workdir/weppcloud-wbt/WBT/\n/opt/vendor/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" &&     printf '/workdir/wepppyo3/release/linux/py312/\n/opt/vendor/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
+#17 DONE 1.5s
+
+#18 [11/14] RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" &&     git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta &&     cd /tmp/rosetta &&     git lfs pull &&     rm -rf .git &&     mv /tmp/rosetta "${SITE_PACKAGES}/rosetta"
+#18 0.726 Cloning into '/tmp/rosetta'...
+#18 2.521 Filtering content:  73% (11/15)Filtering content:  80% (12/15)Filtering content:  86% (13/15)Filtering content:  93% (14/15), 12.41 MiB | 12.75 MiB/sFiltering content: 100% (15/15), 12.41 MiB | 12.75 MiB/sFiltering content: 100% (15/15), 36.82 MiB | 17.84 MiB/s, done.
+#18 DONE 6.8s
+
+#19 [12/14] RUN curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.38/quarto-1.9.38-linux-amd64.deb" -o /tmp/quarto.deb &&     echo "bd0d73c1042fc5f719fb87753f0874c11344e516ee2cfbe4fe3ed4e4458c3988  /tmp/quarto.deb" | sha256sum -c - &&     apt-get update &&     apt-get install -y --no-install-recommends /tmp/quarto.deb &&     rm -f /tmp/quarto.deb &&     rm -rf /var/lib/apt/lists/* &&     /opt/venv/bin/python -m ipykernel install --prefix /opt/venv --name python3 &&     quarto --version
+#19 2.133 /tmp/quarto.deb: OK
+#19 2.222 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#19 2.257 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#19 2.270 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#19 2.295 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+#19 2.336 Get:5 https://deb.nodesource.com/node_20.x nodistro InRelease [12.1 kB]
+#19 2.381 Get:6 https://deb.nodesource.com/node_20.x nodistro/main amd64 Packages [14.4 kB]
+#19 2.421 Get:7 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+#19 2.421 Get:8 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [270 kB]
+#19 3.457 Fetched 10.2 MB in 1s (7964 kB/s)
+#19 3.457 Reading package lists...
+#19 4.274 Reading package lists...
+#19 5.050 Building dependency tree...
+#19 5.222 Reading state information...
+#19 5.435 Recommended packages:
+#19 5.435   unzip
+#19 5.458 The following NEW packages will be installed:
+#19 5.458   quarto
+#19 5.479 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+#19 5.479 Need to get 0 B/139 MB of archives.
+#19 5.479 After this operation, 436 MB of additional disk space will be used.
+#19 5.479 Get:1 /tmp/quarto.deb quarto amd64 1.9.38 [139 MB]
+#19 7.062 debconf: unable to initialize frontend: Dialog
+#19 7.062 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#19 7.062 debconf: falling back to frontend: Readline
+#19 7.073 debconf: unable to initialize frontend: Readline
+#19 7.073 debconf: (This frontend requires a controlling tty.)
+#19 7.073 debconf: falling back to frontend: Teletype
+#19 7.080 debconf: unable to initialize frontend: Teletype
+#19 7.080 debconf: (This frontend requires a controlling tty.)
+#19 7.080 debconf: falling back to frontend: Noninteractive
+#19 7.944 Selecting previously unselected package quarto.
+#19 7.944 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 52278 files and directories currently installed.)
+#19 7.978 Preparing to unpack /tmp/quarto.deb ...
+#19 7.979 Unpacking quarto (1.9.38) ...
+#19 10.35 Setting up quarto (1.9.38) ...
+#19 12.73 Installed kernelspec python3 in /opt/venv/share/jupyter/kernels/python3
+#19 12.82 1.9.38
+#19 DONE 17.3s
+
+#20 [13/14] RUN apt-get update &&     apt-get install -y --no-install-recommends openssh-client &&     rm -rf /var/lib/apt/lists/*
+#20 0.719 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#20 0.753 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#20 0.768 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#20 0.790 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+#20 0.827 Get:5 https://deb.nodesource.com/node_20.x nodistro InRelease [12.1 kB]
+#20 0.856 Get:6 https://deb.nodesource.com/node_20.x nodistro/main amd64 Packages [14.4 kB]
+#20 0.916 Get:7 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+#20 0.916 Get:8 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [270 kB]
+#20 2.095 Fetched 10.2 MB in 1s (7145 kB/s)
+#20 2.095 Reading package lists...
+#20 2.942 Reading package lists...
+#20 3.748 Building dependency tree...
+#20 3.896 Reading state information...
+#20 4.109 The following additional packages will be installed:
+#20 4.110   libcbor0.10 libfido2-1
+#20 4.111 Suggested packages:
+#20 4.111   keychain libpam-ssh monkeysphere ssh-askpass
+#20 4.111 Recommended packages:
+#20 4.111   xauth
+#20 4.152 The following NEW packages will be installed:
+#20 4.153   libcbor0.10 libfido2-1 openssh-client
+#20 4.220 0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+#20 4.220 Need to get 1097 kB of archives.
+#20 4.220 After this operation, 5484 kB of additional disk space will be used.
+#20 4.220 Get:1 http://deb.debian.org/debian trixie/main amd64 libcbor0.10 amd64 0.10.2-2 [28.3 kB]
+#20 4.231 Get:2 http://deb.debian.org/debian trixie/main amd64 libfido2-1 amd64 1.15.0-1+b1 [78.7 kB]
+#20 4.243 Get:3 http://deb.debian.org/debian trixie/main amd64 openssh-client amd64 1:10.0p1-7+deb13u4 [990 kB]
+#20 4.484 debconf: unable to initialize frontend: Dialog
+#20 4.484 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#20 4.484 debconf: falling back to frontend: Readline
+#20 4.494 debconf: unable to initialize frontend: Readline
+#20 4.494 debconf: (This frontend requires a controlling tty.)
+#20 4.494 debconf: falling back to frontend: Teletype
+#20 4.502 debconf: unable to initialize frontend: Teletype
+#20 4.502 debconf: (This frontend requires a controlling tty.)
+#20 4.502 debconf: falling back to frontend: Noninteractive
+#20 5.332 Fetched 1097 kB in 0s (9771 kB/s)
+#20 5.360 Selecting previously unselected package libcbor0.10:amd64.
+#20 5.360 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 55283 files and directories currently installed.)
+#20 5.399 Preparing to unpack .../libcbor0.10_0.10.2-2_amd64.deb ...
+#20 5.402 Unpacking libcbor0.10:amd64 (0.10.2-2) ...
+#20 5.428 Selecting previously unselected package libfido2-1:amd64.
+#20 5.434 Preparing to unpack .../libfido2-1_1.15.0-1+b1_amd64.deb ...
+#20 5.435 Unpacking libfido2-1:amd64 (1.15.0-1+b1) ...
+#20 5.465 Selecting previously unselected package openssh-client.
+#20 5.471 Preparing to unpack .../openssh-client_1%3a10.0p1-7+deb13u4_amd64.deb ...
+#20 5.479 Unpacking openssh-client (1:10.0p1-7+deb13u4) ...
+#20 5.575 Setting up libcbor0.10:amd64 (0.10.2-2) ...
+#20 5.578 Setting up libfido2-1:amd64 (1.15.0-1+b1) ...
+#20 5.581 Setting up openssh-client (1:10.0p1-7+deb13u4) ...
+#20 5.886 Processing triggers for libc-bin (2.41-12+deb13u4) ...
+#20 DONE 7.6s
+
+#21 [14/14] WORKDIR /workdir/wepppy
+#21 DONE 0.8s
+
+#22 exporting to image
+#22 exporting layers
+#22 exporting layers 42.1s done
+#22 writing image sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b done
+#22 naming to docker.io/library/wepppy-dev done
+#22 DONE 42.1s
+
+#23 resolving provenance for metadata file
+#23 DONE 0.0s
+ Image wepppy-dev Built 

@@ -1,0 +1,1667 @@
+{
+  "browse": {
+    "configured_user": "1000:993",
+    "container_id": "bd2279ea9e91c9d9081ea62708862f5f2c9678c4ff15bae21b519e25cb069eb5",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/dtale_internal_token",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/dtale_internal_token",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "bd2279ea9e91",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:02.96059927Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "download": {
+    "configured_user": "1000:993",
+    "container_id": "c07163fc3b5bd05ab0c530e297c2c4414b5355fd4dd1b70b1df9d723825857eb",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "c07163fc3b5b",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:19.053349626Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "dtale": {
+    "configured_user": "1000:993",
+    "container_id": "44e94384585385b18240951f618700540b93bca45562a66f86aa72f244c387ff",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/dtale_internal_token",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/dtale_internal_token",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "44e943845853",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:19.917742154Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "elevationquery": {
+    "configured_user": "1000:993",
+    "container_id": "67532ea4006e7e374193598ce3874c7157fbd52e1a60829fad7d7232fd1b53a3",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "67532ea4006e",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:04.022911483Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "metquery": {
+    "configured_user": "1000:993",
+    "container_id": "1ab9aaf74e69cd8a1191ecf0fcf3afc71817134360d8bb547602dcc9b5b23bb2",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "1ab9aaf74e69",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:03.816583298Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "profile-playback": {
+    "configured_user": "1000:993",
+    "container_id": "27ab143747e8288ed16a211824b2f8cb56d915ab5c2bc2f0734d74b20eb736de",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/admin_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/admin_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "27ab143747e8",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:20.211519958Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "query-engine": {
+    "configured_user": "1000:993",
+    "container_id": "5a2ddc5092ee861210939b9982a30a9d7320d59bcd1931c10e175e0aafaec4eb",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_mcp_jwt_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_mcp_jwt_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "5a2ddc5092ee",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:19.688442541Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "rq-dashboard": {
+    "configured_user": "",
+    "container_id": "1524d8d9e8b3ea578540e29b39062fe16c6f1a1ad5daa1909b6b37aa8db6b723",
+    "image_id": "sha256:019fbdf6ba5c5027149115e30818a8542b6bf33c78be43bc8e77fe841beb2087",
+    "mounts": [
+      {
+        "Destination": "/rq-dashboard",
+        "RW": true,
+        "Source": "/home/workdir/rq-dashboard",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 0,
+      "groups": [
+        0
+      ],
+      "hostname": "1524d8d9e8b3",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "5.2.0",
+      "rq": "2.12.0",
+      "uid": 0,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:03.204645551Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "rq-engine": {
+    "configured_user": "1000:993",
+    "container_id": "784c087f83284f48a8d42293b723450d48e3a30c44c99d88a97bfe8603967b7d",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/cap_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/cap_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "784c087f8328",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:14.534399068Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "rq-worker": {
+    "configured_user": "1000:993",
+    "container_id": "3f273b823828e1b2858addb0c1e6e85a35869198a92bae2b26f98bdb33a2950f",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/climate_engine_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/opentopography_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "3f273b823828",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:04.507091414Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "rq-worker-batch": {
+    "configured_user": "1000:993",
+    "container_id": "56a8bc2b90882cc997f6fbd352d1d5ec6107b40aaed7657a5501974f013f76a3",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/climate_engine_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/opentopography_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "56a8bc2b9088",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:04.272403791Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "rq-worker-fork-archive": {
+    "configured_user": "1000:993",
+    "container_id": "9035add2b0553d1c477e17349a1b2fbbc538e7810ac5c36661bcb0cdadf22879",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "9035add2b055",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:02.775855063Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "scheduler": {
+    "configured_user": "1000:993",
+    "container_id": "0e324c6a4720dec635bfb12e73f644306fca104eb0f4c14531d43efdb6bf2d21",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "0e324c6a4720",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:09.534282376Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "shape-converter": {
+    "configured_user": "10001:10001",
+    "container_id": "716cb74987068ea9f4426a818c6a54b87917180fd500aa8f483862c9ccb81843",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": false,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 10001,
+      "groups": [
+        10001
+      ],
+      "hostname": "716cb7498706",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 10001,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:19.515232633Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "weppcloud": {
+    "configured_user": "1000:993",
+    "container_id": "7021dc56174e8e2d5730776483732c5c6acd6aed3eaeed048a27a7e006aadeb3",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/agent_jwt_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/agent_jwt_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/cap_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/cap_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/climate_engine_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_secret_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/flask_security_password_salt",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/oauth_github_client_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/oauth_github_client_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/oauth_google_client_secret",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/oauth_google_client_secret",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/opentopography_api_key",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/postgres_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/zoho_noreply_email_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/zoho_noreply_email_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "7021dc56174e",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:19.293699241Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "wmesque": {
+    "configured_user": "1000:993",
+    "container_id": "df587d28b8740d53db8e574b6afae9216997120cc0e40180702e6ebd0310dab6",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "df587d28b874",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:03.390915375Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  },
+  "wmesque2": {
+    "configured_user": "1000:993",
+    "container_id": "bad2878848617d191f4a64145f0e1b46101782b98c11401636575dcd7921b67c",
+    "image_id": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+    "mounts": [
+      {
+        "Destination": "/geodata",
+        "RW": true,
+        "Source": "/wc1/geodata",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/wc1",
+        "RW": true,
+        "Source": "/wc1",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/peridot",
+        "RW": true,
+        "Source": "/home/workdir/peridot",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/rosetta",
+        "RW": true,
+        "Source": "/home/workdir/rosetta",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/weppcloud-wbt",
+        "RW": true,
+        "Source": "/home/workdir/weppcloud-wbt",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy",
+        "RW": true,
+        "Source": "/home/workdir/wepppy",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppy-test-engine-data",
+        "RW": true,
+        "Source": "/home/workdir/wepppy-test-engine-data",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/workdir/wepppyo3",
+        "RW": true,
+        "Source": "/home/workdir/wepppyo3",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/run/secrets/redis_password",
+        "RW": false,
+        "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/var/run/docker.sock",
+        "RW": true,
+        "Source": "/var/run/docker.sock",
+        "Type": "bind"
+      }
+    ],
+    "restart_count": 0,
+    "runtime": {
+      "croniter": "6.0.0",
+      "gid": 993,
+      "groups": [
+        993
+      ],
+      "hostname": "bad287884861",
+      "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+      "redis": "6.2.0",
+      "rq": "2.12.0",
+      "uid": 1000,
+      "umask": "0o22"
+    },
+    "state": {
+      "Running": true,
+      "StartedAt": "2026-10-27T19:38:04.728945926Z",
+      "Status": "running"
+    },
+    "supplementary_groups": null
+  }
+}

@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T -e RQ212_PHASE=upgraded_repaired -e RQ212_TARGET=rq212-20261027-upgraded weppcloud /opt/venv/bin/python -
+{"phase": "upgraded_repaired", "inputs": 184, "parquets": 25, "reports": {"outlet": 9, "hillslopes": 29, "channels": 12}}

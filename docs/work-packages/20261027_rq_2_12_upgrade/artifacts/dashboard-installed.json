@@ -1,0 +1,47 @@
+{
+  "acceptance_run": "rq212-20261027-upgraded",
+  "boundary": "installed Gunicorn HTTP on dashboard loopback, read-only real model jobs",
+  "captured_at": "2026-10-27T19:45:46.528363+00:00",
+  "gid": 0,
+  "groups": [
+    0
+  ],
+  "jobs": [
+    {
+      "created_at": "2026-10-27T19:40:00.076948+00:00",
+      "depends_on": [
+        "17a57a30-c4a5-45a0-b7ab-430f1853e6ad"
+      ],
+      "depends_on_status": [
+        "active"
+      ],
+      "detail_page_http_status": 200,
+      "ended_at": "2026-10-27T19:40:22.950587+00:00",
+      "enqueued_at": "2026-10-27T19:40:22.422991+00:00",
+      "http_status": 200,
+      "id": "2b203a33-aedc-4a0e-bdc6-13feb27b07fa",
+      "route": "/rq-dashboard/0/data/job/2b203a33-aedc-4a0e-bdc6-13feb27b07fa.json",
+      "status": "finished"
+    },
+    {
+      "created_at": "2026-10-27T19:40:00.089587+00:00",
+      "depends_on": [
+        "eb1db899-c57b-4a2b-abdc-127f224552f2"
+      ],
+      "depends_on_status": [
+        "active"
+      ],
+      "detail_page_http_status": 200,
+      "ended_at": "2026-10-27T19:40:34.080221+00:00",
+      "enqueued_at": "2026-10-27T19:40:23.246788+00:00",
+      "http_status": 200,
+      "id": "1f6b862e-9769-474a-b269-f6a1ae4c1236",
+      "route": "/rq-dashboard/0/data/job/1f6b862e-9769-474a-b269-f6a1ae4c1236.json",
+      "status": "finished"
+    }
+  ],
+  "python": "3.12.16",
+  "rq": "2.12.0",
+  "uid": 0,
+  "web_py_sha256": "6b72ffffa2b8fb504a21132eac5aef8fbaded49d4b06df738c0cd8a060134c34"
+}

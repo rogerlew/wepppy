@@ -1,0 +1,106 @@
+INFO:wctl2:docker compose exec -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq/test_job_listings.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 3 items
+
+tests/rq/test_job_listings.py F
+
+=================================== FAILURES ===================================
+___ test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7179e0129ca0>
+
+    def test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        calls: list[tuple[str, str]] = []
+    
+        class _Queue:
+            def __init__(self, name: str, connection: object) -> None:
+                self.name = name
+                self.connection = connection
+    
+            def get_job_ids(self, *, offset: int, length: int) -> list[str]:
+                calls.append(("queued", self.name))
+                assert (offset, length) == (0, -1)
+                return [f"{self.name}-queued"]
+    
+        class _StartedJobRegistry:
+            def __init__(self, *, queue: _Queue) -> None:
+                self.queue = queue
+    
+            def get_job_ids(self, *, start: int, end: int) -> list[str]:
+                calls.append(("started", self.queue.name))
+                assert (start, end) == (0, -1)
+                return [f"{self.queue.name}-started"]
+    
+        class _Worker:
+            @staticmethod
+            def all(*, connection: object) -> list[object]:
+                return []
+    
+        def _job(job_id: str) -> SimpleNamespace:
+            queue_name = job_id.split("-", 1)[0]
+            return SimpleNamespace(
+                id=job_id,
+                origin=f" {queue_name} ",
+                meta={},
+                args=(),
+                func_name=f"tasks.{job_id}",
+                description=None,
+                worker_name=None,
+                enqueued_at=None,
+                started_at=None,
+                ended_at=None,
+                get_status=lambda refresh=False: JobStatus.STARTED if job_id.endswith("started") else JobStatus.QUEUED,
+            )
+    
+        class _Job:
+            @staticmethod
+            def fetch_many(job_ids: list[str], *, connection: object) -> list[SimpleNamespace]:
+                return [_job(job_id) for job_id in job_ids]
+    
+        monkeypatch.setattr(job_listings, "Queue", _Queue)
+        monkeypatch.setattr(job_listings, "StartedJobRegistry", _StartedJobRegistry)
+        monkeypatch.setattr(job_listings, "Worker", _Worker)
+        monkeypatch.setattr(job_listings, "Job", _Job)
+    
+        payloads = job_listings.list_active_jobs(
+            object(),
+            queue_names=("default", "batch"),
+        )
+    
+        assert calls == [
+            ("started", "default"),
+            ("queued", "default"),
+            ("started", "batch"),
+            ("queued", "batch"),
+        ]
+        assert [(item["job_id"], item["queue"], item["state"]) for item in payloads] == [
+            ("batch-started", "batch", "started"),
+            ("default-started", "default", "started"),
+            ("batch-queued", "batch", "queued"),
+            ("default-queued", "default", "queued"),
+        ]
+>       assert all(type(item["status"]) is str for item in payloads)
+E       assert False
+E        +  where False = all(<generator object test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls.<locals>.<genexpr> at 0x7179a5859700>)
+
+tests/rq/test_job_listings.py:87: AssertionError
+=============================== warnings summary ===============================
+tests/rq/test_job_listings.py::test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_job_listings.py::test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_job_listings.py::test_list_active_jobs_preserves_queue_labels_states_and_read_only_calls
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 2 warnings in 9.72s =========================

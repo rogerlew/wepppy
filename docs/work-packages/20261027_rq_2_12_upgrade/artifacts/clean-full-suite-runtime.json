@@ -1,0 +1,173 @@
+{
+  "runtime": {
+    "rq": "2.12.0",
+    "redis": "6.2.0",
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0o22"
+  },
+  "image": "sha256:88a982e44d316824f493c99d0c3a9a3db3e4800feef86ff2c65693677039162b",
+  "container": "3532b7336990b3688e19277bbe7ed16e39b82c58eb79a9f48871360f48714420",
+  "state": "running",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/wc1/geodata",
+      "Destination": "/geodata",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/wc1",
+      "Destination": "/wc1",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/peridot",
+      "Destination": "/workdir/peridot",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/rosetta",
+      "Destination": "/workdir/rosetta",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/weppcloud-wbt",
+      "Destination": "/workdir/weppcloud-wbt",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy",
+      "Destination": "/workdir/wepppy",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy-test-engine-data",
+      "Destination": "/workdir/wepppy-test-engine-data",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppyo3",
+      "Destination": "/workdir/wepppyo3",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/agent_jwt_secret",
+      "Destination": "/run/secrets/agent_jwt_secret",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/cap_secret",
+      "Destination": "/run/secrets/cap_secret",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+      "Destination": "/run/secrets/climate_engine_api_key",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+      "Destination": "/run/secrets/flask_secret_key",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+      "Destination": "/run/secrets/flask_security_password_salt",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/oauth_github_client_secret",
+      "Destination": "/run/secrets/oauth_github_client_secret",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/oauth_google_client_secret",
+      "Destination": "/run/secrets/oauth_google_client_secret",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+      "Destination": "/run/secrets/opentopography_api_key",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+      "Destination": "/run/secrets/postgres_password",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/redis_password",
+      "Destination": "/run/secrets/redis_password",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+      "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/workdir/wepppy/docker/secrets/zoho_noreply_email_password",
+      "Destination": "/run/secrets/zoho_noreply_email_password",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/var/run/docker.sock",
+      "Destination": "/var/run/docker.sock",
+      "RW": true
+    },
+    {
+      "Type": "bind",
+      "Source": "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/tests/weppcloud/routes/test_pure_controls_render.py",
+      "Destination": "/workdir/wepppy/tests/weppcloud/routes/test_pure_controls_render.py",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/README.md",
+      "Destination": "/workdir/wepppy/wepppy/nodb/mods/roads/README.md",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/roads.py",
+      "Destination": "/workdir/wepppy/wepppy/nodb/mods/roads/roads.py",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/nodb/mods/roads/specification.md",
+      "Destination": "/workdir/wepppy/wepppy/nodb/mods/roads/specification.md",
+      "RW": false
+    },
+    {
+      "Type": "bind",
+      "Source": "/workdir/wepppy/.pytest_cache/rq212-clean-inputs/wepppy/weppcloud/templates/controls/roads_pure.htm",
+      "Destination": "/workdir/wepppy/wepppy/weppcloud/templates/controls/roads_pure.htm",
+      "RW": false
+    }
+  ]
+}

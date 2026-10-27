@@ -1,0 +1,12 @@
+{
+  "identity": {
+    "uid": 1000,
+    "gid": 993
+  },
+  "open_file_unlink_creates_nfs": true,
+  "second_unlink_errno": 16,
+  "second_unlink_error": "Device or resource busy",
+  "rq_used": false,
+  "close_releases_nfs_file": true,
+  "probe_removed": true
+}

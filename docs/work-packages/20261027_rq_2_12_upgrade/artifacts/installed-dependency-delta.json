@@ -1,0 +1,10 @@
+{
+  "croniter": {
+    "baseline": null,
+    "candidate": "6.0.0"
+  },
+  "rq": {
+    "baseline": "1.16.2",
+    "candidate": "2.12.0"
+  }
+}

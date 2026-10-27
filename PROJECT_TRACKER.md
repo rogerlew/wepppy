@@ -1,4 +1,4 @@
-Active: [RQ 2.12.0 upgrade](docs/work-packages/20261027_rq_2_12_upgrade/package.md) — faithful migration; compatibility inventory and 1.16.2 baseline underway. Local forest only; native webhooks excluded.
+Completed on forest: [RQ 2.12.0 upgrade](docs/work-packages/20261027_rq_2_12_upgrade/package.md) — exact 2.12.0 across 17 runtimes; model/API/artifact acceptance, 598 targeted + 13 lifecycle tests, isolated full suite (11,948 passed; 226 skipped), and independent reviews pass. Unrelated working-tree Roads provenance failure retained separately. Production unchanged; native webhooks disabled.
 
 Completed locally: [Public Usersum feature registry](docs/work-packages/20261027_usersum_feature_registry/package.md) — public Jinja catalog of 18 features and 16 configurations; 219 focused tests pass, independent reviews approved. Not deployed.
 

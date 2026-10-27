@@ -1,0 +1,48 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: b1054fac7
+Merge base: b1054fac79a355528cf77e7cc7a3c35b8d9585c1
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 13
+
+Files:
+  M wepppy/microservices/rq_engine/ag_fields_routes.py
+  M wepppy/microservices/rq_engine/run_sync_routes.py
+  M wepppy/nodb/mods/roads/roads.py
+  M wepppy/profile_coverage/runtime.py
+  M wepppy/rq/ag_fields_rq.py
+  M wepppy/rq/auth_actor.py
+  M wepppy/rq/batch_rq.py
+  M wepppy/rq/culvert_rq_manifest.py
+  M wepppy/rq/job_info.py
+  M wepppy/rq/job_listings.py
+  M wepppy/rq/roads_rq.py
+  M wepppy/rq/run_catalog_rq.py
+  M wepppy/weppcloud/routes/weppcloudr.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/microservices/rq_engine/ag_fields_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/run_sync_routes.py (base=0 current=6 delta=+6)
+    + wepppy/microservices/rq_engine/run_sync_routes.py:188:4 except-Exception  # except Exception:
+    + wepppy/microservices/rq_engine/run_sync_routes.py:298:16 except-Exception  # except Exception:
+    + wepppy/microservices/rq_engine/run_sync_routes.py:345:20 except-Exception  # except Exception:
+    + wepppy/microservices/rq_engine/run_sync_routes.py:353:4 except-Exception  # except Exception:
+    + wepppy/microservices/rq_engine/run_sync_routes.py:375:4 except-Exception  # except Exception:
+    + wepppy/microservices/rq_engine/run_sync_routes.py:384:4 except-Exception  # except Exception:
+  M wepppy/nodb/mods/roads/roads.py (base=18 current=18 delta=+0)
+  M wepppy/profile_coverage/runtime.py (base=0 current=0 delta=+0)
+  M wepppy/rq/ag_fields_rq.py (base=0 current=0 delta=+0)
+  M wepppy/rq/auth_actor.py (base=0 current=0 delta=+0)
+  M wepppy/rq/batch_rq.py (base=12 current=13 delta=+1)
+    + wepppy/rq/batch_rq.py:1012:4 except-Exception  # except Exception:
+  M wepppy/rq/culvert_rq_manifest.py (base=0 current=0 delta=+0)
+  M wepppy/rq/job_info.py (base=2 current=2 delta=+0)
+  M wepppy/rq/job_listings.py (base=0 current=0 delta=+0)
+  M wepppy/rq/roads_rq.py (base=7 current=7 delta=+0)
+  M wepppy/rq/run_catalog_rq.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/weppcloudr.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +7
+Result: FAIL (per-file broad-catch increase detected in changed files)

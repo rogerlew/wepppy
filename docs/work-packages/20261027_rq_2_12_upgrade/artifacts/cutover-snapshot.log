@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec -T redis sh -c 'umask 077; export REDISCLI_AUTH="$(cat /run/secrets/redis_password)"; redis-cli --rdb /tmp/rq212-precutover.rdb'
+sending REPLCONF capa eof
+sending REPLCONF rdb-only 1
+SYNC sent to master, writing bytes of bulk transfer until EOF marker to '/tmp/rq212-precutover.rdb'
+Transfer finished with success after 32508492 bytes

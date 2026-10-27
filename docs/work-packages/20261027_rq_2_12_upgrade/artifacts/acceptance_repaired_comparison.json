@@ -1,0 +1,10 @@
+{
+  "input_files_equal": 184,
+  "output_parquets_equal": 25,
+  "report_rows_equal": [
+    "outlet",
+    "hillslopes",
+    "channels"
+  ],
+  "all417_generated_files_equal_to_archive": "acceptance_final_repaired_manifest.json"
+}

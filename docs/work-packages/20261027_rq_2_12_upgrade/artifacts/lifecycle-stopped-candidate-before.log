@@ -1,0 +1,65 @@
+INFO:wctl2:docker compose exec -T -e RQ212_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash -x -q
+F
+=================================== FAILURES ===================================
+_____________ test_running_stop_timeout_and_workhorse_crash[stop] ______________
+
+lifecycle = namespace(connection=<redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.UnixDomainSocketConnection...at 0x71971d710040>, logs=[PosixPath('/tmp/pytest-of-unknown/pytest-194/test_running_stop_timeout_and_0/worker-0.log')])
+failure = 'stop'
+
+    @pytest.mark.parametrize("failure", ["stop", "timeout", "sigkill"])
+    def test_running_stop_timeout_and_workhorse_crash(lifecycle, failure):
+        h = lifecycle
+        job = h.enqueue(operation="hold", job_timeout=2 if failure == "timeout" else 30)
+        finalizer = h.enqueue(depends_on=failure_tolerant_depends_on(job))
+        with h.worker():
+            pid = int(wait_for(lambda: h.connection.get(job.id + ":started")))
+            if failure == "stop":
+                send_stop_job_command(h.connection, job.id)
+            elif failure == "sigkill":
+                os.kill(pid, signal.SIGKILL)
+            wait_for(lambda: state(job) in {"failed", "stopped"})
+>           wait_for(lambda: state(finalizer) == "finished")
+
+tests/rq/test_rq212_lifecycle.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function test_running_stop_timeout_and_workhorse_crash.<locals>.<lambda> at 0x71971d7105e0>
+
+    def wait_for(predicate, *, timeout=20):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            result = predicate()
+            if result:
+                return result
+            time.sleep(0.02)
+>       pytest.fail(f"condition did not become true within {timeout} seconds")
+E       Failed: condition did not become true within 20 seconds
+
+tests/rq/test_rq212_lifecycle.py:41: Failed
+--------------------------- Captured stdout teardown ---------------------------
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: started with PID 3884079, version 2.12.0
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: subscribing to channel rq:pubsub:d9dc0f2a36f747ae839c96ffaf83afc6
+19:17:39 *** Listening on rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12...
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: cleaning registries for queue: rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12-f4873d04-0b10-43c4-a0b3-182981b..., operation='hold') (rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12-f4873d04-0b10-43c4-a0b3-182981bfd22a)
+Starting job rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12-f4873d04-0b10-43c4-a0b3-182981bfd22a
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: killed horse pid 3885869
+19:17:39 Worker d9dc0f2a36f747ae839c96ffaf83afc6: job rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12-f4873d04-0b10-43c4-a0b3-182981bfd22a stopped by user, moving job to FailedJobRegistry
+Job rq212-ba23283c-91f1-48b0-8ee4-dd57ffb0ec12-f4873d04-0b10-43c4-a0b3-182981bfd22a Failed
+19:17:59 Worker d9dc0f2a36f747ae839c96ffaf83afc6 [PID 3884079]: warm shut down requested
+19:17:59 Worker d9dc0f2a36f747ae839c96ffaf83afc6: unsubscribing from channel rq:pubsub:d9dc0f2a36f747ae839c96ffaf83afc6
+
+=============================== warnings summary ===============================
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 warnings in 41.62s

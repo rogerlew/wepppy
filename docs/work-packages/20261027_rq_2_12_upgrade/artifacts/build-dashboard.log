@@ -1,0 +1,122 @@
+INFO:wctl2:docker compose build rq-dashboard
+ Image docker-rq-dashboard Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 527B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.rq-dashboard
+#2 transferring dockerfile: 921B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.2s
+
+#5 [ 1/14] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#5 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f 1.0s done
+#5 sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f 10.37kB / 10.37kB done
+#5 sha256:6d2b0577e6d1632f077331de8e4780535f54839d163ded7abb4b7dd37b5d37ac 1.75kB / 1.75kB done
+#5 sha256:3a1b98be05abc7ac60c8712a943688620a602c3e0e6bfbc567afbeabe2085b28 5.66kB / 5.66kB done
+#5 sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 1.55MB / 1.55MB 0.3s done
+#5 sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 254B / 254B 0.4s done
+#5 sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 12.12MB / 12.12MB 0.5s done
+#5 sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034 29.84MB / 29.84MB 0.6s done
+#5 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034 3.2s done
+#5 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 0.4s done
+#5 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 1.8s done
+#5 extracting sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 done
+#5 DONE 8.3s
+
+#6 [internal] load build context
+#6 transferring context: 83B done
+#6 DONE 0.0s
+
+#7 [2/5] RUN apt-get update && apt-get install -y --no-install-recommends         bash         gcc         libc-dev     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [3/5] WORKDIR /rq-dashboard
+#8 CACHED
+
+#9 [4/5] COPY rq-dashboard/requirements.txt /tmp/rq-dashboard-requirements.txt
+#9 CACHED
+
+#10 [5/5] RUN python -c "from pathlib import Path; p=Path('/tmp/rq-dashboard-requirements.txt'); s=p.read_text(); assert s.count('rq==2.0.0\n') == 1; p.write_text(s.replace('rq==2.0.0\n', 'rq==2.12.0\ncroniter==6.0.0\npytz==2022.1\n'))"     && pip3 install --no-cache-dir -r /tmp/rq-dashboard-requirements.txt     && pip3 install --no-cache-dir gunicorn==23.0.0
+#10 3.781 Ignoring backports.functools-lru-cache: markers 'python_version < "3.3"' don't match your environment
+#10 3.883 Collecting arrow==1.2.3 (from -r /tmp/rq-dashboard-requirements.txt (line 7))
+#10 3.965   Downloading arrow-1.2.3-py3-none-any.whl.metadata (6.9 kB)
+#10 4.006 Collecting click==8.1.7 (from -r /tmp/rq-dashboard-requirements.txt (line 9))
+#10 4.250   Downloading click-8.1.7-py3-none-any.whl.metadata (3.0 kB)
+#10 4.285 Collecting flask==2.3.2 (from -r /tmp/rq-dashboard-requirements.txt (line 10))
+#10 4.298   Downloading Flask-2.3.2-py3-none-any.whl.metadata (3.7 kB)
+#10 4.321 Collecting itsdangerous==2.1.2 (from -r /tmp/rq-dashboard-requirements.txt (line 11))
+#10 4.335   Downloading itsdangerous-2.1.2-py3-none-any.whl.metadata (2.9 kB)
+#10 4.365 Collecting jinja2==3.1.2 (from -r /tmp/rq-dashboard-requirements.txt (line 12))
+#10 4.379   Downloading Jinja2-3.1.2-py3-none-any.whl.metadata (3.5 kB)
+#10 4.507 Collecting markupsafe==2.1.3 (from -r /tmp/rq-dashboard-requirements.txt (line 13))
+#10 4.521   Downloading MarkupSafe-2.1.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.9 kB)
+#10 4.547 Collecting python-dateutil==2.8.2 (from -r /tmp/rq-dashboard-requirements.txt (line 14))
+#10 4.562   Downloading python_dateutil-2.8.2-py2.py3-none-any.whl.metadata (8.2 kB)
+#10 4.621 Collecting redis==5.2.0 (from -r /tmp/rq-dashboard-requirements.txt (line 15))
+#10 4.637   Downloading redis-5.2.0-py3-none-any.whl.metadata (9.1 kB)
+#10 4.683 Collecting rq==2.12.0 (from -r /tmp/rq-dashboard-requirements.txt (line 16))
+#10 4.697   Downloading rq-2.12.0-py3-none-any.whl.metadata (12 kB)
+#10 4.743 Collecting croniter==6.0.0 (from -r /tmp/rq-dashboard-requirements.txt (line 17))
+#10 5.007   Downloading croniter-6.0.0-py2.py3-none-any.whl.metadata (32 kB)
+#10 5.084 Collecting pytz==2022.1 (from -r /tmp/rq-dashboard-requirements.txt (line 18))
+#10 5.099   Downloading pytz-2022.1-py2.py3-none-any.whl.metadata (21 kB)
+#10 5.125 Collecting six==1.16.0 (from -r /tmp/rq-dashboard-requirements.txt (line 19))
+#10 5.138   Downloading six-1.16.0-py2.py3-none-any.whl.metadata (1.8 kB)
+#10 5.202 Collecting werkzeug==2.3.7 (from -r /tmp/rq-dashboard-requirements.txt (line 20))
+#10 5.219   Downloading werkzeug-2.3.7-py3-none-any.whl.metadata (4.1 kB)
+#10 5.240 Collecting Redis-Sentinel-Url==1.0.1 (from -r /tmp/rq-dashboard-requirements.txt (line 21))
+#10 5.258   Downloading Redis_Sentinel_Url-1.0.1-py2.py3-none-any.whl.metadata (1.0 kB)
+#10 5.334 Collecting blinker>=1.6.2 (from flask==2.3.2->-r /tmp/rq-dashboard-requirements.txt (line 10))
+#10 5.347   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+#10 5.462 Downloading arrow-1.2.3-py3-none-any.whl (66 kB)
+#10 5.480 Downloading click-8.1.7-py3-none-any.whl (97 kB)
+#10 5.497 Downloading Flask-2.3.2-py3-none-any.whl (96 kB)
+#10 5.512 Downloading itsdangerous-2.1.2-py3-none-any.whl (15 kB)
+#10 5.527 Downloading Jinja2-3.1.2-py3-none-any.whl (133 kB)
+#10 5.543 Downloading MarkupSafe-2.1.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (28 kB)
+#10 5.557 Downloading python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
+#10 5.576 Downloading redis-5.2.0-py3-none-any.whl (261 kB)
+#10 5.591 Downloading rq-2.12.0-py3-none-any.whl (127 kB)
+#10 5.605 Downloading croniter-6.0.0-py2.py3-none-any.whl (25 kB)
+#10 5.625 Downloading pytz-2022.1-py2.py3-none-any.whl (503 kB)
+#10 5.643 Downloading six-1.16.0-py2.py3-none-any.whl (11 kB)
+#10 5.658 Downloading werkzeug-2.3.7-py3-none-any.whl (242 kB)
+#10 5.678 Downloading Redis_Sentinel_Url-1.0.1-py2.py3-none-any.whl (4.7 kB)
+#10 5.692 Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+#10 5.772 Installing collected packages: pytz, six, redis, markupsafe, itsdangerous, click, blinker, werkzeug, Redis-Sentinel-Url, python-dateutil, jinja2, flask, croniter, arrow, rq
+#10 12.25 Successfully installed Redis-Sentinel-Url-1.0.1 arrow-1.2.3 blinker-1.9.0 click-8.1.7 croniter-6.0.0 flask-2.3.2 itsdangerous-2.1.2 jinja2-3.1.2 markupsafe-2.1.3 python-dateutil-2.8.2 pytz-2022.1 redis-5.2.0 rq-2.12.0 six-1.16.0 werkzeug-2.3.7
+#10 12.25 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#10 12.40 
+#10 12.40 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#10 12.40 [notice] To update, run: pip install --upgrade pip
+#10 13.11 Collecting gunicorn==23.0.0
+#10 13.19   Downloading gunicorn-23.0.0-py3-none-any.whl.metadata (4.4 kB)
+#10 13.23 Collecting packaging (from gunicorn==23.0.0)
+#10 13.25   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+#10 13.26 Downloading gunicorn-23.0.0-py3-none-any.whl (85 kB)
+#10 13.29 Downloading packaging-26.3-py3-none-any.whl (129 kB)
+#10 13.33 Installing collected packages: packaging, gunicorn
+#10 14.50 Successfully installed gunicorn-23.0.0 packaging-26.3
+#10 14.50 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#10 14.65 
+#10 14.65 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#10 14.65 [notice] To update, run: pip install --upgrade pip
+#10 DONE 17.9s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 1.0s done
+#11 writing image sha256:019fbdf6ba5c5027149115e30818a8542b6bf33c78be43bc8e77fe841beb2087 done
+#11 naming to docker.io/library/docker-rq-dashboard done
+#11 DONE 1.0s
+
+#12 resolving provenance for metadata file
+#12 DONE 0.0s
+ Image docker-rq-dashboard Built 

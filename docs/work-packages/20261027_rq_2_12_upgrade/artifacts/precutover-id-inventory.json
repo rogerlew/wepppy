@@ -1,0 +1,13 @@
+{
+  "captured_at": "2026-10-27T19:18:00Z",
+  "states": {
+    "finished": 5837,
+    "deferred": 1040,
+    "canceled": 243,
+    "failed": 741,
+    "stopped": 41,
+    "queued": 1
+  },
+  "invalid_ids": [],
+  "method": "Read-only SCAN rq:job:* hash status; exact IDs checked against [A-Za-z0-9_-]+; no deserialization or registry cleanup."
+}

@@ -1,0 +1,59 @@
+INFO:wctl2:docker compose run --rm --no-deps -T -e PYTHONPATH=/rq-dashboard -v /tmp/rq212-dashboard:/tmp/rq212-dashboard:ro -v /workdir/wepppy/.pytest_cache/rq212-baseline:/tmp/rq212-redis:ro rq-dashboard python /tmp/rq212-dashboard/probe.py --orphan
+time="2026-10-27T12:23:56-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-rq-dashboard-run-0401a1c887e9 Creating 
+ Container docker-rq-dashboard-run-0401a1c887e9 Created 
+127.0.0.1 - - [27/Oct/2026 19:23:57] "GET /rq-dashboard/0/data/job/rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b-child.json HTTP/1.1" 200 -
+{"http_status": 200, "payload": {"created_at": "2026-10-27T19:23:57.841853+00:00", "depends_on": ["rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b-parent"], "depends_on_status": ["active"], "description": "math.sqrt(9)", "ended_at": null, "enqueued_at": null, "exc_info": null, "id": "rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b-child", "metadata": "{}", "origin": "rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b", "result": null, "status": "deferred"}, "rq": "2.12.0"}
+[2026-10-27 19:23:57,896] ERROR in app: Exception on /rq-dashboard/queue/rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b/started/empty [POST]
+Traceback (most recent call last):
+  File "/rq-dashboard/rq_dashboard/web.py", line 423, in delete_job_view
+    job = Job.fetch(job_id, connection=current_app.redis_conn)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rq/job.py", line 696, in fetch
+    job.refresh()
+  File "/usr/local/lib/python3.12/site-packages/rq/job.py", line 1061, in refresh
+    raise NoSuchJobError(f'No such job: {self.key}')
+rq.exceptions.NoSuchJobError: No such job: rq:job:rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b-orphan
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 119, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 109, in _wrapped
+    result_dict = f(*args, **kwargs)
+                  ^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 469, in empty_queue
+    delete_job_view(id, registry)
+  File "/rq-dashboard/rq_dashboard/web.py", line 119, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 109, in _wrapped
+    result_dict = f(*args, **kwargs)
+                  ^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 427, in delete_job_view
+    registry.remove(job_id)
+  File "/usr/local/lib/python3.12/site-packages/rq/registry.py", line 395, in remove
+    raise NotImplementedError()
+NotImplementedError
+127.0.0.1 - - [27/Oct/2026 19:23:57] "[35m[1mPOST /rq-dashboard/queue/rq212-dashboard-607bdd76-584e-4a12-9c31-5a1cefb47a8b/started/empty HTTP/1.1[0m" 500 -
+{"orphan_http_status": 500, "payload": {"error": "INTERNAL SERVER ERROR"}, "remaining_started": 1, "rq": "2.12.0"}
+Traceback (most recent call last):
+  File "/tmp/rq212-dashboard/probe.py", line 63, in <module>
+    assert empty_status == 200
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError
+

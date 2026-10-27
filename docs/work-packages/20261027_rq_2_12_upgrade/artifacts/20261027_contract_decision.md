@@ -1,7 +1,7 @@
 # RQ212 contract checkpoint
 
-**Date**: 2026-10-27 19:10 UTC  
-**Starting revision**: `9231f2427d33b64f971992ac969fd9420c49afd3`  
+**Date**: 2026-10-27 19:10 UTC
+**Starting revision**: `9231f2427d33b64f971992ac969fd9420c49afd3`
 **Status**: accepted by two independent reviews; implementation has not begun.
 
 ## Authority and exact delta
@@ -11,7 +11,7 @@ local forest rebuild/acceptance, independent reviews, and the required standalon
 ancestor revision. This authorizes the bounded checkpoint commit, with no branch
 change or push. Application behavior is unchanged. The only normative addition
 is the version target and migration acceptance/rollout boundary in
-`docs/schemas/rq-response-contract.md#rq-212-runtime-migration-implementation-pending`.
+`docs/schemas/rq-response-contract.md#rq-212-runtime-migration`.
 Native webhooks remain disabled/unexposed; no infrastructure is introduced.
 
 ## Applicable contracts and discrepancy classification

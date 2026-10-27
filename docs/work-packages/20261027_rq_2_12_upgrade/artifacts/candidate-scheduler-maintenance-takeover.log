@@ -1,0 +1,45 @@
+INFO:wctl2:docker compose exec -T -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python .pytest_cache/rq212_scheduler_takeover_probe.py
+{"blocked_clients": ["1654"], "maintenance_scheduler": 3962710, "old_scheduler": 3962378, "scheduled_result": {"attempt": 1, "value": 42}, "scheduler_sockets": ["socket:[161264097]", "socket:[161264098]", "socket:[161264099]", "socket:[161264100]", "socket:[161286325]", "socket:[161260228]", "socket:[161269116]"], "version": "2.12.0", "worker": 3960051, "worker_sockets": ["socket:[161264097]", "socket:[161264098]", "socket:[161264099]", "socket:[161264100]", "socket:[161286325]", "socket:[161260228]", "socket:[161285447]"]}
+{"replacement": 3962909, "job": "e4ec4c52-4102-43de-9e44-5048fe8997a2", "result": {"attempt": 1, "value": 42}, "intermediate": []}
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: started with PID 3960051, version 2.12.0
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: subscribing to channel rq:pubsub:c0b4c1ac37bb4369b4d7087c55948550
+19:33:30 *** Listening on rq212-takeover-f381dab41b004b17a4dcaf7083583273...
+19:33:30 Acquired scheduler lock for rq212-takeover-f381dab41b004b17a4dcaf7083583273
+19:33:30 Scheduler for rq212-takeover-f381dab41b004b17a4dcaf7083583273 started with PID 3962378
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: cleaning registries for queue: rq212-takeover-f381dab41b004b17a4dcaf7083583273
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-0') (0f946842-df5c-4cc5-970c-e0e7dde074d5)
+Starting job 0f946842-df5c-4cc5-970c-e0e7dde074d5
+19:33:30 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-0') job in 0:00:00.002412s on worker c0b4c1ac37bb4369b4d7087c55948550
+Finished job 0f946842-df5c-4cc5-970c-e0e7dde074d5
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: Job OK (0f946842-df5c-4cc5-970c-e0e7dde074d5)
+19:33:30 Worker c0b4c1ac37bb4369b4d7087c55948550: job 0f946842-df5c-4cc5-970c-e0e7dde074d5 result is kept for 604800 seconds
+19:33:31 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-1') (e4573867-68a1-4515-8835-9db00be4ecc0)
+Starting job e4573867-68a1-4515-8835-9db00be4ecc0
+19:33:31 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-1') job in 0:00:00.002807s on worker c0b4c1ac37bb4369b4d7087c55948550
+Finished job e4573867-68a1-4515-8835-9db00be4ecc0
+19:33:31 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: Job OK (e4573867-68a1-4515-8835-9db00be4ecc0)
+19:33:31 Worker c0b4c1ac37bb4369b4d7087c55948550: job e4573867-68a1-4515-8835-9db00be4ecc0 result is kept for 604800 seconds
+19:33:32 Worker c0b4c1ac37bb4369b4d7087c55948550: cleaning registries for queue: rq212-takeover-f381dab41b004b17a4dcaf7083583273
+19:33:32 Scheduler for rq212-takeover-f381dab41b004b17a4dcaf7083583273 started with PID 3962710
+19:33:33 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-2') (eb3f09c7-d845-41cf-bd34-5780ef3411e1)
+Starting job eb3f09c7-d845-41cf-bd34-5780ef3411e1
+19:33:33 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-2') job in 0:00:00.002549s on worker c0b4c1ac37bb4369b4d7087c55948550
+Finished job eb3f09c7-d845-41cf-bd34-5780ef3411e1
+19:33:33 Worker c0b4c1ac37bb4369b4d7087c55948550: rq212-takeover-f381dab41b004b17a4dcaf7083583273: Job OK (eb3f09c7-d845-41cf-bd34-5780ef3411e1)
+19:33:33 Worker c0b4c1ac37bb4369b4d7087c55948550: job eb3f09c7-d845-41cf-bd34-5780ef3411e1 result is kept for 604800 seconds
+19:33:33 Worker c0b4c1ac37bb4369b4d7087c55948550: cleaning registries for queue: rq212-takeover-f381dab41b004b17a4dcaf7083583273
+
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: started with PID 3962909, version 2.12.0
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: subscribing to channel rq:pubsub:875c4815ac5c429bb19c0c9797372299
+19:33:43 *** Listening on rq212-takeover-f381dab41b004b17a4dcaf7083583273...
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: cleaning registries for queue: rq212-takeover-f381dab41b004b17a4dcaf7083583273
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: rq212-takeover-f381dab41b004b17a4dcaf7083583273: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-3') (e4ec4c52-4102-43de-9e44-5048fe8997a2)
+Starting job e4ec4c52-4102-43de-9e44-5048fe8997a2
+19:33:43 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-takeover-f381dab41b004b17a4dcaf7083583273-3') job in 0:00:00.002472s on worker 875c4815ac5c429bb19c0c9797372299
+Finished job e4ec4c52-4102-43de-9e44-5048fe8997a2
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: rq212-takeover-f381dab41b004b17a4dcaf7083583273: Job OK (e4ec4c52-4102-43de-9e44-5048fe8997a2)
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: job e4ec4c52-4102-43de-9e44-5048fe8997a2 result is kept for 604800 seconds
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299 [PID 3962909]: warm shut down requested
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: stopping on request
+19:33:43 Worker 875c4815ac5c429bb19c0c9797372299: unsubscribing from channel rq:pubsub:875c4815ac5c429bb19c0c9797372299
+

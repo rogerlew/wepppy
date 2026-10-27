@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose run --rm --no-deps -T -e PYTHONPATH=/rq-dashboard -v /tmp/rq212-dashboard:/tmp/rq212-dashboard:ro -v /workdir/wepppy/.pytest_cache/rq212-baseline:/tmp/rq212-redis:ro rq-dashboard python /tmp/rq212-dashboard/run_tests.py
+time="2026-10-27T12:25:16-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-rq-dashboard-run-6495b68a2de8 Creating 
+ Container docker-rq-dashboard-run-6495b68a2de8 Created 
+test_job_info_preserves_dependency_ids (__main__.SocketCase.test_job_info_preserves_dependency_ids) ... ok
+test_empty_started_registry_removes_missing_job_execution (__main__.SocketCase.test_empty_started_registry_removes_missing_job_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.060s
+
+OK

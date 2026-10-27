@@ -1,0 +1,501 @@
+INFO:wctl2:docker compose exec -T -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq --maxfail=5 -q
+...................F..........................................ssssssssss [  5%]
+ssssssssssssssss........................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+...........................................FF........................... [ 35%]
+........................................................................ [ 41%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+..........................sss........................................... [ 61%]
+..........................................ssssssssssssssssssssssssssssss [ 66%]
+ssssssssssssssssssssssssssssssssssssssss.s........sssssss........sssssss [ 71%]
+ssssssssssssssssssss.................................................... [ 77%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+.......FF
+=================================== FAILURES ===================================
+___________ test_active_batch_summaries_use_rq_status_values[False] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e78edcb2d50>
+terminal = False
+
+    @pytest.mark.parametrize("terminal", [False, True])
+    def test_active_batch_summaries_use_rq_status_values(monkeypatch, terminal):
+        from types import SimpleNamespace
+        from rq.job import JobStatus
+    
+        queue = SimpleNamespace(get_job_ids=lambda: ["batch-job"])
+        monkeypatch.setattr(batch_rq, "Queue", lambda *args, **kwargs: queue)
+        for registry in ("StartedJobRegistry", "DeferredJobRegistry", "ScheduledJobRegistry"):
+            monkeypatch.setattr(batch_rq, registry, lambda **kwargs: SimpleNamespace(get_job_ids=lambda: []))
+        job = SimpleNamespace(id="batch-job", args=("demo",), meta={}, func_name="tasks.run",
+                              get_status=lambda refresh=False: JobStatus.FINISHED if terminal else JobStatus.STARTED)
+        monkeypatch.setattr(batch_rq.Job, "fetch", lambda *args, **kwargs: job)
+>       assert batch_rq._active_batch_job_summaries("demo", redis_conn=object()) == (
+            [] if terminal else ["batch-job:started:run"]
+        )
+E       AssertionError: assert [] == ['batch-job:started:run']
+E         
+E         Right contains one more item: 'batch-job:started:run'
+E         Use -v to get more diff
+
+tests/rq/test_batch_rq_delete_batch.py:153: AssertionError
+________ test_dependency_graph_auth_actor_hook_persists_correlation_id _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e78edb02360>
+
+    def test_dependency_graph_auth_actor_hook_persists_correlation_id(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        auth_actor = _load_auth_actor_module()
+        from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
+    
+        class _FakeJob:
+            def __init__(self, job_id: str) -> None:
+                self.id = job_id
+                self.meta: dict[str, str] = {}
+                self.save_meta_calls = 0
+    
+            def save_meta(self) -> None:
+                self.save_meta_calls += 1
+    
+        class _FakeQueue:
+            name = "default"
+    
+            def enqueue_call(self, *args, **kwargs):
+                return _FakeJob("child-job")
+    
+            def enqueue(self, *args, **kwargs):
+                return self.enqueue_call(*args, **kwargs)
+    
+        monkeypatch.setattr(auth_actor, "Queue", _FakeQueue)
+        auth_actor.install_rq_auth_actor_hook()
+    
+        token = set_correlation_id("cid-rq-propagation-01")
+        try:
+            queue = _FakeQueue()
+            child_job = queue.enqueue_call(lambda: None)
+        finally:
+            reset_correlation_id(token)
+    
+>       assert child_job.meta["correlation_id"] == "cid-rq-propagation-01"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'correlation_id'
+
+tests/rq/test_dependency_graph_tools.py:634: KeyError
+____ test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e78edb00140>
+
+    def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        auth_actor = _load_auth_actor_module()
+        from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
+    
+        class _FakeJob:
+            def __init__(self, job_id: str) -> None:
+                self.id = job_id
+                self.meta: dict[str, str] = {"correlation_id": "invalid correlation id !!!"}
+                self.save_meta_calls = 0
+    
+            def save_meta(self) -> None:
+                self.save_meta_calls += 1
+    
+        class _FakeQueue:
+            name = "default"
+    
+            def enqueue_call(self, *args, **kwargs):
+                return _FakeJob("child-job")
+    
+            def enqueue(self, *args, **kwargs):
+                return self.enqueue_call(*args, **kwargs)
+    
+        monkeypatch.setattr(auth_actor, "Queue", _FakeQueue)
+        auth_actor.install_rq_auth_actor_hook()
+    
+        token = set_correlation_id("cid-rq-propagation-02")
+        try:
+            queue = _FakeQueue()
+            child_job = queue.enqueue_call(lambda: None)
+        finally:
+            reset_correlation_id(token)
+    
+>       assert child_job.meta["correlation_id"] == "cid-rq-propagation-02"
+E       AssertionError: assert 'invalid correlation id !!!' == 'cid-rq-propagation-02'
+E         
+E         - cid-rq-propagation-02
+E         + invalid correlation id !!!
+
+tests/rq/test_dependency_graph_tools.py:672: AssertionError
+_______ test_real_tree_http_payload_and_retry_are_terminal_and_sanitized _______
+
+rq_connection = <redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.Connection(host=redis,port=6379,db=9)>)>)>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e7b9655c590>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7e7b96540800>
+
+    def test_real_tree_http_payload_and_retry_are_terminal_and_sanitized(
+        rq_connection,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        monkeypatch.setattr(job_info_module.redis, "Redis", redis.StrictRedis)
+        queue_name = f"surf14a-tree-{uuid.uuid4().hex}"
+        queue = Queue(queue_name, connection=rq_connection)
+        root = queue.enqueue(_noop_job, meta={"runid": "integration-run"})
+        child = queue.enqueue(
+            _controlled_boundary_failure_job,
+            meta={"runid": "integration-run"},
+        )
+        abstraction = queue.enqueue(_noop_job, depends_on=child)
+        root.meta["jobs:0,func:build_subcatchments_rq"] = child.id
+        root.meta["jobs:1,func:abstract_watershed_rq"] = abstraction.id
+        root.save_meta()
+        worker = _InlineWepppyWorker(
+            [queue],
+            connection=rq_connection,
+            name=f"surf14a-tree-worker-{uuid.uuid4().hex}",
+        )
+    
+        retry_build: Job | None = None
+        retry_abstraction: Job | None = None
+        try:
+            with caplog.at_level("ERROR", logger="rq.worker"):
+                worker.work(burst=True, logging_level="WARNING")
+    
+            stored_abstraction = Job.fetch(
+                abstraction.id,
+                connection=rq_connection,
+            )
+            assert stored_abstraction.get_status(refresh=True) == "canceled"
+            assert abstraction.id not in DeferredJobRegistry(
+                queue_name,
+                connection=rq_connection,
+            ).get_job_ids()
+    
+            payload = get_wepppy_rq_job_info(root.id)
+            serialized = str(payload)
+            assert payload["status"] == "failed"
+            assert payload["error_id"] == "integration-controlled-error"
+            assert payload["error"]["message"] == WATERSHED_BOUNDARY_TOUCH_MESSAGE
+            assert payload["exc_info"] is None
+            assert "Traceback" not in serialized
+            assert __file__ not in serialized
+            assert payload["children"]["1"][0]["status"] == "canceled"
+            controlled_logs = [
+                record
+                for record in caplog.records
+                if record.getMessage().startswith("Controlled RQ failure")
+            ]
+>           assert len(controlled_logs) == 1
+E           assert 0 == 1
+E            +  where 0 = len([])
+
+tests/rq/test_wbt_controlled_failure_integration.py:825: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Starting job 3cb87519-9ee6-4ece-9b6a-f4b4fd650e41
+Finished job 3cb87519-9ee6-4ece-9b6a-f4b4fd650e41
+Starting job b146ab47-3fad-4190-b163-5c80752243e2
+Job b146ab47-3fad-4190-b163-5c80752243e2 Raised Exception
+Job b146ab47-3fad-4190-b163-5c80752243e2 Failed
+_ test_same_run_policy_trees_serialize_through_abstraction[policies0-expected_events0-warn-ready] _
+
+rq_connection = <redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.Connection(host=redis,port=6379,db=9)>)>)>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e7b9652e450>
+policies = ('error', 'warn')
+expected_events = ['build:error', 'build:warn', 'abstract:warn']
+expected_readiness = b'warn-ready'
+
+    @pytest.mark.parametrize(
+        ("policies", "expected_events", "expected_readiness"),
+        [
+            (
+                ("error", "warn"),
+                ["build:error", "build:warn", "abstract:warn"],
+                b"warn-ready",
+            ),
+            (
+                ("warn", "error"),
+                ["build:warn", "abstract:warn", "build:error"],
+                None,
+            ),
+        ],
+    )
+    def test_same_run_policy_trees_serialize_through_abstraction(
+        rq_connection,
+        monkeypatch: pytest.MonkeyPatch,
+        policies: tuple[str, str],
+        expected_events: list[str],
+        expected_readiness: bytes | None,
+    ) -> None:
+        queue_name = f"surf14a-serial-{uuid.uuid4().hex}"
+        runid = f"serial-{uuid.uuid4().hex}"
+        queue = Queue(queue_name, connection=rq_connection)
+        event_key = f"surf14a:serial-events:{runid}"
+        readiness_key = f"surf14a:serial-readiness:{runid}"
+        monkeypatch.setattr(
+            project_rq,
+            "build_subcatchments_rq",
+            _serial_policy_build_job,
+        )
+        tail_key = project_rq._subcatchment_tail_key(runid)
+    
+        jobs: list[Job] = []
+        parents: list[Job] = []
+        try:
+            for policy in policies:
+                parent = queue.create_job(
+                    _noop_job,
+                    job_id=f"parent-{uuid.uuid4().hex}",
+                    meta={},
+                )
+                parent.save()
+                parents.append(parent)
+                argument = {
+                        "schema_version": 1,
+                        "effective_policy": policy,
+                        "source": "user_preference",
+                    }
+>               build, receipt = project_rq._enqueue_serial_subcatchment_tree(
+                    rq_connection,
+                    queue,
+                    runid=runid,
+                    updates={},
+                    boundary_policy=argument,
+                    child_meta=None,
+                    receipt_meta={},
+                    parent_job=parent,
+                )
+
+tests/rq/test_wbt_controlled_failure_integration.py:915: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+redis_conn = <redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.Connection(host=redis,port=6379,db=9)>)>)>
+queue = Queue('surf14a-serial-fe67f469a7434982a0e0905a8f1eef4e')
+
+    def _enqueue_serial_subcatchment_tree(
+        redis_conn,
+        queue: Queue,
+        *,
+        runid: str,
+        updates: dict[str, Any],
+        boundary_policy: dict[str, Any] | None,
+        child_meta: dict[str, Any] | None,
+        receipt_meta: dict[str, Any],
+        parent_job: Job,
+    ) -> tuple[Job, Job]:
+        """Atomically admit one serialized mutation and its completion receipt."""
+        tail_key = _subcatchment_tail_key(runid)
+        fingerprint = _subcatchment_admission_fingerprint(
+            parent_job_id=parent_job.id,
+            queue_name=queue.name,
+            runid=runid,
+            updates=updates,
+            boundary_policy=boundary_policy,
+        )
+        existing = _load_exact_subcatchment_tree(
+            redis_conn,
+            queue,
+            parent_job=parent_job,
+            fingerprint=fingerprint,
+            tail_key=tail_key,
+            require_current_tail=False,
+        )
+        if existing is not None:
+            return existing
+    
+        child_id = new_rq_job_id()
+        receipt_id = new_rq_job_id()
+        original_parent_meta = dict(parent_job.meta)
+    
+        for attempt in range(WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS):
+            pipeline = redis_conn.pipeline()
+            try:
+                pipeline.watch(tail_key, parent_job.key)
+                previous_tail_id = _decode_redis_text(pipeline.get(tail_key))
+                previous_tail = _fetch_job_or_none(previous_tail_id, redis_conn)
+                visited_tail_ids: set[str] = set()
+                while previous_tail is not None:
+                    if previous_tail.id in visited_tail_ids:
+                        raise RuntimeError(
+                            "WBT subcatchment admission found a cyclic prior-tail chain."
+                        )
+                    visited_tail_ids.add(previous_tail.id)
+                    pipeline.watch(previous_tail.key)
+                    previous_tail.refresh()
+                    if not _is_wbt_serialized_build(
+                        previous_tail,
+                        runid=runid,
+                        origin=queue.name,
+                    ):
+                        raise RuntimeError(
+                            "WBT subcatchment admission tail is not an associated "
+                            "serialized build."
+                        )
+                    if _is_terminal_job(previous_tail):
+                        predecessor_id = previous_tail.meta.get(
+                            _WBT_ADMISSION_PREVIOUS_KEY
+                        )
+                        previous_tail_id = (
+                            str(predecessor_id).strip() if predecessor_id else None
+                        )
+                        previous_tail = _fetch_job_or_none(
+                            previous_tail_id,
+                            redis_conn,
+                        )
+                        continue
+                    location_keys = _active_job_location_keys(previous_tail)
+                    if location_keys:
+                        pipeline.watch(*location_keys)
+                    if (
+                        not _active_job_has_execution_location(previous_tail)
+                    ):
+                        # Validate that the watched tail/job remained unchanged
+                        # before diagnosing an orphan instead of a live transition.
+                        pipeline.multi()
+                        pipeline.exists(previous_tail.key)
+                        pipeline.execute()
+                        raise RuntimeError(
+                            "WBT subcatchment admission found a nonterminal "
+                            "tail outside every valid execution registry."
+                        )
+                    break
+                if previous_tail is None:
+                    previous_tail_id = None
+    
+                dependency = (
+                    None
+                    if previous_tail_id is None
+                    else Dependency(
+                        jobs=[previous_tail_id],
+                        allow_failure=True,
+                    )
+                )
+                registered_child_meta = dict(child_meta or {})
+                registered_child_meta.update(
+                    {
+                        _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
+                        _WBT_ADMISSION_ROOT_KEY: parent_job.id,
+                        _WBT_ADMISSION_RECEIPT_KEY: receipt_id,
+                        _WBT_ADMISSION_PREVIOUS_KEY: previous_tail_id,
+                    }
+                )
+                registered_receipt_meta = dict(receipt_meta)
+                registered_receipt_meta.update(
+                    {
+                        "wbt_completion_receipt_for": child_id,
+                        _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
+                        _WBT_ADMISSION_ROOT_KEY: parent_job.id,
+                        _WBT_ADMISSION_BUILD_KEY: child_id,
+                    }
+                )
+                child = queue.create_job(
+                    build_subcatchments_rq,
+                    args=(runid, updates, boundary_policy, True),
+                    timeout=TIMEOUT,
+                    depends_on=dependency,
+                    job_id=child_id,
+                    meta=registered_child_meta,
+                )
+                receipt = queue.create_job(
+                    abstract_watershed_rq,
+                    args=(runid, True),
+                    timeout=TIMEOUT,
+                    depends_on=child,
+                    job_id=receipt_id,
+                    meta=registered_receipt_meta,
+                )
+    
+                # Prime version caches before MULTI so every subsequent operation
+                # contributes only commands to the one admission transaction.
+                queue.get_redis_server_version()
+>               child.get_redis_server_version()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Job' object has no attribute 'get_redis_server_version'. Did you mean: 'redis_server_version'?
+
+wepppy/rq/project_rq.py:801: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/rq/test_ag_fields_rq.py: 5 warnings
+tests/rq/test_bootstrap_autocommit_rq.py: 5 warnings
+tests/rq/test_exception_logging.py: 2 warnings
+tests/rq/test_features_export_rq.py: 1 warning
+tests/rq/test_land_and_soil_rq_guards.py: 2 warnings
+tests/rq/test_omni_rq.py: 12 warnings
+tests/rq/test_path_ce_rq.py: 3 warnings
+tests/rq/test_project_config_update_rq.py: 1 warning
+tests/rq/test_project_rq_archive.py: 7 warnings
+tests/rq/test_project_rq_ash.py: 2 warnings
+tests/rq/test_project_rq_debris_flow.py: 2 warnings
+tests/rq/test_project_rq_fork.py: 2 warnings
+tests/rq/test_project_rq_mutation_guards.py: 22 warnings
+tests/rq/test_project_rq_readonly.py: 2 warnings
+tests/rq/test_roads_rq.py: 2 warnings
+tests/rq/test_run_sync_rq.py: 1 warning
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/rq/test_fork_failure.py: 18 warnings
+  /workdir/wepppy/.pytest_cache/rq212-deps/rq/job.py:348: DeprecationWarning: Passing a string or function for `on_failure` is deprecated, pass `Callback` instead
+    warnings.warn(
+
+tests/rq/test_fork_failure.py: 10 warnings
+tests/rq/test_wbt_controlled_failure_integration.py: 9 warnings
+  /workdir/wepppy/.pytest_cache/rq212-deps/rq/job.py:853: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn('job.exc_info is deprecated, use job.latest_result() instead.', DeprecationWarning)
+
+tests/rq/test_fork_failure.py: 8 warnings
+tests/rq/test_wbt_controlled_failure_integration.py: 12 warnings
+  /workdir/wepppy/.pytest_cache/rq212-deps/rq/job.py:905: DeprecationWarning: job.result is deprecated, use job.return_value instead.
+    warnings.warn('job.result is deprecated, use job.return_value instead.', DeprecationWarning)
+
+tests/rq/test_fork_failure.py: 1 warning
+tests/rq/test_wbt_controlled_failure_integration.py: 10 warnings
+  /workdir/wepppy/.pytest_cache/rq212-deps/rq/worker/worker_classes.py:63: DeprecationWarning: This process (pid=3864358) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    child_pid = os.fork()
+
+tests/rq/test_project_rq_archive.py: 35 warnings
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_batch_rq_delete_batch.py::test_active_batch_summaries_use_rq_status_values[False]
+FAILED tests/rq/test_dependency_graph_tools.py::test_dependency_graph_auth_actor_hook_persists_correlation_id
+FAILED tests/rq/test_dependency_graph_tools.py::test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id
+FAILED tests/rq/test_wbt_controlled_failure_integration.py::test_real_tree_http_payload_and_retry_are_terminal_and_sanitized
+FAILED tests/rq/test_wbt_controlled_failure_integration.py::test_same_run_policy_trees_serialize_through_abstraction[policies0-expected_events0-warn-ready]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+5 failed, 1094 passed, 134 skipped, 182 warnings in 211.76s (0:03:31)

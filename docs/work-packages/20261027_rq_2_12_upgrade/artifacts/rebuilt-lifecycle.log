@@ -1,0 +1,438 @@
+INFO:wctl2:docker compose exec -T -e RQ212_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock -e PYTHONPATH=/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq/test_rq212_lifecycle.py -q -rP
+.............                                                            [100%]
+=============================== warnings summary ===============================
+tests/rq/test_rq212_lifecycle.py::test_success_result_retention_strict_release_and_no_webhooks
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_lifecycle.py::test_success_result_retention_strict_release_and_no_webhooks
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_rq212_lifecycle.py::test_abandoned_execution_recovery_retains_failure_and_blocks_strict_child
+tests/rq/test_rq212_lifecycle.py::test_interrupted_dequeue_standard_maintenance_preserves_failure_and_recovers
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:853: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn('job.exc_info is deprecated, use job.latest_result() instead.', DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+--------------------------- Captured stdout teardown ---------------------------
+19:39:40 Worker d6287910200b4d97b71b5e93c2c42815: started with PID 1680, version 2.12.0
+19:39:40 Worker d6287910200b4d97b71b5e93c2c42815: subscribing to channel rq:pubsub:d6287910200b4d97b71b5e93c2c42815
+19:39:40 *** Listening on rq212-abf5a106-1ca7-43b6-97a5-a18399c97050...
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: cleaning registries for queue: rq212-abf5a106-1ca7-43b6-97a5-a18399c97050
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: rq212-abf5a106-1ca7-43b6-97a5-a18399c97050: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff24..., operation='success') (rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff244367f)
+Starting job rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff244367f
+19:39:41 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff24..., operation='success') job in 0:00:00.002034s on worker d6287910200b4d97b71b5e93c2c42815
+Finished job rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff244367f
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: rq212-abf5a106-1ca7-43b6-97a5-a18399c97050: Job OK (rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff244367f)
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: job rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff244367f result will never expire, clean up result key manually
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: rq212-abf5a106-1ca7-43b6-97a5-a18399c97050: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-child', prerequisite='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff24...) (e1d89d35-593b-49cd-a6bd-533a5e6d82cd)
+Starting job e1d89d35-593b-49cd-a6bd-533a5e6d82cd
+19:39:41 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-child', prerequisite='rq212-abf5a106-1ca7-43b6-97a5-a18399c97050-5e987b36-17fe-4113-94d0-3ebff24...) job in 0:00:00.006253s on worker d6287910200b4d97b71b5e93c2c42815
+Finished job e1d89d35-593b-49cd-a6bd-533a5e6d82cd
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: rq212-abf5a106-1ca7-43b6-97a5-a18399c97050: Job OK (e1d89d35-593b-49cd-a6bd-533a5e6d82cd)
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: job e1d89d35-593b-49cd-a6bd-533a5e6d82cd result is kept for 604800 seconds
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: done, quitting
+19:39:41 Worker d6287910200b4d97b71b5e93c2c42815: unsubscribing from channel rq:pubsub:d6287910200b4d97b71b5e93c2c42815
+
+--------------------------- Captured stdout teardown ---------------------------
+19:39:55 Worker 2c0a831323f34f3f918794fec4e2fab2: started with PID 1980, version 2.12.0
+19:39:55 Worker 2c0a831323f34f3f918794fec4e2fab2: subscribing to channel rq:pubsub:2c0a831323f34f3f918794fec4e2fab2
+19:39:55 *** Listening on rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1...
+19:39:55 Worker 2c0a831323f34f3f918794fec4e2fab2: cleaning registries for queue: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1
+19:39:55 Worker 2c0a831323f34f3f918794fec4e2fab2: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec76..., operation='fail') (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec7648527)
+Starting job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec7648527
+19:39:55 Worker 2c0a831323f34f3f918794fec4e2fab2: job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec7648527: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 32, in lifecycle_job
+    raise RuntimeError("rq212 injected attempt failure")
+RuntimeError: rq212 injected attempt failure
+
+Job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec7648527 Raised Exception
+Job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec7648527 Failed
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: cleaning registries for queue: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017..., operation='success', terminal_prerequisite='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec76...) (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017039fb)
+Starting job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017039fb
+19:39:56 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017..., operation='success', terminal_prerequisite='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-3f45ff32-48e7-4fa4-ab8b-62aec76...) job in 0:00:00.005140s on worker 2c0a831323f34f3f918794fec4e2fab2
+Finished job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017039fb
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: Job OK (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017039fb)
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-2c7a1f35-211d-460b-b557-8455017039fb result is kept for 604800 seconds
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: done, quitting
+19:39:56 Worker 2c0a831323f34f3f918794fec4e2fab2: unsubscribing from channel rq:pubsub:2c0a831323f34f3f918794fec4e2fab2
+
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: started with PID 2935, version 2.12.0
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: subscribing to channel rq:pubsub:339633e88bc54ff2adcd3ac0f9c0b675
+19:40:12 *** Listening on rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1...
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: cleaning registries for queue: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d..., operation='success') (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d08036)
+Starting job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d08036
+19:40:12 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d..., operation='success') job in 0:00:00.002808s on worker 339633e88bc54ff2adcd3ac0f9c0b675
+Finished job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d08036
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: Job OK (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d08036)
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-e969038c-b8cd-4a98-9a65-f352b5d08036 result is kept for 604800 seconds
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac09..., operation='success') (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac097ca92)
+Starting job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac097ca92
+19:40:12 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac09..., operation='success') job in 0:00:00.002184s on worker 339633e88bc54ff2adcd3ac0f9c0b675
+Finished job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac097ca92
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1: Job OK (rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac097ca92)
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: job rq212-11f1f206-03a0-4d4f-965f-a4905e59b1b1-48e6a820-55af-41d6-a4b6-fb9ac097ca92 result is kept for 604800 seconds
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: done, quitting
+19:40:12 Worker 339633e88bc54ff2adcd3ac0f9c0b675: unsubscribing from channel rq:pubsub:339633e88bc54ff2adcd3ac0f9c0b675
+
+--------------------------- Captured stdout teardown ---------------------------
+19:40:25 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: started with PID 4133, version 2.12.0
+19:40:25 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: subscribing to channel rq:pubsub:41fe5b8dbfcb4fc48e0aec4ec3cc41aa
+19:40:25 *** Listening on rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a...
+19:40:25 Acquired scheduler lock for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a
+19:40:25 Scheduler for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a started with PID 6523
+19:40:25 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: cleaning registries for queue: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a: tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-retry') (7aa73f30-d89c-4a54-b5f1-3d8c680b649e)
+Starting job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 32, in lifecycle_job
+    raise RuntimeError("rq212 injected attempt failure")
+RuntimeError: rq212 injected attempt failure
+
+Job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e Raised Exception
+Job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e Failed
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a: tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-retry') (7aa73f30-d89c-4a54-b5f1-3d8c680b649e)
+Starting job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e
+19:40:26 Successfully completed tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-retry') job in 0:00:00.001834s on worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa
+Finished job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a: Job OK (7aa73f30-d89c-4a54-b5f1-3d8c680b649e)
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: job 7aa73f30-d89c-4a54-b5f1-3d8c680b649e result is kept for 604800 seconds
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd096..., operation='success') (rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd09675fc8)
+Starting job rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd09675fc8
+19:40:26 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd096..., operation='success') job in 0:00:00.002066s on worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa
+Finished job rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd09675fc8
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a: Job OK (rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd09675fc8)
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: job rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a-b3238611-ba9e-42b8-a279-82dd09675fc8 result is kept for 604800 seconds
+19:40:26 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa [PID 4133]: warm shut down requested
+19:40:26 Scheduler stopping, releasing locks for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a...
+19:40:26 Scheduler with PID 6523 has stopped
+19:40:27 Acquired scheduler lock for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a
+19:40:27 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: cleaning registries for queue: rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a
+19:40:27 Scheduler for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a started with PID 6723
+19:40:27 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: stopping on request
+19:40:27 Scheduler stopping, releasing locks for rq212-ea79056b-ce59-465c-b4e9-cb2a0535961a...
+19:40:27 Scheduler with PID 6723 has stopped
+19:40:27 Worker 41fe5b8dbfcb4fc48e0aec4ec3cc41aa: unsubscribing from channel rq:pubsub:41fe5b8dbfcb4fc48e0aec4ec3cc41aa
+
+--------------------------- Captured stdout teardown ---------------------------
+19:40:37 Worker 7780a850e76c49afa65b9c05e9ac1349: started with PID 6865, version 2.12.0
+19:40:37 Worker 7780a850e76c49afa65b9c05e9ac1349: subscribing to channel rq:pubsub:7780a850e76c49afa65b9c05e9ac1349
+19:40:37 *** Listening on rq212-e7842999-1e3d-493c-a1f3-5c231e30574e...
+19:40:37 Acquired scheduler lock for rq212-e7842999-1e3d-493c-a1f3-5c231e30574e
+19:40:37 Scheduler for rq212-e7842999-1e3d-493c-a1f3-5c231e30574e started with PID 9277
+19:40:37 Worker 7780a850e76c49afa65b9c05e9ac1349: cleaning registries for queue: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e
+19:40:37 Worker 7780a850e76c49afa65b9c05e9ac1349: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e: tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-retry') (980f3a71-8ffe-4e69-98fc-27b28ba96eae)
+Starting job 980f3a71-8ffe-4e69-98fc-27b28ba96eae
+19:40:37 Worker 7780a850e76c49afa65b9c05e9ac1349: job 980f3a71-8ffe-4e69-98fc-27b28ba96eae: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 32, in lifecycle_job
+    raise RuntimeError("rq212 injected attempt failure")
+RuntimeError: rq212 injected attempt failure
+
+Job 980f3a71-8ffe-4e69-98fc-27b28ba96eae Raised Exception
+Job 980f3a71-8ffe-4e69-98fc-27b28ba96eae Failed
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e: tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-retry') (980f3a71-8ffe-4e69-98fc-27b28ba96eae)
+Starting job 980f3a71-8ffe-4e69-98fc-27b28ba96eae
+19:40:39 Successfully completed tests.rq.rq212_tasks.lifecycle_job(fail_attempts=1, marker='rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-retry') job in 0:00:00.002431s on worker 7780a850e76c49afa65b9c05e9ac1349
+Finished job 980f3a71-8ffe-4e69-98fc-27b28ba96eae
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e: Job OK (980f3a71-8ffe-4e69-98fc-27b28ba96eae)
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: job 980f3a71-8ffe-4e69-98fc-27b28ba96eae result is kept for 604800 seconds
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: cleaning registries for queue: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d3..., operation='success') (rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d358291)
+Starting job rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d358291
+19:40:39 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d3..., operation='success') job in 0:00:00.002046s on worker 7780a850e76c49afa65b9c05e9ac1349
+Finished job rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d358291
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: rq212-e7842999-1e3d-493c-a1f3-5c231e30574e: Job OK (rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d358291)
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349: job rq212-e7842999-1e3d-493c-a1f3-5c231e30574e-1f53f957-e346-436a-bc12-3a297d358291 result is kept for 604800 seconds
+19:40:39 Worker 7780a850e76c49afa65b9c05e9ac1349 [PID 6865]: warm shut down requested
+19:40:40 Scheduler stopping, releasing locks for rq212-e7842999-1e3d-493c-a1f3-5c231e30574e...
+19:40:40 Scheduler with PID 9277 has stopped
+19:40:40 Worker 7780a850e76c49afa65b9c05e9ac1349: stopping on request
+19:40:40 Worker 7780a850e76c49afa65b9c05e9ac1349: unsubscribing from channel rq:pubsub:7780a850e76c49afa65b9c05e9ac1349
+
+--------------------------- Captured stdout teardown ---------------------------
+19:40:50 Worker ed760dafef9945138f5701c36b71fdf3: started with PID 10231, version 2.12.0
+19:40:50 Worker ed760dafef9945138f5701c36b71fdf3: subscribing to channel rq:pubsub:ed760dafef9945138f5701c36b71fdf3
+19:40:50 *** Listening on rq212-21394133-9738-4f27-9150-f8fc9c974d8c...
+19:40:50 Worker ed760dafef9945138f5701c36b71fdf3: cleaning registries for queue: rq212-21394133-9738-4f27-9150-f8fc9c974d8c
+19:40:50 Worker ed760dafef9945138f5701c36b71fdf3: rq212-21394133-9738-4f27-9150-f8fc9c974d8c: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d6..., operation='fail') (rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282)
+Starting job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282
+19:40:50 Worker ed760dafef9945138f5701c36b71fdf3: job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 32, in lifecycle_job
+    raise RuntimeError("rq212 injected attempt failure")
+RuntimeError: rq212 injected attempt failure
+
+Job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282 Raised Exception
+Job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282 Failed
+19:40:51 Worker ed760dafef9945138f5701c36b71fdf3: rq212-21394133-9738-4f27-9150-f8fc9c974d8c: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d6..., operation='fail') (rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282)
+Starting job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282
+19:40:51 Worker ed760dafef9945138f5701c36b71fdf3: job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 32, in lifecycle_job
+    raise RuntimeError("rq212 injected attempt failure")
+RuntimeError: rq212 injected attempt failure
+
+Job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282 Raised Exception
+Job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d683282 Failed
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: cleaning registries for queue: rq212-21394133-9738-4f27-9150-f8fc9c974d8c
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: rq212-21394133-9738-4f27-9150-f8fc9c974d8c: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b..., operation='success', terminal_prerequisite='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d6...) (rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b6d719)
+Starting job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b6d719
+19:40:52 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b..., operation='success', terminal_prerequisite='rq212-21394133-9738-4f27-9150-f8fc9c974d8c-4312d272-977b-40c4-bbfe-b9420d6...) job in 0:00:00.003129s on worker ed760dafef9945138f5701c36b71fdf3
+Finished job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b6d719
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: rq212-21394133-9738-4f27-9150-f8fc9c974d8c: Job OK (rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b6d719)
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: job rq212-21394133-9738-4f27-9150-f8fc9c974d8c-d30b18cf-63c6-4f3d-867c-d0b750b6d719 result is kept for 604800 seconds
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: done, quitting
+19:40:52 Worker ed760dafef9945138f5701c36b71fdf3: unsubscribing from channel rq:pubsub:ed760dafef9945138f5701c36b71fdf3
+
+--------------------------- Captured stdout teardown ---------------------------
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: started with PID 11807, version 2.12.0
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: subscribing to channel rq:pubsub:c480f57bcdd842b88965454f16ac9956
+19:41:02 *** Listening on rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c...
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: cleaning registries for queue: rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465..., operation='success') (rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465811cd)
+Starting job rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465811cd
+19:41:02 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465..., operation='success') job in 0:00:00.002070s on worker c480f57bcdd842b88965454f16ac9956
+Finished job rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465811cd
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c: Job OK (rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465811cd)
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: job rq212-1c9fba0b-e1c4-435b-9b2a-35eee3b88c2c-6a1ed2b2-d769-4c32-88d6-d4cd465811cd result is kept for 604800 seconds
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: done, quitting
+19:41:02 Worker c480f57bcdd842b88965454f16ac9956: unsubscribing from channel rq:pubsub:c480f57bcdd842b88965454f16ac9956
+
+--------------------------- Captured stdout teardown ---------------------------
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: started with PID 12486, version 2.12.0
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: subscribing to channel rq:pubsub:20056332f85a4b6fb697e92d8f3adb8e
+19:41:12 *** Listening on rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce...
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: cleaning registries for queue: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019e..., operation='hold') (rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019ec8e74)
+Starting job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019ec8e74
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: killed horse pid 13249
+19:41:12 Worker 20056332f85a4b6fb697e92d8f3adb8e: job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019ec8e74 stopped by user, moving job to FailedJobRegistry
+Job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019ec8e74 Failed
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353..., operation='success', terminal_prerequisite='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019e...) (rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353a1108)
+Starting job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353a1108
+19:41:13 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353..., operation='success', terminal_prerequisite='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-89fe651a-4ea3-4e36-b2e5-012019e...) job in 0:00:00.003089s on worker 20056332f85a4b6fb697e92d8f3adb8e
+Finished job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353a1108
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce: Job OK (rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353a1108)
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-474a2556-b274-415d-b6b2-36bb353a1108 result is kept for 604800 seconds
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2..., operation='success') (rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2818ce)
+Starting job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2818ce
+19:41:13 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2..., operation='success') job in 0:00:00.001922s on worker 20056332f85a4b6fb697e92d8f3adb8e
+Finished job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2818ce
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce: Job OK (rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2818ce)
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: job rq212-bc4e7da3-5bfd-4e0d-8d81-a31e683692ce-e4f6d72d-7c4a-4dfa-9885-c8798d2818ce result is kept for 604800 seconds
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e [PID 12486]: warm shut down requested
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: stopping on request
+19:41:13 Worker 20056332f85a4b6fb697e92d8f3adb8e: unsubscribing from channel rq:pubsub:20056332f85a4b6fb697e92d8f3adb8e
+
+--------------------------- Captured stdout teardown ---------------------------
+19:41:23 Worker 6fcc916f885143ab86e070a3d6e48105: started with PID 13683, version 2.12.0
+19:41:23 Worker 6fcc916f885143ab86e070a3d6e48105: subscribing to channel rq:pubsub:6fcc916f885143ab86e070a3d6e48105
+19:41:23 *** Listening on rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424...
+19:41:24 Worker 6fcc916f885143ab86e070a3d6e48105: cleaning registries for queue: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424
+19:41:24 Worker 6fcc916f885143ab86e070a3d6e48105: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235d..., operation='hold') (rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235da6d2d)
+Starting job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235da6d2d
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235da6d2d: exception raised while executing (tests.rq.rq212_tasks.lifecycle_job)
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/rq/worker/base.py", line 1552, in perform_job
+    return_value = job.perform()
+                   ^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1368, in perform
+    self._result = self._execute()
+                   ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/rq/job.py", line 1428, in _execute
+    result = self.func(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/rq/rq212_tasks.py", line 38, in lifecycle_job
+    time.sleep(0.02)
+  File "/opt/venv/lib/python3.12/site-packages/rq/timeouts.py", line 63, in handle_death_penalty
+    raise self._exception(f'Task exceeded maximum timeout value ({self._timeout} seconds)')
+rq.timeouts.JobTimeoutException: Task exceeded maximum timeout value (2 seconds)
+
+Job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235da6d2d Raised Exception
+Job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235da6d2d Failed
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: cleaning registries for queue: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8..., operation='success', terminal_prerequisite='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235d...) (rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8c7b4a)
+Starting job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8c7b4a
+19:41:26 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8..., operation='success', terminal_prerequisite='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-36d7e495-e100-478a-b0eb-e94235d...) job in 0:00:00.003037s on worker 6fcc916f885143ab86e070a3d6e48105
+Finished job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8c7b4a
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424: Job OK (rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8c7b4a)
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-cf3bb3d5-a023-4941-bf0c-1d280b8c7b4a result is kept for 604800 seconds
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd..., operation='success') (rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd33eef)
+Starting job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd33eef
+19:41:26 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd..., operation='success') job in 0:00:00.002335s on worker 6fcc916f885143ab86e070a3d6e48105
+Finished job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd33eef
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424: Job OK (rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd33eef)
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: job rq212-ff08d9f1-a0f7-45ba-b326-6b222320e424-51be6acd-3b12-4c56-a7ff-42be8cd33eef result is kept for 604800 seconds
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105 [PID 13683]: warm shut down requested
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: stopping on request
+19:41:26 Worker 6fcc916f885143ab86e070a3d6e48105: unsubscribing from channel rq:pubsub:6fcc916f885143ab86e070a3d6e48105
+
+--------------------------- Captured stdout teardown ---------------------------
+19:41:37 Worker 5aaed19a72224c43bf5e7abb74e18346: started with PID 14633, version 2.12.0
+19:41:37 Worker 5aaed19a72224c43bf5e7abb74e18346: subscribing to channel rq:pubsub:5aaed19a72224c43bf5e7abb74e18346
+19:41:37 *** Listening on rq212-da25b393-684d-40d4-8014-59807ae83370...
+19:41:37 Worker 5aaed19a72224c43bf5e7abb74e18346: cleaning registries for queue: rq212-da25b393-684d-40d4-8014-59807ae83370
+19:41:37 Worker 5aaed19a72224c43bf5e7abb74e18346: rq212-da25b393-684d-40d4-8014-59807ae83370: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f17..., operation='hold') (rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f176a31e)
+Starting job rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f176a31e
+19:41:37 Worker 5aaed19a72224c43bf5e7abb74e18346: job rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f176a31e failed (Work-horse terminated unexpectedly; waitpid returned 9 (signal 9); )
+19:41:37 Work horse killed for job rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f176a31e: retpid=15276, ret_val=9
+Job rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f176a31e Failed
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: rq212-da25b393-684d-40d4-8014-59807ae83370: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d928053..., operation='success', terminal_prerequisite='rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f17...) (rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d9280537e0fa)
+Starting job rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d9280537e0fa
+19:41:38 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d928053..., operation='success', terminal_prerequisite='rq212-da25b393-684d-40d4-8014-59807ae83370-f0dc0129-11aa-42fc-8e1c-35e6f17...) job in 0:00:00.003313s on worker 5aaed19a72224c43bf5e7abb74e18346
+Finished job rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d9280537e0fa
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: rq212-da25b393-684d-40d4-8014-59807ae83370: Job OK (rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d9280537e0fa)
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: job rq212-da25b393-684d-40d4-8014-59807ae83370-45a332b0-5735-4910-b78f-d9280537e0fa result is kept for 604800 seconds
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: rq212-da25b393-684d-40d4-8014-59807ae83370: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832..., operation='success') (rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832ccd6e)
+Starting job rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832ccd6e
+19:41:38 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832..., operation='success') job in 0:00:00.002289s on worker 5aaed19a72224c43bf5e7abb74e18346
+Finished job rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832ccd6e
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: rq212-da25b393-684d-40d4-8014-59807ae83370: Job OK (rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832ccd6e)
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: job rq212-da25b393-684d-40d4-8014-59807ae83370-9ca97b19-21ee-4bab-a13d-8190832ccd6e result is kept for 604800 seconds
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346 [PID 14633]: warm shut down requested
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: cleaning registries for queue: rq212-da25b393-684d-40d4-8014-59807ae83370
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: stopping on request
+19:41:38 Worker 5aaed19a72224c43bf5e7abb74e18346: unsubscribing from channel rq:pubsub:5aaed19a72224c43bf5e7abb74e18346
+
+--------------------------- Captured stdout teardown ---------------------------
+19:41:47 Worker 018957ca69154aa78843d01ff0ef2aac: started with PID 15334, version 2.12.0
+19:41:47 Worker 018957ca69154aa78843d01ff0ef2aac: subscribing to channel rq:pubsub:018957ca69154aa78843d01ff0ef2aac
+19:41:47 *** Listening on rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a...
+19:41:47 Worker 018957ca69154aa78843d01ff0ef2aac: cleaning registries for queue: rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a
+19:41:47 Worker 018957ca69154aa78843d01ff0ef2aac: rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba..., operation='hold') (rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba2fd73)
+Starting job rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba2fd73
+19:41:48 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba..., operation='hold') job in 0:00:00.043019s on worker 018957ca69154aa78843d01ff0ef2aac
+Finished job rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba2fd73
+19:41:48 Worker 018957ca69154aa78843d01ff0ef2aac: rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a: Job OK (rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba2fd73)
+19:41:48 Worker 018957ca69154aa78843d01ff0ef2aac: job rq212-cfd0513e-fe3b-4f7f-823b-8ea8091e4e2a-2fb4ef07-e878-441c-89b4-7ac5dba2fd73 result is kept for 604800 seconds
+19:41:48 Worker 018957ca69154aa78843d01ff0ef2aac [PID 15334]: warm shut down requested
+19:41:48 Worker 018957ca69154aa78843d01ff0ef2aac: stopping on request
+19:41:48 Worker 018957ca69154aa78843d01ff0ef2aac: unsubscribing from channel rq:pubsub:018957ca69154aa78843d01ff0ef2aac
+
+__ test_abandoned_execution_recovery_retains_failure_and_blocks_strict_child ___
+------------------------------ Captured log call -------------------------------
+WARNING  rq.registry:registry.py:308 StartedJobRegistry cleanup: rq212-d9ff2aec-5492-4f10-ad94-1779a0851505-2eb6cfa5-93a8-42ab-a9bd-7c8503893b44 Moved to FailedJobRegistry, due to AbandonedJobError, at 2026-10-27 19:41:58.182220+00:00
+--------------------------- Captured stdout teardown ---------------------------
+19:41:58 Worker ed1c385643ed41d99698071c7e9abec8: started with PID 15972, version 2.12.0
+19:41:58 Worker ed1c385643ed41d99698071c7e9abec8: subscribing to channel rq:pubsub:ed1c385643ed41d99698071c7e9abec8
+19:41:58 *** Listening on rq212-d9ff2aec-5492-4f10-ad94-1779a0851505...
+19:41:58 Worker ed1c385643ed41d99698071c7e9abec8: cleaning registries for queue: rq212-d9ff2aec-5492-4f10-ad94-1779a0851505
+19:41:58 Worker ed1c385643ed41d99698071c7e9abec8: rq212-d9ff2aec-5492-4f10-ad94-1779a0851505: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-d9ff2aec-5492-4f10-ad94-1779a0851505-2eb6cfa5-93a8-42ab-a9bd-7c85038..., operation='hold') (rq212-d9ff2aec-5492-4f10-ad94-1779a0851505-2eb6cfa5-93a8-42ab-a9bd-7c8503893b44)
+Starting job rq212-d9ff2aec-5492-4f10-ad94-1779a0851505-2eb6cfa5-93a8-42ab-a9bd-7c8503893b44
+
+--------------------------- Captured stdout teardown ---------------------------
+19:42:07 Starting worker pool 92cf6088c02d42339f67314112853271 with pid 16512...
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: started with PID 17145, version 2.12.0
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: subscribing to channel rq:pubsub:cdf981b4f4bf48a6a7d3ff98ccf39aaf
+19:42:07 *** Listening on rq212-63c8521c-7df2-488d-954c-d34b6def02bb...
+19:42:07 Acquired scheduler lock for rq212-63c8521c-7df2-488d-954c-d34b6def02bb
+19:42:07 Scheduler for rq212-63c8521c-7df2-488d-954c-d34b6def02bb started with PID 17147
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: cleaning registries for queue: rq212-63c8521c-7df2-488d-954c-d34b6def02bb
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-scheduled') (63614bd5-576e-407e-8d7f-2b240eb20376)
+Starting job 63614bd5-576e-407e-8d7f-2b240eb20376
+19:42:07 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-scheduled') job in 0:00:00.003301s on worker cdf981b4f4bf48a6a7d3ff98ccf39aaf
+Finished job 63614bd5-576e-407e-8d7f-2b240eb20376
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: Job OK (63614bd5-576e-407e-8d7f-2b240eb20376)
+19:42:07 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf: job 63614bd5-576e-407e-8d7f-2b240eb20376 result is kept for 604800 seconds
+19:42:08 Worker cdf981b4f4bf48a6a7d3ff98ccf39aaf with pid 17145 is dead
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: started with PID 17290, version 2.12.0
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: subscribing to channel rq:pubsub:cee9f50f8bfe45c3be85b076c001ccfb
+19:42:08 *** Listening on rq212-63c8521c-7df2-488d-954c-d34b6def02bb...
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: cleaning registries for queue: rq212-63c8521c-7df2-488d-954c-d34b6def02bb
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-6848991..., operation='success') (rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-68489919aac3)
+Starting job rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-68489919aac3
+19:42:08 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-6848991..., operation='success') job in 0:00:00.002270s on worker cee9f50f8bfe45c3be85b076c001ccfb
+Finished job rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-68489919aac3
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: Job OK (rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-68489919aac3)
+19:42:08 Worker cee9f50f8bfe45c3be85b076c001ccfb: job rq212-63c8521c-7df2-488d-954c-d34b6def02bb-1dc56b30-18d4-42a7-b4ff-68489919aac3 result is kept for 604800 seconds
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-scheduled-after-replacement') (1f803842-dcd4-45af-8001-40362895cf3f)
+Starting job 1f803842-dcd4-45af-8001-40362895cf3f
+19:42:10 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-63c8521c-7df2-488d-954c-d34b6def02bb-scheduled-after-replacement') job in 0:00:00.002564s on worker cee9f50f8bfe45c3be85b076c001ccfb
+Finished job 1f803842-dcd4-45af-8001-40362895cf3f
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb: rq212-63c8521c-7df2-488d-954c-d34b6def02bb: Job OK (1f803842-dcd4-45af-8001-40362895cf3f)
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb: job 1f803842-dcd4-45af-8001-40362895cf3f result is kept for 604800 seconds
+19:42:10 Received SIGINT/SIGTERM, shutting down...
+19:42:10 Sending stop signal to 1 workers
+19:42:10 Sent shutdown command to worker with 17290
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb [PID 17290]: warm shut down requested
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb: stopping on request
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb: unsubscribing from channel rq:pubsub:cee9f50f8bfe45c3be85b076c001ccfb
+19:42:10 Worker cee9f50f8bfe45c3be85b076c001ccfb with pid 17290 is dead
+19:42:10 All workers stopped, exiting...
+
+--------------------------- Captured stdout teardown ---------------------------
+
+Job rq212-e0a2f697-1124-4927-a419-db511689d3c3-fea837b0-53e9-4ac7-8004-defd865d008b Failed
+
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: started with PID 18517, version 2.12.0
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: subscribing to channel rq:pubsub:4abc63eb01f54c9ca28ab933860fa31f
+19:42:41 *** Listening on rq212-e0a2f697-1124-4927-a419-db511689d3c3...
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: cleaning registries for queue: rq212-e0a2f697-1124-4927-a419-db511689d3c3
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: rq212-e0a2f697-1124-4927-a419-db511689d3c3: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7d..., operation='success') (rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7dadf18)
+Starting job rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7dadf18
+19:42:41 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7d..., operation='success') job in 0:00:00.002159s on worker 4abc63eb01f54c9ca28ab933860fa31f
+Finished job rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7dadf18
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: rq212-e0a2f697-1124-4927-a419-db511689d3c3: Job OK (rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7dadf18)
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: job rq212-e0a2f697-1124-4927-a419-db511689d3c3-23ef6c11-39f3-49e3-ba71-c6f4d7dadf18 result is kept for 604800 seconds
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: rq212-e0a2f697-1124-4927-a419-db511689d3c3: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e92..., operation='success') (rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e924114e)
+Starting job rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e924114e
+19:42:41 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e92..., operation='success') job in 0:00:00.001911s on worker 4abc63eb01f54c9ca28ab933860fa31f
+Finished job rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e924114e
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: rq212-e0a2f697-1124-4927-a419-db511689d3c3: Job OK (rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e924114e)
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: job rq212-e0a2f697-1124-4927-a419-db511689d3c3-ae3f2ea6-6b69-4c24-9f1b-fdb6e924114e result is kept for 604800 seconds
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: done, quitting
+19:42:41 Worker 4abc63eb01f54c9ca28ab933860fa31f: unsubscribing from channel rq:pubsub:4abc63eb01f54c9ca28ab933860fa31f
+
+13 passed, 4 warnings in 201.70s (0:03:21)

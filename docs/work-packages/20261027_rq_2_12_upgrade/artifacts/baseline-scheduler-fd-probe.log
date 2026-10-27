@@ -1,0 +1,35 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python .pytest_cache/rq212_pool_probe.py
+before {"clients": [{"age": "9", "cmd": "ping", "db": "2", "flags": "U", "id": "1421", "idle": "9", "name": ""}, {"age": "0", "cmd": "subscribe", "db": "2", "flags": "PU", "id": "1424", "idle": "0", "name": "9682e53d7e6e4fb7ab7375ceb9bb696b"}, {"age": "0", "cmd": "blmove", "db": "2", "flags": "bU", "id": "1425", "idle": "0", "name": ""}, {"age": "0", "cmd": "expire", "db": "2", "flags": "U", "id": "1427", "idle": "0", "name": ""}, {"age": "9", "cmd": "ping", "db": "2", "flags": "U", "id": "1422", "idle": "9", "name": ""}, {"age": "2", "cmd": "ping", "db": "2", "flags": "U", "id": "1423", "idle": "2", "name": ""}, {"age": "10", "cmd": "client|list", "db": "2", "flags": "U", "id": "1418", "idle": "0", "name": ""}, {"age": "9", "cmd": "ping", "db": "2", "flags": "U", "id": "1419", "idle": "9", "name": ""}, {"age": "9", "cmd": "ping", "db": "2", "flags": "U", "id": "1420", "idle": "9", "name": ""}], "fds": {"3910249": ["pipe:[161214099]", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "socket:[161206159]", "socket:[161206160]", "socket:[161206161]", "socket:[161206162]", "/opt/venv/lib/python3.12/site-packages/pyproj/proj_dir/share/proj/proj.db", "socket:[161206169]", "pipe:[161225514]", "pipe:[161225515]"], "3910745": ["pipe:[161214099]", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "socket:[161206159]", "socket:[161206160]", "socket:[161206161]", "socket:[161206162]", "/opt/venv/lib/python3.12/site-packages/pyproj/proj_dir/share/proj/proj.db", "socket:[161206169]", "/dev/null", "pipe:[161225514]", "pipe:[161225515]", "socket:[161215475]", "socket:[161215476]", "pipe:[161215478]", "pipe:[161215479]"], "3910747": ["pipe:[161214099]", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "socket:[161206159]", "socket:[161206160]", "socket:[161206161]", "socket:[161206162]", "/opt/venv/lib/python3.12/site-packages/pyproj/proj_dir/share/proj/proj.db", "socket:[161206169]", "/dev/null", "pipe:[161225514]", "pipe:[161225515]", "socket:[161215475]", "socket:[161215476]", "/dev/null", "pipe:[161215478]", "pipe:[161215479]", "socket:[161231483]"]}, "pids": [3910249, 3910745, 3910747], "rq": "1.16.2"}
+after {"clients": [{"age": "6", "cmd": "ping", "db": "2", "flags": "U", "id": "1423", "idle": "6", "name": ""}, {"age": "14", "cmd": "client|list", "db": "2", "flags": "U", "id": "1418", "idle": "0", "name": ""}, {"age": "13", "cmd": "ping", "db": "2", "flags": "U", "id": "1419", "idle": "13", "name": ""}, {"age": "13", "cmd": "ping", "db": "2", "flags": "U", "id": "1420", "idle": "13", "name": ""}, {"age": "13", "cmd": "ping", "db": "2", "flags": "U", "id": "1421", "idle": "13", "name": ""}, {"age": "2", "cmd": "subscribe", "db": "2", "flags": "PU", "id": "1430", "idle": "2", "name": "2845310d69e04c04bd38c06aa44f045f"}, {"age": "2", "cmd": "blmove", "db": "2", "flags": "bU", "id": "1431", "idle": "2", "name": ""}, {"age": "2", "cmd": "set", "db": "2", "flags": "U", "id": "1432", "idle": "2", "name": ""}, {"age": "4", "cmd": "subscribe", "db": "2", "flags": "PU", "id": "1424", "idle": "4", "name": "9682e53d7e6e4fb7ab7375ceb9bb696b"}, {"age": "4", "cmd": "blmove", "db": "2", "flags": "U", "id": "1425", "idle": "2", "name": ""}, {"age": "4", "cmd": "expire", "db": "2", "flags": "U", "id": "1427", "idle": "1", "name": ""}, {"age": "13", "cmd": "ping", "db": "2", "flags": "U", "id": "1422", "idle": "13", "name": ""}], "fds": {"3910249": ["pipe:[161214099]", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "socket:[161206159]", "socket:[161206160]", "socket:[161206161]", "socket:[161206162]", "/opt/venv/lib/python3.12/site-packages/pyproj/proj_dir/share/proj/proj.db", "socket:[161206169]", "pipe:[161225516]", "pipe:[161225517]"], "3910747": ["pipe:[161214099]", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "/tmp/rq212-poolprobe-699aa66671d94289beaf9bf157de70af.log", "socket:[161206159]", "socket:[161206160]", "socket:[161206161]", "socket:[161206162]", "/opt/venv/lib/python3.12/site-packages/pyproj/proj_dir/share/proj/proj.db", "socket:[161206169]", "/dev/null", "pipe:[161225514]", "pipe:[161225515]", "socket:[161215475]", "socket:[161215476]", "/dev/null", "pipe:[161215478]", "pipe:[161215479]", "socket:[161231483]"]}, "pids": [3910249, 3910747], "rq": "1.16.2"}
+job b501b014-395d-4847-8b8a-6ce28506ffee queued None queue [] intermediate [b'b501b014-395d-4847-8b8a-6ce28506ffee']
+post-scheduler-kill 8c545bd1-59a1-4e82-97f4-2b655d55c783 finished
+19:28:45 Starting worker pool d6e65a81a7e34fb594a846b915efe92b with pid 3910249...
+19:28:46 Worker rq:worker:9682e53d7e6e4fb7ab7375ceb9bb696b started with PID 3910745, version 1.16.2
+19:28:46 Subscribing to channel rq:pubsub:9682e53d7e6e4fb7ab7375ceb9bb696b
+19:28:46 *** Listening on rq212-poolprobe-699aa66671d94289beaf9bf157de70af...
+19:28:46 Scheduler for rq212-poolprobe-699aa66671d94289beaf9bf157de70af started with PID 3910747
+19:28:46 Cleaning registries for queue: rq212-poolprobe-699aa66671d94289beaf9bf157de70af
+19:28:46 rq212-poolprobe-699aa66671d94289beaf9bf157de70af: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-poolprobe-699aa66671d94289beaf9bf157de70af-a') (a4d16f77-3c4f-4ab6-ae42-75f1726f0b5c)
+Starting job a4d16f77-3c4f-4ab6-ae42-75f1726f0b5c
+Finished job a4d16f77-3c4f-4ab6-ae42-75f1726f0b5c
+19:28:46 rq212-poolprobe-699aa66671d94289beaf9bf157de70af: Job OK (a4d16f77-3c4f-4ab6-ae42-75f1726f0b5c)
+19:28:46 Result is kept for 604800 seconds
+19:28:47 Worker 9682e53d7e6e4fb7ab7375ceb9bb696b with pid 3910745 is dead
+19:28:48 Worker rq:worker:2845310d69e04c04bd38c06aa44f045f started with PID 3910749, version 1.16.2
+19:28:48 Subscribing to channel rq:pubsub:2845310d69e04c04bd38c06aa44f045f
+19:28:48 *** Listening on rq212-poolprobe-699aa66671d94289beaf9bf157de70af...
+19:28:48 Cleaning registries for queue: rq212-poolprobe-699aa66671d94289beaf9bf157de70af
+19:28:50 rq212-poolprobe-699aa66671d94289beaf9bf157de70af: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-poolprobe-699aa66671d94289beaf9bf157de70af-c') (8c545bd1-59a1-4e82-97f4-2b655d55c783)
+Starting job 8c545bd1-59a1-4e82-97f4-2b655d55c783
+Finished job 8c545bd1-59a1-4e82-97f4-2b655d55c783
+19:28:50 rq212-poolprobe-699aa66671d94289beaf9bf157de70af: Job OK (8c545bd1-59a1-4e82-97f4-2b655d55c783)
+19:28:50 Result is kept for 604800 seconds
+19:28:50 Received SIGINT/SIGTERM, shutting down...
+19:28:50 Sending stop signal to 1 workers
+19:28:50 Sent shutdown command to worker with 3910749
+19:28:50 Worker 2845310d69e04c04bd38c06aa44f045f [PID 3910749]: warm shut down requested
+19:28:50 Worker rq:worker:2845310d69e04c04bd38c06aa44f045f: stopping on request
+19:28:50 Unsubscribing from channel rq:pubsub:2845310d69e04c04bd38c06aa44f045f
+19:28:50 Worker 2845310d69e04c04bd38c06aa44f045f with pid 3910749 is dead
+19:28:50 All workers stopped, exiting...
+

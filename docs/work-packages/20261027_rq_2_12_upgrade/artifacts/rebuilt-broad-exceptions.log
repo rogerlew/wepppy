@@ -1,0 +1,47 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 9231f2427d33b64f971992ac969fd9420c49afd3
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 16
+
+Files:
+  M wepppy/microservices/rq_engine/ag_fields_routes.py
+  M wepppy/microservices/rq_engine/run_sync_routes.py
+  M wepppy/nodb/mods/roads/roads.py
+  M wepppy/profile_coverage/runtime.py
+  M wepppy/rq/ag_fields_rq.py
+  M wepppy/rq/auth_actor.py
+  M wepppy/rq/batch_rq.py
+  M wepppy/rq/culvert_rq_manifest.py
+  M wepppy/rq/job_dependencies.py
+  M wepppy/rq/job_info.py
+  M wepppy/rq/job_listings.py
+  M wepppy/rq/project_rq.py
+  M wepppy/rq/roads_rq.py
+  M wepppy/rq/rq_worker.py
+  M wepppy/rq/run_catalog_rq.py
+  M wepppy/weppcloud/routes/weppcloudr.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/microservices/rq_engine/ag_fields_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/run_sync_routes.py (base=6 current=0 delta=-6)
+  M wepppy/nodb/mods/roads/roads.py (base=18 current=18 delta=+0)
+  M wepppy/profile_coverage/runtime.py (base=0 current=0 delta=+0)
+  M wepppy/rq/ag_fields_rq.py (base=0 current=0 delta=+0)
+  M wepppy/rq/auth_actor.py (base=0 current=0 delta=+0)
+  M wepppy/rq/batch_rq.py (base=13 current=12 delta=-1)
+  M wepppy/rq/culvert_rq_manifest.py (base=0 current=0 delta=+0)
+  M wepppy/rq/job_dependencies.py (base=0 current=0 delta=+0)
+  M wepppy/rq/job_info.py (base=2 current=2 delta=+0)
+  M wepppy/rq/job_listings.py (base=0 current=0 delta=+0)
+  M wepppy/rq/project_rq.py (base=23 current=23 delta=+0)
+  M wepppy/rq/roads_rq.py (base=7 current=7 delta=+0)
+  M wepppy/rq/rq_worker.py (base=3 current=0 delta=-3)
+  M wepppy/rq/run_catalog_rq.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/weppcloudr.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): -10
+Result: PASS

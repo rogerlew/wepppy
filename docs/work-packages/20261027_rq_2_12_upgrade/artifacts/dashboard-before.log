@@ -1,0 +1,33 @@
+INFO:wctl2:docker compose run --rm --no-deps -T -e PYTHONPATH=/rq-dashboard -v /tmp/rq212-dashboard:/tmp/rq212-dashboard:ro -v /workdir/wepppy/.pytest_cache/rq212-baseline:/tmp/rq212-redis:ro rq-dashboard python /tmp/rq212-dashboard/probe.py
+time="2026-10-27T12:21:36-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-rq-dashboard-run-6cc1dd1c65a8 Creating 
+ Container docker-rq-dashboard-run-6cc1dd1c65a8 Created 
+[2026-10-27 19:21:37,909] ERROR in app: Exception on /rq-dashboard/0/data/job/rq212-dashboard-b7652a90-dc0a-4827-884e-dda17f97b4fb-child.json [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 109, in _wrapped
+    result_dict = f(*args, **kwargs)
+                  ^^^^^^^^^^^^^^^^^^
+  File "/rq-dashboard/rq_dashboard/web.py", line 617, in job_info
+    dep_ids = [di.decode("utf-8").split(':')[-1].strip() for di in job.dependency_ids]
+               ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'decode'. Did you mean: 'encode'?
+127.0.0.1 - - [27/Oct/2026 19:21:37] "[35m[1mGET /rq-dashboard/0/data/job/rq212-dashboard-b7652a90-dc0a-4827-884e-dda17f97b4fb-child.json HTTP/1.1[0m" 500 -
+{"http_status": 500, "payload": {"error": "INTERNAL SERVER ERROR"}, "rq": "2.12.0"}
+Traceback (most recent call last):
+  File "/tmp/rq212-dashboard/probe.py", line 38, in <module>
+    assert status == 200
+           ^^^^^^^^^^^^^
+AssertionError
+

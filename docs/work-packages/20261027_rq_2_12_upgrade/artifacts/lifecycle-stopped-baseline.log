@@ -1,0 +1,94 @@
+INFO:wctl2:docker compose exec -T -e RQ212_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock -e PYTHONPATH=/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest 'tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]' -x -q
+F
+=================================== FAILURES ===================================
+_____________ test_running_stop_timeout_and_workhorse_crash[stop] ______________
+
+lifecycle = namespace(connection=<redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.UnixDomainSocketConnection...at 0x7663ea73ade0>, logs=[PosixPath('/tmp/pytest-of-unknown/pytest-200/test_running_stop_timeout_and_0/worker-0.log')])
+failure = 'stop'
+
+    @pytest.mark.parametrize("failure", ["stop", "timeout", "sigkill"])
+    def test_running_stop_timeout_and_workhorse_crash(lifecycle, failure):
+        h = lifecycle
+        job = h.enqueue(operation="hold", job_timeout=2 if failure == "timeout" else 30)
+        finalizer = h.enqueue(depends_on=failure_tolerant_depends_on(job),
+                              task_kwargs={"terminal_prerequisite": job.id})
+        strict = h.enqueue(depends_on=job)
+        with h.worker():
+            pid = int(wait_for(lambda: h.connection.get(job.id + ":started")))
+            if failure == "stop":
+                send_stop_job_command(h.connection, job.id)
+            elif failure == "sigkill":
+                os.kill(pid, signal.SIGKILL)
+            wait_for(lambda: state(job) in {"failed", "stopped"})
+            wait_for(lambda: state(finalizer) == "finished")
+            replacement = h.enqueue()
+            wait_for(lambda: state(replacement) == "finished")
+        assert state(job) == ("stopped" if failure == "stop" else "failed")
+>       assert state(strict) == "deferred"
+E       AssertionError: assert 'finished' == 'deferred'
+E         
+E         - deferred
+E         + finished
+
+tests/rq/test_rq212_lifecycle.py:239: AssertionError
+--------------------------- Captured stdout teardown ---------------------------
+19:19:33 Worker rq:worker:6ddd8fa277fd4b26ad7e030c6fdac42c started with PID 3889266, version 1.16.2
+19:19:33 Subscribing to channel rq:pubsub:6ddd8fa277fd4b26ad7e030c6fdac42c
+19:19:33 *** Listening on rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0...
+19:19:33 Cleaning registries for queue: rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0
+19:19:33 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-59092ccb-f009-41c3-b02c-52da6f2..., operation='hold') (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-59092ccb-f009-41c3-b02c-52da6f250e91)
+Starting job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-59092ccb-f009-41c3-b02c-52da6f250e91
+19:19:33 Killed horse pid 3889516
+19:19:33 Job stopped by user, moving job to FailedJobRegistry
+Job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-59092ccb-f009-41c3-b02c-52da6f250e91 Failed
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-2a548f07-8964-4720-b858-602a464..., operation='success') (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-2a548f07-8964-4720-b858-602a4640ce47)
+Starting job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-2a548f07-8964-4720-b858-602a4640ce47
+Finished job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-2a548f07-8964-4720-b858-602a4640ce47
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: Job OK (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-2a548f07-8964-4720-b858-602a4640ce47)
+19:19:34 Result is kept for 604800 seconds
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-62c0b5cb-462e-40d0-8e5d-7545624..., operation='success', terminal_prerequisite='rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-59092ccb-f009-41c3-b02c-52da6f2...) (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-62c0b5cb-462e-40d0-8e5d-7545624106d2)
+Starting job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-62c0b5cb-462e-40d0-8e5d-7545624106d2
+Finished job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-62c0b5cb-462e-40d0-8e5d-7545624106d2
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: Job OK (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-62c0b5cb-462e-40d0-8e5d-7545624106d2)
+19:19:34 Result is kept for 604800 seconds
+19:19:34 Cleaning registries for queue: rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-03d272a0-3fe7-47d3-97b9-8a7d578..., operation='success') (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-03d272a0-3fe7-47d3-97b9-8a7d57839d08)
+Starting job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-03d272a0-3fe7-47d3-97b9-8a7d57839d08
+Finished job rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-03d272a0-3fe7-47d3-97b9-8a7d57839d08
+19:19:34 rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0: Job OK (rq212-55f3aa33-3a74-4c96-8e85-30cb0b55cba0-03d272a0-3fe7-47d3-97b9-8a7d57839d08)
+19:19:34 Result is kept for 604800 seconds
+19:19:34 Worker 6ddd8fa277fd4b26ad7e030c6fdac42c [PID 3889266]: warm shut down requested
+19:19:34 Worker rq:worker:6ddd8fa277fd4b26ad7e030c6fdac42c: stopping on request
+19:19:34 Unsubscribing from channel rq:pubsub:6ddd8fa277fd4b26ad7e030c6fdac42c
+
+=============================== warnings summary ===============================
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:227: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_rq212_lifecycle.py::test_running_stop_timeout_and_workhorse_crash[stop]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 warnings in 23.45s

@@ -1,0 +1,158 @@
+{
+  "rq": "1.16.2",
+  "redis": "6.2.0",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "queues": [
+    {
+      "queue": "qcat-mill-creek-model-20261023",
+      "queued": 0,
+      "started": 0,
+      "deferred": 7,
+      "scheduled": 0
+    },
+    {
+      "queue": "default",
+      "queued": 0,
+      "started": 0,
+      "deferred": 592,
+      "scheduled": 0
+    },
+    {
+      "queue": "batch",
+      "queued": 0,
+      "started": 0,
+      "deferred": 445,
+      "scheduled": 0
+    },
+    {
+      "queue": "fork-archive",
+      "queued": 0,
+      "started": 0,
+      "deferred": 0,
+      "scheduled": 0
+    },
+    {
+      "queue": "qcat-variants-catalog-20261023",
+      "queued": 1,
+      "started": 0,
+      "deferred": 0,
+      "scheduled": 0
+    }
+  ],
+  "workers": [
+    {
+      "worker": "206e20bd90b34358b55ece73cf92a41e",
+      "state": "idle",
+      "pid": 363,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "a6f6cf58493643eebb57062544e199a6",
+      "state": "idle",
+      "pid": 362,
+      "host": "bf05fe7b5515",
+      "queues": [
+        "batch"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "4317f869d4b84e809caf71267af67b6e",
+      "state": "idle",
+      "pid": 359,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "5469c8c68db54114b798217be64f5b59",
+      "state": "idle",
+      "pid": 364,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "16558f54e2d34a4e8357a9e24147430f",
+      "state": "idle",
+      "pid": 362,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "ddc97be874e04c4db3cae1966765715b",
+      "state": "idle",
+      "pid": 407,
+      "host": "24f12152b062",
+      "queues": [
+        "fork-archive"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "0c1dfe10093545f9b1e83f9abb117f27",
+      "state": "idle",
+      "pid": 361,
+      "host": "bf05fe7b5515",
+      "queues": [
+        "batch"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "2feec5c9aeee42a1825647c5358ec769",
+      "state": "idle",
+      "pid": 361,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "804c020389fe42f58b4a528fd7e65593",
+      "state": "idle",
+      "pid": 360,
+      "host": "bf05fe7b5515",
+      "queues": [
+        "batch"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "8ea44c76209f4a4b8f46803e926b75e3",
+      "state": "idle",
+      "pid": 360,
+      "host": "085d383cdb2d",
+      "queues": [
+        "default"
+      ],
+      "current_job": null
+    },
+    {
+      "worker": "2883e8d1f75e4ff7bf2c12f928f76194",
+      "state": "idle",
+      "pid": 359,
+      "host": "bf05fe7b5515",
+      "queues": [
+        "batch"
+      ],
+      "current_job": null
+    }
+  ]
+}

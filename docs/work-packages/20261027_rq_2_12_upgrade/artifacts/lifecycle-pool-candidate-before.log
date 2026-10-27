@@ -1,0 +1,80 @@
+INFO:wctl2:docker compose exec -T -e RQ212_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq/test_rq212_lifecycle.py::test_worker_pool_replaces_failed_worker_and_schedules -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_worker_pool_replaces_failed_worker_and_schedules _____________
+
+lifecycle = namespace(connection=<redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.UnixDomainSocketConnection...at 0x711218efbe20>, logs=[PosixPath('/tmp/pytest-of-unknown/pytest-211/test_worker_pool_replaces_fail0/worker-0.log')])
+
+    def test_worker_pool_replaces_failed_worker_and_schedules(lifecycle):
+        h = lifecycle
+        scheduled = h.queue.enqueue_in(timedelta(seconds=2), lifecycle_job,
+                                       kwargs={"marker": h.prefix + "-scheduled"})
+        with h.worker(pool=True):
+            wait_for(lambda: state(scheduled) == "finished")
+            workers = wait_for(lambda: [w for w in Worker.all(connection=h.connection)
+                                        if h.queue.name in w.queue_names() and w.get_state() == "idle"])
+            assert len(workers) == 1
+            old_pid = workers[0].pid
+            os.kill(old_pid, signal.SIGKILL)
+            wait_for(lambda: not Path(f"/proc/{old_pid}").exists())
+            wait_for(lambda: [w for w in Worker.all(connection=h.connection)
+                              if h.queue.name in w.queue_names() and w.name != workers[0].name])
+            replacement = h.enqueue()
+>           wait_for(lambda: state(replacement) == "finished")
+
+tests/rq/test_rq212_lifecycle.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function test_worker_pool_replaces_failed_worker_and_schedules.<locals>.<lambda> at 0x711218e10220>
+
+    def wait_for(predicate, *, timeout=20):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            result = predicate()
+            if result:
+                return result
+            time.sleep(0.02)
+>       pytest.fail(f"condition did not become true within {timeout} seconds")
+E       Failed: condition did not become true within 20 seconds
+
+tests/rq/test_rq212_lifecycle.py:40: Failed
+--------------------------- Captured stdout teardown ---------------------------
+19:24:12 Starting worker pool 098f9627c5b54b2fab1a896084c56386 with pid 3898562...
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: started with PID 3899189, version 2.12.0
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: subscribing to channel rq:pubsub:a7988277fb234121bf67bc6892ce6122
+19:24:12 *** Listening on rq212-3128e830-bcdd-4e17-ae60-861db3181ac1...
+19:24:12 Acquired scheduler lock for rq212-3128e830-bcdd-4e17-ae60-861db3181ac1
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: cleaning registries for queue: rq212-3128e830-bcdd-4e17-ae60-861db3181ac1
+19:24:12 Scheduler for rq212-3128e830-bcdd-4e17-ae60-861db3181ac1 started with PID 3899191
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: rq212-3128e830-bcdd-4e17-ae60-861db3181ac1: tests.rq.rq212_tasks.lifecycle_job(marker='rq212-3128e830-bcdd-4e17-ae60-861db3181ac1-scheduled') (94954b86-9108-424a-954b-38620296a403)
+Starting job 94954b86-9108-424a-954b-38620296a403
+19:24:12 Successfully completed tests.rq.rq212_tasks.lifecycle_job(marker='rq212-3128e830-bcdd-4e17-ae60-861db3181ac1-scheduled') job in 0:00:00.002384s on worker a7988277fb234121bf67bc6892ce6122
+Finished job 94954b86-9108-424a-954b-38620296a403
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: rq212-3128e830-bcdd-4e17-ae60-861db3181ac1: Job OK (94954b86-9108-424a-954b-38620296a403)
+19:24:12 Worker a7988277fb234121bf67bc6892ce6122: job 94954b86-9108-424a-954b-38620296a403 result is kept for 604800 seconds
+19:24:13 Worker a7988277fb234121bf67bc6892ce6122 with pid 3899189 is dead
+19:24:13 Worker b7c2cddb57d8447d89c1d7ccebbc42a5: started with PID 3899193, version 2.12.0
+19:24:13 Worker b7c2cddb57d8447d89c1d7ccebbc42a5: subscribing to channel rq:pubsub:b7c2cddb57d8447d89c1d7ccebbc42a5
+19:24:13 *** Listening on rq212-3128e830-bcdd-4e17-ae60-861db3181ac1...
+19:24:13 Worker b7c2cddb57d8447d89c1d7ccebbc42a5: cleaning registries for queue: rq212-3128e830-bcdd-4e17-ae60-861db3181ac1
+19:24:33 Received SIGINT/SIGTERM, shutting down...
+19:24:33 Sending stop signal to 1 workers
+19:24:33 Sent shutdown command to worker with 3899193
+19:24:33 Worker b7c2cddb57d8447d89c1d7ccebbc42a5 [PID 3899193]: warm shut down requested
+19:24:33 Worker b7c2cddb57d8447d89c1d7ccebbc42a5: unsubscribing from channel rq:pubsub:b7c2cddb57d8447d89c1d7ccebbc42a5
+19:24:34 Worker b7c2cddb57d8447d89c1d7ccebbc42a5 with pid 3899193 is dead
+19:24:34 All workers stopped, exiting...
+
+=============================== warnings summary ===============================
+tests/rq/test_rq212_lifecycle.py::test_worker_pool_replaces_failed_worker_and_schedules
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_lifecycle.py::test_worker_pool_replaces_failed_worker_and_schedules
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_rq212_lifecycle.py::test_worker_pool_replaces_failed_worker_and_schedules
+1 failed, 2 warnings in 42.62s

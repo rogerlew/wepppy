@@ -1,0 +1,18 @@
+{
+  "socket": "/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock",
+  "database": 0,
+  "ownership_marker": "batch-boundary-test-server=disposable",
+  "precleanup_snapshot": "/home/workdir/wepppy/.pytest_cache/rq212-baseline/db0-preclean-20261027.json",
+  "sha256": "3aa6b2a8d1d19911aaffe80b72c9a91f1711bc5fde9c85707011022eb702ec7a",
+  "keys_deleted_individually": 1086,
+  "preserved_databases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+  ],
+  "shared_application_redis_touched": false
+}

@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose exec -T -e RQ212_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock -e PYTHONPATH=/workdir/wepppy/.pytest_cache/rq212-deps:/workdir/wepppy weppcloud /opt/venv/bin/python -m pytest tests/rq/test_rq212_lifecycle.py::test_interrupted_dequeue_standard_maintenance_preserves_failure_and_recovers -q
+.                                                                        [100%]
+=============================== warnings summary ===============================
+tests/rq/test_rq212_lifecycle.py::test_interrupted_dequeue_standard_maintenance_preserves_failure_and_recovers
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_lifecycle.py::test_interrupted_dequeue_standard_maintenance_preserves_failure_and_recovers
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_rq212_lifecycle.py::test_interrupted_dequeue_standard_maintenance_preserves_failure_and_recovers
+  /workdir/wepppy/.pytest_cache/rq212-deps/rq/job.py:853: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn('job.exc_info is deprecated, use job.latest_result() instead.', DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 3 warnings in 41.56s

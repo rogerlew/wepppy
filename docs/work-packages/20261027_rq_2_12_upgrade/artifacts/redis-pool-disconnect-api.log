@@ -1,0 +1,23 @@
+INFO:wctl2:docker compose exec -T weppcloud /opt/venv/bin/python -c 'import inspect, redis; from redis import ConnectionPool; print('"'"'redis'"'"',redis.__version__); print(inspect.signature(ConnectionPool.disconnect)); print(inspect.getsource(ConnectionPool.disconnect))'
+redis 6.2.0
+(self, inuse_connections: bool = True) -> None
+    def disconnect(self, inuse_connections: bool = True) -> None:
+        """
+        Disconnects connections in the pool
+
+        If ``inuse_connections`` is True, disconnect connections that are
+        current in use, potentially by other threads. Otherwise only disconnect
+        connections that are idle in the pool.
+        """
+        self._checkpid()
+        with self._lock:
+            if inuse_connections:
+                connections = chain(
+                    self._available_connections, self._in_use_connections
+                )
+            else:
+                connections = self._available_connections
+
+            for connection in connections:
+                connection.disconnect()
+

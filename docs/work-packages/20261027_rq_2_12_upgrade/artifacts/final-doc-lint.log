@@ -1,0 +1,18 @@
+wctl doc-lint --path AGENTS.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path PROJECT_TRACKER.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path docs/schemas/rq-response-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path docs/standards/broad-exception-boundary-allowlist.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path docs/dev-notes/rq-2-12-migration.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path wepppy/rq/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path docker/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path wepppy/rq/job-dependencies-catalog.md
+✅ 1 files validated, 0 errors, 0 warnings
+wctl doc-lint --path docs/work-packages/20261027_rq_2_12_upgrade
+✅ 25 files validated, 0 errors, 0 warnings

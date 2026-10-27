@@ -1,0 +1,94 @@
+INFO:wctl2:docker compose exec -T -e RQ212_METADATA_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock weppcloud /opt/venv/bin/python -m pytest tests/rq/test_rq212_metadata.py -k 'durable_when or pipeline_abort' -q
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_metadata_is_durable_when_queue_publishes[enqueue] ____________
+
+metadata_queue = Queue('rq212-metadata-7ca56c05-9bbe-4126-bf42-4dd9ed28fa1d')
+metadata_context = {'auth_actor': {'session_id': 'rq212-test', 'token_class': 'session'}, 'correlation_id': 'rq212-correlation', 'profile_trace_slug': 'rq212-profile'}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76acb4148560>
+method = 'enqueue'
+
+    @pytest.mark.parametrize("method", ["enqueue", "enqueue_call"])
+    def test_metadata_is_durable_when_queue_publishes(metadata_queue, metadata_context, monkeypatch, method):
+        original = Queue.enqueue_job
+        observed = []
+    
+        def publish(self, job, *args, **kwargs):
+            result = original(self, job, *args, **kwargs)
+            # This read is after real Redis publication but before either outer
+            # enqueue hook can repair metadata. A worker may consume at this point.
+            observed.append(Job.fetch(job.id, connection=self.connection).meta)
+            return result
+    
+        monkeypatch.setattr(Queue, "enqueue_job", publish)
+        job = getattr(metadata_queue, method)(metadata_task)
+>       assert observed == [metadata_context]
+E       AssertionError: assert [{}] == [{'auth_actor...212-profile'}]
+E         
+E         At index 0 diff: {} != {'auth_actor': {'token_class': 'session', 'session_id': 'rq212-test'}, 'correlation_id': 'rq212-correlation', 'profile_trace_slug': 'rq212-profile'}
+E         Use -v to get more diff
+
+tests/rq/test_rq212_metadata.py:95: AssertionError
+_________ test_metadata_is_durable_when_queue_publishes[enqueue_call] __________
+
+metadata_queue = Queue('rq212-metadata-fdd7d9fc-d851-43e8-a65a-6014408f7930')
+metadata_context = {'auth_actor': {'session_id': 'rq212-test', 'token_class': 'session'}, 'correlation_id': 'rq212-correlation', 'profile_trace_slug': 'rq212-profile'}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76acb41b1b50>
+method = 'enqueue_call'
+
+    @pytest.mark.parametrize("method", ["enqueue", "enqueue_call"])
+    def test_metadata_is_durable_when_queue_publishes(metadata_queue, metadata_context, monkeypatch, method):
+        original = Queue.enqueue_job
+        observed = []
+    
+        def publish(self, job, *args, **kwargs):
+            result = original(self, job, *args, **kwargs)
+            # This read is after real Redis publication but before either outer
+            # enqueue hook can repair metadata. A worker may consume at this point.
+            observed.append(Job.fetch(job.id, connection=self.connection).meta)
+            return result
+    
+        monkeypatch.setattr(Queue, "enqueue_job", publish)
+        job = getattr(metadata_queue, method)(metadata_task)
+>       assert observed == [metadata_context]
+E       AssertionError: assert [{}] == [{'auth_actor...212-profile'}]
+E         
+E         At index 0 diff: {} != {'auth_actor': {'token_class': 'session', 'session_id': 'rq212-test'}, 'correlation_id': 'rq212-correlation', 'profile_trace_slug': 'rq212-profile'}
+E         Use -v to get more diff
+
+tests/rq/test_rq212_metadata.py:95: AssertionError
+_____________ test_pipeline_abort_never_creates_metadata_only_job ______________
+
+metadata_queue = Queue('rq212-metadata-20bd9ff6-d8ff-4499-9e19-e31a5897bce4')
+metadata_context = {'auth_actor': {'session_id': 'rq212-test', 'token_class': 'session'}, 'correlation_id': 'rq212-correlation', 'profile_trace_slug': 'rq212-profile'}
+
+    def test_pipeline_abort_never_creates_metadata_only_job(metadata_queue, metadata_context):
+        with metadata_queue.connection.pipeline() as pipeline:
+            job = metadata_queue.enqueue_call(metadata_task, pipeline=pipeline)
+>           assert not metadata_queue.connection.exists(job.key)
+E           AssertionError: assert not 1
+E            +  where 1 = exists(b'rq:job:51436e01-9387-4ad7-92ca-3761a49264a3')
+E            +    where exists = <redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.UnixDomainSocketConnection(path=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock,db=3)>)>)>.exists
+E            +      where <redis.client.Redis(<redis.connection.ConnectionPool(<redis.connection.UnixDomainSocketConnection(path=/workdir/wepppy/.pytest_cache/rq212-baseline/redis.sock,db=3)>)>)> = Queue('rq212-metadata-20bd9ff6-d8ff-4499-9e19-e31a5897bce4').connection
+E            +    and   b'rq:job:51436e01-9387-4ad7-92ca-3761a49264a3' = Job('51436e01-9387-4ad7-92ca-3761a49264a3', enqueued_at=datetime.datetime(2026, 10, 27, 19, 14, 26, 305698)).key
+
+tests/rq/test_rq212_metadata.py:102: AssertionError
+=============================== warnings summary ===============================
+tests/rq/test_rq212_metadata.py::test_metadata_is_durable_when_queue_publishes[enqueue]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/rq/test_rq212_metadata.py::test_metadata_is_durable_when_queue_publishes[enqueue]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_rq212_metadata.py: 10 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_rq212_metadata.py::test_metadata_is_durable_when_queue_publishes[enqueue]
+FAILED tests/rq/test_rq212_metadata.py::test_metadata_is_durable_when_queue_publishes[enqueue_call]
+FAILED tests/rq/test_rq212_metadata.py::test_pipeline_abort_never_creates_metadata_only_job
+3 failed, 4 deselected, 12 warnings in 10.78s

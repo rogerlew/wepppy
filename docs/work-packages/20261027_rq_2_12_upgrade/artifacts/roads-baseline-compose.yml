@@ -1,0 +1,18 @@
+services:
+  rq212-roads-baseline:
+    image: sha256:f03d9c55f49229bd1dfb9f720c420ef2568de7919b132ddd7c735a71f4652bcf
+    init: true
+    user: '1000:993'
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp
+    working_dir: /workdir/wepppy
+    environment:
+      PYTHONPATH: /workdir/wepppy
+      PYTHONDONTWRITEBYTECODE: '1'
+      MPLCONFIGDIR: /tmp/matplotlib
+    volumes:
+      - /workdir/wepppy:/workdir/wepppy:ro
+      - /workdir/wepppyo3:/workdir/wepppyo3:ro
+    entrypoint: /opt/venv/bin/python

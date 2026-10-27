@@ -1,0 +1,267 @@
+{
+  "H.ebe.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "75fcac405574375bdb0667425a1b48b52037bc97dfa348fc0fe9b28cea279d3f",
+        "upgraded_sha256": "5b140025e095993372628889d57d2d2d2d3b109effcd96c1038f530efb05e337"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "H.element.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "c0d3f221b51812e826047454e7f2992b51a12959bc68a144fdb4354bf917c8e2",
+        "upgraded_sha256": "2f0bf9f1f0a6c11fd4b77cb792a89d86699a919f2b3e688b07e5c897de6c6a5b"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "H.loss.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "419fba360597e04c45ae3d32394fd3e680c893eabdfb88a2e215f196957d8754",
+        "upgraded_sha256": "21b33fc9d3ee8a708c9763bb2730f9f6a8a21886cb1d1e9e315fe1beb48f4352"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "H.pass.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "fac66dd43442986a0cfeeab4810a27c839945c51d48d7e58d821d28a795d7022",
+        "upgraded_sha256": "2512ba76236f46f5254435f21aa3e7d40c26be3e77a773e6fcf3918c2574e7db"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "H.soil.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "3405be9ac656e3bb7accd3e780ff4e726f6b60922b11ee962b1509bd852de144",
+        "upgraded_sha256": "2cabc8efeceba78994ed1bbe404b5f02f8d22cc488a69c312f518307dc9eecde"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "H.wat.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "0027c5cf28c8c7f9282885fee8b35fbe6881a382914b628eb072df799cb5f863",
+        "upgraded_sha256": "50cda5947c109128979f45f9cbca0ffdabb454c3fa6a75ede89511d46522480b"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "chan.out.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "0771a8cd544a65905f505c2b0ebb065c3e59439cfd405fecdfd30c5319fd557c",
+        "upgraded_sha256": "1ad42e07098b57230dba31d7299b02c86eb91b86fb540c4b74ccdb9e66836df5"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "chanwb.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "4c6ad5c45bcc2dd3b669fb15e7af364d1d1effed4ab1bc7154cee4242bb188fc",
+        "upgraded_sha256": "459d7eb5ab40e4b290f44f76ddbbb3e9a0ec7ed0ef6ca7e5e5aced19d3f537c4"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "chnwb.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "6416ee6ce8744e494a9fe7d9d8981d0243e30710b35963f858fd68cfffeaee7d",
+        "upgraded_sha256": "590182e0d301d5253d0b64c15951ca3e53de936e46caa66c2bfbd235c493a7c5"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "ebe_pw0.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "bf5025f5fcb362d65b3cd4474eb180e7538d30551234df2bdbd71b986f807d6a",
+        "upgraded_sha256": "029afc751fca1a2a3bf4daf35319e62a8ca6b59f7a73c57c847fd2bb23042626"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.all_years.chn.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "deea2f94c25af0db836b7c950f0f61724e3617795e6474f52db4688154390e6b",
+        "upgraded_sha256": "98e7ceae4d24de8bb9e43239479fa393c8bebc3b4d3ddb5eb84db5e87b6727d0"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.all_years.class_data.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "e535c7879ca8f4ca0ba8c87a3029cde314390d827527d4ace6b80c5eb1dffa40",
+        "upgraded_sha256": "a12f43ce774b4e22971fb441df71562f6a564e3a7789ba327e2ff17b89ad3ccd"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.all_years.hill.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "dd028f610fb219eb3801ac9a5e2fb1eb7e4658774e2524773d4f00c1cdbc46fc",
+        "upgraded_sha256": "7d0a633a80c0da07a806f98449f52c17a90eaacd7027f3dcdc5bb7f85203f0d7"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.all_years.out.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "2c7ecca45f3ddda555259fbfc1a1cf1767a649a4ccea0ec2458f62ce841e5833",
+        "upgraded_sha256": "44a7a4fb4d6b39aec48e3c2503e17d1789681d886b6ca16711baaa33bbb2add1"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.chn.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "1c960cea5fa5b7b3c4d6a338bdfc4c602afef6fe79323efd6924b9b0942dbb56",
+        "upgraded_sha256": "a6b1e784769bba9919681c0da0e5ca35977611b36b48d81f52cc27a84e7aaed0"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.class_data.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "9112b14dd61d9cb071b0a5d3c405bc843003426f980a06f0b1f5b669cfd2d416",
+        "upgraded_sha256": "9c6d0a0c47f9c0f5b8999ff077a49ebee81f3f1142d87797ed83c508038f3af1"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.hill.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "cb8d581b9108633dabda8639c2094ba3741cb45bd8e371564824ddb782fdadc7",
+        "upgraded_sha256": "83530f9ad7b35f9da29c0f2a242624c012a6d254962ce4c078090a8d7ea62147"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "loss_pw0.out.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "dbd9061c54ae208d62de35e677ab49b1c44631cd08148db8d3ad4e2fbc2062a8",
+        "upgraded_sha256": "e641d00e44d3f3ec3e63a4a4e77b6f1f411be986d9dd6821fcda89da398b3847"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "pass_pw0.events.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "6a21c4c64989c74beb2366ed88d3a64046ec2bfc51a03c3866d99eef41e76f8a",
+        "upgraded_sha256": "705afd1f5d09008183522a6a1c0f6d4c731040e38c3b8e8bf7019625a9c2024d"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "pass_pw0.metadata.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "6f484f298221619d9e0eba889cbfffeaa83a79f8e516a15b7ee10057f9b52720",
+        "upgraded_sha256": "cc2bd8b1fb62bc34ba98d2bf47495af8e74619eff4e75f2653a084a33e188d12"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "return_period_event_ranks.parquet": {
+    "raw_metadata_differences": {},
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-cpp-arrow version 23.0.1",
+    "upgraded_writer": "parquet-cpp-arrow version 23.0.1"
+  },
+  "return_period_events.parquet": {
+    "raw_metadata_differences": {},
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-cpp-arrow version 23.0.1",
+    "upgraded_writer": "parquet-cpp-arrow version 23.0.1"
+  },
+  "soil_pw0.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "240ce342759bc6104fcdb121c3548c03da4b444c8b71f48d8162be68fc816248",
+        "upgraded_sha256": "c4fc26506b1c8c1999ba5a76b29b6399dda11b5a913723a8e500abb294fcb458"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "tc_out.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "f8e27ac8b8d86c111a791df884b1bcdabf67c7bd9b2c23c3d6f1e638485af510",
+        "upgraded_sha256": "014c583173b2d4546d63880360807e4f17cd6d76817e107a16bc9a40690e1d71"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  },
+  "totalwatsed3.parquet": {
+    "raw_metadata_differences": {
+      "ARROW:schema": {
+        "baseline_sha256": "0b6e0ba472c4c2be18b0bbef3b474a9d7dcfda51f5391aab0161fefa0eac76de",
+        "upgraded_sha256": "fd4fafdc1f2855f0ee27bda7321c8468c15857b0e945d37de7d748771295f9dc"
+      }
+    },
+    "decoded_schema_including_metadata_equal": true,
+    "writer": "parquet-rs version 53.4.1",
+    "upgraded_writer": "parquet-rs version 53.4.1"
+  }
+}

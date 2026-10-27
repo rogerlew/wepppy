@@ -1,0 +1,12 @@
+{
+  "time_utc": "2026-10-27T21:27:27.566969+00:00",
+  "stopped_owned_container": "rq212-baseline-redis",
+  "container_id": "1fa0d54ab09efec6b4e5fd2281e52bfbeb04a36e342c96bddbeeca1106296a7f",
+  "retained_bind_data": "/workdir/wepppy/.pytest_cache/rq212-baseline/data",
+  "shared_redis_ids_still_running": [
+    "2e0fb46f3622"
+  ],
+  "volumes_deleted": false,
+  "redis_flushed": false,
+  "reason": "All owned testing complete; exact one-off container cleanup. wctl passthrough targets Compose services, so direct Docker stop selects this disposable container only."
+}
